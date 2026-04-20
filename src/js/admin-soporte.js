@@ -65,7 +65,6 @@ const adminSoporte = (() => {
             renderPaginacion();
 
         } catch (error) {
-            console.error('Error cargando tickets:', error);
             lista.innerHTML = '<div class="admin-vacio"><i class="fas fa-exclamation-circle"></i><p>Error al cargar las consultas.</p></div>';
         }
     }
@@ -127,7 +126,6 @@ const adminSoporte = (() => {
             actualizarBadgeSidebarDesdeAPI();
 
         } catch (error) {
-            console.error('Error cargando hilo:', error);
             document.getElementById('adminHiloMensajes').innerHTML =
                 '<div class="admin-vacio">Error al cargar los mensajes.</div>';
         }
@@ -177,7 +175,6 @@ const adminSoporte = (() => {
             await abrirHilo(ticketActualId);
 
         } catch (error) {
-            console.error('Error enviando respuesta:', error);
             alert('Error al enviar la respuesta.');
         } finally {
             btn.disabled = false;
@@ -201,7 +198,6 @@ const adminSoporte = (() => {
             await abrirHilo(ticketActualId); // Recargar hilo con estado cerrado
 
         } catch (error) {
-            console.error('Error cerrando ticket:', error);
             alert('Error al cerrar el ticket.');
         }
     }
@@ -222,7 +218,6 @@ const adminSoporte = (() => {
             volverALista();
 
         } catch (error) {
-            console.error('Error eliminando ticket:', error);
             alert('Error al eliminar la consulta.');
         }
     }
