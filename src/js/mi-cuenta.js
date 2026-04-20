@@ -2,8 +2,6 @@
 // mi-cuenta.js - Módulo de perfil de usuario
 // ==============================================
 
-console.log('👤 Mi-cuenta módulo JS cargado');
-
 function formatearVotos(cantidad) {
     if (cantidad === 0) return '0';
     if (cantidad === 1) return '1';
@@ -15,7 +13,6 @@ function formatearVotos(cantidad) {
 window.loadProfile = async function() {
     try {
         const profile = await API.getProfile();
-        console.log('✅ Perfil completo:', profile);
 
         document.getElementById('userName').textContent         = profile.name || '';
         document.getElementById('userFullName').textContent     = profile.name  || '—';
@@ -52,7 +49,6 @@ window.loadProfile = async function() {
     }
 
     } catch (error) {
-        console.error('❌ Error cargando perfil:', error);
         const card = document.querySelector('.profile-card');
         if (card) card.innerHTML = `
             <div style="text-align: center; color: #e50914; padding: 2rem;">
@@ -282,7 +278,6 @@ async function cargarAvataresPredefinidos() {
         `).join('');
 
     } catch (error) {
-        console.error('Error cargando avatares:', error);
         grid.innerHTML = '<div class="avatar-loading">Error al cargar avatares</div>';
     }
 }
@@ -372,7 +367,6 @@ window.guardarAvatar = async function() {
         }
 
     } catch (error) {
-        console.error('Error guardando avatar:', error);
         errorEl.textContent = error.message;
         errorEl.style.display = 'block';
     } finally {
@@ -583,7 +577,6 @@ window.guardarEdicion = async function() {
             }
         }
     } catch (error) {
-        console.error('Error al guardar:', error);
         mostrarErrorEdicion('Error de conexión con el servidor.');
     } finally {
         document.getElementById('btnGuardarTexto').style.display = 'inline';
@@ -699,7 +692,6 @@ window.confirmarEliminarCuenta = async function() {
             errorEl.style.display = 'block';
         }
     } catch (error) {
-        console.error('Error:', error);
         errorEl.textContent = 'Error de conexión con el servidor.';
         errorEl.style.display = 'block';
     } finally {
@@ -857,7 +849,6 @@ window.confirmarCambiarPassword = async function() {
             errorEl.style.display = 'block';
         }
     } catch (error) {
-        console.error('Error cambiando contraseña:', error);
         errorEl.textContent = 'Error de conexión con el servidor.';
         errorEl.style.display = 'block';
     } finally {
