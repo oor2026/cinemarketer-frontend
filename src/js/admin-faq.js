@@ -82,7 +82,6 @@ const adminFaq = (() => {
             `).join('');
 
         } catch (error) {
-            console.error('Error cargando FAQs:', error);
             lista.innerHTML = '<div class="admin-vacio"><i class="fas fa-exclamation-circle"></i><p>Error al cargar las preguntas.</p></div>';
         }
     }
@@ -196,7 +195,6 @@ const adminFaq = (() => {
             await cargarLista();
 
         } catch (error) {
-            console.error('Error guardando FAQ:', error);
             alert('Error al guardar la pregunta. Intentá nuevamente.');
         } finally {
             if (btn && original !== null) {
@@ -221,7 +219,6 @@ const adminFaq = (() => {
             await cargarLista();
 
         } catch (error) {
-            console.error('Error eliminando FAQ:', error);
             alert('Error al eliminar la pregunta.');
         }
     }
