@@ -2,8 +2,6 @@
 // mis-puntos.js - Módulo de historial de puntos
 // ==============================================
 
-console.log('💰 Mis-puntos módulo JS cargado');
-
 // ==============================================
 // ESTADO DEL MÓDULO
 // ==============================================
@@ -123,7 +121,6 @@ window.loadTransactions = async function(page = 1, filter = 'all') {
         }).join('');
 
     } catch (error) {
-        console.error('❌ Error cargando historial:', error);
         lista.innerHTML = `
             <div style="text-align: center; padding: 3rem; color: #e50914;">
                 <i class="fas fa-exclamation-circle" style="font-size: 3rem;"></i>
