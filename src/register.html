@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>Cinemarketer - Crear Cuenta</title>
+
+    <!-- Font Awesome para iconos (mejora visual en móviles) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="css/register.css">
+</head>
+<body class="auth-page">
+<!-- Fondo con overlay para mejor legibilidad -->
+<div class="auth-background"></div>
+
+<!-- BARRA DE NAVEGACIÓN ELIMINADA COMPLETAMENTE (líneas 17-24) -->
+
+<!-- Contenedor principal centrado -->
+<div class="auth-wrapper">
+    <div class="auth-container">
+        <div class="auth-card">
+            <!-- Header con icono -->
+            <div class="auth-header">
+                <div class="auth-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h2>Crear tu cuenta</h2>
+                <p>¿Listo para vivir la experiencia?</p>
+            </div>
+
+            <!-- Formulario de registro -->
+            <form id="registerForm" class="auth-form">
+                <!-- Campo nombre completo -->
+                <div class="form-group">
+                    <label for="name">
+                        <i class="fas fa-user"></i>
+                        Nombre completo
+                    </label>
+                    <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            required
+                            placeholder="Ej: Juan Pérez"
+                            autocomplete="name"
+                            maxlength="50"
+                    >
+                </div>
+
+                <!-- Campo email -->
+                <div class="form-group">
+                    <label for="email">
+                        <i class="fas fa-envelope"></i>
+                        Correo electrónico
+                    </label>
+                    <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            required
+                            placeholder="dirección@email.com"
+                            autocomplete="email"
+                            maxlength="50"
+                    >
+                </div>
+
+                <!-- Campo DNI -->
+                <div class="form-group">
+                    <label for="dni">
+                        <i class="fas fa-id-card"></i>
+                        DNI
+                    </label>
+                    <input
+                            type="text"
+                            id="dni"
+                            name="dni"
+                            required
+                            placeholder="Ej: 12345678"
+                            maxlength="8"
+                            inputmode="numeric"
+                            pattern="\d{7,8}"
+                    >
+                    <span class="field-hint">7 u 8 dígitos numéricos, sin puntos</span>
+                </div>
+
+                <!-- Campo teléfono con prefijo -->
+                <div class="form-group" style="position: relative;">
+                    <label for="phoneNumber">
+                        <i class="fas fa-phone"></i>
+                        Teléfono
+                    </label>
+                    <div class="phone-wrapper">
+                        <div class="phone-prefix-btn" id="phonePrefixBtn" tabindex="0">
+                            <span id="phonePrefixFlag">🇦🇷</span>
+                            <span id="phonePrefixCode">+54</span>
+                            <i class="fas fa-chevron-down phone-chevron"></i>
+                        </div>
+                        <input
+                                type="tel"
+                                id="phoneNumber"
+                                name="phoneNumber"
+                                required
+                                placeholder="11 12345678"
+                                inputmode="numeric"
+                                maxlength="15"
+                                autocomplete="tel-national"
+                        >
+                        <input type="hidden" id="phone" name="phone">
+                    </div>
+                    <div class="phone-prefix-dropdown" id="phonePrefixDropdown" style="display:none;">
+                        <input type="text" class="phone-prefix-search" id="phonePrefixSearch" placeholder="Buscar país...">
+                        <div class="phone-prefix-list" id="phonePrefixList"></div>
+                    </div>
+                    <span class="field-hint" id="phoneHint">Máx. 15 dígitos</span>
+                </div>
+
+                <!-- Campo contraseña con toggle -->
+                <div class="form-group">
+                    <label for="password">
+                        <i class="fas fa-lock"></i>
+                        Contraseña
+                    </label>
+                    <div class="password-wrapper">
+                        <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                required
+                                placeholder="••••••••"
+                                autocomplete="new-password"
+                                maxlength="30"
+                        >
+                        <button
+                                type="button"
+                                class="password-toggle"
+                                id="togglePassword"
+                                aria-label="Mostrar contraseña"
+                        >
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Campo confirmar contraseña -->
+                <div class="form-group">
+                    <label for="confirmPassword">
+                        <i class="fas fa-lock"></i>
+                        Confirmar contraseña
+                    </label>
+                    <div class="password-wrapper">
+                        <input
+                                type="password"
+                                id="confirmPassword"
+                                name="confirmPassword"
+                                required
+                                placeholder="••••••••"
+                                autocomplete="new-password"
+                                maxlength="30"
+                        >
+                        <button
+                                type="button"
+                                class="password-toggle"
+                                id="toggleConfirmPassword"
+                                aria-label="Mostrar contraseña"
+                        >
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Términos y condiciones (responsive) -->
+                <div class="form-group terms-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="terms">
+                        <span class="checkbox-custom"></span>
+                        <span class="checkbox-text">
+                                Acepto los <a href="#" id="termsLink">términos y condiciones</a>
+                            </span>
+                    </label>
+                </div>
+
+                <!-- Botón de registro -->
+                <button type="submit" class="btn btn-primary btn-block" id="registerButton">
+                    <span class="btn-text">Crear cuenta</span>
+                    <span class="btn-loader" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </span>
+                </button>
+            </form>
+
+            <!-- Contenedor para mensajes de error/éxito -->
+            <div id="errorContainer" style="display: none;"></div>
+
+            <!-- Footer con enlaces -->
+            <div class="auth-footer">
+                <p class="login-prompt">
+                    ¿Ya tienes cuenta?
+                    <a href="login.html" class="login-link">
+                        Inicia sesión <i class="fas fa-arrow-right"></i>
+                    </a>
+                </p>
+                <a href="index.html" class="back-link">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver al inicio
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script src="js/footer.js"></script>
+<script src="js/register.js"></script>
+<script>
+    // ========== PREFIJOS TELEFÓNICOS ==========
+    const PHONE_PREFIXES = [
+        { code: '+54',  flag: '🇦🇷', name: 'Argentina',           max: 10 },
+        { code: '+591', flag: '🇧🇴', name: 'Bolivia',              max: 8  },
+        { code: '+55',  flag: '🇧🇷', name: 'Brasil',               max: 11 },
+        { code: '+56',  flag: '🇨🇱', name: 'Chile',                max: 9  },
+        { code: '+57',  flag: '🇨🇴', name: 'Colombia',             max: 10 },
+        { code: '+506', flag: '🇨🇷', name: 'Costa Rica',           max: 8  },
+        { code: '+53',  flag: '🇨🇺', name: 'Cuba',                 max: 8  },
+        { code: '+593', flag: '🇪🇨', name: 'Ecuador',              max: 9  },
+        { code: '+503', flag: '🇸🇻', name: 'El Salvador',          max: 8  },
+        { code: '+502', flag: '🇬🇹', name: 'Guatemala',            max: 8  },
+        { code: '+509', flag: '🇭🇹', name: 'Haití',                max: 8  },
+        { code: '+504', flag: '🇭🇳', name: 'Honduras',             max: 8  },
+        { code: '+52',  flag: '🇲🇽', name: 'México',               max: 10 },
+        { code: '+505', flag: '🇳🇮', name: 'Nicaragua',            max: 8  },
+        { code: '+507', flag: '🇵🇦', name: 'Panamá',               max: 8  },
+        { code: '+595', flag: '🇵🇾', name: 'Paraguay',             max: 9  },
+        { code: '+51',  flag: '🇵🇪', name: 'Perú',                 max: 9  },
+        { code: '+1787',flag: '🇵🇷', name: 'Puerto Rico',          max: 10 },
+        { code: '+1809',flag: '🇩🇴', name: 'Rep. Dominicana',      max: 10 },
+        { code: '+598', flag: '🇺🇾', name: 'Uruguay',              max: 9  },
+        { code: '+58',  flag: '🇻🇪', name: 'Venezuela',            max: 10 },
+        { code: '+34',  flag: '🇪🇸', name: 'España',               max: 9  },
+        { code: '+1',   flag: '🇺🇸', name: 'Estados Unidos',       max: 10 },
+        { code: '+44',  flag: '🇬🇧', name: 'Reino Unido',          max: 10 },
+        { code: '+33',  flag: '🇫🇷', name: 'Francia',              max: 9  },
+        { code: '+49',  flag: '🇩🇪', name: 'Alemania',             max: 11 },
+        { code: '+39',  flag: '🇮🇹', name: 'Italia',               max: 10 },
+        { code: '+351', flag: '🇵🇹', name: 'Portugal',             max: 9  },
+        { code: '+7',   flag: '🇷🇺', name: 'Rusia',                max: 10 },
+        { code: '+86',  flag: '🇨🇳', name: 'China',                max: 11 },
+        { code: '+81',  flag: '🇯🇵', name: 'Japón',                max: 11 },
+        { code: '+82',  flag: '🇰🇷', name: 'Corea del Sur',        max: 11 },
+        { code: '+91',  flag: '🇮🇳', name: 'India',                max: 10 },
+        { code: '+61',  flag: '🇦🇺', name: 'Australia',            max: 9  },
+        { code: '+27',  flag: '🇿🇦', name: 'Sudáfrica',            max: 9  },
+        { code: '+20',  flag: '🇪🇬', name: 'Egipto',               max: 10 },
+        { code: '+972', flag: '🇮🇱', name: 'Israel',               max: 9  },
+        { code: '+971', flag: '🇦🇪', name: 'Emiratos Árabes',      max: 9  },
+        { code: '+966', flag: '🇸🇦', name: 'Arabia Saudita',       max: 9  },
+        { code: '+90',  flag: '🇹🇷', name: 'Turquía',              max: 10 },
+    ];
+
+    let selectedPrefix = PHONE_PREFIXES[0];
+
+    function renderPrefixList(filter = '') {
+        const list = document.getElementById('phonePrefixList');
+        const filtered = PHONE_PREFIXES.filter(p =>
+            p.name.toLowerCase().includes(filter.toLowerCase()) ||
+            p.code.includes(filter)
+        );
+        list.innerHTML = filtered.map(p => `
+            <div class="phone-prefix-option" data-code="${p.code}">
+                <span>${p.flag}</span>
+                <span class="option-name">${p.name}</span>
+                <span class="option-code">${p.code}</span>
+            </div>
+        `).join('');
+
+        list.querySelectorAll('.phone-prefix-option').forEach(el => {
+            el.addEventListener('click', function() {
+                const code = this.dataset.code;
+                selectedPrefix = PHONE_PREFIXES.find(p => p.code === code);
+                document.getElementById('phonePrefixFlag').textContent = selectedPrefix.flag;
+                document.getElementById('phonePrefixCode').textContent = selectedPrefix.code;
+                document.getElementById('phoneNumber').maxLength = selectedPrefix.max;
+                document.getElementById('phoneHint').textContent = `Máx. ${selectedPrefix.max} dígitos`;
+                closePrefixDropdown();
+                updateHiddenPhone();
+                document.getElementById('phoneNumber').focus();
+            });
+        });
+    }
+
+    function openPrefixDropdown() {
+        const dd = document.getElementById('phonePrefixDropdown');
+        dd.style.display = 'block';
+        document.getElementById('phonePrefixSearch').value = '';
+        renderPrefixList('');
+        document.getElementById('phonePrefixSearch').focus();
+    }
+
+    function closePrefixDropdown() {
+        document.getElementById('phonePrefixDropdown').style.display = 'none';
+    }
+
+    function updateHiddenPhone() {
+        const num = document.getElementById('phoneNumber').value.trim();
+        document.getElementById('phone').value = num ? `${selectedPrefix.code} ${num}` : '';
+    }
+
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', function() {
+        renderPrefixList();
+        document.getElementById('phoneNumber').maxLength = selectedPrefix.max;
+
+        document.getElementById('phonePrefixBtn').addEventListener('click', function() {
+            const dd = document.getElementById('phonePrefixDropdown');
+            dd.style.display === 'none' ? openPrefixDropdown() : closePrefixDropdown();
+        });
+
+        document.getElementById('phonePrefixBtn').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPrefixDropdown(); }
+        });
+
+        document.getElementById('phonePrefixSearch').addEventListener('input', function() {
+            renderPrefixList(this.value);
+        });
+
+        document.getElementById('phoneNumber').addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '');
+            updateHiddenPhone();
+        });
+
+        document.addEventListener('click', function(e) {
+            const wrapper = document.querySelector('.phone-wrapper');
+            const dd = document.getElementById('phonePrefixDropdown');
+            if (!wrapper.contains(e.target) && !dd.contains(e.target)) {
+                closePrefixDropdown();
+            }
+        });
+        setupPasswordToggles();
+    });
+</script>
+</body>
+</html>

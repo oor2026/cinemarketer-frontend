@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cinemarketer</title>
+
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<!-- NAVBAR - Se adapta a móvil -->
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="index.html" class="logo">
+            <img src="assets/images/isologotipo.png" alt="Cinemarketer" class="logo-img">
+        </a>
+
+        <!-- Menú hamburguesa para móvil -->
+        <button class="menu-toggle" id="menuToggle" aria-label="Menú">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Enlaces de navegación -->
+        <ul class="nav-menu" id="navMenu">
+            <li><a href="#inicio" class="nav-link active">Inicio</a></li>
+            <li><a href="#quienes" class="nav-link">Quienes Somos</a></li>
+            <li><a href="#como-funciona" class="nav-link">¿Cómo funciona?</a></li>  <!-- CAMBIADO -->
+            <li><a href="#footer-contacto" class="nav-link">Contacto</a></li>
+            <li class="nav-buttons">
+                <a href="login.html" class="btn btn-outline">Iniciar Sesión</a>
+                <a href="register.html" class="btn btn-primary">Registrarse</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<!-- HERO SECTION - Responsive -->
+<section id="inicio" class="hero">
+    <img src="assets/images/pochoclo.png" alt="" class="hero-deco hero-deco-left">
+    <img src="assets/images/proyector.png" alt="" class="hero-deco hero-deco-right">
+    <div class="hero-content">
+        <h1 class="hero-title">Lo mejor del cine está en vos</h1>
+        <p class="hero-subtitle">La red social que estabas esperando para compartir y llevarte lo mejor del cine.</p>
+
+        <div class="hero-buttons">
+            <a href="register.html" class="btn btn-large btn-primary">
+                <i class="fas fa-film"></i>
+                Crear cuenta gratis
+            </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="hero-stats">
+            <div class="stat-item">
+                <span class="stat-number">N°1</span>
+                <span class="stat-label">Red social argentina</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">+10</span>
+                <span class="stat-label">Socios estratégicos</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">+1K</span>
+                <span class="stat-label">Premios a entregar</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ola decorativa -->
+    <div class="hero-wave">
+        <svg viewBox="0 0 1440 320">
+            <path fill="#ffffff" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,170.7C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+        </svg>
+    </div>
+</section>
+
+<!-- QUIÉNES SOMOS SECTION - Imagen full width -->
+<section id="quienes" class="section quienes-somos">
+    <!-- Imagen de fondo que cubre todo el ancho -->
+    <div class="quienes-somos-bg">
+        <div class="bg-overlay"></div>
+    </div>
+
+    <div class="container">
+        <div class="quienes-somos-content">
+            <div class="section-header light">
+                <h2 class="section-title">Quiénes Somos</h2>
+                <p class="section-subtitle">La comunidad que transforma tu opinión en experiencias</p>
+            </div>
+
+            <div class="quienes-somos-text">
+                <p class="highlight-text">
+                    En <strong>Cinemarketer</strong> somos más que una red social: somos el puente entre los amantes del cine y las marcas que hacen posible la magia del séptimo arte.
+                </p>
+
+                <div class="features-list">
+                    <div class="feature-item">
+                        <i class="fas fa-star"></i>
+                        <div>
+                            <h4>Tu opinión vale</h4>
+                            <p>Comparte tus críticas, votaciones y reseñas sobre películas, salas de cine, combos de dulcería y más. Cada opinión cuenta y es valorada.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-gift"></i>
+                        <div>
+                            <h4>Gana premios increíbles</h4>
+                            <p>Acumula puntos por tu participación y cámbialos por boletos de cine, combos exclusivos, mercancía oficial de tus películas favoritas y experiencias VIP.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="fas fa-handshake"></i>
+                        <div>
+                            <h4>Aliados estratégicos</h4>
+                            <p>Trabajamos junto a las principales cadenas de cine, productoras, distribuidoras y marcas del entretenimiento para ofrecerte los mejores premios y experiencias.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-banner">
+                    <div class="stat">
+                        <span class="stat-number">+10K</span>
+                        <span class="stat-label">Usuarios activos</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">+50K</span>
+                        <span class="stat-label">Opiniones compartidas</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">+5</span>
+                        <span class="stat-label">Marcas aliadas</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">+1K</span>
+                        <span class="stat-label">Premios entregados</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-footer">
+                <a href="register.html" class="btn btn-large btn-primary">
+                    Únete a la comunidad
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CÓMO FUNCIONA SECTION (Antes era Promociones) -->
+<section id="como-funciona" class="section bg-light">  <!-- CAMBIADO ID -->
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">¿Cómo funciona?</h2>  <!-- CAMBIADO TÍTULO -->
+            <p class="section-subtitle">Gana puntos, canjea premios, disfruta el cine</p>  <!-- CAMBIADO SUBTÍTULO -->
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-pen"></i>  <!-- CAMBIADO ÍCONO -->
+                </div>
+                <h3>1. Opina y vota</h3>  <!-- CAMBIADO TÍTULO -->
+                <p>Comparte tus reseñas, califica películas y participa en encuestas. Cada interacción suma puntos.</p>  <!-- CAMBIADO TEXTO -->
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-coins"></i>  <!-- CAMBIADO ÍCONO -->
+                </div>
+                <h3>2. Acumula puntos</h3>  <!-- CAMBIADO TÍTULO -->
+                <p>Por cada opinión, voto o reseña recibes puntos que se acumulan en tu cuenta de Cinemarketer.</p>  <!-- CAMBIADO TEXTO -->
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-gift"></i>  <!-- CAMBIADO ÍCONO -->
+                </div>
+                <h3>3. Canjea premios</h3>  <!-- CAMBIADO TÍTULO -->
+                <p>Cambia tus puntos por boletos de cine, combos de dulcería, mercancía oficial y experiencias VIP.</p>  <!-- CAMBIADO TEXTO -->
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-film"></i>  <!-- CAMBIADO ÍCONO -->
+                </div>
+                <h3>4. Disfruta el cine</h3>  <!-- CAMBIADO TÍTULO -->
+                <p>Asiste a las funciones, disfruta tus premios y sigue participando para ganar más.</p>  <!-- CAMBIADO TEXTO -->
+            </div>
+        </div>
+
+        <!-- Dots carrusel (solo visible en mobile) -->
+        <div class="carousel-dots" id="carouselDots">
+            <button class="carousel-dot active"></button>
+            <button class="carousel-dot"></button>
+            <button class="carousel-dot"></button>
+            <button class="carousel-dot"></button>
+        </div>
+    </div>
+</section>
+
+<!-- CTA SECTION -->
+<section class="cta-section">
+    <div class="container">
+        <h2>¿Listo para vivir la experiencia?</h2>
+        <p>Regístrate sin costo, comienza a participar y llévate todos los premios.</p>
+        <a href="register.html" class="btn btn-large btn-primary">Crear cuenta gratis</a>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Cinemarketer</h4>
+                <p>Lo mejor del cine está en vos.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-tiktok"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h4>Enlaces rápidos</h4>
+                <ul>
+                    <li><a href="#inicio">Inicio</a></li>
+                    <li><a href="#quienes">Quienes Somos</a></li>  <!-- CAMBIADO -->
+                    <li><a href="#como-funciona">¿Cómo funciona?</a></li>  <!-- CAMBIADO -->
+                    <li><a href="#contacto">Contacto</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section" id="footer-contacto">
+                <h4>Contacto</h4>
+                <ul>
+                    <li><i class="fas fa-phone"></i> (123) 456-7890</li>
+                    <li><i class="fas fa-envelope"></i> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1d74737b725d7e747378707c6f767869786f337e7270">[email&#160;protected]</a></li>
+                    <li><i class="fas fa-map-marker-alt"></i> Av. Principal 123</li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Horarios (Soporte)</h4>
+                <ul>
+                    <li>Lunes a Viernes: 09pm - 17pm</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- LINKS LEGALES -->
+        <div class="footer-bottom">
+            <nav class="footer-legal-links">
+                <button onclick="footerModal.abrir('terminos')">Términos y Condiciones</button>
+                <button onclick="footerModal.abrir('privacidad')">Política de Privacidad</button>
+                <button onclick="footerModal.abrir('cookies')">Política de Cookies</button>
+                <button onclick="footerModal.abrir('centroPrivacidad')">Centro de Privacidad</button>
+                <button onclick="footerModal.abrir('ayuda')">Centro de Ayuda</button>
+                <button onclick="footerModal.abrir('avisoLegal')">Aviso Legal</button>
+            </nav>
+            <p>&copy; 2026 Cinemarketer. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- Scripts -->
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script src="js/footer.js"></script>
+<script>
+    // Carrusel "Como funciona" - solo activo en mobile
+    (function() {
+        var grid = document.querySelector('.features-grid');
+        var dots = document.querySelectorAll('.carousel-dot');
+        if (!grid || !dots.length) return;
+        grid.addEventListener('scroll', function() {
+            var cardW = grid.firstElementChild.offsetWidth + 20;
+            var idx = Math.min(dots.length - 1, Math.round(grid.scrollLeft / cardW));
+            dots.forEach(function(d, i) { d.classList.toggle('active', i === idx); });
+        });
+    })();
+</script>
+</body>
+</html>

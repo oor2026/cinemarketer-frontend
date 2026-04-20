@@ -1,0 +1,5 @@
+[deploy]
+startCommand = "npx serve . -l $PORT"
+
+[build]
+builder = "nixpacks"

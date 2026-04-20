@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>Cinemarketer - Iniciar Sesión</title>
+
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="css/toast.css">
+    <script src="js/toast.js"></script>
+</head>
+<body class="auth-page">
+<!-- Fondo con efecto parallax -->
+<div class="auth-background">
+    <div class="auth-overlay"></div>
+</div>
+
+<!-- Contenedor principal -->
+<div class="auth-wrapper" style="margin-top: 0;">
+    <div class="auth-container">
+        <!-- Tarjeta de login -->
+        <div class="auth-card">
+            <div class="auth-logo-mobile">
+                <img src="assets/images/isologotipo.png" alt="Cinemarketer">
+            </div>
+            <!-- Header con iconos -->
+            <div class="auth-header">
+                <div class="auth-icon">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <h2>Bienvenido de nuevo</h2>
+                <p>Inicia sesión para continuar</p>
+            </div>
+
+            <!-- Formulario de login -->
+            <form id="loginForm" class="auth-form">
+                <!-- Campo email -->
+                <div class="form-group">
+                    <label for="email">
+                        <i class="fas fa-envelope"></i>
+                        Correo electrónico
+                    </label>
+                    <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            required
+                            placeholder="dirección@email.com"
+                            autocomplete="email"
+                            maxlength="50"
+                    >
+                </div>
+
+                <!-- Campo contraseña -->
+                <div class="form-group">
+                    <label for="password">
+                        <i class="fas fa-lock"></i>
+                        Contraseña
+                    </label>
+                    <div class="password-input-wrapper">
+                        <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                required
+                                placeholder="••••••••"
+                                autocomplete="current-password"
+                                maxlength="30"
+                        >
+                        <button
+                                type="button"
+                                class="password-toggle"
+                                id="togglePassword"
+                                aria-label="Mostrar contraseña"
+                        >
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Opciones adicionales -->
+                <div class="form-options">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="remember">
+                        <span class="checkmark"></span>
+                        Recordarme
+                    </label>
+                    <a href="forgot-password.html" class="forgot-link" id="forgotPassword">
+                        ¿Olvidaste tu contraseña?
+                    </a>
+                </div>
+
+                <!-- Botón de submit -->
+                <button type="submit" class="btn btn-primary btn-block" id="loginButton">
+                    <span class="btn-text">Iniciar Sesión</span>
+                    <span class="btn-loader" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </span>
+                </button>
+            </form>
+
+            <!-- Separador -->
+            <div class="auth-divider">
+                <span>o continúa con</span>
+            </div>
+
+            <!-- Opciones de login social -->
+            <div class="social-login">
+                <button class="social-btn google" id="googleLogin">
+                    <i class="fab fa-google"></i>
+                    <span>Google</span>
+                </button>
+            </div>
+
+            <!-- Footer con enlaces -->
+            <div class="auth-footer">
+                <p class="register-prompt">
+                    ¿No tienes cuenta?
+                    <a href="register.html" class="register-link" id="registerLink">
+                        Regístrate gratis
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </p>
+                <a href="index.html" class="back-link" id="backLink">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver al inicio
+                </a>
+            </div>
+        </div>
+
+        <!-- Mensaje de bienvenida (solo visible en desktop) -->
+        <div class="auth-welcome">
+            <div class="welcome-content">
+                <img src="assets/images/isologotipo.png" alt="Cinemarketer" class="welcome-img">
+                <h2>¡Te extrañamos!</h2>
+                <p>Accede a tu cuenta para disfrutar de los mejores estrenos y promociones exclusivas.</p>
+                <div class="welcome-features">
+                    <div class="welcome-feature">
+                        <i class="fas fa-star"></i>
+                        <span>Estrenos exclusivos</span>
+                    </div>
+                    <div class="welcome-feature">
+                        <i class="fas fa-gift"></i>
+                        <span>Promociones VIP</span>
+                    </div>
+                    <div class="welcome-feature">
+                        <i class="fas fa-clock"></i>
+                        <span>Reservas 24/7</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/footer.js"></script>
+<script>
+    // ==============================================
+    // TOGGLE PASSWORD (AGREGADO)
+    // ==============================================
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+
+    if (togglePassword && passwordInput) {
+        togglePassword.addEventListener('click', function() {
+            // Cambiar el tipo de input
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+
+            // Cambiar el ícono
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        });
+    }
+
+    // ==============================================
+    // BLOQUEAR / DESBLOQUEAR ELEMENTOS DURANTE LOGIN
+    // ==============================================
+    function bloquearElementos() {
+        // Olvidaste tu contraseña
+        const forgotPassword = document.getElementById('forgotPassword');
+        forgotPassword.style.pointerEvents = 'none';
+        forgotPassword.style.opacity = '0.4';
+
+        // Botón Google
+        const googleLogin = document.getElementById('googleLogin');
+        googleLogin.disabled = true;
+        googleLogin.style.opacity = '0.4';
+
+        // Regístrate gratis
+        const registerLink = document.getElementById('registerLink');
+        registerLink.style.pointerEvents = 'none';
+        registerLink.style.opacity = '0.4';
+
+        // Volver al inicio
+        const backLink = document.getElementById('backLink');
+        backLink.style.pointerEvents = 'none';
+        backLink.style.opacity = '0.4';
+    }
+
+    function desbloquearElementos() {
+        // Olvidaste tu contraseña
+        const forgotPassword = document.getElementById('forgotPassword');
+        forgotPassword.style.pointerEvents = '';
+        forgotPassword.style.opacity = '';
+
+        // Botón Google
+        const googleLogin = document.getElementById('googleLogin');
+        googleLogin.disabled = false;
+        googleLogin.style.opacity = '';
+
+        // Regístrate gratis
+        const registerLink = document.getElementById('registerLink');
+        registerLink.style.pointerEvents = '';
+        registerLink.style.opacity = '';
+
+        // Volver al inicio
+        const backLink = document.getElementById('backLink');
+        backLink.style.pointerEvents = '';
+        backLink.style.opacity = '';
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+
+        // Mostrar loading
+        const btn = document.querySelector('#loginButton');
+        const btnText = btn.querySelector('.btn-text');
+        const btnLoader = btn.querySelector('.btn-loader');
+        btn.disabled = true;
+        btnText.style.display = 'none';
+        btnLoader.style.display = 'inline-block';
+
+        // Bloquear elementos durante el proceso
+        bloquearElementos();
+
+        try {
+            // Llamar al backend
+            // DESPUÉS
+                const response = await fetch(`${CONFIG.API_URL}/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            // Obtener texto de la respuesta
+            const text = await response.text();
+            let data = {};
+            try {
+                data = text ? JSON.parse(text) : {};
+            } catch (e) {
+                console.warn('Respuesta no es JSON válido');
+            }
+
+            if (response.ok) {
+                // Login exitoso - Guardar token en localStorage
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('userEmail', data.email);
+                localStorage.setItem('userRole', data.role);
+                localStorage.setItem('userPoints', data.totalPoints);
+                localStorage.setItem('userLevel', data.level || 'AMATEUR');
+
+                showToast('success', '¡Bienvenido de nuevo!');
+
+                // Redirigir según rol
+                setTimeout(() => {
+                    if (data.role === 'ADMIN') {
+                        window.location.replace('admin/admin.html');
+                    } else {
+                         window.location.replace('dashboard.html');
+                    }
+                }, 1500);
+            } else {
+                if (response.status === 403 && data.message) {
+                    // Cuenta suspendida — tiene mensaje personalizado
+                    showNotification(data.message, 'error');
+                }
+                else if (response.status === 403 && !data.message) {
+                    // Cuenta no verificada — 403 sin mensaje
+                    showNotification('Tu cuenta aún no fue verificada. Revisá tu casilla de email y hacé clic en el enlace de verificación.', 'warning');
+                }
+                else if (response.status === 401) {
+                    // Credenciales incorrectas
+                    showNotification('El email o la contraseña son incorrectos. Si eliminaste tu cuenta, deberás registrarte nuevamente.', 'error');
+                }
+                else {
+                    showNotification(data.message || 'Credenciales inválidas', 'error');
+                }
+                // Error de negocio (401, 403) — desbloquear elementos
+                desbloquearElementos();
+            }
+        } catch (error) {
+            // Error de servidor o red — desbloquear elementos
+            console.error('Error:', error);
+            showNotification('No se pudo conectar con el servidor. Intentá nuevamente.', 'error');
+            desbloquearElementos();
+        } finally {
+            // Restaurar botón
+            btn.disabled = false;
+            btnText.style.display = 'inline';
+            btnLoader.style.display = 'none';
+        }
+    });
+
+    // Función para mostrar notificaciones
+    function showNotification(message, type) {
+        alert(message); // Temporal, reemplazar con tu sistema
+    }
+</script>
+</body>
+</html>

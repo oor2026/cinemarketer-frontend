@@ -1,0 +1,439 @@
+/* ========== DASHBOARD - ESTILOS PROPIOS ========== */
+
+/* Hamburguesa - oculta en desktop por defecto */
+
+/* Nombre de usuario - oculto en desktop */
+.user-name-mini {
+    display: none;
+}
+
+.dash-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--dark);
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+.logo-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+}
+
+:root {
+    --primary: #e50914;
+    --primary-dark: #b2070f;
+    --dark: #221f1f;
+    --gray: #7f7f7f;
+    --light: #f5f5f1;
+    --white: #ffffff;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--light);
+    color: var(--dark);
+    display: block !important;
+}
+
+/* ========== NAVBAR / HEADER ========== */
+.navbar {
+    background: var(--white);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 0.5rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--dark);
+    text-decoration: none;
+    width: 200px;
+    flex-shrink: 0;
+    border-right: 1px solid #eee;
+    padding: 0.5rem 1.5rem;
+}
+
+.logo i {
+    color: var(--primary);
+    font-size: 2rem;
+}
+
+.nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    list-style: none;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--dark);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.nav-link:hover {
+    background: var(--light);
+    color: var(--primary);
+}
+
+.nav-link i {
+    color: var(--primary);
+    font-size: 1.1rem;
+}
+
+.nav-text {
+    margin-left: 0.5rem;
+}
+
+.nav-link.active {
+    background: var(--light);
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.nav-link.active i {
+    color: var(--primary);
+}
+
+/* ========== CONTENEDOR DE MÓDULOS ========== */
+#module-container {
+    min-height: calc(100vh - 80px);
+    padding: 2rem;
+}
+
+.loader {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.2rem;
+    color: var(--gray);
+}
+
+/* ========== CAMPANA DE NOTIFICACIONES ========== */
+.nav-notificaciones {
+    position: relative;
+}
+
+.nav-link-bell {
+    padding: 0.5rem 0.75rem;
+}
+
+.bell-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.bell-badge {
+    position: absolute;
+    top: -8px;
+    right: -10px;
+    background: #e50914;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    border: 2px solid white;
+    line-height: 1;
+}
+
+/* ==============================================
+   NUEVOS ESTILOS PARA AVATAR Y NIVEL EN HEADER
+   ============================================== */
+
+/* Contenedor del perfil mini en el header */
+.nav-user-profile {
+    margin-left: 0.5rem;
+}
+
+.user-profile-mini {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.user-profile-mini:hover {
+    background: var(--light);
+}
+
+/* Avatar mini */
+.user-avatar-mini {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--primary);
+}
+
+.user-avatar-mini i {
+    font-size: 2rem;
+    color: var(--gray);
+}
+
+.user-avatar-mini img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Nivel mini */
+.user-level-mini {
+    display: flex;
+    align-items: center;
+}
+
+.level-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: var(--light);
+    color: var(--dark);
+    white-space: nowrap;
+}
+
+/* Colores específicos por nivel */
+.level-badge.level-AMATEUR {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.level-badge.level-COLABORADOR {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.level-badge.level-CRITICO {
+    background: #f3e5f5;
+    color: #6a1b9a;
+}
+
+.level-badge.level-JURADO_EXPERTO {
+    background: #fff3e0;
+    color: #e65100;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+
+
+.nav-menu .nav-link {
+        padding: 0.5rem 1rem;
+    }
+
+    .nav-menu li {
+        margin: 0;
+    }
+
+    .dash-menu-toggle {
+        display: block;
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .nav-container {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        padding: 0.5rem 1rem;
+        min-height: 80px;
+        gap: 0;
+    }
+
+    .logo {
+        width: auto;
+        border-right: none;
+        padding: 0;
+        justify-content: center;
+    }
+
+    .logo-img {
+        height: 60px;
+        width: auto;
+    }
+
+    .nav-menu {
+        position: fixed;
+        top: 80px;
+        left: -100%;
+        width: 100%;
+        height: calc(100vh - 80px);
+        background: var(--white);
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.5rem;
+        gap: 0.5rem;
+        transition: left 0.3s ease;
+        z-index: 999;
+        overflow-y: auto;
+    }
+
+    .nav-menu.active {
+        left: 0;
+    }
+
+    .nav-link {
+        width: 100%;
+        padding: 1rem 1.2rem;
+        border-radius: 10px;
+        font-size: 1.2rem;
+        gap: 1rem;
+    }
+
+    .nav-link i {
+        font-size: 1.4rem;
+    }
+
+    .nav-text {
+        display: inline;
+        font-size: 1.2rem;
+    }
+
+    .nav-link:has(.fa-home) {
+        display: none;
+    }
+
+    .nav-menu-close {
+        display: flex;
+        justify-content: flex-end;
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+
+    #dashMenuClose {
+        background: none;
+        border: none;
+        font-size: 1.8rem;
+        color: var(--dark);
+        cursor: pointer;
+        padding: 0.5rem;
+    }
+
+        .user-profile-mini {
+            padding: 0.25rem;
+            gap: 0.5rem;
+            margin-left: 0;
+            justify-content: center;
+        }
+
+        .user-level-mini {
+            display: flex;  /* ← CAMBIADO: mostrar en móvil */
+        }
+
+        .user-avatar-mini {
+            width: 45px;    /* ← AGREGADO: más grande */
+            height: 45px;   /* ← AGREGADO: más grande */
+            border-width: 2px;
+        }
+
+        .level-badge {
+            font-size: 0.8rem;
+            padding: 0.3rem 0.8rem;
+            white-space: nowrap;
+        }
+
+        /* Asegurar que el contenedor del perfil esté alineado */
+        .nav-user-profile {
+            margin-left: 0;
+            width: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .user-name-mini {
+                display: flex;
+                align-items: center;
+            }
+
+            .user-name-text {
+                font-size: 1rem;
+                font-weight: 600;
+                color: #333;
+            }
+
+    /* Eliminar padding del contenedor de módulos en mobile */
+    #module-container {
+        padding: 0.25rem 0;
+    }
+}
+
+@media (min-width: 769px) {
+    .nav-link {
+        padding: 0.4rem 0.4rem;
+        font-size: 0.85rem;
+    }
+    .nav-text {
+        margin-left: 0.2rem;
+    }
+    .logo {
+        width: 160px;
+        padding: 0.5rem 1rem;
+        align: left;
+    }
+
+/* Cruz de cierre - oculta en desktop */
+.nav-menu-close {
+    display: none;
+}

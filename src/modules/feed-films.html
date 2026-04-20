@@ -1,0 +1,208 @@
+<div class="feed-container">
+    <!-- HEADER CON BIENVENIDA -->
+    <div class="feed-header">
+        <div class="header-content">
+            <h1>¡Lo mejor del cine está en vos!</h1>
+            <p>La única y verdadera red social de cine donde descubrir, votar y comentar tiene su recompensa. ¡Empecemos!</p>
+        </div>
+    </div>
+
+    <!-- FILTROS (cargados dinámicamente) -->
+    <div id="filtros-container"></div>
+
+    <!-- RESULTADOS (PELÍCULAS) -->
+    <div class="resultados-header">
+        <h3>Películas encontradas <span id="resultadosCount">3</span></h3>
+        <div class="ordenar">
+            <label>Ordenar por:</label>
+            <select id="ordenarPor" class="ordenar-select" onchange="window.ordenarPeliculas()">
+                <option value="popularidad">Más populares</option>
+                <option value="fecha">Más recientes</option>
+                <option value="titulo">Título A-Z</option>
+                <option value="votos">Más votadas</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- GRID DE PELÍCULAS -->
+    <div class="peliculas-grid" id="peliculasGrid"></div>
+
+    <!-- PAGINACIÓN (cargada dinámicamente) -->
+    <div id="paginacion-container"></div>
+
+    <!-- MODAL DE DETALLE -->
+    <div id="modalPelicula" class="modal" style="display: none;">
+        <div class="modal-overlay" onclick="window.cerrarModal()"></div>
+        <div class="modal-contenido">
+
+            <!-- HEADER: título + rating + cerrar -->
+            <div class="modal-header">
+                <h2 id="modalTitulo">Título de la película</h2>
+                <div class="modal-header-right">
+                    <div class="modal-rating" id="modalRating">⭐ 0 votos</div>
+                    <div class="modal-rating modal-badge-comentarios" id="modalComentariosCount">💬 0 comentarios</div>
+                    <button class="modal-cerrar" onclick="window.cerrarModal()">×</button>
+                </div>
+            </div>
+
+            <!-- BODY SCROLLABLE -->
+            <div class="modal-body">
+
+                <!-- FILA SUPERIOR: carrusel en móvil, lado a lado en desktop -->
+                <div class="modal-fila-superior">
+
+                    <!-- CARRUSEL MÓVIL -->
+                    <div class="modal-carrusel" id="modalCarrusel">
+
+                        <!-- Slide 1: Poster -->
+                        <div class="carrusel-slide">
+                            <div class="modal-poster">
+                                <img id="modalPoster" src="" alt="Poster">
+                            </div>
+                        </div>
+
+                        <!-- Slide 2: Datos -->
+                        <div class="carrusel-slide">
+                            <div class="modal-columna-derecha">
+                                <div class="modal-info" id="modalInfo">
+                                    <p><strong>Fecha de estreno:</strong> <span id="modalFecha">-</span></p>
+                                    <p><strong>Duración:</strong> <span id="modalDuracion">-</span> min</p>
+                                    <p><strong>Idioma:</strong> <span id="modalIdioma">-</span></p>
+                                    <p><strong>Popularidad:</strong> <span id="modalPopularidad">-</span></p>
+                                    <p><strong>Votos TMDB:</strong> <span id="modalVotos">-</span></p>
+                                    <p><strong>Géneros:</strong> <span id="modalGeneros">-</span></p>
+                                    <div class="modal-sinopsis">
+                                        <strong>Sinopsis</strong>
+                                        <p id="modalSinopsis">Cargando...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div><!-- /slide 2 -->
+
+                    </div><!-- /modal-carrusel -->
+
+                    <!-- MIGA DE PAN -->
+                    <div class="carrusel-dots" id="carruselDots">
+                        <span class="carrusel-dot active" onclick="irASlide(0)"></span>
+                        <span class="carrusel-dot" onclick="irASlide(1)"></span>
+                    </div>
+
+                    <!-- BOTONES VOTAR - siempre visibles, fuera del carrusel -->
+                    <div class="modal-acciones">
+                        <button class="btn-like" onclick="window.votarPelicula(window.peliculaActualId, 'like', event)">
+                            <i class="fas fa-thumbs-up"></i> <span id="modalLikes">0</span>
+                        </button>
+                        <button class="btn-dislike" onclick="window.votarPelicula(window.peliculaActualId, 'dislike', event)">
+                            <i class="fas fa-thumbs-down"></i> <span id="modalDislikes">0</span>
+                        </button>
+                    </div>
+
+                </div><!-- /modal-fila-superior -->
+
+                <!-- FILA INFERIOR: caja de comentarios (ancho completo) -->
+                <div class="modal-fila-comentarios">
+
+                    <!-- Lista de comentarios -->
+                    <div class="comentarios-lista" id="comentariosLista">
+                        <div class="sin-comentarios">Expande para ver comentarios</div>
+                    </div>
+
+                    <!-- Área de escritura (oculta hasta presionar Comentar) -->
+                    <div class="comentario-escritura" id="areaEscritura" style="display: none;">
+                        <textarea id="nuevoComentario" placeholder="Escribe tu comentario... (máx 2000 caracteres)" maxlength="2000"></textarea>
+                        <div class="comentario-acciones">
+                            <span class="caracteres-restantes" id="caracteresRestantes">0/2000</span>
+                            <div class="comentario-botones">
+                                <button class="btn-cancelar" onclick="window.cancelarComentario()">
+                                    <i class="fas fa-times"></i> Cancelar
+                                </button>
+                                <button class="btn-enviar" onclick="window.enviarComentario()">
+                                    <i class="fas fa-paper-plane"></i> Enviar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- /modal-fila-comentarios -->
+
+                <!-- BOTÓN COMENTAR (ancho completo, siempre visible) -->
+                <div class="modal-fila-boton">
+                    <button class="btn-comentar" onclick="window.mostrarAreaComentario()">
+                        <i class="fas fa-pen"></i> Comentar
+                    </button>
+                </div>
+
+            </div><!-- /modal-body -->
+        </div><!-- /modal-contenido -->
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL REPORTAR COMENTARIO                      -->
+    <!-- ============================================== -->
+    <div id="modalReportarComentario" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
+        <div style="background:white; border-radius:16px; padding:2rem; max-width:420px; width:100%; position:relative;">
+            <button onclick="window.cerrarModalReporte()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#666;">×</button>
+            <h3 style="margin:0 0 0.5rem; color:#333; font-size:1.1rem;"><i class="fas fa-flag" style="color:#e50914;"></i> Reportar comentario</h3>
+            <p style="color:#888; font-size:0.85rem; margin-bottom:1.25rem;">Ayudanos a mantener una comunidad respetuosa. ¿Por qué querés reportar este comentario?</p>
+
+            <!-- Motivos -->
+            <div style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1.25rem;">
+                <label style="display:flex; align-items:center; gap:0.75rem; padding:0.65rem 0.9rem; border:1.5px solid #e0e0e0; border-radius:8px; cursor:pointer; font-size:0.9rem; transition:border-color 0.2s;">
+                    <input type="radio" name="reportReason" value="OFFENSIVE" style="accent-color:#e50914;"> Lenguaje ofensivo
+                </label>
+                <label style="display:flex; align-items:center; gap:0.75rem; padding:0.65rem 0.9rem; border:1.5px solid #e0e0e0; border-radius:8px; cursor:pointer; font-size:0.9rem; transition:border-color 0.2s;">
+                    <input type="radio" name="reportReason" value="INSULT" style="accent-color:#e50914;"> Insulto personal
+                </label>
+                <label style="display:flex; align-items:center; gap:0.75rem; padding:0.65rem 0.9rem; border:1.5px solid #e0e0e0; border-radius:8px; cursor:pointer; font-size:0.9rem; transition:border-color 0.2s;">
+                    <input type="radio" name="reportReason" value="SPAM" style="accent-color:#e50914;"> Spam
+                </label>
+                <label style="display:flex; align-items:center; gap:0.75rem; padding:0.65rem 0.9rem; border:1.5px solid #e0e0e0; border-radius:8px; cursor:pointer; font-size:0.9rem; transition:border-color 0.2s;">
+                    <input type="radio" name="reportReason" value="INAPPROPRIATE" style="accent-color:#e50914;"> Contenido inapropiado
+                </label>
+                <label style="display:flex; align-items:center; gap:0.75rem; padding:0.65rem 0.9rem; border:1.5px solid #e0e0e0; border-radius:8px; cursor:pointer; font-size:0.9rem; transition:border-color 0.2s;">
+                    <input type="radio" name="reportReason" value="OTHER" style="accent-color:#e50914;"> Otro
+                </label>
+            </div>
+
+            <!-- Descripción opcional -->
+            <textarea id="reportDescription" placeholder="Descripción adicional (opcional)..." maxlength="500"
+                      style="width:100%; padding:0.75rem; border:1.5px solid #e0e0e0; border-radius:8px; font-size:0.85rem; resize:none; height:80px; box-sizing:border-box; font-family:inherit;"></textarea>
+
+            <!-- Botones -->
+            <div style="display:flex; gap:0.75rem; margin-top:1rem;">
+                <button onclick="window.cerrarModalReporte()"
+                        style="flex:1; padding:0.7rem; border:1.5px solid #ddd; background:none; border-radius:8px; color:#666; cursor:pointer; font-size:0.9rem;">
+                    Cancelar
+                </button>
+                <button onclick="window.enviarReporte()" id="btnEnviarReporte"
+                        style="flex:2; padding:0.7rem; background:#e50914; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer; font-size:0.9rem;">
+                    Enviar reporte
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL OCULTAR COMENTARIO                       -->
+    <!-- ============================================== -->
+    <div id="modalOcultarComentario" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
+        <div style="background:white; border-radius:16px; padding:2rem; max-width:420px; width:100%; position:relative;" onclick="event.stopPropagation()">
+            <button onclick="window.cerrarModalOcultar()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#666;">×</button>
+            <h3 style="margin:0 0 0.5rem; color:#e50914;"><i class="fas fa-ban"></i> Ocultar comentario</h3>
+            <p style="color:#666; font-size:0.9rem; margin-bottom:1.5rem;">
+                Tu comentario dejará de ser visible para otros usuarios. Esta acción es <strong>irreversible</strong> y se descuenta de tu límite de 3 ocultamientos por película.
+            </p>
+            <div style="display:flex; gap:0.75rem;">
+                <button onclick="window.cerrarModalOcultar()"
+                        style="flex:1; padding:0.7rem; border:1.5px solid #ddd; background:none; border-radius:8px; color:#666; cursor:pointer; font-size:0.9rem;">
+                    Cancelar
+                </button>
+                <button id="btnConfirmarOcultar" onclick="window.confirmarOcultar()"
+                        style="flex:2; padding:0.7rem; background:#e50914; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer; font-size:0.9rem;">
+                    Sí, ocultar
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>

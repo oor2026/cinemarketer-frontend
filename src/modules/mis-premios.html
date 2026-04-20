@@ -1,0 +1,306 @@
+<div class="premios-container">
+    <!-- Header con resumen -->
+    <div class="premios-header">
+        <div class="header-icon">
+            <i class="fas fa-gift"></i>
+        </div>
+        <div class="header-text">
+            <h2>Mis Premios</h2>
+            <p>Canjea tus puntos por experiencias únicas</p>
+        </div>
+        <div class="puntos-disponibles">
+            <span class="puntos-label">Tus premios</span>
+            <span class="puntos-valor" id="puntosActuales">0</span>
+        </div>
+    </div>
+
+    <!-- Tabs de navegación -->
+    <div class="premios-tabs">
+        <button class="tab-btn active" onclick="window.switchTab('canjeados', this)">Premios Canjeados</button>
+        <button class="tab-btn" onclick="window.switchTab('disponibles', this)">Premios Disponibles</button>
+        <button class="tab-btn tab-btn-premium" onclick="window.switchTab('especiales', this)">
+            ★ Premios Especiales
+        </button>
+    </div>
+
+    <!-- SECCIÓN: PREMIOS CANJEADOS -->
+    <div id="canjeados-section" class="tab-content active">
+        <div class="canjeados-header">
+            <h3>Historial de canjes</h3>
+        </div>
+
+        <!-- Lista de premios canjeados -->
+        <div class="canjeados-list" id="canjeadosList">
+            <div class="loading">Cargando tus premios...</div>
+        </div>
+
+        <!-- Mensaje si no hay canjes -->
+        <div class="no-premios" id="noCanjeados" style="display: none;">
+            <i class="fas fa-box-open"></i>
+            <h3>Aún no has canjeado premios</h3>
+            <p>¡Gana puntos y canjealos por experiencias increíbles!</p>
+            <button class="btn-canjea" onclick="window.switchTab('disponibles', document.querySelector('.tab-btn:nth-child(2)'))">
+                Ver premios disponibles
+            </button>
+        </div>
+    </div>
+
+    <!-- SECCIÓN: PREMIOS DISPONIBLES -->
+    <div id="disponibles-section" class="tab-content">
+        <div class="disponibles-header">
+            <h3>Premios para canjear</h3>
+            <div class="filtros-premios">
+                <select class="filtro-select" onchange="window.filtrarPremios(this.value)">
+                    <option value="todos">Todos</option>
+                    <option value="entradas">Entradas</option>
+                    <option value="merchandising">Merchandising</option>
+                </select>
+                <select class="filtro-select" onchange="window.ordenarPremios(this.value)">
+                    <option value="puntos-menor">Menor puntos</option>
+                    <option value="puntos-mayor">Mayor puntos</option>
+                    <option value="nombre">Nombre A-Z</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Grid de premios disponibles -->
+        <div class="premios-grid" id="premiosGrid">
+            <div class="loading">Cargando premios disponibles...</div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN: PREMIOS ESPECIALES (PREMIUM) -->
+    <div id="especiales-section" class="tab-content">
+
+        <!-- Banner CTA para no premium -->
+        <div id="especialesBannerNoPremium" style="display:none;">
+            <div class="especiales-cta-banner">
+                <div class="especiales-cta-icon">★</div>
+                <h3>Contenido exclusivo para miembros Premium</h3>
+                <p>Suscribite para acceder a premios exclusivos y participar en sorteos gratuitos cada mes.</p>
+                <button class="btn-suscribirse-cta" onclick="window.irASuscripcion()">
+                    Quiero ser Premium
+                </button>
+            </div>
+        </div>
+
+        <!-- Contenido para premium activo -->
+        <div id="especialesContenido">
+            <div class="disponibles-header">
+                <h3>Premios y sorteos exclusivos</h3>
+                <div class="filtros-premios">
+                    <select class="filtro-select" onchange="window.filtrarEspeciales(this.value)">
+                        <option value="todos">Todos</option>
+                        <option value="CANJEABLE">Solo premios</option>
+                        <option value="SORTEO">Solo sorteos</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Grid de premios especiales -->
+            <div class="premios-grid" id="especialesGrid">
+                <div class="loading"><i class="fas fa-spinner fa-spin"></i><p>Cargando premios especiales...</p></div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- MODAL DE DETALLE DE PREMIO -->
+<div id="modalPremio" class="modal-premio" style="display:none;">
+    <div class="modal-premio-overlay" onclick="window.cerrarModalPremio()"></div>
+    <div class="modal-premio-contenido" onclick="event.stopPropagation()">
+
+        <!-- HEADER -->
+        <div class="modal-premio-header">
+            <h2 id="modalPremioTitulo">Nombre del premio</h2>
+            <div class="modal-premio-header-right">
+                <span class="modal-premio-badge" id="modalPremioBadge">🎁 Merchandising</span>
+                <button class="modal-premio-cerrar" onclick="window.cerrarModalPremio()">×</button>
+            </div>
+        </div>
+
+        <!-- BODY: dos columnas igual al modal de película -->
+        <div class="modal-premio-body">
+
+            <!-- COLUMNA IZQUIERDA: imagen -->
+            <div class="modal-premio-imagen">
+                <img id="modalPremioImg" src="" alt="Premio" style="display:none;">
+                <div class="modal-premio-img-placeholder" id="modalPremioImgPlaceholder">
+                    <i class="fas fa-gift"></i>
+                </div>
+            </div>
+
+            <!-- COLUMNA DERECHA -->
+            <div class="modal-premio-columna-derecha">
+                <div class="modal-premio-info">
+
+                    <p class="modal-premio-descripcion" id="modalPremioDescripcion"></p>
+
+                    <div class="modal-premio-detalles">
+                        <!-- Puntos requeridos -->
+                        <div class="modal-premio-detalle-item">
+                            <span class="detalle-label"><i class="fas fa-coins"></i> Puntos requeridos</span>
+                            <span class="detalle-value puntos-requeridos" id="modalPremioPuntos">0</span>
+                        </div>
+
+                        <!-- Stock disponible -->
+                        <div class="modal-premio-detalle-item">
+                            <span class="detalle-label"><i class="fas fa-boxes"></i> Stock disponible</span>
+                            <span class="detalle-value" id="modalPremioStock">0</span>
+                        </div>
+
+                        <!-- Vencimiento -->
+                        <div class="modal-premio-detalle-item" id="modalPremioVencimientoRow" style="display:none;">
+                            <span class="detalle-label"><i class="fas fa-calendar-alt"></i> Vence el</span>
+                            <span class="detalle-value" id="modalPremioVencimiento">-</span>
+                        </div>
+
+                        <!-- Proveedor -->
+                        <div class="modal-premio-detalle-item" id="modalPremioPartnerRow" style="display:none;">
+                            <span class="detalle-label"><i class="fas fa-handshake"></i> Proveedor</span>
+                            <span class="detalle-value" id="modalPremioPartner">-</span>
+                        </div>
+
+                        <!-- Sitio web -->
+                        <div class="modal-premio-detalle-item" id="modalPremioWebsiteRow" style="display:none;">
+                            <span class="detalle-label"><i class="fas fa-globe"></i> Sitio web</span>
+                            <span class="detalle-value" id="modalPremioWebsite">
+                                <a href="#" target="_blank" id="modalPremioWebsiteLink" style="color: #e50914; text-decoration: none;">-</a>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Mis puntos actuales -->
+                    <div class="modal-premio-mis-puntos">
+                        <i class="fas fa-wallet"></i> Tus puntos actuales:
+                        <strong id="modalPremioMisPuntos">0</strong>
+                    </div>
+
+                    <!-- Términos y condiciones -->
+                    <div class="modal-premio-terminos" id="modalPremioTerminosBox" style="display:none;">
+                        <strong><i class="fas fa-file-alt"></i> Términos y condiciones</strong>
+                        <p id="modalPremioTerminos" style="max-height:150px; overflow-y:auto; padding-right:0.5rem;"></p>
+                    </div>
+
+                </div>
+
+                <!-- BOTÓN CANJEAR -->
+                <div class="modal-premio-acciones">
+                    <button class="btn-canjear-modal" id="btnCanjearModal"
+                            onclick="window.canjearDesdeModal()">
+                        Canjear ahora
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE DETALLE PREMIO ESPECIAL -->
+<div id="modalEspecial" class="modal-premio" style="display:none;">
+    <div class="modal-premio-overlay" onclick="window.cerrarModalEspecial()"></div>
+    <div class="modal-premio-contenido" onclick="event.stopPropagation()">
+
+        <!-- HEADER -->
+        <div class="modal-premio-header">
+            <h2 id="modalEspecialTitulo">Nombre del premio</h2>
+            <div class="modal-premio-header-right">
+                <span class="modal-premio-badge" id="modalEspecialBadge">⭐ Exclusivo</span>
+                <button class="modal-premio-cerrar" onclick="window.cerrarModalEspecial()">×</button>
+            </div>
+        </div>
+
+        <!-- BODY -->
+        <div class="modal-premio-body">
+
+            <!-- COLUMNA IZQUIERDA: imagen -->
+            <div class="modal-premio-imagen">
+                <img id="modalEspecialImg" src="" alt="Premio" style="display:none;">
+                <div class="modal-premio-img-placeholder" id="modalEspecialImgPlaceholder">
+                    <i class="fas fa-star"></i>
+                </div>
+            </div>
+
+            <!-- COLUMNA DERECHA -->
+            <div class="modal-premio-columna-derecha">
+                <div class="modal-premio-info">
+
+                    <p class="modal-premio-descripcion" id="modalEspecialDescripcion"></p>
+
+                    <div class="modal-premio-detalles">
+
+                        <!-- CANJEABLE: puntos -->
+                        <div class="modal-premio-detalle-item" id="modalEspecialPuntosRow">
+                            <span class="detalle-label"><i class="fas fa-coins"></i> Puntos requeridos</span>
+                            <span class="detalle-value puntos-requeridos" id="modalEspecialPuntos">0</span>
+                        </div>
+
+                        <!-- CANJEABLE: stock -->
+                        <div class="modal-premio-detalle-item" id="modalEspecialStockRow">
+                            <span class="detalle-label"><i class="fas fa-boxes"></i> Stock disponible</span>
+                            <span class="detalle-value" id="modalEspecialStock">0</span>
+                        </div>
+
+                        <!-- SORTEO: fecha -->
+                        <div class="modal-premio-detalle-item" id="modalEspecialFechaRow" style="display:none;">
+                            <span class="detalle-label"><i class="fas fa-calendar-alt"></i> Fecha del sorteo</span>
+                            <span class="detalle-value" id="modalEspecialFecha">—</span>
+                        </div>
+
+                        <!-- SORTEO: participantes -->
+                        <div class="modal-premio-detalle-item" id="modalEspecialParticipantesRow" style="display:none;">
+                            <span class="detalle-label"><i class="fas fa-users"></i> Participantes</span>
+                            <span class="detalle-value" id="modalEspecialParticipantes">0</span>
+                        </div>
+
+                        <!-- SORTEO: ganador (solo visible cuando el sorteo fue ejecutado) -->
+                        <div class="modal-premio-detalle-item" id="modalEspecialGanadorRow" style="display:none;">
+                            <span class="detalle-label"><i class="fas fa-trophy"></i> Ganador/a</span>
+                            <span class="detalle-value" id="modalEspecialGanador">—</span>
+                        </div>
+
+                        <!-- Proveedor -->
+                        <div class="modal-premio-detalle-item" id="modalEspecialPartnerRow" style="display:none;">
+                            <span class="detalle-label"><i class="fas fa-handshake"></i> Proveedor</span>
+                            <span class="detalle-value" id="modalEspecialPartner">-</span>
+                        </div>
+
+                        <!-- Sitio web -->
+                        <div class="modal-premio-detalle-item" id="modalEspecialWebsiteRow" style="display:none;">
+                            <span class="detalle-label"><i class="fas fa-globe"></i> Sitio web</span>
+                            <span class="detalle-value" id="modalEspecialWebsite">
+                                <a href="#" target="_blank" id="modalEspecialWebsiteLink" style="color:#e50914;text-decoration:none;">-</a>
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <!-- Mis puntos (solo para canjeables) -->
+                    <div class="modal-premio-mis-puntos" id="modalEspecialMisPuntosBox">
+                        <i class="fas fa-wallet"></i> Tus puntos actuales:
+                        <strong id="modalEspecialMisPuntos">0</strong>
+                    </div>
+
+                    <!-- Términos y condiciones -->
+                    <div class="modal-premio-terminos" id="modalEspecialTerminosBox" style="display:none;">
+                        <strong><i class="fas fa-file-alt"></i> Términos y condiciones</strong>
+                        <p id="modalEspecialTerminos" style="max-height:150px; overflow-y:auto; padding-right:0.5rem;"></p>
+                    </div>
+
+                </div>
+
+                <!-- BOTÓN ACCIÓN -->
+                <div class="modal-premio-acciones">
+                    <button class="btn-canjear-modal" id="btnEspecialAccion"
+                            onclick="window.accionDesdeModalEspecial()">
+                        Participar
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

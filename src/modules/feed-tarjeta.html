@@ -1,0 +1,41 @@
+<!-- Plantilla de tarjeta de película con votación propia -->
+<div class="pelicula-card" data-id="{id}" onclick="window.abrirDetallePelicula({id})" style="cursor: pointer;">
+    <div class="pelicula-poster">
+        <img src="{posterUrl}" alt="{title}"
+             onerror="this.src='https://via.placeholder.com/300x450?text=Error+imagen'">
+        <div class="pelicula-overlay">
+            <span class="total-votos" id="totalVotos-{id}">0</span>
+            <span class="año">{year}</span>
+        </div>
+    </div>
+    <div class="pelicula-info">
+        <h3 class="pelicula-titulo">{title}</h3>
+
+        <!-- DESCRIPCIÓN RESTAURADA -->
+        <p class="pelicula-descripcion">{overview}</p>
+
+        <div class="pelicula-metadata">
+            <span class="comentarios-info">
+                <i class="fas fa-comment"></i> Comentarios: <span class="comentarios-count" id="comentarios-{id}">0</span>
+            </span>
+            <span class="ver-mas" onclick="event.stopPropagation(); window.abrirDetallePelicula({id})">Ver más</span>
+        </div>
+
+        <!-- VOTACIÓN PROPIA DE CINEMARKETER -->
+        <div class="votacion-container" id="votacion-{id}">
+            <div class="porcentaje-container" id="porcentaje-{id}" style="display: none;">
+                <div class="porcentaje-bar" style="width: 0%;"></div>
+                <span class="porcentaje-texto">0%</span>
+            </div>
+
+            <div class="votacion-buttons">
+                <button class="btn-like" onclick="event.stopPropagation(); window.votarPelicula({id}, 'like', event)">
+                    <i class="fas fa-thumbs-up"></i> <span id="likes-{id}">0</span>
+                </button>
+                <button class="btn-dislike" onclick="event.stopPropagation(); window.votarPelicula({id}, 'dislike', event)">
+                    <i class="fas fa-thumbs-down"></i> <span id="dislikes-{id}">0</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

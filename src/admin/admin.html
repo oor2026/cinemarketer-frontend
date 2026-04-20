@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Cinemarketer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/admin.css">
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        (function() {
+            const token = localStorage.getItem('token');
+            const role  = localStorage.getItem('userRole');
+            if (!token || role !== 'ADMIN') {
+                window.location.replace('../login.html');
+            }
+        })();
+    </script>
+    <style>
+        body { visibility: hidden; opacity: 0; }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR ADMIN -->
+<nav class="admin-navbar">
+    <div class="admin-nav-container">
+        <div class="admin-logo">
+            <i class="fas fa-film"></i>
+            <span>Cinemarketer <span class="admin-badge">ADMIN</span></span>
+        </div>
+        <div class="admin-nav-actions">
+            <span class="admin-user" id="adminUserName"></span>
+            <a href="../dashboard.html" class="btn-volver">
+                <i class="fas fa-arrow-left"></i> Volver al sitio
+            </a>
+            <button class="btn-logout" onclick="API.logout()">
+                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+            </button>
+        </div>
+    </div>
+</nav>
+
+<!-- LAYOUT PRINCIPAL -->
+<div class="admin-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar">
+        <ul class="sidebar-menu">
+            <li class="sidebar-item active" onclick="adminUI.switchSection('premios', this)">
+                <i class="fas fa-gift"></i>
+                <span>Premios</span>
+            </li>
+            <li class="sidebar-item" onclick="adminUI.switchSection('premiosPremium', this)">
+                <i class="fas fa-star"></i>
+                <span>Premios Premium</span>
+            </li>
+            <li class="sidebar-item" onclick="adminUI.switchSection('suscripciones', this)">
+                <i class="fas fa-crown"></i>
+                <span>Suscripciones</span>
+                <span class="sidebar-badge" id="adminSubsBadge" style="display:none;">0</span>
+            </li>
+            <li class="sidebar-item" onclick="adminUI.switchSection('canjes', this)">
+                <i class="fas fa-exchange-alt"></i>
+                <span>Canjes</span>
+                <span class="sidebar-badge" id="adminCanjesBadge" style="display:none;">0</span>
+            </li>
+            <li class="sidebar-item" onclick="adminUI.switchSection('usuarios', this)">
+                <i class="fas fa-users"></i>
+                <span>Usuarios</span>
+                <span class="sidebar-badge" id="adminUsuariosBadge" style="display:none;">0</span>
+            </li>
+            <li class="sidebar-item" onclick="adminUI.switchSection('soporte', this)">
+                <i class="fas fa-headset"></i>
+                <span>Soporte</span>
+                <span class="sidebar-badge" id="adminSoporteBadge" style="display:none;">0</span>
+            </li>
+            <li class="sidebar-item" onclick="adminUI.switchSection('faq', this)">
+                <i class="fas fa-question-circle"></i>
+                <span>FAQ</span>
+            </li>
+            <li class="sidebar-item" onclick="adminUI.switchSection('avatares', this)">
+                <i class="fas fa-images"></i>
+                <span>Avatares</span>
+            </li>
+            <li class="sidebar-item" onclick="adminUI.switchSection('supervision', this)">
+                <i class="fas fa-shield-alt"></i>
+                <span>Supervisión</span>
+                <span class="sidebar-badge" id="adminSupervisionBadge" style="display:none;">0</span>
+            </li>
+            <li class="sidebar-item" onclick="adminUI.switchSection('estadisticas', this)">
+                <i class="fas fa-chart-bar"></i>
+                <span>Estadísticas</span>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="admin-main">
+
+        <!-- SECCIÓN: PREMIOS -->
+        <section id="section-premios" class="admin-section active">
+            <div class="section-header">
+                <div>
+                    <h1>Gestión de Premios</h1>
+                    <p>Creá, editá y administrá los premios disponibles</p>
+                </div>
+                <button class="btn-nuevo" onclick="adminUI.abrirFormulario()">
+                    <i class="fas fa-plus"></i> Nuevo Premio
+                </button>
+            </div>
+            <div class="admin-stats">
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statTotal">0</span>
+                    <span class="stat-label">Total premios</span>
+                </div>
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statActivos">0</span>
+                    <span class="stat-label">Activos</span>
+                </div>
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statAgotados">0</span>
+                    <span class="stat-label">Agotados</span>
+                </div>
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statInactivos">0</span>
+                    <span class="stat-label">Inactivos</span>
+                </div>
+            </div>
+            <div class="admin-card">
+                <div class="card-header">
+                    <h3>Lista de premios</h3>
+                    <div style="display:flex; gap:0.75rem; align-items:center;">
+                        <select class="filtro-select" id="filtroEstadoPremios" onchange="adminUI.filtrarPorEstado(this.value)">
+                            <option value="todos">Todos</option>
+                            <option value="activos">Activos</option>
+                            <option value="inactivos">Inactivos</option>
+                            <option value="agotados">Agotados</option>
+                        </select>
+                        <input type="text" class="search-input" placeholder="Buscar premio..." oninput="adminUI.filtrarPremios(this.value)">
+                    </div>
+                </div>
+                <div class="tabla-wrapper">
+                    <table class="admin-table" id="tablaPremios">
+                        <thead>
+                        <tr>
+                            <th>Imagen</th><th>Nombre</th><th>Tipo</th><th>Puntos</th><th>Stock</th><th>Estado</th><th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tablaPremiosBody">
+                        <tr><td colspan="7" class="loading-row"><i class="fas fa-spinner fa-spin"></i> Cargando premios...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN: PREMIOS PREMIUM -->
+        <section id="section-premiosPremium" class="admin-section">
+            <div class="section-header">
+                <div>
+                    <h1>Premios y Sorteos Premium</h1>
+                    <p>Creá y administrá el catálogo exclusivo para suscriptores</p>
+                </div>
+                <button class="btn-nuevo" onclick="adminPremiosPremium.abrirFormulario()">
+                    <i class="fas fa-plus"></i> Nuevo Premio/Sorteo
+                </button>
+            </div>
+            <div class="admin-stats">
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statPPTotal">0</span>
+                    <span class="stat-label">Total</span>
+                </div>
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statPPActivos">0</span>
+                    <span class="stat-label">Activos</span>
+                </div>
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statPPSorteos">0</span>
+                    <span class="stat-label">Sorteos</span>
+                </div>
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statPPCanjeables">0</span>
+                    <span class="stat-label">Canjeables</span>
+                </div>
+            </div>
+            <div class="admin-card">
+                <div class="card-header">
+                    <h3>Catálogo premium</h3>
+                    <div style="display:flex; gap:0.75rem; align-items:center;">
+                        <select class="filtro-select" onchange="adminPremiosPremium.filtrarPorEstado(this.value)">
+                            <option value="todos">Todos los estados</option>
+                            <option value="activos">Activos</option>
+                            <option value="inactivos">Inactivos</option>
+                        </select>
+                        <select class="filtro-select" onchange="adminPremiosPremium.filtrarPorTipo(this.value)">
+                            <option value="todos">Todos los tipos</option>
+                            <option value="CANJEABLE">⭐ Premio</option>
+                            <option value="SORTEO">🎲 Sorteo</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="tabla-wrapper">
+                    <table class="admin-table">
+                        <thead>
+                        <tr>
+                            <th>Imagen</th><th>Nombre</th><th>Tipo</th><th>Fecha sorteo</th><th>Puntos</th><th>Stock</th><th>Estado</th><th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tablaPremiosPremiumBody">
+                        <tr><td colspan="7" class="loading-row"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN: SUSCRIPCIONES -->
+        <section id="section-suscripciones" class="admin-section">
+            <div class="section-header">
+                <div>
+                    <h1>Suscripciones Premium</h1>
+                    <p>Gestioná las suscripciones activas y el historial de pagos</p>
+                </div>
+                <button class="btn-nuevo" onclick="adminSuscripciones.abrirAltaManual()">
+                    <i class="fas fa-plus"></i> Alta manual
+                </button>
+            </div>
+            <div class="admin-stats">
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statSubsTotal">0</span>
+                    <span class="stat-label">Total</span>
+                </div>
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statSubsActivas">0</span>
+                    <span class="stat-label">Activas</span>
+                </div>
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statSubsCanceladas">0</span>
+                    <span class="stat-label">Canceladas</span>
+                </div>
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statSubsExpiradas">0</span>
+                    <span class="stat-label">Expiradas</span>
+                </div>
+            </div>
+            <div class="admin-card">
+                <div class="card-header">
+                    <h3>Lista de suscripciones</h3>
+                    <div style="display:flex;gap:0.75rem;align-items:center;">
+                        <select class="filtro-select" onchange="adminSuscripciones.filtrar(this.value)">
+                            <option value="todas">Todas</option>
+                            <option value="activas">Activas</option>
+                            <option value="canceladas">Canceladas</option>
+                            <option value="expiradas">Expiradas</option>
+                        </select>
+                        <input type="text" class="search-input" placeholder="Buscar..." oninput="adminSuscripciones.buscar(this.value)">
+                    </div>
+                </div>
+                <div class="tabla-wrapper">
+                    <table class="admin-table">
+                        <thead>
+                        <tr>
+                            <th>Plan</th><th>Estado</th><th>Inicio</th><th>Vencimiento</th><th>Próx. renovación</th><th>Último pago</th><th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tablaSuscripcionesBody">
+                        <tr><td colspan="7" class="loading-row"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN: CANJES -->
+        <section id="section-canjes" class="admin-section">
+            <div class="section-header">
+                <div>
+                    <h1>Premios Canjeados</h1>
+                    <p>Gestioná los canjes realizados por los usuarios</p>
+                </div>
+                <div class="filtros-rapidos">
+                    <select class="filtro-select" id="filtroEstadoCanjes" onchange="adminCanjes.filtrarPorEstado(this.value)">
+                        <option value="todos" selected>Todos los estados</option>
+                        <option value="PENDING">Pendiente</option>
+                        <option value="COMPLETED">Completado</option>
+                        <option value="EXPIRED">Expirado</option>
+                        <option value="CANCELLED">Cancelado</option>
+                    </select>
+                </div>
+            </div>
+            <div class="admin-stats">
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statCanjesTotal">0</span>
+                    <span class="stat-label">Total canjes</span>
+                </div>
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statCanjesPendientes">0</span>
+                    <span class="stat-label">Pendientes</span>
+                </div>
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statCanjesCompletados">0</span>
+                    <span class="stat-label">Completados</span>
+                </div>
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statCanjesExpirados">0</span>
+                    <span class="stat-label">Expirados</span>
+                </div>
+            </div>
+            <div class="admin-card">
+                <div class="card-header">
+                    <h3>Historial de canjes</h3>
+                    <input type="text" class="search-input" placeholder="Buscar por usuario o premio..." oninput="adminCanjes.buscar(this.value)">
+                </div>
+                <div class="tabla-wrapper">
+                    <table class="admin-table admin-table-canjes">
+                        <thead>
+                        <tr>
+                            <th>Fecha</th><th>Usuario</th><th>Premio</th><th>Puntos</th><th>Código</th><th>Estado</th><th>Vence</th><th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tablaCanjesBody">
+                        <tr><td colspan="8" class="loading-row"><i class="fas fa-spinner fa-spin"></i> Cargando canjes...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination-container" id="canjesPagination" style="display:none;">
+                    <button class="btn-paginacion" onclick="adminCanjes.cambiarPagina('anterior')" id="btnCanjesAnterior" disabled>
+                        <i class="fas fa-chevron-left"></i> Anterior
+                    </button>
+                    <span class="info-pagina" id="canjesPageInfo">Página 1 de 1</span>
+                    <button class="btn-paginacion" onclick="adminCanjes.cambiarPagina('siguiente')" id="btnCanjesSiguiente" disabled>
+                        Siguiente <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- USUARIOS -->
+        <section id="section-usuarios" class="admin-section">
+            <div class="section-header">
+                <div>
+                    <h1>Gestión de Usuarios</h1>
+                    <p>Administrá, creá y suspendé cuentas de usuarios</p>
+                </div>
+                <button class="btn-nuevo" onclick="adminUsuarios.abrirFormulario()">
+                    <i class="fas fa-user-plus"></i> Nuevo Usuario
+                </button>
+            </div>
+            <div class="admin-stats">
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statUsuariosTotal">0</span>
+                    <span class="stat-label">Total usuarios</span>
+                </div>
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statUsuariosActivos">0</span>
+                    <span class="stat-label">Activos</span>
+                </div>
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statUsuariosSuspendidos">0</span>
+                    <span class="stat-label">Suspendidos</span>
+                </div>
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statUsuariosVerificados">0</span>
+                    <span class="stat-label">Verificados</span>
+                </div>
+            </div>
+            <div class="admin-card" style="margin-bottom: 1rem;">
+                <div class="card-header">
+                    <h3>Filtros</h3>
+                    <div class="filtros-rapidos" style="display: flex; gap: 1rem;">
+                        <select class="filtro-select" id="filtroEstadoUsuarios" onchange="adminUsuarios.filtrarPorEstado(this.value)">
+                            <option value="todos">Todos</option>
+                            <option value="activos">Activos</option>
+                            <option value="suspendidos">Suspendidos</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="admin-card">
+                <div class="card-header">
+                    <h3>Lista de usuarios</h3>
+                    <input type="text" class="search-input" placeholder="Buscar por nombre o email..." oninput="adminUsuarios.buscar(this.value)">
+                </div>
+                <div class="tabla-wrapper">
+                    <table class="admin-table admin-table-usuarios">
+                        <thead>
+                        <tr>
+                            <th>ID</th><th>Nombre</th><th>Email</th><th>DNI</th><th>Teléfono</th><th>Rol</th><th>Puntos</th><th>Estado</th><th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tablaUsuariosBody">
+                        <tr><td colspan="9" class="loading-row"><i class="fas fa-spinner fa-spin"></i> Cargando usuarios...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination-container" id="usuariosPagination" style="display:none;">
+                    <button class="btn-paginacion" onclick="adminUsuarios.cambiarPagina('anterior')" id="btnUsuariosAnterior" disabled>
+                        <i class="fas fa-chevron-left"></i> Anterior
+                    </button>
+                    <span class="info-pagina" id="usuariosPageInfo">Página 1 de 1</span>
+                    <button class="btn-paginacion" onclick="adminUsuarios.cambiarPagina('siguiente')" id="btnUsuariosSiguiente" disabled>
+                        Siguiente <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN: FAQ -->
+        <section id="section-faq" class="admin-section">
+            <div class="section-header">
+                <div>
+                    <h1>Preguntas Frecuentes</h1>
+                    <p>Administrá las preguntas y respuestas visibles en la sección Contacto</p>
+                </div>
+                <button class="btn-nuevo" onclick="adminFaq.abrirFormulario(null)">
+                    <i class="fas fa-plus"></i> Nueva pregunta
+                </button>
+            </div>
+            <div id="adminFaqLista" class="admin-faq-lista">
+                <div class="admin-loading"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN: SOPORTE -->
+        <section id="section-soporte" class="admin-section">
+            <div class="section-header">
+                <div>
+                    <h1>Consultas de Soporte</h1>
+                    <p>Respondé y gestioná los mensajes de los usuarios</p>
+                </div>
+                <div class="filtros-rapidos">
+                    <select class="filtro-select" id="filtroEstadoSoporte" onchange="adminSoporte.filtrarPorEstado(this.value)">
+                        <option value="todos">Todos</option>
+                        <option value="abiertos">Abiertos</option>
+                        <option value="cerrados">Cerrados</option>
+                        <option value="sinleer">Sin leer</option>
+                    </select>
+                </div>
+            </div>
+            <div id="adminTicketsLista" class="admin-tickets-lista">
+                <div class="admin-loading"><i class="fas fa-spinner fa-spin"></i> Cargando consultas...</div>
+            </div>
+            <div id="adminHiloSection" style="display:none;" class="admin-hilo-section">
+                <div class="admin-hilo-header">
+                    <button class="btn-admin-volver" onclick="adminSoporte.volverALista()">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </button>
+                    <div class="admin-hilo-info">
+                        <h3 id="adminHiloAsunto">-</h3>
+                        <div class="admin-hilo-meta">
+                            <span id="adminHiloUsuario"></span>
+                            <span class="hilo-status" id="adminHiloStatus"></span>
+                        </div>
+                    </div>
+                    <div class="admin-hilo-acciones">
+                        <button class="btn-admin-cerrar-ticket" id="btnCerrarTicket" onclick="adminSoporte.cerrarTicket()">
+                            <i class="fas fa-lock"></i> Cerrar ticket
+                        </button>
+                        <button class="btn-admin-eliminar-ticket" onclick="adminSoporte.eliminarTicket()">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </div>
+                </div>
+                <div class="admin-hilo-mensajes" id="adminHiloMensajes"></div>
+                <div class="admin-hilo-responder" id="adminHiloResponder">
+                    <textarea id="adminHiloTexto" class="admin-hilo-textarea" placeholder="Escribí tu respuesta..." maxlength="1000"
+                              oninput="document.getElementById('adminHiloCount').textContent = this.value.length"></textarea>
+                    <div class="admin-hilo-footer">
+                        <span class="admin-hilo-count"><span id="adminHiloCount">0</span>/1000</span>
+                        <button class="btn-admin-enviar" onclick="adminSoporte.enviarMensaje()">
+                            <i class="fas fa-paper-plane"></i> Responder
+                        </button>
+                    </div>
+                </div>
+                <div class="admin-ticket-cerrado-aviso" id="adminTicketCerradoAviso" style="display:none;">
+                    <i class="fas fa-lock"></i> Este ticket está cerrado.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN: AVATARES -->
+        <section id="section-avatares" class="admin-section">
+            <div class="section-header">
+                <div>
+                    <h1>🎨 Gestión de Avatares</h1>
+                    <p>Administrá los avatares predefinidos que los usuarios pueden elegir</p>
+                </div>
+                <button class="btn-nuevo" onclick="adminAvatares.abrirFormulario()">
+                    <i class="fas fa-plus"></i> Nuevo Avatar
+                </button>
+            </div>
+            <div class="admin-stats">
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statAvataresTotal">0</span>
+                    <span class="stat-label">Total avatares</span>
+                </div>
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statAvataresActivos">0</span>
+                    <span class="stat-label">Activos</span>
+                </div>
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statAvataresPorNivel">0</span>
+                    <span class="stat-label">Inactivos</span>
+                </div>
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statAvataresUsados">0</span>
+                    <span class="stat-label">En uso</span>
+                </div>
+            </div>
+            <div class="admin-card" style="margin-bottom: 1rem;">
+                <div class="card-header">
+                    <h3>Filtros</h3>
+                    <div class="filtros-rapidos" style="display: flex; gap: 1rem;">
+                        <select class="filtro-select" id="filtroCategoriaAvatar" onchange="adminAvatares.filtrarPorCategoria(this.value)">
+                            <option value="todas">Todas las categorías</option>
+                            <option value="general">General</option>
+                            <option value="amateur">Amateur</option>
+                            <option value="colaborador">Colaborador</option>
+                            <option value="critico">Crítico</option>
+                            <option value="jurado">Jurado Experto</option>
+                            <option value="temático">Temático</option>
+                        </select>
+                        <select class="filtro-select" id="filtroEstadoAvatar" onchange="adminAvatares.filtrarPorEstado(this.value)">
+                            <option value="todos">Todos</option>
+                            <option value="activos">Activos</option>
+                            <option value="inactivos">Inactivos</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="admin-card">
+                <div class="card-header">
+                    <h3>Avatares disponibles</h3>
+                    <input type="text" class="search-input" placeholder="Buscar avatar por nombre..." oninput="adminAvatares.buscar(this.value)">
+                </div>
+                <div class="tabla-wrapper">
+                    <table class="admin-table admin-table-avatares">
+                        <thead>
+                        <tr>
+                            <th>Vista previa</th><th>Nombre</th><th>Categoría</th><th>Nivel requerido</th><th>Orden</th><th>Estado</th><th>Por defecto</th><th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tablaAvataresBody">
+                        <tr><td colspan="8" class="loading-row"><i class="fas fa-spinner fa-spin"></i> Cargando avatares...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-overlay" id="modalAvatarOverlay" onclick="adminAvatares.cerrarFormulario()"></div>
+                <div class="admin-modal" id="modalAvatar">
+                    <div class="modal-header">
+                        <h2 id="modalAvatarTitulo">Nuevo Avatar</h2>
+                        <button class="modal-cerrar" onclick="adminAvatares.cerrarFormulario()"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="formAvatar" onsubmit="return false;">
+                            <div class="form-group image-upload-group">
+                                <label>Imagen del avatar <span class="required">*</span></label>
+                                <div class="image-upload-area" id="avatarUploadArea" onclick="document.getElementById('inputAvatarImagen').click()">
+                                    <div class="image-placeholder" id="avatarImagePlaceholder">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <p>Hacé clic para subir una imagen</p>
+                                        <small>JPG, PNG o WEBP — máx. 5MB — recomendado 200×200px</small>
+                                    </div>
+                                    <img id="avatarImagePreview" src="" alt="Preview" style="display:none; width:120px; height:120px; border-radius:50%; object-fit:cover; margin:0 auto;">
+                                </div>
+                                <input type="file" id="inputAvatarImagen" accept="image/*" style="display:none;" onchange="adminAvatares.previewImagen(this)">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Nombre <span class="required">*</span></label>
+                                    <input type="text" id="inputAvatarNombre" placeholder="Ej: Cinéfilo Clásico" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Categoría <span class="required">*</span></label>
+                                    <select id="inputAvatarCategoria" required>
+                                        <option value="">Seleccionar...</option>
+                                        <option value="general">General (todos los niveles)</option>
+                                        <option value="amateur">Amateur</option>
+                                        <option value="colaborador">Colaborador</option>
+                                        <option value="critico">Crítico</option>
+                                        <option value="jurado">Jurado Experto</option>
+                                        <option value="tematico">Temático</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Nivel requerido</label>
+                                    <select id="inputAvatarNivel">
+                                        <option value="">Ninguno (disponible para todos)</option>
+                                        <option value="AMATEUR">🟢 Amateur</option>
+                                        <option value="COLABORADOR">🔵 Colaborador</option>
+                                        <option value="CRITICO">🟣 Crítico</option>
+                                        <option value="JURADO_EXPERTO">🏆 Jurado Experto</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Orden de aparición</label>
+                                    <input type="number" id="inputAvatarOrden" min="0" placeholder="0" value="0">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Estado</label>
+                                    <select id="inputAvatarActivo">
+                                        <option value="true">✅ Activo</option>
+                                        <option value="false">❌ Inactivo</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Avatar por defecto</label>
+                                    <select id="inputAvatarDefault">
+                                        <option value="false">No</option>
+                                        <option value="true">⭐ Sí</option>
+                                    </select>
+                                    <small style="color:#999;">El avatar por defecto se asigna automáticamente a usuarios nuevos</small>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-cancelar" onclick="adminAvatares.cerrarFormulario()">Cancelar</button>
+                        <button class="btn-guardar" onclick="adminAvatares.guardarAvatar()">
+                            <i class="fas fa-save"></i> <span id="btnAvatarGuardarLabel">Crear Avatar</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="pagination-container" id="avataresPagination" style="display:none;">
+                    <button class="btn-paginacion" onclick="adminAvatares.cambiarPagina('anterior')" id="btnAvataresAnterior" disabled>
+                        <i class="fas fa-chevron-left"></i> Anterior
+                    </button>
+                    <span class="info-pagina" id="avataresPageInfo">Página 1 de 1</span>
+                    <button class="btn-paginacion" onclick="adminAvatares.cambiarPagina('siguiente')" id="btnAvataresSiguiente" disabled>
+                        Siguiente <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN: SUPERVISIÓN -->
+        <section id="section-supervision" class="admin-section">
+            <div class="section-header">
+                <div>
+                    <h1>Supervisión de Comentarios</h1>
+                    <p>Revisá comentarios reportados, pendientes de moderación y gestioná palabras prohibidas</p>
+                </div>
+            </div>
+            <div class="admin-stats">
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statSupReportados">0</span>
+                    <span class="stat-label">Reportados</span>
+                </div>
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statSupPendientes">0</span>
+                    <span class="stat-label">Pend. revisión</span>
+                </div>
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statSupResueltos">0</span>
+                    <span class="stat-label">Resueltos</span>
+                </div>
+            </div>
+            <div style="display:flex; gap:0.5rem; margin-bottom:1rem; flex-wrap:wrap;">
+                <button class="supervision-tab active" onclick="adminSupervision.cambiarPestana('reported', this)"
+                        style="padding:0.5rem 1rem; border-radius:8px; border:1.5px solid #e50914; background:#fff0f0; color:#e50914; font-weight:600; cursor:pointer;">
+                    <i class="fas fa-flag"></i> Reportados
+                </button>
+                <button class="supervision-tab" onclick="adminSupervision.cambiarPestana('pending', this)"
+                        style="padding:0.5rem 1rem; border-radius:8px; border:1.5px solid #ddd; background:white; color:#555; cursor:pointer;">
+                    <i class="fas fa-clock"></i> Pend. revisión
+                </button>
+                <button class="supervision-tab" onclick="adminSupervision.cambiarPestana('resolved', this)"
+                        style="padding:0.5rem 1rem; border-radius:8px; border:1.5px solid #ddd; background:white; color:#555; cursor:pointer;">
+                    <i class="fas fa-check"></i> Resueltos
+                </button>
+                <button class="supervision-tab" onclick="adminSupervision.cambiarPestana('palabras', this)"
+                        style="padding:0.5rem 1rem; border-radius:8px; border:1.5px solid #ddd; background:white; color:#555; cursor:pointer;">
+                    <i class="fas fa-ban"></i> Palabras prohibidas
+                </button>
+            </div>
+            <div id="tablaSupervisionWrapper" class="admin-card">
+                <div class="tabla-wrapper">
+                    <table class="admin-table">
+                        <thead>
+                        <tr>
+                            <th>Comentario</th><th>Autor</th><th>Reportes</th><th>Toxicidad</th><th>Estado</th><th>Fecha</th><th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tablaSupervisionBody">
+                        <tr><td colspan="7" class="loading-row"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="tablaPalabrasWrapper" class="admin-card" style="display:none;">
+                <div class="card-header" style="flex-wrap:wrap; gap:0.75rem;">
+                    <h3><i class="fas fa-ban" style="color:#e50914;"></i> Lista negra de palabras</h3>
+                    <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+                        <input type="text" id="buscarPalabra" class="search-input"
+                               placeholder="Buscar palabra..." style="width:160px;"
+                               oninput="adminSupervision.buscarPalabra(this.value)">
+                        <input type="text" id="inputNuevaPalabra" class="search-input"
+                               placeholder="Nueva palabra..." maxlength="100" style="width:160px;"
+                               onkeydown="if(event.key==='Enter') adminSupervision.agregarPalabra()">
+                        <select id="selectSeveridad" class="filtro-select">
+                            <option value="BLOCK">🚫 Bloquear</option>
+                            <option value="REVIEW">⚠️ Revisión</option>
+                        </select>
+                        <button class="btn-nuevo" onclick="adminSupervision.agregarPalabra()">
+                            <i class="fas fa-plus"></i> Agregar
+                        </button>
+                    </div>
+                </div>
+                <div class="tabla-wrapper">
+                    <table class="admin-table">
+                        <thead>
+                        <tr><th>Palabra</th><th>Acción</th><th>Eliminar</th></tr>
+                        </thead>
+                        <tbody id="tablaPalabrasBody">
+                        <tr><td colspan="3" class="loading-row"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p style="font-size:0.8rem;color:#999;padding:0.5rem 1rem;">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Bloquear</strong>: el comentario se rechaza directamente.
+                    <strong>Revisión</strong>: el comentario queda pendiente de revisión del admin.
+                </p>
+            </div>
+        </section>
+
+        <!-- SECCIÓN: ESTADÍSTICAS -->
+        <section id="section-estadisticas" class="admin-section">
+            <div class="section-header">
+                <div>
+                    <h1>Estadísticas</h1>
+                    <p>Métricas y KPIs del negocio</p>
+                </div>
+                <div class="filtros-rapidos">
+                    <select class="filtro-select" id="periodoEstadisticas" onchange="adminEstadisticas.cambiarPeriodo(this.value)">
+                        <option value="mes">Este mes</option>
+                        <option value="semana">Esta semana</option>
+                        <option value="trimestre">Últimos 3 meses</option>
+                        <option value="año">Este año</option>
+                        <option value="personalizado">Personalizado</option>
+                    </select>
+                </div>
+            </div>
+            <div class="stats-resumen" id="statsResumen"></div>
+            <div class="stats-tabs">
+                <button class="tab-btn active" onclick="adminEstadisticas.cambiarPestana('usuarios', this)">👥 Usuarios</button>
+                <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('votos', this)">👍 Votaciones</button>
+                <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('comentarios', this)">💬 Comentarios</button>
+                <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('premios', this)">🎁 Premios y Canjes</button>
+                <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('puntos', this)">💰 Puntos</button>
+                <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('soporte', this)">🎫 Soporte</button>
+                <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('crecimiento', this)">📈 Crecimiento</button>
+            </div>
+            <div class="stats-contenido">
+                <div id="stats-usuarios" class="stats-panel active">
+                    <div class="stats-tabla-container">
+                        <table class="stats-tabla">
+                            <thead><tr><th>KPI</th><th>Valor</th><th>vs período ant.</th><th>Tendencia</th></tr></thead>
+                            <tbody id="stats-usuarios-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="stats-votos" class="stats-panel">
+                    <div class="stats-tabla-container">
+                        <table class="stats-tabla">
+                            <thead><tr><th>KPI</th><th>Valor</th><th>Top/Ranking</th></tr></thead>
+                            <tbody id="stats-votos-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="stats-comentarios" class="stats-panel">
+                    <div class="stats-tabla-container">
+                        <table class="stats-tabla">
+                            <thead><tr><th>KPI</th><th>Valor</th><th>Top/Ranking</th></tr></thead>
+                            <tbody id="stats-comentarios-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="stats-premios" class="stats-panel">
+                    <div class="stats-tabla-container">
+                        <table class="stats-tabla">
+                            <thead><tr><th>KPI</th><th>Valor</th><th>vs período ant.</th></tr></thead>
+                            <tbody id="stats-premios-body"></tbody>
+                        </table>
+                    </div>
+                    <div class="stats-top-premios" id="stats-top-premios"></div>
+                </div>
+                <div id="stats-puntos" class="stats-panel">
+                    <div class="stats-tabla-container">
+                        <table class="stats-tabla">
+                            <thead><tr><th>KPI</th><th>Valor</th></tr></thead>
+                            <tbody id="stats-puntos-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="stats-soporte" class="stats-panel">
+                    <div class="stats-tabla-container">
+                        <table class="stats-tabla">
+                            <thead><tr><th>KPI</th><th>Valor</th></tr></thead>
+                            <tbody id="stats-soporte-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="stats-crecimiento" class="stats-panel">
+                    <div class="stats-tabla-container">
+                        <table class="stats-tabla">
+                            <thead><tr><th>KPI</th><th>Valor</th><th>Porcentaje</th></tr></thead>
+                            <tbody id="stats-crecimiento-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- ============================================== -->
+<!-- MODALES GLOBALES                               -->
+<!-- ============================================== -->
+
+<!-- MODAL: FORMULARIO CREAR/EDITAR PREMIO -->
+<div class="modal-overlay" id="modalOverlay" onclick="adminUI.cerrarFormulario()"></div>
+<div class="admin-modal" id="adminModal">
+    <div class="modal-header">
+        <h2 id="modalTitulo">Nuevo Premio</h2>
+        <button class="modal-cerrar" onclick="adminUI.cerrarFormulario()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+        <form id="formPremio" onsubmit="return false;">
+            <div class="form-group image-upload-group">
+                <label>Imagen del premio</label>
+                <div class="image-upload-area" id="imageUploadArea" onclick="document.getElementById('inputImagen').click()">
+                    <div class="image-placeholder" id="imagePlaceholder">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Hacé clic para subir una imagen</p>
+                        <small>JPG, PNG o WEBP — máx. 5MB</small>
+                    </div>
+                    <img id="imagePreview" src="" alt="Preview" style="display:none;">
+                </div>
+                <input type="file" id="inputImagen" accept="image/*" style="display:none;" onchange="adminUI.previewImagen(this)">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nombre <span class="required">*</span></label>
+                    <input type="text" id="inputNombre" placeholder="Ej: Entrada 2D" required>
+                </div>
+                <div class="form-group">
+                    <label>Tipo <span class="required">*</span></label>
+                    <select id="inputTipo" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="TICKET">🎟️ Entrada</option>
+                        <option value="MERCHANDISING">🎁 Merchandising</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Descripción <small style="color:#999;font-weight:normal;">(máx. 165 caracteres)</small></label>
+                <textarea id="inputDescripcion" rows="3" maxlength="165"
+                          oninput="document.getElementById('descCount').textContent = this.value.length"
+                          placeholder="Descripción del premio para los usuarios..."></textarea>
+                <small style="color:#999;display:flex;justify-content:flex-end;margin-top:4px;"><span id="descCount">0</span>/165</small>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Puntos requeridos <span class="required">*</span></label>
+                    <input type="number" id="inputPuntos" min="1" placeholder="Ej: 500" required>
+                </div>
+                <div class="form-group">
+                    <label>Stock inicial <span class="required">*</span></label>
+                    <input type="number" id="inputStock" min="0" placeholder="Ej: 50" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Fecha de vencimiento</label>
+                    <input type="date" id="inputVencimiento">
+                </div>
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select id="inputActivo">
+                        <option value="true">✅ Activo</option>
+                        <option value="false">❌ Inactivo</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Socio / Marca</label>
+                    <input type="text" id="inputPartner" placeholder="Ej: Coca-Cola, Disney, etc.">
+                </div>
+                <div class="form-group">
+                    <label>Sitio web</label>
+                    <input type="url" id="inputWebsite" placeholder="https://ejemplo.com">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Términos y condiciones</label>
+                <textarea id="inputTerminos" rows="2" placeholder="Términos específicos del premio..."></textarea>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button class="btn-cancelar" onclick="adminUI.cerrarFormulario()">Cancelar</button>
+        <button class="btn-guardar" onclick="adminUI.guardarPremio()">
+            <i class="fas fa-save"></i> <span id="btnGuardarLabel">Crear Premio</span>
+        </button>
+    </div>
+</div>
+
+<!-- MODAL FORMULARIO PREMIO PREMIUM -->
+<div style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;" id="modalPremiumOverlay" onclick="adminPremiosPremium.cerrarFormulario()">
+    <div style="background:white; border-radius:12px; padding:2rem; width:100%; max-width:520px; max-height:90vh; overflow-y:auto;" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h2 id="modalPremiumTitulo">Nuevo Premio Premium</h2>
+            <button class="modal-cerrar" onclick="adminPremiosPremium.cerrarFormulario()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body" style="display:flex;flex-direction:column;gap:1rem;">
+            <div class="form-group">
+                <label>Nombre <span class="required">*</span></label>
+                <input type="text" id="formPremiumNombre" placeholder="Nombre del premio o sorteo">
+            </div>
+            <div class="form-group">
+                <label>Descripción <small style="color:#999;font-weight:normal;">(máx. 165 caracteres)</small></label>
+                <textarea id="formPremiumDescripcion" rows="3" maxlength="165"
+                          oninput="document.getElementById('premiumDescCount').textContent = this.value.length"
+                          placeholder="Descripción del premio para los usuarios..."></textarea>
+                <small style="color:#999;display:flex;justify-content:flex-end;margin-top:4px;"><span id="premiumDescCount">0</span>/165</small>
+            </div>
+            <div class="form-group image-upload-group">
+                <label>Imagen del premio</label>
+                <div class="image-upload-area" id="premiumImageUploadArea" onclick="document.getElementById('inputPremiumImagen').click()">
+                    <div class="image-placeholder" id="premiumImagePlaceholder">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Hacé clic para subir una imagen</p>
+                        <small>JPG, PNG o WEBP — máx. 5MB</small>
+                    </div>
+                    <img id="premiumImagePreview" src="" alt="Preview" style="display:none; width:120px; height:120px; object-fit:cover; border-radius:8px; margin:0 auto;">
+                </div>
+                <input type="file" id="inputPremiumImagen" accept="image/*" style="display:none;" onchange="adminPremiosPremium.previewImagen(this)">
+            </div>
+            <div class="form-group">
+                <label>Tipo <span class="required">*</span></label>
+                <select id="formPremiumTipo" onchange="adminPremiosPremium.toggleCamposTipo(this.value)">
+                    <option value="CANJEABLE">⭐ Premio canjeable</option>
+                    <option value="SORTEO">🎲 Sorteo gratuito</option>
+                </select>
+            </div>
+            <div class="form-group" id="campoPremiumPuntos">
+                <label>Puntos requeridos</label>
+                <input type="number" id="formPremiumPuntos" value="0" min="0">
+            </div>
+            <div class="form-group" id="campoPremiumFechaSorteo" style="display:none;">
+                <label>Fecha y hora del sorteo</label>
+                <input type="datetime-local" id="formPremiumFechaSorteo">
+            </div>
+            <div class="form-group" id="campoPremiumStock">
+                <label>Stock (vacío = ilimitado)</label>
+                <input type="number" id="formPremiumStock" placeholder="Ej: 10" min="0">
+            </div>
+            <div class="form-group">
+                <label>Socio / Marca</label>
+                <input type="text" id="formPremiumPartner" placeholder="Ej: Coca-Cola, Disney...">
+            </div>
+            <div class="form-group">
+                <label>Sitio web</label>
+                <input type="url" id="formPremiumWebsite" placeholder="https://ejemplo.com">
+            </div>
+            <div class="form-group">
+                <label>Términos y condiciones</label>
+                <textarea id="formPremiumTerminos" rows="2" placeholder="Términos específicos..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Estado</label>
+                <select id="formPremiumActivo">
+                    <option value="true">✅ Activo</option>
+                    <option value="false">❌ Inactivo</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancelar" onclick="adminPremiosPremium.cerrarFormulario()">Cancelar</button>
+            <button class="btn-guardar" onclick="adminPremiosPremium.guardar()">
+                <i class="fas fa-save"></i> Guardar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL PARTICIPANTES SORTEO -->
+<div style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;" id="modalParticipantesOverlay" onclick="adminPremiosPremium.cerrarParticipantes()">
+    <div style="background:white; border-radius:12px; padding:2rem; width:100%; max-width:600px; max-height:80vh; overflow-y:auto;" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h2 id="modalParticipantesTitulo">Participantes</h2>
+            <button class="modal-cerrar" onclick="adminPremiosPremium.cerrarParticipantes()"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="participantesLista" style="padding:1rem 0;"></div>
+        <div class="modal-footer">
+            <button class="btn-cerrar" onclick="adminPremiosPremium.cerrarParticipantes()">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DETALLE SUSCRIPCIÓN -->
+<div style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;" id="modalDetalleSubsOverlay" onclick="adminSuscripciones.cerrarDetalle()">
+    <div style="background:white; border-radius:12px; padding:2rem; width:100%; max-width:600px; max-height:80vh; overflow-y:auto;" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Historial de pagos</h2>
+            <button class="modal-cerrar" onclick="adminSuscripciones.cerrarDetalle()"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="detalleSubsContenido" style="padding:1rem 0;"></div>
+        <div class="modal-footer">
+            <button class="btn-cerrar" onclick="adminSuscripciones.cerrarDetalle()">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ALTA MANUAL SUSCRIPCIÓN -->
+<div style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;" id="modalAltaManualOverlay" onclick="adminSuscripciones.cerrarAltaManual()">
+    <div style="background:white; border-radius:12px; padding:2rem; width:100%; max-width:400px;" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Alta manual de suscripción</h2>
+            <button class="modal-cerrar" onclick="adminSuscripciones.cerrarAltaManual()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>ID del usuario <span class="required">*</span></label>
+                <input type="number" id="inputAltaManualUserId" placeholder="Ej: 42">
+                <small style="color:#888;">Podés ver el ID en la sección Usuarios</small>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancelar" onclick="adminSuscripciones.cerrarAltaManual()">Cancelar</button>
+            <button class="btn-guardar" onclick="adminSuscripciones.confirmarAltaManual()">
+                <i class="fas fa-check"></i> Activar suscripción
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE DETALLES DEL CANJE -->
+<div id="modalDetalleCanje" class="modal-detalle-canje" style="display:none;">
+    <div class="modal-overlay" onclick="adminCanjes.cerrarModalDetalles()"></div>
+    <div class="modal-contenido">
+        <div class="modal-header">
+            <h2>Detalles del Canje</h2>
+            <button class="modal-cerrar" onclick="adminCanjes.cerrarModalDetalles()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-columnas">
+                <div class="modal-columna">
+                    <h3><i class="fas fa-user"></i> Datos del Usuario</h3>
+                    <div class="info-grid">
+                        <div class="info-item"><span class="label">ID:</span><span class="value" id="detalle-user-id"></span></div>
+                        <div class="info-item"><span class="label">Nombre:</span><span class="value" id="detalle-user-nombre"></span></div>
+                        <div class="info-item"><span class="label">Email:</span><span class="value" id="detalle-user-email"></span></div>
+                        <div class="info-item"><span class="label">DNI:</span><span class="value" id="detalle-user-dni"></span></div>
+                        <div class="info-item"><span class="label">Teléfono:</span><span class="value" id="detalle-user-telefono"></span></div>
+                    </div>
+                </div>
+                <div class="modal-columna">
+                    <h3><i class="fas fa-gift"></i> Datos del Premio</h3>
+                    <div class="premio-imagen-detalle" id="detalle-premio-imagen"><i class="fas fa-gift"></i></div>
+                    <div class="info-grid">
+                        <div class="info-item"><span class="label">ID:</span><span class="value" id="detalle-premio-id"></span></div>
+                        <div class="info-item"><span class="label">Nombre:</span><span class="value" id="detalle-premio-nombre"></span></div>
+                        <div class="info-item"><span class="label">Puntos:</span><span class="value" id="detalle-premio-puntos"></span></div>
+                        <div class="info-item"><span class="label">Socio/Proveedor:</span><span class="value" id="detalle-premio-partner"></span></div>
+                        <div class="info-item"><span class="label">Sitio web:</span><span class="value" id="detalle-premio-website"></span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-seccion-completa">
+                <h3><i class="fas fa-exchange-alt"></i> Datos del Canje</h3>
+                <div class="info-grid columnas-3">
+                    <div class="info-item"><span class="label">Fecha:</span><span class="value" id="detalle-fecha"></span></div>
+                    <div class="info-item"><span class="label">Código:</span><span class="value" id="detalle-codigo"></span></div>
+                    <div class="info-item"><span class="label">Estado:</span><span class="value" id="detalle-estado"></span></div>
+                    <div class="info-item"><span class="label">Puntos gastados:</span><span class="value" id="detalle-puntos"></span></div>
+                    <div class="info-item"><span class="label">Vence:</span><span class="value" id="detalle-vence"></span></div>
+                    <div class="info-item"><span class="label">Usado:</span><span class="value" id="detalle-usado"></span></div>
+                </div>
+            </div>
+            <div class="modal-terminos" id="detalle-terminos-box" style="display:none;">
+                <h4><i class="fas fa-file-alt"></i> Términos y condiciones</h4>
+                <p id="detalle-terminos"></p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cerrar" onclick="adminCanjes.cerrarModalDetalles()">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL FORMULARIO USUARIO -->
+<div class="modal-overlay" id="modalUsuarioOverlay" onclick="adminUsuarios.cerrarFormulario()"></div>
+<div class="admin-modal" id="modalUsuario">
+    <div class="modal-header">
+        <h2 id="modalUsuarioTitulo">Nuevo Usuario</h2>
+        <button class="modal-cerrar" onclick="adminUsuarios.cerrarFormulario()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+        <form id="formUsuario" onsubmit="return false;">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nombre <span class="required">*</span></label>
+                    <input type="text" id="inputUsuarioNombre" placeholder="Nombre completo" required>
+                </div>
+                <div class="form-group">
+                    <label>Email <span class="required">*</span></label>
+                    <input type="email" id="inputUsuarioEmail" placeholder="email@ejemplo.com" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>DNI</label>
+                    <input type="text" id="inputUsuarioDni" placeholder="12345678">
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="text" id="inputUsuarioTelefono" placeholder="+54 11 1234-5678">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Rol</label>
+                    <select id="inputUsuarioRol">
+                        <option value="USER">Usuario</option>
+                        <option value="ADMIN">Administrador</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select id="inputUsuarioActivo">
+                        <option value="true">✅ Activo</option>
+                        <option value="false">❌ Inactivo</option>
+                    </select>
+                </div>
+            </div>
+            <p style="color:#999; font-size:0.85rem;">
+                <i class="fas fa-info-circle"></i>
+                La contraseña temporal será "temporal123". El usuario deberá cambiarla al iniciar sesión.
+            </p>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button class="btn-cancelar" onclick="adminUsuarios.cerrarFormulario()">Cancelar</button>
+        <button class="btn-guardar" onclick="adminUsuarios.guardarUsuario()">
+            <i class="fas fa-save"></i> <span id="btnUsuarioGuardarLabel">Crear Usuario</span>
+        </button>
+    </div>
+</div>
+
+<!-- MODAL DETALLE SUPERVISIÓN -->
+<div id="modalSupervisionDetalle" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:99999; align-items:center; justify-content:center; padding:1rem;">
+    <div style="background:white; border-radius:16px; padding:2rem; max-width:680px; width:100%; max-height:85vh; overflow-y:auto; position:relative;">
+        <button onclick="adminSupervision.cerrarDetalle()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#666;">×</button>
+        <h3 style="margin:0 0 1rem;"><i class="fas fa-eye" style="color:#e50914;"></i> Detalle del comentario</h3>
+        <div id="supDetalleContenido"></div>
+        <div style="margin-top:1.5rem;text-align:right;">
+            <button onclick="adminSupervision.cerrarDetalle()" style="padding:0.6rem 1.2rem;border:1px solid #ddd;background:none;border-radius:8px;cursor:pointer;">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ELIMINAR COMENTARIO -->
+<div id="modalSupEliminar" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:99999; align-items:center; justify-content:center; padding:1rem;">
+    <div style="background:white; border-radius:16px; padding:2rem; max-width:460px; width:100%;" onclick="event.stopPropagation()">
+        <h3 style="margin:0 0 0.5rem; color:#e50914;"><i class="fas fa-trash"></i> Eliminar comentario</h3>
+        <p style="color:#666; font-size:0.9rem; margin-bottom:1rem;">El usuario será notificado por Mis Consultas y por email.</p>
+        <label style="font-weight:600; font-size:0.9rem;">Motivo de eliminación <span style="color:#e50914;">*</span></label>
+        <textarea id="inputSupRazon" placeholder="Explicá brevemente por qué se elimina este comentario..." maxlength="500"
+                  style="width:100%;padding:0.75rem;border:1.5px solid #ddd;border-radius:8px;font-size:0.9rem;resize:none;height:100px;margin-top:0.5rem;box-sizing:border-box;font-family:inherit;"></textarea>
+        <div style="display:flex;gap:0.75rem;margin-top:1rem;">
+            <button onclick="adminSupervision.cerrarModalEliminar()" style="flex:1;padding:0.7rem;border:1px solid #ddd;background:none;border-radius:8px;cursor:pointer;">Cancelar</button>
+            <button id="btnConfirmarEliminar" onclick="adminSupervision.confirmarEliminar()" style="flex:2;padding:0.7rem;background:#e50914;border:none;border-radius:8px;color:white;font-weight:600;cursor:pointer;">Sí, eliminar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL FAQ -->
+<div class="admin-modal-overlay" id="faqModalOverlay" onclick="adminFaq.cerrarFormulario(event)">
+    <div class="admin-modal">
+        <div class="admin-modal-header">
+            <h3 id="faqModalTitulo">Nueva pregunta</h3>
+            <button class="admin-modal-close" onclick="adminFaq.cerrarFormulario(event)"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="admin-modal-body">
+            <div class="form-group-admin">
+                <label>Pregunta</label>
+                <input type="text" id="faqInputPregunta" class="admin-input" placeholder="Escribí la pregunta..." maxlength="300">
+            </div>
+            <div class="form-group-admin">
+                <label>Respuesta</label>
+                <textarea id="faqInputRespuesta" class="admin-textarea" placeholder="Escribí la respuesta..." maxlength="2000"></textarea>
+            </div>
+            <div class="form-group-admin">
+                <label>Orden de aparición</label>
+                <input type="number" id="faqInputOrden" class="admin-input" placeholder="0" min="0" style="width:100px;">
+            </div>
+        </div>
+        <div class="admin-modal-footer">
+            <button class="admin-btn-secondary" onclick="adminFaq.cerrarFormulario(null)"><i class="fas fa-times"></i> Cancelar</button>
+            <button class="admin-btn-primary" onclick="adminFaq.guardar()"><i class="fas fa-save"></i> Guardar</button>
+        </div>
+    </div>
+</div>
+
+<!-- SCRIPTS -->
+<script src="../js/admin-supervision.js"></script>
+<script src="../js/admin.js"></script>
+<script>
+    API.logout = function() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userEmail');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('userPoints');
+        window.location.href = '../login.html';
+    };
+</script>
+<script src="../js/admin-soporte.js"></script>
+<script src="../js/admin-faq.js"></script>
+<script src="../js/admin-usuarios.js"></script>
+<script src="../js/admin-avatares.js"></script>
+<script src="../js/admin-estadisticas.js"></script>
+<script src="../js/admin-premios-premium.js"></script>
+<script src="../js/admin-suscripciones.js"></script>
+
+</body>
+</html>

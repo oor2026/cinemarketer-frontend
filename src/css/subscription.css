@@ -1,0 +1,563 @@
+/* ========== PANEL PREMIUM EN MI CUENTA ========== */
+
+.cuenta-premium-panel {
+    margin-bottom: 1.5rem;
+}
+
+/* ── Banner no suscrito ── */
+.premium-banner {
+    background: #1a3a6b;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.premium-banner-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.15);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    width: fit-content;
+}
+
+.premium-banner-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+}
+
+.premium-banner-price {
+    font-size: 24px;
+    font-weight: 700;
+    color: white;
+}
+
+.premium-banner-price span {
+    font-size: 13px;
+    font-weight: 400;
+    opacity: 0.8;
+}
+
+.premium-banner-benefits {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.premium-banner-benefits li {
+    font-size: 13px;
+    color: rgba(255,255,255,0.85);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.premium-check {
+    width: 16px;
+    height: 16px;
+    background: #e50914;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.premium-check::after {
+    content: '';
+    width: 6px;
+    height: 3px;
+    border-left: 1.5px solid white;
+    border-bottom: 1.5px solid white;
+    transform: rotate(-45deg) translateY(-1px);
+    display: block;
+}
+
+.premium-check.blue {
+    background: #1a3a6b;
+}
+
+.btn-suscribirse {
+    background: #e50914;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.2s;
+}
+
+.btn-suscribirse:hover {
+    background: #b2070f;
+}
+
+/* ── Panel activo ── */
+.premium-activo {
+    background: white;
+    border: 0.5px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.premium-activo-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.premium-activo-nombre {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.premium-activo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff0f0;
+    color: #e50914;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.premium-activo-dot {
+    width: 7px;
+    height: 7px;
+    background: #e50914;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.premium-activo-rows {
+    display: flex;
+    flex-direction: column;
+    border-top: 0.5px solid #f0f0f0;
+    border-bottom: 0.5px solid #f0f0f0;
+    padding: 4px 0;
+}
+
+.premium-activo-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 0;
+    font-size: 13px;
+    border-bottom: 0.5px solid #f5f5f5;
+}
+
+.premium-activo-row:last-child {
+    border-bottom: none;
+}
+
+.pa-label { color: #888; }
+.pa-value { color: #333; font-weight: 500; }
+
+.premium-activo-benefits {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.premium-benefit-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #1a3a6b;
+}
+
+.btn-cancelar-suscripcion {
+    background: none;
+    border: 0.5px solid #ddd;
+    color: #888;
+    border-radius: 8px;
+    padding: 0.55rem 1rem;
+    font-size: 13px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.2s;
+}
+
+.btn-cancelar-suscripcion:hover {
+    background: #f5f5f5;
+    color: #555;
+}
+
+/* ── Modal detalle del plan ── */
+.premium-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 99999;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.premium-modal-overlay.open {
+    display: flex;
+}
+
+.premium-modal-caja {
+    background: white;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 420px;
+    overflow: hidden;
+}
+
+.premium-modal-header {
+    background: #1a3a6b;
+    padding: 1.5rem;
+    color: white;
+}
+
+.premium-modal-header h3 {
+    margin: 0 0 4px;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.premium-modal-header p {
+    margin: 0;
+    opacity: 0.8;
+    font-size: 13px;
+}
+
+.premium-modal-body {
+    padding: 1.5rem;
+}
+
+.premium-modal-precio {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a3a6b;
+    margin-bottom: 1rem;
+}
+
+.premium-modal-precio span {
+    font-size: 14px;
+    font-weight: 400;
+    color: #888;
+}
+
+.premium-modal-lista {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.premium-modal-lista li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #333;
+}
+
+.premium-modal-footer {
+    padding: 0 1.5rem 1.5rem;
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn-modal-cancelar {
+    flex: 1;
+    padding: 0.7rem;
+    border: 0.5px solid #ddd;
+    background: none;
+    border-radius: 8px;
+    color: #888;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-modal-continuar {
+    flex: 2;
+    padding: 0.7rem;
+    background: #e50914;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.btn-modal-continuar:hover {
+    background: #b2070f;
+}
+
+/* ── Modal cancelar confirmación ── */
+.premium-cancel-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 99999;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.premium-cancel-modal-overlay.open {
+    display: flex;
+}
+
+.premium-cancel-caja {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 380px;
+    width: 100%;
+    text-align: center;
+}
+
+.premium-cancel-caja h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.75rem;
+}
+
+.premium-cancel-caja p {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.premium-cancel-btns {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn-cancel-no {
+    flex: 1;
+    padding: 0.7rem;
+    border: 0.5px solid #ddd;
+    background: none;
+    border-radius: 8px;
+    color: #555;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-cancel-si {
+    flex: 1;
+    padding: 0.7rem;
+    background: #e50914;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* ========== PESTAÑA PREMIOS ESPECIALES ========== */
+
+.tab-btn-premium {
+    background: linear-gradient(135deg, #1a3a6b, #2a5298) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em;
+}
+
+.tab-btn-premium:hover {
+    background: linear-gradient(135deg, #2a5298, #1a3a6b) !important;
+    color: white !important;
+}
+
+.tab-btn-premium.active {
+    background: #1a3a6b !important;
+    color: white !important;
+    border-bottom-color: #e50914 !important;
+}
+
+/* ── Banner CTA para no premium ── */
+.especiales-cta-banner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: #1a3a6b;
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    margin: 1.5rem 0;
+    gap: 1rem;
+}
+
+.especiales-cta-icon {
+    font-size: 2.5rem;
+    color: #e50914;
+    line-height: 1;
+}
+
+.especiales-cta-banner h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+}
+
+.especiales-cta-banner p {
+    font-size: 14px;
+    color: rgba(255,255,255,0.8);
+    line-height: 1.6;
+    max-width: 420px;
+    margin: 0;
+}
+
+.btn-suscribirse-cta {
+    background: #e50914;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.85rem 2rem;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: background 0.2s;
+}
+
+.btn-suscribirse-cta:hover {
+    background: #b2070f;
+}
+
+/* ── Cards de sorteo en el grid ── */
+.sorteo-badge {
+    background: #1a3a6b;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.sorteo-fecha {
+    font-size: 12px;
+    color: #888;
+    margin-top: 4px;
+}
+
+.sorteo-participantes {
+    font-size: 12px;
+    color: #555;
+    margin-top: 2px;
+}
+
+.btn-participar {
+    background: #1a3a6b;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 0.5rem;
+    transition: background 0.2s;
+}
+
+.btn-participar:hover:not(:disabled) {
+    background: #2a5298;
+}
+
+.btn-participar:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.btn-participar.ya-anotado {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+}
+
+/* ── Overlay de bloqueo para no premium ── */
+.premio-card-bloqueado {
+    position: relative;
+}
+
+.premio-card-bloqueado::after {
+    content: '🔒 Solo Premium';
+    position: absolute;
+    inset: 0;
+    background: rgba(26, 58, 107, 0.85);
+    border-radius: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: not-allowed;
+}
+
+.premium-cancelado {
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.premium-cancelado-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.premium-cancelado-titulo {
+    font-weight: 700;
+    color: #555;
+    font-size: 1rem;
+}
+
+.premium-cancelado-badge {
+    background: #f0f0f0;
+    color: #888;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.premium-cancelado-texto {
+    font-size: 0.9rem;
+    color: #666;
+    line-height: 1.5;
+}

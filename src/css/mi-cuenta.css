@@ -1,0 +1,853 @@
+/* ========== MI CUENTA - ESTILOS ========== */
+
+.profile-card {
+    max-width: 600px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==============================================
+   NUEVOS ESTILOS PARA AVATAR Y NIVEL
+   ============================================== */
+
+.profile-header {
+    margin-bottom: 2rem;
+}
+
+.profile-avatar-section {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #E50914;
+    border-radius: 15px;
+    color: white;
+}
+
+.profile-avatar-container {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    flex-shrink: 0;
+}
+
+.profile-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    overflow: hidden;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.profile-avatar i {
+    font-size: 5rem;
+    color: white;
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.btn-change-avatar {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #e50914;
+    border: 3px solid white;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 0;
+}
+
+.btn-change-avatar:hover {
+    background: #b2070f;
+    transform: scale(1.1);
+}
+
+.btn-change-avatar i {
+    font-size: 1rem;
+    color: white;
+}
+
+.profile-level-info {
+    flex: 1;
+}
+
+.profile-level-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.2rem;
+    background: rgba(255,255,255,0.2);
+    border-radius: 30px;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    backdrop-filter: blur(5px);
+}
+
+/* ==============================================
+   ESTILOS POR NIVEL PARA LA INSIGNIA
+   ============================================== */
+
+/* Nivel AMATEUR */
+.profile-level-badge.level-AMATEUR {
+    background: linear-gradient(135deg, #4caf50, #2e7d32);
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+/* Nivel COLABORADOR */
+.profile-level-badge.level-COLABORADOR {
+    background: linear-gradient(135deg, #2196f3, #1565c0);
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+}
+
+/* Nivel CRITICO */
+.profile-level-badge.level-CRITICO {
+    background: linear-gradient(135deg, #9c27b0, #6a1b9a);
+    box-shadow: 0 2px 8px rgba(156, 39, 176, 0.3);
+}
+
+/* Nivel JURADO_EXPERTO */
+.profile-level-badge.level-JURADO_EXPERTO {
+    background: linear-gradient(135deg, #ff9800, #e65100);
+    box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+    border: 2px solid gold;
+}
+
+/* Efecto adicional para nivel máximo */
+.profile-level-badge.level-JURADO_EXPERTO .level-icon {
+    animation: shine 2s infinite;
+}
+
+@keyframes shine {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.level-icon {
+    font-size: 1.2rem;
+}
+
+.level-name {
+    font-size: 1rem;
+    color: white;
+}
+
+.profile-level-progress {
+    margin-bottom: 0.75rem;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #e50914;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+.profile-next-level {
+    font-size: 0.9rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.next-level-label {
+    opacity: 0.8;
+}
+
+.next-level-name {
+    font-weight: 600;
+}
+
+.next-level-points {
+    opacity: 0.8;
+    font-size: 0.8rem;
+}
+
+/* ==============================================
+   ESTILOS PARA MODAL DE AVATAR
+   ============================================== */
+
+.modal-avatar-caja {
+    max-width: 600px !important;
+}
+
+.avatar-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 0.5rem;
+}
+
+.avatar-tab {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    background: none;
+    color: #666;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 20px;
+    transition: all 0.2s;
+}
+
+.avatar-tab:hover {
+    background: #f5f5f5;
+    color: #e50914;
+}
+
+.avatar-tab.active {
+    background: #e50914;
+    color: white;
+}
+
+.avatar-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.avatar-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.75rem;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.avatar-item:hover {
+    background: #f5f5f5;
+    border-color: #e0e0e0;
+}
+
+.avatar-item.selected {
+    background: #fff0f0;
+    border-color: #e50914;
+}
+
+.avatar-item img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 0.3rem;
+}
+
+.avatar-item i {
+    font-size: 3rem;
+    color: #ccc;
+    margin-bottom: 0.3rem;
+}
+
+.avatar-item-name {
+    font-size: 0.75rem;
+    color: #666;
+    text-align: center;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.avatar-upload-area {
+    border: 2px dashed #ddd;
+    border-radius: 10px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    background: #fafafa;
+    margin-bottom: 1rem;
+}
+
+.avatar-upload-area:hover {
+    border-color: #e50914;
+}
+
+.avatar-upload-area i {
+    font-size: 2.5rem;
+    color: #ddd;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.avatar-upload-area p {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.25rem;
+}
+
+.avatar-upload-area small {
+    font-size: 0.75rem;
+    color: #999;
+}
+
+.avatar-preview {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.avatar-preview img {
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: 10px;
+    border: 3px solid #e50914;
+}
+
+.avatar-loading {
+    text-align: center;
+    padding: 2rem;
+    color: #999;
+    grid-column: span 4;
+}
+
+.avatar-loading i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ==============================================
+   ESTILOS EXISTENTES (se mantienen intactos)
+   ============================================== */
+
+.welcome-badge {
+    background: #324C89;
+    color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.welcome-badge h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.stat-box {
+    background: #f5f5f5;
+    padding: 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.stat-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #e50914;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.profile-stats .stat-label {
+    font-size: 0.9rem;
+    color: #E50914;
+}
+
+.info-list {
+    margin: 2rem 0;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.3s;
+}
+
+.info-item:hover {
+    background: #f9f9f9;
+}
+
+.info-item i {
+    width: 24px;
+    color: #e50914;
+    font-size: 1.2rem;
+}
+
+.info-item strong {
+    margin-right: 0.5rem;
+    color: #333;
+}
+
+.info-item span {
+    color: #666;
+}
+
+.info-content {
+    flex: 1;
+}
+
+/* ========== BOTÓN LÁPIZ ========== */
+.btn-edit {
+    background: none;
+    border: none;
+    color: #ccc;
+    cursor: pointer;
+    padding: 0.4rem;
+    border-radius: 50%;
+    transition: color 0.2s, background 0.2s;
+    font-size: 0.9rem;
+    line-height: 1;
+}
+
+.btn-edit:hover {
+    color: #e50914;
+    background: #fff0f0;
+}
+
+/* ========== MODAL EDICIÓN ========== */
+.modal-edicion {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.modal-edicion-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+}
+
+.modal-edicion-caja {
+    position: relative;
+    background: white;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 420px;
+    margin: 1rem;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    animation: fadeIn 0.2s ease;
+    z-index: 1;
+}
+
+.modal-edicion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.modal-edicion-header h3 {
+    font-size: 1.1rem;
+    color: #333;
+    margin: 0;
+}
+
+.modal-edicion-cerrar {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #999;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 0.25rem;
+}
+
+.modal-edicion-cerrar:hover { color: #e50914; }
+
+.modal-edicion-body {
+    padding: 1.5rem;
+}
+
+.modal-edicion-body label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 0.5rem;
+}
+
+.modal-edicion-input {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+    outline: none;
+}
+
+.modal-edicion-input:focus {
+    border-color: #e50914;
+    box-shadow: 0 0 0 3px rgba(229,9,20,0.1);
+}
+
+.modal-edicion-error {
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+    color: #e50914;
+    background: #fff5f5;
+    border-left: 3px solid #e50914;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0 6px 6px 0;
+}
+
+.modal-edicion-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #f0f0f0;
+}
+
+.btn-cancelar-edicion {
+    padding: 0.7rem 1.4rem;
+    border: 2px solid #e0e0e0;
+    background: white;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    color: #666;
+    transition: all 0.2s;
+}
+
+.btn-cancelar-edicion:hover {
+    border-color: #ccc;
+    background: #f5f5f5;
+}
+
+.btn-guardar-edicion {
+    padding: 0.7rem 1.4rem;
+    background: #e50914;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-guardar-edicion:hover:not(:disabled) { background: #b2070f; }
+.btn-guardar-edicion:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ========== BOTÓN ELIMINAR CUENTA ========== */
+.btn-eliminar-cuenta {
+    background: #e50914;
+    border: none;
+    color: white;
+    padding: 0.6rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-eliminar-cuenta:hover {
+    background: #b2070f;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(229,9,20,0.25);
+}
+
+.btn-eliminar-cuenta:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.btn-eliminar-confirmar {
+    padding: 0.7rem 1.4rem;
+    background: #e50914;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-eliminar-confirmar:hover:not(:disabled) { background: #b2070f; }
+.btn-eliminar-confirmar:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ========== SELECTOR DE PREFIJO TELEFÓNICO (modal edición) ========== */
+
+/* Fix dropdown dentro de modal */
+.modal-edicion-caja {
+    overflow: visible !important;
+}
+
+.modal-edicion-body {
+    overflow: visible !important;
+}
+
+#modalPhoneWrapper .phone-wrapper {
+    display: flex;
+    align-items: stretch;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    overflow: visible;
+    transition: border-color 0.2s;
+    position: relative;
+}
+
+#modalPhoneWrapper .phone-wrapper:focus-within {
+    border-color: #e50914;
+    box-shadow: 0 0 0 3px rgba(229,9,20,0.1);
+}
+
+.phone-prefix-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.75rem 0.85rem;
+    background: #f5f5f5;
+    border: none;
+    border-right: 2px solid #e0e0e0;
+    border-radius: 8px 0 0 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap;
+    user-select: none;
+    transition: background 0.2s;
+    min-width: 90px;
+}
+
+.phone-prefix-btn:hover {
+    background: #ececec;
+}
+
+.phone-chevron {
+    font-size: 0.7rem;
+    color: #888;
+    margin-left: 2px;
+}
+
+/* Overrides para el input dentro del wrapper */
+#modalPhoneWrapper .modal-edicion-input {
+    border: none !important;
+    border-radius: 0 8px 8px 0 !important;
+    box-shadow: none !important;
+    flex: 1;
+    min-width: 0;
+}
+
+#modalPhoneWrapper .modal-edicion-input:focus {
+    border: none !important;
+    box-shadow: none !important;
+    outline: none;
+}
+
+/* Dropdown */
+.phone-prefix-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 100%;
+    min-width: 260px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    z-index: 99999;
+    overflow: hidden;
+}
+
+.phone-prefix-search {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border: none;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.9rem;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.phone-prefix-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.phone-prefix-option {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.15s;
+}
+
+.phone-prefix-option:hover {
+    background: #fff0f0;
+}
+
+.phone-prefix-option .option-name {
+    flex: 1;
+    color: #333;
+}
+
+.phone-prefix-option .option-code {
+    color: #999;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 480px) {
+    .profile-card {
+        padding: 1rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .stat-box {
+        padding: 1rem;
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+    }
+
+    .welcome-badge h1 {
+        font-size: 1.5rem;
+    }
+
+    .info-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+
+    /* Responsive para avatar */
+    .profile-avatar-section {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .profile-avatar-container {
+        width: 100px;
+        height: 100px;
+    }
+
+    .avatar-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .profile-level-badge {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 0.5rem 1rem;
+            gap: 0.25rem;
+        }
+
+    .level-name {
+        font-size: 0.85rem;
+        word-break: break-word;
+        white-space: normal;
+    }
+
+    .welcome-badge p {
+            font-size: 0.75rem;
+        }
+
+    .next-level-points {
+            text-align: center;
+            width: 100%;
+        }
+
+        .profile-next-level {
+            justify-content: center;
+        }
+
+        .info-item {
+                flex-direction: row;
+                text-align: left;
+                align-items: center;
+                gap: 0.75rem;
+        }
+
+        .info-content {
+            text-align: left;
+        }
+}

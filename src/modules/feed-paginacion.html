@@ -1,0 +1,24 @@
+<!-- PAGINACIÓN -->
+<div class="paginacion-container">
+    <button id="btnAnterior" class="btn-paginacion" onclick="cambiarPagina('anterior')">
+        <i class="fas fa-chevron-left"></i> Anterior
+    </button>
+
+    <span id="infoPagina" class="info-pagina">
+        Página 1 de 500
+    </span>
+
+    <button id="btnSiguiente" class="btn-paginacion" onclick="cambiarPagina('siguiente')">
+        Siguiente <i class="fas fa-chevron-right"></i>
+    </button>
+</div>
+
+<!-- CARGAR MÁS (solo mobile) -->
+<div id="cargarMasContainer" style="display:none; text-align:center; padding:1rem 0;">
+    <button id="btnCargarMas" onclick="window.cargarMas()"
+            style="background:#e50914; color:white; border:none; border-radius:24px;
+               padding:0.75rem 2rem; font-size:0.95rem; font-weight:600;
+               cursor:pointer; display:inline-flex; align-items:center; gap:0.5rem;">
+        <i class="fas fa-plus"></i> Cargar más
+    </button>
+</div>

@@ -1,0 +1,1816 @@
+/* ========== FEED FILMS - ESTILOS ========== */
+
+.feed-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Header */
+.feed-header {
+    background: #324C89;
+    color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.header-content h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.header-stats {
+    display: flex;
+    gap: 1rem;
+}
+
+.stat-badge {
+    background: rgba(255,255,255,0.2);
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Filtros */
+.filtros-container {
+    background: white;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.filtros-header {
+    padding: 1.5rem;
+    background: #E50914;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: white;
+}
+
+.filtros-header i:first-child {
+    color: #e50914;
+}
+
+.filtros-header i:last-child {
+    margin-left: auto;
+    transition: transform 0.3s;
+}
+
+.filtros-content {
+    padding: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.busqueda {
+    margin-bottom: 1.5rem;
+}
+
+.filtro-input,
+.filtro-select {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 1rem;
+    background: white;
+    box-sizing: border-box;
+    height: 48px;
+    line-height: 1.2;
+}
+
+.filtro-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 16px;
+    cursor: pointer;
+}
+
+.filtros-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    align-items: start;
+}
+
+.filtro-grupo {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-height: 100px;
+}
+
+.filtro-grupo label {
+    font-weight: 600;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.filtro-grupo label i {
+    color: #e50914;
+    margin-right: 0.3rem;
+}
+
+.filtros-acciones {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.btn-aplicar {
+    padding: 0.8rem 2rem;
+    background: #e50914;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s;
+}
+
+.btn-aplicar:hover {
+    background: #b2070f;
+}
+
+.btn-limpiar {
+    padding: 0.8rem 2rem;
+    background: #f5f5f5;
+    color: #666;
+    border: 2px solid #e0e0e0;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-limpiar:hover {
+    background: #e0e0e0;
+}
+
+/* Resultados header */
+.resultados-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.resultados-header h3 {
+    color: #333;
+}
+
+.resultados-header span {
+    background: #e50914;
+    color: white;
+    padding: 0.2rem 0.8rem;
+    border-radius: 20px;
+    margin-left: 0.5rem;
+}
+
+.ordenar-select {
+    padding: 0.5rem 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 25px;
+    background: white;
+    color: #333;
+    margin-left: 0.5rem;
+}
+
+/* Grid de películas */
+.peliculas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+    justify-content: center;
+}
+
+.peliculas-grid:has(.pelicula-card:only-child) {
+    grid-template-columns: repeat(auto-fit, 350px);
+    justify-content: center;
+}
+
+.pelicula-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+    display: flex;
+    flex-direction: column;
+    max-width: 350px;
+    justify-self: center;
+    width: 100%;
+}
+
+.pelicula-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.pelicula-poster {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+.pelicula-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.pelicula-overlay {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    left: 1rem;
+    display: flex;
+    justify-content: space-between;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.rating {
+    background: rgba(0,0,0,0.7);
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.año {
+    background: rgba(0,0,0,0.7);
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.pelicula-info {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.pelicula-titulo {
+    font-size: 1.3rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.pelicula-metadata {
+    display: flex;
+    gap: 1rem;
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.pelicula-descripcion {
+    color: #555;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: 0.5rem;
+}
+
+.pelicula-director {
+    color: #888;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    font-style: italic;
+}
+
+/* Votación */
+.votacion-container {
+    margin-top: 1rem;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 1rem;
+}
+
+.votacion-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* ========== BOTONES DE VOTACIÓN UNIFICADOS ========== */
+.btn-like, .btn-dislike {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.btn-like {
+    background: #e8f5e8;
+    border-color: #4caf50;
+    color: #2e7d32;
+}
+
+.btn-dislike {
+    background: #ffebee;
+    border-color: #f44336;
+    color: #c62828;
+}
+
+.btn-like:hover:not(:disabled) {
+    background: #4caf50;
+    color: white;
+}
+
+.btn-dislike:hover:not(:disabled) {
+    background: #f44336;
+    color: white;
+}
+
+.btn-like.votado {
+    background: #4caf50;
+    border-color: #2e7d32;
+    color: white;
+}
+
+.btn-dislike.votado {
+    background: #f44336;
+    border-color: #c62828;
+    color: white;
+}
+
+.btn-like.votado:hover,
+.btn-dislike.votado:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.btn-like:disabled,
+.btn-dislike:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Comentarios en tarjetas */
+.comentarios-section {
+    margin-top: 1rem;
+}
+
+.comentarios-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.comentarios-header:hover {
+    background: #f5f5f5;
+}
+
+.comentarios-header i:last-child {
+    margin-left: auto;
+    transition: transform 0.3s;
+}
+
+.comentarios-list {
+    margin-top: 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.comentario-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.comentario-avatar {
+    width: 40px;
+    height: 40px;
+    background: #f0f0f0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+}
+
+.comentario-contenido {
+    flex: 1;
+}
+
+.comentario-contenido strong {
+    display: block;
+    margin-bottom: 0.3rem;
+    color: #333;
+}
+
+.comentario-contenido p {
+    color: #555;
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+}
+
+.comentario-fecha {
+    font-size: 0.75rem;
+    color: #999;
+}
+
+.nuevo-comentario {
+    margin-top: 1rem;
+}
+
+.nuevo-comentario textarea {
+    width: 100%;
+    height: 80px;
+    padding: 0.8rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.comentario-acciones {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.5rem;
+}
+
+.caracteres-restantes {
+    color: #999;
+    font-size: 0.8rem;
+}
+
+.btn-enviar-comentario {
+    padding: 0.5rem 1.5rem;
+    background: #e50914;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-enviar-comentario:hover {
+    background: #b2070f;
+}
+
+/* ========== AUTOCOMPLETADO ========== */
+.filtro-grupo {
+    position: relative;
+}
+
+.autocomplete-resultados {
+    position: absolute;
+    top: 80%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    width: 100%;
+}
+
+.filtro-grupo:has(#busquedaInput) {
+    position: relative;
+}
+
+.filtro-grupo:has(#busquedaInput).resultados-visibles {
+    padding-bottom: 210px;
+}
+
+.filtro-grupo:has(#busquedaInput) .autocomplete-resultados {
+    top: 70px;
+}
+
+.autocomplete-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.autocomplete-item:hover {
+    background: #f5f5f5;
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-item .nombre {
+    font-weight: 600;
+    color: #333;
+}
+
+.autocomplete-item .conocido-por {
+    font-size: 0.8rem;
+    color: #999;
+    margin-top: 4px;
+}
+
+/* ========== SISTEMA DE VOTACIÓN PROPIO ========== */
+.porcentaje-container {
+    margin-bottom: 10px;
+    height: 24px;
+    background: #f0f0f0;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    display: none;
+}
+
+.porcentaje-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #4caf50, #8bc34a);
+    border-radius: 12px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.porcentaje-texto {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    z-index: 1;
+}
+
+.votos-totales {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #999;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.votacion-buttons button:active {
+    animation: pulse 0.2s ease;
+}
+
+.total-votos {
+    background: rgba(0, 0, 0, 0.75);
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #ffd700;
+    display: inline-block;
+    white-space: nowrap;
+    max-width: 100%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    line-height: 1.4;
+}
+
+/* ========== PAGINACIÓN ========== */
+.paginacion-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    margin: 2rem 0 3rem 0;
+}
+
+.btn-paginacion {
+    padding: 0.8rem 2rem;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 25px;
+    color: #666;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-paginacion:hover:not(:disabled) {
+    border-color: #e50914;
+    color: #e50914;
+}
+
+.btn-paginacion:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.info-pagina {
+    font-size: 1.1rem;
+    color: #333;
+    font-weight: 500;
+}
+
+/* ========== METADATA DE COMENTARIOS ========== */
+.pelicula-metadata {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.5rem;
+}
+
+.comentarios-info {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.comentarios-info i {
+    color: #e50914;
+    margin-right: 0.3rem;
+}
+
+.ver-mas {
+    color: #e50914;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.3s;
+}
+
+.ver-mas:hover {
+    color: #b2070f;
+}
+
+/* ========== MODAL COMPLETAMENTE REORGANIZADO ========== */
+
+/* Contenedor principal del modal */
+.modal {
+    display: none !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 999999 !important;
+}
+
+.modal[style*="display: flex"] {
+    display: flex !important;
+}
+
+.modal-contenido {
+    background: white !important;
+    width: 90% !important;
+    max-width: 1000px !important;
+    max-height: 90vh !important;
+    border-radius: 15px !important;
+    overflow: hidden !important;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3) !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* ========== HEADER DEL MODAL ========== */
+#modalPelicula .modal-header {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    color: white !important;
+    padding: 1.5rem 2rem !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+}
+
+#modalPelicula .modal-header h2 {
+    font-size: 1.8rem !important;
+    margin: 0 !important;
+    color: white !important;
+}
+
+#modalPelicula .modal-rating {
+    background: rgba(255,255,255,0.2) !important;
+    padding: 0.5rem 1.5rem !important;
+    border-radius: 50px !important;
+    font-size: 1.2rem !important;
+    font-weight: bold !important;
+    color: white !important;
+}
+
+/* ========== BODY DEL MODAL CON DOS COLUMNAS ========== */
+#modalPelicula .modal-body {
+    display: grid !important;
+    grid-template-columns: 300px 1fr !important;
+    grid-template-rows: auto auto auto !important;
+    gap: 2rem !important;
+    padding: 2rem !important;
+    overflow-y: auto !important;
+    flex: 1 !important;
+}
+
+/* Columna izquierda - Poster */
+#modalPelicula .modal-poster {
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2) !important;
+    height: fit-content !important;
+}
+
+#modalPelicula .modal-poster img {
+    width: 100% !important;
+    height: auto !important;
+    display: block !important;
+}
+
+/* ========== COLUMNA DERECHA - INFORMACIÓN ========== */
+#modalPelicula .modal-info {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1rem !important;
+}
+
+/* Grid de información de la película */
+#modalPelicula .modal-info-grid {
+    background: #f8f9fa !important;
+    padding: 1.5rem !important;
+    border-radius: 12px !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem !important;
+    margin-bottom: 1rem !important;
+}
+
+#modalPelicula .info-item {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.3rem !important;
+}
+
+#modalPelicula .info-item .label {
+    font-size: 0.8rem !important;
+    color: #999 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+#modalPelicula .info-item .value {
+    font-size: 1rem !important;
+    color: #333 !important;
+    font-weight: 600 !important;
+}
+
+/* Sinopsis */
+#modalPelicula .modal-sinopsis {
+    background: #ffffff !important;
+    padding: 1.5rem !important;
+    border-radius: 12px !important;
+    border: 1px solid #e0e0e0 !important;
+    margin: 1rem 0 !important;
+}
+
+#modalPelicula .modal-sinopsis h4 {
+    color: #333 !important;
+    font-size: 1.2rem !important;
+    margin: 0 0 1rem 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+}
+
+#modalPelicula .modal-sinopsis h4 i {
+    color: #e50914 !important;
+}
+
+#modalPelicula .modal-sinopsis p {
+    margin: 0 !important;
+    line-height: 1.6 !important;
+    color: #555 !important;
+    font-size: 0.95rem !important;
+}
+
+/* Botones de votación */
+#modalPelicula .modal-acciones {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 1rem !important;
+    margin: 1rem 0 !important;
+}
+
+#modalPelicula .btn-like,
+#modalPelicula .btn-dislike {
+    padding: 1rem !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+    font-size: 1rem !important;
+}
+
+#modalPelicula .btn-like {
+    background: #e8f5e8 !important;
+    color: #2e7d32 !important;
+    border: 2px solid #4caf50 !important;
+}
+
+#modalPelicula .btn-like:hover {
+    background: #4caf50 !important;
+    color: white !important;
+}
+
+#modalPelicula .btn-like.votado {
+    background: #4caf50 !important;
+    color: white !important;
+    border-color: #2e7d32 !important;
+}
+
+#modalPelicula .btn-dislike {
+    background: #ffebee !important;
+    color: #c62828 !important;
+    border: 2px solid #f44336 !important;
+}
+
+#modalPelicula .btn-dislike:hover {
+    background: #f44336 !important;
+    color: white !important;
+}
+
+#modalPelicula .btn-dislike.votado {
+    background: #f44336 !important;
+    color: white !important;
+    border-color: #c62828 !important;
+}
+
+/* ========== SECCIÓN DE COMENTARIOS ========== */
+#modalPelicula .modal-comentarios {
+    background: #ffffff !important;
+    border-radius: 12px !important;
+    padding: 1.5rem !important;
+    margin-top: 1rem !important;
+    border: 1px solid #e0e0e0 !important;
+}
+
+#modalPelicula .modal-comentarios h4 {
+    color: #333 !important;
+    font-size: 1.2rem !important;
+    margin: 0 0 1rem 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    border-bottom: 2px solid #e50914 !important;
+    padding-bottom: 0.5rem !important;
+}
+
+/* Lista de comentarios */
+#modalPelicula .comentarios-lista {
+    max-height: 200px !important;
+    overflow-y: auto !important;
+    padding-right: 0.5rem !important;
+    margin-bottom: 1rem !important;
+}
+
+/* Scrollbar */
+#modalPelicula .comentarios-lista::-webkit-scrollbar {
+    width: 4px !important;
+}
+
+#modalPelicula .comentarios-lista::-webkit-scrollbar-track {
+    background: #f1f1f1 !important;
+}
+
+#modalPelicula .comentarios-lista::-webkit-scrollbar-thumb {
+    background: #e50914 !important;
+    border-radius: 4px !important;
+}
+
+/* Items de comentarios */
+#modalPelicula .comentario-item {
+    background: #f8f9fa !important;
+    border-radius: 8px !important;
+    padding: 1rem !important;
+    margin-bottom: 0.8rem !important;
+    border-left: 3px solid #e50914 !important;
+}
+
+#modalPelicula .comentario-email {
+    font-weight: 600 !important;
+    color: #e50914 !important;
+    font-size: 0.85rem !important;
+    margin-bottom: 0.3rem !important;
+    word-break: break-all !important;
+    line-height: 1.3 !important;
+}
+
+#modalPelicula .comentario-texto {
+    color: #333 !important;
+    font-size: 0.9rem !important;
+    line-height: 1.4 !important;
+    margin: 0.3rem 0 !important;
+    word-break: break-word !important;
+}
+
+#modalPelicula .comentario-fecha {
+    color: #999 !important;
+    font-size: 0.7rem !important;
+    text-align: right !important;
+    margin-top: 0.3rem !important;
+}
+
+/* Botón Comentar */
+#modalPelicula .btn-comentar {
+    width: 100% !important;
+    padding: 1rem !important;
+    background: linear-gradient(135deg, #e50914, #b2070f) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    cursor: pointer !important;
+    transition: all 0.3s !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+    margin: 1rem 0 !important;
+}
+
+#modalPelicula .btn-comentar:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(229,9,20,0.3) !important;
+}
+
+/* Área de escritura */
+#modalPelicula .comentario-escritura {
+    background: #ffffff !important;
+    border: 2px solid #e0e0e0 !important;
+    border-radius: 8px !important;
+    padding: 1rem !important;
+    margin-top: 1rem !important;
+}
+
+#modalPelicula .comentario-escritura textarea {
+    width: 100% !important;
+    min-height: 60px !important;
+    padding: 0.8rem !important;
+    border: 2px solid #ddd !important;
+    border-radius: 6px !important;
+    font-family: inherit !important;
+    font-size: 0.9rem !important;
+    resize: vertical !important;
+    margin-bottom: 0.8rem !important;
+}
+
+#modalPelicula .comentario-escritura textarea:focus {
+    outline: none !important;
+    border-color: #e50914 !important;
+}
+
+/* Acciones del área de escritura */
+#modalPelicula .comentario-acciones {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+}
+
+#modalPelicula .caracteres-restantes {
+    color: #666 !important;
+    font-size: 0.8rem !important;
+    background: #f5f5f5 !important;
+    padding: 0.3rem 1rem !important;
+    border-radius: 20px !important;
+}
+
+#modalPelicula .btn-cancelar {
+    padding: 0.5rem 1rem !important;
+    background: white !important;
+    border: 2px solid #ddd !important;
+    border-radius: 6px !important;
+    color: #666 !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    font-size: 0.9rem !important;
+}
+
+#modalPelicula .btn-cancelar:hover {
+    background: #f5f5f5 !important;
+}
+
+#modalPelicula .btn-enviar {
+    padding: 0.5rem 1.5rem !important;
+    background: #e50914 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    color: white !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    font-size: 0.9rem !important;
+    margin-left: 0.5rem !important;
+}
+
+#modalPelicula .btn-enviar:hover:not(:disabled) {
+    background: #b2070f !important;
+    transform: translateY(-2px) !important;
+}
+
+#modalPelicula .btn-enviar:disabled {
+    background: #ccc !important;
+    cursor: not-allowed !important;
+}
+
+/* Botón cerrar */
+#modalPelicula .modal-cerrar {
+    position: absolute !important;
+    top: 1rem !important;
+    right: 1.5rem !important;
+    background: none !important;
+    border: none !important;
+    font-size: 2.5rem !important;
+    color: white !important;
+    cursor: pointer !important;
+    z-index: 10 !important;
+    line-height: 1 !important;
+}
+
+#modalPelicula .modal-cerrar:hover {
+    color: #ff4444 !important;
+}
+
+/* Mensaje sin comentarios */
+#modalPelicula .sin-comentarios {
+    text-align: center !important;
+    padding: 1.5rem !important;
+    color: #999 !important;
+    font-style: italic !important;
+    background: #f9f9f9 !important;
+    border-radius: 8px !important;
+    border: 2px dashed #ddd !important;
+    margin-bottom: 1rem !important;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+    .feed-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .filtros-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filtros-acciones {
+        flex-direction: column;
+    }
+
+    .peliculas-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .resultados-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .header-stats {
+        flex-direction: column;
+    }
+
+    .filtro-grupo:has(#busquedaInput).resultados-visibles {
+        padding-bottom: 180px;
+    }
+
+    #modalPelicula .modal-body {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+        padding: 1rem !important;
+    }
+
+    #modalPelicula .modal-poster {
+        max-width: 200px !important;
+        margin: 0 auto !important;
+    }
+
+    #modalPelicula .modal-info-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    #modalPelicula .modal-acciones {
+        grid-template-columns: 1fr !important;
+    }
+
+    #modalPelicula .modal-header {
+        flex-direction: column !important;
+        text-align: center !important;
+        gap: 1rem !important;
+        padding: 1rem !important;
+    }
+
+    #modalPelicula .modal-header h2 {
+        font-size: 1.3rem !important;
+    }
+
+#modalPelicula .comentario-acciones {
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#modalPelicula .btn-enviar {
+    margin-left: 0.5rem !important;
+    width: auto !important;
+    background: #324C89 !important;
+}
+
+#modalPelicula .btn-cancelar {
+    width: auto !important;
+}
+
+    .feed-header {
+            padding: 1rem 1.2rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            flex-direction: row;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-content h1 {
+                font-size: 1rem;
+                margin-bottom: 0.2rem;
+            }
+
+            .header-content p {
+                font-size: 0.8rem;
+                opacity: 0.85;
+            }
+
+            .header-stats {
+                flex-direction: column;
+                gap: 0.4rem;
+                flex-shrink: 0;
+            }
+
+            .stat-badge {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.78rem;
+                border-radius: 15px;
+            }
+
+            .btn-filtros-mobile .fa-chevron-up {
+                    display: none;
+                }
+
+        #modalPelicula .modal-header {
+                padding: 0.75rem 1rem !important;
+                gap: 0.5rem !important;
+            }
+
+            #modalPelicula .modal-header h2 {
+                font-size: 1rem !important;
+                line-height: 1.3 !important;
+            }
+
+            #modalPelicula .modal-rating {
+                font-size: 0.75rem !important;
+                padding: 0.3rem 0.75rem !important;
+            }
+
+            #modalPelicula .modal-header-right .modal-rating {
+                font-size: 0.75rem !important;
+                padding: 0.3rem 0.75rem !important;
+            }
+
+            #modalPelicula .modal-cerrar {
+                width: 28px !important;
+                height: 28px !important;
+                font-size: 1rem !important;
+            }
+
+            /* Sobrescribir display:contents del base */
+                #modalPelicula .modal-fila-superior {
+                    display: flex !important;
+                    flex-direction: column !important;
+                    width: 100% !important;
+                    grid-column: 1 / -1 !important;
+                }
+
+                /* Modal body como flex en móvil */
+                #modalPelicula .modal-body {
+                    display: flex !important;
+                    flex-direction: column !important;
+                    padding: 0.5rem !important;
+                    gap: 0.5rem !important;
+                    overflow-y: auto !important;
+                }
+
+
+    }
+
+@media (max-width: 480px) {
+    .votacion-buttons {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .btn-like, .btn-dislike {
+        padding: 8px;
+        font-size: 0.9rem;
+    }
+
+    .porcentaje-container {
+        height: 20px;
+    }
+
+    .porcentaje-texto {
+        font-size: 0.7rem;
+    }
+
+    .total-votos {
+        font-size: 0.8rem;
+        padding: 0.2rem 0.5rem;
+    }
+
+    .comentario-item {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .comentario-avatar {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+    }
+
+    .comentario-acciones {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .caracteres-restantes {
+        text-align: center;
+    }
+
+    .botones-accion {
+        justify-content: center;
+    }
+
+    .btn-cancelar, .btn-enviar {
+        flex: 1;
+        text-align: center;
+        justify-content: center;
+    }
+
+    .comentario-escritura {
+        padding: 1rem;
+    }
+
+    .paginacion-container {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .btn-paginacion {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    #modalPelicula .modal-contenido {
+        width: 95% !important;
+    }
+}
+
+/* ==============================================
+   DIRECTOR AUTOCOMPLETE
+   ============================================== */
+.autocomplete-resultados {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    z-index: 9999;
+    max-height: 280px;
+    overflow-y: auto;
+    margin-top: 4px;
+}
+
+.filtro-grupo {
+    position: relative;
+}
+
+.autocomplete-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 1rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-bottom: 1px solid #f4f5f7;
+}
+
+.autocomplete-item:last-child { border-bottom: none; }
+.autocomplete-item:hover { background: #fff5f5; }
+
+.autocomplete-item img {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.autocomplete-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #bbb;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.autocomplete-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.autocomplete-nombre {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1a1a2e;
+}
+
+.autocomplete-rol {
+    font-size: 0.75rem;
+    color: #e50914;
+    font-weight: 500;
+}
+
+.autocomplete-loading,
+.autocomplete-empty {
+    padding: 1rem;
+    text-align: center;
+    color: #999;
+    font-size: 0.85rem;
+}
+
+.autocomplete-loading i { margin-right: 0.4rem; }
+
+/* ========== FILAS INFERIORES DEL MODAL (comentarios y botón) ========== */
+#modalPelicula .modal-fila-superior {
+    display: contents !important; /* Los hijos directos participan en el grid del modal-body */
+}
+
+#modalPelicula .modal-fila-comentarios,
+#modalPelicula .modal-fila-boton {
+    grid-column: 1 / -1 !important; /* Ocupar todo el ancho del grid */
+}
+
+#modalPelicula .modal-fila-comentarios {
+    border-top: 1px solid #eee !important;
+    padding-top: 1.5rem !important;
+}
+
+#modalPelicula .modal-fila-boton {
+    display: flex !important;
+    justify-content: center !important;
+    padding-bottom: 0.5rem !important;
+}
+
+/* ========== BOTONES DE VOTO SIEMPRE AL FONDO DE LA TARJETA ========== */
+.votacion-container {
+    margin-top: auto !important;
+}
+
+/* ========== BOTÓN COMENTAR - ancho normal ========== */
+#modalPelicula .btn-comentar {
+    width: auto !important;
+    padding: 0.75rem 2rem !important;
+}
+
+/* ========== TEXTAREA COMENTARIO - altura máxima ========== */
+#modalPelicula .comentario-escritura textarea {
+    max-height: 150px !important;
+    resize: vertical !important;
+}
+
+/* ========== BOTÓN CERRAR - dentro del header ========== */
+#modalPelicula .modal-header {
+    position: relative !important;
+}
+
+#modalPelicula .modal-cerrar {
+    position: static !important;
+    background: rgba(255,255,255,0.2) !important;
+    border: none !important;
+    border-radius: 50% !important;
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 1.4rem !important;
+    color: white !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    transition: background 0.2s !important;
+    line-height: 1 !important;
+}
+
+#modalPelicula .modal-cerrar:hover {
+    background: rgba(255,255,255,0.35) !important;
+    color: white !important;
+}
+
+#modalPelicula .modal-header-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    flex-shrink: 0 !important;
+}
+
+/* ========== CLICK FUERA PARA CERRAR ========== */
+.modal-overlay {
+    position: absolute !important;
+    inset: 0 !important;
+    cursor: pointer !important;
+}
+
+/* ========== OVERLAY DETRÁS DEL CONTENIDO ========== */
+.modal-overlay {
+    z-index: 0 !important;
+}
+
+.modal-contenido {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* ========== VER MÁS LINK EN TARJETA ========== */
+.pelicula-metadata {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ver-mas-link {
+    color: #e50914;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.ver-mas-link:hover { text-decoration: underline; }
+
+/* ========== BADGE COMENTARIOS EN HEADER MODAL ========== */
+#modalPelicula .modal-badge-comentarios {
+    background: rgba(255,255,255,0.2) !important;
+    padding: 0.5rem 1.5rem !important;
+    border-radius: 50px !important;
+    font-size: 1.2rem !important;
+    font-weight: bold !important;
+    color: white !important;
+    margin-top: 0 !important;
+    border: none !important;
+}
+
+/* ========== FILTROS RESPONSIVE - MODAL MÓVIL ========== */
+
+/* Ocultar versión desktop en móvil y viceversa */
+@media (max-width: 768px) {
+    .filtros-desktop { display: none; }
+    .filtros-mobile { display: block; }
+}
+
+@media (min-width: 769px) {
+    .filtros-desktop { display: block; }
+    .filtros-mobile { display: none; }
+    .filtros-modal-overlay,
+    .filtros-modal-sheet { display: none !important; }
+}
+
+.feed-header {
+        justify-content: center;
+    }
+
+    .header-content {
+        text-align: center;
+    }
+
+/* Botón abrir filtros en móvil */
+.filtros-mobile {
+    display: none;
+    margin-bottom: 1rem;
+}
+
+.btn-filtros-mobile {
+    width: 100%;
+    padding: 0.9rem 1.5rem;
+    background: #E50914;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* Overlay oscuro */
+.filtros-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1100;
+}
+
+.filtros-modal-overlay.active {
+    display: block;
+}
+
+/* Bottom sheet */
+.filtros-modal-sheet {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 20px 20px 0 0;
+    z-index: 1101;
+    max-height: 85vh;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+.filtros-modal-sheet.active {
+    display: block;
+    transform: translateY(0);
+}
+
+/* Header del modal */
+.filtros-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid #eee;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #333;
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 1;
+}
+
+.filtros-modal-header button {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    color: #666;
+    cursor: pointer;
+}
+
+/* Body del modal */
+.filtros-modal-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+/* Footer del modal */
+.filtros-modal-footer {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #eee;
+    position: sticky;
+    bottom: 0;
+    background: white;
+}
+
+.filtros-modal-footer .btn-aplicar,
+.filtros-modal-footer .btn-limpiar {
+    flex: 1;
+}
+
+@media (max-width: 768px) {
+    .filtros-mobile {
+        display: block !important;
+    }
+    .filtros-desktop {
+        display: none !important;
+    }
+}
+
+/* ========== CARRUSEL MODAL MÓVIL ========== */
+@media (min-width: 769px) {
+    .modal-carrusel {
+        display: contents;
+    }
+    .carrusel-dots {
+        display: none;
+    }
+
+    #modalPelicula .modal-fila-superior .modal-acciones {
+            grid-column: 1 / -1 !important;
+            display: flex !important;
+            justify-content: center !important;
+            gap: 2rem !important;
+            margin: 1.5rem 0 !important;
+        }
+
+        #modalPelicula .modal-fila-superior .modal-acciones .btn-like,
+        #modalPelicula .modal-fila-superior .modal-acciones .btn-dislike {
+            padding: 1rem 3rem !important;
+            font-size: 1.1rem !important;
+            font-weight: 700 !important;
+            border-radius: 10px !important;
+            min-width: 180px !important;
+        }
+}
+
+@media (max-width: 768px) {
+
+    /* Modal ocupa toda la pantalla */
+    #modalPelicula .modal-contenido {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 100% !important;
+        max-height: 100% !important;
+        border-radius: 0 !important;
+        overflow: hidden !important;
+    }
+
+    /* Body del modal hace el scroll general */
+    #modalPelicula .modal-body {
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 0.75rem !important;
+        gap: 0.75rem !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        flex: 1 !important;
+        height: 0 !important;
+    }
+
+    /* Fila superior como flex columna */
+    #modalPelicula .modal-fila-superior {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        grid-column: unset !important;
+    }
+
+    /* Carrusel — altura fija para ambos slides */
+    #modalPelicula .modal-carrusel {
+        display: flex !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        scroll-snap-type: x mandatory !important;
+        -webkit-overflow-scrolling: touch !important;
+        scroll-behavior: smooth !important;
+        width: 100% !important;
+        gap: 0 !important;
+        scrollbar-width: none !important;
+        height: 420px !important;
+    }
+
+    #modalPelicula .modal-carrusel::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Ambos slides exactamente igual de altos */
+    #modalPelicula .carrusel-slide {
+        flex: 0 0 100% !important;
+        scroll-snap-align: start !important;
+        width: 100% !important;
+        height: 420px !important;
+        min-height: 420px !important;
+        box-sizing: border-box !important;
+        padding: 0.5rem !important;
+        overflow: hidden !important;
+        display: block !important;
+    }
+
+    /* Slide 1: sin padding para que imagen ocupe todo el ancho */
+    #modalPelicula .carrusel-slide:first-child {
+        padding: 0 !important;
+    }
+
+    /* Slide 1: imagen llena todo */
+    #modalPelicula .carrusel-slide:first-child .modal-poster {
+        min-width: 130% !important;
+        height: 100% !important;
+        border-radius: 10px !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+    }
+
+    #modalPelicula .carrusel-slide:first-child .modal-poster img {
+        width: 75% !important;
+        height: 100% !important;
+        object-fit: fill !important;
+        display: block !important;
+        border-radius: 10px;
+    }
+
+    /* Slide 2: datos con scroll interno */
+    #modalPelicula .carrusel-slide:last-child .modal-columna-derecha {
+        width: 100% !important;
+        height: 100% !important;
+        overflow-y: auto !important;
+        padding: 0.5rem !important;
+    }
+
+    /* Miga de pan */
+    .carrusel-dots {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 0 0.25rem;
+    }
+
+    .carrusel-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #ccc;
+        cursor: pointer;
+        transition: background 0.3s, transform 0.3s;
+    }
+
+    .carrusel-dot.active {
+        background: #e50914;
+        transform: scale(1.3);
+    }
+
+    /* Comentarios y botón ocupan ancho completo */
+    #modalPelicula .modal-fila-comentarios,
+    #modalPelicula .modal-fila-boton {
+        grid-column: unset !important;
+        width: 100% !important;
+    }
+}

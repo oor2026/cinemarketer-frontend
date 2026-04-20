@@ -1,0 +1,287 @@
+/* ========== CONTACTO - ESTILOS ========== */
+
+.contacto-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 1rem;
+    animation: fadeIn 0.3s ease;
+}
+
+.contacto-header {
+    background: #324C89;
+    color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.contacto-header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex: 1;
+}
+
+.contacto-header .header-icon {
+    background: rgba(255,255,255,0.2);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.contacto-header .header-icon i { font-size: 2rem; }
+
+.contacto-header .header-text h2 { font-size: 2rem; margin-bottom: 0.3rem; }
+
+.contacto-header .header-text p { opacity: 0.9; font-size: 1rem; }
+
+.btn-soporte {
+    background: white;
+    color: #e50914;
+    border: none;
+    padding: 0.75rem 1.75rem;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    white-space: nowrap;
+}
+
+.btn-soporte:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+}
+
+.faq-section {
+    background: #E50914;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+
+.faq-titulo {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.faq-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.faq-item {
+    border: 1px solid #eee;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+}
+
+.faq-item:hover { box-shadow: 0 3px 12px rgba(0,0,0,0.08); }
+
+.faq-item.abierto { border-color: #e50914; }
+
+.faq-pregunta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+    color: #333;
+    font-size: 0.95rem;
+    background: #fafafa;
+    gap: 1rem;
+}
+
+.faq-item.abierto .faq-pregunta { background: #fff5f5; color: #e50914; }
+
+.faq-chevron {
+    font-size: 0.8rem;
+    color: #999;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+}
+
+.faq-item.abierto .faq-chevron { transform: rotate(180deg); color: #e50914; }
+
+.faq-respuesta {
+    display: none;
+    padding: 1rem 1.25rem;
+    color: #555;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    border-top: 1px solid #f0f0f0;
+    background: white;
+}
+
+.faq-respuesta p { margin: 0; }
+
+.soporte-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.soporte-modal {
+    background: white;
+    border-radius: 15px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    overflow: hidden;
+    animation: fadeIn 0.2s ease;
+}
+
+.soporte-modal-header {
+    background: linear-gradient(135deg, #e50914 0%, #b2070f 100%);
+    color: white;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.soporte-modal-titulo {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.soporte-close {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.soporte-close:hover { background: rgba(255,255,255,0.35); }
+
+.soporte-modal-body { padding: 1.5rem; }
+
+.soporte-desc { color: #666; font-size: 0.9rem; margin-bottom: 1rem; }
+
+.soporte-textarea {
+    width: 100%;
+    height: 140px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 0.9rem;
+    font-size: 0.95rem;
+    font-family: inherit;
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.soporte-textarea:focus { border-color: #e50914; }
+
+.soporte-footer-info { text-align: right; font-size: 0.8rem; color: #aaa; margin-top: 0.4rem; }
+
+.soporte-modal-footer {
+    padding: 1rem 1.5rem;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    border-top: 1px solid #f0f0f0;
+}
+
+.btn-cancelar-soporte {
+    background: #f5f5f5;
+    color: #666;
+    border: none;
+    padding: 0.65rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: background 0.2s;
+}
+
+.btn-cancelar-soporte:hover { background: #e0e0e0; }
+
+.btn-enviar-soporte {
+    background: #e50914;
+    color: white;
+    border: none;
+    padding: 0.65rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.btn-enviar-soporte:hover { background: #b2070f; transform: translateY(-1px); }
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+    .contacto-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .contacto-header-left {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .contacto-header .header-text h2 {
+        font-size: 1.5rem;
+    }
+
+    .contacto-header .header-text p {
+        font-size: 0.9rem;
+    }
+
+    .btn-soporte {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .soporte-modal-titulo {
+        font-size: 0.85rem;
+    }
+}
+

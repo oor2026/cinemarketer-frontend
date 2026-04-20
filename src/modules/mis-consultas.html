@@ -1,0 +1,115 @@
+<div class="consultas-container">
+
+    <!-- HEADER -->
+    <div class="consultas-header">
+        <div class="consultas-header-left">
+            <div class="header-icon">
+                <i class="fas fa-inbox"></i>
+            </div>
+            <div class="header-text">
+                <h2>Mis Consultas</h2>
+                <p>Seguimiento de tus conversaciones con soporte</p>
+            </div>
+        </div>
+        <button class="btn-nueva-consulta" onclick="consultasAbrirNueva()">
+            <i class="fas fa-plus"></i>
+            Nueva consulta
+        </button>
+    </div>
+
+    <!-- LISTA DE TICKETS -->
+    <div class="consultas-lista-section">
+        <div id="consultasLista" class="consultas-lista">
+            <div class="consultas-loading">
+                <i class="fas fa-spinner fa-spin"></i> Cargando consultas...
+            </div>
+        </div>
+    </div>
+
+    <!-- VISTA DE HILO (oculta inicialmente) -->
+    <div class="consultas-hilo-section" id="consultasHiloSection" style="display:none;">
+        <div class="hilo-header">
+            <button class="btn-volver" onclick="consultasVolverALista()">
+                <i class="fas fa-arrow-left"></i> Volver
+            </button>
+            <div class="hilo-info">
+                <h3 id="hiloAsunto">Cargando...</h3>
+                <span class="hilo-status" id="hiloStatus"></span>
+            </div>
+        </div>
+
+        <div class="hilo-mensajes" id="hiloMensajes"></div>
+
+        <!-- Área de respuesta (solo si ticket abierto) -->
+        <div class="hilo-responder" id="hiloResponder">
+            <textarea
+                id="hiloTexto"
+                class="hilo-textarea"
+                placeholder="Escribí tu respuesta..."
+                maxlength="1000"
+                oninput="document.getElementById('hiloCount').textContent = this.value.length"
+            ></textarea>
+            <div class="hilo-responder-footer">
+                <span class="hilo-count"><span id="hiloCount">0</span>/1000</span>
+                <button class="btn-enviar-hilo" onclick="consultasEnviarMensaje()">
+                    <i class="fas fa-paper-plane"></i> Enviar
+                </button>
+            </div>
+        </div>
+
+        <div class="hilo-cerrado-aviso" id="hiloCerradoAviso" style="display:none;">
+            <i class="fas fa-lock"></i>
+            Esta consulta fue cerrada. Ya no es posible enviar mensajes.
+        </div>
+    </div>
+
+    <!-- MODAL NUEVA CONSULTA -->
+    <div class="soporte-overlay" id="nuevaConsultaOverlay" style="display:none;" onclick="consultasCerrarNueva(event)">
+        <div class="soporte-modal">
+            <div class="soporte-modal-header">
+                <div class="soporte-modal-titulo">
+                    <i class="fas fa-headset"></i>
+                    <span>¿En qué podemos ayudarte hoy?</span>
+                </div>
+                <button class="soporte-close" onclick="consultasCerrarNueva(null)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="soporte-modal-body">
+                <p class="soporte-desc">Acercanos tu consulta y nos pondremos en contacto a la brevedad.</p>
+                <!-- Después: -->
+                <input
+                        type="text"
+                        id="nuevaConsultaAsunto"
+                        class="soporte-textarea"
+                        placeholder="Asunto (ej: No puedo canjear un premio)"
+                        maxlength="60"
+                        oninput="document.getElementById('nuevaConsultaAsuntoCount').textContent = this.value.length"
+                        style="height:auto; padding:0.75rem 0.9rem; margin-bottom:0.25rem;"
+                >
+                <div class="soporte-footer-info" style="margin-bottom:0.75rem;">
+                    <span id="nuevaConsultaAsuntoCount">0</span>/60 caracteres
+                </div>
+                <textarea
+                    id="nuevaConsultaTexto"
+                    class="soporte-textarea"
+                    placeholder="Describí tu consulta..."
+                    maxlength="1000"
+                    oninput="document.getElementById('nuevaConsultaCount').textContent = this.value.length"
+                ></textarea>
+                <div class="soporte-footer-info">
+                    <span id="nuevaConsultaCount">0</span>/1000 caracteres
+                </div>
+            </div>
+            <div class="soporte-modal-footer">
+                <button class="btn-cancelar-soporte" onclick="consultasCerrarNueva(null)">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button class="btn-enviar-soporte" id="btnEnviarNueva" onclick="consultasEnviarNueva()">
+                    <i class="fas fa-paper-plane"></i> Enviar
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,358 @@
+/* ========== MIS PUNTOS - ESTILOS ========== */
+
+.points-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1rem;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Header */
+.points-header {
+    background: #324C89;
+    color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.points-summary {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.points-summary i {
+    font-size: 3rem;
+}
+
+.points-summary h2 {
+    font-size: 1.8rem;
+    margin-bottom: 0.3rem;
+}
+
+.points-summary p {
+    opacity: 0.9;
+    font-size: 0.9rem;
+}
+
+.points-total {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.total-label {
+    display: block;
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin-bottom: 0.3rem;
+}
+
+.total-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+/* Estadísticas */
+.points-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-item {
+    background: #E50914;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: transform 0.3s;
+}
+
+.stat-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.stat-item i {
+    font-size: 2rem;
+    color: #ffffff
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ffffff !important;
+}
+
+.points-stats .stat-label {
+    font-size: 0.9rem;
+    color: #ffffff !important;
+}
+
+/* Filtros */
+.points-filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 0.5rem 1.5rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 25px;
+    background: white;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+}
+
+.filter-btn:hover {
+    border-color: #e50914;
+    color: #e50914;
+}
+
+.filter-btn.active {
+    background: #e50914;
+    border-color: #e50914;
+    color: white;
+}
+
+.filter-select {
+    padding: 0.5rem 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 25px;
+    background: white;
+    color: #666;
+    cursor: pointer;
+    font-size: 0.9rem;
+    min-width: 150px;
+}
+
+/* Lista de transacciones */
+.transactions-list {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+}
+
+.transaction-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.3s;
+    cursor: pointer;
+}
+
+.transaction-item:hover {
+    background: #f9f9f9;
+}
+
+.transaction-item:last-child {
+    border-bottom: none;
+}
+
+.transaction-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+}
+
+.transaction-icon.earned {
+    background: #e8f5e8;
+    color: #2e7d32;
+}
+
+.transaction-icon.spent {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.transaction-details {
+    flex: 1;
+}
+
+.transaction-concept {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.2rem;
+}
+
+.transaction-date {
+    font-size: 0.8rem;
+    color: #999;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.transaction-date i {
+    font-size: 0.7rem;
+}
+
+.transaction-amount {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.transaction-amount.earned {
+    color: #2e7d32;
+}
+
+.transaction-amount.spent {
+    color: #c62828;
+}
+
+.transaction-amount i {
+    font-size: 0.9rem;
+    margin-left: 0.3rem;
+}
+
+/* Loading y estados vacíos */
+.loading {
+    text-align: center;
+    padding: 3rem;
+    color: #999;
+}
+
+.loading i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.no-transactions {
+    text-align: center;
+    padding: 3rem;
+    background: white;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+}
+
+.no-transactions i {
+    font-size: 4rem;
+    color: #ccc;
+    margin-bottom: 1rem;
+}
+
+.no-transactions h3 {
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.no-transactions p {
+    color: #999;
+    margin-bottom: 1.5rem;
+}
+
+.btn-votar {
+    display: inline-block;
+    padding: 0.8rem 2rem;
+    background: #e50914;
+    color: white;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: background 0.3s;
+}
+
+.btn-votar:hover {
+    background: #b2070f;
+}
+
+/* Paginación */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.page-btn {
+    padding: 0.5rem 1.5rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 5px;
+    background: white;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.page-btn:hover:not(:disabled) {
+    border-color: #e50914;
+    color: #e50914;
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.page-info {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+    .points-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .points-summary {
+        flex-direction: column;
+    }
+
+    .points-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .points-filters {
+        flex-direction: column;
+    }
+
+    .filter-select {
+        width: 100%;
+    }
+
+    .transaction-item {
+        flex-wrap: wrap;
+    }
+
+    .transaction-amount {
+        width: 100%;
+        margin-top: 0.5rem;
+        text-align: left;
+    }
+}

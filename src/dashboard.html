@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>Dashboard - Cinemarketer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- CSS BASE -->
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/feed-films.css">
+    <link rel="stylesheet" href="css/mi-cuenta.css">
+    <link rel="stylesheet" href="css/mis-puntos.css">
+    <link rel="stylesheet" href="css/mis-premios.css">
+    <link rel="stylesheet" href="css/mis-consultas.css">
+    <link rel="stylesheet" href="css/contacto.css">
+    <link rel="stylesheet" href="css/toast.css">
+    <link rel="stylesheet" href="css/levelup.css">
+    <link rel="stylesheet" href="css/subscription.css">
+
+    <!-- SCRIPTS -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/module-loader.js"></script>
+    <script src="js/feed-films.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/levelup.js"></script>
+    <script src="js/subscription.js"></script>
+    <script>
+        (function() {
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                window.location.replace('login.html');
+                return;
+            }
+
+            // ==============================================
+            // BLOQUEO DE NAVEGACIÓN ATRÁS - MÁXIMA ROBUSTEZ
+            // ==============================================
+
+            // 1. Marcar que estamos en dashboard
+            sessionStorage.setItem('in_dashboard', 'true');
+
+            // 2. Limpiar TODO el historial anterior
+            // Esto elimina cualquier entrada previa (incluyendo login)
+            history.replaceState(null, null, location.href);
+
+            // 3. Crear un estado base que sea la raíz
+            history.pushState({ root: true }, null, location.href);
+
+            // 4. Escuchar popstate
+            window.addEventListener('popstate', function(event) {
+                console.log('🔙 popstate detectado, estado:', event.state);
+
+                // Si estamos en dashboard, siempre bloquear
+                if (sessionStorage.getItem('in_dashboard') === 'true') {
+                    console.log('🚫 Navegación atrás bloqueada');
+                    // Restaurar el estado raíz
+                    history.go(1); // Avanzar para cancelar el retroceso
+                    return;
+                }
+            });
+
+            // 5. Verificar token
+            fetch(`${CONFIG.API_URL}/users/me`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            }).then(function(r) {
+                if (!r.ok) {
+                    localStorage.removeItem('token');
+                    sessionStorage.removeItem('in_dashboard');
+                    window.location.replace('login.html');
+                }
+            }).catch(function() {
+                window.location.replace('login.html');
+            });
+        })();
+    </script>
+</head>
+<body>
+<!-- HEADER / NAVBAR -->
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="#" class="logo" onclick="loadModule('feed-films', this); return false;">
+            <img src="assets/images/isologotipo.png" alt="Cinemarketer" class="logo-img">
+        </a>
+        <button class="dash-menu-toggle" id="dashMenuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <ul class="nav-menu" id="dashNavMenu">
+            <li class="nav-menu-close">
+                <button id="dashMenuClose" onclick="document.getElementById('dashNavMenu').classList.remove('active'); document.querySelector('.dash-menu-toggle i').classList.add('fa-bars'); document.querySelector('.dash-menu-toggle i').classList.remove('fa-times');">
+                    <i class="fas fa-times"></i>
+                </button>
+            </li>
+            <li>
+                <a class="nav-link" onclick="loadModule('feed-films', this)" title="Ver películas">
+                    <i class="fas fa-home"></i>
+                </a>
+            </li>
+            <li class="nav-user-profile">
+                <div class="user-profile-mini">
+                    <div class="user-avatar-mini" id="headerAvatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="user-name-mini" id="headerUserName">
+                        <span class="user-name-text">Cargando...</span>
+                    </div>
+                    <div class="user-level-mini" id="headerLevel">
+                        <span class="level-badge">🟢 Amateur</span>
+                    </div>
+                </div>
+            </li>
+            <li class="nav-notificaciones">
+                <a class="nav-link nav-link-bell" onclick="loadModule('mis-consultas', this)" title="Mis consultas">
+                    <div class="bell-wrapper">
+                        <i class="fas fa-bell"></i>
+                        <span class="bell-badge" id="bellBadge" style="display:none;">0</span>
+                    </div>
+                    <span class="nav-text">Mis Consultas</span>
+                </a>
+            </li>
+            <li>
+                <a class="nav-link" onclick="loadModule('mi-cuenta', this)">
+                    <i class="fas fa-user"></i>
+                    <span class="nav-text">Mi Cuenta</span>
+                </a>
+            </li>
+            <li>
+                <a class="nav-link" onclick="loadModule('mis-puntos', this)">
+                    <i class="fas fa-coins"></i>
+                    <span class="nav-text">Mis Puntos</span>
+                </a>
+            </li>
+            <li>
+                <a class="nav-link" onclick="loadModule('mis-premios', this)">
+                    <i class="fas fa-gift"></i>
+                    <span class="nav-text">Mis Premios</span>
+                </a>
+            </li>
+            <li>
+                <a class="nav-link" onclick="loadModule('contacto', this)">
+                    <i class="fas fa-envelope"></i>
+                    <span class="nav-text">Contacto</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="nav-link" onclick="API.logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="nav-text">Cerrar Sesión</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div id="module-container">
+    <div class="loader">Cargando...</div>
+</div>
+
+<script>
+    // ==============================================
+    // CARGAR MÓDULO INICIAL (después de que todo esté listo)
+    // ==============================================
+    document.addEventListener('DOMContentLoaded', function() {
+        // Cargar el módulo inicial después de configurar el historial
+        window.loadDefaultModule();
+
+        // Cargar información del usuario
+        if (API.isAuthenticated()) {
+            loadHeaderUserInfo();
+        }
+    });
+
+    // ==============================================
+    // CARGAR AVATAR Y NIVEL EN EL HEADER
+    // ==============================================
+    window.loadHeaderUserInfo = async function() {
+        try {
+            const response = await fetch(`${API.BASE_URL}/users/me`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+
+            if (response.ok) {
+                const user = await response.json();
+
+                const avatarContainer = document.getElementById('headerAvatar');
+                if (user.avatarUrl) {
+                    avatarContainer.innerHTML = `<img src="${user.avatarUrl}" alt="Avatar" class="avatar-img">`;
+                } else {
+                    avatarContainer.innerHTML = `<i class="fas fa-user-circle"></i>`;
+                }
+
+                let nombreAMostrar = user.name || 'Usuario';
+                if (user.avatarName && user.avatarName.trim() !== '') {
+                    nombreAMostrar = user.avatarName;
+                }
+
+                const userNameContainer = document.getElementById('headerUserName');
+                if (userNameContainer) {
+                    userNameContainer.innerHTML = `<span class="user-name-text">${nombreAMostrar}</span>`;
+                }
+
+                const levelContainer = document.getElementById('headerLevel');
+                levelContainer.innerHTML = `
+                    <span class="level-badge level-${user.level}">
+                        ${user.levelEmoji || '🟢'} ${user.levelDisplayName || 'Amateur'}
+                    </span>
+                `;
+            }
+        } catch (error) {
+            console.error('Error cargando info de usuario en header:', error);
+        }
+    }
+
+    window.addEventListener('pageshow', function(e) {
+        if (!localStorage.getItem('token')) {
+            window.location.replace('login.html');
+        }
+    });
+
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'token' && !e.newValue) {
+            window.location.replace('login.html');
+        }
+    });
+</script>
+<script src="js/main.js"></script>
+<script src="js/notificaciones.js"></script>
+<script src="js/footer.js"></script>
+</body>
+</html>

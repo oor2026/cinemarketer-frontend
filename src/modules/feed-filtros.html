@@ -1,0 +1,187 @@
+<!-- FILTROS AVANZADOS -->
+
+<!-- VERSION DESKTOP: contenedor normal -->
+<div class="filtros-container filtros-desktop">
+    <div class="filtros-header" onclick="toggleFiltros()">
+        <i class="fas fa-filter"></i>
+        <span>Filtros avanzados</span>
+        <i class="fas fa-chevron-down" id="filtrosToggle"></i>
+    </div>
+
+    <div class="filtros-content" id="filtrosContent">
+        <!-- Búsqueda por texto - CON AUTOCOMPLETADO -->
+        <div class="filtro-grupo busqueda">
+            <label><i class="fas fa-search"></i> Buscar película</label>
+            <input type="text" id="busquedaInput"
+                   placeholder="Título, director, actor..."
+                   class="filtro-input"
+                   autocomplete="off"
+                   maxlength="100">
+            <div id="busquedaResultados" class="autocomplete-resultados" style="display: none;"></div>
+        </div>
+
+        <div class="filtros-grid">
+            <!-- Género -->
+            <div class="filtro-grupo">
+                <label><i class="fas fa-tag"></i> Género</label>
+                <select id="filtroGenero" class="filtro-select">
+                    <option value="todos">Todos los géneros</option>
+                    <option value="28">Acción</option>
+                    <option value="35">Comedia</option>
+                    <option value="18">Drama</option>
+                    <option value="878">Ciencia Ficción</option>
+                    <option value="27">Terror</option>
+                    <option value="16">Animación</option>
+                    <option value="99">Documental</option>
+                    <option value="10749">Romance</option>
+                    <option value="53">Suspenso</option>
+                    <option value="12">Aventura</option>
+                    <option value="14">Fantasía</option>
+                    <option value="80">Crimen</option>
+                </select>
+            </div>
+
+            <!-- Año -->
+            <div class="filtro-grupo">
+                <label><i class="fas fa-calendar-alt"></i> Año</label>
+                <select id="filtroAnio" class="filtro-select">
+                </select>
+            </div>
+
+            <!-- Director - Búsqueda con autocompletado -->
+            <div class="filtro-grupo">
+                <label><i class="fas fa-video"></i> Director</label>
+                <input type="text" id="busquedaDirector"
+                       placeholder="Escribe nombre del director..."
+                       class="filtro-input"
+                       autocomplete="off">
+                <div id="directorResultados" class="autocomplete-resultados" style="display: none;"></div>
+            </div>
+
+            <!-- Idioma original -->
+            <div class="filtro-grupo">
+                <label><i class="fas fa-language"></i> Idioma</label>
+                <select id="filtroIdioma" class="filtro-select">
+                    <option value="todos">Todos los idiomas</option>
+                    <option value="es">Español</option>
+                    <option value="en">Inglés</option>
+                    <option value="fr">Francés</option>
+                    <option value="ja">Japonés</option>
+                </select>
+            </div>
+
+            <!-- Popularidad -->
+            <div class="filtro-grupo">
+                <label><i class="fas fa-fire"></i> Popularidad</label>
+                <select id="filtroPopularidad" class="filtro-select">
+                    <option value="todas">Todas</option>
+                    <option value="alta">Alta (7.5+⭐)</option>
+                    <option value="media">Media (5-7.4⭐)</option>
+                    <option value="baja">Baja (menos 5⭐)</option>
+                </select>
+            </div>
+
+            <!-- Duración -->
+            <div class="filtro-grupo">
+                <label><i class="fas fa-clock"></i> Duración</label>
+                <select id="filtroDuracion" class="filtro-select">
+                    <option value="todos">Cualquier duración</option>
+                    <option value="corta">Menos 90 min</option>
+                    <option value="media">90-120 min</option>
+                    <option value="larga">Más 120 min</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="filtros-acciones">
+            <button class="btn-aplicar" onclick="window.aplicarFiltros()">
+                <i class="fas fa-check"></i> Aplicar filtros
+            </button>
+            <button class="btn-limpiar" onclick="window.limpiarFiltros()">
+                <i class="fas fa-undo"></i> Limpiar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- VERSION MÓVIL: botón + modal bottom sheet -->
+<div class="filtros-mobile">
+    <button class="btn-filtros-mobile" onclick="abrirFiltrosModal()">
+        <i class="fas fa-filter"></i> Filtros avanzados
+        <i class="fas fa-chevron-up"></i>
+    </button>
+</div>
+
+<!-- MODAL FILTROS MÓVIL -->
+<div class="filtros-modal-overlay" id="filtrosModalOverlay" onclick="cerrarFiltrosModal()"></div>
+<div class="filtros-modal-sheet" id="filtrosModalSheet">
+    <div class="filtros-modal-header">
+        <span><i class="fas fa-filter"></i> Filtros avanzados</span>
+        <button onclick="cerrarFiltrosModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="filtros-modal-body">
+        <div class="filtro-grupo">
+            <label><i class="fas fa-search"></i> Buscar película</label>
+            <input type="text" id="busquedaInputMobile" placeholder="Título, director, actor..." class="filtro-input" autocomplete="off" maxlength="100">
+        </div>
+        <div class="filtro-grupo">
+            <label><i class="fas fa-tag"></i> Género</label>
+            <select id="filtroGeneroMobile" class="filtro-select">
+                <option value="todos">Todos los géneros</option>
+                <option value="28">Acción</option>
+                <option value="35">Comedia</option>
+                <option value="18">Drama</option>
+                <option value="878">Ciencia Ficción</option>
+                <option value="27">Terror</option>
+                <option value="16">Animación</option>
+                <option value="99">Documental</option>
+                <option value="10749">Romance</option>
+                <option value="53">Suspenso</option>
+                <option value="12">Aventura</option>
+                <option value="14">Fantasía</option>
+                <option value="80">Crimen</option>
+            </select>
+        </div>
+        <div class="filtro-grupo">
+            <label><i class="fas fa-calendar-alt"></i> Año</label>
+            <select id="filtroAnioMobile" class="filtro-select"></select>
+        </div>
+        <div class="filtro-grupo">
+            <label><i class="fas fa-language"></i> Idioma</label>
+            <select id="filtroIdiomaMobile" class="filtro-select">
+                <option value="todos">Todos los idiomas</option>
+                <option value="es">Español</option>
+                <option value="en">Inglés</option>
+                <option value="fr">Francés</option>
+                <option value="ja">Japonés</option>
+            </select>
+        </div>
+        <div class="filtro-grupo">
+            <label><i class="fas fa-fire"></i> Popularidad</label>
+            <select id="filtroPopularidadMobile" class="filtro-select">
+                <option value="todas">Todas</option>
+                <option value="alta">Alta (7.5+⭐)</option>
+                <option value="media">Media (5-7.4⭐)</option>
+                <option value="baja">Baja (menos 5⭐)</option>
+            </select>
+        </div>
+        <div class="filtro-grupo">
+            <label><i class="fas fa-clock"></i> Duración</label>
+            <select id="filtroDuracionMobile" class="filtro-select">
+                <option value="todos">Cualquier duración</option>
+                <option value="corta">Menos 90 min</option>
+                <option value="media">90-120 min</option>
+                <option value="larga">Más 120 min</option>
+            </select>
+        </div>
+    </div>
+    <div class="filtros-modal-footer">
+        <button class="btn-limpiar" onclick="limpiarFiltrosMobile()">
+            <i class="fas fa-undo"></i> Limpiar
+        </button>
+        <button class="btn-aplicar" onclick="aplicarFiltrosMobile()">
+            <i class="fas fa-check"></i> Aplicar
+        </button>
+    </div>
+</div>

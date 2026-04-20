@@ -1,0 +1,68 @@
+<div class="contacto-container">
+
+    <!-- SECCIÓN HERO -->
+    <div class="contacto-header">
+        <div class="contacto-header-left">
+            <div class="header-icon">
+                <i class="fas fa-headset"></i>
+            </div>
+            <div class="header-text">
+                <h2>Centro de Ayuda</h2>
+                <p>Encontrá respuestas a tus preguntas o contactate con nuestro equipo de soporte</p>
+            </div>
+        </div>
+        <button class="btn-soporte" onclick="contacto_abrirSoporte()">
+            <i class="fas fa-comment-dots"></i>
+            Soporte
+        </button>
+    </div>
+
+    <!-- SECCIÓN FAQ -->
+    <div class="faq-section">
+        <h3 class="faq-titulo">Preguntas Frecuentes</h3>
+
+        <div class="faq-lista" id="faqLista">
+            <div style="text-align:center; padding:2rem; color:#999;">
+                <i class="fas fa-spinner fa-spin"></i> Cargando preguntas...
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE SOPORTE -->
+    <div class="soporte-overlay" id="soporteOverlay" style="display:none;" onclick="contacto_cerrarSoporte(event)">
+        <div class="soporte-modal">
+            <div class="soporte-modal-header">
+                <div class="soporte-modal-titulo">
+                    <i class="fas fa-headset"></i>
+                    <span>¿En qué podemos ayudarte hoy?</span>
+                </div>
+                <button class="soporte-close" onclick="contacto_cerrarSoporte(null)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="soporte-modal-body">
+                <p class="soporte-desc">Acercanos tu consulta y nos pondremos en contacto a la brevedad.</p>
+                <textarea
+                        id="soporteTexto"
+                        class="soporte-textarea"
+                        placeholder="Escribí tu consulta acá..."
+                        maxlength="1000"
+                        oninput="document.getElementById('soporteCount').textContent = this.value.length"
+                ></textarea>
+                <div class="soporte-footer-info">
+                    <span id="soporteCount">0</span>/1000 caracteres
+                </div>
+            </div>
+            <div class="soporte-modal-footer">
+                <button class="btn-cancelar-soporte" onclick="contacto_cerrarSoporte(null)">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button class="btn-enviar-soporte" onclick="contacto_enviarSoporte()">
+                    <i class="fas fa-paper-plane"></i> Enviar
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+

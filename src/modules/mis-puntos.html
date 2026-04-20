@@ -1,0 +1,76 @@
+<div class="points-container">
+    <!-- Header con resumen de puntos -->
+    <div class="points-header">
+        <div class="points-summary">
+            <i class="fas fa-coins"></i>
+            <div>
+                <h2>Mis Puntos</h2>
+                <p>Historial de transacciones y acumulación</p>
+            </div>
+        </div>
+        <div class="points-total" id="totalPointsDisplay">
+            <span class="total-label">Puntos actuales</span>
+            <span class="total-number" id="totalPoints">0</span>
+        </div>
+    </div>
+
+    <!-- Estadísticas rápidas -->
+    <div class="points-stats">
+        <div class="stat-item">
+            <i class="fas fa-arrow-up"></i>
+            <div>
+                <span class="stat-value" id="pointsEarned">0</span>
+                <span class="stat-label">Ganados</span>
+            </div>
+        </div>
+        <div class="stat-item">
+            <i class="fas fa-arrow-down"></i>
+            <div>
+                <span class="stat-value" id="pointsSpent">0</span>
+                <span class="stat-label">Canjeados</span>
+            </div>
+        </div>
+        <div class="stat-item">
+            <i class="fas fa-calendar-alt"></i>
+            <div>
+                <span class="stat-value" id="thisMonthPoints">0</span>
+                <span class="stat-label">Este mes</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="points-filters">
+        <button class="filter-btn active" onclick="filterPoints('all')">Todos</button>
+        <button class="filter-btn" onclick="filterPoints('earned')">Ganados</button>
+        <button class="filter-btn" onclick="filterPoints('spent')">Canjeados</button>
+        <select class="filter-select" onchange="filterByDate(this.value)">
+            <option value="all">Todas las fechas</option>
+            <option value="today">Hoy</option>
+            <option value="week">Esta semana</option>
+            <option value="month">Este mes</option>
+            <option value="year">Este año</option>
+        </select>
+    </div>
+
+    <!-- Lista de transacciones -->
+    <div class="transactions-list" id="transactionsList">
+        <!-- Las transacciones se cargarán dinámicamente -->
+        <div class="loading">Cargando historial...</div>
+    </div>
+
+    <!-- Mensaje si no hay transacciones -->
+    <div class="no-transactions" id="noTransactions" style="display: none;">
+        <i class="fas fa-receipt"></i>
+        <h3>Aún no tienes transacciones</h3>
+        <p>¡Participa votando y comentando para ganar puntos!</p>
+
+    </div>
+
+    <!-- Paginación -->
+    <div class="pagination" id="pagination">
+        <button class="page-btn" onclick="changePage('prev')" disabled>Anterior</button>
+        <span class="page-info" id="pageInfo">Página 1 de 1</span>
+        <button class="page-btn" onclick="changePage('next')" disabled>Siguiente</button>
+    </div>
+</div>

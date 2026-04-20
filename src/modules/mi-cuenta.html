@@ -1,0 +1,416 @@
+<div class="profile-card">
+    <!-- ============================================== -->
+    <!-- NUEVO: SECCIÓN DE AVATAR Y NIVEL -->
+    <!-- ============================================== -->
+    <div class="profile-header">
+        <div class="welcome-badge">
+            <h1>¡Hola, <span id="userName"></span>!</h1>
+            <p id="memberSince"></p>
+        </div>
+        <div class="profile-avatar-section">
+            <div class="profile-avatar-container">
+                <div class="profile-avatar" id="profileAvatar">
+                    <i class="fas fa-user-circle"></i> <!-- Placeholder -->
+                </div>
+                <button class="btn-change-avatar" onclick="window.abrirSelectorAvatar()" title="Cambiar avatar">
+                    <i class="fas fa-camera"></i>
+                </button>
+            </div>
+
+            <div class="profile-level-info">
+                <div class="profile-level-badge" id="profileLevelBadge">
+                    <span class="level-icon">🟢</span>
+                    <span class="level-name">Amateur</span>
+                </div>
+                <div class="profile-level-progress" id="profileLevelProgress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%;"></div>
+                    </div>
+                    <span class="progress-text">0% al siguiente nivel</span>
+                </div>
+                <div class="profile-next-level" id="profileNextLevel">
+                    <span class="next-level-label">Próximo nivel:</span>
+                    <span class="next-level-name">Colaborador</span>
+                    <span class="next-level-points">(faltan 100 pts)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-box">
+            <div class="stat-number" id="totalPoints">0</div>
+            <div class="stat-label">Puntos totales</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number" id="reviewsCountFormatted">0</div>
+            <div class="stat-label">Votaciones</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number" id="redemptionsCount">0</div>
+            <div class="stat-label">Comentarios</div>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- PANEL PREMIUM -->
+    <!-- ============================================== -->
+    <div class="cuenta-premium-panel" id="cuentaPremiumPanel">
+
+        <!-- Estado: NO suscrito — banner -->
+        <div class="premium-banner" id="premiumBanner">
+            <div class="premium-banner-badge">★ Exclusivo</div>
+            <p class="premium-banner-title">Cinemarketer Premium</p>
+            <div class="premium-banner-price">$2.999 <span>/ mes</span></div>
+            <ul class="premium-banner-benefits">
+                <li><span class="premium-check"></span>Premios exclusivos</li>
+                <li><span class="premium-check"></span>Sorteos gratuitos</li>
+                <li><span class="premium-check"></span>Puntos x2 en todo</li>
+            </ul>
+            <button class="btn-suscribirse" onclick="window.abrirDetallePlan()">
+                Quiero ser Premium
+            </button>
+        </div>
+
+        <!-- Estado: SUSCRITO activo -->
+        <div class="premium-activo" id="premiumActivo" style="display:none;">
+            <div class="premium-activo-header">
+                <span class="premium-activo-nombre">Premium</span>
+                <span class="premium-activo-badge">
+                    <span class="premium-activo-dot"></span>Activo
+                </span>
+            </div>
+            <div class="premium-activo-rows">
+                <div class="premium-activo-row">
+                    <span class="pa-label">Tipo</span>
+                    <span class="pa-value">Mensual</span>
+                </div>
+                <div class="premium-activo-row">
+                    <span class="pa-label">Medio de pago</span>
+                    <span class="pa-value">Mercado Pago</span>
+                </div>
+                <div class="premium-activo-row">
+                    <span class="pa-label">Próxima renovación</span>
+                    <span class="pa-value" id="premiumRenovacion">—</span>
+                </div>
+            </div>
+            <div class="premium-activo-benefits">
+                <div class="premium-benefit-item">
+                    <span class="premium-check blue"></span>Premios exclusivos activos
+                </div>
+                <div class="premium-benefit-item">
+                    <span class="premium-check blue"></span>Sorteos gratuitos activos
+                </div>
+                <div class="premium-benefit-item">
+                    <span class="premium-check blue"></span>Puntos x2 activos
+                </div>
+            </div>
+            <button class="btn-cancelar-suscripcion" onclick="window.abrirCancelarSuscripcion()">
+                Cancelar suscripción
+            </button>
+        </div>
+
+        <!-- Estado: CANCELADA con acceso vigente -->
+        <div class="premium-cancelado" id="premiumCancelado" style="display:none;">
+            <div class="premium-cancelado-header">
+                <span class="premium-cancelado-titulo">Suscripción cancelada</span>
+                <span class="premium-cancelado-badge">Cancelada</span>
+            </div>
+            <p class="premium-cancelado-texto">
+                Cancelaste tu suscripción. Tu acceso premium se mantiene activo hasta el
+                <strong id="premiumCanceladoFecha">—</strong>.
+                Podés volver a suscribirte cuando quieras.
+            </p>
+            <div class="premium-cancelado-benefits">
+                <div class="premium-benefit-item">
+                    <span class="premium-check blue"></span>Premios exclusivos activos hasta vencimiento
+                </div>
+                <div class="premium-benefit-item">
+                    <span class="premium-check blue"></span>Sorteos gratuitos activos hasta vencimiento
+                </div>
+                <div class="premium-benefit-item">
+                    <span class="premium-check blue"></span>Puntos x2 activos hasta vencimiento
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="info-list">
+        <div class="info-item">
+            <i class="fas fa-user"></i>
+            <div class="info-content">
+                <strong>Nombre completo:</strong>
+                <span id="userFullName"></span>
+            </div>
+            <button class="btn-edit" onclick="window.abrirEdicion('name')" title="Editar nombre">
+                <i class="fas fa-pencil-alt"></i>
+            </button>
+        </div>
+        <div class="info-item">
+            <i class="fas fa-envelope"></i>
+            <div class="info-content">
+                <strong>Email:</strong>
+                <span id="userEmail"></span>
+            </div>
+            <button class="btn-edit" onclick="window.abrirEdicion('email')" title="Editar email">
+                <i class="fas fa-pencil-alt"></i>
+            </button>
+        </div>
+        <div class="info-item">
+            <i class="fas fa-id-card"></i>
+            <div class="info-content">
+                <strong>DNI:</strong>
+                <span id="userDni">—</span>
+            </div>
+        </div>
+        <div class="info-item">
+            <i class="fas fa-phone"></i>
+            <div class="info-content">
+                <strong>Teléfono:</strong>
+                <span id="userPhone">—</span>
+            </div>
+            <button class="btn-edit" onclick="window.abrirEdicion('phone')" title="Editar teléfono">
+                <i class="fas fa-pencil-alt"></i>
+            </button>
+        </div>
+        <div class="info-item">
+            <i class="fas fa-check-circle"></i>
+            <div class="info-content">
+                <strong>Email verificado:</strong>
+                <span id="emailVerified"></span>
+            </div>
+        </div>
+        <div class="info-item">
+            <i class="fas fa-lock"></i>
+            <div class="info-content">
+                <strong>Contraseña:</strong>
+                <span>••••••••</span>
+            </div>
+            <button class="btn-edit" onclick="window.abrirCambiarPassword()" title="Cambiar contraseña">
+                <i class="fas fa-pencil-alt"></i>
+            </button>
+        </div>
+        <div class="info-item">
+            <i class="fas fa-clock"></i>
+            <div class="info-content">
+                <strong>Último acceso:</strong>
+                <span id="lastLogin"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTÓN ELIMINAR CUENTA -->
+    <div style="text-align:center; margin-top: 1.5rem;">
+        <button class="btn-eliminar-cuenta" onclick="window.abrirEliminarCuenta()">
+            <i class="fas fa-trash-alt"></i> Eliminar mi cuenta
+        </button>
+    </div>
+
+    <!-- MODAL SELECTOR DE AVATAR (NUEVO) -->
+    <div id="modalSelectorAvatar" class="modal-edicion" style="display:none;">
+        <div class="modal-edicion-overlay" onclick="window.cerrarSelectorAvatar()"></div>
+        <div class="modal-edicion-caja modal-avatar-caja">
+            <div class="modal-edicion-header">
+                <h3>🎨 Elegí tu avatar</h3>
+                <button class="modal-edicion-cerrar" onclick="window.cerrarSelectorAvatar()">×</button>
+            </div>
+            <div class="modal-edicion-body">
+                <div class="avatar-tabs">
+                    <button class="avatar-tab active" onclick="window.cambiarCategoriaAvatar('predefinidos', this)">Predefinidos</button>
+                    <button class="avatar-tab" onclick="window.cambiarCategoriaAvatar('personalizado', this)">Subir propio</button>
+                </div>
+
+                <div id="avatarPredefinidos" class="avatar-grid">
+                    <!-- Se cargarán dinámicamente -->
+                    <div class="avatar-loading">Cargando avatares...</div>
+                </div>
+
+                <div id="avatarPersonalizado" style="display:none;">
+                    <div class="avatar-upload-area" onclick="document.getElementById('avatarFileInput').click()">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Hacé clic para subir una imagen</p>
+                        <small>JPG, PNG o WEBP — máx. 5MB</small>
+                    </div>
+                    <input type="file" id="avatarFileInput" accept="image/*" style="display:none;">
+                    <div id="avatarPreview" class="avatar-preview" style="display:none;">
+                        <img id="avatarPreviewImg" src="" alt="Preview">
+                    </div>
+                </div>
+
+                <p id="avatarError" class="modal-edicion-error" style="display:none;"></p>
+            </div>
+            <div class="modal-edicion-footer">
+                <button class="btn-cancelar-edicion" onclick="window.cerrarSelectorAvatar()">Cancelar</button>
+                <button class="btn-guardar-edicion" id="btnGuardarAvatar" onclick="window.guardarAvatar()">
+                    <span id="btnGuardarAvatarTexto">Guardar</span>
+                    <i id="btnGuardarAvatarLoader" class="fas fa-spinner fa-spin" style="display:none;"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CAMBIAR CONTRASEÑA -->
+    <div id="modalCambiarPassword" class="modal-edicion" style="display:none;">
+        <div class="modal-edicion-overlay" onclick="window.cerrarCambiarPassword()"></div>
+        <div class="modal-edicion-caja">
+            <div class="modal-edicion-header">
+                <h3>Cambiar contraseña</h3>
+                <button class="modal-edicion-cerrar" onclick="window.cerrarCambiarPassword()">×</button>
+            </div>
+            <div class="modal-edicion-body">
+                <label style="display:block;font-size:0.85rem;font-weight:600;color:#555;margin-bottom:0.4rem;">Contraseña actual</label>
+                <div class="password-wrapper" style="position:relative;margin-bottom:1rem;">
+                    <input type="password" id="inputPasswordActual" class="modal-edicion-input" placeholder="••••••••" maxlength="30"/>
+                    <button type="button" onclick="window.togglePassVis('inputPasswordActual', 'iconPassActual')"
+                            style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);background:none;border:none;color:#999;cursor:pointer;font-size:1rem;">
+                        <i id="iconPassActual" class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <label style="display:block;font-size:0.85rem;font-weight:600;color:#555;margin-bottom:0.4rem;">Nueva contraseña</label>
+                <div class="password-wrapper" style="position:relative;margin-bottom:1rem;">
+                    <input type="password" id="inputPasswordNueva" class="modal-edicion-input" placeholder="••••••••" maxlength="30"/>
+                    <button type="button" onclick="window.togglePassVis('inputPasswordNueva', 'iconPassNueva')"
+                            style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);background:none;border:none;color:#999;cursor:pointer;font-size:1rem;">
+                        <i id="iconPassNueva" class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <label style="display:block;font-size:0.85rem;font-weight:600;color:#555;margin-bottom:0.4rem;">Confirmar nueva contraseña</label>
+                <div class="password-wrapper" style="position:relative;">
+                    <input type="password" id="inputPasswordConfirmar" class="modal-edicion-input" placeholder="••••••••" maxlength="30"/>
+                    <button type="button" onclick="window.togglePassVis('inputPasswordConfirmar', 'iconPassConfirmar')"
+                            style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);background:none;border:none;color:#999;cursor:pointer;font-size:1rem;">
+                        <i id="iconPassConfirmar" class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <p id="cambiarPassError" class="modal-edicion-error" style="display:none;"></p>
+            </div>
+            <div class="modal-edicion-footer">
+                <button class="btn-cancelar-edicion" onclick="window.cerrarCambiarPassword()">Cancelar</button>
+                <button class="btn-guardar-edicion" id="btnCambiarPassGuardar" onclick="window.confirmarCambiarPassword()">
+                    <span id="btnCambiarPassTexto">Guardar</span>
+                    <i id="btnCambiarPassLoader" class="fas fa-spinner fa-spin" style="display:none;"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ELIMINAR CUENTA -->
+    <div id="modalEliminarCuenta" class="modal-edicion" style="display:none;">
+        <div class="modal-edicion-overlay" onclick="window.cerrarEliminarCuenta()"></div>
+        <div class="modal-edicion-caja">
+            <div class="modal-edicion-header">
+                <h3 style="color:#e50914;">⚠️ Eliminar cuenta</h3>
+                <button class="modal-edicion-cerrar" onclick="window.cerrarEliminarCuenta()">×</button>
+            </div>
+            <div class="modal-edicion-body">
+                <p style="color:#555;font-size:0.9rem;line-height:1.6;margin-bottom:1rem;">
+                    Esta acción es <strong>permanente e irreversible</strong>. Se eliminarán todos tus datos: votos, comentarios, canjes y puntos.
+                </p>
+                <label style="display:block;font-size:0.9rem;font-weight:600;color:#555;margin-bottom:0.5rem;">
+                    Ingresá tu contraseña para confirmar
+                </label>
+                <div class="password-wrapper" style="position:relative;">
+                    <input type="password" id="inputEliminarPassword"
+                           class="modal-edicion-input" placeholder="••••••••" maxlength="30"/>
+                    <button type="button" id="toggleEliminarPassword"
+                            style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);
+                                   background:none;border:none;color:#999;cursor:pointer;font-size:1rem;">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <p id="eliminarError" class="modal-edicion-error" style="display:none;"></p>
+            </div>
+            <div class="modal-edicion-footer">
+                <button class="btn-cancelar-edicion" onclick="window.cerrarEliminarCuenta()">Cancelar</button>
+                <button class="btn-eliminar-confirmar" id="btnEliminarConfirmar" onclick="window.confirmarEliminarCuenta()">
+                    <span id="btnEliminarTexto">Sí, eliminar mi cuenta</span>
+                    <i id="btnEliminarLoader" class="fas fa-spinner fa-spin" style="display:none;"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDICIÓN -->
+    <div id="modalEdicion" class="modal-edicion" style="display:none;">
+        <div class="modal-edicion-overlay" onclick="window.cerrarEdicion()"></div>
+        <div class="modal-edicion-caja">
+            <div class="modal-edicion-header">
+                <h3 id="modalEdicionTitulo">Editar dato</h3>
+                <button class="modal-edicion-cerrar" onclick="window.cerrarEdicion()">×</button>
+            </div>
+            <div class="modal-edicion-body">
+                <label id="modalEdicionLabel"></label>
+                <input type="text" id="modalEdicionInput" class="modal-edicion-input" maxlength="50"/>
+
+                <!-- INPUT TELÉFONO CON PREFIJO (solo visible cuando campo = phone) -->
+                <div id="modalPhoneWrapper" style="display:none;">
+                    <label style="display:block;font-size:0.85rem;font-weight:600;color:#555;margin-bottom:0.4rem;">Teléfono</label>
+                    <div class="phone-wrapper" style="position:relative;display:flex;">
+                        <div class="phone-prefix-btn" id="cuentaPhonePrefixBtn" tabindex="0">
+                            <span id="cuentaPhonePrefixFlag">🇦🇷</span>
+                            <span id="cuentaPhonePrefixCode">+54</span>
+                            <i class="fas fa-chevron-down phone-chevron"></i>
+                        </div>
+                        <input type="tel" id="cuentaPhoneNumber" class="modal-edicion-input"
+                               placeholder="11 12345678" inputmode="numeric" maxlength="10"
+                               style="border-radius:0 8px 8px 0;flex:1;">
+                    </div>
+                    <div class="phone-prefix-dropdown" id="cuentaPhonePrefixDropdown" style="display:none;">
+                        <input type="text" class="phone-prefix-search" id="cuentaPhonePrefixSearch" placeholder="Buscar país...">
+                        <div class="phone-prefix-list" id="cuentaPhonePrefixList"></div>
+                    </div>
+                </div>
+
+                <p id="modalEdicionError" class="modal-edicion-error" style="display:none;"></p>
+            </div>
+            <div class="modal-edicion-footer">
+                <button class="btn-cancelar-edicion" onclick="window.cerrarEdicion()">Cancelar</button>
+                <button class="btn-guardar-edicion" onclick="window.guardarEdicion()">
+                    <span id="btnGuardarTexto">Guardar</span>
+                    <i id="btnGuardarLoader" class="fas fa-spinner fa-spin" style="display:none;"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DETALLE DEL PLAN -->
+    <div class="premium-modal-overlay" id="premiumModalDetalle">
+        <div class="premium-modal-caja">
+            <div class="premium-modal-header">
+                <h3>Cinemarketer Premium</h3>
+                <p>Suscripción mensual sin permanencia</p>
+            </div>
+            <div class="premium-modal-body">
+                <div class="premium-modal-precio">$2.999 <span>/ mes</span></div>
+                <ul class="premium-modal-lista">
+                    <li><span class="premium-check"></span>Acceso a premios exclusivos para suscriptores</li>
+                    <li><span class="premium-check"></span>Participación gratuita en sorteos mensuales</li>
+                    <li><span class="premium-check"></span>Puntos x2 en votos y comentarios</li>
+                    <li><span class="premium-check"></span>Cancelás cuando quieras</li>
+                </ul>
+            </div>
+            <div class="premium-modal-footer">
+                <button class="btn-modal-cancelar" onclick="window.cerrarDetallePlan()">Ahora no</button>
+                <button class="btn-modal-continuar" onclick="window.iniciarSuscripcion()">
+                    Suscribirme ahora
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMAR CANCELACIÓN -->
+    <div class="premium-cancel-modal-overlay" id="premiumModalCancelar">
+        <div class="premium-cancel-caja">
+            <h3>¿Cancelar tu suscripción?</h3>
+            <p>Mantenés el acceso Premium hasta el fin del período pagado. Podés volver a suscribirte cuando quieras.</p>
+            <div class="premium-cancel-btns">
+                <button class="btn-cancel-no" onclick="window.cerrarCancelarSuscripcion()">No, mantener</button>
+                <button class="btn-cancel-si" id="btnConfirmarCancelacion" onclick="window.confirmarCancelacion()">
+                    Sí, cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>

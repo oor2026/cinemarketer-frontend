@@ -1,0 +1,766 @@
+/* ========== RESET Y VARIABLES ========== */
+:root {
+    --primary: #e50914;
+    --primary-dark: #b2070f;
+    --dark: #221f1f;
+    --gray: #7f7f7f;
+    --light-gray: #f5f5f5;
+    --white: #ffffff;
+    --success: #4caf50;
+    --error: #f44336;
+    --warning: #ff9800;
+    --info: #2196f3;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    line-height: 1.6;
+    color: var(--dark);
+    min-height: 100vh;
+}
+
+/* ========== FONDO ========== */
+.auth-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1a3a6b 0%, #2a5298 50%, #764ba2 100%);
+    z-index: -1;
+}
+
+/* ========== NAVBAR ========== */
+.auth-nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    padding: 1rem;
+    z-index: 10;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: white;
+    text-decoration: none;
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.logo i {
+    font-size: 1.5rem;
+}
+
+/* ========== CONTENEDOR PRINCIPAL ========== */
+.auth-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 1rem 2rem;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 450px;
+    margin: 0 auto;
+}
+
+/* ========== TARJETA ========== */
+.auth-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    animation: slideUp 0.5s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========== HEADER ========== */
+.auth-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.auth-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+
+.auth-icon i {
+    font-size: 2rem;
+    color: white;
+}
+
+.auth-header h2 {
+    font-size: 1.75rem;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+}
+
+.auth-header p {
+    color: var(--gray);
+    font-size: 0.95rem;
+}
+
+/* ========== FORMULARIO ========== */
+.auth-form {
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--dark);
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.form-group label i {
+    color: var(--primary);
+    font-size: 0.9rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s;
+    background: white;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.1);
+}
+
+.form-group input.valid {
+    border-color: var(--success);
+}
+
+.form-group input.invalid {
+    border-color: var(--error);
+}
+
+/* Wrapper para campo de contraseña */
+.password-wrapper {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--gray);
+    cursor: pointer;
+    padding: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.password-toggle:hover {
+    color: var(--primary);
+}
+
+/* Grupo de términos */
+.terms-group {
+    margin: 1.5rem 0;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.checkbox-label input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.checkbox-custom {
+    position: relative;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 5px;
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+
+.checkbox-label:hover .checkbox-custom {
+    border-color: var(--primary);
+}
+
+.checkbox-label input:checked ~ .checkbox-custom {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.checkbox-custom:after {
+    content: '';
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.checkbox-label input:checked ~ .checkbox-custom:after {
+    display: block;
+}
+
+.checkbox-text {
+    font-size: 0.9rem;
+    color: var(--gray);
+    line-height: 1.4;
+}
+
+.checkbox-text a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.checkbox-text a:hover {
+    text-decoration: underline;
+}
+
+/* ========== BOTONES ========== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.9rem 1.5rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(229, 9, 20, 0.3);
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-block {
+    width: 100%;
+}
+
+/* Loader en botón */
+.btn-loader {
+    display: inline-block;
+}
+
+/* ========== FOOTER ========== */
+.auth-footer {
+    text-align: center;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 1.5rem;
+}
+
+.login-prompt {
+    margin-bottom: 0.75rem;
+    color: var(--gray);
+    font-size: 0.95rem;
+}
+
+.login-link {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 0.25rem;
+}
+
+.login-link i {
+    font-size: 0.8rem;
+    transition: transform 0.3s;
+}
+
+.login-link:hover i {
+    transform: translateX(5px);
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: white;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+
+    background: linear-gradient(135deg, #e50914 0%, #b2070f 100%);
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    box-shadow: 0 4px 12px rgba(229, 9, 20, 0.3);
+    font-weight: 600;
+    width: fit-content;
+    margin: 0 auto;
+}
+
+.back-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(229, 9, 20, 0.4);
+}
+
+/* ========== NOTIFICACIONES ========== */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    left: 20px;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 1rem;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transform: translateX(calc(100% + 20px));
+    transition: transform 0.3s ease;
+    z-index: 9999;
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification i {
+    font-size: 1.25rem;
+}
+
+.notification span {
+    flex: 1;
+    font-size: 0.95rem;
+}
+
+.notification.success {
+    border-left: 4px solid var(--success);
+}
+
+.notification.success i {
+    color: var(--success);
+}
+
+.notification.error {
+    border-left: 4px solid var(--error);
+}
+
+.notification.error i {
+    color: var(--error);
+}
+
+.notification.warning {
+    border-left: 4px solid var(--warning);
+}
+
+.notification.warning i {
+    color: var(--warning);
+}
+
+.notification.info {
+    border-left: 4px solid var(--info);
+}
+
+.notification.info i {
+    color: var(--info);
+}
+
+/* ========== MODAL ========== */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+}
+
+.modal.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    transform: translateY(20px);
+    transition: transform 0.3s;
+}
+
+.modal.show .modal-content {
+    transform: translateY(0);
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    background: white;
+    border-radius: 20px 20px 0 0;
+}
+
+.modal-header h3 {
+    font-size: 1.25rem;
+    color: var(--dark);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--gray);
+    padding: 0.5rem;
+}
+
+.modal-close:hover {
+    color: var(--error);
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-body p {
+    margin-bottom: 0.75rem;
+    color: var(--gray);
+}
+
+.modal-footer {
+    padding: 1.5rem;
+    border-top: 1px solid #e0e0e0;
+    text-align: right;
+}
+
+/* ========== HINT DE CAMPO ========== */
+.field-hint {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--gray);
+    margin-top: 4px;
+    padding-left: 2px;
+}
+
+/* ========== MEDIA QUERIES ========== */
+
+/* Tablet (768px y menores) */
+@media (max-width: 768px) {
+    .auth-card {
+        padding: 1.5rem;
+    }
+
+    .auth-icon {
+        width: 60px;
+        height: 60px;
+    }
+
+    .auth-icon i {
+        font-size: 1.5rem;
+    }
+
+    .auth-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .form-group input {
+        padding: 0.8rem 1rem;
+    }
+
+    .btn {
+        padding: 0.8rem 1.5rem;
+    }
+}
+
+/* Móvil (480px y menores) */
+@media (max-width: 480px) {
+    .auth-wrapper {
+        padding: 4rem 0.75rem 1rem;
+    }
+
+    .auth-card {
+        padding: 1.25rem;
+        border-radius: 16px;
+    }
+
+    .auth-header h2 {
+        font-size: 1.25rem;
+    }
+
+    .auth-header p {
+        font-size: 0.85rem;
+    }
+
+    .form-group label {
+        font-size: 0.9rem;
+    }
+
+    .form-group input {
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+    }
+
+    .checkbox-text {
+        font-size: 0.85rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.95rem;
+    }
+
+    .login-prompt {
+        font-size: 0.9rem;
+    }
+
+    .back-link {
+        font-size: 0.85rem;
+    }
+
+    /* Notificaciones en móvil */
+    .notification {
+        left: 10px;
+        right: 10px;
+        padding: 0.75rem;
+    }
+
+    .notification i {
+        font-size: 1rem;
+    }
+
+    .notification span {
+        font-size: 0.9rem;
+    }
+}
+
+/* Landscape en móviles */
+@media (max-height: 600px) and (orientation: landscape) {
+    .auth-wrapper {
+        padding: 5rem 1rem 1rem;
+    }
+
+    .auth-card {
+        padding: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 0.75rem;
+    }
+
+    .auth-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .auth-icon i {
+        font-size: 1rem;
+    }
+
+    .auth-header {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Pantallas muy pequeñas (320px) */
+@media (max-width: 320px) {
+    .auth-card {
+        padding: 1rem;
+    }
+
+    .checkbox-label {
+        flex-wrap: wrap;
+    }
+
+    .login-link {
+        display: block;
+        margin-top: 0.25rem;
+    }
+}
+/* ========== SELECTOR DE PREFIJO TELEFÓNICO ========== */
+.phone-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    background: white;
+    transition: border-color 0.3s;
+    overflow: visible;
+}
+
+.phone-wrapper:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.1);
+}
+
+.phone-prefix-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.9rem 0.75rem;
+    cursor: pointer;
+    border-right: 2px solid #e0e0e0;
+    white-space: nowrap;
+    user-select: none;
+    background: #f9f9f9;
+    border-radius: 10px 0 0 10px;
+    font-size: 0.9rem;
+    min-width: 90px;
+}
+
+.phone-prefix-btn:hover {
+    background: #f0f0f0;
+}
+
+.phone-chevron {
+    font-size: 0.7rem;
+    color: var(--gray);
+    margin-left: 2px;
+}
+
+.phone-wrapper input[type="tel"] {
+    flex: 1;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 10px 10px 0 !important;
+    padding: 0.9rem 1rem !important;
+    font-size: 1rem;
+    outline: none;
+    background: white;
+}
+
+.phone-prefix-dropdown {
+    position: absolute;
+    top: calc(100% - 1.25rem);
+    left: 0;
+    width: 100%;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    z-index: 9999;
+    overflow: hidden;
+}
+
+.phone-prefix-search {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 0.9rem;
+    outline: none;
+}
+
+.phone-prefix-list {
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.phone-prefix-option {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.15s;
+}
+
+.phone-prefix-option:hover {
+    background: #fff0f0;
+}
+
+.option-name {
+    flex: 1;
+    color: #333;
+}
+
+.option-code {
+    color: var(--gray);
+    font-size: 0.82rem;
+}
