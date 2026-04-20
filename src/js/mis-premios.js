@@ -2,8 +2,6 @@
 // mis-premios.js - Módulo de premios
 // ==============================================
 
-console.log('🎁 Mis-premios módulo JS cargado');
-
 // ==============================================
 // ESTADO DEL MÓDULO
 // ==============================================
@@ -52,7 +50,6 @@ async function cargarPuntosUsuario() {
         const profile = await API.getProfile();
         premiosState.puntosActuales = profile.totalPoints || 0;
     } catch (e) {
-        console.warn('⚠️ No se pudieron cargar los puntos del usuario');
     }
 }
 
@@ -97,7 +94,6 @@ window.cargarCanjeados = async function(pagina = 1) {
         renderCanjeadosPagina(pagina);
 
     } catch (error) {
-        console.error('❌ Error cargando canjeados:', error);
         lista.innerHTML = '<div style="text-align:center;padding:3rem;color:#e50914;">Error al cargar los premios</div>';
     }
 };
@@ -236,7 +232,6 @@ window.cargarDisponibles = async function(pagina = 1) {
         renderDisponiblesPagina(pagina);
 
     } catch (error) {
-        console.error('❌ Error cargando premios:', error);
         grid.innerHTML = '<div style="text-align:center;padding:3rem;color:#e50914;">Error al cargar los premios</div>';
     }
 };
@@ -401,7 +396,6 @@ window.cargarEspeciales = async function() {
         renderEspecialesPagina(1, isPremium);
 
     } catch (error) {
-        console.error('❌ Error cargando especiales:', error);
         grid.innerHTML = '<div style="text-align:center;padding:3rem;color:#e50914;">Error al cargar los premios especiales</div>';
     }
 };
@@ -583,7 +577,6 @@ window.participarSorteo = async function(rewardId, rewardName) {
         window.cargarEspeciales();
 
     } catch (error) {
-        console.error('❌ Error participando en sorteo:', error);
         showToast('error', 'Error al procesar tu participación. Intentá de nuevo.');
     }
 };
@@ -611,7 +604,6 @@ window.canjearEspecial = async function(rewardId, rewardName, pointsRequired) {
         mostrarExito(rewardName, result.redemptionCode);
 
     } catch (error) {
-        console.error('❌ Error canjeando especial:', error);
         showToast('error', 'Error al canjear el premio. Intentá de nuevo.');
     }
 };
@@ -702,7 +694,6 @@ window.canjearPremio = async function(rewardId, rewardName, pointsRequired) {
         } : null);
 
     } catch (error) {
-        console.error('❌ Error al canjear:', error);
         mostrarToast('Error al canjear el premio. Intentá de nuevo.', 'error');
     }
 };
@@ -798,7 +789,6 @@ window.irASuscripcion = function() {
 // INICIALIZACIÓN
 // ==============================================
 window['init_mis-premios'] = function() {
-    console.log('🎁 Inicializando módulo de premios');
     cargarPuntosUsuario();
     window.cargarCanjeados();
 };
@@ -943,7 +933,6 @@ window.canjearDesdeModal = async function() {
         } : null);
 
     } catch (error) {
-        console.error('❌ Error al canjear:', error);
         mostrarToast('Error al canjear el premio. Intentá de nuevo.', 'error');
     }
 };
