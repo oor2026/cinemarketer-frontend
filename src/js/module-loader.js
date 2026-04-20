@@ -2,8 +2,6 @@
 // module-loader.js - Cargador de Módulos
 // ==============================================
 
-console.log('📦 Module Loader cargado');
-
 const MODULE_PATH = 'modules/';
 const CSS_PATH = 'css/';
 const JS_PATH = 'js/';
@@ -14,8 +12,6 @@ async function loadModule(moduleName, element = null) {
         window.location.replace('login.html');
         return;
     }
-
-    console.log('🔥 Cargando módulo:', moduleName);
 
     const container = document.getElementById('module-container');
     if (!container) return;
@@ -77,28 +73,14 @@ async function loadModule(moduleName, element = null) {
         // Actualizar URL SIN agregar al historial
         const newUrl = window.location.pathname + `?module=${moduleName}`;
         history.replaceState(null, null, newUrl);
-        console.log(`📌 URL actualizada (sin historial): ${newUrl}`);
 
     } catch (error) {
-        console.error('❌ Error:', error);
         container.innerHTML = `<div style="text-align:center;padding:3rem;">
             <i class="fas fa-exclamation-circle" style="font-size:3rem;color:#e50914;"></i>
             <h3>Error al cargar ${moduleName}</h3>
             <button onclick="location.reload()">Reintentar</button>
         </div>`;
     }
-}
-
-function loadDefaultModule() {
-    const defaultModule = 'feed-films';
-    const links = document.querySelectorAll('.nav-link');
-    let targetLink = null;
-    links.forEach(link => {
-        if (link.getAttribute('onclick')?.includes(defaultModule)) {
-            targetLink = link;
-        }
-    });
-    loadModule(defaultModule, targetLink);
 }
 
 function resetDashboardState() {
@@ -129,7 +111,6 @@ function loadDefaultModule() {
             for (let i = 0; i < 15; i++) {
                 history.pushState(null, '', window.location.pathname + '?module=feed-films');
             }
-            console.log('✅ Historial registrado tras interacción del usuario');
         };
 
         // Escuchar cualquier interacción del usuario
