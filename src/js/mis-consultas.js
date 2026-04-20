@@ -122,7 +122,6 @@ async function consultasCargarLista(page = 0) {
         consultasRenderPaginacion();
 
     } catch (error) {
-        console.error('Error cargando consultas:', error);
         lista.innerHTML = '<div class="consultas-vacio"><i class="fas fa-exclamation-circle"></i><p>Error al cargar las consultas.</p></div>';
     }
 }
@@ -193,7 +192,6 @@ async function consultasAbrirHilo(ticketId) {
         }
 
     } catch (error) {
-        console.error('Error cargando hilo:', error);
         document.getElementById('hiloMensajes').innerHTML = '<div class="consultas-vacio">Error al cargar los mensajes.</div>';
     }
 }
@@ -245,7 +243,6 @@ async function consultasEnviarMensaje() {
         showToast('success', 'Mensaje enviado correctamente.');
 
     } catch (error) {
-        console.error('Error enviando mensaje:', error);
         showToast('error', 'Error al enviar el mensaje. Intentá nuevamente.');
     } finally {
         btn.disabled = false;
@@ -269,7 +266,6 @@ async function consultasEliminarTicket(ticketId) {
         consultasCargarLista();
 
     } catch (error) {
-        console.error('Error eliminando ticket:', error);
         showToast('error', 'Error al eliminar la consulta.');
     }
 }
@@ -342,7 +338,6 @@ async function consultasEnviarNueva() {
         consultasCargarLista();
 
     } catch (error) {
-        console.error('Error enviando consulta:', error);
         showToast('error', 'Error al enviar la consulta. Intentá nuevamente.');
     } finally {
         btn.disabled = false;
