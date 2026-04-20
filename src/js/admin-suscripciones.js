@@ -36,7 +36,6 @@ const adminSuscripciones = {
             this.renderTabla();
             this.actualizarStats();
         } catch (error) {
-            console.error('Error cargando suscripciones:', error);
             tbody.innerHTML = `<tr><td colspan="7" class="loading-row" style="color:#e50914;">Error al cargar las suscripciones</td></tr>`;
         }
     },
