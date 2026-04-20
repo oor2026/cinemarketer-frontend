@@ -39,7 +39,6 @@ const adminUsuarios = {
             }
 
         } catch (error) {
-            console.error('Error cargando stats:', error);
         }
     },
 
@@ -74,7 +73,6 @@ const adminUsuarios = {
             this.actualizarPaginacion();
 
         } catch (error) {
-            console.error('Error cargando usuarios:', error);
             tbody.innerHTML = `<tr><td colspan="9" class="loading-row" style="color:#e50914;">
                 Error al cargar usuarios</td></tr>`;
         }
@@ -215,7 +213,6 @@ const adminUsuarios = {
                 document.getElementById('inputUsuarioRol').value = user.role || 'USER';
                 document.getElementById('inputUsuarioActivo').value = String(user.active);
             } catch (error) {
-                console.error('Error cargando usuario:', error);
                 toast('Error al cargar datos del usuario', 'error');
                 return;
             }
@@ -288,7 +285,6 @@ const adminUsuarios = {
             this.cargarStats();
 
         } catch (error) {
-            console.error('Error:', error);
             toast('Error al guardar usuario', 'error');
         } finally {
             btnGuardar.disabled = false;
@@ -319,7 +315,6 @@ const adminUsuarios = {
             this.cargarStats();
 
         } catch (error) {
-            console.error('Error:', error);
             toast('Error al suspender usuario', 'error');
         }
     },
@@ -343,7 +338,6 @@ const adminUsuarios = {
             this.cargarStats();
 
         } catch (error) {
-            console.error('Error:', error);
             toast('Error al reactivar usuario', 'error');
         }
     },
@@ -354,8 +348,6 @@ eliminarUsuario: async function(id) {
 
     try {
         const token = localStorage.getItem('token');
-        console.log('🔍 Token existe:', !!token);
-        console.log('🔍 Token (primeros 20 chars):', token?.substring(0, 20) + '...');
 
         if (!token) {
             toast('No hay sesión activa', 'error');
@@ -369,10 +361,7 @@ eliminarUsuario: async function(id) {
             }
         });
 
-        console.log('📡 Status:', response.status);
-
         const text = await response.text();
-        console.log('📦 Respuesta:', text);
 
         if (!response.ok) {
             throw new Error(`Error ${response.status}${text ? ': ' + text : ''}`);
