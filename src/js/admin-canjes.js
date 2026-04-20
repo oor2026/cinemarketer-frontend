@@ -53,7 +53,6 @@ const adminCanjes = {
             this.actualizarPaginacion();
 
         } catch (error) {
-            console.error('Error cargando canjes:', error);
             tbody.innerHTML = `<tr><td colspan="8" class="loading-row" style="color:#e50914;">
                 Error al cargar los canjes</td></tr>`;
         }
@@ -92,7 +91,6 @@ const adminCanjes = {
             await this.actualizarStats();
 
         } catch (error) {
-            console.error('Error cargando por estado:', error);
             tbody.innerHTML = `<tr><td colspan="8" class="loading-row" style="color:#e50914;">
                 Error al cargar los canjes</td></tr>`;
         }
@@ -307,7 +305,6 @@ const adminCanjes = {
             }
 
         } catch (error) {
-            console.error('Error actualizando stats:', error);
         }
     },
 
@@ -374,7 +371,6 @@ const adminCanjes = {
             setTimeout(() => modal.classList.add('open'), 10);
 
         } catch (error) {
-            console.error('Error cargando detalles:', error);
             toast('Error al cargar los detalles del canje', 'error');
         }
     },
@@ -417,7 +413,6 @@ const adminCanjes = {
     buscar: function(query) {
         this.searchQuery = query;
         if (query.length > 2) {
-            console.log('Buscando:', query);
         } else {
             if (this.currentFilter === 'todos') {
                 this.cargarCanjes(0);
@@ -481,7 +476,6 @@ const adminCanjes = {
             }
 
         } catch (error) {
-            console.error('Error marcando canje como usado:', error);
             toast('Error al marcar el canje como usado', 'error');
         }
     },
