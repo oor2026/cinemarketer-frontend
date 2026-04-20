@@ -2,8 +2,6 @@
 // register.js - Registro de usuarios
 // ==============================================
 
-console.log('📝 Módulo de registro cargado');
-
 // Elementos del DOM
 const registerForm = document.getElementById('registerForm');
 const nameInput = document.getElementById('name');
@@ -168,14 +166,12 @@ function setupPasswordToggles() {
 
 async function handleRegister(e) {
     e.preventDefault();
-    console.log('📤 Enviando formulario...');
 
     // Validar todo
     const errores = validarFormulario();
     mostrarErrores(errores);
 
     if (errores.length > 0) {
-        console.log('❌ Errores de validación:', errores);
         return;
     }
 
@@ -200,8 +196,6 @@ async function handleRegister(e) {
             phone: phone
         };
 
-        console.log('📦 Datos a enviar:', registerData);
-
         const response = await fetch(`${CONFIG.API_URL}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -213,8 +207,6 @@ async function handleRegister(e) {
         if (contentType && contentType.includes('application/json')) {
             data = await response.json();
         }
-
-        console.log('📨 Respuesta:', { status: response.status, data });
 
         if (response.ok) {
             // Éxito
@@ -268,7 +260,6 @@ async function handleRegister(e) {
         }
 
     } catch (error) {
-        console.error('❌ Error:', error);
         mostrarErrores(['Error de conexión con el servidor']);
 
     } finally {
@@ -288,8 +279,5 @@ async function handleRegister(e) {
 // ==============================================
 
 if (registerForm) {
-    console.log('✅ Formulario encontrado, agregando event listener');
     registerForm.addEventListener('submit', handleRegister);
-} else {
-    console.error('❌ No se encontró el formulario con id "registerForm"');
 }
