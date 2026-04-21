@@ -262,7 +262,6 @@
             try {
                 data = text ? JSON.parse(text) : {};
             } catch (e) {
-                console.warn('Respuesta no es JSON válido');
             }
 
             if (response.ok) {
@@ -304,7 +303,6 @@
             }
         } catch (error) {
             // Error de servidor o red — desbloquear elementos
-            console.error('Error:', error);
             showNotification('No se pudo conectar con el servidor. Intentá nuevamente.', 'error');
             desbloquearElementos();
         } finally {

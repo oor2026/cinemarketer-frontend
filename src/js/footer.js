@@ -218,7 +218,6 @@ const DOCUMENTOS = {
                 })
                 .catch(err => {
                     document.getElementById('footerModalBody').innerHTML = '<p style="color:#e50914;text-align:center;padding:2rem">Error al cargar el documento.</p>';
-                    console.error('footerModal fetch error:', err);
                 });
         },
         cerrar(event) {

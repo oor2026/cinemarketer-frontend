@@ -38,7 +38,6 @@ const adminPremiosPremium = {
             this.aplicarFiltros();
             this.actualizarStats();
         } catch (error) {
-            console.error('Error cargando premios premium:', error);
             tbody.innerHTML = `<tr><td colspan="8" class="loading-row" style="color:#e50914;">Error al cargar los premios premium</td></tr>`;
         }
     },
@@ -377,7 +376,6 @@ const adminPremiosPremium = {
             this.cerrarFormulario();
             await this.cargarPremios();
         } catch (error) {
-            console.error('Error guardando premio premium:', error);
             alert('Error al guardar el premio premium');
         }
     },

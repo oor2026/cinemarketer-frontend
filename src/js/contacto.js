@@ -60,7 +60,6 @@ async function contacto_enviarSoporte() {
         showToast('success', '¡Consulta recibida! Nos pondremos en contacto a la brevedad.');
 
     } catch (error) {
-        console.error('Error enviando consulta de soporte:', error);
         showToast('error', 'Error al enviar la consulta. Intentá nuevamente.');
     } finally {
         if (btn) {
@@ -106,7 +105,6 @@ async function contacto_cargarFaqs() {
         `).join('');
 
     } catch (error) {
-        console.error('Error cargando FAQs:', error);
         lista.innerHTML = '<div style="text-align:center;padding:2rem;color:#999;">Error al cargar las preguntas frecuentes.</div>';
     }
 }

@@ -58,7 +58,6 @@ const adminEstadisticas = {
             this.renderizarCrecimiento();
 
         } catch (error) {
-            console.error('Error:', error);
             toast('Error al cargar estadísticas', 'error');
         }
     },

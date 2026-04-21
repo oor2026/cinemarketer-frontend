@@ -2,15 +2,12 @@
 // feed-films.js - Módulo de películas
 // ==============================================
 
-console.log('🎬 Feed-films módulo JS cargado');
-
 // ==============================================
 // LIMPIAR MODALES DUPLICADOS
 // ==============================================
 function limpiarModalesDuplicados() {
     const modales = document.querySelectorAll('#modalPelicula');
     if (modales.length > 1) {
-        console.log(`🧹 Eliminando ${modales.length - 1} modales duplicados`);
         for (let i = 1; i < modales.length; i++) {
             modales[i].remove();
         }
@@ -41,7 +38,6 @@ async function cargarComponente(url, contenedorId) {
         const html = await response.text();
         document.getElementById(contenedorId).innerHTML = html;
     } catch (error) {
-        console.error(`Error cargando componente ${url}:`, error);
     }
 }
 
@@ -78,7 +74,6 @@ window.generarTarjetasHTML = async function(peliculas) {
         }).join('');
 
     } catch (error) {
-        console.error('❌ Error cargando plantilla:', error);
         return generarTarjetasFallback(peliculas);
     }
 };
@@ -164,7 +159,6 @@ window.cargarPeliculasPopulares = async function(pagina = 1) {
         window.actualizarBotonesPaginacion();
 
     } catch (error) {
-        console.error(error);
         grid.innerHTML = `<div class="error">Error: ${error.message}</div>`;
     } finally {
         window.estadoPaginacion.cargando = false;
@@ -269,7 +263,6 @@ window.cargarMas = async function() {
         window.actualizarBotonesPaginacion();
 
     } catch (error) {
-        console.error('Error al cargar más:', error);
     } finally {
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-plus"></i> Cargar más'; }
     }
@@ -410,7 +403,6 @@ window.votarPelicula = async function(movieId, tipo, event) {
     if (event) event.stopPropagation();
 
     if (!movieId) {
-        console.error('❌ votarPelicula: movieId no definido');
         return;
     }
 
@@ -482,7 +474,6 @@ window.votarPelicula = async function(movieId, tipo, event) {
         }
 
     } catch (error) {
-        console.error('❌ Error al votar:', error);
         alert('Error al registrar el voto. Intentá de nuevo.');
     }
 };
@@ -535,7 +526,6 @@ window.cargarEstadisticasVotacion = async function() {
                 }
             } catch (ce) {}
         } catch (e) {
-            console.warn(`⚠️ No se pudieron cargar stats para película ${movieId}`);
         }
     });
 
@@ -633,7 +623,6 @@ window.aplicarFiltros = async function(pagina = 1) {
         window.actualizarBotonesPaginacion();
 
     } catch (error) {
-        console.error(error);
         grid.innerHTML = `<div class="error">Error: ${error.message}</div>`;
     } finally {
         window.estadoPaginacion.cargando = false;
@@ -671,7 +660,6 @@ window.abrirDetallePelicula = function(id) {
 
     const modal = document.getElementById('modalPelicula');
     if (!modal) {
-        console.error('❌ MODAL NO ENCONTRADO');
         return;
     }
 
@@ -833,7 +821,6 @@ window.cargarDatosPelicula = async function(id) {
             }
         }
     } catch (error) {
-        console.error('Error:', error);
         document.getElementById('modalTitulo').textContent = 'Error al cargar';
     }
 };
@@ -852,7 +839,6 @@ window.cargarComentariosPelicula = async function(id) {
     }
 
     if (!lista) {
-        console.warn('⚠️ Elemento comentariosLista no encontrado después de 1 segundo');
         return;
     }
 
@@ -935,7 +921,6 @@ window.cargarComentariosPelicula = async function(id) {
             });
         }
     } catch (error) {
-        console.error('Error:', error);
         if (lista) lista.innerHTML = '<div class="sin-comentarios">Error al cargar comentarios</div>';
     }
 };
@@ -1001,7 +986,6 @@ window.enviarReporte = async function() {
         alert('Reporte enviado. Nuestro equipo lo revisara a la brevedad.');
 
     } catch (error) {
-        console.error('❌ Error enviando reporte:', error);
         alert('Error al enviar el reporte. Intentá de nuevo.');
     } finally {
         if (btn) { btn.disabled = false; btn.textContent = 'Enviar reporte'; }
@@ -1059,7 +1043,6 @@ window.confirmarOcultar = async function() {
         if (movieId) await window.cargarComentariosPelicula(movieId);
 
     } catch (error) {
-        console.error('❌ Error ocultando comentario:', error);
         window.cerrarModalOcultar();
         window.mostrarToast('Error al ocultar el comentario. Intentá de nuevo.', 'error');
     } finally {
@@ -1185,7 +1168,6 @@ window.enviarComentario = async function() {
         showToast('success', '¡Comentario enviado con éxito!');
 
     } catch (error) {
-        console.error('❌ Error al enviar comentario:', error);
         alert('Error al enviar comentario. Por favor intenta de nuevo.');
     } finally {
         btnEnviar.disabled = false;
@@ -1273,7 +1255,6 @@ function inicializarAutocompletadoDirector() {
                 });
 
             } catch (e) {
-                console.warn('⚠️ Error en autocompletado director:', e);
             }
         }, 400);
     });

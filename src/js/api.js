@@ -77,37 +77,9 @@ async request(endpoint, method = 'GET', data = null) {
         localStorage.removeItem('userEmail');
         localStorage.removeItem('userRole');
         localStorage.removeItem('userPoints');
-        sessionStorage.setItem('logged_out', 'true');
         window.location.replace('login.html');
     }
 };
-
-// Interceptor global de fetch — redirige a login en cualquier 401
-const _fetchOriginal = window.fetch;
-window.fetch = async function(...args) {
-    const response = await _fetchOriginal(...args);
-    if (response.status === 401) {
-        const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || '';
-        const esEndpointDeAccion = url.includes('/password') ||
-                                   url.includes('/auth/login') ||
-                                   url.includes('/users/me');
-            if (url.includes(CONFIG.API_URL) && !esEndpointDeAccion) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('userRole');
-            localStorage.removeItem('userPoints');
-            window.location.replace('login.html');
-        }
-    }
-    return response;
-};
-
-// Listener para detectar eliminación de token en tiempo real
-window.addEventListener('storage', function(e) {
-    if (e.key === 'token' && !e.newValue) {
-        window.location.replace('login.html');
-    }
-});
 
 // EXPONER GLOBALMENTE
 window.API = API;

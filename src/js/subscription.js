@@ -2,8 +2,6 @@
 // suscripcion.js - Panel Premium en Mi Cuenta
 // ==============================================
 
-console.log('💎 Suscripcion módulo JS cargado');
-
 // ==============================================
 // ESTADO
 // ==============================================
@@ -40,7 +38,6 @@ async function cargarEstadoPremium() {
         renderPanelPremium(data);
 
     } catch (error) {
-        console.error('❌ Error cargando estado premium:', error);
         mostrarBanner();
     }
 }
@@ -198,7 +195,6 @@ window.iniciarSuscripcion = async function() {
         }
 
     } catch (error) {
-        console.error('❌ Error iniciando suscripción:', error);
         showToast('error', 'Error al conectar con Mercado Pago. Intentá de nuevo.');
     } finally {
         if (btn) {
@@ -252,7 +248,6 @@ window.confirmarCancelacion = async function() {
         await cargarEstadoPremium();
 
     } catch (error) {
-        console.error('❌ Error cancelando suscripción:', error);
         showToast('error', 'Error al cancelar. Intentá de nuevo.');
     } finally {
         if (btn) {

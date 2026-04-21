@@ -54,7 +54,6 @@ cargarAvatares: async function(page = 0) {
         this.actualizarPaginacion();
 
     } catch (error) {
-        console.error('Error cargando avatares:', error);
         tbody.innerHTML = `<tr><td colspan="8" class="loading-row" style="color:#e50914;">
             Error al cargar los avatares</td></tr>`;
     }
@@ -145,7 +144,6 @@ cargarAvatares: async function(page = 0) {
                 document.getElementById('statAvataresUsados').textContent  = stats.usedByUsers   || 0;
             }
         } catch (error) {
-            console.error('Error actualizando stats:', error);
         }
     },
 
@@ -314,7 +312,6 @@ cargarAvatares: async function(page = 0) {
                 toast(err.message || 'Error al guardar el avatar', 'error');
             }
         } catch (error) {
-            console.error('Error guardando avatar:', error);
             toast('Error de conexión con el servidor', 'error');
         } finally {
             btn.disabled  = false;

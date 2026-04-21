@@ -51,11 +51,9 @@
 
             // 4. Escuchar popstate
             window.addEventListener('popstate', function(event) {
-                console.log('🔙 popstate detectado, estado:', event.state);
 
                 // Si estamos en dashboard, siempre bloquear
                 if (sessionStorage.getItem('in_dashboard') === 'true') {
-                    console.log('🚫 Navegación atrás bloqueada');
                     // Restaurar el estado raíz
                     history.go(1); // Avanzar para cancelar el retroceso
                     return;
@@ -209,7 +207,6 @@
                 `;
             }
         } catch (error) {
-            console.error('Error cargando info de usuario en header:', error);
         }
     }
 

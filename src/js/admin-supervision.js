@@ -53,7 +53,6 @@ const adminSupervision = {
             document.getElementById('statSupResueltos')  && (document.getElementById('statSupResueltos').textContent  = stats.resueltos  || 0);
 
         } catch (error) {
-            console.error('Error cargando stats supervisión:', error);
         }
     },
 
@@ -114,7 +113,6 @@ const adminSupervision = {
             this.paginaActual  = 1;
             this.renderTabla();
         } catch (error) {
-            console.error('Error cargando supervisión:', error);
             tbody.innerHTML = `<tr><td colspan="7" class="loading-row" style="color:#e50914;">Error al cargar los datos</td></tr>`;
         }
     },
@@ -371,7 +369,6 @@ const adminSupervision = {
             await this.cargarPestana(this.pestanaActual);
 
         } catch (error) {
-            console.error('Error eliminando comentario:', error);
             toast('Error al eliminar el comentario', 'error');
         } finally {
             btn.disabled = false;
@@ -441,7 +438,6 @@ const adminSupervision = {
             this.palabrasPagina    = 1;
             this.renderPalabras();
         } catch (error) {
-            console.error('Error cargando palabras:', error);
             tbody.innerHTML = `<tr><td colspan="3" class="loading-row" style="color:#e50914;">Error al cargar la lista</td></tr>`;
         }
     },
@@ -568,7 +564,6 @@ const adminSupervision = {
             await this.cargarPalabras();
 
         } catch (error) {
-            console.error('Error agregando palabra:', error);
             toast('Error al agregar la palabra', 'error');
         }
     },

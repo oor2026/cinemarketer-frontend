@@ -132,7 +132,6 @@ const adminUI = {
             this.actualizarStats(adminState.premios);
 
         } catch (e) {
-            console.error('Error cargando premios:', e);
             tbody.innerHTML = `<tr><td colspan="7" class="loading-row" style="color:#e50914;">
                 Error al cargar premios</td></tr>`;
         }
@@ -464,7 +463,6 @@ const adminUI = {
             this.cargarPremios();
 
         } catch (e) {
-            console.error('Error guardando premio:', e);
             toast('Error al guardar el premio', 'error');
         } finally {
             btnGuardar.disabled = false;
