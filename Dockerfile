@@ -2,14 +2,15 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copiar los archivos estáticos
+# Copiar todo el contenido de la carpeta src
 COPY src ./src
 
-# Instalar serve globalmente
+# Instalar serve
 RUN npm install -g serve
 
 # Exponer el puerto
 EXPOSE 8080
 
 # Servir los archivos estáticos
-CMD ["serve", "-s", "src", "-l", "8080"]
+# El flag --single permite manejar rutas como /login
+CMD ["serve", "-s", "src", "-l", "8080", "--single"]
