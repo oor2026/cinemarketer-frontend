@@ -7,5 +7,12 @@
     "startCommand": "serve -s src -l 8080",
     "healthcheckPath": "/",
     "restartPolicyType": "ON_FAILURE"
+  },
+  "nixpacks": {
+    "phases": {
+      "setup": {
+        "nixPkgs": ["nodejs_20"]
+      }
+    }
   }
 }
