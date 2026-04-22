@@ -3,7 +3,9 @@
     "builder": "NIXPACKS",
     "buildCommand": "echo 'Static site - no build needed'"
   },
-  "start": {
-    "cmd": "npx serve src"
+  "deploy": {
+    "startCommand": "npx serve -s src -l 3000",
+    "healthcheckPath": "/",
+    "restartPolicyType": "ON_FAILURE"
   }
 }
