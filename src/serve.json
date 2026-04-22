@@ -1,5 +1,4 @@
 {
-  "public": "src",
   "rewrites": [
     { "source": "/dashboard", "destination": "/dashboard.html" },
     { "source": "/forgot-password", "destination": "/forgot-password.html" },
