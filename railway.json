@@ -1,7 +1,9 @@
 {
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "echo 'Static site - no build needed'",
-    "publish": "src"
+    "buildCommand": "echo 'Static site - no build needed'"
+  },
+  "start": {
+    "cmd": "npx serve src"
   }
 }
