@@ -4,7 +4,7 @@
     "buildCommand": "echo 'Static site - no build needed'"
   },
   "deploy": {
-    "startCommand": "npx serve -s src -l 3000",
+    "startCommand": "python -m http.server 3000 --directory src",
     "healthcheckPath": "/",
     "restartPolicyType": "ON_FAILURE"
   }
