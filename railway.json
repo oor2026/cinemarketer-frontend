@@ -4,7 +4,7 @@
     "buildCommand": "echo 'Static site - no build needed'"
   },
   "deploy": {
-    "startCommand": "python -m http.server 3000 --directory src",
+    "startCommand": "python3 -m http.server 8080 --directory src",
     "healthcheckPath": "/",
     "restartPolicyType": "ON_FAILURE"
   }
