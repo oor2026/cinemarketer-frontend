@@ -2,13 +2,16 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-COPY src ./src
+# Copiar TODO el contenido de src (incluyendo subcarpetas)
+COPY src/ ./src/
 
+# Instalar serve
 RUN npm install -g serve
+
+# Listar archivos para debug (opcional, pero ayuda)
+RUN ls -la ./src/
 
 EXPOSE 8080
 
-# Entra a la carpeta src y ejecuta serve desde ahí
-WORKDIR /app/src
-
-CMD ["serve", "-s", ".", "-l", "8080", "--config", "serve.json"]
+# Servir desde la carpeta src
+CMD ["serve", "-s", "./src", "-l", "8080"]
