@@ -1,0 +1,6 @@
+{
+  "build": {
+    "builder": "STATIC",
+    "publish": "src"
+  }
+}
