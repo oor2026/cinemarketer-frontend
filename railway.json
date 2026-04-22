@@ -1,6 +1,7 @@
 {
   "build": {
-    "builder": "STATIC",
+    "builder": "NIXPACKS",
+    "buildCommand": "echo 'Static site - no build needed'",
     "publish": "src"
   }
 }
