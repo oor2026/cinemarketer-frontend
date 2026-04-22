@@ -1,10 +1,10 @@
 {
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "echo 'Static site - no build needed'"
+    "buildCommand": "npm install -g serve"
   },
   "deploy": {
-    "startCommand": "python3 -m http.server 8080 --directory src",
+    "startCommand": "serve -s src -l 8080",
     "healthcheckPath": "/",
     "restartPolicyType": "ON_FAILURE"
   }
