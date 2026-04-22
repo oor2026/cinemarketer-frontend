@@ -8,5 +8,5 @@ RUN npm install -g serve
 
 EXPOSE 8080
 
-# El archivo serve.json está dentro de src/
-CMD ["serve", "-s", "src", "-l", "8080", "--config", "src/serve.json"]
+# No cambies WORKDIR, usa la ruta completa
+CMD ["serve", "-s", "/app/src", "-l", "8080", "--config", "/app/src/serve.json"]
