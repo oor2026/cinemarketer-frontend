@@ -2,12 +2,13 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copiar TODO el contenido de src directamente a /app
-COPY src/ .
+COPY src/ ./
 
 RUN npm install -g serve
 
+# Listar archivos para debug
+RUN ls -la && ls -la ./admin/ || true && ls -la ./legal/ || true && ls -la ./modules/ || true
+
 EXPOSE 8080
 
-# Servir el directorio actual (que contiene index.html, login.html, etc.)
 CMD ["serve", "-s", ".", "-l", "8080"]
