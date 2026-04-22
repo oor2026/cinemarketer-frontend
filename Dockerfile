@@ -1,5 +1,7 @@
 FROM node:18-alpine
 
+ARG CACHE_BUST=1
+
 WORKDIR /app
 
 COPY src/ ./
