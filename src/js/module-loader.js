@@ -1,12 +1,12 @@
 // ==============================================
-// module-loader.js - Cargador de Módulos
+// module-loader.js - Cargador de Módulos con Hash Routing
 // ==============================================
 
 const MODULE_PATH = 'modules/';
 const CSS_PATH = 'css/';
 const JS_PATH = 'js/';
 
-async function loadModule(moduleName, element = null) {
+async function loadModule(moduleName, element = null, updateHash = true) {
 
     if (!localStorage.getItem('token')) {
         window.location.replace('login.html');
@@ -25,6 +25,7 @@ async function loadModule(moduleName, element = null) {
         // HTML
         const htmlResponse = await fetch(`${MODULE_PATH}${moduleName}.html`);
         if (!htmlResponse.ok) throw new Error(`Error HTTP: ${htmlResponse.status}`);
+
         container.innerHTML = await htmlResponse.text();
         window.scrollTo(0, 0);
 
@@ -53,8 +54,10 @@ async function loadModule(moduleName, element = null) {
             }
         });
 
+        // Inicializadores específicos
         setTimeout(() => {
             const initFn = window[`init_${moduleName}`];
+
             if (typeof initFn === 'function') {
                 initFn();
             } else {
@@ -70,16 +73,21 @@ async function loadModule(moduleName, element = null) {
             }
         }, 100);
 
-        // Actualizar URL SIN agregar al historial
-        const newUrl = window.location.pathname + `?module=${moduleName}`;
-        history.replaceState(null, null, newUrl);
+        // ==============================================
+        // ACTUALIZAR HASH
+        // ==============================================
+        if (updateHash) {
+            window.location.hash = moduleName;
+        }
 
     } catch (error) {
-        container.innerHTML = `<div style="text-align:center;padding:3rem;">
-            <i class="fas fa-exclamation-circle" style="font-size:3rem;color:#e50914;"></i>
-            <h3>Error al cargar ${moduleName}</h3>
-            <button onclick="location.reload()">Reintentar</button>
-        </div>`;
+        container.innerHTML = `
+            <div style="text-align:center;padding:3rem;">
+                <i class="fas fa-exclamation-circle" style="font-size:3rem;color:#e50914;"></i>
+                <h3>Error al cargar ${moduleName}</h3>
+                <button onclick="location.reload()">Reintentar</button>
+            </div>
+        `;
     }
 }
 
@@ -87,74 +95,38 @@ function resetDashboardState() {
     document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
 }
 
+function getModuleFromHash() {
+    const hash = window.location.hash.replace('#', '');
+    return hash || 'feed-films';
+}
+
 function loadDefaultModule() {
-    const defaultModule = 'feed-films';
+    const moduleName = getModuleFromHash();
+
     const links = document.querySelectorAll('.nav-link');
     let targetLink = null;
+
     links.forEach(link => {
-        if (link.getAttribute('onclick')?.includes(defaultModule)) {
+        if (link.getAttribute('onclick')?.includes(moduleName)) {
             targetLink = link;
         }
     });
-    loadModule(defaultModule, targetLink);
 
-    // Solo en móvil — registra evento en historial y muestra bienvenida
-    // Solo en móvil — esperar interacción del usuario para registrar historial
-    const esMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-    if (esMobile) {
-        let historialRegistrado = false;
-
-        const registrarHistorial = () => {
-            if (historialRegistrado) return;
-            historialRegistrado = true;
-
-            for (let i = 0; i < 15; i++) {
-                history.pushState(null, '', window.location.pathname + '?module=feed-films');
-            }
-        };
-
-        // Escuchar cualquier interacción del usuario
-        ['touchstart', 'touchend', 'click', 'scroll'].forEach(evento => {
-            document.addEventListener(evento, registrarHistorial, { once: true });
-        });
-
-        // Toast de aviso
-        setTimeout(() => {
-            const toast = document.createElement('div');
-            toast.id = 'toast-bienvenida';
-            toast.innerHTML = `<i class="fas fa-film"></i> ¡Hola! Explorá las películas 🎬`;
-            toast.style.cssText = `
-                position:fixed; bottom:2rem; left:50%;
-                transform:translateX(-50%);
-                background:#1a3a6b; color:white;
-                padding:0.85rem 1.5rem; border-radius:25px;
-                font-size:0.9rem; z-index:999999;
-                display:flex; align-items:center; gap:0.5rem;
-                box-shadow:0 4px 20px rgba(0,0,0,0.3);
-                white-space:nowrap; max-width:90vw;
-            `;
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transition = 'opacity 0.3s ease';
-                setTimeout(() => toast.remove(), 300);
-            }, 2500);
-        }, 1500);
-    }
+    loadModule(moduleName, targetLink, false);
 }
+
+// ==============================================
+// ESCUCHAR CAMBIO DE HASH
+// ==============================================
+window.addEventListener('hashchange', function() {
+    loadDefaultModule();
+});
 
 // ==============================================
 // INICIALIZACIÓN
 // ==============================================
 document.addEventListener('DOMContentLoaded', function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const moduleFromUrl = urlParams.get('module');
-
-    if (moduleFromUrl && moduleFromUrl !== 'feed-films') {
-        loadModule(moduleFromUrl);
-    } else {
-        loadDefaultModule();
-    }
+    loadDefaultModule();
 });
 
 window.loadModule = loadModule;
