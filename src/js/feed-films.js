@@ -820,8 +820,85 @@ window.cargarDatosPelicula = async function(id) {
                 if (stats.userVoteType === 'DISLIKE') btnDislike?.classList.add('votado');
             }
         }
+        if (typeof window.cargarTrailerPelicula === 'function') {
+                    window.cargarTrailerPelicula(id);
+                }
     } catch (error) {
         document.getElementById('modalTitulo').textContent = 'Error al cargar';
+    }
+};
+
+// ==============================================
+// CARGAR TRÁILER DE LA PELÍCULA
+// ==============================================
+window.cargarTrailerPelicula = async function(movieId) {
+    const container = document.getElementById('modalTrailerContainer');
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="trailer-loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span>Cargando tráiler...</span>
+        </div>
+    `;
+
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${CONFIG.API_URL}/movies/${movieId}/videos`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+            throw new Error('No se encontraron videos');
+        }
+
+        const data = await response.json();
+
+        // Buscar un tráiler oficial en YouTube
+        const trailer = data.results?.find(video =>
+            video.site === 'YouTube' &&
+            video.type === 'Trailer' &&
+            video.official === true
+        );
+
+        // Si no hay oficial, buscar cualquier tráiler en YouTube
+        const anyTrailer = !trailer && data.results?.find(video =>
+            video.site === 'YouTube' &&
+            video.type === 'Trailer'
+        );
+
+        const videoToUse = trailer || anyTrailer;
+
+        if (videoToUse && videoToUse.key) {
+            container.innerHTML = `
+                <div class="trailer-embed">
+                    <iframe
+                        width="100%"
+                        height="100%"
+                        src="https://www.youtube.com/embed/${videoToUse.key}"
+                        title="Tráiler"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            `;
+        } else {
+            container.innerHTML = `
+                <div class="sin-trailer">
+                    <i class="fas fa-video-slash"></i>
+                    <p>Tráiler no disponible</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error cargando tráiler:', error);
+        container.innerHTML = `
+            <div class="sin-trailer">
+                <i class="fas fa-video-slash"></i>
+                <p>Tráiler no disponible</p>
+            </div>
+        `;
     }
 };
 

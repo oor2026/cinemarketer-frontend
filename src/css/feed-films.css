@@ -1814,3 +1814,330 @@
         width: 100% !important;
     }
 }
+
+/* ==============================================
+   ESTILOS PARA EL TRÁILER EN EL MODAL
+   ============================================== */
+
+/* Contenedor principal del tráiler */
+.modal-trailer-container {
+    width: 100%;
+    height: 100%;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Contenedor del iframe (mantiene proporción 16:9) */
+.trailer-embed {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 16 / 9;
+}
+
+.trailer-embed iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Estado de carga del tráiler */
+.trailer-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    color: #fff;
+    text-align: center;
+    padding: 2rem;
+    background: #111;
+    width: 100%;
+    height: 100%;
+    min-height: 250px;
+}
+
+.trailer-loading i {
+    font-size: 2.5rem;
+    color: #e50914;
+}
+
+.trailer-loading span {
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+/* Mensaje cuando no hay tráiler disponible */
+.sin-trailer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    color: #888;
+    text-align: center;
+    padding: 2rem;
+    background: #0a0a0a;
+    width: 100%;
+    height: 100%;
+    min-height: 250px;
+}
+
+.sin-trailer i {
+    font-size: 3rem;
+    color: #e50914;
+    opacity: 0.6;
+}
+
+.sin-trailer p {
+    font-size: 0.9rem;
+    color: #aaa;
+    margin: 0;
+}
+
+/* Placeholder inicial antes de cargar */
+.trailer-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    color: #888;
+    text-align: center;
+    padding: 2rem;
+    background: #0a0a0a;
+    width: 100%;
+    height: 100%;
+    min-height: 250px;
+}
+
+.trailer-placeholder i {
+    font-size: 3rem;
+    color: #555;
+}
+
+.trailer-placeholder span {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* ==============================================
+   AJUSTES MÓVIL PARA EL TRÁILER
+   ============================================== */
+@media (max-width: 768px) {
+    .modal-trailer-container {
+        min-height: 250px;
+        border-radius: 8px;
+    }
+
+    .trailer-loading,
+    .sin-trailer,
+    .trailer-placeholder {
+        min-height: 220px;
+        padding: 1rem;
+    }
+
+    .trailer-loading i,
+    .sin-trailer i,
+    .trailer-placeholder i {
+        font-size: 2rem;
+    }
+
+    .trailer-embed {
+        aspect-ratio: 16 / 9;
+    }
+}
+
+/* ==============================================
+   AJUSTES PARA PANTALLAS MUY PEQUEÑAS
+   ============================================== */
+@media (max-width: 480px) {
+    .modal-trailer-container {
+        min-height: 200px;
+    }
+
+    .trailer-loading,
+    .sin-trailer,
+    .trailer-placeholder {
+        min-height: 180px;
+    }
+
+    .trailer-loading i,
+    .sin-trailer i,
+    .trailer-placeholder i {
+        font-size: 1.8rem;
+    }
+
+    .trailer-loading span,
+    .sin-trailer p,
+    .trailer-placeholder span {
+        font-size: 0.8rem;
+    }
+}
+
+/* ==============================================
+   TRAILER - VERSIÓN SIMPLE Y FUNCIONAL
+   ============================================== */
+
+/* Forzar que el trailer se vea en desktop */
+.modal-trailer-container {
+    display: block !important;
+    width: 100% !important;
+    max-width: 800px !important;
+    min-height: 350px !important;
+    background: #000 !important;
+    margin: 20px 0 !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+}
+
+/* El iframe del trailer */
+.modal-trailer-container iframe {
+    width: 100% !important;
+    height: 350px !important;
+    border: none !important;
+}
+
+/* En móvil un poco más chico */
+@media (max-width: 768px) {
+    .modal-trailer-container {
+        min-height: 250px !important;
+    }
+    .modal-trailer-container iframe {
+        height: 250px !important;
+    }
+}
+
+/* Mensaje cuando no hay trailer */
+.sin-trailer {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 100% !important;
+    min-height: 350px !important;
+    background: #0a0a0a !important;
+    color: #888 !important;
+    text-align: center !important;
+}
+
+/* ==============================================
+   TRAILER DESKTOP - FUERA DEL CARRUSEL
+   ============================================== */
+
+/* En desktop, mostrar el trailer fuera del carrusel */
+@media (min-width: 769px) {
+    .trailer-desktop-container {
+        display: block !important;
+        width: 100% !important;
+        margin-top: 2rem !important;
+        clear: both !important;
+    }
+
+    .modal-trailer-container {
+        width: 100% !important;
+        max-width: 800px !important;
+        min-height: 450px !important;
+        margin: 0 auto !important;
+    }
+
+    .modal-trailer-container iframe {
+        width: 100% !important;
+        height: 450px !important;
+    }
+}
+
+/* En móvil, ocultar el trailer desktop y usar el del carrusel */
+@media (max-width: 768px) {
+    .trailer-desktop-container {
+        display: none !important;
+    }
+}
+
+/* ==============================================
+   CORRECCIÓN: BOTONES DEBAJO DEL TRÁILER
+   ============================================== */
+
+/* Forzar que los botones de votar ocupen toda la fila y estén debajo del tráiler */
+#modalPelicula .modal-acciones {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 2rem !important;
+    margin: 2rem auto 1rem auto !important;
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+}
+
+/* Estilo de los botones */
+#modalPelicula .modal-acciones .btn-like,
+#modalPelicula .modal-acciones .btn-dislike {
+    min-width: 140px !important;
+    padding: 12px 24px !important;
+}
+
+/* Asegurar que el tráiler no tenga float que afecte */
+.trailer-propio-container {
+    grid-column: 1 / -1 !important;
+    clear: both !important;
+}
+
+/* ==============================================
+   BOTONES CON MISMO ANCHO QUE EL TRÁILER
+   ============================================== */
+
+#modalPelicula .modal-acciones {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 2rem !important;
+    margin: 2rem auto 1rem auto !important;
+    grid-column: 1 / -1 !important;
+    max-width: 800px !important;
+    width: 100% !important;
+}
+
+#modalPelicula .modal-acciones .btn-like,
+#modalPelicula .modal-acciones .btn-dislike {
+    flex: 1 !important;
+    min-width: 0 !important;
+    padding: 12px 24px !important;
+    max-width: 380px !important;
+}
+
+/* ==============================================
+   TRÁILER ANCHO COMPLETO
+   ============================================== */
+
+/* El contenedor del tráiler ocupa todo el ancho */
+.trailer-propio-container {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    max-width: none !important;
+}
+
+/* El wrapper también ocupa todo el ancho */
+.trailer-propio-wrapper {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+/* El contenedor del video ocupa todo el ancho */
+.modal-trailer-container {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 auto !important;
+}
+
+/* El iframe ocupa todo el ancho disponible */
+.modal-trailer-container iframe {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+/* Los botones también ocupan el mismo ancho */
+#modalPelicula .modal-acciones {
+    max-width: none !important;
+    width: 100% !important;
+}
