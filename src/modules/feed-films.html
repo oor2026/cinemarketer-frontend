@@ -81,23 +81,39 @@
 
                     </div><!-- /modal-carrusel -->
 
-                    <!-- MIGA DE PAN -->
+                    <!-- MIGA DE PAN (dots) -->
                     <div class="carrusel-dots" id="carruselDots">
                         <span class="carrusel-dot active" onclick="irASlide(0)"></span>
                         <span class="carrusel-dot" onclick="irASlide(1)"></span>
                     </div>
 
-                    <!-- BOTONES VOTAR - siempre visibles, fuera del carrusel -->
-                    <div class="modal-acciones">
-                        <button class="btn-like" onclick="window.votarPelicula(window.peliculaActualId, 'like', event)">
-                            <i class="fas fa-thumbs-up"></i> <span id="modalLikes">0</span>
-                        </button>
-                        <button class="btn-dislike" onclick="window.votarPelicula(window.peliculaActualId, 'dislike', event)">
-                            <i class="fas fa-thumbs-down"></i> <span id="modalDislikes">0</span>
-                        </button>
-                    </div>
-
                 </div><!-- /modal-fila-superior -->
+
+                <!-- ============================================== -->
+                <!-- CONTENEDOR PROPIO DEL TRÁILER -->
+                <!-- ============================================== -->
+                <div class="trailer-propio-container" id="trailerPropioContainer">
+                    <div class="trailer-propio-wrapper">
+                        <div class="modal-trailer-container" id="modalTrailerContainer">
+                            <div class="trailer-placeholder">
+                                <i class="fas fa-film"></i>
+                                <span>Cargando tráiler...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================== -->
+                <!-- BOTONES VOTAR - DEBAJO DEL TRÁILER -->
+                <!-- ============================================== -->
+                <div class="modal-acciones">
+                    <button class="btn-like" onclick="window.votarPelicula(window.peliculaActualId, 'like', event)">
+                        <i class="fas fa-thumbs-up"></i> <span id="modalLikes">0</span>
+                    </button>
+                    <button class="btn-dislike" onclick="window.votarPelicula(window.peliculaActualId, 'dislike', event)">
+                        <i class="fas fa-thumbs-down"></i> <span id="modalDislikes">0</span>
+                    </button>
+                </div>
 
                 <!-- FILA INFERIOR: caja de comentarios (ancho completo) -->
                 <div class="modal-fila-comentarios">
