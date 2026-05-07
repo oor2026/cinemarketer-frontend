@@ -757,6 +757,7 @@
                 <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('comentarios', this)">💬 Comentarios</button>
                 <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('premios', this)">🎁 Premios y Canjes</button>
                 <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('premium', this)">🏆 Premium y Sorteos</button>
+                <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('suscripciones', this)">👑 Suscripciones</button>
                 <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('puntos', this)">💰 Puntos</button>
                 <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('soporte', this)">🎫 Soporte</button>
                 <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('crecimiento', this)">📈 Crecimiento</button>
@@ -800,6 +801,14 @@
                         <table class="stats-tabla">
                             <thead><tr><th>KPI</th><th>VALOR</th><th>VS PERÍODO ANT.</th></tr></thead>
                             <tbody id="stats-premium-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="stats-suscripciones" class="stats-panel">
+                    <div class="stats-tabla-container">
+                        <table class="stats-tabla">
+                            <thead><tr><th>KPI</th><th>VALOR</th><th>VS PERÍODO ANT.</th></tr></thead>
+                            <tbody id="stats-suscripciones-body"></tbody>
                         </table>
                     </div>
                 </div>
