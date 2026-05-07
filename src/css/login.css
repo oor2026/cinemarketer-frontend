@@ -508,19 +508,15 @@ body.auth-page {
         }
 
         .auth-logo-mobile img {
-            height: 100px;
+            height: 65px;
             width: auto;
             object-fit: contain;
         }
 
     .auth-wrapper {
-        height: auto;
-        min-height: 100vh;
-        padding: 1rem;
-        margin-top: 0;
-        align-items: flex-start;
-        padding-top: 1.5rem;
-        padding-bottom: 1.5rem;
+        padding: 1.25rem 1rem;
+        padding-top: 1.25rem;
+        padding-bottom: 1.25rem;
     }
 
     .auth-container {
@@ -528,8 +524,9 @@ body.auth-page {
     }
 
     .auth-card {
-            padding-top: 0.5rem;
-        }
+        border-radius: 16px;
+        padding: 1.25rem 1.25rem 1rem;
+    }
 
     .auth-welcome {
         display: none;
@@ -540,20 +537,37 @@ body.auth-page {
     }
 
     .form-group {
-        margin-bottom: 1rem;
+        margin-bottom: 0.85rem;
+    }
+
+    .form-options {
+        margin-bottom: 0.85rem;
     }
 
     .auth-divider {
-        margin: 1rem 0;
+        margin: 0.75rem 0;
     }
 
     .social-login {
         grid-template-columns: 1fr;
-        margin-bottom: 1rem;
+        justify-items: center;
+    }
+
+    .social-btn {
+        width: 100%;
     }
 
     .auth-header h2 {
-        font-size: 1.5rem;
+        font-size: 1.3rem;
+            margin-bottom: 0.25rem;
+    }
+
+    .auth-header p {
+        font-size: 0.82rem;
+    }
+
+    .auth-footer {
+        font-size: 0.82rem;
     }
 
     .auth-icon {
@@ -563,6 +577,21 @@ body.auth-page {
 
     .auth-icon i {
         font-size: 2rem;
+    }
+
+    .form-group label {
+        font-size: 0.82rem;
+        margin-bottom: 4px;
+    }
+
+    .form-group input {
+        padding: 0.65rem 0.9rem;
+        font-size: 0.85rem;
+    }
+
+    #loginButton {
+        width: 100%;
+        display: block;
     }
 }
 

@@ -129,6 +129,9 @@ const adminPremiosPremium = {
                             <button class="btn-accion btn-eliminar" onclick="adminPremiosPremium.toggleActivo(${p.id}, ${p.active})" title="${p.active ? 'Desactivar' : 'Activar'}">
                                 <i class="fas fa-${p.active ? 'eye-slash' : 'eye'}"></i>
                             </button>
+                            <button class="btn-accion btn-eliminar" onclick="adminPremiosPremium.eliminarPremio(${p.id})" title="Eliminar" style="background:#fff0f0;color:#c0392b;border:1px solid #f5c6c6;">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>`;
@@ -398,6 +401,23 @@ const adminPremiosPremium = {
             alert('Error al actualizar el premio');
         }
     },
+
+    // ------------------------------------------
+        // ELIMINAR (borrado lógico)
+        // ------------------------------------------
+        async eliminarPremio(id) {
+            if (!confirm('¿Confirmás eliminar este premio? No aparecerá más en la plataforma.')) return;
+            try {
+                const response = await fetch(`${CONFIG.API_URL}/admin/premium/rewards/${id}/delete`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error();
+                await this.cargarPremios();
+            } catch {
+                alert('Error al eliminar el premio');
+            }
+        },
 
     // ------------------------------------------
     // VER PARTICIPANTES DEL SORTEO
