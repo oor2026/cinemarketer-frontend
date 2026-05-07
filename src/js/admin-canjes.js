@@ -189,6 +189,11 @@ const adminCanjes = {
                                     onclick="adminCanjes.verDetalles(${c.id})">
                                 <i class="fas fa-eye"></i>
                             </button>
+                            <button class="btn-accion btn-eliminar" title="Eliminar"
+                                    onclick="adminCanjes.eliminarCanje(${c.id})"
+                                    style="background:#fff0f0;color:#c0392b;border:1px solid #f5c6c6;">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>`;
@@ -481,17 +486,39 @@ const adminCanjes = {
     },
 
     // ==============================================
-    // FILTRAR POR ESTADO
-    // ==============================================
-    filtrarPorEstado: function(estado) {
-        this.currentFilter = estado;
-        if (estado === 'todos') {
-            this.cargarCanjes(0);
-        } else {
-            this.cargarPorEstado(estado);
+        // FILTRAR POR ESTADO
+        // ==============================================
+        filtrarPorEstado: function(estado) {
+            this.currentFilter = estado;
+            if (estado === 'todos') {
+                this.cargarCanjes(0);
+            } else {
+                this.cargarPorEstado(estado);
+            }
+        },
+
+        // ------------------------------------------
+        // ELIMINAR CANJE (borrado lógico)
+        // ------------------------------------------
+        eliminarCanje: async function(id) {
+            if (!confirm('¿Confirmás eliminar este canje? No aparecerá más en el historial.')) return;
+            try {
+                const response = await fetch(`${CONFIG.API_URL}/admin/redemptions/${id}/delete`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error();
+                toast('Canje eliminado correctamente', 'success');
+                if (this.currentFilter === 'todos') {
+                    this.cargarCanjes(this.currentPage);
+                } else {
+                    this.cargarPorEstado(this.currentFilter);
+                }
+            } catch {
+                toast('Error al eliminar el canje', 'error');
+            }
         }
-    }
-};
+    };
 
 // Cargar por default al entrar a la sección
 document.addEventListener('DOMContentLoaded', () => {
