@@ -200,6 +200,10 @@ const adminUI = {
                                 <i class="fas fa-image"></i>
                             </button>
                             ${btnActivar}
+                            <button class="btn-accion btn-eliminar" title="Eliminar"
+                                onclick="adminUI.eliminarPremio(${p.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>`;
@@ -536,6 +540,27 @@ const adminUI = {
 
         } catch (e) {
             toast(`Error al ${accion} el premio`, 'error');
+        }
+    },
+
+    // ------------------------------------------
+    // ELIMINAR (borrado lógico)
+    // ------------------------------------------
+    async eliminarPremio(premioId) {
+        if (!confirm('¿Confirmás eliminar este premio? No aparecerá más en la plataforma.')) return;
+
+        try {
+            const response = await fetch(`${CONFIG.API_URL}/admin/rewards/${premioId}/delete`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!response.ok) throw new Error();
+            toast('Premio eliminado correctamente', 'success');
+            this.cargarPremios();
+
+        } catch (e) {
+            toast('Error al eliminar el premio', 'error');
         }
     }
 };
