@@ -56,6 +56,8 @@ const adminEstadisticas = {
             this.renderizarPuntos();
             this.renderizarSoporte();
             this.renderizarCrecimiento();
+            this.renderizarPremiumSorteos();
+            this.renderizarSuscripciones();
 
         } catch (error) {
             toast('Error al cargar estadísticas', 'error');
@@ -451,6 +453,89 @@ const adminEstadisticas = {
             </tr>
         `;
         document.getElementById('stats-crecimiento-body').innerHTML = html;
+    },
+
+    // Renderizar tabla de premium y sorteos
+    renderizarPremiumSorteos: function() {
+        const p = this.datos.premium;
+        if (!p) return;
+        const html = `
+            <tr>
+                <td><strong>Total premios premium</strong></td>
+                <td class="stat-valor">${this.formatearNumero(p.totalPremiumRewards)}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><strong>Premios premium activos</strong></td>
+                <td class="stat-valor">${this.formatearNumero(p.activePremiumRewards)}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><strong>Total sorteos</strong></td>
+                <td class="stat-valor">${this.formatearNumero(p.totalSorteos)}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><strong>Sorteos ejecutados</strong></td>
+                <td class="stat-valor">${this.formatearNumero(p.sorteosEjecutados)}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><strong>Sorteos pendientes</strong></td>
+                <td class="stat-valor">${this.formatearNumero(p.sorteosPendientes)}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><strong>Total canjeables premium</strong></td>
+                <td class="stat-valor">${this.formatearNumero(p.totalCanjeables)}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><strong>Canjeables activos</strong></td>
+                <td class="stat-valor">${this.formatearNumero(p.canjeablesActivos)}</td>
+                <td></td>
+            </tr>
+        `;
+        document.getElementById('stats-premium-body').innerHTML = html;
+    },
+
+    // Renderizar tabla de suscripciones
+    renderizarSuscripciones: function() {
+        const s = this.datos.subscriptions;
+        if (!s) return;
+        const html = `
+            <tr>
+                <td><strong>Total suscripciones</strong></td>
+                <td class="stat-valor">${this.formatearNumero(s.totalSuscripciones)}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><strong>Suscripciones activas</strong></td>
+                <td class="stat-valor">${this.formatearNumero(s.suscripcionesActivas)}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><strong>Suscripciones canceladas</strong></td>
+                <td class="stat-valor">${this.formatearNumero(s.suscripcionesCanceladas)}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><strong>Suscripciones pendientes</strong></td>
+                <td class="stat-valor">${this.formatearNumero(s.suscripcionesPendientes)}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><strong>Nuevas este período</strong></td>
+                <td class="stat-valor">${this.formatearNumero(s.nuevasSuscripciones)}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><strong>Usuarios suscriptos activos</strong></td>
+                <td class="stat-valor">${this.formatearNumero(s.usuariosSuscriptos)}</td>
+                <td></td>
+            </tr>
+        `;
+        document.getElementById('stats-suscripciones-body').innerHTML = html;
     },
 
     // Formatear números grandes (ej: 1234 → 1.2K)
