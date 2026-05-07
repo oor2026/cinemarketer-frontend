@@ -28,7 +28,10 @@
     <link rel="apple-touch-icon" href="assets/images/favicon.png">
 
     <!-- Font Awesome para iconos -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"></noscript>
+
+    <link rel="preload" as="image" href="assets/images/isologotipo.png">
 
     <!-- Estilos -->
     <link rel="stylesheet" href="css/styles.css">
@@ -38,7 +41,7 @@
 <nav class="navbar">
     <div class="nav-container">
         <a href="index.html" class="logo">
-            <img src="assets/images/isologotipo.png" alt="Cinemarketer" class="logo-img">
+            <img src="assets/images/isologotipo.png" alt="Cinemarketer" class="logo-img" fetchpriority="high" loading="eager" width="200" height="60">
         </a>
 
         <!-- Menú hamburguesa para móvil -->
@@ -62,8 +65,8 @@
 <main>
 <!-- HERO SECTION - Responsive -->
 <section id="inicio" class="hero">
-    <img src="assets/images/pochoclo.png" alt="" class="hero-deco hero-deco-left">
-    <img src="assets/images/proyector.png" alt="" class="hero-deco hero-deco-right">
+    <img src="assets/images/pochoclo.png" alt="" class="hero-deco hero-deco-left" width="200" height="200" loading="lazy">
+    <img src="assets/images/proyector.png" alt="" class="hero-deco hero-deco-right" width="200" height="200" loading="lazy">
     <div class="hero-content">
         <h1 class="hero-title">Lo mejor del cine está en vos</h1>
         <p class="hero-subtitle">La red social que estabas esperando para compartir y llevarte lo mejor del cine.</p>
