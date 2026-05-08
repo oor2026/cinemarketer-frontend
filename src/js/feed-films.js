@@ -46,10 +46,14 @@ async function cargarComponente(url, contenedorId) {
 // ==============================================
 window.generarTarjetasHTML = async function(peliculas) {
     try {
+         const peliculasFiltradas = peliculas.filter(p =>
+         p.poster_path && p.overview && p.overview.trim() !== ''
+            );
+
         const response = await fetch('modules/feed-tarjeta.html');
         let plantilla = await response.text();
 
-        return peliculas.map(pelicula => {
+        return peliculasFiltradas.map(pelicula => {
             const posterUrl = pelicula.poster_path
                 ? `https://image.tmdb.org/t/p/w500${pelicula.poster_path}`
                 : 'https://via.placeholder.com/300x450?text=Sin+imagen';
@@ -79,10 +83,12 @@ window.generarTarjetasHTML = async function(peliculas) {
 };
 
 function generarTarjetasFallback(peliculas) {
-    return peliculas.map(pelicula => {
-        const posterUrl = pelicula.poster_path
-            ? `https://image.tmdb.org/t/p/w500${pelicula.poster_path}`
-            : 'https://via.placeholder.com/300x450?text=Sin+imagen';
+    const peliculasFiltradas = peliculas.filter(p =>
+        p.poster_path && p.overview && p.overview.trim() !== ''
+    );
+
+    return peliculasFiltradas.map(pelicula => {
+        const posterUrl = `https://image.tmdb.org/t/p/w500${pelicula.poster_path}`;
 
         const year = pelicula.release_date
             ? new Date(pelicula.release_date).getFullYear()
@@ -99,7 +105,7 @@ function generarTarjetasFallback(peliculas) {
                 </div>
                 <div class="pelicula-info">
                     <h3 class="pelicula-titulo">${pelicula.title}</h3>
-                    <p class="pelicula-descripcion">${pelicula.overview?.substring(0, 120)}...</p>
+                    <p class="pelicula-descripcion">${pelicula.overview.substring(0, 120)}...</p>
                     <div class="pelicula-metadata">
                         <span><i class="fas fa-clock"></i> Popularidad: ${Math.round(pelicula.popularity)}</span>
                     </div>
@@ -148,8 +154,18 @@ window.cargarPeliculasPopulares = async function(pagina = 1) {
         window.estadoPaginacion.totalPaginas = data.total_pages;
         window.estadoPaginacion.totalResultados = data.total_results;
 
-        document.getElementById('resultadosCount').textContent = data.results.length;
         grid.innerHTML = await window.generarTarjetasHTML(data.results);
+
+        const peliculasMostradas = grid.querySelectorAll('.pelicula-card').length;
+        const countEl = document.getElementById('resultadosCount');
+        if (countEl) countEl.textContent = peliculasMostradas;
+
+        // Si la página quedó vacía y hay más páginas, cargar la siguiente automáticamente
+        if (peliculasMostradas === 0 && data.page < data.total_pages) {
+            window.estadoPaginacion.cargando = false;
+            await window.cargarPeliculasPopulares(data.page + 1);
+            return;
+        }
 
         limpiarModalesDuplicados();
 
@@ -608,19 +624,30 @@ window.aplicarFiltros = async function(pagina = 1) {
         window.estadoPaginacion.totalPaginas = data.total_pages;
         window.estadoPaginacion.totalResultados = data.total_results;
 
-        const countEl = document.getElementById('resultadosCount');
-        if (countEl) countEl.textContent = data.results?.length || 0;
+if (!data.results || data.results.length === 0) {
+    grid.innerHTML = '<div class="sin-resultados"><i class="fas fa-film"></i><p>No se encontraron películas con esos filtros.</p></div>';
+    const countEl = document.getElementById('resultadosCount');
+    if (countEl) countEl.textContent = 0;
+} else {
+    grid.innerHTML = await window.generarTarjetasHTML(data.results);
 
-        if (!data.results || data.results.length === 0) {
-            grid.innerHTML = '<div class="sin-resultados"><i class="fas fa-film"></i><p>No se encontraron películas con esos filtros.</p></div>';
-        } else {
-            grid.innerHTML = await window.generarTarjetasHTML(data.results);
-            limpiarModalesDuplicados();
-            if (typeof window.cargarEstadisticasVotacion === 'function') {
-                window.cargarEstadisticasVotacion();
-            }
-        }
-        window.actualizarBotonesPaginacion();
+    const peliculasMostradas = grid.querySelectorAll('.pelicula-card').length;
+    const countEl = document.getElementById('resultadosCount');
+    if (countEl) countEl.textContent = peliculasMostradas;
+
+    // Si la página quedó vacía tras el filtro y hay más páginas, saltar automáticamente
+    if (peliculasMostradas === 0 && data.page < data.total_pages) {
+        window.estadoPaginacion.cargando = false;
+        await window.aplicarFiltros(data.page + 1);
+        return;
+    }
+
+    limpiarModalesDuplicados();
+    if (typeof window.cargarEstadisticasVotacion === 'function') {
+        window.cargarEstadisticasVotacion();
+    }
+}
+window.actualizarBotonesPaginacion();
 
     } catch (error) {
         grid.innerHTML = `<div class="error">Error: ${error.message}</div>`;
