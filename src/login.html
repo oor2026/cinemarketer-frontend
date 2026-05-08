@@ -18,7 +18,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <!-- Estilos -->
+
     <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/toast.css">
     <script src="js/toast.js"></script>
 </head>
@@ -162,6 +164,36 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+
+        <!-- Links legales -->
+        <div class="footer-bottom">
+            <nav class="footer-legal-links">
+                <button onclick="footerModal.abrir('terminos')">Términos y Condiciones</button>
+                <button onclick="footerModal.abrir('privacidad')">Política de Privacidad</button>
+                <button onclick="footerModal.abrir('cookies')">Política de Cookies</button>
+                <button onclick="footerModal.abrir('centroPrivacidad')">Centro de Privacidad</button>
+                <button onclick="footerModal.abrir('ayuda')">Centro de Ayuda</button>
+                <button onclick="footerModal.abrir('avisoLegal')">Aviso Legal</button>
+            </nav>
+            <p>&copy; 2026 Cinemarketer. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</footer>
+<!-- MODAL PARA DOCUMENTOS LEGALES (estructura que espera footer.js) -->
+<div id="footerModalOverlay" class="footer-modal-overlay">
+    <div class="footer-modal-container">
+        <div class="footer-modal-header">
+            <h3 id="footerModalTitulo">Términos y Condiciones</h3>
+            <button class="footer-modal-close" onclick="footerModal.cerrar()">×</button>
+        </div>
+        <div class="footer-modal-body" id="footerModalBody">
+            Cargando...
         </div>
     </div>
 </div>

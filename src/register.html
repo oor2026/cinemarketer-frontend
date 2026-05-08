@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <!-- Estilos -->
+    <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/register.css">
 </head>
 <body class="auth-page">
@@ -185,8 +186,9 @@
                         <input type="checkbox" id="terms">
                         <span class="checkbox-custom"></span>
                         <span class="checkbox-text">
-                                Acepto los <a href="terminos.html" id="termsLink">términos y condiciones</a>
-                            </span>
+                        Acepto los
+                        <a href="#" id="termsLink">términos y condiciones</a>
+                        </span>
                     </label>
                 </div>
 
@@ -215,6 +217,81 @@
                     Volver al inicio
                 </a>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <!-- Sección marca y redes sociales -->
+            <div class="footer-section">
+                <h3>Cinemarketer</h3>
+                <p>Lo mejor del cine está en vos.</p>
+                <div class="social-links">
+                    <a href="https://www.linkedin.com/company/cinemarketer" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                    <a href="https://www.instagram.com/cinemarketer.ar/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="mailto:info@cinemarketer.com.ar" aria-label="Email">
+                        <i class="fas fa-envelope"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Enlaces rápidos -->
+            <div class="footer-section">
+                <h3>Enlaces rápidos</h3>
+                <ul>
+                    <li><a href="#inicio">Inicio</a></li>
+                    <li><a href="#quienes">Quienes Somos</a></li>
+                    <li><a href="#como-funciona">¿Cómo funciona?</a></li>
+                </ul>
+            </div>
+
+            <!-- Contacto -->
+            <div class="footer-section" id="footer-contacto">
+                <h3>Contacto</h3>
+                <ul>
+                    <li><i class="fas fa-envelope"></i> <a href="mailto:info@cinemarketer.com.ar">info@cinemarketer.com.ar</a></li>
+                </ul>
+            </div>
+
+            <!-- Horarios -->
+            <div class="footer-section">
+                <h3>Horarios (Soporte)</h3>
+                <ul>
+                    <li>Lunes a Viernes: 09am - 17pm</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Links legales -->
+        <div class="footer-bottom">
+            <nav class="footer-legal-links">
+                <button onclick="footerModal.abrir('terminos')">Términos y Condiciones</button>
+                <button onclick="footerModal.abrir('privacidad')">Política de Privacidad</button>
+                <button onclick="footerModal.abrir('cookies')">Política de Cookies</button>
+                <button onclick="footerModal.abrir('centroPrivacidad')">Centro de Privacidad</button>
+                <button onclick="footerModal.abrir('ayuda')">Centro de Ayuda</button>
+                <button onclick="footerModal.abrir('avisoLegal')">Aviso Legal</button>
+            </nav>
+            <p>&copy; 2026 Cinemarketer. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</footer>
+<!-- MODAL PARA DOCUMENTOS LEGALES (estructura que espera footer.js) -->
+<div id="footerModalOverlay" class="footer-modal-overlay">
+    <div class="footer-modal-container">
+        <div class="footer-modal-header">
+            <h3 id="footerModalTitulo">Términos y Condiciones</h3>
+            <button class="footer-modal-close" onclick="footerModal.cerrar()">×</button>
+        </div>
+        <div class="footer-modal-body" id="footerModalBody">
+            Cargando...
         </div>
     </div>
 </div>
@@ -349,6 +426,14 @@
             }
         });
         setupPasswordToggles();
+
+        const termsLink = document.getElementById('termsLink');
+    if (termsLink) {
+        termsLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            footerModal.abrir('terminos');
+        });
+    }
     });
 </script>
 </body>
