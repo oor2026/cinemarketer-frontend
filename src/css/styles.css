@@ -1074,3 +1074,112 @@ body {
         opacity: 1;
     }
 }
+
+/* ==============================================
+   MODAL LEGAL (para footer.js)
+   ============================================== */
+
+.footer-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.footer-modal-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.footer-modal-container {
+    background: white;
+    width: 90%;
+    max-width: 900px;
+    max-height: 85vh;
+    border-radius: 15px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.footer-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.footer-modal-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.footer-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: white;
+    cursor: pointer;
+    line-height: 1;
+    transition: opacity 0.2s;
+}
+
+.footer-modal-close:hover {
+    opacity: 0.8;
+}
+
+.footer-modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #333;
+}
+
+/* Tablas dentro del modal */
+.footer-modal-body .legal-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+}
+
+.footer-modal-body .legal-table th,
+.footer-modal-body .legal-table td {
+    border: 1px solid #ddd;
+    padding: 0.5rem;
+    text-align: left;
+}
+
+.footer-modal-body .legal-table th {
+    background: #f5f5f5;
+    font-weight: 600;
+}
+
+/* Responsive modal */
+@media (max-width: 768px) {
+    .footer-modal-container {
+        width: 95%;
+        max-height: 90vh;
+    }
+
+    .footer-modal-header {
+        padding: 0.75rem 1rem;
+    }
+
+    .footer-modal-body {
+        padding: 1rem;
+    }
+}
