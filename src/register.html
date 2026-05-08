@@ -185,8 +185,9 @@
                         <input type="checkbox" id="terms">
                         <span class="checkbox-custom"></span>
                         <span class="checkbox-text">
-                                Acepto los <a href="terminos.html" id="termsLink">términos y condiciones</a>
-                            </span>
+                        Acepto los
+                        <a href="#" id="termsLink">términos y condiciones</a>
+                        </span>
                     </label>
                 </div>
 
@@ -349,6 +350,14 @@
             }
         });
         setupPasswordToggles();
+
+        const termsLink = document.getElementById('termsLink');
+    if (termsLink) {
+        termsLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            footerModal.abrir('terminos');
+        });
+    }
     });
 </script>
 </body>
