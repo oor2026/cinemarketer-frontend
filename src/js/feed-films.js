@@ -726,7 +726,8 @@ window.cerrarModal = function() {
     const modal = document.getElementById('modalPelicula');
     if (modal) {
         modal.style.display = 'none';
-
+        const iframe = modal.querySelector('iframe');
+        if (iframe) iframe.src = iframe.src;
         const movieId = window.peliculaActualId;
         if (movieId) {
             const card = document.querySelector(`.pelicula-card[data-id="${movieId}"]`);
