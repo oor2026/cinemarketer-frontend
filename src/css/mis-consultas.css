@@ -69,9 +69,15 @@
     border-radius: 15px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.06);
     overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-.consultas-lista { display: flex; flex-direction: column; }
+.consultas-lista {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
 
 .consultas-loading,
 .consultas-vacio {
@@ -92,6 +98,8 @@
     cursor: pointer;
     transition: background 0.15s;
     position: relative;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .ticket-item:last-child { border-bottom: none; }

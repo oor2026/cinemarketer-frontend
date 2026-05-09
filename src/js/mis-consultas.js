@@ -90,7 +90,7 @@ async function consultasCargarLista(page = 0) {
         lista.innerHTML = data.tickets.map(t => {
             // Usar escapeHtmlSafe para el asunto (puede venir del sistema)
             const subject = escapeHtmlSafe(t.subject);
-            const lastMessage = escapeHtmlSafe(t.lastMessage || 'Sin mensajes');
+            const lastMessage = escapeHtmlSafe((t.lastMessage || 'Sin mensajes').replace(/\n/g, ' ').replace(/\r/g, ''));
             const status = t.status === 'OPEN' ? 'abierto' : 'cerrado';
             const statusIcon = t.status === 'OPEN' ? 'fa-comment-dots' : 'fa-lock';
             const fecha = consultasFormatearFecha(t.lastMessageAt || t.createdAt);
