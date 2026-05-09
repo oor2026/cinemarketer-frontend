@@ -66,22 +66,49 @@ window.cargarCanjeados = async function(pagina = 1) {
     lista.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i><p>Cargando tus premios...</p></div>';
 
     try {
-        const response = await fetch(`${CONFIG.API_URL}/redemptions/me`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const [resComunes, resPremium, resSorteos] = await Promise.all([
+            fetch(`${CONFIG.API_URL}/redemptions/me`, { headers: { 'Authorization': `Bearer ${token}` } }),
+            fetch(`${CONFIG.API_URL}/premium/redemptions/me`, { headers: { 'Authorization': `Bearer ${token}` } }),
+            fetch(`${CONFIG.API_URL}/premium/rewards/draws/me`, { headers: { 'Authorization': `Bearer ${token}` } })
+        ]);
 
-        if (!response.ok) throw new Error(`Error ${response.status}`);
-        const canjeados = await response.json();
+        const comunes  = resComunes.ok  ? await resComunes.json()  : [];
+        const premium  = resPremium.ok  ? await resPremium.json()  : [];
+        const sorteos  = resSorteos.ok  ? await resSorteos.json()  : [];
 
-        premiosState.canjeadosCache = canjeados;
+        const premiumNorm = premium.map(p => ({
+            rewardName:        p.rewardName,
+            rewardDescription: '',
+            rewardImageUrl:    p.rewardImageUrl || null,
+            pointsSpent:       p.pointsSpent,
+            redemptionCode:    p.redemptionCode,
+            redemptionDate:    p.redeemedAt,
+            status:            p.status,
+            expiresAt:         null,
+            tipoBadge:         '⭐ Premium'
+        }));
+
+        const sorteosNorm = sorteos.map(s => ({
+            rewardName:        s.rewardName,
+            rewardDescription: s.drawExecuted ? (s.won ? '🏆 ¡Ganaste este sorteo!' : 'Sorteo finalizado') : 'Sorteo en curso',
+            rewardImageUrl:    s.rewardImageUrl || null,
+            pointsSpent:       0,
+            redemptionCode:    '-',
+            redemptionDate:    s.enteredAt,
+            status:            s.drawExecuted ? (s.won ? 'COMPLETED' : 'EXPIRED') : 'PENDING',
+            expiresAt:         null,
+            tipoBadge:         s.won ? '🏆 Ganador' : '🎲 Sorteo'
+        }));
+
+        const todos = [...comunes, ...premiumNorm, ...sorteosNorm]
+            .sort((a, b) => new Date(b.redemptionDate) - new Date(a.redemptionDate));
+
+        premiosState.canjeadosCache  = todos;
         premiosState.canjeadosPagina = pagina;
 
-        if (countEl) countEl.textContent = `${canjeados.length} premios`;
+        if (countEl) countEl.textContent = `${todos.length} premios`;
 
-        const headerCount = document.getElementById('puntosActuales');
-        if (headerCount) headerCount.textContent = canjeados.length;
-
-        if (canjeados.length === 0) {
+        if (todos.length === 0) {
             lista.style.display = 'none';
             if (noEl) noEl.style.display = 'block';
             renderCanjeadosPaginacion();
@@ -90,7 +117,6 @@ window.cargarCanjeados = async function(pagina = 1) {
 
         lista.style.display = 'block';
         if (noEl) noEl.style.display = 'none';
-
         renderCanjeadosPagina(pagina);
 
     } catch (error) {
@@ -122,16 +148,28 @@ function renderCanjeadosPagina(pagina) {
             ? `<img src="${c.rewardImageUrl}" alt="${c.rewardName}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`
             : `<i class="fas fa-gift"></i>`;
 
+        const badge = c.tipoBadge
+            ? `<span style="font-size:0.72rem;background:#1a3a5c;color:gold;padding:2px 8px;border-radius:12px;margin-left:6px;">${c.tipoBadge}</span>`
+            : '';
+
+        const codigoRow = c.redemptionCode && c.redemptionCode !== '-'
+            ? `<span><i class="fas fa-hashtag"></i> ${c.redemptionCode}</span>`
+            : '';
+
+        const puntosRow = c.pointsSpent > 0
+            ? `<span><i class="fas fa-coins"></i> ${c.pointsSpent} pts</span>`
+            : '';
+
         return `
             <div class="canjeado-item ${estado}">
                 <div class="canjeado-imagen">${icono}</div>
                 <div class="canjeado-info">
-                    <div class="canjeado-titulo">${c.rewardName}</div>
+                    <div class="canjeado-titulo">${c.rewardName}${badge}</div>
                     <div class="canjeado-descripcion">${c.rewardDescription || ''}</div>
                     <div class="canjeado-metadata">
                         <span><i class="fas fa-calendar-alt"></i> ${fecha}</span>
-                        <span><i class="fas fa-coins"></i> ${c.pointsSpent} pts</span>
-                        <span><i class="fas fa-hashtag"></i> ${c.redemptionCode}</span>
+                        ${puntosRow}
+                        ${codigoRow}
                     </div>
                     ${c.expiresAt ? `<small style="color:#999">Vence: ${new Date(c.expiresAt).toLocaleDateString('es-ES')}</small>` : ''}
                 </div>
