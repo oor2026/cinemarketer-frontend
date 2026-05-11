@@ -91,6 +91,41 @@ async function loadModule(moduleName, element = null, updateHash = true) {
     }
 }
 
+// ==============================================
+// CARGAR PERFIL EN HEADER
+// ==============================================
+async function cargarPerfilHeader() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+        const response = await fetch(`${CONFIG.API_URL}/users/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) return;
+        const data = await response.json();
+
+        // Nombre
+        const nameEl = document.getElementById('headerUserName');
+        if (nameEl) {
+            nameEl.innerHTML = `<span class="user-name-text">${data.name || data.email}</span>`;
+        }
+
+        // Avatar
+        const avatarEl = document.getElementById('headerAvatar');
+        if (avatarEl && data.avatarUrl) {
+            avatarEl.innerHTML = `<img src="${data.avatarUrl}" alt="Avatar" class="avatar-img">`;
+        }
+
+        // Nivel
+        const levelEl = document.getElementById('headerLevel');
+        if (levelEl && data.levelEmoji && data.levelDisplayName) {
+            levelEl.innerHTML = `<span class="level-badge level-${data.level}">${data.levelEmoji} ${data.levelDisplayName}</span>`;
+        }
+
+    } catch (e) {}
+}
+
 function resetDashboardState() {
     document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
 }
@@ -126,9 +161,11 @@ window.addEventListener('hashchange', function() {
 // INICIALIZACIÓN
 // ==============================================
 document.addEventListener('DOMContentLoaded', function() {
+    cargarPerfilHeader();
     loadDefaultModule();
 });
 
 window.loadModule = loadModule;
 window.loadDefaultModule = loadDefaultModule;
 window.resetDashboardState = resetDashboardState;
+window.cargarPerfilHeader = cargarPerfilHeader;
