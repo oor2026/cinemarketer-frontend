@@ -38,9 +38,15 @@
     </div>
 
     <div class="stats-grid">
-        <div class="stat-box">
-            <div class="stat-number" id="totalPoints">0</div>
-            <div class="stat-label">Puntos totales</div>
+        <div class="stat-box stat-box-points">
+            <div class="stat-number" id="availablePoints">0</div>
+            <div class="stat-label">Puntos disponibles</div>
+            <div class="stat-sublabel" id="expiringPointsAlert" style="display:none;"></div>
+        </div>
+        <div class="stat-box stat-box-accumulated">
+            <div class="stat-number" id="accumulatedPoints">0</div>
+            <div class="stat-label">Acumulados este mes</div>
+            <div class="stat-sublabel" id="nextReleaseLabel"></div>
         </div>
         <div class="stat-box">
             <div class="stat-number" id="reviewsCountFormatted">0</div>
@@ -61,7 +67,7 @@
         <div class="premium-banner" id="premiumBanner">
             <div class="premium-banner-badge">★ Exclusivo</div>
             <p class="premium-banner-title">Cinemarketer Premium</p>
-            <div class="premium-banner-price">$2.999 <span>/ mes</span></div>
+            <div class="premium-banner-price"><span id="premiumPlanPrice">$1000</span> <span>/ mes</span></div>
             <ul class="premium-banner-benefits">
                 <li><span class="premium-check"></span>Premios exclusivos</li>
                 <li><span class="premium-check"></span>Sorteos gratuitos</li>

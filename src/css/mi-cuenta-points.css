@@ -1,0 +1,15 @@
+/* ── Puntos: cards diferenciadas (Fase 7 - sistema de puntos) ─────────── */
+.stat-box-points {
+    border-top: 3px solid #e23232;
+}
+
+.stat-box-accumulated {
+    border-top: 3px solid rgba(255,255,255,0.2);
+}
+
+.stat-sublabel {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.55);
+    margin-top: 4px;
+    line-height: 1.3;
+}

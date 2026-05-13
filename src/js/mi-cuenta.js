@@ -19,7 +19,39 @@ window.loadProfile = async function() {
         document.getElementById('userEmail').textContent        = profile.email || '';
         document.getElementById('userDni').textContent          = profile.dni   || '—';
         document.getElementById('userPhone').textContent        = profile.phone || '—';
-        document.getElementById('totalPoints').textContent      = profile.totalPoints ?? 0;
+        // ── Puntos: disponibles y acumulados ──────────────────────────────────
+        const available    = profile.availablePoints ?? 0;
+        const accumulated  = profile.accumulatedPoints ?? 0;
+        const isFree       = !profile.isPremium;
+        const CAP_FREE     = 20000;
+
+        document.getElementById('availablePoints').textContent   = available.toLocaleString('es-AR');
+        document.getElementById('accumulatedPoints').textContent = accumulated.toLocaleString('es-AR');
+
+        // Próxima fecha de cobro: 1° del mes siguiente
+        const now       = new Date();
+        const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        const dayDiff   = Math.ceil((nextMonth - now) / (1000 * 60 * 60 * 24));
+        const toRelease = isFree ? Math.min(accumulated, CAP_FREE) : accumulated;
+        const nextLabel = document.getElementById('nextReleaseLabel');
+        if (nextLabel) {
+            nextLabel.textContent = toRelease > 0
+                ? `+ ${toRelease.toLocaleString('es-AR')} pts el 1° (en ${dayDiff} días)`
+                : `Próximo cobro: 1° del mes`;
+        }
+
+        // Alerta de vencimiento si hay puntos próximos a expirar (< 30 días)
+        const expiringAlert = document.getElementById('expiringPointsAlert');
+        if (expiringAlert && profile.expiringPoints && profile.expiringPoints > 0) {
+            expiringAlert.style.display = 'block';
+            expiringAlert.textContent   = `⚠️ ${profile.expiringPoints.toLocaleString('es-AR')} pts vencen pronto`;
+            expiringAlert.style.color   = '#e23232';
+            expiringAlert.style.fontSize = '0.75rem';
+        }
+
+        // Compatibilidad: mantener id totalPoints si algo más lo usa
+        const legacyEl = document.getElementById('totalPoints');
+        if (legacyEl) legacyEl.textContent = available.toLocaleString('es-AR');
         document.getElementById('redemptionsCount').textContent = profile.commentsCount ?? 0;
 
         const reviewsSpan = document.getElementById('reviewsCountFormatted');
@@ -47,6 +79,9 @@ window.loadProfile = async function() {
     if (typeof window.initSuscripcion === 'function') {
         window.initSuscripcion();
     }
+
+    // Cargar precio del plan desde la BD (dinámico)
+    cargarPrecioPlan();
 
     } catch (error) {
         const card = document.querySelector('.profile-card');
@@ -929,3 +964,33 @@ window['init_mi-cuenta'] = function() {
 
     window.loadProfile();
 };
+// Carga el precio del plan premium desde la BD y lo muestra dinámicamente
+async function cargarPrecioPlan() {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        // Usar subscriptions/me — funciona para usuarios premium
+        // Para FREE, el precio hardcodeado en HTML actúa como fallback
+        const res = await fetch(`${CONFIG.API_URL}/subscriptions/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+            const sub = await res.json();
+            if (sub && sub.planPrice) {
+                const priceEl = document.getElementById('premiumPlanPrice');
+                if (priceEl) {
+                    const formatted = '$' + Number(sub.planPrice).toLocaleString('es-AR', {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                    });
+                    priceEl.textContent = formatted;
+                }
+            }
+        }
+    } catch (e) {
+        // Si falla, el precio hardcodeado sigue visible como fallback
+        console.warn('No se pudo cargar el precio del plan:', e);
+    }
+}
