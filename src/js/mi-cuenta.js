@@ -970,43 +970,22 @@ async function cargarPrecioPlan() {
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        // Usar el endpoint público de planes que no requiere suscripción activa
-        const res = await fetch(`${CONFIG.API_URL}/subscriptions/plans/active`, {
+        // Usar subscriptions/me — funciona para usuarios premium
+        // Para FREE, el precio hardcodeado en HTML actúa como fallback
+        const res = await fetch(`${CONFIG.API_URL}/subscriptions/me`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (res.ok) {
-            const plans = await res.json();
-            const plan = Array.isArray(plans)
-                ? plans.find(p => p.type === 'MENSUAL') || plans[0]
-                : plans;
-
-            if (plan && plan.price) {
+            const sub = await res.json();
+            if (sub && sub.planPrice) {
                 const priceEl = document.getElementById('premiumPlanPrice');
                 if (priceEl) {
-                    const formatted = '$' + Number(plan.price).toLocaleString('es-AR', {
+                    const formatted = '$' + Number(sub.planPrice).toLocaleString('es-AR', {
                         minimumFractionDigits: 0,
                         maximumFractionDigits: 0
                     });
                     priceEl.textContent = formatted;
-                }
-            }
-        } else {
-            // Fallback: intentar con subscriptions/me si el usuario ya es premium
-            const resMe = await fetch(`${CONFIG.API_URL}/subscriptions/me`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (resMe.ok) {
-                const sub = await resMe.json();
-                if (sub && sub.planPrice) {
-                    const priceEl = document.getElementById('premiumPlanPrice');
-                    if (priceEl) {
-                        const formatted = '$' + Number(sub.planPrice).toLocaleString('es-AR', {
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 0
-                        });
-                        priceEl.textContent = formatted;
-                    }
                 }
             }
         }
