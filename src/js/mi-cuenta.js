@@ -80,6 +80,9 @@ window.loadProfile = async function() {
         window.initSuscripcion();
     }
 
+    // Cargar precio del plan desde la BD (dinámico)
+    cargarPrecioPlan();
+
     } catch (error) {
         const card = document.querySelector('.profile-card');
         if (card) card.innerHTML = `
@@ -961,3 +964,54 @@ window['init_mi-cuenta'] = function() {
 
     window.loadProfile();
 };
+// Carga el precio del plan premium desde la BD y lo muestra dinámicamente
+async function cargarPrecioPlan() {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        // Usar el endpoint público de planes que no requiere suscripción activa
+        const res = await fetch(`${CONFIG.API_URL}/subscriptions/plans/active`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+            const plans = await res.json();
+            const plan = Array.isArray(plans)
+                ? plans.find(p => p.type === 'MENSUAL') || plans[0]
+                : plans;
+
+            if (plan && plan.price) {
+                const priceEl = document.getElementById('premiumPlanPrice');
+                if (priceEl) {
+                    const formatted = '$' + Number(plan.price).toLocaleString('es-AR', {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                    });
+                    priceEl.textContent = formatted;
+                }
+            }
+        } else {
+            // Fallback: intentar con subscriptions/me si el usuario ya es premium
+            const resMe = await fetch(`${CONFIG.API_URL}/subscriptions/me`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (resMe.ok) {
+                const sub = await resMe.json();
+                if (sub && sub.planPrice) {
+                    const priceEl = document.getElementById('premiumPlanPrice');
+                    if (priceEl) {
+                        const formatted = '$' + Number(sub.planPrice).toLocaleString('es-AR', {
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                        });
+                        priceEl.textContent = formatted;
+                    }
+                }
+            }
+        }
+    } catch (e) {
+        // Si falla, el precio hardcodeado sigue visible como fallback
+        console.warn('No se pudo cargar el precio del plan:', e);
+    }
+}
