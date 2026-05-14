@@ -829,7 +829,28 @@ window.irASuscripcion = function() {
 window['init_mis-premios'] = function() {
     cargarPuntosUsuario();
     window.cargarCanjeados();
+    cargarPrecioPlanEspeciales();
 };
+
+async function cargarPrecioPlanEspeciales() {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        const res = await fetch(`${CONFIG.API_URL}/subscriptions/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            const sub = await res.json();
+            if (sub && sub.planPrice != null) {
+                const el = document.getElementById('especialesPlanPrice');
+                if (el) {
+                    const val = Math.round(Number(sub.planPrice));
+                    el.textContent = '$' + val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                }
+            }
+        }
+    } catch (e) { /* fallback hardcodeado queda visible */ }
+}
 
 // ==============================================
 // MODAL DE DETALLE DE PREMIO (DISPONIBLES)
