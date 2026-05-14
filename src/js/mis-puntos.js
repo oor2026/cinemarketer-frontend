@@ -45,11 +45,22 @@ window.loadTransactions = async function(page = 1, filter = 'all') {
         puntosState.totalPages   = data.totalPages;
         puntosState.currentFilter = filter;
 
-        // Actualizar resumen
-        document.getElementById('totalPoints').textContent     = data.totalPoints    ?? 0;
-        document.getElementById('pointsEarned').textContent    = data.totalEarned    ?? 0;
-        document.getElementById('pointsSpent').textContent     = data.totalSpent     ?? 0;
-        document.getElementById('thisMonthPoints').textContent = data.earnedThisMonth ?? 0;
+        // Actualizar resumen — nuevo sistema de puntos
+        const fmt = n => (n ?? 0).toLocaleString('es-AR');
+
+        // Header: puntos disponibles
+        const totalEl = document.getElementById('totalPoints');
+        if (totalEl) totalEl.textContent = fmt(data.totalPoints);
+
+        // Stats cards
+        const accEl = document.getElementById('accumulatedPoints');
+        if (accEl) accEl.textContent = fmt(data.accumulatedPoints ?? data.earnedThisMonth);
+
+        const redMonthEl = document.getElementById('redeemedThisMonth');
+        if (redMonthEl) redMonthEl.textContent = fmt(data.redeemedThisMonth ?? 0);
+
+        const totalRedEl = document.getElementById('totalRedeemed');
+        if (totalRedEl) totalRedEl.textContent = fmt(data.totalRedeemed ?? data.totalSpent ?? 0);
 
         // Actualizar paginación
         document.getElementById('pageInfo').textContent = `Página ${data.currentPage} de ${data.totalPages || 1}`;

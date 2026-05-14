@@ -1249,10 +1249,16 @@ window.enviarComentario = async function() {
                 return;
             }
 
+            // Comentario duplicado — antispam
+            if (response.status === 409) {
+                showToast('error', 'No podés publicar el mismo comentario dos veces seguidas.');
+                return;
+            }
+
             // Comentario rechazado por moderación
             if (response.status === 422) {
                 const data = await response.json();
-                alert(data.error || 'Tu comentario no pudo publicarse por no cumplir con nuestras politicas de convivencia.');
+                showToast('error', data.error || 'Tu comentario no pudo publicarse por no cumplir con nuestras políticas de convivencia.');
                 return;
             }
 
@@ -1273,7 +1279,7 @@ window.enviarComentario = async function() {
         showToast('success', '¡Comentario enviado con éxito!');
 
     } catch (error) {
-        alert('Error al enviar comentario. Por favor intenta de nuevo.');
+        showToast('error', 'No se pudo enviar el comentario. Intentá de nuevo.');
     } finally {
         btnEnviar.disabled = false;
         btnEnviar.textContent = originalText;
