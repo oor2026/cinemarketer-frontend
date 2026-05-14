@@ -12,7 +12,9 @@ const dniInput = document.getElementById('dni');
 const phoneInput = document.getElementById('phone');
 const submitBtn = document.getElementById('registerButton');
 const errorContainer = document.getElementById('errorContainer');
-const termsCheckbox = document.getElementById('terms');
+const termsCheckbox     = document.getElementById('terms');
+const privacidadCheckbox = document.getElementById('privacidad');
+const normasCheckbox     = document.getElementById('normas');
 
 // ==============================================
 // VALIDACIÓN DE CONTRASEÑA
@@ -85,9 +87,18 @@ function validarFormulario() {
         errores.push('Las contraseñas no coinciden');
     }
 
-    // Validar términos
+    // Validar los 3 documentos obligatorios
+    const privacidad = privacidadCheckbox?.checked || false;
+    const normas     = normasCheckbox?.checked || false;
+
     if (!terms) {
-        errores.push('Debés aceptar los términos y condiciones');
+        errores.push('Debés aceptar los Términos y Condiciones');
+    }
+    if (!privacidad) {
+        errores.push('Debés aceptar la Política de Privacidad');
+    }
+    if (!normas) {
+        errores.push('Debés aceptar las Normas de Convivencia');
     }
 
     return errores;
@@ -281,3 +292,30 @@ async function handleRegister(e) {
 if (registerForm) {
     registerForm.addEventListener('submit', handleRegister);
 }
+
+// Links de documentos legales
+document.addEventListener('DOMContentLoaded', function() {
+    const termsLink = document.getElementById('termsLink');
+    if (termsLink) {
+        termsLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            footerModal.abrir('terminos');
+        });
+    }
+
+    const privacidadLink = document.getElementById('privacidadLink');
+    if (privacidadLink) {
+        privacidadLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            footerModal.abrir('privacidad');
+        });
+    }
+
+    const normasLink = document.getElementById('normasLink');
+    if (normasLink) {
+        normasLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            footerModal.abrir('normasConvivencia');
+        });
+    }
+});
