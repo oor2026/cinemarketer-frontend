@@ -13,7 +13,8 @@
         cookies:         { titulo: 'Política de Cookies', ruta: 'legal/cookies.html' },
         centroPrivacidad:{ titulo: 'Centro de Privacidad', ruta: 'legal/centro-privacidad.html' },
         ayuda:           { titulo: 'Centro de Ayuda', ruta: 'legal/ayuda.html' },
-        avisoLegal:      { titulo: 'Aviso Legal', ruta: 'legal/aviso-legal.html' }
+        avisoLegal:      { titulo: 'Aviso Legal', ruta: 'legal/aviso-legal.html' },
+        normasConvivencia: { titulo: 'Normas de Convivencia', ruta: 'legal/normas.html' }
     };
 
     // ─────────────────────────────────────────────
