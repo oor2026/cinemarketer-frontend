@@ -1339,3 +1339,11 @@ body {
     line-height: 1.6;
     text-align: left;
 }
+
+@media (max-width: 768px) {
+    .hero {
+        min-height: auto;
+        padding-top: calc(var(--header-height) + 1.5rem);
+        padding-bottom: 2.5rem;
+    }
+}
