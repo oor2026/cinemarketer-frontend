@@ -31,212 +31,237 @@
 <div class="auth-wrapper">
     <div class="auth-container">
         <div class="auth-card">
-            <!-- Header con icono -->
-            <div class="auth-header">
-                <div class="auth-icon">
-                    <i class="fas fa-user-plus"></i>
-                </div>
+
+            <!-- Panel izquierdo (solo desktop) -->
+            <div class="auth-panel-left">
+                <img src="assets/images/logoregister.png" alt="Cinemarketer" class="auth-panel-logo" />
                 <h2>Crear tu cuenta</h2>
-                <p>¿Listo para vivir la experiencia?</p>
+                <div class="auth-panel-divider"></div>
+                <p>Sumáte a la comunidad de cine <br> más grande de Argentina</p>
+                <div class="auth-panel-divider"></div>
+                <div class="auth-panel-benefits">
+                    <div class="auth-benefit"><i class="fas fa-coins"></i> Ganás puntos por votar y comentar</div>
+                    <div class="auth-benefit"><i class="fas fa-gift"></i> Canjeá premios reales con tus puntos</div>
+                    <div class="auth-benefit"><i class="fas fa-star"></i> Alcanzá nuevos niveles de insignia</div>
+                    <div class="auth-benefit"><i class="fas fa-crown"></i> Premium: puntos x2 sin tope</div>
+                </div>
             </div>
 
-            <!-- Formulario de registro -->
-            <form id="registerForm" class="auth-form">
-                <!-- Campo nombre completo -->
-                <div class="form-group">
-                    <label for="name">
-                        <i class="fas fa-user"></i>
-                        Nombre completo
-                    </label>
-                    <input
-                            type="text"
-                            id="name"
-                            name="name"
-                            required
-                            placeholder="Ej: Juan Pérez"
-                            autocomplete="name"
-                            maxlength="50"
-                    >
+            <!-- Panel derecho: formulario -->
+            <div class="auth-panel-right">
+
+                <!-- Header mobile (oculto en desktop) -->
+                <div class="auth-header auth-header-mobile">
+                    <div class="auth-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h2>Crear tu cuenta</h2>
+                    <p>¿Listo para vivir la experiencia?</p>
                 </div>
 
-                <!-- Campo email -->
-                <div class="form-group">
-                    <label for="email">
-                        <i class="fas fa-envelope"></i>
-                        Correo electrónico
-                    </label>
-                    <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            required
-                            placeholder="dirección@email.com"
-                            autocomplete="email"
-                            maxlength="50"
-                    >
-                </div>
-
-                <!-- Campo DNI -->
-                <div class="form-group">
-                    <label for="dni">
-                        <i class="fas fa-id-card"></i>
-                        DNI
-                    </label>
-                    <input
-                            type="text"
-                            id="dni"
-                            name="dni"
-                            required
-                            placeholder="Ej: 12345678"
-                            maxlength="8"
-                            inputmode="numeric"
-                            pattern="\d{7,8}"
-                    >
-                    <span class="field-hint">7 u 8 dígitos numéricos, sin puntos</span>
-                </div>
-
-                <!-- Campo teléfono con prefijo -->
-                <div class="form-group" style="position: relative;">
-                    <label for="phoneNumber">
-                        <i class="fas fa-phone"></i>
-                        Teléfono
-                    </label>
-                    <div class="phone-wrapper">
-                        <div class="phone-prefix-btn" id="phonePrefixBtn" tabindex="0">
-                            <span id="phonePrefixFlag">🇦🇷</span>
-                            <span id="phonePrefixCode">+54</span>
-                            <i class="fas fa-chevron-down phone-chevron"></i>
+                <!-- Formulario de registro -->
+                <form id="registerForm" class="auth-form">
+                    <div class="form-grid-2">
+                        <!-- Campo nombre completo -->
+                        <div class="form-group">
+                            <label for="name">
+                                <i class="fas fa-user"></i>
+                                Nombre completo
+                            </label>
+                            <input
+                                    type="text"
+                                    id="name"
+                                    name="name"
+                                    required
+                                    placeholder="Ej: Juan Pérez"
+                                    autocomplete="name"
+                                    maxlength="50"
+                            >
                         </div>
-                        <input
-                                type="tel"
-                                id="phoneNumber"
-                                name="phoneNumber"
-                                required
-                                placeholder="11 12345678"
-                                inputmode="numeric"
-                                maxlength="15"
-                                autocomplete="tel-national"
-                        >
-                        <input type="hidden" id="phone" name="phone">
-                    </div>
-                    <div class="phone-prefix-dropdown" id="phonePrefixDropdown" style="display:none;">
-                        <input type="text" class="phone-prefix-search" id="phonePrefixSearch" placeholder="Buscar país...">
-                        <div class="phone-prefix-list" id="phonePrefixList"></div>
-                    </div>
-                    <span class="field-hint" id="phoneHint">Máx. 15 dígitos</span>
-                </div>
 
-                <!-- Campo contraseña con toggle -->
-                <div class="form-group">
-                    <label for="password">
-                        <i class="fas fa-lock"></i>
-                        Contraseña
-                    </label>
-                    <div class="password-wrapper">
-                        <input
-                                type="password"
-                                id="password"
-                                name="password"
-                                required
-                                placeholder="••••••••"
-                                autocomplete="new-password"
-                                maxlength="30"
-                        >
-                        <button
-                                type="button"
-                                class="password-toggle"
-                                id="togglePassword"
-                                aria-label="Mostrar contraseña"
-                        >
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
+                        <!-- Campo email -->
+                        <div class="form-group">
+                            <label for="email">
+                                <i class="fas fa-envelope"></i>
+                                Correo electrónico
+                            </label>
+                            <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    required
+                                    placeholder="dirección@email.com"
+                                    autocomplete="email"
+                                    maxlength="50"
+                            >
+                        </div>
+                    </div><!-- fin form-grid-2 nombre+email -->
 
-                <!-- Campo confirmar contraseña -->
-                <div class="form-group">
-                    <label for="confirmPassword">
-                        <i class="fas fa-lock"></i>
-                        Confirmar contraseña
-                    </label>
-                    <div class="password-wrapper">
-                        <input
-                                type="password"
-                                id="confirmPassword"
-                                name="confirmPassword"
-                                required
-                                placeholder="••••••••"
-                                autocomplete="new-password"
-                                maxlength="30"
-                        >
-                        <button
-                                type="button"
-                                class="password-toggle"
-                                id="toggleConfirmPassword"
-                                aria-label="Mostrar contraseña"
-                        >
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
+                    <div class="form-grid-2">
+                        <!-- Campo DNI -->
+                        <div class="form-group">
+                            <label for="dni">
+                                <i class="fas fa-id-card"></i>
+                                DNI
+                            </label>
+                            <input
+                                    type="text"
+                                    id="dni"
+                                    name="dni"
+                                    required
+                                    placeholder="Ej: 12345678"
+                                    maxlength="8"
+                                    inputmode="numeric"
+                                    pattern="\d{7,8}"
+                            >
+                            <span class="field-hint">7 u 8 dígitos numéricos, sin puntos</span>
+                        </div>
 
-                <!-- Documentos legales de aceptación obligatoria -->
-                <div class="form-group terms-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="terms">
-                        <span class="checkbox-custom"></span>
-                        <span class="checkbox-text">
+                        <!-- Campo teléfono con prefijo -->
+                        <div class="form-group" style="position: relative;">
+                            <label for="phoneNumber">
+                                <i class="fas fa-phone"></i>
+                                Teléfono
+                            </label>
+                            <div class="phone-wrapper">
+                                <div class="phone-prefix-btn" id="phonePrefixBtn" tabindex="0">
+                                    <span id="phonePrefixFlag">🇦🇷</span>
+                                    <span id="phonePrefixCode">+54</span>
+                                    <i class="fas fa-chevron-down phone-chevron"></i>
+                                </div>
+                                <input
+                                        type="tel"
+                                        id="phoneNumber"
+                                        name="phoneNumber"
+                                        required
+                                        placeholder="11 12345678"
+                                        inputmode="numeric"
+                                        maxlength="15"
+                                        autocomplete="tel-national"
+                                >
+                                <input type="hidden" id="phone" name="phone">
+                            </div>
+                            <div class="phone-prefix-dropdown" id="phonePrefixDropdown" style="display:none;">
+                                <input type="text" class="phone-prefix-search" id="phonePrefixSearch" placeholder="Buscar país...">
+                                <div class="phone-prefix-list" id="phonePrefixList"></div>
+                            </div>
+                            <span class="field-hint" id="phoneHint">Máx. 15 dígitos</span>
+                        </div>
+
+                        <!-- Campo contraseña con toggle -->
+                        <div class="form-group">
+                            <label for="password">
+                                <i class="fas fa-lock"></i>
+                                Contraseña
+                            </label>
+                            <div class="password-wrapper">
+                                <input
+                                        type="password"
+                                        id="password"
+                                        name="password"
+                                        required
+                                        placeholder="••••••••"
+                                        autocomplete="new-password"
+                                        maxlength="30"
+                                >
+                                <button
+                                        type="button"
+                                        class="password-toggle"
+                                        id="togglePassword"
+                                        aria-label="Mostrar contraseña"
+                                >
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Campo confirmar contraseña -->
+                        <div class="form-group">
+                            <label for="confirmPassword">
+                                <i class="fas fa-lock"></i>
+                                Confirmar contraseña
+                            </label>
+                            <div class="password-wrapper">
+                                <input
+                                        type="password"
+                                        id="confirmPassword"
+                                        name="confirmPassword"
+                                        required
+                                        placeholder="••••••••"
+                                        autocomplete="new-password"
+                                        maxlength="30"
+                                >
+                                <button
+                                        type="button"
+                                        class="password-toggle"
+                                        id="toggleConfirmPassword"
+                                        aria-label="Mostrar contraseña"
+                                >
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div><!-- fin form-grid-2 passwords -->
+
+                    <!-- Documentos legales de aceptación obligatoria -->
+                    <div class="form-group terms-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="terms">
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-text">
                             He leído y acepto los
                             <a href="#" id="termsLink">Términos y Condiciones</a>
                         </span>
-                    </label>
-                </div>
-                <div class="form-group terms-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="privacidad">
-                        <span class="checkbox-custom"></span>
-                        <span class="checkbox-text">
+                        </label>
+                    </div>
+                    <div class="form-group terms-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="privacidad">
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-text">
                             He leído y acepto la
                             <a href="#" id="privacidadLink">Política de Privacidad</a>
                         </span>
-                    </label>
-                </div>
-                <div class="form-group terms-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="normas">
-                        <span class="checkbox-custom"></span>
-                        <span class="checkbox-text">
+                        </label>
+                    </div>
+                    <div class="form-group terms-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="normas">
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-text">
                             He leído y acepto las
                             <a href="#" id="normasLink">Normas de Convivencia</a>
                         </span>
-                    </label>
-                </div>
+                        </label>
+                    </div>
 
-                <!-- Botón de registro -->
-                <button type="submit" class="btn btn-primary btn-block" id="registerButton">
-                    <span class="btn-text">Crear cuenta</span>
-                    <span class="btn-loader" style="display: none;">
+                    <!-- Botón de registro -->
+                    <button type="submit" class="btn btn-primary btn-block" id="registerButton">
+                        <span class="btn-text">Crear cuenta</span>
+                        <span class="btn-loader" style="display: none;">
                             <i class="fas fa-spinner fa-spin"></i>
                         </span>
-                </button>
-            </form>
+                    </button>
+                </form>
 
-            <!-- Contenedor para mensajes de error/éxito -->
-            <div id="errorContainer" style="display: none;"></div>
+                <!-- Contenedor para mensajes de error/éxito -->
+                <div id="errorContainer" style="display: none;"></div>
 
-            <!-- Footer con enlaces -->
-            <div class="auth-footer">
-                <p class="login-prompt">
-                    ¿Ya tienes cuenta?
-                    <a href="login.html" class="login-link">
-                        Inicia sesión <i class="fas fa-arrow-right"></i>
+                <!-- Footer con enlaces -->
+                <div class="auth-footer">
+                    <p class="login-prompt">
+                        ¿Ya tienes cuenta?
+                        <a href="login.html" class="login-link">
+                            Inicia sesión <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </p>
+                    <a href="index.html" class="back-link">
+                        <i class="fas fa-arrow-left"></i>
+                        Volver al inicio
                     </a>
-                </p>
-                <a href="index.html" class="back-link">
-                    <i class="fas fa-arrow-left"></i>
-                    Volver al inicio
-                </a>
-            </div>
+                </div>
+            </div> <!-- fin auth-panel-right -->
         </div>
     </div>
 </div>
