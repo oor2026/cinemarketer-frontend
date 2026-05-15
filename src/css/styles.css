@@ -1319,7 +1319,18 @@ body {
 
 @media (max-width: 600px) {
     .planes-comparativo {
-        grid-template-columns: 1fr;
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        gap: 12px;
+        padding-bottom: 8px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .plan-card {
+        min-width: 85%;
+        scroll-snap-align: center;
+        flex-shrink: 0;
     }
 }
 
