@@ -78,6 +78,7 @@ function cargarAvatarYNivel(profile) {
         const levelEmoji = profile.levelEmoji || getLevelEmoji(profile.level);
         const levelName  = profile.levelDisplayName || profile.level;
         levelBadge.innerHTML = `
+            <span class="level-label">NIVEL:</span>
             <span class="level-icon">${levelEmoji}</span>
             <span class="level-name">${levelName}</span>
             ${profile.avatarName ? `<span class="avatar-name">· ${profile.avatarName}</span>` : ''}
