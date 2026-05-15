@@ -168,7 +168,7 @@ body {
 }
 
 .hero-title {
-    font-size: clamp(2rem, 5vw, 4rem);
+    font-size: clamp(2rem, 3.5vw, 4rem);
     margin-bottom: 1rem;
     animation: fadeInUp 1s ease;
 }
@@ -190,6 +190,7 @@ body {
 }
 
 .hero-stats {
+    margin-top: 15rem;
     display: flex;
     justify-content: center;
     gap: 3rem;
