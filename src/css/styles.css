@@ -281,7 +281,7 @@ body {
     font-size: 1.5rem;
     line-height: 1.6;
     margin-bottom: 3rem;
-    text-align: center;
+    text-align: left;
     max-width: 800px;
     margin-left: auto;
     margin-right: auto;
@@ -317,12 +317,17 @@ body {
 }
 
 .feature-item i {
-    font-size: 2.5rem;
+    font-size: 1.6rem;
     flex-shrink: 0;
-    background: linear-gradient(135deg, #e50914 0%, #b2070f 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: white;
+    color: #e50914;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-text-fill-color: #e50914;
 }
 
 .feature-item h4 {
