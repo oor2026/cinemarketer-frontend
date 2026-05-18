@@ -164,8 +164,8 @@ body.modulo-contacto .ad-image {
     color: #aaa;
 }
 
-/* ── DEBUG: bordes temporales para visualizar espacios ── */
+/* ── DEBUG: bordes temporales para visualizar espacios
 .ads-sidebar-left  { border: 2px solid red; }
 .ads-sidebar-right { border: 2px solid blue; }
 .dashboard-layout  { border: 2px solid green; }
-.dashboard-layout #module-container { border: 2px solid orange; }
+.dashboard-layout #module-container { border: 2px solid orange; }*/
