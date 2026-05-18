@@ -1,0 +1,23 @@
+/* google-auth.css */
+#googleLoginBtn {
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+#googleLoginBtn:hover {
+    background: #db4437;
+    border-color: #db4437;
+    color: white;
+}
+
+#googleLoginBtn:hover svg path {
+    fill: white;
+}
+
+#googleCompleteProfileModal {
+    display: none;
+}
+
+#googleCompleteProfileModal[style*="flex"] {
+    display: flex !important;
+}
