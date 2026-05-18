@@ -74,6 +74,9 @@
 }
 
 .stat-item {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
     background: #E50914;
     padding: 1.5rem;
     border-radius: 10px;

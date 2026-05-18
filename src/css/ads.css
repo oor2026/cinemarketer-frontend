@@ -1,0 +1,171 @@
+/* ========================================
+   ADS.CSS — Sistema de banners publicitarios
+   Cinemarketer
+   ======================================== */
+
+/* ── Wrapper general: 3 columnas ── */
+.dashboard-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    max-width: 1520px;
+    margin: 0 auto;
+    padding: 0 16px 0 0; /* respiro derecho entre banner y borde de pantalla */
+}
+
+/* ── Columna central: el module-container existente ── */
+.dashboard-layout #module-container {
+    flex: 1;
+    min-width: 0;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+/* ── Columna lateral izquierda ── */
+.ads-sidebar-left {
+    width: clamp(160px, 20vw, 300px);
+    flex-shrink: 0;
+    padding-top: 0.5rem;
+    display: none;
+}
+
+/* ── Mostrar sidebar izquierda según módulo activo ── */
+body.modulo-mi-cuenta .ads-sidebar-left {
+    display: block;
+}
+
+/* ── Columna lateral derecha ── */
+.ads-sidebar-right {
+    width: clamp(160px, 20vw, 300px);
+    flex-shrink: 0;
+    padding-top: 0.5rem;
+    /* oculta por defecto — se muestra solo en las vistas habilitadas */
+    display: none;
+}
+
+/* ── El bloque del banner en sí ── */
+.ad-block {
+    position: sticky;
+    top: 100px; /* respeta el alto del navbar (~80px) + margen */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ── Etiqueta "Publicidad" ── */
+.ad-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #aaa;
+    align-self: center;
+    padding-left: 2px;
+}
+
+/* ── La imagen del banner ── */
+.ad-image {
+    display: block;
+    width: clamp(160px, 20vw, 300px);
+    height: 600px;
+    object-fit: contain;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    transition: opacity 0.2s ease, box-shadow 0.2s ease, width 0.2s ease;
+}
+
+.ad-image:hover {
+    opacity: 0.92;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* ── Mostrar sidebar derecha según módulo activo ── */
+/* Se activa agregando una clase al body desde module-loader.js */
+body.modulo-mi-cuenta .ads-sidebar-right {
+    display: block;
+}
+
+/*
+   Para agregar más vistas en el futuro, solo agregar una línea:
+   body.modulo-mis-premios .ads-sidebar-right { display: block; }
+*/
+
+/* ── RESPONSIVE: ocultar por debajo de 1280px ── */
+/* Por encima de 1280px hay espacio suficiente para el contenido + 300px de banner */
+/* Por debajo, el banner desaparece y el contenido central ocupa todo el ancho */
+@media (max-width: 1279px) {
+    .ads-sidebar-right,
+    .ads-sidebar-left {
+        display: none !important;
+    }
+
+    .dashboard-layout {
+        display: block;
+    }
+}
+
+/* Sidebar vacío: reserva espacio pero no muestra nada */
+.ads-sidebar-left.ad-empty .ad-block,
+.ads-sidebar-right.ad-empty .ad-block {
+    visibility: hidden;
+}
+
+body.modulo-mis-puntos .ads-sidebar-left,
+body.modulo-mis-puntos .ads-sidebar-right {
+    display: block;
+}
+
+/* Vistas con contenido central más ancho — banner angosto */
+body.modulo-mis-premios .ads-sidebar-left,
+body.modulo-mis-premios .ads-sidebar-right,
+body.modulo-mis-consultas .ads-sidebar-left,
+body.modulo-mis-consultas .ads-sidebar-right,
+body.modulo-contacto .ads-sidebar-left,
+body.modulo-contacto .ads-sidebar-right {
+    display: block;
+    width: 200px;
+}
+
+body.modulo-mis-premios .ad-image,
+body.modulo-mis-consultas .ad-image,
+body.modulo-contacto .ad-image {
+    width: 200px;
+}
+
+/* ── Banner horizontal feed ── */
+.feed-banner-img {
+    display: block;
+    width: 100%;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    transition: opacity 0.2s ease;
+}
+
+.feed-banner-img:hover {
+    opacity: 0.92;
+}
+
+#feedBannerHorizontal {
+    margin: 0 0 0 0;
+    position: relative;
+}
+
+.feed-banner-label {
+    position: absolute;
+    top: 4px;
+    right: 8px;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #aaa;
+}
+
+/* ── DEBUG: bordes temporales para visualizar espacios
+.ads-sidebar-left  { border: 2px solid red; }
+.ads-sidebar-right { border: 2px solid blue; }
+.dashboard-layout  { border: 2px solid green; }
+.dashboard-layout #module-container { border: 2px solid orange; }*/

@@ -108,7 +108,9 @@ const adminUI = {
                 adminSupervision.init();
         } else if (sectionName === 'estadisticas' && typeof adminEstadisticas !== 'undefined') {
             adminEstadisticas.init();
-        }
+        } else if (sectionName === 'comercial' && typeof adminComercial !== 'undefined') {
+                      adminComercial.cargar();
+                  }
     },
 
     // ------------------------------------------

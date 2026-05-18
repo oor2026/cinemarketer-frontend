@@ -168,7 +168,7 @@ body {
 }
 
 .hero-title {
-    font-size: clamp(2rem, 5vw, 4rem);
+    font-size: clamp(2rem, 3.5vw, 4rem);
     margin-bottom: 1rem;
     animation: fadeInUp 1s ease;
 }
@@ -190,6 +190,7 @@ body {
 }
 
 .hero-stats {
+    margin-top: 15rem;
     display: flex;
     justify-content: center;
     gap: 3rem;
@@ -280,7 +281,7 @@ body {
     font-size: 1.5rem;
     line-height: 1.6;
     margin-bottom: 3rem;
-    text-align: center;
+    text-align: left;
     max-width: 800px;
     margin-left: auto;
     margin-right: auto;
@@ -316,12 +317,17 @@ body {
 }
 
 .feature-item i {
-    font-size: 2.5rem;
+    font-size: 1.6rem;
     flex-shrink: 0;
-    background: linear-gradient(135deg, #e50914 0%, #b2070f 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: white;
+    color: #e50914;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-text-fill-color: #e50914;
 }
 
 .feature-item h4 {
@@ -1184,5 +1190,166 @@ body {
 
     .footer-modal-body {
         padding: 1rem;
+    }
+}
+/* ========== CUADRO COMPARATIVO FREE VS PREMIUM ========== */
+.planes-comparativo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.plan-card {
+    background: #242424;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 0.5px solid rgba(255,255,255,0.1);
+}
+
+.plan-card-premium {
+    border: 2px solid #e50914;
+}
+
+.plan-head {
+    padding: 1.25rem 1.25rem 1rem;
+    border-bottom: 0.5px solid rgba(255,255,255,0.08);
+}
+
+.plan-badge {
+    display: inline-block;
+    background: #e50914;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+}
+
+.plan-badge-free {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.6);
+}
+
+.plan-nombre {
+    color: #fff;
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.plan-precio {
+    font-size: 28px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.plan-precio span {
+    font-size: 13px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.5);
+}
+
+.plan-precio-free {
+    font-size: 20px;
+    color: rgba(255,255,255,0.7);
+}
+
+.plan-rows {
+    list-style: none;
+    padding: 0.75rem 1.25rem;
+    margin: 0;
+}
+
+.plan-rows li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 0;
+    border-bottom: 0.5px solid rgba(255,255,255,0.06);
+}
+
+.plan-rows li:last-child {
+    border-bottom: none;
+}
+
+.plan-row-label {
+    font-size: 16px;
+    color: rgba(255,255,255,0.5);
+}
+
+.plan-row-val {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.plan-highlight { color: #e50914; }
+.plan-muted { color: rgba(255,255,255,0.35); }
+.plan-check { color: #4caf50; font-size: 15px; }
+.plan-cross { color: rgba(255,255,255,0.25); font-size: 15px; }
+
+.plan-btn {
+    display: block;
+    margin: 0 1.25rem 1.25rem;
+    padding: 0.7rem;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+}
+
+.plan-btn-free {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.7);
+}
+
+.plan-btn-free:hover {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+}
+
+.plan-btn-premium {
+    background: #e50914;
+    color: #fff;
+}
+
+.plan-btn-premium:hover {
+    background: #b2070f;
+}
+
+@media (max-width: 600px) {
+    .planes-comparativo {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        gap: 12px;
+        padding-bottom: 8px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .plan-card {
+        min-width: 85%;
+        scroll-snap-align: center;
+        flex-shrink: 0;
+    }
+}
+
+.feature-card p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    text-align: left;
+}
+
+@media (max-width: 768px) {
+    .hero {
+        min-height: auto;
+        padding-top: calc(var(--header-height) + 1.5rem);
+        padding-bottom: 2.5rem;
     }
 }

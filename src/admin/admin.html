@@ -96,6 +96,11 @@
                 <i class="fas fa-chart-bar"></i>
                 <span>Estadísticas</span>
             </li>
+            <!-- ── NUEVO: Comercial ── -->
+            <li class="sidebar-item" onclick="adminUI.switchSection('comercial', this)">
+                <i class="fas fa-bullhorn"></i>
+                <span>Comercial</span>
+            </li>
         </ul>
     </aside>
 
@@ -838,6 +843,79 @@
                 </div>
             </div>
         </section>
+
+        <!-- ── NUEVA SECCIÓN: COMERCIAL ── -->
+        <section id="section-comercial" class="admin-section">
+            <div class="section-header">
+                <div>
+                    <h1>Gestión Comercial</h1>
+                    <p>Administrá los banners publicitarios en cada vista del sitio</p>
+                </div>
+                <button class="btn-nuevo" onclick="adminComercial.abrirFormulario()">
+                    <i class="fas fa-plus"></i> Nuevo Banner
+                </button>
+            </div>
+            <div class="admin-stats">
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="comercialStatTotal">0</span>
+                    <span class="stat-label">Total banners</span>
+                </div>
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="comercialStatVisibles">0</span>
+                    <span class="stat-label">Visibles</span>
+                </div>
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="comercialStatOcultos">0</span>
+                    <span class="stat-label">Ocultos</span>
+                </div>
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="comercialStatSinImagen">0</span>
+                    <span class="stat-label">Sin imagen</span>
+                </div>
+            </div>
+            <div class="admin-card">
+                <div class="card-header">
+                    <h3>Lista de banners</h3>
+                    <div style="display:flex; gap:0.75rem; align-items:center;">
+                        <select class="filtro-select" id="filtroModuloBanners" onchange="adminComercial.filtrar()">
+                            <option value="todos">Todos los módulos</option>
+                            <option value="MI_CUENTA">Mi Cuenta</option>
+                            <option value="MIS_PUNTOS">Mis Puntos</option>
+                            <option value="MIS_PREMIOS">Mis Premios</option>
+                            <option value="MIS_CONSULTAS">Mis Consultas</option>
+                            <option value="CONTACTO">Contacto</option>
+                            <option value="FEED_FILMS">Feed de Películas</option>
+                        </select>
+                        <select class="filtro-select" id="filtroVisibilidadBanners" onchange="adminComercial.filtrar()">
+                            <option value="todos">Todos</option>
+                            <option value="visibles">Visibles</option>
+                            <option value="ocultos">Ocultos</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="tabla-wrapper">
+                    <table class="admin-table" id="tablaBanners">
+                        <thead>
+                        <tr>
+                            <th>Preview</th>
+                            <th>Marca</th>
+                            <th>Módulo</th>
+                            <th>Posición</th>
+                            <th>Link destino</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tablaBannersBody">
+                        <tr><td colspan="7" class="loading-row">
+                            <i class="fas fa-spinner fa-spin"></i> Cargando banners...
+                        </td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
     </main>
 </div>
 
@@ -1232,6 +1310,123 @@
     </div>
 </div>
 
+<!-- ── NUEVO: Modal formulario banner comercial ── -->
+<div class="modal-overlay" id="modalComercialOverlay" onclick="adminComercial.cerrarFormulario()"></div>
+<div class="admin-modal" id="modalComercial">
+    <div class="modal-header">
+        <h2 id="modalComercialTitulo">Nuevo Banner</h2>
+        <button class="modal-cerrar" onclick="adminComercial.cerrarFormulario()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="form-row">
+            <div class="form-group">
+                <label>Nombre de la marca <span class="required">*</span></label>
+                <input type="text" id="inputBannerMarca" placeholder="Ej: Coca-Cola" maxlength="200">
+            </div>
+            <div class="form-group">
+                <label>Link de destino</label>
+                <input type="url" id="inputBannerLink" placeholder="https://www.ejemplo.com">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Módulo <span class="required">*</span></label>
+                <select id="inputBannerModulo">
+                    <option value="">— Seleccioná un módulo —</option>
+                    <option value="MI_CUENTA">Mi Cuenta</option>
+                    <option value="MIS_PUNTOS">Mis Puntos</option>
+                    <option value="MIS_PREMIOS">Mis Premios</option>
+                    <option value="MIS_CONSULTAS">Mis Consultas</option>
+                    <option value="CONTACTO">Contacto</option>
+                    <option value="FEED_FILMS">Feed de Películas</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Posición <span class="required">*</span></label>
+                <select id="inputBannerPosicion">
+                    <option value="">— Seleccioná una posición —</option>
+                    <option value="IZQUIERDO">Lateral izquierdo</option>
+                    <option value="DERECHO">Lateral derecho</option>
+                    <option value="HORIZONTAL">Banner horizontal (feed)</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Visibilidad</label>
+            <select id="inputBannerVisible">
+                <option value="true">✅ Visible</option>
+                <option value="false">🚫 Oculto</option>
+            </select>
+        </div>
+        <div id="bannerImagenSection" style="display:none;">
+            <div class="comercial-divider"><span>Imagen del banner</span></div>
+            <div class="comercial-imagen-wrapper">
+                <div class="comercial-preview" id="comercialPreview">
+                    <i class="fas fa-image"></i>
+                    <span>Sin imagen</span>
+                </div>
+                <div class="comercial-imagen-acciones">
+                    <p class="comercial-imagen-hint">
+                        <i class="fas fa-info-circle"></i>
+                        Dimensiones recomendadas: <strong>300 × 1100 px</strong><br>
+                        Formatos: JPG, PNG, WEBP, GIF — Máx. 2MB
+                    </p>
+                    <label class="btn-upload-imagen" for="inputBannerImagen">
+                        <i class="fas fa-upload"></i> Subir imagen
+                    </label>
+                    <input type="file" id="inputBannerImagen" accept="image/jpeg,image/png,image/webp,image/gif"
+                           style="display:none;" onchange="adminComercial.previewImagen(this)">
+                    <button class="btn-eliminar-imagen" id="btnEliminarImagen"
+                            onclick="adminComercial.eliminarImagen()" style="display:none;">
+                        <i class="fas fa-trash"></i> Eliminar imagen
+                    </button>
+                </div>
+            </div>
+        </div>
+        <p class="comercial-nota" id="comercialNotaGuardar">
+            <i class="fas fa-lightbulb"></i>
+            Guardá primero el banner y luego podrás subir la imagen.
+        </p>
+    </div>
+    <div class="modal-footer">
+        <button class="btn-cancelar" onclick="adminComercial.cerrarFormulario()">Cancelar</button>
+        <button class="btn-guardar" id="btnComercialGuardar" onclick="adminComercial.guardar()">
+            <i class="fas fa-save"></i>
+            <span id="btnComercialGuardarLabel">Crear Banner</span>
+        </button>
+    </div>
+</div>
+
+<!-- ── NUEVO: Modal confirmar eliminación banner ── -->
+<div class="modal-overlay" id="modalEliminarBannerOverlay" onclick="adminComercial.cerrarEliminar()"></div>
+<div class="admin-modal admin-modal-sm" id="modalEliminarBanner">
+    <div class="modal-header">
+        <h2 style="color:#e50914;"><i class="fas fa-trash"></i> Eliminar banner</h2>
+        <button class="modal-cerrar" onclick="adminComercial.cerrarEliminar()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body">
+        <p>¿Estás seguro que querés eliminar el banner de <strong id="eliminarBannerNombre"></strong>?</p>
+        <p style="color:#e50914; font-size:0.85rem;">
+            <i class="fas fa-exclamation-triangle"></i>
+            Esta acción es permanente. La imagen también se eliminará de Cloudinary.
+        </p>
+        <p style="color:#666; font-size:0.85rem;">
+            <i class="fas fa-info-circle"></i>
+            Si querés pausarlo temporalmente, usá <strong>Ocultar</strong> en lugar de eliminar.
+        </p>
+    </div>
+    <div class="modal-footer">
+        <button class="btn-cancelar" onclick="adminComercial.cerrarEliminar()">Cancelar</button>
+        <button class="btn-eliminar" onclick="adminComercial.confirmarEliminar()">
+            <i class="fas fa-trash"></i> Sí, eliminar
+        </button>
+    </div>
+</div>
+
 <!-- SCRIPTS -->
 <script src="../js/admin-supervision.js"></script>
 <script src="../js/admin.js"></script>
@@ -1251,6 +1446,8 @@
 <script src="../js/admin-estadisticas.js"></script>
 <script src="../js/admin-premios-premium.js"></script>
 <script src="../js/admin-suscripciones.js"></script>
+<!-- ── NUEVO ── -->
+<script src="../js/admin-comercial.js"></script>
 
 </body>
 </html>

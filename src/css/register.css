@@ -80,6 +80,12 @@ body {
     margin: 0 auto;
 }
 
+@media (min-width: 769px) {
+    .auth-container {
+        max-width: 1050px;
+    }
+}
+
 /* ========== TARJETA ========== */
 .auth-card {
     background: white;
@@ -87,6 +93,15 @@ body {
     padding: 2rem;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
     animation: slideUp 0.5s ease;
+}
+
+@media (min-width: 769px) {
+    .auth-card {
+        display: flex;
+        padding: 0;
+        overflow: hidden;
+        align-items: stretch;
+    }
 }
 
 @keyframes slideUp {
@@ -310,7 +325,10 @@ body {
 }
 
 .btn-block {
-    width: 100%;
+    width: auto;
+    min-width: 300px;;
+    margin: 0 auto;  /* ← Centra el bloque horizontalmente */
+    display: block;
 }
 
 /* Loader en botón */
@@ -560,7 +578,7 @@ body {
 /* Móvil (480px y menores) */
 @media (max-width: 480px) {
     .auth-wrapper {
-        padding: 4rem 0.75rem 1rem;
+        padding: 1rem 0.75rem 1rem;
     }
 
     .auth-card {
@@ -763,4 +781,99 @@ body {
 .option-code {
     color: var(--gray);
     font-size: 0.82rem;
+}
+
+/* ========== LAYOUT DOS COLUMNAS (DESKTOP) ========== */
+.auth-panel-left {
+    display: none;
+}
+
+.auth-panel-right {
+    width: 100%;
+}
+
+.auth-header-mobile {
+    display: block;
+}
+
+@media (min-width: 769px) {
+    .auth-panel-left {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        width: 335px;
+        flex-shrink: 0;
+        background: #1a3a6b;
+        padding: 2rem 1.5rem;
+        border-radius: 20px 0 0 20px;
+        text-align: center;
+    }
+
+    .auth-panel-logo {
+        width: 130px;
+        object-fit: contain;
+    }
+
+    .auth-panel-left h2 {
+        color: white;
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .auth-panel-divider {
+        width: 40px;
+        height: 1px;
+        background: rgba(255,255,255,0.2);
+    }
+
+    .auth-panel-left p {
+        color: rgba(255,255,255,0.65);
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin: 0;
+        font-weight: bold;
+    }
+
+    .auth-panel-benefits {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        width: 100%;
+    }
+
+    .auth-benefit {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: rgba(255,255,255,0.85);
+        font-size: 1rem;
+        text-align: left;
+    }
+
+    .auth-benefit i {
+        color: #e50914;
+        font-size: 0.85rem;
+        width: 14px;
+        flex-shrink: 0;
+    }
+
+    .auth-panel-right {
+        flex: 1;
+        padding: 1.75rem 2rem;
+        min-width: 0;
+    }
+
+    .auth-header-mobile {
+        display: none;
+    }
+
+    /* Grid 2 columnas para los campos del form en desktop */
+    .form-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 1rem;
+    }
 }

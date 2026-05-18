@@ -19,6 +19,7 @@
 
             <div class="profile-level-info">
                 <div class="profile-level-badge" id="profileLevelBadge">
+                    <span class="level-label">NIVEL:</span>
                     <span class="level-icon">🟢</span>
                     <span class="level-name">Amateur</span>
                 </div>
@@ -179,13 +180,13 @@
                 <span id="emailVerified"></span>
             </div>
         </div>
-        <div class="info-item">
+        <div class="info-item" id="passwordInfoItem">
             <i class="fas fa-lock"></i>
             <div class="info-content">
                 <strong>Contraseña:</strong>
-                <span>••••••••</span>
+                <span id="passwordDisplay">••••••••</span>
             </div>
-            <button class="btn-edit" onclick="window.abrirCambiarPassword()" title="Cambiar contraseña">
+            <button class="btn-edit" id="btnCambiarPassword" onclick="window.abrirCambiarPassword()" title="Cambiar contraseña">
                 <i class="fas fa-pencil-alt"></i>
             </button>
         </div>

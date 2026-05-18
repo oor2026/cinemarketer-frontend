@@ -24,6 +24,9 @@
     <link rel="stylesheet" href="css/levelup.css">
     <link rel="stylesheet" href="css/subscription.css">
 
+    <!-- CSS PUBLICIDAD -->
+    <link rel="stylesheet" href="css/ads.css">
+
     <!-- SCRIPTS -->
     <script src="js/config.js"></script>
     <script src="js/api.js"></script>
@@ -82,8 +85,48 @@
     </div>
 </nav>
 
-<!-- CONTENEDOR DE MÓDULOS -->
-<div id="module-container"><div class="loader">Cargando...</div></div>
+<!-- =====================================================
+     LAYOUT PRINCIPAL: columna central + sidebar de ads
+     ===================================================== -->
+<div class="dashboard-layout">
+
+    <!-- Columna lateral izquierda: llenada dinámicamente por module-loader.js -->
+    <aside class="ads-sidebar-left ad-empty" id="adsSidebarLeft">
+        <div class="ad-block">
+            <span class="ad-label">Publicidad</span>
+            <a href="#" target="_blank" rel="noopener noreferrer sponsored" id="adBannerLinkLeft">
+                <img
+                        src=""
+                        alt="Publicidad"
+                        class="ad-image"
+                        id="adBannerImgLeft"
+                        style="display:none;"
+                >
+            </a>
+        </div>
+    </aside>
+
+    <!-- Columna central: módulos inyectados aquí -->
+    <div id="module-container"><div class="loader">Cargando...</div></div>
+
+    <!-- Columna lateral derecha: llenada dinámicamente por module-loader.js -->
+    <aside class="ads-sidebar-right ad-empty" id="adsSidebarRight">
+        <div class="ad-block">
+            <span class="ad-label">Publicidad</span>
+            <a href="#" target="_blank" rel="noopener noreferrer sponsored" id="adBannerLink">
+                <img
+                        src=""
+                        alt="Publicidad"
+                        class="ad-image"
+                        id="adBannerImg"
+                        style="display:none;"
+                >
+            </a>
+        </div>
+    </aside>
+
+</div>
+<!-- fin .dashboard-layout -->
 
 <!-- FOOTER -->
 <footer class="footer">
@@ -148,7 +191,8 @@
         </div>
     </div>
 </footer>
-<!-- MODAL PARA DOCUMENTOS LEGALES (estructura que espera footer.js) -->
+
+<!-- MODAL PARA DOCUMENTOS LEGALES -->
 <div id="footerModalOverlay" class="footer-modal-overlay">
     <div class="footer-modal-container">
         <div class="footer-modal-header">

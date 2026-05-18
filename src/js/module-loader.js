@@ -6,6 +6,104 @@ const MODULE_PATH = 'modules/';
 const CSS_PATH = 'css/';
 const JS_PATH = 'js/';
 
+// ==============================================
+// MÓDULOS CON BANNER PUBLICITARIO HABILITADO
+// Agregar aquí el nombre del módulo para activar
+// el sidebar de ads en esa vista.
+// ==============================================
+const MODULES_WITH_ADS = ['mi-cuenta', 'mis-puntos', 'mis-premios', 'mis-consultas', 'contacto', 'feed-films'];
+
+// Mapa de nombre de módulo → valor del enum en el backend
+const MODULO_API_MAP = {
+    'mi-cuenta':    'MI_CUENTA',
+    'mis-puntos':   'MIS_PUNTOS',
+    'mis-premios':  'MIS_PREMIOS',
+    'mis-consultas':'MIS_CONSULTAS',
+    'contacto':     'CONTACTO',
+    'feed-films':   'FEED_FILMS'
+};
+
+function actualizarClaseModulo(moduleName) {
+    document.body.className = document.body.className
+        .split(' ')
+        .filter(c => !c.startsWith('modulo-'))
+        .join(' ');
+    document.body.classList.add(`modulo-${moduleName}`);
+}
+
+// ==============================================
+// CARGAR BANNERS DESDE LA API
+// Consulta GET /api/banners?modulo=XX y monta
+// las imágenes en los sidebars izquierdo y derecho
+// ==============================================
+async function cargarBanners(moduleName) {
+    const moduloApi = MODULO_API_MAP[moduleName];
+
+    // Resetear ambos sidebars a vacío por defecto
+    const sidebarLeft  = document.getElementById('adsSidebarLeft');
+    const sidebarRight = document.getElementById('adsSidebarRight');
+    const imgLeft      = document.getElementById('adBannerImgLeft');
+    const linkLeft     = document.getElementById('adBannerLinkLeft');
+    const imgRight     = document.getElementById('adBannerImg');
+    const linkRight    = document.getElementById('adBannerLink');
+
+    // Ocultar imágenes y marcar como vacíos
+    if (imgLeft)  { imgLeft.src  = ''; imgLeft.style.display  = 'none'; }
+    if (imgRight) { imgRight.src = ''; imgRight.style.display = 'none'; }
+    if (linkLeft)  linkLeft.href  = '#';
+    if (linkRight) linkRight.href = '#';
+    if (sidebarLeft)  sidebarLeft.classList.add('ad-empty');
+    if (sidebarRight) sidebarRight.classList.add('ad-empty');
+
+    // Resetear banner horizontal por defecto
+    const feedBanner = document.getElementById('feedBannerHorizontal');
+    if (feedBanner) feedBanner.style.display = 'none';
+
+    // Si el módulo no tiene ads habilitados, no consultar la API
+    if (!moduloApi || !MODULES_WITH_ADS.includes(moduleName)) return;
+
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/banners?modulo=${moduloApi}`);
+        if (!res.ok) return;
+        const banners = await res.json();
+
+        banners.forEach(banner => {
+            if (!banner.imageUrl) return;
+
+            if (banner.posicion === 'IZQUIERDO' && imgLeft && linkLeft && sidebarLeft) {
+                imgLeft.src           = banner.imageUrl;
+                imgLeft.alt           = banner.nombreMarca || 'Publicidad';
+                imgLeft.style.display = 'block';
+                linkLeft.href         = banner.linkDestino || '#';
+                sidebarLeft.classList.remove('ad-empty');
+            }
+
+            if (banner.posicion === 'DERECHO' && imgRight && linkRight && sidebarRight) {
+                imgRight.src           = banner.imageUrl;
+                imgRight.alt           = banner.nombreMarca || 'Publicidad';
+                imgRight.style.display = 'block';
+                linkRight.href         = banner.linkDestino || '#';
+                sidebarRight.classList.remove('ad-empty');
+            }
+
+            if (banner.posicion === 'HORIZONTAL') {
+                const bloque = document.getElementById('feedBannerHorizontal');
+                const img    = document.getElementById('feedBannerImg');
+                const link   = document.getElementById('feedBannerLink');
+                if (bloque && img && link) {
+                    img.src              = banner.imageUrl;
+                    img.alt              = banner.nombreMarca || 'Publicidad';
+                    link.href            = banner.linkDestino || '#';
+                    bloque.style.display = 'block';
+                }
+            }
+        });
+
+    } catch (e) {
+        // Falla silenciosa — los sidebars quedan vacíos, no rompe la experiencia
+    }
+}
+
 async function loadModule(moduleName, element = null, updateHash = true) {
 
     if (!localStorage.getItem('token')) {
@@ -20,6 +118,12 @@ async function loadModule(moduleName, element = null, updateHash = true) {
 
     document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
     if (element) element.classList.add('active');
+
+    // Actualiza la clase del body según el módulo — controla visibilidad del banner
+    actualizarClaseModulo(moduleName);
+
+    // Carga los banners correspondientes al módulo desde la API
+    cargarBanners(moduleName);
 
     try {
         // HTML
@@ -73,9 +177,7 @@ async function loadModule(moduleName, element = null, updateHash = true) {
             }
         }, 100);
 
-        // ==============================================
         // ACTUALIZAR HASH
-        // ==============================================
         if (updateHash) {
             window.location.hash = moduleName;
         }
@@ -105,19 +207,16 @@ async function cargarPerfilHeader() {
         if (!response.ok) return;
         const data = await response.json();
 
-        // Nombre
         const nameEl = document.getElementById('headerUserName');
         if (nameEl) {
             nameEl.innerHTML = `<span class="user-name-text">${data.name || data.email}</span>`;
         }
 
-        // Avatar
         const avatarEl = document.getElementById('headerAvatar');
         if (avatarEl && data.avatarUrl) {
             avatarEl.innerHTML = `<img src="${data.avatarUrl}" alt="Avatar" class="avatar-img">`;
         }
 
-        // Nivel
         const levelEl = document.getElementById('headerLevel');
         if (levelEl && data.levelEmoji && data.levelDisplayName) {
             levelEl.innerHTML = `<span class="level-badge level-${data.level}">${data.levelEmoji} ${data.levelDisplayName}</span>`;
