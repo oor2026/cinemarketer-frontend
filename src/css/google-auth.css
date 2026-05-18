@@ -21,3 +21,14 @@
 #googleCompleteProfileModal[style*="flex"] {
     display: flex !important;
 }
+
+@media (min-width: 769px) {
+    #googleLoginBtn {
+        min-width: 280px;
+        margin: 0 auto;
+    }
+
+    .social-login {
+            display: flex;
+            justify-content: center;
+}
