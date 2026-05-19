@@ -164,9 +164,21 @@ function validarFormulario() {
         errores.push('El DNI debe tener 7 u 8 dígitos numéricos');
     }
 
-    // Validar teléfono
-    if (!phoneNumber || phoneNumber.length < 6) {
-        errores.push('El teléfono debe tener al menos 6 dígitos');
+    // Validar teléfono — min/max según el país seleccionado
+    // selectedPrefix es la variable global definida en register.html
+    const prefixData = typeof selectedPrefix !== 'undefined' ? selectedPrefix : null;
+    const phoneMin = prefixData?.min ?? 6;
+    const phoneMax = prefixData?.max ?? 15;
+    const phoneName = prefixData?.name ?? 'el país seleccionado';
+
+    if (!phoneNumber) {
+        errores.push('El teléfono es obligatorio');
+    } else if (!/^\d+$/.test(phoneNumber)) {
+        errores.push('El teléfono solo debe contener dígitos numéricos');
+    } else if (phoneNumber.length < phoneMin) {
+        errores.push(`El teléfono para ${phoneName} debe tener al menos ${phoneMin} dígitos`);
+    } else if (phoneNumber.length > phoneMax) {
+        errores.push(`El teléfono para ${phoneName} no puede superar los ${phoneMax} dígitos`);
     }
 
     // Validar contraseña

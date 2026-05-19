@@ -354,137 +354,143 @@
 <script src="js/register.js"></script>
 <script>
     // ========== PREFIJOS TELEFÓNICOS ==========
-    const PHONE_PREFIXES = [
-        { code: '+54',  flag: '🇦🇷', name: 'Argentina',           max: 10 },
-        { code: '+591', flag: '🇧🇴', name: 'Bolivia',              max: 8  },
-        { code: '+55',  flag: '🇧🇷', name: 'Brasil',               max: 11 },
-        { code: '+56',  flag: '🇨🇱', name: 'Chile',                max: 9  },
-        { code: '+57',  flag: '🇨🇴', name: 'Colombia',             max: 10 },
-        { code: '+506', flag: '🇨🇷', name: 'Costa Rica',           max: 8  },
-        { code: '+53',  flag: '🇨🇺', name: 'Cuba',                 max: 8  },
-        { code: '+593', flag: '🇪🇨', name: 'Ecuador',              max: 9  },
-        { code: '+503', flag: '🇸🇻', name: 'El Salvador',          max: 8  },
-        { code: '+502', flag: '🇬🇹', name: 'Guatemala',            max: 8  },
-        { code: '+509', flag: '🇭🇹', name: 'Haití',                max: 8  },
-        { code: '+504', flag: '🇭🇳', name: 'Honduras',             max: 8  },
-        { code: '+52',  flag: '🇲🇽', name: 'México',               max: 10 },
-        { code: '+505', flag: '🇳🇮', name: 'Nicaragua',            max: 8  },
-        { code: '+507', flag: '🇵🇦', name: 'Panamá',               max: 8  },
-        { code: '+595', flag: '🇵🇾', name: 'Paraguay',             max: 9  },
-        { code: '+51',  flag: '🇵🇪', name: 'Perú',                 max: 9  },
-        { code: '+1787',flag: '🇵🇷', name: 'Puerto Rico',          max: 10 },
-        { code: '+1809',flag: '🇩🇴', name: 'Rep. Dominicana',      max: 10 },
-        { code: '+598', flag: '🇺🇾', name: 'Uruguay',              max: 9  },
-        { code: '+58',  flag: '🇻🇪', name: 'Venezuela',            max: 10 },
-        { code: '+34',  flag: '🇪🇸', name: 'España',               max: 9  },
-        { code: '+1',   flag: '🇺🇸', name: 'Estados Unidos',       max: 10 },
-        { code: '+44',  flag: '🇬🇧', name: 'Reino Unido',          max: 10 },
-        { code: '+33',  flag: '🇫🇷', name: 'Francia',              max: 9  },
-        { code: '+49',  flag: '🇩🇪', name: 'Alemania',             max: 11 },
-        { code: '+39',  flag: '🇮🇹', name: 'Italia',               max: 10 },
-        { code: '+351', flag: '🇵🇹', name: 'Portugal',             max: 9  },
-        { code: '+7',   flag: '🇷🇺', name: 'Rusia',                max: 10 },
-        { code: '+86',  flag: '🇨🇳', name: 'China',                max: 11 },
-        { code: '+81',  flag: '🇯🇵', name: 'Japón',                max: 11 },
-        { code: '+82',  flag: '🇰🇷', name: 'Corea del Sur',        max: 11 },
-        { code: '+91',  flag: '🇮🇳', name: 'India',                max: 10 },
-        { code: '+61',  flag: '🇦🇺', name: 'Australia',            max: 9  },
-        { code: '+27',  flag: '🇿🇦', name: 'Sudáfrica',            max: 9  },
-        { code: '+20',  flag: '🇪🇬', name: 'Egipto',               max: 10 },
-        { code: '+972', flag: '🇮🇱', name: 'Israel',               max: 9  },
-        { code: '+971', flag: '🇦🇪', name: 'Emiratos Árabes',      max: 9  },
-        { code: '+966', flag: '🇸🇦', name: 'Arabia Saudita',       max: 9  },
-        { code: '+90',  flag: '🇹🇷', name: 'Turquía',              max: 10 },
-    ];
+        // min/max = dígitos del número nacional (sin código de país)
+        // Fuente: ITU E.164, Wikipedia numbering plans, worldpopulationreview.com (2026)
+        const PHONE_PREFIXES = [
+            // ── Latinoamérica ──────────────────────────────────────────────────────
+            { code: '+54',  flag: '🇦🇷', name: 'Argentina',           min: 6,  max: 10 }, // plan variable: área + suscriptor = 10 dígitos siempre; suscriptor puede ser 6-8
+            { code: '+591', flag: '🇧🇴', name: 'Bolivia',              min: 7,  max: 9  }, // celulares 8 dígitos, algunos fijos 7
+            { code: '+55',  flag: '🇧🇷', name: 'Brasil',               min: 10, max: 11 }, // fijos 10, celulares 11
+            { code: '+56',  flag: '🇨🇱', name: 'Chile',                min: 9,  max: 9  }, // fijo 9 dígitos
+            { code: '+57',  flag: '🇨🇴', name: 'Colombia',             min: 10, max: 10 }, // fijo 10 dígitos
+            { code: '+506', flag: '🇨🇷', name: 'Costa Rica',           min: 8,  max: 8  }, // plan cerrado 8 dígitos
+            { code: '+53',  flag: '🇨🇺', name: 'Cuba',                 min: 8,  max: 8  }, // fijo 8 dígitos
+            { code: '+593', flag: '🇪🇨', name: 'Ecuador',              min: 9,  max: 9  }, // fijo 9 dígitos
+            { code: '+503', flag: '🇸🇻', name: 'El Salvador',          min: 8,  max: 8  }, // plan cerrado 8 dígitos
+            { code: '+502', flag: '🇬🇹', name: 'Guatemala',            min: 8,  max: 8  }, // plan cerrado 8 dígitos
+            { code: '+509', flag: '🇭🇹', name: 'Haití',                min: 8,  max: 8  }, // plan cerrado 8 dígitos
+            { code: '+504', flag: '🇭🇳', name: 'Honduras',             min: 8,  max: 8  }, // plan cerrado 8 dígitos
+            { code: '+52',  flag: '🇲🇽', name: 'México',               min: 10, max: 10 }, // plan cerrado 10 dígitos desde 2019
+            { code: '+505', flag: '🇳🇮', name: 'Nicaragua',            min: 8,  max: 8  }, // plan cerrado 8 dígitos
+            { code: '+507', flag: '🇵🇦', name: 'Panamá',               min: 8,  max: 8  }, // plan cerrado 8 dígitos
+            { code: '+595', flag: '🇵🇾', name: 'Paraguay',             min: 9,  max: 9  }, // fijo 9 dígitos
+            { code: '+51',  flag: '🇵🇪', name: 'Perú',                 min: 9,  max: 9  }, // fijo 9 dígitos
+            { code: '+1787',flag: '🇵🇷', name: 'Puerto Rico',          min: 10, max: 10 }, // NANP 10 dígitos
+            { code: '+1809',flag: '🇩🇴', name: 'Rep. Dominicana',      min: 10, max: 10 }, // NANP 10 dígitos
+            { code: '+598', flag: '🇺🇾', name: 'Uruguay',              min: 8,  max: 9  }, // fijos 8, celulares 9
+            { code: '+58',  flag: '🇻🇪', name: 'Venezuela',            min: 10, max: 10 }, // fijo 10 dígitos
+            // ── Europa ─────────────────────────────────────────────────────────────
+            { code: '+34',  flag: '🇪🇸', name: 'España',               min: 9,  max: 9  }, // plan cerrado 9 dígitos
+            { code: '+33',  flag: '🇫🇷', name: 'Francia',              min: 9,  max: 9  }, // plan cerrado 9 dígitos
+            { code: '+49',  flag: '🇩🇪', name: 'Alemania',             min: 10, max: 11 }, // variable 10-11
+            { code: '+39',  flag: '🇮🇹', name: 'Italia',               min: 9,  max: 10 }, // fijos 9-10, celulares 10
+            { code: '+351', flag: '🇵🇹', name: 'Portugal',             min: 9,  max: 9  }, // plan cerrado 9 dígitos
+            { code: '+44',  flag: '🇬🇧', name: 'Reino Unido',          min: 10, max: 10 }, // plan cerrado 10 dígitos
+            { code: '+7',   flag: '🇷🇺', name: 'Rusia',                min: 10, max: 10 }, // plan cerrado 10 dígitos
+            // ── Norteamérica ────────────────────────────────────────────────────────
+            { code: '+1',   flag: '🇺🇸', name: 'Estados Unidos',       min: 10, max: 10 }, // NANP 10 dígitos
+            // ── Asia / Oceanía / África ─────────────────────────────────────────────
+            { code: '+86',  flag: '🇨🇳', name: 'China',                min: 11, max: 11 }, // plan cerrado 11 dígitos
+            { code: '+81',  flag: '🇯🇵', name: 'Japón',                min: 10, max: 11 }, // fijos 10, celulares 11
+            { code: '+82',  flag: '🇰🇷', name: 'Corea del Sur',        min: 10, max: 11 }, // fijos 10, celulares 11
+            { code: '+91',  flag: '🇮🇳', name: 'India',                min: 10, max: 10 }, // plan cerrado 10 dígitos
+            { code: '+61',  flag: '🇦🇺', name: 'Australia',            min: 9,  max: 9  }, // plan cerrado 9 dígitos
+            { code: '+27',  flag: '🇿🇦', name: 'Sudáfrica',            min: 9,  max: 9  }, // plan cerrado 9 dígitos
+            { code: '+20',  flag: '🇪🇬', name: 'Egipto',               min: 10, max: 10 }, // plan cerrado 10 dígitos
+            { code: '+972', flag: '🇮🇱', name: 'Israel',               min: 9,  max: 9  }, // plan cerrado 9 dígitos
+            { code: '+971', flag: '🇦🇪', name: 'Emiratos Árabes',      min: 9,  max: 9  }, // plan cerrado 9 dígitos
+            { code: '+966', flag: '🇸🇦', name: 'Arabia Saudita',       min: 9,  max: 9  }, // plan cerrado 9 dígitos
+            { code: '+90',  flag: '🇹🇷', name: 'Turquía',              min: 10, max: 10 }, // plan cerrado 10 dígitos
+        ];
 
-    let selectedPrefix = PHONE_PREFIXES[0];
+        let selectedPrefix = PHONE_PREFIXES[0];
 
-    function renderPrefixList(filter = '') {
-        const list = document.getElementById('phonePrefixList');
-        const filtered = PHONE_PREFIXES.filter(p =>
-            p.name.toLowerCase().includes(filter.toLowerCase()) ||
-            p.code.includes(filter)
-        );
-        list.innerHTML = filtered.map(p => `
-            <div class="phone-prefix-option" data-code="${p.code}">
-                <span>${p.flag}</span>
-                <span class="option-name">${p.name}</span>
-                <span class="option-code">${p.code}</span>
-            </div>
-        `).join('');
+        function renderPrefixList(filter = '') {
+            const list = document.getElementById('phonePrefixList');
+            const filtered = PHONE_PREFIXES.filter(p =>
+                p.name.toLowerCase().includes(filter.toLowerCase()) ||
+                p.code.includes(filter)
+            );
+            list.innerHTML = filtered.map(p => `
+                <div class="phone-prefix-option" data-code="${p.code}">
+                    <span>${p.flag}</span>
+                    <span class="option-name">${p.name}</span>
+                    <span class="option-code">${p.code}</span>
+                </div>
+            `).join('');
 
-        list.querySelectorAll('.phone-prefix-option').forEach(el => {
-            el.addEventListener('click', function() {
-                const code = this.dataset.code;
-                selectedPrefix = PHONE_PREFIXES.find(p => p.code === code);
-                document.getElementById('phonePrefixFlag').textContent = selectedPrefix.flag;
-                document.getElementById('phonePrefixCode').textContent = selectedPrefix.code;
-                document.getElementById('phoneNumber').maxLength = selectedPrefix.max;
-                document.getElementById('phoneHint').textContent = `Máx. ${selectedPrefix.max} dígitos`;
-                closePrefixDropdown();
-                updateHiddenPhone();
-                document.getElementById('phoneNumber').focus();
+            list.querySelectorAll('.phone-prefix-option').forEach(el => {
+                el.addEventListener('click', function() {
+                    const code = this.dataset.code;
+                    selectedPrefix = PHONE_PREFIXES.find(p => p.code === code);
+                    document.getElementById('phonePrefixFlag').textContent = selectedPrefix.flag;
+                    document.getElementById('phonePrefixCode').textContent = selectedPrefix.code;
+                    document.getElementById('phoneNumber').maxLength = selectedPrefix.max;
+                    document.getElementById('phoneHint').textContent = `Máx. ${selectedPrefix.max} dígitos`;
+                    closePrefixDropdown();
+                    updateHiddenPhone();
+                    document.getElementById('phoneNumber').focus();
+                });
             });
-        });
-    }
+        }
 
-    function openPrefixDropdown() {
-        const dd = document.getElementById('phonePrefixDropdown');
-        dd.style.display = 'block';
-        document.getElementById('phonePrefixSearch').value = '';
-        renderPrefixList('');
-        document.getElementById('phonePrefixSearch').focus();
-    }
-
-    function closePrefixDropdown() {
-        document.getElementById('phonePrefixDropdown').style.display = 'none';
-    }
-
-    function updateHiddenPhone() {
-        const num = document.getElementById('phoneNumber').value.trim();
-        document.getElementById('phone').value = num ? `${selectedPrefix.code} ${num}` : '';
-    }
-
-    // Inicializar
-    document.addEventListener('DOMContentLoaded', function() {
-        renderPrefixList();
-        document.getElementById('phoneNumber').maxLength = selectedPrefix.max;
-
-        document.getElementById('phonePrefixBtn').addEventListener('click', function() {
+        function openPrefixDropdown() {
             const dd = document.getElementById('phonePrefixDropdown');
-            dd.style.display === 'none' ? openPrefixDropdown() : closePrefixDropdown();
-        });
+            dd.style.display = 'block';
+            document.getElementById('phonePrefixSearch').value = '';
+            renderPrefixList('');
+            document.getElementById('phonePrefixSearch').focus();
+        }
 
-        document.getElementById('phonePrefixBtn').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPrefixDropdown(); }
-        });
+        function closePrefixDropdown() {
+            document.getElementById('phonePrefixDropdown').style.display = 'none';
+        }
 
-        document.getElementById('phonePrefixSearch').addEventListener('input', function() {
-            renderPrefixList(this.value);
-        });
+        function updateHiddenPhone() {
+            const num = document.getElementById('phoneNumber').value.trim();
+            document.getElementById('phone').value = num ? `${selectedPrefix.code} ${num}` : '';
+        }
 
-        document.getElementById('phoneNumber').addEventListener('input', function() {
-            this.value = this.value.replace(/\D/g, '');
-            updateHiddenPhone();
-        });
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            renderPrefixList();
+            document.getElementById('phoneNumber').maxLength = selectedPrefix.max;
 
-        document.addEventListener('click', function(e) {
-            const wrapper = document.querySelector('.phone-wrapper');
-            const dd = document.getElementById('phonePrefixDropdown');
-            if (!wrapper.contains(e.target) && !dd.contains(e.target)) {
-                closePrefixDropdown();
-            }
-        });
-        setupPasswordToggles();
+            document.getElementById('phonePrefixBtn').addEventListener('click', function() {
+                const dd = document.getElementById('phonePrefixDropdown');
+                dd.style.display === 'none' ? openPrefixDropdown() : closePrefixDropdown();
+            });
 
-        const termsLink = document.getElementById('termsLink');
-    if (termsLink) {
-        termsLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            footerModal.abrir('terminos');
+            document.getElementById('phonePrefixBtn').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPrefixDropdown(); }
+            });
+
+            document.getElementById('phonePrefixSearch').addEventListener('input', function() {
+                renderPrefixList(this.value);
+            });
+
+            document.getElementById('phoneNumber').addEventListener('input', function() {
+                this.value = this.value.replace(/\D/g, '');
+                updateHiddenPhone();
+            });
+
+            document.addEventListener('click', function(e) {
+                const wrapper = document.querySelector('.phone-wrapper');
+                const dd = document.getElementById('phonePrefixDropdown');
+                if (!wrapper.contains(e.target) && !dd.contains(e.target)) {
+                    closePrefixDropdown();
+                }
+            });
+            setupPasswordToggles();
+
+            const termsLink = document.getElementById('termsLink');
+        if (termsLink) {
+            termsLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                footerModal.abrir('terminos');
+            });
+        }
         });
-    }
-    });
 </script>
 </body>
 </html>
