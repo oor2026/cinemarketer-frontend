@@ -60,13 +60,14 @@
                         Correo electrónico
                     </label>
                     <input
-                            type="email"
+                            type="text"
                             id="email"
                             name="email"
                             required
                             placeholder="dirección@email.com"
                             autocomplete="email"
-                            maxlength="50"
+                            maxlength="78"
+                            inputmode="email"
                     >
                 </div>
 
@@ -183,19 +184,19 @@
 <!-- FOOTER -->
 <footer class="footer">
 
-        <!-- Links legales -->
-        <div class="footer-bottom">
-            <nav class="footer-legal-links">
-                <button onclick="footerModal.abrir('terminos')">Términos y Condiciones</button>
-                <button onclick="footerModal.abrir('privacidad')">Política de Privacidad</button>
-                <button onclick="footerModal.abrir('cookies')">Política de Cookies</button>
-                <button onclick="footerModal.abrir('centroPrivacidad')">Centro de Privacidad</button>
-                <button onclick="footerModal.abrir('normasConvivencia')">Normas de Convivencia</button>
-                <button onclick="footerModal.abrir('ayuda')">Centro de Ayuda</button>
-                <button onclick="footerModal.abrir('avisoLegal')">Aviso Legal</button>
-            </nav>
-            <p>&copy; 2026 Cinemarketer. Todos los derechos reservados.</p>
-        </div>
+    <!-- Links legales -->
+    <div class="footer-bottom">
+        <nav class="footer-legal-links">
+            <button onclick="footerModal.abrir('terminos')">Términos y Condiciones</button>
+            <button onclick="footerModal.abrir('privacidad')">Política de Privacidad</button>
+            <button onclick="footerModal.abrir('cookies')">Política de Cookies</button>
+            <button onclick="footerModal.abrir('centroPrivacidad')">Centro de Privacidad</button>
+            <button onclick="footerModal.abrir('normasConvivencia')">Normas de Convivencia</button>
+            <button onclick="footerModal.abrir('ayuda')">Centro de Ayuda</button>
+            <button onclick="footerModal.abrir('avisoLegal')">Aviso Legal</button>
+        </nav>
+        <p>&copy; 2026 Cinemarketer. Todos los derechos reservados.</p>
+    </div>
     </div>
 </footer>
 <!-- MODAL PARA DOCUMENTOS LEGALES (estructura que espera footer.js) -->
@@ -343,10 +344,75 @@
         backLink.style.opacity = '';
     }
 
-    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+
+    // ========== VALIDACIÓN DE EMAIL (mismas reglas que registro) ==========
+    const DOMINIOS_PERMITIDOS_LOGIN = [
+        'gmail', 'hotmail', 'outlook', 'yahoo', 'live', 'msn',
+        'icloud', 'me', 'mac', 'protonmail', 'proton',
+        'tutanota', 'gmx', 'yandex', 'zoho',
+        'fibertel', 'arnet', 'speedy', 'ciudad', 'uolsinectis',
+        'infovia', 'personal', 'claro',
+        'terra', 'bol', 'uol', 'oi', 'telmex'
+    ];
+
+    const DOMINIOS_DISPLAY_LOGIN = [
+        'Gmail', 'Hotmail', 'Outlook', 'Yahoo', 'Live', 'iCloud',
+        'ProtonMail', 'Tutanota', 'GMX', 'Yandex', 'Zoho',
+        'Fibertel', 'Arnet', 'Speedy', 'Ciudad', 'Personal', 'Claro'
+    ];
+
+    const TLD_VALIDOS_LOGIN = [
+        'com.ar','net.ar','org.ar','gob.ar','edu.ar',
+        'com.br','net.br','com.mx','net.mx','com.uy','net.uy',
+        'com.co','net.co','com.pe','net.pe','com.cl','com.ve',
+        'com.bo','com.py','com.es',
+        'com','net','org','info','io','co',
+        'ar','es','mx','br','uy','cl','pe','ve','bo','py'
+    ];
+
+    function validarEmailLogin(email) {
+        if (!email) return { valido: false, error: 'El email es obligatorio' };
+        if (email.length > 254) return { valido: false, error: 'El email es demasiado largo (máximo 254 caracteres)' };
+
+        const partes = email.split('@');
+        if (partes.length !== 2) return { valido: false, error: 'El email debe contener exactamente un @' };
+
+        const local = partes[0];
+        const dominio = partes[1].toLowerCase();
+
+        if (local.length < 6) return { valido: false, error: 'La parte local del email debe tener al menos 6 caracteres' };
+        if (local.length > 64) return { valido: false, error: 'La parte local del email no puede superar 64 caracteres' };
+        if (!/^[a-zA-Z0-9._-]+$/.test(local)) return { valido: false, error: 'El email contiene caracteres no permitidos antes del @' };
+        if (/^[._-]/.test(local) || /[._-]$/.test(local)) return { valido: false, error: 'El email no puede empezar ni terminar con punto, guión o guión bajo' };
+        if (/[._-]{2,}/.test(local)) return { valido: false, error: 'El email no puede tener caracteres especiales consecutivos' };
+
+        const proveedor = dominio.split('.')[0];
+        if (!DOMINIOS_PERMITIDOS_LOGIN.includes(proveedor)) {
+            return {
+                valido: false,
+                error: 'Proveedor de email no reconocido. Proveedores aceptados: ' +
+                       DOMINIOS_DISPLAY_LOGIN.join(', ') +
+                       '. Para dominios privados o institucionales contactá a info@cinemarketer.com.ar'
+            };
+        }
+
+        const tld = dominio.substring(proveedor.length + 1).toLowerCase();
+        if (!TLD_VALIDOS_LOGIN.includes(tld)) return { valido: false, error: 'La extensión del email (' + tld + ') no es reconocida' };
+
+        return { valido: true };
+    }
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
         e.preventDefault();
 
         const email = document.getElementById('email').value.trim();
+
+        // Validar email antes de llamar al backend
+        const emailValidacion = validarEmailLogin(email);
+        if (!emailValidacion.valido) {
+            showNotification(emailValidacion.error, 'error');
+            return;
+        }
         const password = document.getElementById('password').value;
 
         // Mostrar loading
