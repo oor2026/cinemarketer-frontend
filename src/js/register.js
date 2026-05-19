@@ -55,7 +55,15 @@ function validarFormulario() {
     const errores = [];
 
     // Validar nombre
-    if (!name) errores.push('El nombre es obligatorio');
+    if (!name) {
+        errores.push('El nombre es obligatorio');
+    } else if (name.length < 2) {
+        errores.push('El nombre debe tener al menos 2 caracteres');
+    } else if (name.length > 50) {
+        errores.push('El nombre no puede superar los 50 caracteres');
+    } else if (!/^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]+(\s[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]+)*$/.test(name)) {
+        errores.push('El nombre solo puede contener letras y espacios simples entre palabras');
+    }
 
     // Validar email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
