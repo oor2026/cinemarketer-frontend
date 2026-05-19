@@ -21,14 +21,11 @@ const normasCheckbox     = document.getElementById('normas');
 // ==============================================
 
 const DOMINIOS_PERMITIDOS = [
-    // Globales principales
     'gmail', 'hotmail', 'outlook', 'yahoo', 'live', 'msn',
     'icloud', 'me', 'mac', 'protonmail', 'proton',
     'tutanota', 'gmx', 'yandex', 'zoho',
-    // Argentina
     'fibertel', 'arnet', 'speedy', 'ciudad', 'uolsinectis',
     'infovia', 'personal', 'claro',
-    // Regionales
     'terra', 'bol', 'uol', 'oi', 'telmex'
 ];
 
@@ -38,12 +35,81 @@ const DOMINIOS_PERMITIDOS_DISPLAY = [
     'Fibertel', 'Arnet', 'Speedy', 'Ciudad', 'Personal', 'Claro'
 ];
 
-function validarDominioEmail(email) {
+// TLD simples y compuestos válidos
+const TLD_VALIDOS = [
+    'com.ar','net.ar','org.ar','gob.ar','edu.ar',
+    'com.br','net.br',
+    'com.mx','net.mx',
+    'com.uy','net.uy',
+    'com.co','net.co',
+    'com.pe','net.pe',
+    'com.cl','com.ve','com.bo','com.py','com.es',
+    'com','net','org','info','io','co',
+    'ar','es','mx','br','uy','cl','pe','ve','bo','py'
+];
+
+// ==============================================
+// VALIDACIÓN COMPLETA DE EMAIL
+// Reglas alineadas a los estándares de Gmail, Outlook, Yahoo:
+// - Parte local: letras, números, puntos, guiones y guiones bajos
+// - No empieza ni termina con punto, guión o guión bajo
+// - Sin puntos, guiones o guiones bajos consecutivos
+// - Longitud parte local: 1-64 caracteres
+// - Longitud total: máximo 254 caracteres
+// - Proveedor: debe estar en la lista permitida
+// - TLD: debe ser uno de los reconocidos
+// ==============================================
+
+function validarEmail(email) {
+    if (!email) return { valido: false, error: 'El email es obligatorio' };
+
+    // Longitud total máxima RFC 5321
+    if (email.length > 254) return { valido: false, error: 'El email es demasiado largo (máximo 254 caracteres)' };
+
+    // Debe tener exactamente un @
     const partes = email.split('@');
-    if (partes.length !== 2) return false;
+    if (partes.length !== 2) return { valido: false, error: 'El email debe contener exactamente un @' };
+
+    const local = partes[0];
     const dominio = partes[1].toLowerCase();
+
+    // Validar parte local
+    if (local.length === 0) return { valido: false, error: 'La parte local del email no puede estar vacía' };
+    if (local.length > 64) return { valido: false, error: 'La parte local del email no puede superar 64 caracteres' };
+
+    // Solo caracteres permitidos en parte local
+    if (!/^[a-zA-Z0-9._-]+$/.test(local)) {
+        return { valido: false, error: 'El email contiene caracteres no permitidos. Solo se aceptan letras, números, puntos, guiones y guiones bajos antes del @' };
+    }
+
+    // No puede empezar ni terminar con punto, guión o guión bajo
+    if (/^[._-]/.test(local) || /[._-]$/.test(local)) {
+        return { valido: false, error: 'El email no puede empezar ni terminar con punto, guión o guión bajo' };
+    }
+
+    // Sin caracteres especiales consecutivos
+    if (/[._-]{2,}/.test(local)) {
+        return { valido: false, error: 'El email no puede tener puntos, guiones o guiones bajos consecutivos' };
+    }
+
+    // Validar proveedor
     const proveedor = dominio.split('.')[0];
-    return DOMINIOS_PERMITIDOS.includes(proveedor);
+    if (!DOMINIOS_PERMITIDOS.includes(proveedor)) {
+        return {
+            valido: false,
+            error: 'El proveedor de email no está permitido. Los proveedores aceptados son: ' +
+                   DOMINIOS_PERMITIDOS_DISPLAY.join(', ') +
+                   '. Si deseás registrarte con un dominio privado o institucional, comunicate con nosotros a info@cinemarketer.com.ar'
+        };
+    }
+
+    // Validar TLD
+    const tldParte = dominio.substring(proveedor.length + 1).toLowerCase();
+    if (!TLD_VALIDOS.includes(tldParte)) {
+        return { valido: false, error: 'La extensión del email (' + tldParte + ') no es reconocida' };
+    }
+
+    return { valido: true };
 }
 
 // ==============================================
@@ -52,25 +118,15 @@ function validarDominioEmail(email) {
 
 function validarPassword(password) {
     const errores = [];
-
-    if (password.length < 8) {
-        errores.push('• Mínimo 8 caracteres');
-    }
-    if (!/[A-Z]/.test(password)) {
-        errores.push('• Al menos una letra mayúscula');
-    }
-    if (!/[0-9]/.test(password)) {
-        errores.push('• Al menos un número');
-    }
-    if (/[^A-Za-z0-9@!_-]/.test(password)) {
-        errores.push('• Solo letras, números y @ ! - _');
-    }
-
+    if (password.length < 8) errores.push('• Mínimo 8 caracteres');
+    if (!/[A-Z]/.test(password)) errores.push('• Al menos una letra mayúscula');
+    if (!/[0-9]/.test(password)) errores.push('• Al menos un número');
+    if (/[^A-Za-z0-9@!_-]/.test(password)) errores.push('• Solo letras, números y @ ! - _');
     return errores;
 }
 
 // ==============================================
-// VALIDACIÓN COMPLETA
+// VALIDACIÓN COMPLETA DEL FORMULARIO
 // ==============================================
 
 function validarFormulario() {
@@ -95,19 +151,10 @@ function validarFormulario() {
         errores.push('El nombre solo puede contener letras y espacios simples entre palabras');
     }
 
-    // Validar email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email) {
-        errores.push('El email es obligatorio');
-    } else if (!emailRegex.test(email)) {
-        errores.push('El email no tiene un formato válido');
-    } else if (!validarDominioEmail(email)) {
-        errores.push(
-            'El proveedor de email no está permitido. ' +
-            'Los proveedores aceptados son: ' + DOMINIOS_PERMITIDOS_DISPLAY.join(', ') + '. ' +
-            'Si deseás registrarte con un dominio privado o institucional, ' +
-            'comunicate con nosotros a info@cinemarketer.com.ar'
-        );
+    // Validar email — validación completa
+    const emailValidacion = validarEmail(email);
+    if (!emailValidacion.valido) {
+        errores.push(emailValidacion.error);
     }
 
     // Validar DNI
@@ -135,16 +182,9 @@ function validarFormulario() {
     // Validar los 3 documentos obligatorios
     const privacidad = privacidadCheckbox?.checked || false;
     const normas     = normasCheckbox?.checked || false;
-
-    if (!terms) {
-        errores.push('Debés aceptar los Términos y Condiciones');
-    }
-    if (!privacidad) {
-        errores.push('Debés aceptar la Política de Privacidad');
-    }
-    if (!normas) {
-        errores.push('Debés aceptar las Normas de Convivencia');
-    }
+    if (!terms)     errores.push('Debés aceptar los Términos y Condiciones');
+    if (!privacidad) errores.push('Debés aceptar la Política de Privacidad');
+    if (!normas)     errores.push('Debés aceptar las Normas de Convivencia');
 
     return errores;
 }
@@ -224,10 +264,7 @@ async function handleRegister(e) {
 
     const errores = validarFormulario();
     mostrarErrores(errores);
-
-    if (errores.length > 0) {
-        return;
-    }
+    if (errores.length > 0) return;
 
     if (submitBtn) {
         submitBtn.disabled = true;
@@ -239,7 +276,6 @@ async function handleRegister(e) {
 
     try {
         const phone = document.getElementById('phone').value;
-
         const registerData = {
             name: nameInput.value.trim(),
             email: emailInput.value.trim(),
@@ -270,23 +306,15 @@ async function handleRegister(e) {
             if (errorContainer) {
                 errorContainer.style.display = 'block';
                 errorContainer.innerHTML = `
-                    <div style="
-                        background: #e8f5e9;
-                        color: #2e7d32;
-                        border: 1px solid #c8e6c9;
-                        border-radius: 8px;
-                        padding: 1rem;
-                        margin: 1rem 0;
-                    ">
-                        <i class="fas fa-check-circle" style="margin-right: 8px;"></i>
+                    <div style="background:#e8f5e9;color:#2e7d32;border:1px solid #c8e6c9;border-radius:8px;padding:1rem;margin:1rem 0;">
+                        <i class="fas fa-check-circle" style="margin-right:8px;"></i>
                         <strong>${mensajeExito}</strong>
-                        <p style="margin: 0.5rem 0 0;">Serás redirigido al login en 3 segundos...</p>
+                        <p style="margin:0.5rem 0 0;">Serás redirigido al login en 3 segundos...</p>
                     </div>
                 `;
             } else {
                 alert(mensajeExito);
             }
-
             setTimeout(() => window.location.href = 'login.html', 3000);
 
         } else {
@@ -308,7 +336,6 @@ async function handleRegister(e) {
 
     } catch (error) {
         mostrarErrores(['Error de conexión con el servidor']);
-
     } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
@@ -328,7 +355,6 @@ if (registerForm) {
     registerForm.addEventListener('submit', handleRegister);
 }
 
-// Links de documentos legales
 document.addEventListener('DOMContentLoaded', function() {
     const termsLink = document.getElementById('termsLink');
     if (termsLink) {
@@ -337,7 +363,6 @@ document.addEventListener('DOMContentLoaded', function() {
             footerModal.abrir('terminos');
         });
     }
-
     const privacidadLink = document.getElementById('privacidadLink');
     if (privacidadLink) {
         privacidadLink.addEventListener('click', function(e) {
@@ -345,7 +370,6 @@ document.addEventListener('DOMContentLoaded', function() {
             footerModal.abrir('privacidad');
         });
     }
-
     const normasLink = document.getElementById('normasLink');
     if (normasLink) {
         normasLink.addEventListener('click', function(e) {
