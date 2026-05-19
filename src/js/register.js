@@ -74,7 +74,9 @@ function validarEmail(email) {
     const dominio = partes[1].toLowerCase();
 
     // Validar parte local
-    if (local.length === 0) return { valido: false, error: 'La parte local del email no puede estar vacía' };
+    // Mínimo 6: alineado a Gmail y Yahoo (los más restrictivos)
+    // Máximo 64: alineado a Outlook e iCloud (los más permisivos) y al RFC 5321
+    if (local.length < 6) return { valido: false, error: 'La parte local del email debe tener al menos 6 caracteres (ej: juan.p@gmail.com)' };
     if (local.length > 64) return { valido: false, error: 'La parte local del email no puede superar 64 caracteres' };
 
     // Solo caracteres permitidos en parte local
