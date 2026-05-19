@@ -75,8 +75,12 @@
                                     required
                                     placeholder="Ej: Juan Pérez"
                                     autocomplete="name"
+                                    minlength="2"
                                     maxlength="50"
+                                    pattern="^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]+(\s[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]+)*$"
+                                    title="Solo letras y espacios simples entre palabras (mínimo 2, máximo 50 caracteres)"
                             >
+                            <span class="field-hint">Solo letras y espacios · mín. 2, máx. 50 caracteres</span>
                         </div>
 
                         <!-- Campo email -->
