@@ -17,6 +17,36 @@ const privacidadCheckbox = document.getElementById('privacidad');
 const normasCheckbox     = document.getElementById('normas');
 
 // ==============================================
+// PROVEEDORES DE EMAIL PERMITIDOS
+// ==============================================
+
+const DOMINIOS_PERMITIDOS = [
+    // Globales principales
+    'gmail', 'hotmail', 'outlook', 'yahoo', 'live', 'msn',
+    'icloud', 'me', 'mac', 'protonmail', 'proton',
+    'tutanota', 'gmx', 'yandex', 'zoho',
+    // Argentina
+    'fibertel', 'arnet', 'speedy', 'ciudad', 'uolsinectis',
+    'infovia', 'personal', 'claro',
+    // Regionales
+    'terra', 'bol', 'uol', 'oi', 'telmex'
+];
+
+const DOMINIOS_PERMITIDOS_DISPLAY = [
+    'Gmail', 'Hotmail', 'Outlook', 'Yahoo', 'Live', 'iCloud',
+    'ProtonMail', 'Tutanota', 'GMX', 'Yandex', 'Zoho',
+    'Fibertel', 'Arnet', 'Speedy', 'Ciudad', 'Personal', 'Claro'
+];
+
+function validarDominioEmail(email) {
+    const partes = email.split('@');
+    if (partes.length !== 2) return false;
+    const dominio = partes[1].toLowerCase();
+    const proveedor = dominio.split('.')[0];
+    return DOMINIOS_PERMITIDOS.includes(proveedor);
+}
+
+// ==============================================
 // VALIDACIÓN DE CONTRASEÑA
 // ==============================================
 
@@ -71,6 +101,13 @@ function validarFormulario() {
         errores.push('El email es obligatorio');
     } else if (!emailRegex.test(email)) {
         errores.push('El email no tiene un formato válido');
+    } else if (!validarDominioEmail(email)) {
+        errores.push(
+            'El proveedor de email no está permitido. ' +
+            'Los proveedores aceptados son: ' + DOMINIOS_PERMITIDOS_DISPLAY.join(', ') + '. ' +
+            'Si deseás registrarte con un dominio privado o institucional, ' +
+            'comunicate con nosotros a info@cinemarketer.com.ar'
+        );
     }
 
     // Validar DNI
@@ -118,8 +155,7 @@ function validarFormulario() {
 
 function mostrarErrores(errores) {
     if (!errorContainer) {
-        // Si no hay contenedor de errores, usar alert
-       errores.forEach(err => showToast('error', err));
+        errores.forEach(err => showToast('error', err));
         return;
     }
 
@@ -186,7 +222,6 @@ function setupPasswordToggles() {
 async function handleRegister(e) {
     e.preventDefault();
 
-    // Validar todo
     const errores = validarFormulario();
     mostrarErrores(errores);
 
@@ -194,7 +229,6 @@ async function handleRegister(e) {
         return;
     }
 
-    // Mostrar loading
     if (submitBtn) {
         submitBtn.disabled = true;
         const btnText = submitBtn.querySelector('.btn-text');
@@ -204,7 +238,6 @@ async function handleRegister(e) {
     }
 
     try {
-        // Obtener teléfono completo (con prefijo)
         const phone = document.getElementById('phone').value;
 
         const registerData = {
@@ -228,8 +261,7 @@ async function handleRegister(e) {
         }
 
         if (response.ok) {
-            // Éxito
-            mostrarErrores([]); // Limpiar errores
+            mostrarErrores([]);
             const mensajeExito = '✅ ¡Registro exitoso!\n\n' +
                                 'Te hemos enviado un email de verificación a:\n' +
                                 emailInput.value.trim() + '\n\n' +
@@ -258,13 +290,10 @@ async function handleRegister(e) {
             setTimeout(() => window.location.href = 'login.html', 3000);
 
         } else {
-            // Error del backend
             if (response.status === 400 && data && typeof data === 'object') {
-                // Si tiene campo message, mostrar solo ese
                 if (data.message) {
                     mostrarErrores([data.message]);
                 } else {
-                    // Errores de validación campo por campo (BindingResult)
                     const erroresCampo = Object.entries(data)
                         .filter(([campo]) => !['email', 'emailSent', 'success', 'token', 'type'].includes(campo))
                         .map(([_, mensaje]) => mensaje);
@@ -272,7 +301,6 @@ async function handleRegister(e) {
                 }
             } else if (response.status === 409) {
                 mostrarErrores([data?.message || 'El DNI o email ya están registrados']);
-
             } else {
                 mostrarErrores([data?.message || 'Error en el registro. Intenta de nuevo.']);
             }
@@ -282,7 +310,6 @@ async function handleRegister(e) {
         mostrarErrores(['Error de conexión con el servidor']);
 
     } finally {
-        // Restaurar botón
         if (submitBtn) {
             submitBtn.disabled = false;
             const btnText = submitBtn.querySelector('.btn-text');
