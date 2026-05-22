@@ -990,6 +990,7 @@ window.cargarComentariosPelicula = async function(id) {
                         <i class="fas fa-ban"></i>
                     </button>` : '';
 
+                console.log('comentario', c.id, 'replyCount:', c.replyCount, typeof c.replyCount);
                 const item = document.createElement('div');
                 item.className = 'comentario-item';
                 item.style.cssText = 'display:flex; gap:0.75rem; padding:0.75rem 0; border-bottom:1px solid #f0f0f0; align-items:flex-start;';
@@ -1031,14 +1032,20 @@ window.cargarComentariosPelicula = async function(id) {
                                                             <span class="merece-count-${c.id}">${c.merecePuntoCount || 0}</span>
                                                             <span style="font-size:0.75rem;">¡Merecés un punto!</span>
                                                         </button>` : ''}
-                                                        <button onclick="window.toggleRespuestas(${c.id}, this)"
-                                                            style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;
-                                                                   font-size:0.8rem;color:#999;padding:0;transition:color 0.2s;"
-                                                            title="Responder">
-                                                            <i class="fas fa-reply"></i>
-                                                            <span class="reply-count-${c.id}">${c.replyCount || 0}</span>
-                                                            <span style="font-size:0.75rem;">Responder</span>
-                                                        </button>
+                                                        <button onclick="window.toggleRespuestas(${c.id}, this, true)"
+                                                                                            style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;
+                                                                                                   font-size:0.8rem;color:#999;padding:0;transition:color 0.2s;"
+                                                                                            title="Responder">
+                                                                                            <i class="fas fa-reply"></i>
+                                                                                            <span style="font-size:0.75rem;">Responder</span>
+                                                                                        </button>
+                                                                                        ${(c.replyCount || 0) > 0 ? `
+                                                                                        <button onclick="window.toggleRespuestas(${c.id}, this, false)"
+                                                                                            style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;
+                                                                                                   font-size:0.8rem;color:#1a3a6b;padding:0;transition:color 0.2s;"
+                                                                                            title="Ver respuestas">
+                                                                                            <span style="font-size:0.75rem;">— Ver respuestas (<span class="reply-count-btn-${c.id}">${c.replyCount}</span>)</span>
+                                                                                        </button>` : `<span class="reply-count-${c.id}" style="display:none;">${c.replyCount || 0}</span>`}
                                                     </div>
                                                     <div class="comentario-fecha" style="font-size:0.75rem;color:#999;">${new Date(c.createdAt).toLocaleDateString('es-ES')}</div>
                                                 </div>
@@ -1250,18 +1257,27 @@ window.toggleMerecePunto = async function(commentId, btn, authorName) {
 // ==============================================
 // RESPUESTAS: TOGGLE + CARGA + ENVÍO
 // ==============================================
-window.toggleRespuestas = async function(commentId, btn) {
+window.toggleRespuestas = async function(commentId, btn, focusInput = false) {
     const container = document.querySelector(`.replies-container-${commentId}`);
     if (!container) return;
 
-    if (container.style.display !== 'none') {
-        container.style.display = 'none';
-        return;
-    }
+    if (container.style.display !== 'none' && !focusInput) {
+            container.style.display = 'none';
+            return;
+        }
 
-    container.style.display = 'block';
-    container.innerHTML = '<div style="font-size:0.8rem;color:#999;">Cargando...</div>';
-    await window.cargarRespuestas(commentId, 0);
+        container.style.display = 'block';
+        // Solo recargar si el container está vacío o solo tiene el loader
+        const soloLoader = container.innerHTML.trim() === '' ||
+                           container.innerHTML.includes('Cargando...');
+        if (soloLoader) {
+            container.innerHTML = '<div style="font-size:0.8rem;color:#999;">Cargando...</div>';
+            await window.cargarRespuestas(commentId, 0);
+        }
+
+    if (focusInput) {
+            setTimeout(() => window.abrirFormRespuesta(commentId, null), 150);
+        }
 };
 
 window.cargarRespuestas = async function(commentId, offset) {
@@ -1276,11 +1292,11 @@ window.cargarRespuestas = async function(commentId, offset) {
         if (!res.ok) throw new Error();
         const replies = await res.json();
         const hasMore = res.headers.get('X-Has-More') === 'true';
-        const total = res.headers.get('X-Total-Replies');
+        const total = res.headers.get('X-Total-Replies') || '0';
 
         // Actualizar contador
-        const replyCount = document.querySelector(`.reply-count-${commentId}`);
-        if (replyCount) replyCount.textContent = total;
+        document.querySelectorAll(`.reply-count-${commentId}, .reply-count-btn-${commentId}`)
+                    .forEach(el => el.textContent = total);
 
         if (offset === 0) container.innerHTML = '';
 
@@ -1311,6 +1327,10 @@ window.cargarRespuestas = async function(commentId, offset) {
                             <span>Te banco</span>
                         </button>
                         <span style="font-size:0.7rem;color:#bbb;">${new Date(r.createdAt).toLocaleDateString('es-ES')}</span>
+                        <button onclick="window.abrirFormRespuesta(${commentId}, this)"
+                            style="background:none;border:none;cursor:pointer;font-size:0.75rem;color:#999;padding:0;">
+                            <i class="fas fa-reply"></i> Responder
+                        </button>
                     </div>
                 </div>
             `;
@@ -1328,26 +1348,6 @@ window.cargarRespuestas = async function(commentId, offset) {
             verMas.textContent = 'Ver más respuestas...';
             verMas.onclick = () => window.cargarRespuestas(commentId, offset + 5);
             container.appendChild(verMas);
-        }
-
-        // Formulario de respuesta (siempre al final)
-        const existingForm = container.querySelector('.reply-form');
-        if (!existingForm) {
-            const form = document.createElement('div');
-            form.className = 'reply-form';
-            form.style.cssText = 'margin-top:0.5rem;display:flex;gap:0.5rem;';
-            form.innerHTML = `
-                <input type="text" placeholder="Escribí tu respuesta..."
-                    style="flex:1;border:1px solid #e0e0e0;border-radius:20px;padding:0.4rem 0.75rem;font-size:0.85rem;outline:none;"
-                    id="reply-input-${commentId}"
-                    maxlength="2000"
-                    onkeydown="if(event.key==='Enter') window.enviarRespuesta(${commentId})">
-                <button onclick="window.enviarRespuesta(${commentId})"
-                    style="background:#1a3a6b;color:white;border:none;border-radius:20px;padding:0.4rem 0.9rem;font-size:0.8rem;cursor:pointer;">
-                    Enviar
-                </button>
-            `;
-            container.appendChild(form);
         }
 
     } catch (e) {
@@ -1399,6 +1399,35 @@ window.toggleReplyBanco = async function(replyId, btn) {
         const counter = document.querySelector(`.reply-banco-count-${replyId}`);
         if (counter) counter.textContent = data.count;
     } catch (e) { console.error(e); }
+};
+
+window.abrirFormRespuesta = function(commentId, btn) {
+    const container = document.querySelector(`.replies-container-${commentId}`);
+    if (!container) return;
+
+    // Si ya hay un form abierto, lo quitamos
+    const existing = container.querySelector('.reply-form');
+    if (existing) {
+        existing.remove();
+        return;
+    }
+
+    const form = document.createElement('div');
+    form.className = 'reply-form';
+    form.style.cssText = 'margin-top:0.5rem;display:flex;gap:0.5rem;';
+    form.innerHTML = `
+        <input type="text" placeholder="Escribí tu respuesta..."
+            style="flex:1;border:1px solid #e0e0e0;border-radius:20px;padding:0.4rem 0.75rem;font-size:0.85rem;outline:none;"
+            id="reply-input-${commentId}"
+            maxlength="2000"
+            onkeydown="if(event.key==='Enter') window.enviarRespuesta(${commentId})">
+        <button onclick="window.enviarRespuesta(${commentId})"
+            style="background:#1a3a6b;color:white;border:none;border-radius:20px;padding:0.4rem 0.9rem;font-size:0.8rem;cursor:pointer;">
+            Enviar
+        </button>
+    `;
+    container.appendChild(form);
+    setTimeout(() => document.getElementById(`reply-input-${commentId}`)?.focus(), 50);
 };
 
 // ==============================================
