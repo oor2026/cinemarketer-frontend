@@ -1047,7 +1047,7 @@ window.cargarComentariosPelicula = async function(id) {
                                                                                             <span style="font-size:0.75rem;">— Ver respuestas (<span class="reply-count-btn-${c.id}">${c.replyCount}</span>)</span>
                                                                                         </button>` : `<span class="reply-count-${c.id}" style="display:none;">${c.replyCount || 0}</span>`}
                                                     </div>
-                                                    <div class="comentario-fecha" style="font-size:0.75rem;color:#999;">${new Date(c.createdAt).toLocaleDateString('es-ES')}</div>
+                                                    <div class="comentario-fecha" style="font-size:0.75rem;color:#999;">${new Date(c.createdAt).toLocaleDateString('es-ES')} ${new Date(c.createdAt).toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'})}</div>
                                                 </div>
                                                 <div class="replies-container-${c.id}" style="display:none;margin-top:0.75rem;padding-left:1rem;border-left:2px solid #f0f0f0;"></div>
                     </div>
@@ -1227,10 +1227,15 @@ window.toggleBanco = async function(commentId, btn) {
 // REACCIONES: ¡MERECÉS UN PUNTO!
 // ==============================================
 window.toggleMerecePunto = async function(commentId, btn, authorName) {
-    if (btn.dataset.locked === 'true') {
-        window.mostrarToast(`Este punto ya está disponible para ${authorName}. No es posible retirarlo.`, 'info');
+    if (btn.dataset.active === 'true') {
+        window.mostrarToast('Ya le diste un punto a este comentario. Esta acción es irreversible.', 'info');
         return;
     }
+
+    // Modal de confirmacion
+    const confirmar = confirm(`¿Confirmás que querés darle 1 punto a ${authorName}?\n\nEsta acción es irreversible.`);
+    if (!confirmar) return;
+
     const token = localStorage.getItem('token');
     try {
         const res = await fetch(`${CONFIG.API_URL}/comments/${commentId}/merece-punto`, {
@@ -1238,19 +1243,21 @@ window.toggleMerecePunto = async function(commentId, btn, authorName) {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
-        if (res.status === 409 && data.locked) {
-            window.mostrarToast(`Este punto ya está disponible para ${authorName}. No es posible retirarlo.`, 'info');
-            btn.dataset.locked = 'true';
+
+        if (res.status === 409 && data.alreadyGiven) {
+            window.mostrarToast('Ya le diste un punto a este comentario.', 'info');
+            btn.dataset.active = 'true';
+            btn.style.color = '#e8a800';
             return;
         }
         if (!res.ok) return;
-        btn.dataset.active = data.active;
-        btn.style.color = data.active ? '#e8a800' : '#999';
+
+        btn.dataset.active = 'true';
+        btn.style.color = '#e8a800';
         const counter = document.querySelector(`.merece-count-${commentId}`);
         if (counter) counter.textContent = data.count;
-        if (data.active) {
-            window.mostrarToast(`Le avisamos a ${authorName} que su comentario vale un punto extra este mes.`, 'success');
-        }
+        window.mostrarToast(`Le avisamos a ${authorName} que su comentario vale un punto extra este mes.`, 'success');
+
     } catch (e) { console.error(e); }
 };
 
@@ -1326,7 +1333,7 @@ window.cargarRespuestas = async function(commentId, offset) {
                             <span class="reply-banco-count-${r.id}">${r.bancoCount || 0}</span>
                             <span>Te banco</span>
                         </button>
-                        <span style="font-size:0.7rem;color:#bbb;">${new Date(r.createdAt).toLocaleDateString('es-ES')}</span>
+                        <span style="font-size:0.7rem;color:#bbb;">${new Date(r.createdAt).toLocaleDateString('es-ES')} ${new Date(r.createdAt).toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'})}</span>
                         <button onclick="window.abrirFormRespuesta(${commentId}, this)"
                             style="background:none;border:none;cursor:pointer;font-size:0.75rem;color:#999;padding:0;">
                             <i class="fas fa-reply"></i> Responder
