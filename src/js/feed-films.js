@@ -27,6 +27,7 @@ window.estadoPaginacion = {
 window.modalActualId = null;
 window.peliculaActualId = null;
 window._comentarioReportandoId = null;
+window._replyReportandoId = null;
 window._comentarioOcultandoId = null;
 
 // ==============================================
@@ -1083,7 +1084,8 @@ window.cerrarModalReporte = function() {
 
 window.enviarReporte = async function() {
     const commentId = window._comentarioReportandoId;
-    if (!commentId) return;
+        const replyId = window._replyReportandoId;
+        if (!commentId && !replyId) return;
 
     const reasonEl = document.querySelector('input[name="reportReason"]:checked');
     if (!reasonEl) {
@@ -1098,7 +1100,10 @@ window.enviarReporte = async function() {
 
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${CONFIG.API_URL}/comments/${commentId}/report`, {
+        const endpoint = replyId
+                    ? `${CONFIG.API_URL}/comments/replies/${replyId}/report`
+                    : `${CONFIG.API_URL}/comments/${commentId}/report`;
+                const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1312,37 +1317,59 @@ window.cargarRespuestas = async function(commentId, offset) {
         }
 
         replies.forEach(r => {
-            const div = document.createElement('div');
-            div.style.cssText = 'display:flex;gap:0.5rem;padding:0.5rem 0;border-bottom:1px solid #f8f8f8;align-items:flex-start;';
-            div.innerHTML = `
-                <div style="flex-shrink:0;">
-                    ${r.avatarUrl
-                        ? `<img src="${r.avatarUrl}" style="width:28px;height:28px;object-fit:cover;border-radius:50%;">`
-                        : `<div style="width:28px;height:28px;background:#1a3a6b;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:0.75rem;">${r.userName?.charAt(0)||'U'}</div>`
+                    const div = document.createElement('div');
+                    div.style.cssText = 'display:flex;gap:0.5rem;padding:0.5rem 0;border-bottom:1px solid #f8f8f8;align-items:flex-start;';
+
+                    // Respuesta eliminada por moderación
+                    if (r.moderationStatus === 'REMOVED') {
+                        div.innerHTML = `
+                            <div style="flex:1;padding:0.3rem 0.5rem;border-left:2px solid #e0e0e0;">
+                                <em style="font-size:0.8rem;color:#bbb;">
+                                    Cinemarketer eliminó esta respuesta por infringir nuestras normas de convivencia.
+                                </em>
+                            </div>`;
+                        container.appendChild(div);
+                        return;
                     }
-                </div>
-                <div style="flex:1;min-width:0;">
-                    <span style="font-weight:600;font-size:0.8rem;color:#333;">${r.userName}</span>
-                    <div style="font-size:0.85rem;color:#444;margin:0.2rem 0;word-break:break-word;">${r.content}</div>
-                    <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.3rem;">
-                        <button onclick="window.toggleReplyBanco(${r.id}, this)"
-                            data-active="${r.bancadoByMe}"
-                            style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;
-                                   font-size:0.75rem;color:${r.bancadoByMe ? '#1a3a6b' : '#999'};padding:0;">
-                            <i class="fas fa-thumbs-up"></i>
-                            <span class="reply-banco-count-${r.id}">${r.bancoCount || 0}</span>
-                            <span>Te banco</span>
-                        </button>
-                        <span style="font-size:0.7rem;color:#bbb;">${new Date(r.createdAt).toLocaleDateString('es-ES')} ${new Date(r.createdAt).toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'})}</span>
-                        <button onclick="window.abrirFormRespuesta(${commentId}, this)"
-                            style="background:none;border:none;cursor:pointer;font-size:0.75rem;color:#999;padding:0;">
-                            <i class="fas fa-reply"></i> Responder
-                        </button>
-                    </div>
-                </div>
-            `;
-            container.appendChild(div);
-        });
+
+                    div.innerHTML = `
+                        <div style="flex-shrink:0;">
+                            ${r.avatarUrl
+                                ? `<img src="${r.avatarUrl}" style="width:28px;height:28px;object-fit:cover;border-radius:50%;">`
+                                : `<div style="width:28px;height:28px;background:#1a3a6b;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:0.75rem;">${r.userName?.charAt(0)||'U'}</div>`
+                            }
+                        </div>
+                        <div style="flex:1;min-width:0;">
+                            <span style="font-weight:600;font-size:0.8rem;color:#333;">${r.userName}</span>
+                            <div style="font-size:0.85rem;color:#444;margin:0.2rem 0;word-break:break-word;">${r.content}</div>
+                            <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.3rem;">
+                                <button onclick="window.toggleReplyBanco(${r.id}, this)"
+                                    data-active="${r.bancadoByMe}"
+                                    style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;
+                                           font-size:0.75rem;color:${r.bancadoByMe ? '#1a3a6b' : '#999'};padding:0;">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span class="reply-banco-count-${r.id}">${r.bancoCount || 0}</span>
+                                    <span>Te banco</span>
+                                </button>
+                                ${!r.ownReply ? `
+                                <button onclick="window.abrirModalReporteReply(${r.id})"
+                                    style="background:none;border:none;cursor:pointer;font-size:0.75rem;
+                                           color:#ccc;padding:0;transition:color 0.2s;"
+                                    onmouseover="this.style.color='#e50914'"
+                                    onmouseout="this.style.color='#ccc'"
+                                    title="Reportar respuesta">
+                                    <i class="fas fa-flag"></i>
+                                </button>` : ''}
+                                <button onclick="window.abrirFormRespuesta(${commentId}, this)"
+                                    style="background:none;border:none;cursor:pointer;font-size:0.75rem;color:#999;padding:0;">
+                                    <i class="fas fa-reply"></i> Responder
+                                </button>
+                                <span style="font-size:0.7rem;color:#bbb;">${new Date(r.createdAt).toLocaleDateString('es-ES')} ${new Date(r.createdAt).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</span>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
 
         // Botón "Ver más"
         const existingVerMas = container.querySelector('.ver-mas-btn');
@@ -1406,6 +1433,18 @@ window.toggleReplyBanco = async function(replyId, btn) {
         const counter = document.querySelector(`.reply-banco-count-${replyId}`);
         if (counter) counter.textContent = data.count;
     } catch (e) { console.error(e); }
+};
+
+window.abrirModalReporteReply = function(replyId) {
+    window._replyReportandoId = replyId;
+    window._comentarioReportandoId = null; // asegura que no use el de comentario
+
+    document.querySelectorAll('input[name="reportReason"]').forEach(r => r.checked = false);
+    const desc = document.getElementById('reportDescription');
+    if (desc) desc.value = '';
+
+    const modal = document.getElementById('modalReportarComentario');
+    if (modal) modal.style.display = 'flex';
 };
 
 window.abrirFormRespuesta = function(commentId, btn) {
