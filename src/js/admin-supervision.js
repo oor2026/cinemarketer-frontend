@@ -101,7 +101,8 @@ const adminSupervision = {
         const endpoints = {
             reported: 'reported',
             pending:  'pending',
-            resolved: 'resolved'
+            resolved: 'resolved',
+            replies:  'replies-reported'
         };
 
         try {
@@ -148,6 +149,10 @@ const adminSupervision = {
             const contenidoCorto = c.content?.length > 80
                 ? c.content.substring(0, 80) + '...'
                 : (c.content || '');
+            const esReply = c.isReply === true;
+            const tipoLabel = esReply
+                ? '<span style="background:#e8f0fe;color:#1a3a6b;padding:1px 6px;border-radius:8px;font-size:10px;margin-left:4px;">Respuesta</span>'
+                : '';
 
             const toxicity = c.toxicityScore != null
                 ? `<span style="color:${c.toxicityScore >= 0.6 ? '#e50914' : '#2e7d32'};">${(c.toxicityScore * 100).toFixed(0)}%</span>`
@@ -160,7 +165,7 @@ const adminSupervision = {
             return `
                 <tr>
                     <td>
-                        <div style="font-size:0.85rem;color:#333;max-width:250px;">${contenidoCorto}</div>
+                        <div style="font-size:0.85rem;color:#333;max-width:250px;">${contenidoCorto}${tipoLabel}</div>
                         <small style="color:#999;">Película ID: ${c.movieId}</small>
                     </td>
                     <td>
@@ -187,34 +192,30 @@ const adminSupervision = {
     },
 
     generarAcciones(c) {
-        let acciones = `
-            <button class="btn-accion btn-editar" onclick="adminSupervision.verDetalle(${c.commentId})" title="Ver detalle">
-                <i class="fas fa-eye"></i>
-            </button>`;
+            const esReply = c.isReply === true;
+            const id = esReply ? c.replyId : c.commentId;
 
-        if (c.moderationStatus !== 'REMOVED') {
-            acciones += `
-                <button class="btn-accion btn-eliminar" onclick="adminSupervision.abrirModalEliminar(${c.commentId})" title="Eliminar comentario">
-                    <i class="fas fa-trash"></i>
+            let acciones = `
+                <button class="btn-accion btn-editar" onclick="adminSupervision.verDetalle(${c.commentId})" title="Ver detalle">
+                    <i class="fas fa-eye"></i>
                 </button>`;
-        }
 
-        if (c.moderationStatus === 'AUTO_HIDDEN' || c.moderationStatus === 'PENDING_REVIEW') {
-            acciones += `
-                <button class="btn-accion btn-activar" onclick="adminSupervision.restaurar(${c.commentId})" title="Restaurar comentario">
-                    <i class="fas fa-check"></i>
-                </button>`;
-        }
+            if (c.moderationStatus !== 'REMOVED') {
+                acciones += `
+                    <button class="btn-accion btn-eliminar" onclick="adminSupervision.abrirModalEliminar(${id}, ${esReply})" title="Eliminar">
+                        <i class="fas fa-trash"></i>
+                    </button>`;
+            }
 
-        if (c.reportCount > 0 && c.moderationStatus !== 'REMOVED') {
-            acciones += `
-                <button class="btn-accion" style="background:#f0f0f0;color:#555;" onclick="adminSupervision.descartarReportes(${c.commentId})" title="Descartar reportes">
-                    <i class="fas fa-ban"></i>
-                </button>`;
-        }
+            if (c.moderationStatus === 'AUTO_HIDDEN' || c.moderationStatus === 'PENDING_REVIEW') {
+                acciones += `
+                    <button class="btn-accion btn-activar" onclick="adminSupervision.restaurar(${id}, ${esReply})" title="Restaurar">
+                        <i class="fas fa-check"></i>
+                    </button>`;
+            }
 
-        return acciones;
-    },
+            return acciones;
+        },
 
     // ------------------------------------------
     // PAGINACIÓN COMENTARIOS
@@ -267,7 +268,8 @@ const adminSupervision = {
     // VER DETALLE
     // ------------------------------------------
     verDetalle(commentId) {
-        const c = this.datosActuales.find(x => x.commentId === commentId);
+        const c = this.datosActuales.find(x =>
+                    x.isReply ? x.replyId === commentId : x.commentId === commentId);
         if (!c) return;
 
         const contenido = document.getElementById('supDetalleContenido');
@@ -297,7 +299,7 @@ const adminSupervision = {
                 <strong>Estado:</strong> ${c.moderationStatus}
             </div>
             <div style="background:#f9f9f9;border-radius:8px;padding:1rem;margin-bottom:1rem;border-left:3px solid #e50914;">
-                <strong>Comentario:</strong>
+                <strong>${c.isReply ? 'Respuesta:' : 'Comentario:'}</strong>
                 <p style="margin:0.5rem 0 0;color:#444;">${c.content}</p>
             </div>
             <div>
@@ -327,11 +329,12 @@ const adminSupervision = {
     // ------------------------------------------
     // MODAL ELIMINAR
     // ------------------------------------------
-    abrirModalEliminar(commentId) {
-        document.getElementById('inputSupRazon').value = '';
-        document.getElementById('modalSupEliminar').style.display = 'flex';
-        document.getElementById('modalSupEliminar').dataset.commentId = commentId;
-    },
+    abrirModalEliminar(id, esReply = false) {
+            document.getElementById('inputSupRazon').value = '';
+            document.getElementById('modalSupEliminar').style.display = 'flex';
+            document.getElementById('modalSupEliminar').dataset.commentId = id;
+            document.getElementById('modalSupEliminar').dataset.esReply = esReply;
+        },
 
     cerrarModalEliminar() {
         document.getElementById('modalSupEliminar').style.display = 'none';
@@ -352,7 +355,11 @@ const adminSupervision = {
         btn.textContent = 'Eliminando...';
 
         try {
-            const response = await fetch(`${CONFIG.API_URL}/admin/supervision/${commentId}/remove`, {
+            const esReply = modal.dataset.esReply === 'true';
+                    const endpoint = esReply
+                        ? `${CONFIG.API_URL}/admin/supervision/replies/${commentId}/remove`
+                        : `${CONFIG.API_URL}/admin/supervision/${commentId}/remove`;
+                    const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -379,11 +386,14 @@ const adminSupervision = {
     // ------------------------------------------
     // RESTAURAR
     // ------------------------------------------
-    async restaurar(commentId) {
-        if (!confirm('¿Restaurar este comentario? Volverá a ser visible para los usuarios.')) return;
+    async restaurar(id, esReply = false) {
+            if (!confirm('¿Restaurar? Volverá a ser visible para los usuarios.')) return;
 
-        try {
-            const response = await fetch(`${CONFIG.API_URL}/admin/supervision/${commentId}/restore`, {
+            try {
+                const endpoint = esReply
+                    ? `${CONFIG.API_URL}/admin/supervision/replies/${id}/restore`
+                    : `${CONFIG.API_URL}/admin/supervision/${id}/restore`;
+                const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
