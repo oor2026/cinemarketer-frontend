@@ -990,6 +990,7 @@ window.cargarComentariosPelicula = async function(id) {
                         <i class="fas fa-ban"></i>
                     </button>` : '';
 
+                console.log('comentario', c.id, 'replyCount:', c.replyCount, typeof c.replyCount);
                 const item = document.createElement('div');
                 item.className = 'comentario-item';
                 item.style.cssText = 'display:flex; gap:0.75rem; padding:0.75rem 0; border-bottom:1px solid #f0f0f0; align-items:flex-start;';
@@ -1009,7 +1010,46 @@ window.cargarComentariosPelicula = async function(id) {
                             </div>
                         </div>
                         <div class="comentario-texto" style="font-size:0.9rem;color:#444;margin:0.25rem 0;word-break:break-word;">${c.content}</div>
-                        <div class="comentario-fecha" style="font-size:0.75rem;color:#999;">${new Date(c.createdAt).toLocaleDateString('es-ES')}</div>
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.4rem;flex-wrap:wrap;gap:0.4rem;">
+                                                    <div style="display:flex;align-items:center;gap:0.75rem;">
+                                                        <button onclick="window.toggleBanco(${c.id}, this)"
+                                                            data-active="${c.bancadoByMe}"
+                                                            style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;
+                                                                   font-size:0.8rem;color:${c.bancadoByMe ? '#1a3a6b' : '#999'};padding:0;transition:color 0.2s;"
+                                                            title="Te banco">
+                                                            <i class="fas fa-thumbs-up"></i>
+                                                            <span class="banco-count-${c.id}">${c.bancoCount || 0}</span>
+                                                            <span style="font-size:0.75rem;">Te banco</span>
+                                                        </button>
+                                                        ${!c.ownComment ? `
+                                                        <button onclick="window.toggleMerecePunto(${c.id}, this, '${c.userName}')"
+                                                            data-active="${c.merecePuntoByMe}"
+                                                            data-locked="${c.merecePuntoLocked}"
+                                                            style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;
+                                                                   font-size:0.8rem;color:${c.merecePuntoByMe ? '#e8a800' : '#999'};padding:0;transition:color 0.2s;"
+                                                            title="¡Merecés un punto!">
+                                                            <i class="fas fa-star"></i>
+                                                            <span class="merece-count-${c.id}">${c.merecePuntoCount || 0}</span>
+                                                            <span style="font-size:0.75rem;">¡Merecés un punto!</span>
+                                                        </button>` : ''}
+                                                        <button onclick="window.toggleRespuestas(${c.id}, this, true)"
+                                                                                            style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;
+                                                                                                   font-size:0.8rem;color:#999;padding:0;transition:color 0.2s;"
+                                                                                            title="Responder">
+                                                                                            <i class="fas fa-reply"></i>
+                                                                                            <span style="font-size:0.75rem;">Responder</span>
+                                                                                        </button>
+                                                                                        ${(c.replyCount || 0) > 0 ? `
+                                                                                        <button onclick="window.toggleRespuestas(${c.id}, this, false)"
+                                                                                            style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;
+                                                                                                   font-size:0.8rem;color:#1a3a6b;padding:0;transition:color 0.2s;"
+                                                                                            title="Ver respuestas">
+                                                                                            <span style="font-size:0.75rem;">— Ver respuestas (<span class="reply-count-btn-${c.id}">${c.replyCount}</span>)</span>
+                                                                                        </button>` : `<span class="reply-count-${c.id}" style="display:none;">${c.replyCount || 0}</span>`}
+                                                    </div>
+                                                    <div class="comentario-fecha" style="font-size:0.75rem;color:#999;">${new Date(c.createdAt).toLocaleDateString('es-ES')} ${new Date(c.createdAt).toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'})}</div>
+                                                </div>
+                                                <div class="replies-container-${c.id}" style="display:none;margin-top:0.75rem;padding-left:1rem;border-left:2px solid #f0f0f0;"></div>
                     </div>
                 `;
                 lista.appendChild(item);
@@ -1162,6 +1202,239 @@ window.mostrarToast = function(mensaje, tipo = 'success') {
     `;
     document.body.appendChild(t);
     setTimeout(() => { if (t.parentNode) t.remove(); }, 3500);
+};
+
+// ==============================================
+// REACCIONES: TE BANCO
+// ==============================================
+window.toggleBanco = async function(commentId, btn) {
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/comments/${commentId}/banco`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        btn.dataset.active = data.active;
+        btn.style.color = data.active ? '#1a3a6b' : '#999';
+        const counter = document.querySelector(`.banco-count-${commentId}`);
+        if (counter) counter.textContent = data.count;
+    } catch (e) { console.error(e); }
+};
+
+// ==============================================
+// REACCIONES: ¡MERECÉS UN PUNTO!
+// ==============================================
+window.toggleMerecePunto = async function(commentId, btn, authorName) {
+    if (btn.dataset.active === 'true') {
+        window.mostrarToast('Ya le diste un punto a este comentario. Esta acción es irreversible.', 'info');
+        return;
+    }
+
+    // Modal de confirmacion
+    const confirmar = confirm(`¿Confirmás que querés darle 1 punto a ${authorName}?\n\nEsta acción es irreversible.`);
+    if (!confirmar) return;
+
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/comments/${commentId}/merece-punto`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+
+        if (res.status === 409 && data.alreadyGiven) {
+            window.mostrarToast('Ya le diste un punto a este comentario.', 'info');
+            btn.dataset.active = 'true';
+            btn.style.color = '#e8a800';
+            return;
+        }
+        if (!res.ok) return;
+
+        btn.dataset.active = 'true';
+        btn.style.color = '#e8a800';
+        const counter = document.querySelector(`.merece-count-${commentId}`);
+        if (counter) counter.textContent = data.count;
+        window.mostrarToast(`Le avisamos a ${authorName} que su comentario vale un punto extra este mes.`, 'success');
+
+    } catch (e) { console.error(e); }
+};
+
+// ==============================================
+// RESPUESTAS: TOGGLE + CARGA + ENVÍO
+// ==============================================
+window.toggleRespuestas = async function(commentId, btn, focusInput = false) {
+    const container = document.querySelector(`.replies-container-${commentId}`);
+    if (!container) return;
+
+    if (container.style.display !== 'none' && !focusInput) {
+            container.style.display = 'none';
+            return;
+        }
+
+        container.style.display = 'block';
+        // Solo recargar si el container está vacío o solo tiene el loader
+        const soloLoader = container.innerHTML.trim() === '' ||
+                           container.innerHTML.includes('Cargando...');
+        if (soloLoader) {
+            container.innerHTML = '<div style="font-size:0.8rem;color:#999;">Cargando...</div>';
+            await window.cargarRespuestas(commentId, 0);
+        }
+
+    if (focusInput) {
+            setTimeout(() => window.abrirFormRespuesta(commentId, null), 150);
+        }
+};
+
+window.cargarRespuestas = async function(commentId, offset) {
+    const container = document.querySelector(`.replies-container-${commentId}`);
+    if (!container) return;
+
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/comments/${commentId}/replies?offset=${offset}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error();
+        const replies = await res.json();
+        const hasMore = res.headers.get('X-Has-More') === 'true';
+        const total = res.headers.get('X-Total-Replies') || '0';
+
+        // Actualizar contador
+        document.querySelectorAll(`.reply-count-${commentId}, .reply-count-btn-${commentId}`)
+                    .forEach(el => el.textContent = total);
+
+        if (offset === 0) container.innerHTML = '';
+
+        if (replies.length === 0 && offset === 0) {
+            container.innerHTML = '<div style="font-size:0.8rem;color:#999;">Sin respuestas aún.</div>';
+        }
+
+        replies.forEach(r => {
+            const div = document.createElement('div');
+            div.style.cssText = 'display:flex;gap:0.5rem;padding:0.5rem 0;border-bottom:1px solid #f8f8f8;align-items:flex-start;';
+            div.innerHTML = `
+                <div style="flex-shrink:0;">
+                    ${r.avatarUrl
+                        ? `<img src="${r.avatarUrl}" style="width:28px;height:28px;object-fit:cover;border-radius:50%;">`
+                        : `<div style="width:28px;height:28px;background:#1a3a6b;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:0.75rem;">${r.userName?.charAt(0)||'U'}</div>`
+                    }
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <span style="font-weight:600;font-size:0.8rem;color:#333;">${r.userName}</span>
+                    <div style="font-size:0.85rem;color:#444;margin:0.2rem 0;word-break:break-word;">${r.content}</div>
+                    <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.3rem;">
+                        <button onclick="window.toggleReplyBanco(${r.id}, this)"
+                            data-active="${r.bancadoByMe}"
+                            style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;
+                                   font-size:0.75rem;color:${r.bancadoByMe ? '#1a3a6b' : '#999'};padding:0;">
+                            <i class="fas fa-thumbs-up"></i>
+                            <span class="reply-banco-count-${r.id}">${r.bancoCount || 0}</span>
+                            <span>Te banco</span>
+                        </button>
+                        <span style="font-size:0.7rem;color:#bbb;">${new Date(r.createdAt).toLocaleDateString('es-ES')} ${new Date(r.createdAt).toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'})}</span>
+                        <button onclick="window.abrirFormRespuesta(${commentId}, this)"
+                            style="background:none;border:none;cursor:pointer;font-size:0.75rem;color:#999;padding:0;">
+                            <i class="fas fa-reply"></i> Responder
+                        </button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+
+        // Botón "Ver más"
+        const existingVerMas = container.querySelector('.ver-mas-btn');
+        if (existingVerMas) existingVerMas.remove();
+
+        if (hasMore) {
+            const verMas = document.createElement('button');
+            verMas.className = 'ver-mas-btn';
+            verMas.style.cssText = 'background:none;border:none;color:#1a3a6b;font-size:0.8rem;cursor:pointer;padding:0.4rem 0;width:100%;text-align:left;';
+            verMas.textContent = 'Ver más respuestas...';
+            verMas.onclick = () => window.cargarRespuestas(commentId, offset + 5);
+            container.appendChild(verMas);
+        }
+
+    } catch (e) {
+        container.innerHTML = '<div style="font-size:0.8rem;color:#999;">Error al cargar respuestas.</div>';
+    }
+};
+
+window.enviarRespuesta = async function(commentId) {
+    const input = document.getElementById(`reply-input-${commentId}`);
+    if (!input) return;
+    const content = input.value.trim();
+    if (!content) return;
+
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/comments/${commentId}/replies`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content })
+        });
+        const data = await res.json();
+        if (res.status === 422 && data.rejected) {
+            window.mostrarToast('Tu respuesta no cumple con nuestras políticas de convivencia.', 'error');
+            return;
+        }
+        if (!res.ok) {
+            window.mostrarToast(data.message || 'Error al enviar la respuesta.', 'error');
+            return;
+        }
+        input.value = '';
+        // Recargar respuestas desde el inicio
+        await window.cargarRespuestas(commentId, 0);
+    } catch (e) {
+        window.mostrarToast('Error de conexión.', 'error');
+    }
+};
+
+window.toggleReplyBanco = async function(replyId, btn) {
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/comments/replies/${replyId}/banco`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        btn.dataset.active = data.active;
+        btn.style.color = data.active ? '#1a3a6b' : '#999';
+        const counter = document.querySelector(`.reply-banco-count-${replyId}`);
+        if (counter) counter.textContent = data.count;
+    } catch (e) { console.error(e); }
+};
+
+window.abrirFormRespuesta = function(commentId, btn) {
+    const container = document.querySelector(`.replies-container-${commentId}`);
+    if (!container) return;
+
+    // Si ya hay un form abierto, lo quitamos
+    const existing = container.querySelector('.reply-form');
+    if (existing) {
+        existing.remove();
+        return;
+    }
+
+    const form = document.createElement('div');
+    form.className = 'reply-form';
+    form.style.cssText = 'margin-top:0.5rem;display:flex;gap:0.5rem;';
+    form.innerHTML = `
+        <input type="text" placeholder="Escribí tu respuesta..."
+            style="flex:1;border:1px solid #e0e0e0;border-radius:20px;padding:0.4rem 0.75rem;font-size:0.85rem;outline:none;"
+            id="reply-input-${commentId}"
+            maxlength="2000"
+            onkeydown="if(event.key==='Enter') window.enviarRespuesta(${commentId})">
+        <button onclick="window.enviarRespuesta(${commentId})"
+            style="background:#1a3a6b;color:white;border:none;border-radius:20px;padding:0.4rem 0.9rem;font-size:0.8rem;cursor:pointer;">
+            Enviar
+        </button>
+    `;
+    container.appendChild(form);
+    setTimeout(() => document.getElementById(`reply-input-${commentId}`)?.focus(), 50);
 };
 
 // ==============================================
