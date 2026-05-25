@@ -437,3 +437,9 @@ body {
 .nav-menu-close {
     display: none;
 }
+
+@media (min-width: 769px) {
+    .nav-text-hide-desktop {
+        display: none;
+    }
+}
