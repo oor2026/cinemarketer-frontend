@@ -46,8 +46,8 @@ window.cargarNovedades = async function() {
         }
 
         lista.innerHTML = novedades.map(n => `
-            <div onclick="window.clickNovedad(${n.movieId}, ${n.commentId}, '${n.type}')"
-                style="padding:0.75rem 1rem;border-bottom:1px solid #f5f5f5;cursor:${n.type === 'REPLY' ? 'pointer' : 'default'};
+            <div onclick="window.clickNovedad(${n.id}, ${n.movieId}, ${n.commentId}, '${n.type}', ${n.read})"
+                style="padding:0.75rem 1rem;border-bottom:1px solid #f5f5f5;cursor:pointer;
                        background:${n.read ? 'white' : '#f0f4ff'};
                        transition:background 0.2s;"
                 onmouseover="this.style.background='#f8f8f8'"
@@ -68,12 +68,37 @@ window.cargarNovedades = async function() {
     }
 };
 
-window.clickNovedad = async function(movieId, commentId, type) {
-    // Solo navega en respuestas
-    if (type !== 'REPLY') return;
-    document.getElementById('novedadesDropdown').style.display = 'none';
-    if (typeof window.abrirDetallePelicula === 'function') {
-        window.abrirDetallePelicula(movieId);
+window.clickNovedad = async function(notificationId, movieId, commentId, type, yaLeida) {
+    const token = localStorage.getItem('token');
+
+    // Marcar como leída si no lo está
+    if (!yaLeida) {
+        try {
+            await fetch(`${CONFIG.API_URL}/notifications/${notificationId}/read`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+        } catch(e) {}
+
+        // Actualizar badge inmediatamente
+        const badge = document.getElementById('novedadesBadge');
+        if (badge) {
+            const actual = parseInt(badge.textContent) || 0;
+            const nuevo = Math.max(0, actual - 1);
+            badge.textContent = nuevo;
+            badge.style.display = nuevo > 0 ? 'inline-block' : 'none';
+        }
+
+        // Recargar lista para actualizar visual
+        window.cargarNovedades();
+    }
+
+    // Navegar solo en respuestas
+    if (type === 'REPLY') {
+        document.getElementById('novedadesDropdown').style.display = 'none';
+        if (typeof window.abrirDetallePelicula === 'function') {
+            window.abrirDetallePelicula(movieId);
+        }
     }
 };
 
