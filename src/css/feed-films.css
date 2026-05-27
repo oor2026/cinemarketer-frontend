@@ -2141,3 +2141,44 @@
     max-width: none !important;
     width: 100% !important;
 }
+
+/* PILLS DE ORDENAMIENTO */
+.ordenar-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    padding: 0 0.25rem;
+}
+
+.pill-orden {
+    background: white;
+    border: 1.5px solid #ddd;
+    border-radius: 20px;
+    padding: 0.45rem 1rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.pill-orden:hover {
+    border-color: #1a3a6b;
+    color: #1a3a6b;
+}
+
+.pill-orden.active {
+    background: #1a3a6b;
+    border-color: #1a3a6b;
+    color: white;
+    font-weight: 600;
+}
+
+@media (max-width: 480px) {
+    .pill-orden {
+        font-size: 0.78rem;
+        padding: 0.4rem 0.75rem;
+    }
+}

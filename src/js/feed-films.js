@@ -48,9 +48,23 @@ async function cargarComponente(url, contenedorId) {
 // ==============================================
 window.generarTarjetasHTML = async function(peliculas) {
     try {
-         const peliculasFiltradas = peliculas.filter(p =>
-         p.poster_path && p.overview && p.overview.trim() !== ''
-            );
+         const soloLatinos = /^[a-zA-ZÀ-ÿ0-9\s\-:,.!?'"()\u00C0-\u024F\u1E00-\u1EFF]+$/;
+         const anioActual = new Date().getFullYear();
+         const criterio = window._criterioOrden || 'fecha';
+
+         const peliculasFiltradas = peliculas.filter(p => {
+             if (!p.poster_path) return false;
+             if (!p.overview || p.overview.trim() === '') return false;
+             if (!p.title || !soloLatinos.test(p.title.trim())) return false;
+
+             const anio = p.release_date ? new Date(p.release_date).getFullYear() : null;
+
+             // "Lo que se viene": solo películas de años futuros
+             if (criterio === 'proximamente') return anio > anioActual;
+
+             // Feed normal: excluir películas de años futuros
+             return !anio || anio <= anioActual;
+         });
 
         const response = await fetch('modules/feed-tarjeta.html');
         let plantilla = await response.text();
@@ -145,7 +159,11 @@ window.cargarPeliculasPopulares = async function(pagina = 1) {
             return;
         }
 
-        const response = await fetch(`${CONFIG.API_URL}/movies/popular?page=${pagina}`, {
+        const criterioOrden = window._criterioOrden || 'fecha';
+                let sortParam = '';
+                if (criterioOrden === 'fecha') sortParam = '&sortBy=primary_release_date.desc';
+                if (criterioOrden === 'proximamente') sortParam = '&sortBy=primary_release_date.asc&releaseDateGte=' + (new Date().getFullYear() + 1);
+                const response = await fetch(`${CONFIG.API_URL}/movies/popular?page=${pagina}${sortParam}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
 
@@ -156,25 +174,62 @@ window.cargarPeliculasPopulares = async function(pagina = 1) {
         window.estadoPaginacion.totalPaginas = data.total_pages;
         window.estadoPaginacion.totalResultados = data.total_results;
 
-        grid.innerHTML = await window.generarTarjetasHTML(data.results);
+        // Acumular páginas hasta tener 20 válidos
+                const soloLatinos = /^[a-zA-ZÀ-ÿ0-9\s\-:,.!?'"()\u00C0-\u024F\u1E00-\u1EFF]+$/;
+                const anioActual = new Date().getFullYear();
+                const criterio = window._criterioOrden || 'fecha';
 
-        const peliculasMostradas = grid.querySelectorAll('.pelicula-card').length;
-        const countEl = document.getElementById('resultadosCount');
-        if (countEl) countEl.textContent = peliculasMostradas;
+                const esValida = (p) => {
+                    if (!p.poster_path) return false;
+                    if (!p.overview || p.overview.trim() === '') return false;
+                    if (!p.title || !soloLatinos.test(p.title.trim())) return false;
+                    const anio = p.release_date ? new Date(p.release_date).getFullYear() : null;
+                    if (criterio === 'proximamente') return anio > anioActual;
+                    return !anio || anio <= anioActual;
+                };
 
-        // Si la página quedó vacía y hay más páginas, cargar la siguiente automáticamente
-        if (peliculasMostradas === 0 && data.page < data.total_pages) {
-            window.estadoPaginacion.cargando = false;
-            await window.cargarPeliculasPopulares(data.page + 1);
-            return;
-        }
+                let acumulados = [...data.results];
+                let paginaExtra = pagina;
+                window.estadoPaginacion._ultimaPaginaTmdb = pagina;
 
-        limpiarModalesDuplicados();
+                while (acumulados.filter(esValida).length < 18 && paginaExtra < data.total_pages) {
+                    paginaExtra++;
+                    try {
+                        const token2 = localStorage.getItem('token');
+                        const criterioOrden2 = window._criterioOrden || 'fecha';
+                        let sortParam2 = '';
+                        if (criterioOrden2 === 'fecha') sortParam2 = '&sortBy=primary_release_date.desc';
+                        if (criterioOrden2 === 'proximamente') sortParam2 = '&sortBy=primary_release_date.asc&releaseDateGte=' + (anioActual + 1);
+                        const resExtra = await fetch(`${CONFIG.API_URL}/movies/popular?page=${paginaExtra}${sortParam2}`, {
+                            headers: { 'Authorization': `Bearer ${token2}` }
+                        });
+                        if (!resExtra.ok) break;
+                        const dataExtra = await resExtra.json();
+                        acumulados = [...acumulados, ...dataExtra.results];
+                        window.estadoPaginacion.totalPaginas = dataExtra.total_pages;
+                        window.estadoPaginacion._ultimaPaginaTmdb = paginaExtra;
+                    } catch(e) { break; }
+                }
 
-        if (typeof window.cargarEstadisticasVotacion === 'function') {
-            window.cargarEstadisticasVotacion();
-        }
-        window.actualizarBotonesPaginacion();
+                const validos = acumulados.filter(esValida).slice(0, 18);
+                grid.innerHTML = await window.generarTarjetasHTML(validos);
+
+                const peliculasMostradas = grid.querySelectorAll('.pelicula-card').length;
+                const countEl = document.getElementById('resultadosCount');
+                if (countEl) countEl.textContent = peliculasMostradas;
+
+                if (peliculasMostradas === 0 && data.page < data.total_pages) {
+                    window.estadoPaginacion.cargando = false;
+                    await window.cargarPeliculasPopulares(data.page + 1);
+                    return;
+                }
+
+                limpiarModalesDuplicados();
+
+                if (typeof window.cargarEstadisticasVotacion === 'function') {
+                    window.cargarEstadisticasVotacion();
+                }
+                window.actualizarBotonesPaginacion();
 
     } catch (error) {
         grid.innerHTML = `<div class="error">Error: ${error.message}</div>`;
@@ -259,7 +314,11 @@ window.cargarMas = async function() {
             if (!response.ok) throw new Error(`Error ${response.status}`);
             data = await response.json();
         } else {
-            const response = await fetch(`${CONFIG.API_URL}/movies/popular?page=${siguientePagina}`, {
+            const criterioOrden = window._criterioOrden || 'fecha';
+            let sortParam = '';
+            if (criterioOrden === 'fecha') sortParam = '&sortBy=primary_release_date.desc';
+            if (criterioOrden === 'proximamente') sortParam = '&sortBy=primary_release_date.asc&releaseDateGte=' + (new Date().getFullYear() + 1);
+            const response = await fetch(`${CONFIG.API_URL}/movies/popular?page=${siguientePagina}${sortParam}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!response.ok) throw new Error(`Error ${response.status}`);
@@ -304,18 +363,44 @@ window.cambiarPagina = async function(direccion) {
                        duracion !== 'todos' || director;
 
     if (hayFiltros) {
-        await window.aplicarFiltros(nuevaPagina);
-    } else {
-        await window.cargarPeliculasPopulares(nuevaPagina);
-    }
+            await window.aplicarFiltros(nuevaPagina);
+        } else {
+            const criterioOrden = window._criterioOrden || 'fecha';
+            if (criterioOrden === 'fecha' || criterioOrden === 'proximamente') {
+                // Usar cursor real de TMDB para no repetir películas
+                const ultimaTmdb = window.estadoPaginacion._ultimaPaginaTmdb || window.estadoPaginacion.paginaActual;
+                const siguienteTmdb = direccion === 'siguiente' ? ultimaTmdb + 1 : Math.max(1, ultimaTmdb - 20);
+                await window.cargarPeliculasPopulares(siguienteTmdb);
+            } else {
+                await window.cargarPeliculasPopulares(nuevaPagina);
+            }
+        }
     document.querySelector('.resultados-header')?.scrollIntoView({ behavior: 'smooth' });
 };
 
 // ==============================================
 // ORDENAR PELÍCULAS
 // ==============================================
+window._criterioOrden = 'fecha';
+
+window.seleccionarOrden = async function(criterio, btn) {
+    document.querySelectorAll('.pill-orden').forEach(p => p.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    window._criterioOrden = criterio;
+
+    if (criterio === 'fecha' || criterio === 'proximamente') {
+        await window.cargarPeliculasPopulares(1);
+    } else {
+        // Asegurar que las estadísticas estén cargadas antes de ordenar
+        if (typeof window.cargarEstadisticasVotacion === 'function') {
+            await window.cargarEstadisticasVotacion();
+        }
+        await window.ordenarPeliculas();
+    }
+};
+
 window.ordenarPeliculas = async function() {
-    const criterio = document.getElementById('ordenarPor')?.value || 'popularidad';
+    const criterio = window._criterioOrden || 'fecha';
     const grid = document.getElementById('peliculasGrid');
     if (!grid) return;
 
@@ -368,15 +453,6 @@ window.ordenarPeliculas = async function() {
         const statsB = statsMap[idB] || { totalVotos: 0, porcentaje: 0, comentarios: 0 };
 
         switch(criterio) {
-            case 'popularidad':
-                if (statsA.totalVotos === 0 && statsB.totalVotos === 0) {
-                    const yearA = parseInt(a.querySelector('.año')?.textContent || '0');
-                    const yearB = parseInt(b.querySelector('.año')?.textContent || '0');
-                    return yearB - yearA;
-                }
-                if (statsA.totalVotos === 0) return 1;
-                if (statsB.totalVotos === 0) return -1;
-                return statsB.porcentaje - statsA.porcentaje;
             case 'fecha':
                 const yearA = parseInt(a.querySelector('.año')?.textContent || '0');
                 const yearB = parseInt(b.querySelector('.año')?.textContent || '0');
@@ -622,7 +698,8 @@ window.aplicarFiltros = async function(pagina = 1) {
         if (!response.ok) throw new Error(`Error ${response.status}`);
         const data = await response.json();
 
-        window.estadoPaginacion.paginaActual = data.page;
+        window.estadoPaginacion.paginaActual = pagina;
+        window.estadoPaginacion._ultimaPaginaTmdb = pagina; // cursor real de TMDB
         window.estadoPaginacion.totalPaginas = data.total_pages;
         window.estadoPaginacion.totalResultados = data.total_results;
 
@@ -1802,16 +1879,29 @@ window['init_feed-films'] = async function() {
     await cargarComponente('modules/feed-paginacion.html', 'paginacion-container');
 
     setTimeout(() => {
-        const content = document.getElementById('filtrosContent');
-        if (content) content.style.display = 'none';
-        poblarFiltroAnio();
-        inicializarAutocompletadoDirector();
-    }, 200);
+            const content = document.getElementById('filtrosContent');
+            if (content) content.style.display = 'none';
+            poblarFiltroAnio();
+            inicializarAutocompletadoDirector();
 
-    window.cargarPeliculasPopulares(1);
-    inicializarContadorCaracteres();
-    window.addEventListener('resize', window.actualizarBotonesPaginacion);
-};
+            // Enter en cualquier input de filtros desktop dispara aplicar
+            const filtrosDesktop = document.querySelector('.filtros-desktop');
+            if (filtrosDesktop) {
+                filtrosDesktop.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        window.aplicarFiltros();
+                    }
+                });
+            }
+        }, 200);
+
+    window.cargarPeliculasPopulares(1).then(() => {
+            window.ordenarPeliculas();
+        });
+        inicializarContadorCaracteres();
+        window.addEventListener('resize', window.actualizarBotonesPaginacion);
+    };
 
 // ==============================================
 // MODAL OCULTAR RESPUESTA PROPIA
