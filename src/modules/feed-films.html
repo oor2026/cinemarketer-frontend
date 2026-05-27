@@ -207,6 +207,30 @@
     </div>
 
     <!-- ============================================== -->
+    <!-- MODAL MERECE UN PUNTO                          -->
+    <!-- ============================================== -->
+    <div id="modalMerecePunto" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
+        <div style="background:white; border-radius:16px; padding:2rem; max-width:420px; width:100%; position:relative;" onclick="event.stopPropagation()">
+            <button onclick="window.cerrarModalMerecePunto()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#666;">×</button>
+            <h3 style="margin:0 0 0.5rem; color:#e8a800;"><i class="fas fa-star"></i> ¡Merecés un punto!</h3>
+            <p style="color:#666; font-size:0.9rem; margin-bottom:1.5rem;">
+                ¿Confirmás que querés darle <strong>1 punto</strong> a <strong><span id="merecePuntoAutorNombre"></span></strong>?
+                Esta acción es <strong>irreversible</strong>.
+            </p>
+            <div style="display:flex; gap:0.75rem;">
+                <button onclick="window.cerrarModalMerecePunto()"
+                        style="flex:1; padding:0.7rem; border:1.5px solid #ddd; background:none; border-radius:8px; color:#666; cursor:pointer; font-size:0.9rem;">
+                    Cancelar
+                </button>
+                <button id="btnConfirmarMerecePunto" onclick="window.confirmarMerecePunto()"
+                        style="flex:2; padding:0.7rem; background:#e8a800; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer; font-size:0.9rem;">
+                    Sí, dar punto
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
     <!-- MODAL OCULTAR COMENTARIO                       -->
     <!-- ============================================== -->
     <div id="modalOcultarComentario" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">

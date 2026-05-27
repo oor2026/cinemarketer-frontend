@@ -1232,15 +1232,26 @@ window.toggleBanco = async function(commentId, btn) {
 // ==============================================
 // REACCIONES: ¡MERECÉS UN PUNTO!
 // ==============================================
-window.toggleMerecePunto = async function(commentId, btn, authorName) {
-    if (btn.dataset.active === 'true') {
-        window.mostrarToast('Ya le diste un punto a este comentario. Esta acción es irreversible.', 'info');
-        return;
-    }
+window._merecePuntoCommentId = null;
+window._merecePuntoBtn = null;
+window._merecePuntoAuthorName = null;
 
-    // Modal de confirmacion
-    const confirmar = confirm(`¿Confirmás que querés darle 1 punto a ${authorName}?\n\nEsta acción es irreversible.`);
-    if (!confirmar) return;
+window.cerrarModalMerecePunto = function() {
+    const modal = document.getElementById('modalMerecePunto');
+    if (modal) modal.style.display = 'none';
+    window._merecePuntoCommentId = null;
+    window._merecePuntoBtn = null;
+    window._merecePuntoAuthorName = null;
+};
+
+window.confirmarMerecePunto = async function() {
+    const commentId = window._merecePuntoCommentId;
+    const btn = window._merecePuntoBtn;
+    const authorName = window._merecePuntoAuthorName;
+    if (!commentId) return;
+
+    const btnConfirmar = document.getElementById('btnConfirmarMerecePunto');
+    if (btnConfirmar) { btnConfirmar.disabled = true; btnConfirmar.textContent = 'Enviando...'; }
 
     const token = localStorage.getItem('token');
     try {
@@ -1250,21 +1261,88 @@ window.toggleMerecePunto = async function(commentId, btn, authorName) {
         });
         const data = await res.json();
 
+        window.cerrarModalMerecePunto();
+
         if (res.status === 409 && data.alreadyGiven) {
             window.mostrarToast('Ya le diste un punto a este comentario.', 'info');
-            btn.dataset.active = 'true';
-            btn.style.color = '#e8a800';
+            if (btn) { btn.dataset.active = 'true'; btn.style.color = '#e8a800'; }
             return;
         }
         if (!res.ok) return;
 
-        btn.dataset.active = 'true';
-        btn.style.color = '#e8a800';
+        if (btn) { btn.dataset.active = 'true'; btn.style.color = '#e8a800'; }
         const counter = document.querySelector(`.merece-count-${commentId}`);
         if (counter) counter.textContent = data.count;
         window.mostrarToast(`Le avisamos a ${authorName} que su comentario vale un punto extra este mes.`, 'success');
 
-    } catch (e) { console.error(e); }
+    } catch(e) {
+        window.cerrarModalMerecePunto();
+        console.error(e);
+    } finally {
+        if (btnConfirmar) { btnConfirmar.disabled = false; btnConfirmar.textContent = 'Sí, dar punto'; }
+    }
+};
+
+window._merecePuntoCommentId = null;
+window._merecePuntoBtn = null;
+window._merecePuntoAuthorName = null;
+
+window.cerrarModalMerecePunto = function() {
+    const modal = document.getElementById('modalMerecePunto');
+    if (modal) modal.style.display = 'none';
+    window._merecePuntoCommentId = null;
+    window._merecePuntoBtn = null;
+    window._merecePuntoAuthorName = null;
+};
+
+window.confirmarMerecePunto = async function() {
+    const commentId = window._merecePuntoCommentId;
+    const btn = window._merecePuntoBtn;
+    const authorName = window._merecePuntoAuthorName;
+    if (!commentId) return;
+
+    const btnConfirmar = document.getElementById('btnConfirmarMerecePunto');
+    if (btnConfirmar) { btnConfirmar.disabled = true; btnConfirmar.textContent = 'Enviando...'; }
+
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/comments/${commentId}/merece-punto`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+
+        window.cerrarModalMerecePunto();
+
+        if (res.status === 409 && data.alreadyGiven) {
+            window.mostrarToast('Ya le diste un punto a este comentario.', 'info');
+            if (btn) { btn.dataset.active = 'true'; btn.style.color = '#e8a800'; }
+            return;
+        }
+        if (!res.ok) return;
+
+        if (btn) { btn.dataset.active = 'true'; btn.style.color = '#e8a800'; }
+        const counter = document.querySelector(`.merece-count-${commentId}`);
+        if (counter) counter.textContent = data.count;
+        window.mostrarToast(`Le avisamos a ${authorName} que su comentario vale un punto extra este mes.`, 'success');
+
+    } catch(e) { console.error(e); } finally {
+        if (btnConfirmar) { btnConfirmar.disabled = false; btnConfirmar.textContent = 'Sí, dar punto'; }
+    }
+};
+
+window.toggleMerecePunto = async function(commentId, btn, authorName) {
+    if (btn.dataset.active === 'true') {
+        window.mostrarToast('Ya le diste un punto a este comentario. Esta acción es irreversible.', 'info');
+        return;
+    }
+    window._merecePuntoCommentId = commentId;
+    window._merecePuntoBtn = btn;
+    window._merecePuntoAuthorName = authorName;
+    const nombreEl = document.getElementById('merecePuntoAutorNombre');
+    if (nombreEl) nombreEl.textContent = authorName;
+    const modal = document.getElementById('modalMerecePunto');
+    if (modal) modal.style.display = 'flex';
 };
 
 // ==============================================
