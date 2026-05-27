@@ -21,15 +21,14 @@
     <!-- RESULTADOS (PELÍCULAS) -->
     <div class="resultados-header">
         <h3>Películas encontradas <span id="resultadosCount">3</span></h3>
-        <div class="ordenar">
-            <label>Ordenar por:</label>
-            <select id="ordenarPor" class="ordenar-select" onchange="window.ordenarPeliculas()">
-                <option value="popularidad">Más populares</option>
-                <option value="fecha">Más recientes</option>
-                <option value="titulo">Título A-Z</option>
-                <option value="votos">Más votadas</option>
-            </select>
-        </div>
+    </div>
+
+    <!-- PILLS DE ORDENAMIENTO -->
+    <div class="ordenar-pills" id="ordenarPills">
+        <button class="pill-orden active" data-criterio="fecha" onclick="window.seleccionarOrden('fecha', this)">🔥 Más populares</button>
+        <button class="pill-orden" data-criterio="proximamente" onclick="window.seleccionarOrden('proximamente', this)">🎬 Lo que se viene</button>
+        <button class="pill-orden" data-criterio="votos" onclick="window.seleccionarOrden('votos', this)">👍 Más votadas</button>
+        <button class="pill-orden" data-criterio="titulo" onclick="window.seleccionarOrden('titulo', this)">🔤 Título A-Z</button>
     </div>
 
     <!-- GRID DE PELÍCULAS -->
