@@ -46,7 +46,7 @@ window.cargarNovedades = async function() {
         }
 
         lista.innerHTML = novedades.map(n => `
-            <div onclick="window.clickNovedad(${n.id}, ${n.movieId}, ${n.commentId}, '${n.type}', ${n.read})"
+            <div onclick="window.clickNovedad(${n.id}, ${n.movieId}, ${n.commentId}, ${n.replyId || 'null'}, '${n.type}', ${n.read})"
                 style="padding:0.75rem 1rem;border-bottom:1px solid #f5f5f5;cursor:pointer;
                        background:${n.read ? 'white' : '#f0f4ff'};
                        transition:background 0.2s;"
@@ -68,7 +68,7 @@ window.cargarNovedades = async function() {
     }
 };
 
-window.clickNovedad = async function(notificationId, movieId, commentId, type, yaLeida) {
+window.clickNovedad = async function(notificationId, movieId, commentId, replyId, type, yaLeida) {
     const token = localStorage.getItem('token');
 
     // Marcar como leída si no lo está
@@ -94,12 +94,46 @@ window.clickNovedad = async function(notificationId, movieId, commentId, type, y
     }
 
     // Navegar solo en respuestas
-    if (type === 'REPLY') {
-        document.getElementById('novedadesDropdown').style.display = 'none';
-        if (typeof window.abrirDetallePelicula === 'function') {
-            window.abrirDetallePelicula(movieId);
+        if (type === 'REPLY') {
+            document.getElementById('novedadesDropdown').style.display = 'none';
+            if (typeof window.abrirDetallePelicula === 'function') {
+                window.abrirDetallePelicula(movieId);
+                // Esperar a que carguen comentarios y replies, luego scroll + resaltado
+                if (replyId && commentId) {
+                    setTimeout(async () => {
+                        // Expandir el hilo del comentario padre
+                        await window.cargarRespuestas(commentId, 0);
+                        const container = document.querySelector(`.replies-container-${commentId}`);
+                        if (container) container.style.display = 'block';
+
+                        // Esperar a que rendericen las replies
+                        setTimeout(() => {
+                            // Buscar la reply por data o por posición en el DOM
+                            const allReplies = container ? container.querySelectorAll('div[style*="display:flex"]') : [];
+                            let targetEl = null;
+
+                            // Buscar el div que contiene el banco button con el replyId
+                            if (container) {
+                                const bancoBtns = container.querySelectorAll(`button[onclick*="toggleReplyBanco(${replyId}"]`);
+                                if (bancoBtns.length > 0) {
+                                    targetEl = bancoBtns[0].closest('div[style*="display:flex"]');
+                                }
+                            }
+
+                            if (targetEl) {
+                                targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                // Resaltado temporal
+                                targetEl.style.transition = 'background 0.3s';
+                                targetEl.style.background = '#fff3cd';
+                                setTimeout(() => {
+                                    targetEl.style.background = '';
+                                }, 3000);
+                            }
+                        }, 500);
+                    }, 800);
+                }
+            }
         }
-    }
 };
 
 window.marcarTodasLeidas = async function() {
