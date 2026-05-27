@@ -29,6 +29,7 @@ window.peliculaActualId = null;
 window._comentarioReportandoId = null;
 window._replyReportandoId = null;
 window._comentarioOcultandoId = null;
+window._replyOcultandoId = null;
 
 // ==============================================
 // FUNCIÓN PARA CARGAR COMPONENTES HTML
@@ -1320,8 +1321,20 @@ window.cargarRespuestas = async function(commentId, offset) {
                     const div = document.createElement('div');
                     div.style.cssText = 'display:flex;gap:0.5rem;padding:0.5rem 0;border-bottom:1px solid #f8f8f8;align-items:flex-start;';
 
-                    // Respuesta eliminada por moderación
-                    if (r.moderationStatus === 'REMOVED') {
+                    // Respuesta ocultada por el propio usuario
+                                        if (r.moderationStatus === 'HIDDEN_BY_USER') {
+                                            div.innerHTML = `
+                                                <div style="flex:1;padding:0.3rem 0.5rem;border-left:2px solid #e0e0e0;">
+                                                    <em style="font-size:0.8rem;color:#bbb;">
+                                                        Esta respuesta fue ocultada por ${r.userName}.
+                                                    </em>
+                                                </div>`;
+                                            container.appendChild(div);
+                                            return;
+                                        }
+
+                                        // Respuesta eliminada por moderación
+                                        if (r.moderationStatus === 'REMOVED') {
                         div.innerHTML = `
                             <div style="flex:1;padding:0.3rem 0.5rem;border-left:2px solid #e0e0e0;">
                                 <em style="font-size:0.8rem;color:#bbb;">
@@ -1352,14 +1365,22 @@ window.cargarRespuestas = async function(commentId, offset) {
                                     <span>Te banco</span>
                                 </button>
                                 ${!r.ownReply ? `
-                                <button onclick="window.abrirModalReporteReply(${r.id})"
-                                    style="background:none;border:none;cursor:pointer;font-size:0.75rem;
-                                           color:#ccc;padding:0;transition:color 0.2s;"
-                                    onmouseover="this.style.color='#e50914'"
-                                    onmouseout="this.style.color='#ccc'"
-                                    title="Reportar respuesta">
-                                    <i class="fas fa-flag"></i>
-                                </button>` : ''}
+                                    <button onclick="window.abrirModalReporteReply(${r.id})"
+                                        style="background:none;border:none;cursor:pointer;font-size:0.75rem;
+                                               color:#ccc;padding:0;transition:color 0.2s;"
+                                        onmouseover="this.style.color='#e50914'"
+                                        onmouseout="this.style.color='#ccc'"
+                                        title="Reportar respuesta">
+                                        <i class="fas fa-flag"></i>
+                                    </button>` : `
+                                    <button onclick="window.abrirModalOcultarReply(${r.id})"
+                                        style="background:none;border:none;cursor:pointer;font-size:0.75rem;
+                                               color:#ccc;padding:0;transition:color 0.2s;"
+                                        onmouseover="this.style.color='#e50914'"
+                                        onmouseout="this.style.color='#ccc'"
+                                        title="Ocultar mi respuesta">
+                                        <i class="fas fa-ban"></i>
+                                    </button>`}
                                 <button onclick="window.abrirFormRespuesta(${commentId}, this)"
                                     style="background:none;border:none;cursor:pointer;font-size:0.75rem;color:#999;padding:0;">
                                     <i class="fas fa-reply"></i> Responder
@@ -1712,6 +1733,68 @@ window['init_feed-films'] = async function() {
     window.cargarPeliculasPopulares(1);
     inicializarContadorCaracteres();
     window.addEventListener('resize', window.actualizarBotonesPaginacion);
+};
+
+// ==============================================
+// MODAL OCULTAR RESPUESTA PROPIA
+// ==============================================
+window.abrirModalOcultarReply = function(replyId) {
+    window._replyOcultandoId = replyId;
+    const btn = document.getElementById('btnConfirmarOcultar');
+    if (btn) btn.onclick = window.confirmarOcultarReply;
+    const modal = document.getElementById('modalOcultarComentario');
+    if (modal) modal.style.display = 'flex';
+};
+
+window.cerrarModalOcultarReply = function() {
+    window._replyOcultandoId = null;
+    const btn = document.getElementById('btnConfirmarOcultar');
+    if (btn) btn.onclick = window.confirmarOcultar;
+    const modal = document.getElementById('modalOcultarComentario');
+    if (modal) modal.style.display = 'none';
+};
+
+window.confirmarOcultarReply = async function() {
+    const replyId = window._replyOcultandoId;
+    if (!replyId) return;
+
+    const btn = document.getElementById('btnConfirmarOcultar');
+    if (btn) { btn.disabled = true; btn.textContent = 'Ocultando...'; }
+
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${CONFIG.API_URL}/comments/replies/${replyId}/hide`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            window.cerrarModalOcultarReply();
+            window.mostrarToast(data.error || 'Error al ocultar la respuesta.', 'error');
+            return;
+        }
+
+        window.cerrarModalOcultarReply();
+        window.mostrarToast('Tu respuesta fue ocultada correctamente.', 'success');
+
+        // Recargar el hilo del comentario padre que está abierto
+        const containers = document.querySelectorAll('[class*="replies-container-"]');
+        for (const c of containers) {
+            if (c.style.display !== 'none') {
+                const match = c.className.match(/replies-container-(\d+)/);
+                if (match) await window.cargarRespuestas(match[1], 0);
+                break;
+            }
+        }
+
+    } catch (error) {
+        window.cerrarModalOcultarReply();
+        window.mostrarToast('Error al ocultar la respuesta. Intentá de nuevo.', 'error');
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Sí, ocultar'; btn.onclick = window.confirmarOcultar; }
+    }
 };
 
 // Cerrar modal con ESC
