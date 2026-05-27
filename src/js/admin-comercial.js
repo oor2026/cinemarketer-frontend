@@ -18,12 +18,22 @@ const adminComercial = (() => {
         MIS_PREMIOS:   'Mis Premios',
         MIS_CONSULTAS: 'Mis Consultas',
         CONTACTO:      'Contacto',
-        FEED_FILMS:    'Feed de Películas'
+        FEED_FILMS:    'Feed de Películas',
+        SPLASH_MOBILE: 'Splash Mobile'
     };
 
     const POSICION_LABELS = {
-        IZQUIERDO: 'Lateral izquierdo',
-        DERECHO:   'Lateral derecho'
+        IZQUIERDO:  'Lateral izquierdo',
+        DERECHO:    'Lateral derecho',
+        HORIZONTAL: 'Banner horizontal',
+        SPLASH:     'Splash mobile'
+    };
+
+    const DIMENSIONES_HINTS = {
+        IZQUIERDO:  '300 × 1100 px',
+        DERECHO:    '300 × 1100 px',
+        HORIZONTAL: '1200 × 200 px',
+        SPLASH:     '400 × 600 px'
     };
 
     // =============================================
@@ -140,6 +150,13 @@ const adminComercial = (() => {
         document.getElementById('inputBannerModulo').value   = '';
         document.getElementById('inputBannerPosicion').value = '';
         document.getElementById('inputBannerVisible').value  = 'true';
+
+        // Escuchar cambio de posición para actualizar hint de dimensiones
+        const selectPosicion = document.getElementById('inputBannerPosicion');
+        selectPosicion.onchange = function() {
+            const hint = document.getElementById('hintDimensiones');
+            if (hint) hint.textContent = DIMENSIONES_HINTS[this.value] || '300 × 1100 px';
+        };
 
         const imagenSection = document.getElementById('bannerImagenSection');
         const notaGuardar   = document.getElementById('comercialNotaGuardar');

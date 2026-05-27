@@ -23,6 +23,75 @@ const MODULO_API_MAP = {
     'feed-films':   'FEED_FILMS'
 };
 
+// Módulos donde aplica el splash mobile
+const MODULES_WITH_SPLASH = ['feed-films', 'mi-cuenta', 'mis-puntos', 'mis-premios', 'mis-consultas', 'contacto'];
+
+// Clave de sessionStorage para controlar que solo aparezca una vez por sesión por módulo
+function splashKey(moduleName) {
+    return `splash_shown_${moduleName}`;
+}
+
+window._splashTimer = null;
+
+window.cerrarSplashAd = function() {
+    const overlay = document.getElementById('splashAdOverlay');
+    if (overlay) overlay.style.display = 'none';
+    if (window._splashTimer) { clearInterval(window._splashTimer); window._splashTimer = null; }
+};
+
+async function mostrarSplashMobile(moduleName) {
+    // Solo mobile
+    if (window.innerWidth > 768) return;
+
+    // Solo una vez por sesión por módulo
+    if (sessionStorage.getItem(splashKey(moduleName))) return;
+
+    if (!MODULES_WITH_SPLASH.includes(moduleName)) return;
+
+    try {
+        const moduloApi = MODULO_API_MAP[moduleName] || moduleName.toUpperCase().replace(/-/g, '_');
+        const res = await fetch(`${CONFIG.API_URL}/banners?modulo=${moduloApi}`);
+        if (!res.ok) return;
+        const banners = await res.json();
+        const banner = banners.find(b => b.posicion === 'SPLASH' && b.imageUrl);
+        if (!banner) return;
+
+        const overlay = document.getElementById('splashAdOverlay');
+        const img     = document.getElementById('splashAdImg');
+        const link    = document.getElementById('splashAdLink');
+        const countdown = document.getElementById('splashCountdown');
+        const closeBtn  = document.getElementById('splashCloseBtn');
+
+        if (!overlay || !img) return;
+
+        img.src   = banner.imageUrl;
+        img.alt   = banner.nombreMarca || 'Publicidad';
+        link.href = banner.linkDestino || '#';
+
+        overlay.style.display = 'flex';
+        sessionStorage.setItem(splashKey(moduleName), '1');
+
+        // Countdown de 5 segundos
+        let segundos = 5;
+        if (countdown) { countdown.textContent = segundos; countdown.style.display = 'block'; }
+        if (closeBtn)    closeBtn.style.display = 'none';
+
+        window._splashTimer = setInterval(() => {
+            segundos--;
+            if (countdown) countdown.textContent = segundos;
+            if (segundos <= 0) {
+                clearInterval(window._splashTimer);
+                window._splashTimer = null;
+                if (countdown) countdown.style.display = 'none';
+                if (closeBtn)  closeBtn.style.display  = 'block';
+                // Cerrar automáticamente después de mostrar el botón por 2 segundos más
+                setTimeout(() => window.cerrarSplashAd(), 2000);
+            }
+        }, 1000);
+
+    } catch(e) {}
+}
+
 function actualizarClaseModulo(moduleName) {
     document.body.className = document.body.className
         .split(' ')
@@ -86,6 +155,7 @@ async function cargarBanners(moduleName) {
                 sidebarRight.classList.remove('ad-empty');
             }
 
+            if (banner.posicion === 'SPLASH') return; // Lo maneja mostrarSplashMobile
             if (banner.posicion === 'HORIZONTAL') {
                 const bloque = document.getElementById('feedBannerHorizontal');
                 const img    = document.getElementById('feedBannerImg');
@@ -123,7 +193,10 @@ async function loadModule(moduleName, element = null, updateHash = true) {
     actualizarClaseModulo(moduleName);
 
     // Carga los banners correspondientes al módulo desde la API
-    cargarBanners(moduleName);
+        cargarBanners(moduleName);
+
+    // Splash mobile — solo una vez por sesión por módulo
+        mostrarSplashMobile(moduleName);
 
     try {
         // HTML
