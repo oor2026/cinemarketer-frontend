@@ -20,6 +20,7 @@ async request(endpoint, method = 'GET', data = null) {
         localStorage.removeItem('userEmail');
         localStorage.removeItem('userRole');
         localStorage.removeItem('userPoints');
+        sessionStorage.clear();
         window.location.replace('login.html');
         return;
     }
@@ -77,6 +78,7 @@ async request(endpoint, method = 'GET', data = null) {
         localStorage.removeItem('userEmail');
         localStorage.removeItem('userRole');
         localStorage.removeItem('userPoints');
+        sessionStorage.clear();
         window.location.replace('login.html');
     }
 };
