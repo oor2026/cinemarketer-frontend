@@ -315,6 +315,15 @@
     background: #b2070f;
 }
 
+@media (min-width: 769px) {
+    .btn-suscribirse-cta {
+        box-shadow: 0 0 18px 4px rgba(255, 255, 255, 0.45);
+    }
+    .btn-suscribirse-cta:hover {
+        box-shadow: 0 0 28px 8px rgba(255, 255, 255, 0.65);
+    }
+}
+
 /* ── Modal cancelar confirmación ── */
 .premium-cancel-modal-overlay {
     display: none;
@@ -404,15 +413,66 @@
 
 /* ── Banner CTA para no premium ── */
 .especiales-cta-banner {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 160px 1fr 160px;
     align-items: center;
-    text-align: center;
     background: #1a3a6b;
     border-radius: 16px;
     padding: 3rem 2rem;
     margin: 1.5rem 0;
     gap: 1rem;
+}
+
+.especiales-cta-centro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+}
+
+.especiales-cta-lateral {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+    justify-content: center;
+}
+
+.especiales-merch-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.especiales-merch-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    background: #e50914;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: white;
+}
+
+.especiales-merch-label {
+    font-size: 15px;
+    font-weight: 700;
+    color: white;
+    text-align: center;
+    opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+    .especiales-cta-banner {
+        grid-template-columns: 1fr;
+    }
+    .especiales-cta-lateral {
+        display: none;
+    }
 }
 
 .especiales-cta-icon {
