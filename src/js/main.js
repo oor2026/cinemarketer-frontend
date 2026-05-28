@@ -49,6 +49,9 @@ if (dashToggle && dashMenu) {
     // Cerrar al hacer click en cualquier opción
     dashMenu.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', function() {
+            const esMobile = window.innerWidth <= 768;
+            const esNovedades = link.getAttribute('onclick') && link.getAttribute('onclick').includes('toggleNovedades');
+            if (esMobile && esNovedades) return;
             dashMenu.classList.remove('active');
             const icon = dashToggle.querySelector('i');
             icon.classList.add('fa-bars');
