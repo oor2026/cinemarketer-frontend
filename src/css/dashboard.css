@@ -296,15 +296,15 @@ body {
         align-items: center;
         justify-content: center;
         position: relative;
-        padding: 0.5rem 1rem;
-        min-height: 80px;
+        padding: 0.75rem 1rem;
+        min-height: 50px;
         gap: 0;
     }
 
     .logo {
         width: auto;
         border-right: none;
-        padding: 0;
+        padding: 0.5rem 0;
         justify-content: center;
     }
 
