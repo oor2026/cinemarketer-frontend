@@ -82,6 +82,7 @@
                             <span class="bell-badge" id="novedadesBadge" style="display:none;">0</span>
                         </div>
                         <span class="nav-text nav-text-hide-desktop">Novedades</span>
+                        <i class="fas fa-chevron-down nav-text nav-text-hide-desktop" id="novedadesChevron" style="margin-left:auto;font-size:0.8rem;transition:transform 0.3s;"></i>
                     </a>
                     <div id="novedadesDropdown" style="display:none;position:absolute;top:100%;right:0;width:320px;max-height:400px;overflow-y:auto;
              background:white;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.15);z-index:9999;border:1px solid #eee;">
@@ -90,6 +91,16 @@
                             <button onclick="window.marcarTodasLeidas()" style="background:none;border:none;font-size:0.75rem;color:#1a3a6b;cursor:pointer;">Marcar todas como leídas</button>
                         </div>
                         <div id="novedadesLista" style="padding:0.5rem 0;">
+                            <div style="padding:1rem;text-align:center;color:#999;font-size:0.85rem;">Cargando...</div>
+                        </div>
+                    </div>
+                    <!-- ACORDEÓN MOBILE -->
+                    <div id="novedadesMobile" style="display:none; width:100%; background:#f9f9f9; border-radius:10px; margin-top:0.25rem; overflow:hidden;">
+                        <div style="padding:0.5rem 1rem;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;">
+                            <span style="font-weight:600;font-size:0.85rem;color:#333;">Novedades</span>
+                            <button onclick="window.marcarTodasLeidas()" style="background:none;border:none;font-size:0.75rem;color:#1a3a6b;cursor:pointer;">Marcar todas leídas</button>
+                        </div>
+                        <div id="novedadesListaMobile" style="max-height:340px;overflow-y:auto;">
                             <div style="padding:1rem;text-align:center;color:#999;font-size:0.85rem;">Cargando...</div>
                         </div>
                     </div>

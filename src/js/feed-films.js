@@ -1089,45 +1089,70 @@ window.cargarComentariosPelicula = async function(id) {
                             </div>
                         </div>
                         <div class="comentario-texto" style="font-size:0.9rem;color:#444;margin:0.25rem 0;word-break:break-word;">${c.content}</div>
+                        ${c.ownComment ? `
                         <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.4rem;flex-wrap:wrap;gap:0.4rem;">
-                                                    <div style="display:flex;align-items:center;gap:0.75rem;">
-                                                        <button onclick="window.toggleBanco(${c.id}, this)"
-                                                            data-active="${c.bancadoByMe}"
-                                                            style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;
-                                                                   font-size:0.8rem;color:${c.bancadoByMe ? '#1a3a6b' : '#999'};padding:0;transition:color 0.2s;"
-                                                            title="Te banco">
-                                                            <i class="fas fa-thumbs-up"></i>
-                                                            <span class="banco-count-${c.id}">${c.bancoCount || 0}</span>
-                                                            <span style="font-size:0.75rem;">Te banco</span>
-                                                        </button>
-                                                        ${!c.ownComment ? `
-                                                        <button onclick="window.toggleMerecePunto(${c.id}, this, '${c.userName}')"
-                                                            data-active="${c.merecePuntoByMe}"
-                                                            data-locked="${c.merecePuntoLocked}"
-                                                            style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;
-                                                                   font-size:0.8rem;color:${c.merecePuntoByMe ? '#e8a800' : '#999'};padding:0;transition:color 0.2s;"
-                                                            title="¡Merecés un punto!">
-                                                            <i class="fas fa-star"></i>
-                                                            <span class="merece-count-${c.id}">${c.merecePuntoCount || 0}</span>
-                                                            <span style="font-size:0.75rem;">¡Merecés un punto!</span>
-                                                        </button>` : ''}
-                                                        <button onclick="window.toggleRespuestas(${c.id}, this, true)"
-                                                                                            style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;
-                                                                                                   font-size:0.8rem;color:#999;padding:0;transition:color 0.2s;"
-                                                                                            title="Responder">
-                                                                                            <i class="fas fa-reply"></i>
-                                                                                            <span style="font-size:0.75rem;">Responder</span>
-                                                                                        </button>
-                                                                                        ${(c.replyCount || 0) > 0 ? `
-                                                                                        <button onclick="window.toggleRespuestas(${c.id}, this, false)"
-                                                                                            style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;
-                                                                                                   font-size:0.8rem;color:#1a3a6b;padding:0;transition:color 0.2s;"
-                                                                                            title="Ver respuestas">
-                                                                                            <span style="font-size:0.75rem;">— Ver respuestas (<span class="reply-count-btn-${c.id}">${c.replyCount}</span>)</span>
-                                                                                        </button>` : `<span class="reply-count-${c.id}" style="display:none;">${c.replyCount || 0}</span>`}
-                                                    </div>
-                                                    <div class="comentario-fecha" style="font-size:0.75rem;color:#999;">${new Date(c.createdAt).toLocaleDateString('es-ES')} ${new Date(c.createdAt).toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'})}</div>
-                                                </div>
+                            <div style="display:flex;align-items:center;gap:0.75rem;">
+                                <button onclick="window.toggleBanco(${c.id}, this)"
+                                    data-active="${c.bancadoByMe}"
+                                    style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;font-size:0.8rem;color:${c.bancadoByMe ? '#1a3a6b' : '#999'};padding:0;transition:color 0.2s;"
+                                    title="Te banco">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span class="banco-count-${c.id}">${c.bancoCount || 0}</span>
+                                    <span style="font-size:0.75rem;">Te banco</span>
+                                </button>
+                                <button onclick="window.toggleRespuestas(${c.id}, this, true)"
+                                    style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;font-size:0.8rem;color:#999;padding:0;transition:color 0.2s;"
+                                    title="Responder">
+                                    <i class="fas fa-reply"></i>
+                                    <span style="font-size:0.75rem;">Responder</span>
+                                </button>
+                                ${(c.replyCount || 0) > 0 ? `
+                                <button onclick="window.toggleRespuestas(${c.id}, this, false)"
+                                    style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;font-size:0.8rem;color:#1a3a6b;padding:0;transition:color 0.2s;"
+                                    title="Ver respuestas">
+                                    <span style="font-size:0.75rem;">— Ver respuestas (<span class="reply-count-btn-${c.id}">${c.replyCount}</span>)</span>
+                                </button>` : `<span class="reply-count-${c.id}" style="display:none;">${c.replyCount || 0}</span>`}
+                            </div>
+                            <div class="comentario-fecha" style="font-size:0.75rem;color:#999;">${new Date(c.createdAt).toLocaleDateString('es-ES')} ${new Date(c.createdAt).toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'})}</div>
+                        </div>
+                        ` : `
+                        <div style="margin-top:0.4rem;">
+                            <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.35rem;">
+                                <button onclick="window.toggleBanco(${c.id}, this)"
+                                    data-active="${c.bancadoByMe}"
+                                    style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;font-size:0.8rem;color:${c.bancadoByMe ? '#1a3a6b' : '#999'};padding:0;transition:color 0.2s;"
+                                    title="Te banco">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span class="banco-count-${c.id}">${c.bancoCount || 0}</span>
+                                    <span style="font-size:0.75rem;">Te banco</span>
+                                </button>
+                                <button onclick="window.toggleMerecePunto(${c.id}, this, '${c.userName}')"
+                                    data-active="${c.merecePuntoByMe}"
+                                    data-locked="${c.merecePuntoLocked}"
+                                    style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;font-size:0.8rem;color:${c.merecePuntoByMe ? '#e8a800' : '#999'};padding:0;transition:color 0.2s;"
+                                    title="¡Merecés un punto!">
+                                    <i class="fas fa-star"></i>
+                                    <span class="merece-count-${c.id}">${c.merecePuntoCount || 0}</span>
+                                    <span style="font-size:0.75rem;">¡Merecés un punto!</span>
+                                </button>
+                                <button onclick="window.toggleRespuestas(${c.id}, this, true)"
+                                    style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;font-size:0.8rem;color:#999;padding:0;transition:color 0.2s;"
+                                    title="Responder">
+                                    <i class="fas fa-reply"></i>
+                                    <span style="font-size:0.75rem;">Responder</span>
+                                </button>
+                            </div>
+                            <div style="display:flex;align-items:center;justify-content:space-between;">
+                                <div class="comentario-fecha" style="font-size:0.75rem;color:#999;">${new Date(c.createdAt).toLocaleDateString('es-ES')} ${new Date(c.createdAt).toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'})}</div>
+                                ${(c.replyCount || 0) > 0 ? `
+                                <button onclick="window.toggleRespuestas(${c.id}, this, false)"
+                                    style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;font-size:0.8rem;color:#1a3a6b;padding:0;transition:color 0.2s;"
+                                    title="Ver respuestas">
+                                    <span style="font-size:0.75rem;">— Ver respuestas (<span class="reply-count-btn-${c.id}">${c.replyCount}</span>)</span>
+                                </button>` : `<span class="reply-count-${c.id}" style="display:none;">${c.replyCount || 0}</span>`}
+                            </div>
+                        </div>
+                        `}
                                                 <div class="replies-container-${c.id}" style="display:none;margin-top:0.75rem;padding-left:1rem;border-left:2px solid #f0f0f0;"></div>
                     </div>
                 `;
