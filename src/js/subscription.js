@@ -89,7 +89,7 @@ function mostrarBanner() {
     const banner    = document.getElementById('premiumBanner');
     const activo    = document.getElementById('premiumActivo');
     const cancelado = document.getElementById('premiumCancelado');
-    if (banner)    banner.style.display    = 'flex';
+    if (banner)    banner.style.display    = '';
     if (activo)    activo.style.display    = 'none';
     if (cancelado) cancelado.style.display = 'none';
 }

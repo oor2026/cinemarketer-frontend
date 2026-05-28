@@ -579,10 +579,25 @@
 }
 
 @media (max-width: 768px) {
+    .premium-banner {
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .premium-banner-badge,
+    .premium-banner-title,
+    .premium-banner-price,
+    .premium-banner-benefits,
+    .premium-banner-benefits li {
+        text-align: left;
+        align-self: flex-start;
+    }
+
     .premium-banner-title {
         font-size: 25px;
     }
 }
+
 
 
 /* ── Banner CTA premium mejorado (mis-premios) ─────────────────────────── */
