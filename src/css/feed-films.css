@@ -2176,9 +2176,17 @@
     font-weight: 600;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
+    .ordenar-pills {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.5rem;
+    }
+
     .pill-orden {
-        font-size: 0.78rem;
-        padding: 0.4rem 0.75rem;
+        white-space: normal;
+        text-align: center;
+        padding: 0.55rem 0.5rem;
+        font-size: 0.80rem;
     }
 }
