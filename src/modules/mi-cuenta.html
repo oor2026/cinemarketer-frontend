@@ -169,66 +169,72 @@
 
     </div>
 
-    <div class="info-list">
-        <div class="info-item">
-            <i class="fas fa-user"></i>
-            <div class="info-content">
-                <strong>Nombre completo:</strong>
-                <span id="userFullName"></span>
+    <div class="datos-grid">
+        <div class="dato-card">
+            <div class="dato-icon"><i class="fas fa-user" aria-hidden="true"></i></div>
+            <div class="dato-body">
+                <div class="dato-label">Nombre completo</div>
+                <div class="dato-valor" id="userFullName"></div>
             </div>
-            <button class="btn-edit" onclick="window.abrirEdicion('name')" title="Editar nombre">
+            <button class="dato-edit-btn" onclick="window.abrirEdicion('name')" title="Editar nombre">
                 <i class="fas fa-pencil-alt"></i>
             </button>
         </div>
-        <div class="info-item">
-            <i class="fas fa-envelope"></i>
-            <div class="info-content">
-                <strong>Email:</strong>
-                <span id="userEmail"></span>
+
+        <div class="dato-card">
+            <div class="dato-icon"><i class="fas fa-envelope" aria-hidden="true"></i></div>
+            <div class="dato-body">
+                <div class="dato-label">Email</div>
+                <div class="dato-valor" id="userEmail"></div>
             </div>
-            <button class="btn-edit" onclick="window.abrirEdicion('email')" title="Editar email">
+            <button class="dato-edit-btn" onclick="window.abrirEdicion('email')" title="Editar email">
                 <i class="fas fa-pencil-alt"></i>
             </button>
         </div>
-        <div class="info-item">
-            <i class="fas fa-id-card"></i>
-            <div class="info-content">
-                <strong>DNI:</strong>
-                <span id="userDni">—</span>
+
+        <div class="dato-card">
+            <div class="dato-icon"><i class="fas fa-id-card" aria-hidden="true"></i></div>
+            <div class="dato-body">
+                <div class="dato-label">DNI</div>
+                <div class="dato-valor" id="userDni">—</div>
             </div>
         </div>
-        <div class="info-item">
-            <i class="fas fa-phone"></i>
-            <div class="info-content">
-                <strong>Teléfono:</strong>
-                <span id="userPhone">—</span>
+
+        <div class="dato-card">
+            <div class="dato-icon"><i class="fas fa-phone" aria-hidden="true"></i></div>
+            <div class="dato-body">
+                <div class="dato-label">Teléfono</div>
+                <div class="dato-valor" id="userPhone">—</div>
             </div>
-            <button class="btn-edit" onclick="window.abrirEdicion('phone')" title="Editar teléfono">
+            <button class="dato-edit-btn" onclick="window.abrirEdicion('phone')" title="Editar teléfono">
                 <i class="fas fa-pencil-alt"></i>
             </button>
         </div>
-        <div class="info-item">
-            <i class="fas fa-check-circle"></i>
-            <div class="info-content">
-                <strong>Email verificado:</strong>
-                <span id="emailVerified"></span>
+
+        <div class="dato-card">
+            <div class="dato-icon"><i class="fas fa-check-circle" aria-hidden="true"></i></div>
+            <div class="dato-body">
+                <div class="dato-label">Email verificado</div>
+                <div class="dato-valor" id="emailVerified"></div>
             </div>
         </div>
-        <div class="info-item" id="passwordInfoItem">
-            <i class="fas fa-lock"></i>
-            <div class="info-content">
-                <strong>Contraseña:</strong>
-                <span id="passwordDisplay">••••••••</span>
+
+        <div class="dato-card" id="passwordInfoItem">
+            <div class="dato-icon"><i class="fas fa-lock" aria-hidden="true"></i></div>
+            <div class="dato-body">
+                <div class="dato-label">Contraseña</div>
+                <div class="dato-valor" id="passwordDisplay">••••••••</div>
             </div>
-            <button class="btn-edit" id="btnCambiarPassword" onclick="window.abrirCambiarPassword()" title="Cambiar contraseña">
+            <button class="dato-edit-btn" id="btnCambiarPassword" onclick="window.abrirCambiarPassword()" title="Cambiar contraseña">
                 <i class="fas fa-pencil-alt"></i>
             </button>
         </div>
-        <div class="info-item">
-            <i class="fas fa-clock"></i>
-            <div class="info-content">
-                <strong>Último acceso:</strong>
-                <span id="lastLogin"></span>
+
+        <div class="dato-card dato-card-full">
+            <div class="dato-icon"><i class="fas fa-clock" aria-hidden="true"></i></div>
+            <div class="dato-body">
+                <div class="dato-label">Último acceso</div>
+                <div class="dato-valor" id="lastLogin"></div>
             </div>
         </div>
     </div>
