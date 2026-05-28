@@ -9,10 +9,53 @@
     background: #1a3a6b;
     border-radius: 14px;
     padding: 2rem;
+    display: grid;
+    grid-template-columns: 100px 1fr 100px;
+    gap: 1rem;
+    align-items: center;
+}
+
+.premium-banner-centro {
     display: flex;
     flex-direction: column;
-    gap: 16px;
     align-items: center;
+    text-align: center;
+    gap: 12px;
+}
+
+.premium-banner-lateral {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+}
+
+.premium-merch-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.premium-merch-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: #e50914;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: white;
+}
+
+.premium-merch-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: white;
+    text-align: center;
+    opacity: 0.9;
 }
 
 .premium-banner-badge {
@@ -100,12 +143,31 @@
     font-weight: 700;
     cursor: pointer;
     width: 100%;
-    transition: background 0.2s;
+    max-width: 280px;
+    transition: background 0.2s, box-shadow 0.2s;
     margin-top: 4px;
 }
 
 .btn-suscribirse:hover {
     background: #b2070f;
+}
+
+@keyframes btn-pulse {
+    0%   { box-shadow: 0 0 18px 4px rgba(255,255,255,0.45); }
+    50%  { box-shadow: 0 0 28px 10px rgba(255,255,255,0.65); }
+    100% { box-shadow: 0 0 18px 4px rgba(255,255,255,0.45); }
+}
+
+.btn-suscribirse,
+.btn-suscribirse-cta {
+    animation: btn-pulse 2.5s ease-in-out infinite;
+}
+
+.btn-suscribirse:hover,
+.btn-suscribirse-cta:hover {
+    animation: none;
+    box-shadow: 0 0 28px 8px rgba(255,255,255,0.65);
+}
 }
 
 /* ── Panel activo ── */
@@ -640,17 +702,17 @@
 
 @media (max-width: 768px) {
     .premium-banner {
-        align-items: flex-start;
+        grid-template-columns: 1fr;
         text-align: left;
     }
 
-    .premium-banner-badge,
-    .premium-banner-title,
-    .premium-banner-price,
-    .premium-banner-benefits,
-    .premium-banner-benefits li {
+    .premium-banner-lateral {
+        display: none;
+    }
+
+    .premium-banner-centro {
+        align-items: flex-start;
         text-align: left;
-        align-self: flex-start;
     }
 
     .premium-banner-title {
