@@ -102,7 +102,9 @@ async function consultasCargarLista(page = 0) {
                         <i class="fas ${statusIcon}"></i>
                     </div>
                     <div class="ticket-body">
-                        <div class="ticket-asunto" title="${subject}">${truncateText(subject, 60)}</div>
+                        <div class="ticket-asunto" title="${subject}">
+                            <span style="font-size:0.75rem;color:#999;font-weight:400;margin-right:0.4rem;">Ticket #${sanitizeNumber(t.id)}</span>${truncateText(subject, 60)}
+                        </div>
                         <div class="ticket-preview" title="${lastMessage}">${truncateText(lastMessage, 100)}</div>
                     </div>
                     <div class="ticket-meta">
@@ -147,7 +149,7 @@ async function consultasAbrirHilo(ticketId) {
         const ticket = await response.json();
 
         // Usar textContent para el asunto — no necesita HTML
-        document.getElementById('hiloAsunto').textContent = ticket.subject;
+        document.getElementById('hiloAsunto').textContent = `Ticket #${ticketId} — ${ticket.subject}`;
 
         const statusEl = document.getElementById('hiloStatus');
         statusEl.textContent = ticket.status === 'OPEN' ? 'Abierto' : 'Cerrado';
