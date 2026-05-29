@@ -350,12 +350,14 @@
     }
 
     .transaction-item {
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
+        align-items: flex-start;
     }
 
     .transaction-amount {
-        width: 100%;
-        margin-top: 0.5rem;
-        text-align: left;
+        width: auto;
+        margin-top: 0.15rem;
+        text-align: right;
+        flex-shrink: 0;
     }
 }
