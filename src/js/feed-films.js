@@ -1097,7 +1097,6 @@ window.cargarComentariosPelicula = async function(id) {
                         <i class="fas fa-ban"></i>
                     </button>` : '';
 
-                console.log('comentario', c.id, 'replyCount:', c.replyCount, typeof c.replyCount);
                 const item = document.createElement('div');
                 item.className = 'comentario-item';
                 item.style.cssText = 'display:flex; gap:0.75rem; padding:0.75rem 0; border-bottom:1px solid #f0f0f0; align-items:flex-start;';
@@ -1589,7 +1588,7 @@ window.cargarRespuestas = async function(commentId, offset) {
                                         title="Ocultar mi respuesta">
                                         <i class="fas fa-ban"></i>
                                     </button>`}
-                                <button onclick="window.abrirFormRespuesta(${commentId}, this)"
+                                <button onclick="window.abrirFormRespuesta(${commentId}, this, ${r.id})"
                                     style="background:none;border:none;cursor:pointer;font-size:0.75rem;color:#999;padding:0;">
                                     <i class="fas fa-reply"></i> Responder
                                 </button>
@@ -1629,7 +1628,7 @@ window.enviarRespuesta = async function(commentId) {
         const res = await fetch(`${CONFIG.API_URL}/comments/${commentId}/replies`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ content })
+            body: JSON.stringify({ content, parentReplyId: window._replyingToReplyId || null })
         });
         const data = await res.json();
         if (res.status === 422 && data.rejected) {
@@ -1676,7 +1675,8 @@ window.abrirModalReporteReply = function(replyId) {
     if (modal) modal.style.display = 'flex';
 };
 
-window.abrirFormRespuesta = function(commentId, btn) {
+window.abrirFormRespuesta = function(commentId, btn, replyId = null) {
+    window._replyingToReplyId = replyId;
     const container = document.querySelector(`.replies-container-${commentId}`);
     if (!container) return;
 
