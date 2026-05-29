@@ -369,7 +369,7 @@ window.cambiarPagina = async function(direccion) {
             if (criterioOrden === 'fecha' || criterioOrden === 'proximamente') {
                 // Usar cursor real de TMDB para no repetir películas
                 const ultimaTmdb = window.estadoPaginacion._ultimaPaginaTmdb || window.estadoPaginacion.paginaActual;
-                const siguienteTmdb = direccion === 'siguiente' ? ultimaTmdb + 1 : Math.max(1, ultimaTmdb - 20);
+                const siguienteTmdb = direccion === 'siguiente' ? ultimaTmdb + 1 : Math.max(1, ultimaTmdb - 1);
                 await window.cargarPeliculasPopulares(siguienteTmdb);
             } else {
                 await window.cargarPeliculasPopulares(nuevaPagina);
