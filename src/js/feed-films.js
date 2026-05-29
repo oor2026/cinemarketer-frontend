@@ -1847,8 +1847,17 @@ function inicializarContadorCaracteres() {
 window._directorSeleccionadoId = '';
 
 function inicializarAutocompletadoDirector() {
-    const input     = document.getElementById('busquedaDirector');
-    const resultados = document.getElementById('directorResultados');
+    configurarAutocompletado(
+        document.getElementById('busquedaDirector'),
+        document.getElementById('directorResultados')
+    );
+    configurarAutocompletado(
+        document.getElementById('busquedaDirectorMobile'),
+        document.getElementById('directorResultadosMobile')
+    );
+}
+
+function configurarAutocompletado(input, resultados) {
     if (!input || !resultados) return;
 
     let timeoutDirector = null;
@@ -2047,12 +2056,19 @@ function cerrarFiltrosModal() {
 }
 
 function aplicarFiltrosMobile() {
-    document.getElementById('busquedaInput').value    = document.getElementById('busquedaInputMobile').value;
-    document.getElementById('filtroGenero').value     = document.getElementById('filtroGeneroMobile').value;
-    document.getElementById('filtroAnio').value       = document.getElementById('filtroAnioMobile').value;
-    document.getElementById('filtroIdioma').value     = document.getElementById('filtroIdiomaMobile').value;
+    document.getElementById('busquedaInput').value     = document.getElementById('busquedaInputMobile').value;
+    document.getElementById('filtroGenero').value      = document.getElementById('filtroGeneroMobile').value;
+    document.getElementById('filtroAnio').value        = document.getElementById('filtroAnioMobile').value;
+    document.getElementById('filtroIdioma').value      = document.getElementById('filtroIdiomaMobile').value;
     document.getElementById('filtroPopularidad').value = document.getElementById('filtroPopularidadMobile').value;
-    document.getElementById('filtroDuracion').value   = document.getElementById('filtroDuracionMobile').value;
+    document.getElementById('filtroDuracion').value    = document.getElementById('filtroDuracionMobile').value;
+
+    // Sincronizar director mobile → desktop
+    const directorMobile = document.getElementById('busquedaDirectorMobile');
+    const directorDesktop = document.getElementById('busquedaDirector');
+    if (directorMobile && directorDesktop) {
+        directorDesktop.value = directorMobile.value;
+    }
 
     cerrarFiltrosModal();
     window.aplicarFiltros();
@@ -2065,6 +2081,9 @@ function limpiarFiltrosMobile() {
     document.getElementById('filtroIdiomaMobile').value       = 'todos';
     document.getElementById('filtroPopularidadMobile').value  = 'todas';
     document.getElementById('filtroDuracionMobile').value     = 'todos';
+    const dirMobile = document.getElementById('busquedaDirectorMobile');
+    if (dirMobile) dirMobile.value = '';
+    window._directorSeleccionadoId = '';
 }
 
 window.abrirFiltrosModal   = abrirFiltrosModal;
