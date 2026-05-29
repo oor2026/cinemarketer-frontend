@@ -6,13 +6,17 @@ window.googleAuth = {
 
     _tokenTemporal: null,
 
+    _initialized: false,
+
     iniciar: function() {
-        // Inicializar Google Identity Services
-        google.accounts.id.initialize({
-            client_id: '842892243934-ug8f2tn79ohm9nqvca01kjt84i5q6vic.apps.googleusercontent.com',
-            callback: window.googleAuth._handleCredential,
-            ux_mode: 'popup'
-        });
+        if (!window.googleAuth._initialized) {
+            google.accounts.id.initialize({
+                client_id: '842892243934-ug8f2tn79ohm9nqvca01kjt84i5q6vic.apps.googleusercontent.com',
+                callback: window.googleAuth._handleCredential,
+                ux_mode: 'popup'
+            });
+            window.googleAuth._initialized = true;
+        }
         google.accounts.id.prompt();
     },
 
