@@ -808,6 +808,13 @@
     margin: 1rem 0 !important;
 }
 
+@media (min-width: 769px) {
+    #modalPelicula .modal-sinopsis {
+        max-height: 180px !important;
+        overflow-y: auto !important;
+    }
+}
+
 #modalPelicula .modal-sinopsis h4 {
     color: #333 !important;
     font-size: 1.2rem !important;
