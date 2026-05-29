@@ -902,10 +902,38 @@ window.cargarDatosPelicula = async function(id) {
 
         if (fecha)       fecha.textContent       = pelicula.release_date ? new Date(pelicula.release_date).toLocaleDateString('es-ES') : 'N/A';
         if (duracion)    duracion.textContent    = pelicula.runtime || 'N/A';
-        if (idioma)      idioma.textContent      = (pelicula.original_language || 'N/A').toUpperCase();
+        const TMDB_IDIOMAS = {
+            'af': 'Afrikáans', 'ar': 'Árabe', 'bg': 'Búlgaro', 'bn': 'Bengalí',
+            'ca': 'Catalán', 'cs': 'Checo', 'da': 'Danés', 'de': 'Alemán',
+            'el': 'Griego', 'en': 'Inglés', 'es': 'Español', 'et': 'Estonio',
+            'fa': 'Persa', 'fi': 'Finlandés', 'fr': 'Francés', 'gu': 'Gujarati',
+            'he': 'Hebreo', 'hi': 'Hindi', 'hr': 'Croata', 'hu': 'Húngaro',
+            'id': 'Indonesio', 'it': 'Italiano', 'ja': 'Japonés', 'kn': 'Canarés',
+            'ko': 'Coreano', 'lt': 'Lituano', 'lv': 'Letón', 'ml': 'Malabar',
+            'mr': 'Maratí', 'ms': 'Malayo', 'nb': 'Noruego', 'nl': 'Neerlandés',
+            'pa': 'Punjabi', 'pl': 'Polaco', 'pt': 'Portugués', 'ro': 'Rumano',
+            'ru': 'Ruso', 'sk': 'Eslovaco', 'sl': 'Esloveno', 'sr': 'Serbio',
+            'sv': 'Sueco', 'sw': 'Suajili', 'ta': 'Tamil', 'te': 'Telugu',
+            'th': 'Tailandés', 'tl': 'Filipino', 'tr': 'Turco', 'uk': 'Ucraniano',
+            'ur': 'Urdu', 'vi': 'Vietnamita', 'zh': 'Chino', 'zu': 'Zulú'
+        };
+        if (idioma) idioma.textContent = TMDB_IDIOMAS[pelicula.original_language] || (pelicula.original_language || 'N/A').toUpperCase();
         if (popularidad) popularidad.textContent = Math.round(pelicula.popularity || 0);
         if (votos)       votos.textContent       = pelicula.vote_count || 0;
-        if (generos)     generos.textContent     = pelicula.genres?.map(g => g.name).join(', ') || 'No especificado';
+        const TMDB_GENEROS = {
+            28: 'Acción', 12: 'Aventura', 16: 'Animación', 35: 'Comedia',
+            80: 'Crimen', 99: 'Documental', 18: 'Drama', 10751: 'Familia',
+            14: 'Fantasía', 36: 'Historia', 27: 'Terror', 10402: 'Música',
+            9648: 'Misterio', 10749: 'Romance', 878: 'Ciencia Ficción',
+            10770: 'Película de TV', 53: 'Suspenso', 10752: 'Bélica', 37: 'Western'
+        };
+
+        if (generos) {
+            const ids = pelicula.genre_ids || (pelicula.genres?.map(g => g.id)) || [];
+            generos.textContent = ids.length > 0
+                ? ids.map(id => TMDB_GENEROS[id] || id).join(', ')
+                : 'No especificado';
+        }
 
         const statsResponse = await fetch(`${CONFIG.API_URL}/reviews/movies/${id}/stats`, {
             headers: { 'Authorization': `Bearer ${token}` }
