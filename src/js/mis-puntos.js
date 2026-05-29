@@ -145,20 +145,22 @@ window.loadTransactions = async function(page = 1, filter = 'all') {
 // ==============================================
 function getIconForAction(action) {
     const icons = {
-        VOTE_MOVIE:        'fa-thumbs-up',
-        VOTE_CINEMA:       'fa-building',
-        COMMENT_MOVIE:     'fa-comment',
-        REWARD_REDEMPTION: 'fa-ticket-alt'
+        VOTE_MOVIE:           'fa-thumbs-up',
+        VOTE_CINEMA:          'fa-building',
+        COMMENT_MOVIE:        'fa-comment',
+        REWARD_REDEMPTION:    'fa-ticket-alt',
+        RECEIVE_MERECE_PUNTO: 'fa-star'
     };
     return icons[action] || 'fa-coins';
 }
 
 function getLabelForAction(action) {
     const labels = {
-        VOTE_MOVIE:        'Voto en película',
-        VOTE_CINEMA:       'Voto en cine',
-        COMMENT_MOVIE:     'Comentario en película',
-        REWARD_REDEMPTION: 'Canje de premio'
+        VOTE_MOVIE:           'Voto en película',
+        VOTE_CINEMA:          'Voto en cine',
+        COMMENT_MOVIE:        'Comentario en película',
+        REWARD_REDEMPTION:    'Canje de premio',
+        RECEIVE_MERECE_PUNTO: '¡Merecés un punto!'
     };
     return labels[action] || action;
 }
