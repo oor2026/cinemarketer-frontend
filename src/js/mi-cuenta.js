@@ -547,9 +547,23 @@ window.guardarEdicion = async function() {
         }
 
         if (campoActual === 'email') {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(valor)) {
+            const parteLocal = valor.split('@')[0] || '';
+            if (parteLocal.length < 6) {
+                mostrarErrorEdicion('La parte local del email debe tener al menos 6 caracteres.');
+                return;
+            }
+            if (parteLocal.length > 64) {
+                mostrarErrorEdicion('La parte local del email no puede superar los 64 caracteres.');
+                return;
+            }
+            const emailFormatoRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailFormatoRegex.test(valor)) {
                 mostrarErrorEdicion('Ingresá un email con formato válido.');
+                return;
+            }
+            const emailDominioRegex = /^[^\s@]+@(gmail|hotmail|outlook|yahoo|live|msn|icloud|me|mac|protonmail|proton|tutanota|gmx|yandex|zoho|fibertel|arnet|speedy|ciudad|uolsinectis|infovia|personal|claro|terra|bol|uol|oi|telmex)\.[a-zA-Z]{2,}$/i;
+            if (!emailDominioRegex.test(valor)) {
+                mostrarErrorEdicion('El proveedor de email no está permitido. Los proveedores aceptados son: Gmail, Hotmail, Outlook, Yahoo, Live, iCloud, ProtonMail, Tutanota, GMX, Yandex, Zoho, Fibertel, Arnet, Speedy, Ciudad, Personal, Claro. Para dominios privados o institucionales contactanos a info@cinemarketer.com.ar');
                 return;
             }
         }
