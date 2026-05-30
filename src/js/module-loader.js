@@ -193,7 +193,8 @@ async function loadModule(moduleName, element = null, updateHash = true) {
     actualizarClaseModulo(moduleName);
 
     // Carga los banners correspondientes al módulo desde la API
-        cargarBanners(moduleName);
+    // Se ejecuta después del timeout para asegurar que el HTML del módulo ya está en el DOM
+    setTimeout(() => cargarBanners(moduleName), 300);
 
     // Splash mobile — solo una vez por sesión por módulo
         mostrarSplashMobile(moduleName);
