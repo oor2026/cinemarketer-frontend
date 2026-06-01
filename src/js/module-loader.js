@@ -225,7 +225,7 @@ async function loadModule(moduleName, element = null, updateHash = true) {
             } else {
                 const script = document.createElement('script');
                 script.id = jsId;
-                script.src = `${JS_PATH}${moduleName}.js`;
+                script.src = `${JS_PATH}${moduleName}.js?v=2`;
                 script.onload = () => resolve();
                 script.onerror = () => resolve();
                 document.head.appendChild(script);

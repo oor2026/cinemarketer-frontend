@@ -28,15 +28,19 @@ window.loadProfile = async function() {
         document.getElementById('emailVerified').innerHTML = profile.emailVerified ? '✅ Sí' : '❌ No';
 
         if (profile.createdAt) {
-            const joinDate = new Date(profile.createdAt);
+            const joinDate = new Date(profile.createdAt + 'Z');
             document.getElementById('memberSince').textContent =
-                `Miembro desde ${joinDate.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}`;
+                `Miembro desde ${joinDate.toLocaleDateString('es-ES', {
+                    year: 'numeric', month: 'long', day: 'numeric',
+                    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                })}`;
         }
 
         if (profile.lastLoginAt) {
-            const lastLogin = new Date(profile.lastLoginAt);
+            const lastLogin = new Date(profile.lastLoginAt + 'Z');
             document.getElementById('lastLogin').textContent = lastLogin.toLocaleString('es-ES', {
-                year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
+                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
             });
         } else {
             document.getElementById('lastLogin').textContent = 'Primer inicio de sesión';
