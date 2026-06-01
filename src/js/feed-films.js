@@ -1140,7 +1140,11 @@ window.cargarComentariosPelicula = async function(id) {
                                     <span style="font-size:0.75rem;">— Ver respuestas (<span class="reply-count-btn-${c.id}">${c.replyCount}</span>)</span>
                                 </button>` : `<span class="reply-count-${c.id}" style="display:none;">${c.replyCount || 0}</span>`}
                             </div>
-                            <div class="comentario-fecha" style="font-size:0.75rem;color:#999;">${new Date(c.createdAt).toLocaleDateString('es-ES')} ${new Date(c.createdAt).toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'})}</div>
+                            <div class="comentario-fecha" style="font-size:0.75rem;color:#999;">${new Date(c.createdAt).toLocaleString('es-ES', {
+                                                                                                      day: '2-digit', month: '2-digit', year: 'numeric',
+                                                                                                      hour: '2-digit', minute: '2-digit',
+                                                                                                      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                                                                                                  })}</div>
                         </div>
                         ` : `
                         <div style="margin-top:0.4rem;">
@@ -1170,7 +1174,11 @@ window.cargarComentariosPelicula = async function(id) {
                                 </button>
                             </div>
                             <div style="display:flex;align-items:center;justify-content:space-between;">
-                                <div class="comentario-fecha" style="font-size:0.75rem;color:#999;">${new Date(c.createdAt).toLocaleDateString('es-ES')} ${new Date(c.createdAt).toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'})}</div>
+                                <div class="comentario-fecha" style="font-size:0.75rem;color:#999;">${new Date(c.createdAt).toLocaleString('es-ES', {
+                                                                                                          day: '2-digit', month: '2-digit', year: 'numeric',
+                                                                                                          hour: '2-digit', minute: '2-digit',
+                                                                                                          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                                                                                                      })}</div>
                                 ${(c.replyCount || 0) > 0 ? `
                                 <button onclick="window.toggleRespuestas(${c.id}, this, false)"
                                     style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;font-size:0.8rem;color:#1a3a6b;padding:0;transition:color 0.2s;"
@@ -1592,7 +1600,11 @@ window.cargarRespuestas = async function(commentId, offset) {
                                     style="background:none;border:none;cursor:pointer;font-size:0.75rem;color:#999;padding:0;">
                                     <i class="fas fa-reply"></i> Responder
                                 </button>
-                                <span style="font-size:0.7rem;color:#bbb;">${new Date(r.createdAt).toLocaleDateString('es-ES')} ${new Date(r.createdAt).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</span>
+                                <span style="font-size:0.7rem;color:#bbb;">${new Date(r.createdAt).toLocaleString('es-ES', {
+                                                                                 day: '2-digit', month: '2-digit', year: 'numeric',
+                                                                                 hour: '2-digit', minute: '2-digit',
+                                                                                 timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                                                                             })}</span>
                             </div>
                         </div>
                     `;
