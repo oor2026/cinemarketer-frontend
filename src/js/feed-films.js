@@ -1140,7 +1140,7 @@ window.cargarComentariosPelicula = async function(id) {
                                     <span style="font-size:0.75rem;">— Ver respuestas (<span class="reply-count-btn-${c.id}">${c.replyCount}</span>)</span>
                                 </button>` : `<span class="reply-count-${c.id}" style="display:none;">${c.replyCount || 0}</span>`}
                             </div>
-                            <div class="comentario-fecha" style="font-size:0.75rem;color:#999;">${new Date(c.createdAt).toLocaleString('es-ES', {
+                            <div class="comentario-fecha" style="font-size:0.75rem;color:#999;">${new Date(c.createdAt + 'Z').toLocaleString('es-ES', {
                                                                                                       day: '2-digit', month: '2-digit', year: 'numeric',
                                                                                                       hour: '2-digit', minute: '2-digit',
                                                                                                       timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -1174,7 +1174,7 @@ window.cargarComentariosPelicula = async function(id) {
                                 </button>
                             </div>
                             <div style="display:flex;align-items:center;justify-content:space-between;">
-                                <div class="comentario-fecha" style="font-size:0.75rem;color:#999;">${new Date(c.createdAt).toLocaleString('es-ES', {
+                                <div class="comentario-fecha" style="font-size:0.75rem;color:#999;">${new Date(c.createdAt + 'Z').toLocaleString('es-ES', {
                                                                                                           day: '2-digit', month: '2-digit', year: 'numeric',
                                                                                                           hour: '2-digit', minute: '2-digit',
                                                                                                           timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
