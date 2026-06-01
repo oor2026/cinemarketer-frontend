@@ -384,7 +384,7 @@ function consultasRenderPaginacion() {
 // ── Helpers de fecha ──────────────────────────────────────────────────────────
 function consultasFormatearFecha(fechaStr) {
     if (!fechaStr) return '';
-    const fecha = new Date(fechaStr + 'Z');
+    const fecha = new Date(fechaStr);
     const hoy = new Date();
     const diff = hoy - fecha;
     if (diff < 86400000) {
@@ -395,7 +395,7 @@ function consultasFormatearFecha(fechaStr) {
 
 function consultasFormatearFechaHora(fechaStr) {
     if (!fechaStr) return '';
-    return new Date(fechaStr + 'Z').toLocaleString('es-AR', {
+    return new Date(fechaStr).toLocaleString('es-AR', {
         day: '2-digit', month: '2-digit', year: '2-digit',
         hour: '2-digit', minute: '2-digit'
     });
