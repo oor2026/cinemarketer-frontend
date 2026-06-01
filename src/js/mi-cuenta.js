@@ -28,7 +28,7 @@ window.loadProfile = async function() {
         document.getElementById('emailVerified').innerHTML = profile.emailVerified ? '✅ Sí' : '❌ No';
 
         if (profile.createdAt) {
-            const joinDate = new Date(profile.createdAt + 'Z');
+            const joinDate = new Date(profile.createdAt);
             document.getElementById('memberSince').textContent =
                 `Miembro desde ${joinDate.toLocaleDateString('es-ES', {
                     year: 'numeric', month: 'long', day: 'numeric',
@@ -37,7 +37,7 @@ window.loadProfile = async function() {
         }
 
         if (profile.lastLoginAt) {
-            const lastLogin = new Date(profile.lastLoginAt + 'Z');
+            const lastLogin = new Date(profile.lastLoginAt);
             document.getElementById('lastLogin').textContent = lastLogin.toLocaleString('es-ES', {
                 year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
                 timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone

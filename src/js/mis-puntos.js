@@ -94,7 +94,7 @@ window.loadTransactions = async function(page = 1, filter = 'all') {
         const desde = limites[dateFilter] || null;
 
         const transacciones = desde
-            ? data.transactions.filter(t => new Date(t.createdAt + 'Z') >= desde)
+            ? data.transactions.filter(t => new Date(t.createdAt) >= desde)
             : data.transactions;
 
         if (transacciones.length === 0) {
@@ -107,7 +107,7 @@ window.loadTransactions = async function(page = 1, filter = 'all') {
         lista.innerHTML = transacciones.map(t => {
             const esGanado  = t.type === 'EARNED';
             const icono     = getIconForAction(t.action);
-            const fecha     = new Date(t.createdAt + 'Z').toLocaleDateString('es-ES', {
+            const fecha     = new Date(t.createdAt).toLocaleDateString('es-ES', {
                 day: '2-digit', month: '2-digit', year: 'numeric',
                 hour: '2-digit', minute: '2-digit'
             });
