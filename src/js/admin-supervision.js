@@ -6,8 +6,11 @@ const adminSupervision = {
 
     pestanaActual: 'reported',
     datosActuales: [],
+    datosFiltrados: [],
     paginaActual: 1,
     porPagina: 20,
+    filtroDesde: null,
+    filtroHasta: null,
 
     // Palabras prohibidas
     palabrasActuales: [],
@@ -21,8 +24,8 @@ const adminSupervision = {
     async init() {
         await this.cargarStats();
         setTimeout(() => {
-            const btnReportados = document.querySelector('.supervision-tab');
-            this.cambiarPestana('reported', btnReportados);
+            const btnPendientes = document.querySelector('.supervision-tab');
+            this.cambiarPestana('pending', btnPendientes);
         }, 100);
     },
 
@@ -37,7 +40,7 @@ const adminSupervision = {
             if (!response.ok) return;
             const stats = await response.json();
 
-            const total = (stats.reportados || 0) + (stats.pendientes || 0);
+            const total = (stats.pendientes || 0) + (stats.enRevision || 0);
             const badge = document.getElementById('adminSupervisionBadge');
             if (badge) {
                 if (total > 0) {
@@ -48,8 +51,8 @@ const adminSupervision = {
                 }
             }
 
-            document.getElementById('statSupReportados') && (document.getElementById('statSupReportados').textContent = stats.reportados || 0);
-            document.getElementById('statSupPendientes') && (document.getElementById('statSupPendientes').textContent = stats.pendientes || 0);
+            document.getElementById('statSupReportados') && (document.getElementById('statSupReportados').textContent = stats.pendientes || 0);
+            document.getElementById('statSupPendientes') && (document.getElementById('statSupPendientes').textContent = stats.enRevision || 0);
             document.getElementById('statSupResueltos')  && (document.getElementById('statSupResueltos').textContent  = stats.resueltos  || 0);
 
         } catch (error) {
@@ -78,6 +81,13 @@ const adminSupervision = {
 
         this.pestanaActual = pestana;
         this.paginaActual  = 1;
+        this.filtroDesde   = null;
+        this.filtroHasta   = null;
+        this.datosFiltrados = [];
+        const desdeEl = document.getElementById('supFiltroDesde');
+        const hastaEl = document.getElementById('supFiltroHasta');
+        if (desdeEl) desdeEl.value = '';
+        if (hastaEl) hastaEl.value = '';
 
         const tablaComentarios = document.getElementById('tablaSupervisionWrapper');
         const tablaPalabras    = document.getElementById('tablaPalabrasWrapper');
@@ -99,10 +109,9 @@ const adminSupervision = {
         tbody.innerHTML = `<tr><td colspan="7" class="loading-row"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>`;
 
         const endpoints = {
-            reported: 'reported',
-            pending:  'pending',
-            resolved: 'resolved',
-            replies:  'replies-reported'
+            pending:   'pending',
+            inreview:  'in-review',
+            resolved:  'resolved'
         };
 
         try {
@@ -112,11 +121,63 @@ const adminSupervision = {
             if (!response.ok) throw new Error(`Error ${response.status}`);
             this.datosActuales = await response.json();
             this.paginaActual  = 1;
-            this.renderTabla();
+            this.aplicarFiltroFecha();
         } catch (error) {
-            tbody.innerHTML = `<tr><td colspan="7" class="loading-row" style="color:#e50914;">Error al cargar los datos</td></tr>`;
-        }
-    },
+                    tbody.innerHTML = `<tr><td colspan="7" class="loading-row" style="color:#e50914;">Error al cargar los datos</td></tr>`;
+                }
+            },
+
+            aplicarFiltroFecha() {
+                const desde = this.filtroDesde ? new Date(this.filtroDesde + 'T00:00:00') : null;
+                const hasta = this.filtroHasta ? new Date(this.filtroHasta + 'T23:59:59') : null;
+
+                if (!desde && !hasta) {
+                    this.datosFiltrados = [...this.datosActuales];
+                } else {
+                    this.datosFiltrados = this.datosActuales.filter(c => {
+                        const fecha = new Date(c.createdAt);
+                        if (desde && fecha < desde) return false;
+                        if (hasta && fecha > hasta) return false;
+                        return true;
+                    });
+                }
+
+                this.paginaActual = 1;
+                this.renderTabla();
+                this.actualizarContadorFiltro();
+            },
+
+            actualizarContadorFiltro() {
+                const contador = document.getElementById('supFiltroContador');
+                if (!contador) return;
+                if (this.filtroDesde || this.filtroHasta) {
+                    contador.textContent = `${this.datosFiltrados.length} resultado(s)`;
+                    contador.style.display = 'inline';
+                } else {
+                    contador.style.display = 'none';
+                }
+            },
+
+            filtrarPorFecha() {
+                const desde = document.getElementById('supFiltroDesde')?.value || null;
+                const hasta = document.getElementById('supFiltroHasta')?.value || null;
+                this.filtroDesde = desde;
+                this.filtroHasta = hasta;
+                this.aplicarFiltroFecha();
+            },
+
+            limpiarFiltroFecha() {
+                this.filtroDesde = null;
+                this.filtroHasta = null;
+                const desdeEl = document.getElementById('supFiltroDesde');
+                const hastaEl = document.getElementById('supFiltroHasta');
+                if (desdeEl) desdeEl.value = '';
+                if (hastaEl) hastaEl.value = '';
+                this.datosFiltrados = [...this.datosActuales];
+                this.paginaActual = 1;
+                this.renderTabla();
+                this.actualizarContadorFiltro();
+            },
 
     // ------------------------------------------
     // RENDER TABLA COMENTARIOS
@@ -125,7 +186,9 @@ const adminSupervision = {
         const tbody = document.getElementById('tablaSupervisionBody');
         if (!tbody) return;
 
-        const datos       = this.datosActuales;
+        const datos       = this.datosFiltrados.length > 0 || this.filtroDesde || this.filtroHasta
+                            ? this.datosFiltrados
+                            : this.datosActuales;
         const totalPag    = Math.ceil(datos.length / this.porPagina);
         this.paginaActual = Math.max(1, Math.min(this.paginaActual, totalPag || 1));
         const inicio      = (this.paginaActual - 1) * this.porPagina;
@@ -192,30 +255,27 @@ const adminSupervision = {
     },
 
     generarAcciones(c) {
-            const esReply = c.isReply === true;
-            const id = esReply ? c.replyId : c.commentId;
+        const esReply = c.isReply === true;
+        const id = esReply ? c.replyId : c.commentId;
+        const pestana = this.pestanaActual;
 
-            let acciones = `
-                <button class="btn-accion btn-editar" onclick="adminSupervision.verDetalle(${c.commentId})" title="Ver detalle">
-                    <i class="fas fa-eye"></i>
+        let acciones = `
+            <button class="btn-accion btn-editar" onclick="adminSupervision.verDetalle(${c.commentId}, ${esReply})" title="Ver detalle">
+                <i class="fas fa-eye"></i>
+            </button>`;
+
+        if (pestana === 'inreview') {
+            acciones += `
+                <button class="btn-accion btn-eliminar" onclick="adminSupervision.abrirModalEliminar(${id}, ${esReply})" title="Eliminar">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <button class="btn-accion btn-activar" onclick="adminSupervision.desestimar(${id}, ${esReply})" title="Desestimar reporte" style="background:#f0ad4e;">
+                    <i class="fas fa-times"></i>
                 </button>`;
+        }
 
-            if (c.moderationStatus !== 'REMOVED') {
-                acciones += `
-                    <button class="btn-accion btn-eliminar" onclick="adminSupervision.abrirModalEliminar(${id}, ${esReply})" title="Eliminar">
-                        <i class="fas fa-trash"></i>
-                    </button>`;
-            }
-
-            if (c.moderationStatus === 'AUTO_HIDDEN' || c.moderationStatus === 'PENDING_REVIEW') {
-                acciones += `
-                    <button class="btn-accion btn-activar" onclick="adminSupervision.restaurar(${id}, ${esReply})" title="Restaurar">
-                        <i class="fas fa-check"></i>
-                    </button>`;
-            }
-
-            return acciones;
-        },
+        return acciones;
+    },
 
     // ------------------------------------------
     // PAGINACIÓN COMENTARIOS
@@ -267,7 +327,7 @@ const adminSupervision = {
     // ------------------------------------------
     // VER DETALLE
     // ------------------------------------------
-    verDetalle(commentId) {
+    verDetalle(commentId, esReply = false) {
         const c = this.datosActuales.find(x =>
                     x.isReply ? x.replyId === commentId : x.commentId === commentId);
         if (!c) return;
@@ -307,12 +367,28 @@ const adminSupervision = {
                 ${reportesHTML}
             </div>
         `;
+        // Guardar referencia para mark-reviewed al cerrar
+        const esReplyActual = c.isReply === true;
+        const idActual = esReplyActual ? c.replyId : c.commentId;
+        this._detalleCurrent = { id: idActual, esReply: esReplyActual };
 
         document.getElementById('modalSupervisionDetalle').style.display = 'flex';
     },
 
     cerrarDetalle() {
         document.getElementById('modalSupervisionDetalle').style.display = 'none';
+        if (this.pestanaActual === 'pending' && this._detalleCurrent) {
+            const { id, esReply } = this._detalleCurrent;
+            const endpoint = `${CONFIG.API_URL}/admin/supervision/${id}/mark-reviewed?isReply=${esReply}`;
+            fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            }).then(() => {
+                this.cargarStats();
+                this.cargarPestana(this.pestanaActual);
+            }).catch(() => {});
+            this._detalleCurrent = null;
+        }
     },
 
     traducirMotivo(reason) {
@@ -410,21 +486,38 @@ const adminSupervision = {
     // DESCARTAR REPORTES
     // ------------------------------------------
     async descartarReportes(commentId) {
-        if (!confirm('¿Descartar todos los reportes de este comentario? El comentario seguirá visible.')) return;
+            if (!confirm('¿Descartar todos los reportes de este comentario? El comentario seguirá visible.')) return;
 
-        try {
-            const response = await fetch(`${CONFIG.API_URL}/admin/supervision/${commentId}/dismiss`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (!response.ok) throw new Error();
-            toast('Reportes descartados. El comentario sigue visible.', 'success');
-            await this.cargarStats();
-            await this.cargarPestana(this.pestanaActual);
-        } catch {
-            toast('Error al descartar los reportes', 'error');
-        }
-    },
+            try {
+                const response = await fetch(`${CONFIG.API_URL}/admin/supervision/${commentId}/dismiss`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error();
+                toast('Reportes descartados. El comentario sigue visible.', 'success');
+                await this.cargarStats();
+                await this.cargarPestana(this.pestanaActual);
+            } catch {
+                toast('Error al descartar los reportes', 'error');
+            }
+        },
+
+        async desestimar(id, esReply = false) {
+            if (!confirm('¿Desestimar este reporte? El contenido seguirá visible.')) return;
+            try {
+                const response = await fetch(
+                    `${CONFIG.API_URL}/admin/supervision/${id}/dismiss?isReply=${esReply}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error();
+                toast('Reporte desestimado correctamente', 'success');
+                await this.cargarStats();
+                await this.cargarPestana(this.pestanaActual);
+            } catch {
+                toast('Error al desestimar el reporte', 'error');
+            }
+        },
 
     // ------------------------------------------
     // PALABRAS PROHIBIDAS
