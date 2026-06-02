@@ -658,11 +658,11 @@
             <div class="admin-stats">
                 <div class="admin-stat-box">
                     <span class="stat-num" id="statSupReportados">0</span>
-                    <span class="stat-label">Reportados</span>
+                    <span class="stat-label">Pendientes</span>
                 </div>
                 <div class="admin-stat-box">
                     <span class="stat-num" id="statSupPendientes">0</span>
-                    <span class="stat-label">Pend. revisión</span>
+                    <span class="stat-label">En revisión</span>
                 </div>
                 <div class="admin-stat-box">
                     <span class="stat-num" id="statSupResueltos">0</span>
@@ -670,17 +670,13 @@
                 </div>
             </div>
             <div style="display:flex; gap:0.5rem; margin-bottom:1rem; flex-wrap:wrap;">
-                <button class="supervision-tab active" onclick="adminSupervision.cambiarPestana('reported', this)"
+                <button class="supervision-tab active" onclick="adminSupervision.cambiarPestana('pending', this)"
                         style="padding:0.5rem 1rem; border-radius:8px; border:1.5px solid #e50914; background:#fff0f0; color:#e50914; font-weight:600; cursor:pointer;">
-                    <i class="fas fa-flag"></i> Reportados
+                    <i class="fas fa-inbox"></i> Pendientes
                 </button>
-                <button class="supervision-tab" onclick="adminSupervision.cambiarPestana('pending', this)"
+                <button class="supervision-tab" onclick="adminSupervision.cambiarPestana('inreview', this)"
                         style="padding:0.5rem 1rem; border-radius:8px; border:1.5px solid #ddd; background:white; color:#555; cursor:pointer;">
-                    <i class="fas fa-clock"></i> Pend. revisión
-                </button>
-                <button class="supervision-tab" onclick="adminSupervision.cambiarPestana('replies', this)"
-                        style="padding:0.5rem 1rem;border-radius:20px;border:1.5px solid #ddd;background:white;color:#555;cursor:pointer;font-size:0.85rem;">
-                    💬 Respuestas reportadas
+                    <i class="fas fa-search"></i> En revisión
                 </button>
                 <button class="supervision-tab" onclick="adminSupervision.cambiarPestana('resolved', this)"
                         style="padding:0.5rem 1rem; border-radius:8px; border:1.5px solid #ddd; background:white; color:#555; cursor:pointer;">
@@ -690,6 +686,29 @@
                         style="padding:0.5rem 1rem; border-radius:8px; border:1.5px solid #ddd; background:white; color:#555; cursor:pointer;">
                     <i class="fas fa-ban"></i> Palabras prohibidas
                 </button>
+            </div>
+            <!-- FILTRO DE FECHAS -->
+            <div id="supFiltroBar" style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap;background:#f9f9f9;padding:0.75rem 1rem;border-radius:8px;border:1px solid #eee;">
+    <span style="font-size:0.85rem;color:#555;font-weight:600;">
+        <i class="fas fa-calendar-alt" style="color:#e50914;margin-right:0.3rem;"></i> Filtrar por fecha:
+    </span>
+                <label style="font-size:0.82rem;color:#666;">Desde
+                    <input type="date" id="supFiltroDesde"
+                           style="margin-left:0.4rem;padding:0.3rem 0.5rem;border:1px solid #ddd;border-radius:6px;font-size:0.82rem;">
+                </label>
+                <label style="font-size:0.82rem;color:#666;">Hasta
+                    <input type="date" id="supFiltroHasta"
+                           style="margin-left:0.4rem;padding:0.3rem 0.5rem;border:1px solid #ddd;border-radius:6px;font-size:0.82rem;">
+                </label>
+                <button onclick="adminSupervision.filtrarPorFecha()"
+                        style="padding:0.3rem 0.9rem;background:#e50914;color:white;border:none;border-radius:6px;font-size:0.82rem;cursor:pointer;font-weight:600;">
+                    Filtrar
+                </button>
+                <button onclick="adminSupervision.limpiarFiltroFecha()"
+                        style="padding:0.3rem 0.9rem;background:white;color:#555;border:1px solid #ddd;border-radius:6px;font-size:0.82rem;cursor:pointer;">
+                    Todos
+                </button>
+                <span id="supFiltroContador" style="display:none;font-size:0.82rem;color:#1a3a6b;font-weight:600;"></span>
             </div>
             <div id="tablaSupervisionWrapper" class="admin-card">
                 <div class="tabla-wrapper">
