@@ -1020,7 +1020,7 @@
 /* Acciones del área de escritura */
 #modalPelicula .comentario-acciones {
     display: flex !important;
-    justify-content: space-between !important;
+    justify-content: center !important;
     align-items: center !important;
     flex-wrap: wrap !important;
     gap: 0.5rem !important;
@@ -1051,7 +1051,7 @@
 
 #modalPelicula .btn-enviar {
     padding: 0.5rem 1.5rem !important;
-    background: #e50914 !important;
+    background: #1a3a6b !important;
     border: none !important;
     border-radius: 6px !important;
     color: white !important;
@@ -2200,4 +2200,54 @@
         padding: 0.55rem 0.5rem;
         font-size: 0.80rem;
     }
+}
+
+.textarea-wrapper {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+}
+
+.textarea-emoji-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0.4rem;
+    border-right: 1px solid #f0f0f0;
+    background: #fafafa;
+    min-width: 2.2rem;
+}
+
+.textarea-input-col {
+    position: relative;
+    flex: 1;
+}
+
+.textarea-input-col textarea {
+    width: 100%;
+    border: none !important;
+    outline: none !important;
+    padding: 0.6rem 0.75rem 1.5rem 0.75rem;
+    resize: vertical;
+    font-size: 0.9rem;
+    background: transparent;
+    box-sizing: border-box;
+}
+
+.textarea-input-col .caracteres-restantes {
+    position: absolute;
+    bottom: 0.4rem;
+    right: 0.6rem;
+    font-size: 0.72rem;
+    color: #999;
+    pointer-events: none;
+}
+
+#modalPelicula #nuevoComentario {
+    border: none !important;
+    box-shadow: none !important;
 }

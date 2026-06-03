@@ -30,6 +30,7 @@ window._comentarioReportandoId = null;
 window._replyReportandoId = null;
 window._comentarioOcultandoId = null;
 window._replyOcultandoId = null;
+window._gifSeleccionado = null;
 
 // ==============================================
 // FUNCIÓN PARA CARGAR COMPONENTES HTML
@@ -1116,6 +1117,7 @@ window.cargarComentariosPelicula = async function(id) {
                             </div>
                         </div>
                         <div class="comentario-texto" style="font-size:0.9rem;color:#444;margin:0.25rem 0;word-break:break-word;">${c.content}</div>
+                        ${c.hasGif && c.gifUrl ? `<img src="${c.gifUrl}" alt="GIF" style="max-width:100%;max-height:200px;border-radius:8px;margin-top:0.4rem;display:block;">` : ''}
                         ${c.ownComment ? `
                         <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.4rem;flex-wrap:wrap;gap:0.4rem;">
                             <div style="display:flex;align-items:center;gap:0.75rem;">
@@ -1570,6 +1572,7 @@ window.cargarRespuestas = async function(commentId, offset) {
                         <div style="flex:1;min-width:0;">
                             <span style="font-weight:600;font-size:0.8rem;color:#333;">${r.userName}</span>
                             <div style="font-size:0.85rem;color:#444;margin:0.2rem 0;word-break:break-word;">${r.content}</div>
+                            ${r.hasGif && r.gifUrl ? `<img src="${r.gifUrl}" alt="GIF" style="max-width:100%;max-height:160px;border-radius:8px;margin-top:0.3rem;display:block;">` : ''}
                             <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.3rem;">
                                 <button onclick="window.toggleReplyBanco(${r.id}, this)"
                                     data-active="${r.bancadoByMe}"
@@ -1640,7 +1643,11 @@ window.enviarRespuesta = async function(commentId) {
         const res = await fetch(`${CONFIG.API_URL}/comments/${commentId}/replies`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ content, parentReplyId: window._replyingToReplyId || null })
+            body: JSON.stringify({
+                            content,
+                            parentReplyId: window._replyingToReplyId || null,
+                            gifUrl: window._gifSeleccionadoReply || null
+                        })
         });
         const data = await res.json();
         if (res.status === 422 && data.rejected) {
@@ -1652,7 +1659,7 @@ window.enviarRespuesta = async function(commentId) {
             return;
         }
         input.value = '';
-        // Recargar respuestas desde el inicio
+        window._gifSeleccionadoReply = null;
         await window.cargarRespuestas(commentId, 0);
     } catch (e) {
         window.mostrarToast('Error de conexión.', 'error');
@@ -1703,18 +1710,45 @@ window.abrirFormRespuesta = function(commentId, btn, replyId = null) {
     form.className = 'reply-form';
     form.style.cssText = 'margin-top:0.5rem;display:flex;gap:0.5rem;';
     form.innerHTML = `
-        <input type="text" placeholder="Escribí tu respuesta..."
-            style="flex:1;border:1px solid #e0e0e0;border-radius:20px;padding:0.4rem 0.75rem;font-size:0.85rem;outline:none;"
-            id="reply-input-${commentId}"
-            maxlength="2000"
-            onkeydown="if(event.key==='Enter') window.enviarRespuesta(${commentId})">
-        <button onclick="window.enviarRespuesta(${commentId})"
-            style="background:#1a3a6b;color:white;border:none;border-radius:20px;padding:0.4rem 0.9rem;font-size:0.8rem;cursor:pointer;">
-            Enviar
-        </button>
-    `;
-    container.appendChild(form);
-    setTimeout(() => document.getElementById(`reply-input-${commentId}`)?.focus(), 50);
+            <div style="display:flex;flex-direction:column;gap:0.3rem;flex:1;">
+                <div style="display:flex;gap:0.4rem;align-items:center;">
+                    <input type="text" placeholder="Escribí tu respuesta..."
+                        style="flex:1;border:1px solid #e0e0e0;border-radius:20px;padding:0.4rem 0.75rem;font-size:0.85rem;outline:none;"
+                        id="reply-input-${commentId}"
+                        maxlength="2000"
+                        onkeydown="if(event.key==='Enter') window.enviarRespuesta(${commentId})">
+                    <button type="button" id="emoji-trigger-reply-${commentId}"
+                        class="cep-trigger-btn" title="Insertar emoji">😊</button>
+                    <button type="button" id="gif-trigger-reply-${commentId}"
+                        class="cep-trigger-btn gif-trigger-btn"
+                        style="font-size:0.7rem;font-weight:700;color:#888;letter-spacing:-0.5px;"
+                        title="Insertar GIF">GIF</button>
+                    <button onclick="window.enviarRespuesta(${commentId})"
+                        style="background:#1a3a6b;color:white;border:none;border-radius:20px;padding:0.4rem 0.9rem;font-size:0.8rem;cursor:pointer;">
+                        Enviar
+                    </button>
+                </div>
+                <div id="gifPreviewReply-${commentId}" style="display:none;position:relative;padding:0.2rem 0;">
+                    <img id="gifPreviewImgReply-${commentId}" src="" alt="GIF"
+                         style="max-height:100px;border-radius:6px;display:block;">
+                    <button onclick="window.quitarGifReply(${commentId})"
+                        style="position:absolute;top:0;right:0;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:50%;width:18px;height:18px;font-size:0.7rem;cursor:pointer;line-height:1;padding:0;">✕</button>
+                </div>
+            </div>
+        `;
+        container.appendChild(form);
+        setTimeout(() => {
+        const replyInput = document.getElementById(`reply-input-${commentId}`);
+        const emojiBtn   = document.getElementById(`emoji-trigger-reply-${commentId}`);
+        const gifBtn     = document.getElementById(`gif-trigger-reply-${commentId}`);
+        if (replyInput) replyInput.focus();
+        if (replyInput && emojiBtn && typeof window.initEmojiPicker === 'function') {
+            window.initEmojiPicker(replyInput, emojiBtn);
+        }
+        if (gifBtn && typeof window.initGifPicker === 'function') {
+            window.initGifPicker(gifBtn, 'reply', commentId);
+        }
+    }, 50);
 };
 
 // ==============================================
@@ -1729,6 +1763,18 @@ window.mostrarAreaComentario = function() {
             textarea.focus();
             const restantes = document.getElementById('caracteresRestantes');
             if (restantes) restantes.textContent = `${textarea.value.length}/2000`;
+
+            // Inicializar emoji picker si no está ya
+            if (!textarea._emojiPickerInit) {
+                textarea._emojiPickerInit = true;
+                const triggerBtn = document.getElementById('emojiTriggerMain');
+                if (triggerBtn && typeof window.initEmojiPicker === 'function') {
+                    window.initEmojiPicker(textarea, triggerBtn);
+                }
+                if (typeof window.initGifPickerMain === 'function') {
+                    window.initGifPickerMain();
+                }
+            }
         }
     }
 };
@@ -1742,6 +1788,17 @@ window.cancelarComentario = function() {
 
     const restantes = document.getElementById('caracteresRestantes');
     if (restantes) restantes.textContent = '0/2000';
+
+    // Limpiar GIF
+    window._gifSeleccionado = null;
+    const preview = document.getElementById('gifPreviewMain');
+    const img     = document.getElementById('gifPreviewImgMain');
+    if (preview) preview.style.display = 'none';
+    if (img)     img.src = '';
+
+    // Cerrar pickers si están abiertos
+    if (typeof window.cerrarEmojiPicker === 'function') window.cerrarEmojiPicker();
+    if (typeof window.cerrarGifPicker   === 'function') window.cerrarGifPicker();
 };
 
 window.enviarComentario = async function() {
@@ -1755,7 +1812,7 @@ window.enviarComentario = async function() {
     const movieId = window.peliculaActualId;
 
     if (!movieId) { alert('Error: No hay película seleccionada'); return; }
-    if (!texto)   { alert('Por favor escribe un comentario'); input.focus(); return; }
+    if (!texto && !window._gifSeleccionado) { alert('Por favor escribe un comentario o seleccioná un GIF'); input.focus(); return; }
 
     if (texto.length > 2000) {
         alert(`El comentario excede el límite de 2000 caracteres.`);
@@ -1782,7 +1839,10 @@ window.enviarComentario = async function() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ content: texto })
+            body: JSON.stringify({
+                            content: texto,
+                            gifUrl: window._gifSeleccionado || null
+                        })
         });
 
         if (!response.ok) {
@@ -1811,6 +1871,7 @@ window.enviarComentario = async function() {
         const comentario = await response.json();
 
         input.value = '';
+        window._gifSeleccionado = null;
         window.cancelarComentario();
 
         const contadorCard = document.getElementById(`comentarios-${movieId}`);

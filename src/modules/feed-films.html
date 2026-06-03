@@ -132,9 +132,26 @@
 
                     <!-- Área de escritura (oculta hasta presionar Comentar) -->
                     <div class="comentario-escritura" id="areaEscritura" style="display: none;">
-                        <textarea id="nuevoComentario" placeholder="Escribe tu comentario... (máx 2000 caracteres)" maxlength="2000"></textarea>
+                        <div class="textarea-wrapper">
+                            <div class="textarea-emoji-col">
+                                <button id="emojiTriggerMain" type="button"
+                                        class="cep-trigger-btn" title="Insertar emoji">😊</button>
+                                <button id="gifTriggerMain" type="button"
+                                        class="cep-trigger-btn" title="Insertar GIF"
+                                        style="font-size:0.7rem;font-weight:700;color:#888;letter-spacing:-0.5px;">GIF</button>
+                            </div>
+                            <div class="textarea-input-col">
+                                <textarea id="nuevoComentario" placeholder="Escribe tu comentario... (máx 2000 caracteres)" maxlength="2000"></textarea>
+                                <div id="gifPreviewMain" style="display:none;padding:0.4rem 0.5rem 0.2rem;position:relative;">
+                                    <img id="gifPreviewImgMain" src="" alt="GIF seleccionado"
+                                         style="max-height:120px;border-radius:6px;display:block;">
+                                    <button onclick="window.quitarGifMain()"
+                                            style="position:absolute;top:0.2rem;right:0.7rem;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.75rem;cursor:pointer;line-height:1;padding:0;">✕</button>
+                                </div>
+                                <span class="caracteres-restantes" id="caracteresRestantes">0/2000</span>
+                            </div>
+                        </div>
                         <div class="comentario-acciones">
-                            <span class="caracteres-restantes" id="caracteresRestantes">0/2000</span>
                             <div class="comentario-botones">
                                 <button class="btn-cancelar" onclick="window.cancelarComentario()">
                                     <i class="fas fa-times"></i> Cancelar
