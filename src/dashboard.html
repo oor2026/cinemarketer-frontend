@@ -269,6 +269,49 @@
           }
         };
     </script>
+    <!-- BANNER PWA INSTALACIÓN -->
+    <div id="pwaInstallBanner" style="display:none; position:fixed; bottom:0; left:0; right:0;
+         background:#1a3a6b; color:white; padding:1rem 1.25rem; z-index:99998;
+         box-shadow:0 -4px 16px rgba(0,0,0,0.2); align-items:center; gap:1rem; flex-wrap:wrap;">
+        <img src="/assets/images/icon-192.png" style="width:40px;height:40px;border-radius:8px;flex-shrink:0;">
+        <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:0.9rem;">¡Instalá Cinemarketer!</div>
+            <div style="font-size:0.78rem;opacity:0.85;">Accedé más rápido desde tu pantalla de inicio</div>
+        </div>
+        <button id="pwaBtnInstalar" style="background:#e50914;color:white;border:none;border-radius:8px;
+                padding:0.5rem 1rem;font-weight:700;font-size:0.85rem;cursor:pointer;white-space:nowrap;">
+            Instalar
+        </button>
+        <button onclick="document.getElementById('pwaInstallBanner').style.display='none'; localStorage.setItem('pwaDismissed','1');"
+                style="background:none;border:none;color:white;font-size:1.2rem;cursor:pointer;padding:0;opacity:0.7;">✕</button>
+    </div>
+
+    <script>
+        let deferredPrompt = null;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (!localStorage.getItem('pwaDismissed') && !localStorage.getItem('pwaInstalled')) {
+                const banner = document.getElementById('pwaInstallBanner');
+                if (banner) banner.style.display = 'flex';
+            }
+        });
+
+        document.getElementById('pwaBtnInstalar')?.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') localStorage.setItem('pwaInstalled', '1');
+            deferredPrompt = null;
+            document.getElementById('pwaInstallBanner').style.display = 'none';
+        });
+
+        window.addEventListener('appinstalled', () => {
+            localStorage.setItem('pwaInstalled', '1');
+            document.getElementById('pwaInstallBanner').style.display = 'none';
+        });
+    </script>
     <script src="js/emoji-picker.js"></script>
     <script src="js/gif-picker.js"></script>
     <script src="js/novedades.js"></script>
