@@ -282,40 +282,89 @@
                 padding:0.5rem 1rem;font-weight:700;font-size:0.85rem;cursor:pointer;white-space:nowrap;">
             Instalar
         </button>
-        <button onclick="document.getElementById('pwaInstallBanner').style.display='none'; localStorage.setItem('pwaDismissed','1');"
+        <button onclick="document.getElementById('pwaInstallBanner').style.display='none';"
                 style="background:none;border:none;color:white;font-size:1.2rem;cursor:pointer;padding:0;opacity:0.7;">✕</button>
     </div>
+    <!-- INSTRUCCIONES MANUALES PWA -->
+    <div id="pwaManualInstrucciones" style="display:none; position:fixed; inset:0;
+     background:rgba(0,0,0,0.7); z-index:99999; align-items:center; justify-content:center; padding:1rem;">
+        <div style="background:white; border-radius:16px; padding:1.5rem; max-width:320px; width:100%;">
+            <h3 style="margin:0 0 1rem; color:#1a3a6b; font-size:1rem;">📲 Instalá Cinemarketer</h3>
+            <p style="font-size:0.85rem; color:#555; margin-bottom:0.75rem;">
+                <strong>En Android:</strong> Tocá los 3 puntitos del navegador → "Agregar a pantalla de inicio"
+            </p>
+            <p style="font-size:0.85rem; color:#555; margin-bottom:1.25rem;">
+                <strong>En iPhone:</strong> Tocá el botón compartir → "Agregar a pantalla de inicio"
+            </p>
+            <button onclick="document.getElementById('pwaManualInstrucciones').style.display='none';"
+                    style="width:100%;background:#e50914;color:white;border:none;border-radius:8px;
+                padding:0.75rem;font-weight:700;cursor:pointer;">
+                Entendido
+            </button>
+        </div>
+    </div>
 
+    <!-- SUGERENCIA ABRIR DESDE APP INSTALADA -->
+    <div id="pwaAbrirDesdeApp" style="display:none; position:fixed; bottom:0; left:0; right:0;
+     background:#1a3a6b; color:white; padding:0.9rem 1.25rem; z-index:99997;
+     box-shadow:0 -4px 16px rgba(0,0,0,0.2); align-items:center; gap:1rem; flex-wrap:wrap;">
+        <span style="font-size:1.3rem;">📲</span>
+        <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:0.85rem;">Mejorá tu experiencia</div>
+            <div style="font-size:0.75rem;opacity:0.85;">Ingresá desde la app instalada en tu dispositivo</div>
+        </div>
+        <button onclick="document.getElementById('pwaAbrirDesdeApp').style.display='none'; sessionStorage.setItem('pwaAppSuggDismissed','1');"
+                style="background:none;border:none;color:white;font-size:1.2rem;cursor:pointer;padding:0;opacity:0.7;">✕</button>
+    </div>
     <script>
         let deferredPrompt = null;
 
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            if (!localStorage.getItem('pwaDismissed') && !localStorage.getItem('pwaInstalled')) {
-                const banner = document.getElementById('pwaInstallBanner');
-                if (banner) banner.style.display = 'flex';
-            }
+        });
+
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const esStandalone = window.matchMedia('(display-mode: standalone)').matches;
+                if (!esStandalone) {
+                    const banner = document.getElementById('pwaInstallBanner');
+                    if (banner) banner.style.display = 'flex';
+                }
+            }, 3000);
+
+            setTimeout(async () => {
+                const esStandalone  = window.matchMedia('(display-mode: standalone)').matches;
+                const yaDismissed   = sessionStorage.getItem('pwaAppSuggDismissed');
+                const bannerVisible = document.getElementById('pwaInstallBanner')?.style.display === 'flex';
+                if (!esStandalone && !yaDismissed && !bannerVisible) {
+                    try {
+                        if ('getInstalledRelatedApps' in navigator) {
+                            const apps = await navigator.getInstalledRelatedApps();
+                            if (apps.length > 0) {
+                                document.getElementById('pwaAbrirDesdeApp').style.display = 'flex';
+                            }
+                        }
+                    } catch(e) {}
+                }
+            }, 3500);
         });
 
         document.getElementById('pwaBtnInstalar')?.addEventListener('click', async () => {
-            if (!deferredPrompt) return;
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === 'accepted') localStorage.setItem('pwaInstalled', '1');
-            deferredPrompt = null;
-            document.getElementById('pwaInstallBanner').style.display = 'none';
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                document.getElementById('pwaInstallBanner').style.display = 'none';
+            } else {
+                document.getElementById('pwaInstallBanner').style.display = 'none';
+                document.getElementById('pwaManualInstrucciones').style.display = 'flex';
+            }
         });
 
         window.addEventListener('appinstalled', () => {
             document.getElementById('pwaInstallBanner').style.display = 'none';
         });
-
-        // Si ya está corriendo como PWA instalada, ocultar banner
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-            const banner = document.getElementById('pwaInstallBanner');
-            if (banner) banner.style.display = 'none';
-        }
     </script>
     <script src="js/emoji-picker.js"></script>
     <script src="js/gif-picker.js"></script>
