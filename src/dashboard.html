@@ -308,9 +308,14 @@
         });
 
         window.addEventListener('appinstalled', () => {
-            localStorage.setItem('pwaInstalled', '1');
             document.getElementById('pwaInstallBanner').style.display = 'none';
         });
+
+        // Si ya está corriendo como PWA instalada, ocultar banner
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            const banner = document.getElementById('pwaInstallBanner');
+            if (banner) banner.style.display = 'none';
+        }
     </script>
     <script src="js/emoji-picker.js"></script>
     <script src="js/gif-picker.js"></script>
