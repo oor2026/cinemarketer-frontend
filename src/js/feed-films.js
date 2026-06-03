@@ -171,8 +171,12 @@ window.cargarPeliculasPopulares = async function(pagina = 1) {
         if (!response.ok) throw new Error(`Error ${response.status}`);
         const data = await response.json();
 
-        window.estadoPaginacion.paginaActual = data.page;
-        window.estadoPaginacion.totalPaginas = data.total_pages;
+        // Para proximamente: usar página lógica propia, no la de TMDB
+        if (criterioOrden !== 'proximamente') {
+            window.estadoPaginacion.paginaActual = data.page;
+            window.estadoPaginacion.totalPaginas = data.total_pages;
+        }
+        // Para proximamente el paginaActual lo manejamos manualmente abajo
         window.estadoPaginacion.totalResultados = data.total_results;
 
         // Acumular páginas hasta tener 20 válidos
@@ -190,29 +194,41 @@ window.cargarPeliculasPopulares = async function(pagina = 1) {
                 };
 
                 let acumulados = [...data.results];
-                let paginaExtra = pagina;
-                window.estadoPaginacion._ultimaPaginaTmdb = pagina;
+                                let paginaExtra = pagina;
+                                window.estadoPaginacion._ultimaPaginaTmdb = pagina;
 
-                while (acumulados.filter(esValida).length < 18 && paginaExtra < data.total_pages) {
-                    paginaExtra++;
-                    try {
-                        const token2 = localStorage.getItem('token');
-                        const criterioOrden2 = window._criterioOrden || 'fecha';
-                        let sortParam2 = '';
-                        if (criterioOrden2 === 'fecha') sortParam2 = '&sortBy=primary_release_date.desc';
-                        if (criterioOrden2 === 'proximamente') sortParam2 = '&sortBy=primary_release_date.asc&releaseDateGte=' + (anioActual + 1);
-                        const resExtra = await fetch(`${CONFIG.API_URL}/movies/popular?page=${paginaExtra}${sortParam2}`, {
-                            headers: { 'Authorization': `Bearer ${token2}` }
-                        });
-                        if (!resExtra.ok) break;
-                        const dataExtra = await resExtra.json();
-                        acumulados = [...acumulados, ...dataExtra.results];
-                        window.estadoPaginacion.totalPaginas = dataExtra.total_pages;
-                        window.estadoPaginacion._ultimaPaginaTmdb = paginaExtra;
-                    } catch(e) { break; }
-                }
+                                while (acumulados.filter(esValida).length < 18 && paginaExtra < data.total_pages) {
+                                    paginaExtra++;
+                                    try {
+                                        const token2 = localStorage.getItem('token');
+                                        const criterioOrden2 = window._criterioOrden || 'fecha';
+                                        let sortParam2 = '';
+                                        if (criterioOrden2 === 'fecha') sortParam2 = '&sortBy=primary_release_date.desc';
+                                        if (criterioOrden2 === 'proximamente') sortParam2 = '&sortBy=primary_release_date.asc&releaseDateGte=' + (anioActual + 1);
+                                        const resExtra = await fetch(`${CONFIG.API_URL}/movies/popular?page=${paginaExtra}${sortParam2}`, {
+                                            headers: { 'Authorization': `Bearer ${token2}` }
+                                        });
+                                        if (!resExtra.ok) break;
+                                        const dataExtra = await resExtra.json();
+                                        acumulados = [...acumulados, ...dataExtra.results];
+                                        window.estadoPaginacion.totalPaginas = dataExtra.total_pages;
+                                        window.estadoPaginacion._ultimaPaginaTmdb = paginaExtra;
+                                    } catch(e) { break; }
+                                }
 
-                const validos = acumulados.filter(esValida).slice(0, 18);
+                                const validos = acumulados.filter(esValida).slice(0, 18);
+
+                                if (criterio === 'proximamente') {
+                                    // paginaActual lógica — se incrementa desde cambiarPagina
+                                    // totalPaginas estimado: si acumulamos hasta paginaExtra y aún hay más,
+                                    // no sabemos cuántas páginas lógicas quedan, así que ponemos un valor
+                                    // que permita seguir navegando y se actualiza dinámicamente
+                                    const hayMasEnTmdb = paginaExtra < data.total_pages;
+                                    window.estadoPaginacion.totalPaginas = hayMasEnTmdb
+                                        ? window.estadoPaginacion.paginaActual + 1  // al menos una más
+                                        : window.estadoPaginacion.paginaActual;      // esta es la última
+                                }
+
                 grid.innerHTML = await window.generarTarjetasHTML(validos);
 
                 const peliculasMostradas = grid.querySelectorAll('.pelicula-card').length;
@@ -366,16 +382,28 @@ window.cambiarPagina = async function(direccion) {
     if (hayFiltros) {
             await window.aplicarFiltros(nuevaPagina);
         } else {
-            const criterioOrden = window._criterioOrden || 'fecha';
-            if (criterioOrden === 'fecha' || criterioOrden === 'proximamente') {
-                // Usar cursor real de TMDB para no repetir películas
-                const ultimaTmdb = window.estadoPaginacion._ultimaPaginaTmdb || window.estadoPaginacion.paginaActual;
-                const siguienteTmdb = direccion === 'siguiente' ? ultimaTmdb + 1 : Math.max(1, ultimaTmdb - 1);
-                await window.cargarPeliculasPopulares(siguienteTmdb);
-            } else {
-                await window.cargarPeliculasPopulares(nuevaPagina);
+                const criterioOrden = window._criterioOrden || 'fecha';
+                if (criterioOrden === 'proximamente') {
+                    const paginaLogicaAnterior = window.estadoPaginacion.paginaActual;
+                    const cursorTmdb = direccion === 'siguiente'
+                        ? (window.estadoPaginacion._ultimaPaginaTmdb || 1) + 1
+                        : Math.max(1, (window.estadoPaginacion._ultimaPaginaTmdb || 1) - 1);
+
+                    // Setear página lógica ANTES de cargar
+                    window.estadoPaginacion.paginaActual = direccion === 'siguiente'
+                        ? paginaLogicaAnterior + 1
+                        : Math.max(1, paginaLogicaAnterior - 1);
+
+                    await window.cargarPeliculasPopulares(cursorTmdb);
+
+                } else if (criterioOrden === 'fecha') {
+                    const ultimaTmdb = window.estadoPaginacion._ultimaPaginaTmdb || window.estadoPaginacion.paginaActual;
+                    const cursorPagina = direccion === 'siguiente' ? ultimaTmdb + 1 : Math.max(1, ultimaTmdb - 1);
+                    await window.cargarPeliculasPopulares(cursorPagina);
+                } else {
+                    await window.cargarPeliculasPopulares(nuevaPagina);
+                }
             }
-        }
     document.querySelector('.resultados-header')?.scrollIntoView({ behavior: 'smooth' });
 };
 
