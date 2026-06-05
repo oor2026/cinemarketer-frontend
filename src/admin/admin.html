@@ -564,14 +564,14 @@
                     <div class="modal-body">
                         <form id="formAvatar" onsubmit="return false;">
                             <div class="form-group image-upload-group">
-                                <label>Imagen del avatar <span class="required">*</span></label>
+                                <label>Imagen del premio</label>
                                 <div class="image-upload-area" id="avatarUploadArea" onclick="document.getElementById('inputAvatarImagen').click()">
                                     <div class="image-placeholder" id="avatarImagePlaceholder">
                                         <i class="fas fa-cloud-upload-alt"></i>
                                         <p>Hacé clic para subir una imagen</p>
-                                        <small>JPG, PNG o WEBP — máx. 5MB — recomendado 200×200px</small>
+                                        <small>JPG, PNG o WEBP — máx. 5MB</small>
                                     </div>
-                                    <img id="avatarImagePreview" src="" alt="Preview" style="display:none; width:120px; height:120px; border-radius:50%; object-fit:cover; margin:0 auto;">
+                                    <img id="avatarImagePreview" src="" alt="Preview" style="display:none;">
                                 </div>
                                 <input type="file" id="inputAvatarImagen" accept="image/*" style="display:none;" onchange="adminAvatares.previewImagen(this)">
                             </div>
@@ -966,6 +966,13 @@
                     <img id="imagePreview" src="" alt="Preview" style="display:none;">
                 </div>
                 <input type="file" id="inputImagen" accept="image/*" style="display:none;" onchange="adminUI.previewImagen(this)">
+                <!-- Galería de imágenes múltiples — visible solo al editar -->
+                <div id="galeriaImagenes" style="margin-top:0.75rem;min-height:20px;display:none;">
+                    <label style="font-size:0.8rem;color:#666;display:block;margin-bottom:0.4rem;">
+                        <i class="fas fa-images"></i> Imágenes del premio (máx. 5) — clickeá para marcar como principal
+                    </label>
+                    <div id="galeriaImagenesGrid"></div>
+                </div>
             </div>
             <div class="form-row">
                 <div class="form-group">

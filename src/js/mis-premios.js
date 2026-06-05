@@ -575,7 +575,7 @@ function renderCardEspecial(p, isPremium) {
                  </button>`;
     }
 
-    const agotado = (!esSorteo && (p.stock != null && p.stock <= 0 || p.isExpired)) || (esSorteo && p.drawExecuted)
+    const agotado = (!esSorteo && (p.stock != null && p.stock <= 0 || p.isExpired)) || (esSorteo && p.drawExecuted);
     return `
         <div class="premio-card ${agotado ? 'agotado' : ''}" style="cursor:pointer;"
              onclick="window.abrirModalEspecial(${JSON.stringify(p).replace(/"/g, '&quot;')}, ${isPremium})">
@@ -864,16 +864,17 @@ window.abrirModalPremio = function(premio) {
     document.getElementById('modalPremioBadge').textContent =
         premio.rewardType === 'TICKET' ? '🎟️ Entrada' : '🎁 Merchandising';
 
-    const img = document.getElementById('modalPremioImg');
+    const img         = document.getElementById('modalPremioImg');
     const placeholder = document.getElementById('modalPremioImgPlaceholder');
-    if (premio.imageUrl) {
-        img.src = premio.imageUrl;
-        img.style.display = 'block';
-        placeholder.style.display = 'none';
-    } else {
-        img.style.display = 'none';
-        placeholder.style.display = 'flex';
-    }
+    const imagenes    = (premio.images && premio.images.length > 0)
+        ? premio.images.map(i => i.imageUrl)
+        : (premio.imageUrl ? [premio.imageUrl] : []);
+
+    renderCarrusel(imagenes, img, placeholder,
+        document.getElementById('premioBtnPrev'),
+        document.getElementById('premioBtnNext'),
+        document.getElementById('premioMiniaturas'),
+        'premio');
 
     document.getElementById('modalPremioDescripcion').textContent = premio.description || '';
     document.getElementById('modalPremioPuntos').textContent = premio.pointsRequired + ' pts';
@@ -889,7 +890,7 @@ window.abrirModalPremio = function(premio) {
         vencRow.style.display = 'none';
     }
 
-    const partnerRow = document.getElementById('modalPremioPartnerRow');
+    const partnerRow  = document.getElementById('modalPremioPartnerRow');
     const partnerSpan = document.getElementById('modalPremioPartner');
     if (premio.partner) {
         partnerRow.style.display = 'flex';
@@ -898,7 +899,7 @@ window.abrirModalPremio = function(premio) {
         partnerRow.style.display = 'none';
     }
 
-    const websiteRow = document.getElementById('modalPremioWebsiteRow');
+    const websiteRow  = document.getElementById('modalPremioWebsiteRow');
     const websiteLink = document.getElementById('modalPremioWebsiteLink');
     if (premio.website) {
         websiteRow.style.display = 'flex';
@@ -1011,14 +1012,15 @@ window.abrirModalEspecial = function(p, isPremium) {
     // Imagen
     const img         = document.getElementById('modalEspecialImg');
     const placeholder = document.getElementById('modalEspecialImgPlaceholder');
-    if (p.imageUrl) {
-        img.src = p.imageUrl;
-        img.style.display = 'block';
-        placeholder.style.display = 'none';
-    } else {
-        img.style.display = 'none';
-        placeholder.style.display = 'flex';
-    }
+    const imagenes    = (p.images && p.images.length > 0)
+        ? p.images.map(i => i.imageUrl)
+        : (p.imageUrl ? [p.imageUrl] : []);
+
+    renderCarrusel(imagenes, img, placeholder,
+        document.getElementById('especialBtnPrev'),
+        document.getElementById('especialBtnNext'),
+        document.getElementById('especialMiniaturas'),
+        'especial');
 
     document.getElementById('modalEspecialDescripcion').textContent = p.description || '';
 
@@ -1028,6 +1030,7 @@ window.abrirModalEspecial = function(p, isPremium) {
     const fechaRow     = document.getElementById('modalEspecialFechaRow');
     const participRow  = document.getElementById('modalEspecialParticipantesRow');
     const misPuntosBox = document.getElementById('modalEspecialMisPuntosBox');
+
     // Partner
     const partnerRow  = document.getElementById('modalEspecialPartnerRow');
     const partnerSpan = document.getElementById('modalEspecialPartner');
@@ -1074,7 +1077,7 @@ window.abrirModalEspecial = function(p, isPremium) {
         document.getElementById('modalEspecialParticipantes').textContent = `${p.totalEntries || 0} anotados`;
 
         // Fila ganador — solo si el sorteo fue ejecutado
-        const ganadorRow = document.getElementById('modalEspecialGanadorRow');
+        const ganadorRow  = document.getElementById('modalEspecialGanadorRow');
         const ganadorSpan = document.getElementById('modalEspecialGanador');
         if (ganadorRow && ganadorSpan) {
             if (p.drawExecuted && p.winnerName) {
@@ -1091,8 +1094,8 @@ window.abrirModalEspecial = function(p, isPremium) {
         participRow.style.display  = 'none';
         misPuntosBox.style.display = 'block';
 
-        document.getElementById('modalEspecialPuntos').textContent   = `${p.pointsRequired} pts`;
-        document.getElementById('modalEspecialStock').textContent    = p.stock != null ? `${p.stock} disponibles` : 'Ilimitado';
+        document.getElementById('modalEspecialPuntos').textContent    = `${p.pointsRequired} pts`;
+        document.getElementById('modalEspecialStock').textContent     = p.stock != null ? `${p.stock} disponibles` : 'Ilimitado';
         document.getElementById('modalEspecialMisPuntos').textContent = premiosState.puntosActuales;
     }
 
@@ -1100,13 +1103,13 @@ window.abrirModalEspecial = function(p, isPremium) {
     const btn = document.getElementById('btnEspecialAccion');
     btn.style.color = 'white';
     if (!isPremium) {
-        btn.textContent  = '🔒 Solo Premium';
-        btn.disabled     = true;
+        btn.textContent      = '🔒 Solo Premium';
+        btn.disabled         = true;
         btn.style.background = '#ccc';
-        btn.style.color  = '#666';
+        btn.style.color      = '#666';
     } else if (esSorteo) {
         if (p.drawExecuted) {
-            btn.textContent = 'Sorteo finalizado';
+            btn.textContent      = 'Sorteo finalizado';
             btn.disabled         = true;
             btn.style.background = '#ccc';
             btn.style.color      = '#666';
@@ -1185,3 +1188,98 @@ document.addEventListener('keydown', (e) => {
         window.cerrarModalEspecial();
     }
 });
+
+// ==============================================
+// CARRUSEL DE IMÁGENES DE PREMIOS
+// ==============================================
+const carruselState = { premio: { imagenes: [], actual: 0 }, especial: { imagenes: [], actual: 0 } };
+
+function renderCarrusel(imagenes, imgEl, placeholderEl, btnPrev, btnNext, miniaturasEl, tipo) {
+    carruselState[tipo] = { imagenes, actual: 0 };
+
+    if (imagenes.length === 0) {
+        imgEl.style.display         = 'none';
+        placeholderEl.style.display = 'flex';
+        btnPrev.style.display       = 'none';
+        btnNext.style.display       = 'none';
+        miniaturasEl.style.display  = 'none';
+        const dotsElVacio = document.getElementById(tipo === 'premio' ? 'premioDots' : 'especialDots');
+        if (dotsElVacio) dotsElVacio.innerHTML = '';
+        return;
+    }
+
+    imgEl.src               = imagenes[0];
+    imgEl.style.display     = 'block';
+    placeholderEl.style.display = 'none';
+
+    const hayVarias = imagenes.length > 1;
+    btnPrev.style.display = hayVarias ? 'flex' : 'none';
+    btnNext.style.display = hayVarias ? 'flex' : 'none';
+
+    miniaturasEl.style.display = 'none';
+    miniaturasEl.innerHTML     = '';
+
+    // Dots (visibles solo en mobile via CSS)
+    const dotsEl = document.getElementById(tipo === 'premio' ? 'premioDots' : 'especialDots');
+    if (dotsEl) {
+        if (hayVarias) {
+            dotsEl.innerHTML = imagenes.map((_, i) =>
+                `<span class="dot${i === 0 ? ' activo' : ''}" onclick="irAImagenCarrusel('${tipo}', ${i})"></span>`
+            ).join('');
+        } else {
+            dotsEl.innerHTML = '';
+        }
+    }
+
+    // Drag táctil (mobile)
+    iniciarDragCarrusel(imgEl, tipo);
+}
+
+window.cambiarImagenPremio   = function(dir) { moverCarrusel('premio', dir); };
+window.cambiarImagenEspecial = function(dir) { moverCarrusel('especial', dir); };
+
+function moverCarrusel(tipo, dir) {
+    const state = carruselState[tipo];
+    state.actual = (state.actual + dir + state.imagenes.length) % state.imagenes.length;
+    actualizarCarrusel(tipo);
+}
+
+window.irAImagenCarrusel = function(tipo, idx) {
+    carruselState[tipo].actual = idx;
+    actualizarCarrusel(tipo);
+};
+
+function actualizarCarrusel(tipo) {
+    const state    = carruselState[tipo];
+    const esPremio = tipo === 'premio';
+    const imgEl    = document.getElementById(esPremio ? 'modalPremioImg' : 'modalEspecialImg');
+    const miniEl   = document.getElementById(esPremio ? 'premioMiniaturas' : 'especialMiniaturas');
+    const dotsEl   = document.getElementById(esPremio ? 'premioDots' : 'especialDots');
+
+    imgEl.src = state.imagenes[state.actual];
+    miniEl.querySelectorAll('.miniatura').forEach((m, i) =>
+        m.classList.toggle('activa', i === state.actual));
+    if (dotsEl) {
+        dotsEl.querySelectorAll('.dot').forEach((d, i) =>
+            d.classList.toggle('activo', i === state.actual));
+    }
+}
+
+function iniciarDragCarrusel(imgEl, tipo) {
+    let startX   = 0;
+    let dragging = false;
+
+    imgEl.addEventListener('touchstart', (e) => {
+        startX   = e.touches[0].clientX;
+        dragging = true;
+    }, { passive: true });
+
+    imgEl.addEventListener('touchend', (e) => {
+        if (!dragging) return;
+        dragging  = false;
+        const diff = startX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 40) {
+            moverCarrusel(tipo, diff > 0 ? 1 : -1);
+        }
+    }, { passive: true });
+}
