@@ -34,7 +34,9 @@ window.googleAuth = {
             const data = await response.json();
 
             if (!response.ok) {
-                showToast('error', data.message || 'Error al autenticar con Google');
+                let mensaje = data.message || data.detail || data.title || data.error || 'Error al autenticar con Google';
+                mensaje = mensaje.replace(/^\d{3}\s+[A-Z_]+\s+"?/i, '').replace(/"$/, '');
+                showToast('error', mensaje);
                 return;
             }
 

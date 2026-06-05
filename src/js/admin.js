@@ -105,12 +105,12 @@ const adminUI = {
         } else if (sectionName === 'avatares' && typeof adminAvatares !== 'undefined') {
             if (adminAvatares.init) adminAvatares.init();
         } else if (sectionName === 'supervision' && typeof adminSupervision !== 'undefined') {
-                adminSupervision.init();
+            adminSupervision.init();
         } else if (sectionName === 'estadisticas' && typeof adminEstadisticas !== 'undefined') {
             adminEstadisticas.init();
         } else if (sectionName === 'comercial' && typeof adminComercial !== 'undefined') {
-                      adminComercial.cargar();
-                  }
+            adminComercial.cargar();
+        }
     },
 
     // ------------------------------------------
@@ -197,9 +197,9 @@ const adminUI = {
                                 onclick="adminUI.abrirFormulario(${p.id})">
                                 <i class="fas fa-pen"></i>
                             </button>
-                            <button class="btn-accion btn-imagen" title="Cambiar imagen"
-                                onclick="adminUI.abrirSubidaImagen(${p.id})">
-                                <i class="fas fa-image"></i>
+                            <button class="btn-accion btn-imagen" title="Gestionar imágenes"
+                                onclick="adminUI.abrirFormulario(${p.id})">
+                                <i class="fas fa-images"></i>
                             </button>
                             ${btnActivar}
                             <button class="btn-accion btn-eliminar" title="Eliminar"
@@ -312,7 +312,7 @@ const adminUI = {
     // ------------------------------------------
     // ABRIR FORMULARIO (crear o editar)
     // ------------------------------------------
-    abrirFormulario(id = null) {
+    async abrirFormulario(id = null) {
         adminState.premioEditandoId = id;
         adminState.imagenPendiente  = null;
 
@@ -328,6 +328,12 @@ const adminUI = {
         document.getElementById('imagePreview').style.display     = 'none';
         document.getElementById('imagePlaceholder').style.display = 'flex';
         document.getElementById('inputImagen').value      = '';
+
+        // Ocultar galería por defecto
+        const wrapper = document.getElementById('galeriaImagenes');
+        const grid    = document.getElementById('galeriaImagenesGrid');
+        if (wrapper) wrapper.style.display = 'none';
+        if (grid)    grid.innerHTML = '';
 
         if (id) {
             const premio = adminState.premios.find(p => p.id === id);
@@ -351,6 +357,9 @@ const adminUI = {
                     document.getElementById('imagePreview').style.display  = 'block';
                     document.getElementById('imagePlaceholder').style.display = 'none';
                 }
+
+                // Cargar galería de imágenes existentes
+                await this.cargarGaleriaImagenes(id, 'COMMON');
             }
         } else {
             document.getElementById('modalTitulo').textContent     = 'Nuevo Premio';
@@ -368,6 +377,10 @@ const adminUI = {
         document.getElementById('adminModal').classList.remove('open');
         adminState.premioEditandoId = null;
         adminState.imagenPendiente  = null;
+        const galeriaEl = document.getElementById('galeriaImagenesGrid');
+        const wrapper   = document.getElementById('galeriaImagenes');
+        if (galeriaEl) galeriaEl.innerHTML = '';
+        if (wrapper)   wrapper.style.display = 'none';
     },
 
     // ------------------------------------------
@@ -413,7 +426,6 @@ const adminUI = {
             toast('El stock debe estar entre 0 y 99.999', 'error');
             return;
         }
-
         if (!nombre || !tipo || !puntos || !stock) {
             toast('Completá todos los campos obligatorios', 'error');
             return;
@@ -437,9 +449,10 @@ const adminUI = {
         btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
         try {
-            let premioId = adminState.premioEditandoId;
-            let method   = premioId ? 'PUT' : 'POST';
-            let url      = premioId
+            let premioId  = adminState.premioEditandoId;
+            const esNuevo = !premioId;
+            const method  = premioId ? 'PUT' : 'POST';
+            const url     = premioId
                 ? `${CONFIG.API_URL}/admin/rewards/${premioId}`
                 : `${CONFIG.API_URL}/admin/rewards`;
 
@@ -456,17 +469,23 @@ const adminUI = {
             const premioGuardado = await response.json();
             premioId = premioGuardado.id;
 
+            // Subir imagen pendiente si hay
             if (adminState.imagenPendiente) {
                 await this.subirImagen(premioId, adminState.imagenPendiente);
             }
 
             toast(
-                adminState.premioEditandoId ? 'Premio actualizado correctamente' : 'Premio creado correctamente',
+                esNuevo ? 'Premio creado correctamente' : 'Premio actualizado correctamente',
                 'success'
             );
 
             this.cerrarFormulario();
-            this.cargarPremios();
+            await this.cargarPremios();
+
+            // Si era nuevo, reabrir en modo edición para agregar más imágenes
+            if (esNuevo && premioId) {
+                await this.abrirFormulario(premioId);
+            }
 
         } catch (e) {
             toast('Error al guardar el premio', 'error');
@@ -482,40 +501,164 @@ const adminUI = {
     async subirImagen(premioId, file) {
         const formData = new FormData();
         formData.append('image', file);
-
-        const response = await fetch(`${CONFIG.API_URL}/admin/rewards/${premioId}/image`, {
+        const response = await fetch(`${CONFIG.API_URL}/admin/rewards/${premioId}/images`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` },
             body: formData
         });
-
         if (!response.ok) throw new Error('Error al subir imagen');
         return await response.json();
     },
 
-    // ------------------------------------------
-    // SUBIDA RÁPIDA DE IMAGEN DESDE TABLA
-    // ------------------------------------------
+    // Subida rápida desde tabla (abre edición directamente)
     abrirSubidaImagen(premioId) {
-        const input = document.createElement('input');
-        input.type   = 'file';
-        input.accept = 'image/*';
-        input.onchange = async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            if (file.size > 5 * 1024 * 1024) {
-                toast('La imagen supera los 5MB', 'error');
+        this.abrirFormulario(premioId);
+    },
+
+    // ------------------------------------------
+    // GALERÍA DE IMÁGENES (múltiples)
+    // ------------------------------------------
+    async cargarGaleriaImagenes(premioId, tipo = 'COMMON') {
+        const endpoint = tipo === 'PREMIUM'
+            ? `${CONFIG.API_URL}/admin/premium/rewards/${premioId}/images`
+            : `${CONFIG.API_URL}/admin/rewards/${premioId}/images`;
+
+        try {
+            const res = await fetch(endpoint, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) return;
+            const images = await res.json();
+            this.renderGaleriaImagenes(images, premioId, tipo);
+        } catch (e) {
+            console.error('Error cargando galería:', e);
+        }
+    },
+
+    renderGaleriaImagenes(images, premioId, tipo = 'COMMON') {
+        const galeriaEl = document.getElementById('galeriaImagenesGrid');
+        const wrapper   = document.getElementById('galeriaImagenes');
+        if (!galeriaEl || !wrapper) return;
+        wrapper.style.display = 'block';
+
+        if (images.length === 0) {
+            galeriaEl.innerHTML = `
+                <div style="display:inline-block;margin:0.3rem;vertical-align:top;">
+                    <label style="width:80px;height:80px;border:2px dashed #ccc;border-radius:8px;
+                                  display:flex;flex-direction:column;align-items:center;justify-content:center;
+                                  cursor:pointer;color:#aaa;font-size:0.7rem;text-align:center;">
+                        <i class="fas fa-plus" style="font-size:1.2rem;margin-bottom:0.2rem;"></i>
+                        Agregar
+                        <input type="file" accept="image/*" style="display:none;"
+                               onchange="adminUI.agregarImagenGaleria(${premioId}, this, '${tipo}')">
+                    </label>
+                </div>`;
+            return;
+        }
+
+        galeriaEl.innerHTML = images.map(img => `
+            <div style="position:relative;display:inline-block;margin:0.3rem;">
+                <img src="${img.imageUrl}" alt="imagen"
+                     style="width:80px;height:80px;object-fit:cover;border-radius:8px;
+                            border:3px solid ${img.primary ? '#e50914' : '#e0e0e0'};cursor:pointer;"
+                     title="${img.primary ? 'Imagen principal' : 'Clic para hacer principal'}"
+                     onclick="adminUI.marcarPrincipal(${premioId}, ${img.id}, '${tipo}')">
+                ${img.primary ? `<span style="position:absolute;top:2px;left:2px;background:#e50914;color:white;
+                    font-size:0.6rem;padding:1px 4px;border-radius:4px;font-weight:700;">Principal</span>` : ''}
+                <button onclick="adminUI.eliminarImagenGaleria(${premioId}, ${img.id}, '${tipo}')"
+                    style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.6);color:white;
+                           border:none;border-radius:50%;width:18px;height:18px;font-size:0.65rem;
+                           cursor:pointer;line-height:1;padding:0;" title="Eliminar imagen">✕</button>
+            </div>
+        `).join('');
+
+        // Botón agregar si hay menos de 5
+        if (images.length < 5) {
+            galeriaEl.innerHTML += `
+                <div style="display:inline-block;margin:0.3rem;vertical-align:top;">
+                    <label style="width:80px;height:80px;border:2px dashed #ccc;border-radius:8px;
+                                  display:flex;flex-direction:column;align-items:center;justify-content:center;
+                                  cursor:pointer;color:#aaa;font-size:0.7rem;text-align:center;">
+                        <i class="fas fa-plus" style="font-size:1.2rem;margin-bottom:0.2rem;"></i>
+                        Agregar
+                        <input type="file" accept="image/*" style="display:none;"
+                               onchange="adminUI.agregarImagenGaleria(${premioId}, this, '${tipo}')">
+                    </label>
+                </div>`;
+        }
+    },
+
+    async agregarImagenGaleria(premioId, input, tipo = 'COMMON') {
+        const file = input.files[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) {
+            toast('La imagen supera los 5MB', 'error');
+            return;
+        }
+
+        const endpoint = tipo === 'PREMIUM'
+            ? `${CONFIG.API_URL}/admin/premium/rewards/${premioId}/images`
+            : `${CONFIG.API_URL}/admin/rewards/${premioId}/images`;
+
+        try {
+            const formData = new FormData();
+            formData.append('image', file);
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                toast(err.error || 'Error al subir imagen', 'error');
                 return;
             }
-            try {
-                await this.subirImagen(premioId, file);
-                toast('Imagen actualizada correctamente', 'success');
-                this.cargarPremios();
-            } catch (err) {
-                toast('Error al subir la imagen', 'error');
-            }
-        };
-        input.click();
+            toast('Imagen agregada correctamente', 'success');
+            await this.cargarGaleriaImagenes(premioId, tipo);
+            this.cargarPremios();
+        } catch (e) {
+            toast('Error al subir imagen', 'error');
+        }
+    },
+
+    async marcarPrincipal(premioId, imageId, tipo = 'COMMON') {
+        const endpoint = tipo === 'PREMIUM'
+            ? `${CONFIG.API_URL}/admin/premium/rewards/${premioId}/images/${imageId}/primary`
+            : `${CONFIG.API_URL}/admin/rewards/${premioId}/images/${imageId}/primary`;
+
+        try {
+            const res = await fetch(endpoint, {
+                method: 'PATCH',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error();
+            toast('Imagen principal actualizada', 'success');
+            await this.cargarGaleriaImagenes(premioId, tipo);
+            this.cargarPremios();
+        } catch (e) {
+            toast('Error al marcar imagen principal', 'error');
+        }
+    },
+
+    async eliminarImagenGaleria(premioId, imageId, tipo = 'COMMON') {
+        if (!confirm('¿Eliminar esta imagen?')) return;
+
+        const endpoint = tipo === 'PREMIUM'
+            ? `${CONFIG.API_URL}/admin/premium/rewards/${premioId}/images/${imageId}`
+            : `${CONFIG.API_URL}/admin/rewards/${premioId}/images/${imageId}`;
+
+        try {
+            const res = await fetch(endpoint, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error();
+            toast('Imagen eliminada correctamente', 'success');
+            await this.cargarGaleriaImagenes(premioId, tipo);
+            this.cargarPremios();
+        } catch (e) {
+            toast('Error al eliminar imagen', 'error');
+        }
     },
 
     // ------------------------------------------

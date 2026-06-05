@@ -170,10 +170,16 @@
 
             <!-- COLUMNA IZQUIERDA: imagen -->
             <div class="modal-premio-imagen">
-                <img id="modalPremioImg" src="" alt="Premio" style="display:none;">
-                <div class="modal-premio-img-placeholder" id="modalPremioImgPlaceholder">
-                    <i class="fas fa-gift"></i>
+                <div class="premio-carrusel" id="premioCarrusel">
+                    <img id="modalPremioImg" src="" alt="Premio" style="display:none;">
+                    <div class="modal-premio-img-placeholder" id="modalPremioImgPlaceholder">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <button class="carrusel-btn carrusel-prev" id="premioBtnPrev" onclick="cambiarImagenPremio(-1)" style="display:none;">&#8249;</button>
+                    <button class="carrusel-btn carrusel-next" id="premioBtnNext" onclick="cambiarImagenPremio(1)" style="display:none;">&#8250;</button>
                 </div>
+                <div class="carrusel-miniaturas" id="premioMiniaturas" style="display:none;"></div>
+                <div class="carrusel-dots" id="premioDots"></div>
             </div>
 
             <!-- COLUMNA DERECHA -->
@@ -262,10 +268,16 @@
 
             <!-- COLUMNA IZQUIERDA: imagen -->
             <div class="modal-premio-imagen">
-                <img id="modalEspecialImg" src="" alt="Premio" style="display:none;">
-                <div class="modal-premio-img-placeholder" id="modalEspecialImgPlaceholder">
-                    <i class="fas fa-star"></i>
+                <div class="premio-carrusel" id="especialCarrusel">
+                    <img id="modalEspecialImg" src="" alt="Premio" style="display:none;">
+                    <div class="modal-premio-img-placeholder" id="modalEspecialImgPlaceholder">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <button class="carrusel-btn carrusel-prev" id="especialBtnPrev" onclick="cambiarImagenEspecial(-1)" style="display:none;">&#8249;</button>
+                    <button class="carrusel-btn carrusel-next" id="especialBtnNext" onclick="cambiarImagenEspecial(1)" style="display:none;">&#8250;</button>
                 </div>
+                <div class="carrusel-miniaturas" id="especialMiniaturas" style="display:none;"></div>
+                <div class="carrusel-dots" id="especialDots"></div>
             </div>
 
             <!-- COLUMNA DERECHA -->
