@@ -1602,7 +1602,28 @@ window.cargarRespuestas = async function(commentId, offset) {
                             }
                         </div>
                         <div style="flex:1;min-width:0;">
-                            <span style="font-weight:600;font-size:0.8rem;color:#333;">${r.userName}</span>
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+                                <span style="font-weight:600;font-size:0.8rem;color:#333;">${r.userName}</span>
+                                <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
+                                    ${!r.ownReply ? `
+                                    <button onclick="window.abrirModalReporteReply(${r.id})"
+                                        style="background:none;border:none;cursor:pointer;font-size:0.75rem;
+                                               color:#ccc;padding:2px 4px;transition:color 0.2s;"
+                                        onmouseover="this.style.color='#e50914'"
+                                        onmouseout="this.style.color='#ccc'"
+                                        title="Reportar respuesta">
+                                        <i class="fas fa-flag"></i>
+                                    </button>` : `
+                                    <button onclick="window.abrirModalOcultarReply(${r.id})"
+                                        style="background:none;border:none;cursor:pointer;font-size:0.75rem;
+                                               color:#ccc;padding:2px 4px;transition:color 0.2s;"
+                                        onmouseover="this.style.color='#e50914'"
+                                        onmouseout="this.style.color='#ccc'"
+                                        title="Ocultar mi respuesta">
+                                        <i class="fas fa-ban"></i>
+                                    </button>`}
+                                </div>
+                            </div>
                             <div style="font-size:0.85rem;color:#444;margin:0.2rem 0;word-break:break-word;">${r.content}</div>
                             ${r.hasGif && r.gifUrl ? `<img src="${r.gifUrl}" alt="GIF" style="max-width:100%;max-height:160px;border-radius:8px;margin-top:0.3rem;display:block;">` : ''}
                             <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.3rem;">
@@ -1614,33 +1635,16 @@ window.cargarRespuestas = async function(commentId, offset) {
                                     <span class="reply-banco-count-${r.id}">${r.bancoCount || 0}</span>
                                     <span>Te banco</span>
                                 </button>
-                                ${!r.ownReply ? `
-                                    <button onclick="window.abrirModalReporteReply(${r.id})"
-                                        style="background:none;border:none;cursor:pointer;font-size:0.75rem;
-                                               color:#ccc;padding:0;transition:color 0.2s;"
-                                        onmouseover="this.style.color='#e50914'"
-                                        onmouseout="this.style.color='#ccc'"
-                                        title="Reportar respuesta">
-                                        <i class="fas fa-flag"></i>
-                                    </button>` : `
-                                    <button onclick="window.abrirModalOcultarReply(${r.id})"
-                                        style="background:none;border:none;cursor:pointer;font-size:0.75rem;
-                                               color:#ccc;padding:0;transition:color 0.2s;"
-                                        onmouseover="this.style.color='#e50914'"
-                                        onmouseout="this.style.color='#ccc'"
-                                        title="Ocultar mi respuesta">
-                                        <i class="fas fa-ban"></i>
-                                    </button>`}
                                 <button onclick="window.abrirFormRespuesta(${commentId}, this, ${r.id})"
                                     style="background:none;border:none;cursor:pointer;font-size:0.75rem;color:#999;padding:0;">
                                     <i class="fas fa-reply"></i> Responder
                                 </button>
-                                <span style="font-size:0.7rem;color:#bbb;">${new Date(r.createdAt).toLocaleString('es-ES', {
+                            </div>
+                            <div style="font-size:0.7rem;color:#bbb;margin-top:5px;">${new Date(r.createdAt).toLocaleString('es-ES', {
                                                                                  day: '2-digit', month: '2-digit', year: 'numeric',
                                                                                  hour: '2-digit', minute: '2-digit',
                                                                                  timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-                                                                             })}</span>
-                            </div>
+                                                                             })}</div>
                         </div>
                     `;
                     container.appendChild(div);
