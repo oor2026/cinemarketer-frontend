@@ -713,7 +713,7 @@
 
 /* ========== HEADER DEL MODAL ========== */
 #modalPelicula .modal-header {
-    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    background: linear-gradient(135deg, #e50914, #b2070f) !important;
     color: white !important;
     padding: 1.5rem 2rem !important;
     display: flex !important;
@@ -2250,4 +2250,77 @@
 #modalPelicula #nuevoComentario {
     border: none !important;
     box-shadow: none !important;
+}
+
+/* ── Modo Spoiler ── */
+.spoiler-switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 8px 0 10px;
+}
+
+.spoiler-switch-label {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #888;
+    transition: color 0.25s;
+}
+
+.spoiler-switch-label.activo {
+    color: #6c63ff;
+}
+
+.spoiler-toggle {
+    width: 40px;
+    height: 22px;
+    border-radius: 11px;
+    background: #ccc;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.25s;
+    flex-shrink: 0;
+}
+
+.spoiler-toggle.activo {
+    background: #6c63ff;
+}
+
+.spoiler-toggle-dot {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: white;
+    transition: left 0.25s;
+}
+
+.spoiler-toggle.activo .spoiler-toggle-dot {
+    left: 21px;
+}
+
+.spoiler-aviso {
+    font-size: 0.75rem;
+    color: #6c63ff;
+    margin-top: 4px;
+    padding: 0 0.25rem;
+}
+
+#nuevoComentario.spoiler-mode {
+    border-color: #6c63ff !important;
+    background: #f5f3ff;
+}
+
+#modalPelicula .btn-comentar.spoiler-mode,
+.btn-comentar.spoiler-mode {
+    background: #6c63ff !important;
+    border-color: #6c63ff !important;
+}
+
+/* ── Header modal en modo spoiler ── */
+#modalPelicula .modal-header.spoiler-mode {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
 }

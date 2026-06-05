@@ -861,6 +861,10 @@ window.cerrarModal = function() {
     const modal = document.getElementById('modalPelicula');
     if (modal) {
         modal.style.display = 'none';
+
+        // Reset modo spoiler
+        activarModoSpoiler(false);
+
         const iframe = modal.querySelector('iframe');
         if (iframe) iframe.src = iframe.src;
         const movieId = window.peliculaActualId;
@@ -1077,9 +1081,9 @@ window.cargarComentariosPelicula = async function(id) {
 
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${CONFIG.API_URL}/comments/movies/${id}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const response = await fetch(`${CONFIG.API_URL}/comments/movies/${id}?spoiler=${modoSpoilerActivo}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
 
         if (!response.ok) throw new Error('Error al cargar comentarios');
         const comentarios = await response.json();
@@ -1779,6 +1783,92 @@ window.abrirFormRespuesta = function(commentId, btn, replyId = null) {
     }, 50);
 };
 
+// ── Modo Spoiler ──────────────────────────────────────────────
+let modoSpoilerActivo = false;
+
+async function spoilerYaAceptado(movieId) {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) return false;
+        const res = await fetch(`${CONFIG.API_URL}/comments/spoiler-accepted/${movieId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return false;
+        const data = await res.json();
+        return data.accepted === true;
+    } catch { return false; }
+}
+
+async function guardarSpoilerAceptado(movieId) {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        await fetch(`${CONFIG.API_URL}/comments/spoiler-accepted/${movieId}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+    } catch {}
+}
+
+window.toggleModoSpoiler = async function() {
+    if (!modoSpoilerActivo) {
+        const yaAceptado = await spoilerYaAceptado(window.peliculaActualId);
+        if (yaAceptado) {
+            activarModoSpoiler(true);
+            return;
+        }
+        const checkbox = document.getElementById('spoilerNoAdvertir');
+        if (checkbox) checkbox.checked = false;
+        const modal = document.getElementById('modalSpoilerWarning');
+        if (modal) modal.style.display = 'flex';
+        return;
+    }
+    activarModoSpoiler(false);
+};
+
+window.confirmarSpoilerWarning = async function() {
+    const modal    = document.getElementById('modalSpoilerWarning');
+    const checkbox = document.getElementById('spoilerNoAdvertir');
+    if (modal) modal.style.display = 'none';
+    if (checkbox?.checked && window.peliculaActualId) {
+        await guardarSpoilerAceptado(window.peliculaActualId);
+    }
+    activarModoSpoiler(true);
+};
+
+window.cancelarSpoilerWarning = function() {
+    const modal = document.getElementById('modalSpoilerWarning');
+    if (modal) modal.style.display = 'none';
+};
+
+function activarModoSpoiler(activar) {
+    modoSpoilerActivo = activar;
+
+    const toggle   = document.getElementById('spoilerToggle');
+    const label    = document.getElementById('spoilerSwitchLabel');
+    const textarea = document.getElementById('nuevoComentario');
+    const aviso    = document.getElementById('spoilerAviso');
+    const btnCom   = document.querySelector('.btn-comentar');
+    const header   = document.querySelector('#modalPelicula .modal-header');
+
+    toggle?.classList.toggle('activo', modoSpoilerActivo);
+    label?.classList.toggle('activo', modoSpoilerActivo);
+    textarea?.classList.toggle('spoiler-mode', modoSpoilerActivo);
+    if (aviso) aviso.style.display = modoSpoilerActivo ? 'block' : 'none';
+    if (btnCom) btnCom.classList.toggle('spoiler-mode', modoSpoilerActivo);
+    header?.classList.toggle('spoiler-mode', modoSpoilerActivo);
+
+    if (textarea) {
+        textarea.placeholder = modoSpoilerActivo
+            ? 'Escribí tu spoiler... (máx 2000 caracteres)'
+            : 'Escribe tu comentario... (máx 2000 caracteres)';
+    }
+
+    if (window.peliculaActualId) {
+        window.cargarComentariosPelicula(window.peliculaActualId);
+    }
+}
+
 // ==============================================
 // FUNCIONES DE COMENTARIOS EN MODAL
 // ==============================================
@@ -1868,9 +1958,10 @@ window.enviarComentario = async function() {
                 'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
-                            content: texto,
-                            gifUrl: window._gifSeleccionado || null
-                        })
+                    content: texto,
+                    gifUrl: window._gifSeleccionado || null,
+                    spoiler: modoSpoilerActivo
+                })
         });
 
         if (!response.ok) {
