@@ -914,7 +914,7 @@
 
 /* Lista de comentarios */
 #modalPelicula .comentarios-lista {
-    max-height: 200px !important;
+    max-height: 420px !important;
     overflow-y: auto !important;
     padding-right: 0.5rem !important;
     margin-bottom: 1rem !important;
