@@ -1668,7 +1668,7 @@ window.enviarRespuesta = async function(commentId) {
     const input = document.getElementById(`reply-input-${commentId}`);
     if (!input) return;
     const content = input.value.trim();
-    if (!content) return;
+    if (!content && !window._gifSeleccionadoReply) return;
 
     const token = localStorage.getItem('token');
     try {
@@ -1684,6 +1684,10 @@ window.enviarRespuesta = async function(commentId) {
         const data = await res.json();
         if (res.status === 422 && data.rejected) {
             window.mostrarToast('Tu respuesta no cumple con nuestras políticas de convivencia.', 'error');
+            return;
+        }
+        if (res.status === 409) {
+            window.mostrarToast('No podés publicar la misma respuesta dos veces en una misma película.', 'error');
             return;
         }
         if (!res.ok) {
@@ -1728,6 +1732,10 @@ window.abrirModalReporteReply = function(replyId) {
 
 window.abrirFormRespuesta = function(commentId, btn, replyId = null) {
     window._replyingToReplyId = replyId;
+
+    // Cerrar área de comentario principal si está abierta
+    window.cancelarComentario();
+
     const container = document.querySelector(`.replies-container-${commentId}`);
     if (!container) return;
 
@@ -1841,7 +1849,7 @@ window.cancelarSpoilerWarning = function() {
     if (modal) modal.style.display = 'none';
 };
 
-function activarModoSpoiler(activar) {
+window.activarModoSpoiler = function activarModoSpoiler(activar) {
     modoSpoilerActivo = activar;
 
     const toggle   = document.getElementById('spoilerToggle');
@@ -1873,6 +1881,9 @@ function activarModoSpoiler(activar) {
 // FUNCIONES DE COMENTARIOS EN MODAL
 // ==============================================
 window.mostrarAreaComentario = function() {
+    // Cerrar cualquier form de respuesta abierto
+    document.querySelectorAll('.reply-form').forEach(f => f.remove());
+
     const area = document.getElementById('areaEscritura');
     if (area) {
         area.style.display = 'block';

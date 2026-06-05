@@ -104,47 +104,65 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
         window.cargarNovedades();
     }
 
-    // Navegar solo en respuestas
-        if (type === 'REPLY') {
-            document.getElementById('novedadesDropdown').style.display = 'none';
-            if (typeof window.abrirDetallePelicula === 'function') {
-                window.abrirDetallePelicula(movieId);
-                // Esperar a que carguen comentarios y replies, luego scroll + resaltado
-                if (replyId && commentId) {
-                    setTimeout(async () => {
-                        // Expandir el hilo del comentario padre
-                        await window.cargarRespuestas(commentId, 0);
-                        const container = document.querySelector(`.replies-container-${commentId}`);
-                        if (container) container.style.display = 'block';
+        // Navegar solo en respuestas
+            if (type === 'REPLY') {
+                const dropdown = document.getElementById('novedadesDropdown');
+                if (dropdown) dropdown.style.display = 'none';
 
-                        // Esperar a que rendericen las replies
-                        setTimeout(() => {
-                            // Buscar la reply por data o por posición en el DOM
-                            const allReplies = container ? container.querySelectorAll('div[style*="display:flex"]') : [];
-                            let targetEl = null;
+                if (typeof window.abrirDetallePelicula === 'function') {
 
-                            // Buscar el div que contiene el banco button con el replyId
-                            if (container) {
-                                const bancoBtns = container.querySelectorAll(`button[onclick*="toggleReplyBanco(${replyId}"]`);
-                                if (bancoBtns.length > 0) {
-                                    targetEl = bancoBtns[0].closest('div[style*="display:flex"]');
+                    // Consultar si el comentario padre es spoiler antes de abrir
+                    if (commentId) {
+                        try {
+                            const token2 = localStorage.getItem('token');
+                            const res = await fetch(`${CONFIG.API_URL}/comments/${commentId}`, {
+                                headers: { 'Authorization': `Bearer ${token2}` }
+                            });
+                            if (res.ok) {
+                                const data = await res.json();
+                                if (data.spoiler) {
+                                    modoSpoilerActivo = true;
                                 }
                             }
+                        } catch(e) {}
+                    }
 
-                            if (targetEl) {
-                                targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                // Resaltado temporal
-                                targetEl.style.transition = 'background 0.3s';
-                                targetEl.style.background = '#fff3cd';
-                                setTimeout(() => {
-                                    targetEl.style.background = '';
-                                }, 3000);
-                            }
-                        }, 500);
-                    }, 800);
+                   window.abrirDetallePelicula(movieId);
+
+                           if (replyId && commentId) {
+                              setTimeout(async () => {
+                                  // Aplicar modo spoiler visual ahora que el modal ya está abierto
+                                  if (modoSpoilerActivo && typeof window.activarModoSpoiler === 'function') {
+                                      window.activarModoSpoiler(true);
+                                  }
+                                  // Esperar a que cargarComentariosPelicula termine de renderizar
+                                  await new Promise(resolve => setTimeout(resolve, 600));
+
+                                  const container = document.querySelector(`.replies-container-${commentId}`);
+                                  if (container) {
+                                      container.style.display = 'block';
+                                      await window.cargarRespuestas(commentId, 0);
+                                  }
+
+                                  setTimeout(() => {
+                                      const containerFinal = document.querySelector(`.replies-container-${commentId}`);
+                                      const bancoBtns = containerFinal
+                                          ? containerFinal.querySelectorAll(`button[onclick*="toggleReplyBanco(${replyId}"]`)
+                                          : [];
+                                      const targetEl = bancoBtns.length > 0
+                                          ? bancoBtns[0].closest('div[style*="display:flex"]')
+                                          : null;
+                                      if (targetEl) {
+                                          targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                          targetEl.style.transition = 'background 0.3s';
+                                          targetEl.style.background = '#fff3cd';
+                                          setTimeout(() => { targetEl.style.background = ''; }, 3000);
+                                      }
+                                  }, 600);
+                              }, 800);
+                          }
                 }
             }
-        }
 };
 
 window.marcarTodasLeidas = async function() {
