@@ -107,6 +107,10 @@ const adminUsuarios = {
 
             const acciones = `
                 <div class="tabla-acciones">
+                    <button class="btn-accion btn-ver" title="Ver detalle"
+                            onclick="adminUsuarios.verDetalle(${u.id})">
+                        <i class="fas fa-eye"></i>
+                    </button>
                     <button class="btn-accion btn-editar" title="Editar"
                             onclick="adminUsuarios.abrirFormulario(${u.id})">
                         <i class="fas fa-pen"></i>
@@ -375,5 +379,101 @@ eliminarUsuario: async function(id) {
         console.error('❌ Error detallado:', error);
         toast('Error al eliminar usuario: ' + error.message, 'error');
     }
+}
+,
+
+verDetalle: async function(id) {
+    try {
+        const response = await fetch(`${CONFIG.API_URL}/admin/users/${id}/detail`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Error al cargar detalle');
+        const d = await response.json();
+
+        const fmt = (dt) => dt ? new Date(dt).toLocaleString('es-AR', {
+            day:'2-digit', month:'2-digit', year:'numeric',
+            hour:'2-digit', minute:'2-digit'
+        }) : '—';
+
+        const fmtFecha = (dt) => dt ? new Date(dt).toLocaleDateString('es-AR', {
+            day:'2-digit', month:'2-digit', year:'numeric'
+        }) : '—';
+
+        const nivelLabel = {
+            'AMATEUR': '🎬 Amateur', 'CRITICO': '🎭 Crítico',
+            'EXPERTO': '🏆 Experto', 'LEYENDA': '⭐ Leyenda'
+        }[d.nivel] || d.nivel;
+
+        const listadoPremios = d.premios.listado.length > 0
+            ? d.premios.listado.map(p => `
+                <tr>
+                    <td>${p.nombre}</td>
+                    <td>${p.tipo === 'TICKET' ? '🎟️ Entrada' : '🎁 Merchandising'}</td>
+                    <td>${fmtFecha(p.fecha)}</td>
+                </tr>`).join('')
+            : '<tr><td colspan="3" style="text-align:center;color:#999;">Sin canjes</td></tr>';
+
+        document.getElementById('modalDetalleUsuarioContenido').innerHTML = `
+            <div class="detalle-grid">
+
+                <div class="detalle-seccion">
+                    <h4><i class="fas fa-user"></i> Datos personales</h4>
+                    <div class="detalle-fila"><span>Nombre</span><strong>${d.nombre}</strong></div>
+                    <div class="detalle-fila"><span>Email</span><strong>${d.email}</strong></div>
+                    <div class="detalle-fila"><span>DNI</span><strong>${d.dni || '—'}</strong></div>
+                    <div class="detalle-fila"><span>Teléfono</span><strong>${d.telefono || '—'}</strong></div>
+                    <div class="detalle-fila"><span>Email verificado</span><strong>${d.emailVerificado ? '✅ Sí' : '❌ No'}</strong></div>
+                    <div class="detalle-fila"><span>Autenticación</span><strong>${d.googleAuth ? '🔵 Google' : '🔑 Contraseña'}</strong></div>
+                    <div class="detalle-fila"><span>Miembro desde</span><strong>${fmt(d.creadoEn)}</strong></div>
+                    <div class="detalle-fila"><span>Último acceso</span><strong>${fmt(d.ultimoAcceso)}</strong></div>
+                </div>
+
+                <div class="detalle-seccion">
+                    <h4><i class="fas fa-id-badge"></i> Estado de cuenta</h4>
+                    <div class="detalle-fila"><span>Rol</span><strong>${d.rol}</strong></div>
+                    <div class="detalle-fila"><span>Estado</span><strong>${d.estado}</strong></div>
+                    <div class="detalle-fila"><span>Premium</span><strong>${d.premium ? '⭐ Activo' : '—'}</strong></div>
+                    <div class="detalle-fila"><span>Nivel</span><strong>${nivelLabel}</strong></div>
+                </div>
+
+                <div class="detalle-seccion">
+                    <h4><i class="fas fa-coins"></i> Puntos</h4>
+                    <div class="detalle-fila"><span>Disponibles</span><strong>${d.puntosDisponibles} pts</strong></div>
+                    <div class="detalle-fila"><span>Acumulados (mes)</span><strong>${d.puntosAcumulados} pts</strong></div>
+                    <div class="detalle-fila"><span>Canjeados histórico</span><strong>${d.puntosCanjeadosHistorico} pts</strong></div>
+                </div>
+
+                <div class="detalle-seccion">
+                    <h4><i class="fas fa-chart-bar"></i> Actividad</h4>
+                    <div class="detalle-fila"><span>Votaciones</span><strong>${d.totalVotaciones}</strong></div>
+                    <div class="detalle-fila"><span>Comentarios</span><strong>${d.totalComentarios}</strong></div>
+                    <div class="detalle-fila"><span>Premios canjeados</span><strong>${d.premios.totalCanjeados}</strong></div>
+                    <div class="detalle-fila"><span>— Entradas</span><strong>${d.premios.entradas}</strong></div>
+                    <div class="detalle-fila"><span>— Merchandising</span><strong>${d.premios.merchandising}</strong></div>
+                </div>
+
+            </div>
+
+            ${d.premios.listado.length > 0 ? `
+            <div class="detalle-seccion" style="margin-top:1rem;">
+                <h4><i class="fas fa-gift"></i> Historial de canjes</h4>
+                <table class="admin-table" style="margin-top:0.5rem;">
+                    <thead><tr><th>Premio</th><th>Tipo</th><th>Fecha</th></tr></thead>
+                    <tbody>${listadoPremios}</tbody>
+                </table>
+            </div>` : ''}
+        `;
+
+        document.getElementById('modalDetalleUsuarioOverlay').classList.add('open');
+        document.getElementById('modalDetalleUsuario').classList.add('open');
+
+    } catch (error) {
+        toast('Error al cargar el detalle del usuario', 'error');
+    }
+},
+
+cerrarDetalleUsuario: function() {
+    document.getElementById('modalDetalleUsuarioOverlay').classList.remove('open');
+    document.getElementById('modalDetalleUsuario').classList.remove('open');
 }
 };
