@@ -305,6 +305,11 @@ function resetDashboardState() {
 
 function getModuleFromHash() {
     const hash = window.location.hash.replace('#', '');
+    if (hash.startsWith('perfil/')) {
+        const userId = hash.split('/')[1];
+        window._perfilUsuarioId = userId;
+        return 'perfil';
+    }
     return hash || 'feed-films';
 }
 
@@ -342,3 +347,8 @@ window.loadModule = loadModule;
 window.loadDefaultModule = loadDefaultModule;
 window.resetDashboardState = resetDashboardState;
 window.cargarPerfilHeader = cargarPerfilHeader;
+
+window.abrirPerfilUsuario = function(userId) {
+    window._perfilUsuarioId = userId;
+    window.location.hash = `perfil/${userId}`;
+};

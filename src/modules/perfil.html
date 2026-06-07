@@ -1,0 +1,83 @@
+<div class="perfil-card" id="perfilContenido">
+
+    <!-- HEADER: identidad -->
+    <div class="perfil-header">
+        <div class="perfil-avatar-wrap">
+            <div class="perfil-avatar" id="perfilAvatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+        </div>
+        <div class="perfil-identidad">
+            <h1 class="perfil-nombre" id="perfilNombre">Cargando...</h1>
+            <div class="perfil-level-badge" id="perfilLevelBadge">
+                <span class="level-icon" id="perfilLevelEmoji">🟢</span>
+                <span class="level-name" id="perfilLevelName">Amateur</span>
+            </div>
+            <p class="perfil-miembro" id="perfilMiembro"></p>
+        </div>
+        <div class="perfil-accion">
+            <button class="btn-seguir" id="btnSeguir" onclick="window.toggleSeguir()" style="display:none;">
+                <i class="fas fa-user-plus"></i> Seguir
+            </button>
+        </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="perfil-stats">
+        <div class="perfil-stat">
+            <span class="perfil-stat-num" id="perfilSeguidores">0</span>
+            <span class="perfil-stat-label">seguidores</span>
+        </div>
+        <div class="perfil-stat">
+            <span class="perfil-stat-num" id="perfilSiguiendo">0</span>
+            <span class="perfil-stat-label">siguiendo</span>
+        </div>
+        <div class="perfil-stat">
+            <span class="perfil-stat-num" id="perfilVotaciones">0</span>
+            <span class="perfil-stat-label">votaciones</span>
+        </div>
+        <div class="perfil-stat">
+            <span class="perfil-stat-num" id="perfilComentarios">0</span>
+            <span class="perfil-stat-label">comentarios</span>
+        </div>
+    </div>
+
+    <!-- ÚLTIMAS VOTACIONES -->
+    <div class="perfil-seccion">
+        <h3 class="perfil-seccion-titulo">
+            <i class="fas fa-film"></i> Últimas películas votadas
+        </h3>
+        <div id="perfilVotacionesWrapper">
+            <div class="perfil-loading"><i class="fas fa-spinner fa-spin"></i></div>
+        </div>
+    </div>
+
+    <!-- ÚLTIMOS COMENTARIOS -->
+    <div class="perfil-seccion">
+        <h3 class="perfil-seccion-titulo">
+            <i class="fas fa-comment"></i> Últimos comentarios
+        </h3>
+        <div class="perfil-comentarios" id="perfilComentariosList">
+            <div class="perfil-loading"><i class="fas fa-spinner fa-spin"></i></div>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMAR DEJAR DE SEGUIR -->
+    <div id="modalDejarSeguir" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
+        <div style="background:white; border-radius:16px; padding:2rem; max-width:380px; width:100%;" onclick="event.stopPropagation()">
+            <h3 style="margin:0 0 0.75rem; font-size:1rem; color:#333;">¿Dejás de seguir a <span id="dejarSeguirNombre"></span>?</h3>
+            <p style="color:#888; font-size:0.88rem; margin:0 0 1.5rem;">Podés volver a seguirlo cuando quieras.</p>
+            <div style="display:flex; gap:0.75rem;">
+                <button onclick="window.cerrarDejarSeguir()"
+                        style="flex:1; padding:0.7rem; border:1.5px solid #ddd; background:none; border-radius:8px; color:#666; cursor:pointer;">
+                    Cancelar
+                </button>
+                <button onclick="window.confirmarDejarSeguir()"
+                        style="flex:1; padding:0.7rem; background:#e50914; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer;">
+                    Dejar de seguir
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>

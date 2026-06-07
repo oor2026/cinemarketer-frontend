@@ -169,6 +169,28 @@
 
     </div>
 
+    <!-- ============================================== -->
+    <!-- MI RED — SIGUIENDO / SEGUIDORES               -->
+    <!-- ============================================== -->
+    <div class="mi-red-seccion">
+        <div class="mi-red-header">
+            <h3 class="mi-red-titulo"><i class="fas fa-users"></i> Mi red</h3>
+        </div>
+        <div class="mi-red-tabs">
+            <button class="mi-red-tab active" id="tabSiguiendo"
+                    onclick="window.switchRedTab('siguiendo')">
+                Siguiendo (<span id="countSiguiendo">0</span>)
+            </button>
+            <button class="mi-red-tab" id="tabSeguidores"
+                    onclick="window.switchRedTab('seguidores')">
+                Seguidores (<span id="countSeguidores">0</span>)
+            </button>
+        </div>
+        <div id="miRedLista">
+            <div class="mi-red-loading"><i class="fas fa-spinner fa-spin"></i></div>
+        </div>
+    </div>
+
     <div class="datos-grid">
         <div class="dato-card">
             <div class="dato-icon"><i class="fas fa-user" aria-hidden="true"></i></div>
