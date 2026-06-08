@@ -33,6 +33,27 @@ document.addEventListener('click', function(e) {
     }
 });
 
+// Helper: cierra todos los menús de novedades y hamburguesa
+function cerrarTodosLosMenus() {
+    const dropdown = document.getElementById('novedadesDropdown');
+    if (dropdown) dropdown.style.display = 'none';
+
+    const acordeon = document.getElementById('novedadesMobile');
+    if (acordeon) acordeon.style.display = 'none';
+
+    const chevron = document.getElementById('novedadesChevron');
+    if (chevron) chevron.style.transform = 'rotate(0deg)';
+
+    const navMenu = document.getElementById('dashNavMenu');
+    if (navMenu) navMenu.classList.remove('active');
+
+    const menuToggleIcon = document.querySelector('.dash-menu-toggle i');
+    if (menuToggleIcon) {
+        menuToggleIcon.classList.add('fa-bars');
+        menuToggleIcon.classList.remove('fa-times');
+    }
+}
+
 window.cargarNovedades = async function() {
     const lista = document.getElementById('novedadesLista');
     const token = localStorage.getItem('token');
@@ -80,7 +101,11 @@ window.cargarNovedades = async function() {
 };
 
 window.clickNovedad = async function(notificationId, movieId, commentId, replyId, type, yaLeida, actorId) {
+     console.log('clickNovedad ejecutado, type:', type);
     const token = localStorage.getItem('token');
+
+    // Cerrar todos los menús al inicio
+    cerrarTodosLosMenus();
 
     // Marcar como leída si no lo está
     if (!yaLeida) {
@@ -104,74 +129,77 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
         window.cargarNovedades();
     }
 
-        // Navegar a perfil del seguidor
-        if (type === 'NEW_FOLLOWER') {
-            const dropdown = document.getElementById('novedadesDropdown');
-            if (dropdown) dropdown.style.display = 'none';
-            if (actorId && typeof window.abrirPerfilUsuario === 'function') {
-                window.abrirPerfilUsuario(actorId);
-            }
+    // Navegar a perfil del seguidor
+    if (type === 'NEW_FOLLOWER') {
+        if (actorId && typeof window.abrirPerfilUsuario === 'function') {
+            window.abrirPerfilUsuario(actorId);
         }
+        return;
+    }
 
     // Navegar solo en respuestas
-        if (type === 'REPLY') {
-            const dropdown = document.getElementById('novedadesDropdown');
-            if (dropdown) dropdown.style.display = 'none';
-
+    if (type === 'REPLY') {
+            // Si el modal no está en el DOM, hay que cargar el feed primero
+            if (!document.getElementById('movieModal')) {
+                await new Promise(resolve => {
+                    loadModule('feed-films', null, true);
+                    setTimeout(resolve, 1200);
+                });
+            }
             if (typeof window.abrirDetallePelicula === 'function') {
 
-                // Consultar si el comentario padre es spoiler antes de abrir
-                if (commentId) {
-                    try {
-                        const token2 = localStorage.getItem('token');
-                        const res = await fetch(`${CONFIG.API_URL}/comments/${commentId}`, {
-                            headers: { 'Authorization': `Bearer ${token2}` }
-                        });
-                        if (res.ok) {
-                            const data = await res.json();
-                            if (data.spoiler) {
-                                modoSpoilerActivo = true;
-                            }
+            // Consultar si el comentario padre es spoiler antes de abrir
+            if (commentId) {
+                try {
+                    const token2 = localStorage.getItem('token');
+                    const res = await fetch(`${CONFIG.API_URL}/comments/${commentId}`, {
+                        headers: { 'Authorization': `Bearer ${token2}` }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.spoiler) {
+                            modoSpoilerActivo = true;
                         }
-                    } catch(e) {}
-                }
+                    }
+                } catch(e) {}
+            }
 
-               window.abrirDetallePelicula(movieId);
+            window.abrirDetallePelicula(movieId);
 
-                       if (replyId && commentId) {
-                          setTimeout(async () => {
-                              // Aplicar modo spoiler visual ahora que el modal ya está abierto
-                              if (modoSpoilerActivo && typeof window.activarModoSpoiler === 'function') {
-                                  window.activarModoSpoiler(true);
-                              }
-                              // Esperar a que cargarComentariosPelicula termine de renderizar
-                              await new Promise(resolve => setTimeout(resolve, 600));
+            if (replyId && commentId) {
+                setTimeout(async () => {
+                    // Aplicar modo spoiler visual ahora que el modal ya está abierto
+                    if (modoSpoilerActivo && typeof window.activarModoSpoiler === 'function') {
+                        window.activarModoSpoiler(true);
+                    }
+                    // Esperar a que cargarComentariosPelicula termine de renderizar
+                    await new Promise(resolve => setTimeout(resolve, 600));
 
-                              const container = document.querySelector(`.replies-container-${commentId}`);
-                              if (container) {
-                                  container.style.display = 'block';
-                                  await window.cargarRespuestas(commentId, 0);
-                              }
+                    const container = document.querySelector(`.replies-container-${commentId}`);
+                    if (container) {
+                        container.style.display = 'block';
+                        await window.cargarRespuestas(commentId, 0);
+                    }
 
-                              setTimeout(() => {
-                                  const containerFinal = document.querySelector(`.replies-container-${commentId}`);
-                                  const bancoBtns = containerFinal
-                                      ? containerFinal.querySelectorAll(`button[onclick*="toggleReplyBanco(${replyId}"]`)
-                                      : [];
-                                  const targetEl = bancoBtns.length > 0
-                                      ? bancoBtns[0].closest('div[style*="display:flex"]')
-                                      : null;
-                                  if (targetEl) {
-                                      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                      targetEl.style.transition = 'background 0.3s';
-                                      targetEl.style.background = '#fff3cd';
-                                      setTimeout(() => { targetEl.style.background = ''; }, 3000);
-                                  }
-                              }, 600);
-                          }, 800);
-                      }
+                    setTimeout(() => {
+                        const containerFinal = document.querySelector(`.replies-container-${commentId}`);
+                        const bancoBtns = containerFinal
+                            ? containerFinal.querySelectorAll(`button[onclick*="toggleReplyBanco(${replyId}"]`)
+                            : [];
+                        const targetEl = bancoBtns.length > 0
+                            ? bancoBtns[0].closest('div[style*="display:flex"]')
+                            : null;
+                        if (targetEl) {
+                            targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            targetEl.style.transition = 'background 0.3s';
+                            targetEl.style.background = '#fff3cd';
+                            setTimeout(() => { targetEl.style.background = ''; }, 3000);
+                        }
+                    }, 600);
+                }, 800);
             }
         }
+    }
 };
 
 window.marcarTodasLeidas = async function() {
