@@ -48,6 +48,15 @@ window.loadProfile = async function() {
 
         cargarAvatarYNivel(profile);
 
+        // Guardar ID para perfil público
+        if (profile.id) localStorage.setItem('userId', profile.id);
+
+        // Resetear cache y cargar Mi red
+        _siguiendoCache = [];
+        _seguidoresCache = [];
+        _redTab = 'siguiendo';
+        cargarMiRed();
+
         // Detectar si es cuenta Google y ajustar campo contraseña
         const isGoogleAccount = profile.googleId !== null && profile.googleId !== undefined;
         const btnCambiarPassword = document.getElementById('btnCambiarPassword');
@@ -996,3 +1005,135 @@ async function cargarPrecioPlan() {
         // El precio hardcodeado en HTML queda como fallback
     }
 }
+
+// ==============================================
+// MI RED — SIGUIENDO / SEGUIDORES
+// ==============================================
+let _redTab = 'siguiendo';
+let _siguiendoCache = [];
+let _seguidoresCache = [];
+
+async function cargarMiRed() {
+    const token = localStorage.getItem('token');
+    try {
+        const [resSig, resSeg] = await Promise.all([
+            fetch(`${CONFIG.API_URL}/follows/following`, { headers: { 'Authorization': `Bearer ${token}` } }),
+            fetch(`${CONFIG.API_URL}/follows/followers`, { headers: { 'Authorization': `Bearer ${token}` } })
+        ]);
+        _siguiendoCache = resSig.ok ? await resSig.json() : [];
+        _seguidoresCache = resSeg.ok ? await resSeg.json() : [];
+
+        document.getElementById('countSiguiendo').textContent = _siguiendoCache.length;
+        document.getElementById('countSeguidores').textContent = _seguidoresCache.length;
+
+        renderRedTab(_redTab);
+    } catch (e) {
+        document.getElementById('miRedLista').innerHTML =
+            '<div class="mi-red-vacio">Error al cargar tu red</div>';
+    }
+}
+
+window.switchRedTab = function(tab) {
+    _redTab = tab;
+    document.getElementById('tabSiguiendo').classList.toggle('active', tab === 'siguiendo');
+    document.getElementById('tabSeguidores').classList.toggle('active', tab === 'seguidores');
+    renderRedTab(tab);
+};
+
+function renderRedTab(tab) {
+    const lista = document.getElementById('miRedLista');
+    const usuarios = tab === 'siguiendo' ? _siguiendoCache : _seguidoresCache;
+
+    if (usuarios.length === 0) {
+        lista.innerHTML = `<div class="mi-red-vacio">${
+            tab === 'siguiendo' ? 'Todavía no seguís a nadie' : 'Todavía nadie te sigue'
+        }</div>`;
+        return;
+    }
+
+    const miId = localStorage.getItem('userId');
+
+    lista.innerHTML = usuarios.map(u => {
+        const inicial = u.name?.charAt(0)?.toUpperCase() || 'U';
+        const avatar = u.avatarUrl
+            ? `<img src="${u.avatarUrl}" alt="${u.name}">`
+            : inicial;
+
+        // En tab "seguidores" mostrar botón seguir/siguiendo según si ya lo sigo
+        let btn = '';
+        if (tab === 'siguiendo') {
+            btn = `<button class="mi-red-btn"
+                           onclick="window.dejarDeSeguirDesdeRed(${u.id}, '${u.name}', this)">
+                       Siguiendo
+                   </button>`;
+        } else {
+            const yaSigo = _siguiendoCache.some(s => s.id === u.id);
+            btn = yaSigo
+                ? `<button class="mi-red-btn"
+                           onclick="window.dejarDeSeguirDesdeRed(${u.id}, '${u.name}', this)">
+                       Siguiendo
+                   </button>`
+                : `<button class="mi-red-btn seguir"
+                           onclick="window.seguirDesdeRed(${u.id}, this)">
+                       Seguir
+                   </button>`;
+        }
+
+        return `
+            <div class="mi-red-usuario">
+                <div class="mi-red-avatar" onclick="window.abrirPerfilUsuario(${u.id})">${avatar}</div>
+                <div class="mi-red-info" onclick="window.abrirPerfilUsuario(${u.id})">
+                    <p class="mi-red-nombre">${u.name}</p>
+                    <p class="mi-red-nivel">${u.levelEmoji || ''} ${u.levelDisplayName || u.level || ''}</p>
+                </div>
+                ${btn}
+            </div>`;
+    }).join('');
+}
+
+window.seguirDesdeRed = async function(userId, btn) {
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/follows/${userId}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        // Actualizar cache y re-render
+        const usuario = _seguidoresCache.find(u => u.id === userId);
+        if (usuario) _siguiendoCache.push(usuario);
+        document.getElementById('countSiguiendo').textContent = _siguiendoCache.length;
+        renderRedTab(_redTab);
+    } catch (e) {}
+};
+
+let _dejarSeguirRedUserId = null;
+
+window.dejarDeSeguirDesdeRed = function(userId, nombre, btn) {
+    _dejarSeguirRedUserId = userId;
+    document.getElementById('dejarSeguirRedNombre').textContent = nombre;
+    const modal = document.getElementById('modalDejarSeguirRed');
+    if (modal) modal.style.display = 'flex';
+};
+
+window.cerrarModalDejarSeguirRed = function() {
+    const modal = document.getElementById('modalDejarSeguirRed');
+    if (modal) modal.style.display = 'none';
+    _dejarSeguirRedUserId = null;
+};
+
+window.confirmarDejarSeguirRed = async function() {
+    if (!_dejarSeguirRedUserId) return;
+    window.cerrarModalDejarSeguirRed();
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/follows/${_dejarSeguirRedUserId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        _siguiendoCache = _siguiendoCache.filter(u => u.id !== _dejarSeguirRedUserId);
+        document.getElementById('countSiguiendo').textContent = _siguiendoCache.length;
+        renderRedTab(_redTab);
+    } catch (e) {}
+};

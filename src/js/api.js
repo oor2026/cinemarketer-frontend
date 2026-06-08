@@ -43,6 +43,7 @@ async request(endpoint, method = 'GET', data = null) {
             localStorage.setItem('userEmail', data.email);
             localStorage.setItem('userRole', data.role);
             localStorage.setItem('userPoints', data.totalPoints);
+            if (data.id) localStorage.setItem('userId', data.id);
         }
 
         return { ok: response.ok, data };

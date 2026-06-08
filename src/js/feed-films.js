@@ -1136,13 +1136,14 @@ window.cargarComentariosPelicula = async function(id) {
                 item.innerHTML = `
                     <div class="comentario-avatar" style="flex-shrink:0;">
                         ${c.avatarUrl
-                            ? `<img src="${c.avatarUrl}" alt="${c.userName}" style="width:36px;height:36px;object-fit:cover;border-radius:50%;">`
-                            : `<div style="width:36px;height:36px;background:#1a3a6b;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:0.85rem;">${c.userName?.charAt(0) || 'U'}</div>`
+                            ? `<img src="${c.avatarUrl}" alt="${c.userName}" style="width:36px;height:36px;object-fit:cover;border-radius:50%;cursor:pointer;" onclick="event.stopPropagation(); window.abrirPerfilUsuario(${c.userId})">`
+                            : `<div style="width:36px;height:36px;background:#1a3a6b;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:0.85rem;cursor:pointer;" onclick="event.stopPropagation(); window.abrirPerfilUsuario(${c.userId})">${c.userName?.charAt(0) || 'U'}</div>`
                         }
                     </div>
                     <div class="comentario-contenido" style="flex:1;min-width:0;width:100%;">
                         <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
-                            <span class="comentario-autor" style="font-weight:600;font-size:0.85rem;color:#333;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.userName || 'Usuario'}</span>
+                            <span class="comentario-autor" style="font-weight:600;font-size:0.85rem;color:#333;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;"
+                                  onclick="event.stopPropagation(); window.abrirPerfilUsuario(${c.userId})">${c.userName || 'Usuario'}</span>
                             <div style="display:flex;align-items:center;gap:0.2rem;flex-shrink:0;">
                                 ${btnReporte}
                                 ${btnOcultar}

@@ -281,6 +281,8 @@ async function cargarPerfilHeader() {
         if (!response.ok) return;
         const data = await response.json();
 
+        if (data.id) localStorage.setItem('userId', data.id);
+
         const nameEl = document.getElementById('headerUserName');
         if (nameEl) {
             nameEl.innerHTML = `<span class="user-name-text">${data.name || data.email}</span>`;
@@ -305,6 +307,11 @@ function resetDashboardState() {
 
 function getModuleFromHash() {
     const hash = window.location.hash.replace('#', '');
+    if (hash.startsWith('perfil/')) {
+        const userId = hash.split('/')[1];
+        window._perfilUsuarioId = userId;
+        return 'perfil';
+    }
     return hash || 'feed-films';
 }
 
@@ -342,3 +349,10 @@ window.loadModule = loadModule;
 window.loadDefaultModule = loadDefaultModule;
 window.resetDashboardState = resetDashboardState;
 window.cargarPerfilHeader = cargarPerfilHeader;
+
+window.abrirPerfilUsuario = function(userId) {
+    window._perfilUsuarioId = userId;
+    sessionStorage.setItem('perfilUsuarioId', userId);
+    window.location.hash = `perfil/${userId}`;
+    loadModule('perfil', null, false);
+};

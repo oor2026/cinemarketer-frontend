@@ -169,6 +169,28 @@
 
     </div>
 
+    <!-- ============================================== -->
+    <!-- MI RED — SIGUIENDO / SEGUIDORES               -->
+    <!-- ============================================== -->
+    <div class="mi-red-seccion">
+        <div class="mi-red-header">
+            <h3 class="mi-red-titulo"><i class="fas fa-users"></i> Mi red</h3>
+        </div>
+        <div class="mi-red-tabs">
+            <button class="mi-red-tab active" id="tabSiguiendo"
+                    onclick="window.switchRedTab('siguiendo')">
+                Siguiendo (<span id="countSiguiendo">0</span>)
+            </button>
+            <button class="mi-red-tab" id="tabSeguidores"
+                    onclick="window.switchRedTab('seguidores')">
+                Seguidores (<span id="countSeguidores">0</span>)
+            </button>
+        </div>
+        <div id="miRedLista">
+            <div class="mi-red-loading"><i class="fas fa-spinner fa-spin"></i></div>
+        </div>
+    </div>
+
     <div class="datos-grid">
         <div class="dato-card">
             <div class="dato-icon"><i class="fas fa-user" aria-hidden="true"></i></div>
@@ -451,5 +473,21 @@
             </div>
         </div>
     </div>
-
+    <!-- MODAL DEJAR DE SEGUIR -->
+    <div id="modalDejarSeguirRed" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
+        <div style="background:white; border-radius:16px; padding:2rem; max-width:380px; width:100%;" onclick="event.stopPropagation()">
+            <h3 style="margin:0 0 0.75rem; font-size:1rem; color:#333;">¿Dejás de seguir a <span id="dejarSeguirRedNombre"></span>?</h3>
+            <p style="color:#888; font-size:0.88rem; margin:0 0 1.5rem;">Podés volver a seguirlo cuando quieras.</p>
+            <div style="display:flex; gap:0.75rem;">
+                <button onclick="window.cerrarModalDejarSeguirRed()"
+                        style="flex:1; padding:0.7rem; border:1.5px solid #ddd; background:none; border-radius:8px; color:#666; cursor:pointer;">
+                    Cancelar
+                </button>
+                <button onclick="window.confirmarDejarSeguirRed()"
+                        style="flex:1; padding:0.7rem; background:#e50914; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer;">
+                    Dejar de seguir
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
