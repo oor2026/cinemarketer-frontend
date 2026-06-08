@@ -191,6 +191,32 @@
         </div>
     </div>
 
+    <!-- ============================================== -->
+    <!-- MI LISTA / RECOMENDACIONES                    -->
+    <!-- ============================================== -->
+    <div class="mi-red-seccion">
+        <div class="mi-red-tabs">
+            <button class="mi-red-tab active" id="tabMiLista"
+                    onclick="window.switchListaTab('mi-lista')">
+                Mi lista (<span id="countMiLista">0</span>)
+            </button>
+            <button class="mi-red-tab" id="tabRecomendaciones"
+                    onclick="window.switchListaTab('recomendaciones')">
+                Recomendaciones (<span id="countRecomendaciones">0</span>)
+            </button>
+        </div>
+
+        <div id="panelMiLista">
+            <div class="mi-red-vacio">Tu lista de películas guardadas aparecerá acá.</div>
+        </div>
+
+        <div id="panelRecomendaciones" style="display:none;">
+            <div id="meRecomendaronLista">
+                <div class="mi-red-loading"><i class="fas fa-spinner fa-spin"></i></div>
+            </div>
+        </div>
+    </div>
+
     <div class="datos-grid">
         <div class="dato-card">
             <div class="dato-icon"><i class="fas fa-user" aria-hidden="true"></i></div>
@@ -486,6 +512,23 @@
                 <button onclick="window.confirmarDejarSeguirRed()"
                         style="flex:1; padding:0.7rem; background:#e50914; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer;">
                     Dejar de seguir
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- MODAL YA LA VI -->
+    <div id="modalYaLaVi" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
+        <div style="background:white; border-radius:16px; padding:2rem; max-width:380px; width:100%;" onclick="event.stopPropagation()">
+            <h3 style="margin:0 0 0.75rem; font-size:1rem; color:#333;">¿Ya viste esta película?</h3>
+            <p style="color:#888; font-size:0.88rem; margin:0 0 1.5rem;">Esta acción es <strong>irreversible</strong>. Una vez marcada como vista no podrás deshacerlo.</p>
+            <div style="display:flex; gap:0.75rem;">
+                <button onclick="window.cerrarModalYaLaVi()"
+                        style="flex:1; padding:0.7rem; border:1.5px solid #ddd; background:none; border-radius:8px; color:#666; cursor:pointer;">
+                    Cancelar
+                </button>
+                <button onclick="window.confirmarYaLaVi()"
+                        style="flex:1; padding:0.7rem; background:#1a3a6b; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer;">
+                    Sí, ya la vi
                 </button>
             </div>
         </div>

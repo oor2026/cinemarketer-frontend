@@ -1040,6 +1040,14 @@ window.switchRedTab = function(tab) {
     renderRedTab(tab);
 };
 
+window.switchListaTab = function(tab) {
+    document.getElementById('tabMiLista').classList.toggle('active', tab === 'mi-lista');
+    document.getElementById('tabRecomendaciones').classList.toggle('active', tab === 'recomendaciones');
+    document.getElementById('panelMiLista').style.display = tab === 'mi-lista' ? 'block' : 'none';
+    document.getElementById('panelRecomendaciones').style.display = tab === 'recomendaciones' ? 'block' : 'none';
+    if (tab === 'recomendaciones') cargarMeRecomendaron();
+};
+
 function renderRedTab(tab) {
     const lista = document.getElementById('miRedLista');
     const usuarios = tab === 'siguiendo' ? _siguiendoCache : _seguidoresCache;
@@ -1135,5 +1143,151 @@ window.confirmarDejarSeguirRed = async function() {
         _siguiendoCache = _siguiendoCache.filter(u => u.id !== _dejarSeguirRedUserId);
         document.getElementById('countSiguiendo').textContent = _siguiendoCache.length;
         renderRedTab(_redTab);
+    } catch (e) {}
+};
+
+// ==============================================
+// ME RECOMENDARON
+// ==============================================
+
+let _recomendacionesCache = [];
+window._recModalId = null;
+
+async function cargarMeRecomendaron() {
+    const token = localStorage.getItem('token');
+    const lista = document.getElementById('meRecomendaronLista');
+    if (!lista) return;
+    lista.innerHTML = '<div class="mi-red-vacio">Cargando...</div>';
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/recommendations/received`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        _recomendacionesCache = res.ok ? await res.json() : [];
+        const countEl = document.getElementById('countRecomendaciones');
+                if (countEl) countEl.textContent = _recomendacionesCache.length;
+        renderMeRecomendaron();
+    } catch (e) {
+        lista.innerHTML = '<div class="mi-red-vacio">Error al cargar recomendaciones</div>';
+    }
+}
+
+function renderMeRecomendaron() {
+    const lista = document.getElementById('meRecomendaronLista');
+    if (!lista) return;
+
+    if (_recomendacionesCache.length === 0) {
+        lista.innerHTML = '<div class="mi-red-vacio">Todavía no te recomendaron ninguna película</div>';
+        return;
+    }
+
+    lista.innerHTML = _recomendacionesCache.map(r => {
+        const posterUrl = r.moviePosterPath
+            ? `https://image.tmdb.org/t/p/w185${r.moviePosterPath}`
+            : null;
+        const senderInicial = r.senderName?.charAt(0)?.toUpperCase() || '?';
+        const avatarHtml = r.senderAvatarUrl
+            ? `<img src="${r.senderAvatarUrl}" alt="${r.senderName}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+            : senderInicial;
+
+        const yaVista = !!r.seenAt;
+        const yaCalificada = !!r.rating;
+
+        const estrellasActivas = [1,2,3,4,5].map(i => `
+            <span onclick="window.seleccionarEstrellaRec(${r.id}, ${i})"
+                  style="cursor:pointer;font-size:1.3rem;color:${yaCalificada && r.rating >= i ? '#E8A800' : '#ddd'};"
+                  data-rec-id="${r.id}" data-star="${i}">★</span>
+        `).join('');
+
+        const estrellasDeshabilitadas = `
+            <span title="Primero marcá la película como vista"
+                  style="font-size:1.3rem;color:#ddd;cursor:not-allowed;" title="Marcá como vista para calificar">★</span>
+            <span style="font-size:1.3rem;color:#ddd;cursor:not-allowed;">★</span>
+            <span style="font-size:1.3rem;color:#ddd;cursor:not-allowed;">★</span>
+            <span style="font-size:1.3rem;color:#ddd;cursor:not-allowed;">★</span>
+            <span style="font-size:1.3rem;color:#ddd;cursor:not-allowed;">★</span>
+            <span style="font-size:0.72rem;color:#aaa;margin-left:4px;">Marcá como vista para calificar</span>
+        `;
+
+        return `
+            <div style="display:flex;align-items:flex-start;gap:0.85rem;padding:0.9rem 0;border-bottom:1px solid #f5f5f5;">
+                ${posterUrl
+                    ? `<img src="${posterUrl}" alt="${r.movieTitle || 'Película'}" style="width:85px;height:128px;object-fit:cover;border-radius:6px;flex-shrink:0;">`
+                    : `<div style="width:85px;height:128px;background:#1a3a6b;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;">🎬</div>`
+                }
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:0.92rem;font-weight:600;color:#333;margin-bottom:4px;">
+                        Película: ${r.movieTitle || '—'}
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+                        <div style="width:22px;height:22px;border-radius:50%;background:#1a3a6b;color:white;font-size:0.7rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">${avatarHtml}</div>
+                        <span style="font-size:0.8rem;color:#666;">Por <strong>${r.senderName}</strong></span>
+                        ${r.contextType ? `<span style="font-size:0.75rem;padding:2px 8px;border-radius:99px;background:#f0f0f0;color:#666;">${r.contextType}</span>` : ''}
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap;">
+                        ${!yaVista
+                            ? `<button onclick="window.abrirModalYaLaVi(${r.id})"
+                                       style="font-size:0.8rem;padding:4px 12px;border-radius:8px;background:#1a3a6b;color:white;border:none;cursor:pointer;font-weight:500;">
+                                   ✓ Ya la vi
+                               </button>`
+                            : `<span style="font-size:0.75rem;color:#1d9e75;font-weight:500;">✓ Vista</span>`
+                        }
+                    </div>
+                    <div style="display:flex;align-items:center;gap:2px;margin-top:6px;flex-wrap:wrap;">
+                        ${yaVista ? estrellasActivas : estrellasDeshabilitadas}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+window.abrirModalYaLaVi = function(recId) {
+    _recModalId = recId;
+    const modal = document.getElementById('modalYaLaVi');
+    if (modal) modal.style.display = 'flex';
+};
+
+window.cerrarModalYaLaVi = function() {
+    _recModalId = null;
+    const modal = document.getElementById('modalYaLaVi');
+    if (modal) modal.style.display = 'none';
+};
+
+window.confirmarYaLaVi = async function() {
+    const recId = window._recModalId;
+    if (!recId) return;
+    window.cerrarModalYaLaVi();
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/recommendations/${recId}/seen`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            const rec = _recomendacionesCache.find(r => r.id === recId);
+            if (rec) rec.seenAt = new Date().toISOString();
+            renderMeRecomendaron();
+        }
+    } catch (e) {}
+};
+
+window.seleccionarEstrellaRec = async function(recId, rating) {
+    const rec = _recomendacionesCache.find(r => r.id === recId);
+    if (!rec || !rec.seenAt || rec.rating) return;
+
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/recommendations/${recId}/rate`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ rating })
+        });
+        if (res.ok) {
+            rec.rating = rating;
+            renderMeRecomendaron();
+        }
     } catch (e) {}
 };

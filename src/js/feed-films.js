@@ -134,6 +134,9 @@ function generarTarjetasFallback(peliculas) {
                             <button class="btn-dislike" onclick="window.votarPelicula(${pelicula.id}, 'dislike')">
                                 <i class="fas fa-thumbs-down"></i> 0
                             </button>
+                            <button class="btn-recomendar" onclick="event.stopPropagation(); window.abrirPanelRecomendar(${pelicula.id}, event)">
+                                <i class="fas fa-share"></i> Recomendar
+                            </button>
                         </div>
                     </div>
                 </div>

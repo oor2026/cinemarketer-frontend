@@ -120,6 +120,9 @@
                     <button class="btn-dislike" onclick="window.votarPelicula(window.peliculaActualId, 'dislike', event)">
                         <i class="fas fa-thumbs-down"></i> <span id="modalDislikes">0</span>
                     </button>
+                    <button class="btn-recomendar" onclick="window.abrirPanelRecomendar(window.peliculaActualId, event)">
+                        <i class="fas fa-share"></i> Recomendar
+                    </button>
                 </div>
 
                 <!-- FILA INFERIOR: caja de comentarios (ancho completo) -->
@@ -279,6 +282,145 @@
             </div>
         </div>
     </div>
+
+    <!-- ============================================== -->
+    <!-- PANEL RECOMENDAR PELÍCULA                      -->
+    <!-- ============================================== -->
+    <div id="panelRecomendar" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
+        <div style="background:white; border-radius:16px; padding:1.5rem; max-width:480px; width:100%; position:relative; max-height:90vh; overflow-y:auto;" onclick="event.stopPropagation()">
+
+            <button onclick="window.cerrarPanelRecomendar()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#666;">×</button>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;">
+                <div id="recPosterMini" style="width:36px;height:52px;background:#1a3a6b;border-radius:4px;flex-shrink:0;overflow:hidden;">
+                    <img id="recPosterImg" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:none;">
+                </div>
+                <div>
+                    <div style="font-size:11px;color:#999;">Recomendando</div>
+                    <div id="recTituloFilm" style="font-size:14px;font-weight:600;color:#333;">Cargando...</div>
+                </div>
+            </div>
+
+            <div style="font-size:13px;font-weight:500;color:#333;margin-bottom:6px;">¿A quién se la recomendás?</div>
+            <input type="text" id="recBuscadorUsuario" placeholder="Buscar usuario..." onkeyup="window.filtrarUsuariosRec(this.value)"
+                   style="width:100%;box-sizing:border-box;padding:8px 12px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:13px;margin-bottom:10px;font-family:inherit;">
+
+            <div id="recListaUsuarios" style="display:flex;flex-wrap:wrap;gap:6px;min-height:40px;margin-bottom:14px;">
+                <div style="font-size:12px;color:#999;padding:8px 0;">Cargando usuarios...</div>
+            </div>
+
+            <div id="recSeleccionadosRow" style="display:none;margin-bottom:14px;">
+                <div style="font-size:12px;color:#1a3a6b;font-weight:500;margin-bottom:6px;">Seleccionados:</div>
+                <div id="recSeleccionadosTags" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+            </div>
+
+            <hr style="border:none;border-top:1px solid #f0f0f0;margin:0 0 14px;">
+
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <span style="font-size:13px;font-weight:500;color:#333;">Contexto</span>
+                <span style="font-size:10px;padding:2px 8px;border-radius:99px;background:#f5f5f5;color:#999;border:1px solid #e0e0e0;">opcional</span>
+            </div>
+            <div id="recContextos" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.25rem;">
+                <div data-ctx="Te va a encantar" class="rec-ctx-chip" onclick="window.toggleContextoRec(this)">Te va a encantar</div>
+                <div data-ctx="Llorás con esta" class="rec-ctx-chip" onclick="window.toggleContextoRec(this)">Llorás con esta</div>
+                <div data-ctx="Te hace pensar" class="rec-ctx-chip" onclick="window.toggleContextoRec(this)">Te hace pensar</div>
+                <div data-ctx="Para ver de noche solo" class="rec-ctx-chip" onclick="window.toggleContextoRec(this)">Para ver de noche solo</div>
+                <div data-ctx="No es para todos pero vos sí" class="rec-ctx-chip" onclick="window.toggleContextoRec(this)">No es para todos pero vos sí</div>
+                <div data-ctx="Cambia cómo ves el mundo" class="rec-ctx-chip" onclick="window.toggleContextoRec(this)">Cambia cómo ves el mundo</div>
+                <div data-ctx="Para ver en familia" class="rec-ctx-chip" onclick="window.toggleContextoRec(this)">Para ver en familia</div>
+                <div data-ctx="Un clásico que hay que ver" class="rec-ctx-chip" onclick="window.toggleContextoRec(this)">Un clásico que hay que ver</div>
+                <div data-ctx="Para ver con tu pareja" class="rec-ctx-chip" onclick="window.toggleContextoRec(this)">Para ver con tu pareja</div>
+                <div data-ctx="Te deja pensando días" class="rec-ctx-chip" onclick="window.toggleContextoRec(this)">Te deja pensando días</div>
+                <div data-ctx="Entretenida y sin pretensiones" class="rec-ctx-chip" onclick="window.toggleContextoRec(this)">Entretenida y sin pretensiones</div>
+                <div data-ctx="Para reírse a carcajadas" class="rec-ctx-chip" onclick="window.toggleContextoRec(this)">Para reírse a carcajadas</div>
+                <div data-ctx="Imperdible del género" class="rec-ctx-chip" onclick="window.toggleContextoRec(this)">Imperdible del género</div>
+                <div data-ctx="Perfecta para maratón" class="rec-ctx-chip" onclick="window.toggleContextoRec(this)">Perfecta para maratón</div>
+                <div data-ctx="Sorprende de principio a fin" class="rec-ctx-chip" onclick="window.toggleContextoRec(this)">Sorprende de principio a fin</div>
+            </div>
+
+            <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+                <button onclick="window.cerrarPanelRecomendar()"
+                        style="padding:0.65rem 1.25rem;border:1.5px solid #ddd;background:none;border-radius:8px;color:#666;cursor:pointer;font-size:0.9rem;">
+                    Cancelar
+                </button>
+                <button id="btnEnviarRecomendacion" onclick="window.enviarRecomendacion()"
+                        style="padding:0.65rem 1.25rem;background:#e50914;border:none;border-radius:8px;color:white;font-weight:600;cursor:pointer;font-size:0.9rem;opacity:0.5;cursor:not-allowed;">
+                    <i class="fas fa-share"></i> Enviar recomendación
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .rec-ctx-chip {
+            font-size: 12px;
+            padding: 5px 11px;
+            border-radius: 99px;
+            border: 1.5px solid #e0e0e0;
+            background: #f9f9f9;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.15s;
+            user-select: none;
+        }
+        .rec-ctx-chip.selected {
+            border-color: #e50914;
+            background: #ffeaea;
+            color: #e50914;
+        }
+        .rec-usuario-chip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 11px;
+            border-radius: 99px;
+            border: 1.5px solid #e0e0e0;
+            background: #f9f9f9;
+            color: #333;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+            user-select: none;
+        }
+        .rec-usuario-chip .chip-avatar {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #1a3a6b;
+            color: white;
+            font-size: 9px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .rec-usuario-chip .chip-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .rec-usuario-chip.selected {
+            border-color: #1a3a6b;
+            background: #e8eef7;
+            color: #1a3a6b;
+        }
+        .btn-recomendar {
+            background: none;
+            border: 1.5px solid #1a3a6b;
+            color: #1a3a6b;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.15s;
+        }
+        .btn-recomendar:hover {
+            background: #1a3a6b;
+            color: white;
+        }
+    </style>
 
     <!-- ============================================== -->
     <!-- MODAL SPOILER WARNING                          -->

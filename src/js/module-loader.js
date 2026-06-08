@@ -240,7 +240,7 @@ async function loadModule(moduleName, element = null, updateHash = true) {
                 initFn();
             } else {
                 if (moduleName === 'feed-films' && typeof window.cargarPeliculasPopulares === 'function') {
-                    window.cargarPeliculasPopulares(1);
+                                    window.cargarPeliculasPopulares(1);
                 } else if (moduleName === 'mis-premios' && typeof window.cargarCanjeados === 'function') {
                     window.cargarCanjeados();
                 } else if (moduleName === 'mi-cuenta' && typeof window.loadProfile === 'function') {
