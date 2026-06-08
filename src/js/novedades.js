@@ -57,14 +57,14 @@ window.cargarNovedades = async function() {
         }
 
         lista.innerHTML = novedades.map(n => `
-            <div onclick="window.clickNovedad(${n.id}, ${n.movieId}, ${n.commentId}, ${n.replyId || 'null'}, '${n.type}', ${n.read})"
+            <div onclick="window.clickNovedad(${n.id}, ${n.movieId}, ${n.commentId}, ${n.replyId || 'null'}, '${n.type}', ${n.read}, ${n.actorId || 'null'})"
                 style="padding:0.75rem 1rem;border-bottom:1px solid #f5f5f5;cursor:pointer;
                        background:${n.read ? 'white' : '#f0f4ff'};
                        transition:background 0.2s;"
                 onmouseover="this.style.background='#f8f8f8'"
                 onmouseout="this.style.background='${n.read ? 'white' : '#f0f4ff'}'">
                 <div style="display:flex;align-items:flex-start;gap:0.5rem;">
-                    <span style="font-size:1rem;flex-shrink:0;">${n.type === 'BANCO' ? '👍' : n.type === 'MERECE_PUNTO' ? '⭐' : '💬'}</span>
+                    <span style="font-size:1rem;flex-shrink:0;">${n.type === 'BANCO' ? '👍' : n.type === 'MERECE_PUNTO' ? '⭐' : n.type === 'NEW_FOLLOWER' ? '👤' : '💬'}</span>
                     <div style="flex:1;min-width:0;">
                         <div style="font-size:0.83rem;color:#333;line-height:1.4;">${n.message}</div>
                         <div style="font-size:0.75rem;color:#999;margin-top:0.2rem;">${new Date(n.createdAt).toLocaleDateString('es-ES')} ${new Date(n.createdAt).toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'})}</div>
@@ -79,7 +79,7 @@ window.cargarNovedades = async function() {
     }
 };
 
-window.clickNovedad = async function(notificationId, movieId, commentId, replyId, type, yaLeida) {
+window.clickNovedad = async function(notificationId, movieId, commentId, replyId, type, yaLeida, actorId) {
     const token = localStorage.getItem('token');
 
     // Marcar como leída si no lo está
@@ -104,65 +104,74 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
         window.cargarNovedades();
     }
 
-        // Navegar solo en respuestas
-            if (type === 'REPLY') {
-                const dropdown = document.getElementById('novedadesDropdown');
-                if (dropdown) dropdown.style.display = 'none';
-
-                if (typeof window.abrirDetallePelicula === 'function') {
-
-                    // Consultar si el comentario padre es spoiler antes de abrir
-                    if (commentId) {
-                        try {
-                            const token2 = localStorage.getItem('token');
-                            const res = await fetch(`${CONFIG.API_URL}/comments/${commentId}`, {
-                                headers: { 'Authorization': `Bearer ${token2}` }
-                            });
-                            if (res.ok) {
-                                const data = await res.json();
-                                if (data.spoiler) {
-                                    modoSpoilerActivo = true;
-                                }
-                            }
-                        } catch(e) {}
-                    }
-
-                   window.abrirDetallePelicula(movieId);
-
-                           if (replyId && commentId) {
-                              setTimeout(async () => {
-                                  // Aplicar modo spoiler visual ahora que el modal ya está abierto
-                                  if (modoSpoilerActivo && typeof window.activarModoSpoiler === 'function') {
-                                      window.activarModoSpoiler(true);
-                                  }
-                                  // Esperar a que cargarComentariosPelicula termine de renderizar
-                                  await new Promise(resolve => setTimeout(resolve, 600));
-
-                                  const container = document.querySelector(`.replies-container-${commentId}`);
-                                  if (container) {
-                                      container.style.display = 'block';
-                                      await window.cargarRespuestas(commentId, 0);
-                                  }
-
-                                  setTimeout(() => {
-                                      const containerFinal = document.querySelector(`.replies-container-${commentId}`);
-                                      const bancoBtns = containerFinal
-                                          ? containerFinal.querySelectorAll(`button[onclick*="toggleReplyBanco(${replyId}"]`)
-                                          : [];
-                                      const targetEl = bancoBtns.length > 0
-                                          ? bancoBtns[0].closest('div[style*="display:flex"]')
-                                          : null;
-                                      if (targetEl) {
-                                          targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                          targetEl.style.transition = 'background 0.3s';
-                                          targetEl.style.background = '#fff3cd';
-                                          setTimeout(() => { targetEl.style.background = ''; }, 3000);
-                                      }
-                                  }, 600);
-                              }, 800);
-                          }
-                }
+        // Navegar a perfil del seguidor
+        if (type === 'NEW_FOLLOWER') {
+            const dropdown = document.getElementById('novedadesDropdown');
+            if (dropdown) dropdown.style.display = 'none';
+            if (actorId && typeof window.abrirPerfilUsuario === 'function') {
+                window.abrirPerfilUsuario(actorId);
             }
+        }
+
+    // Navegar solo en respuestas
+        if (type === 'REPLY') {
+            const dropdown = document.getElementById('novedadesDropdown');
+            if (dropdown) dropdown.style.display = 'none';
+
+            if (typeof window.abrirDetallePelicula === 'function') {
+
+                // Consultar si el comentario padre es spoiler antes de abrir
+                if (commentId) {
+                    try {
+                        const token2 = localStorage.getItem('token');
+                        const res = await fetch(`${CONFIG.API_URL}/comments/${commentId}`, {
+                            headers: { 'Authorization': `Bearer ${token2}` }
+                        });
+                        if (res.ok) {
+                            const data = await res.json();
+                            if (data.spoiler) {
+                                modoSpoilerActivo = true;
+                            }
+                        }
+                    } catch(e) {}
+                }
+
+               window.abrirDetallePelicula(movieId);
+
+                       if (replyId && commentId) {
+                          setTimeout(async () => {
+                              // Aplicar modo spoiler visual ahora que el modal ya está abierto
+                              if (modoSpoilerActivo && typeof window.activarModoSpoiler === 'function') {
+                                  window.activarModoSpoiler(true);
+                              }
+                              // Esperar a que cargarComentariosPelicula termine de renderizar
+                              await new Promise(resolve => setTimeout(resolve, 600));
+
+                              const container = document.querySelector(`.replies-container-${commentId}`);
+                              if (container) {
+                                  container.style.display = 'block';
+                                  await window.cargarRespuestas(commentId, 0);
+                              }
+
+                              setTimeout(() => {
+                                  const containerFinal = document.querySelector(`.replies-container-${commentId}`);
+                                  const bancoBtns = containerFinal
+                                      ? containerFinal.querySelectorAll(`button[onclick*="toggleReplyBanco(${replyId}"]`)
+                                      : [];
+                                  const targetEl = bancoBtns.length > 0
+                                      ? bancoBtns[0].closest('div[style*="display:flex"]')
+                                      : null;
+                                  if (targetEl) {
+                                      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                      targetEl.style.transition = 'background 0.3s';
+                                      targetEl.style.background = '#fff3cd';
+                                      setTimeout(() => { targetEl.style.background = ''; }, 3000);
+                                  }
+                              }, 600);
+                          }, 800);
+                      }
+            }
+        }
 };
 
 window.marcarTodasLeidas = async function() {
@@ -210,11 +219,11 @@ window.cargarNovedadesMobile = async function() {
         }
 
         lista.innerHTML = novedades.map(n => `
-            <div onclick="window.clickNovedad(${n.id}, ${n.movieId}, ${n.commentId}, ${n.replyId || 'null'}, '${n.type}', ${n.read})"
+            <div onclick="window.clickNovedad(${n.id}, ${n.movieId}, ${n.commentId}, ${n.replyId || 'null'}, '${n.type}', ${n.read}, ${n.actorId || 'null'})"
                 style="padding:0.75rem 1rem;border-bottom:1px solid #eee;cursor:pointer;
                        background:${n.read ? 'white' : '#f0f4ff'};">
                 <div style="display:flex;align-items:flex-start;gap:0.5rem;">
-                    <span style="font-size:1rem;flex-shrink:0;">${n.type === 'BANCO' ? '👍' : n.type === 'MERECE_PUNTO' ? '⭐' : '💬'}</span>
+                    <span style="font-size:1rem;flex-shrink:0;">${n.type === 'BANCO' ? '👍' : n.type === 'MERECE_PUNTO' ? '⭐' : n.type === 'NEW_FOLLOWER' ? '👤' : '💬'}</span>
                     <div style="flex:1;min-width:0;">
                         <div style="font-size:0.83rem;color:#333;line-height:1.4;">${n.message}</div>
                         <div style="font-size:0.75rem;color:#999;margin-top:0.2rem;">${new Date(n.createdAt).toLocaleDateString('es-ES')} ${new Date(n.createdAt).toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'})}</div>

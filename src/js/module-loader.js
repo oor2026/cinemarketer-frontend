@@ -281,6 +281,8 @@ async function cargarPerfilHeader() {
         if (!response.ok) return;
         const data = await response.json();
 
+        if (data.id) localStorage.setItem('userId', data.id);
+
         const nameEl = document.getElementById('headerUserName');
         if (nameEl) {
             nameEl.innerHTML = `<span class="user-name-text">${data.name || data.email}</span>`;
@@ -350,5 +352,7 @@ window.cargarPerfilHeader = cargarPerfilHeader;
 
 window.abrirPerfilUsuario = function(userId) {
     window._perfilUsuarioId = userId;
+    sessionStorage.setItem('perfilUsuarioId', userId);
     window.location.hash = `perfil/${userId}`;
+    loadModule('perfil', null, false);
 };

@@ -51,7 +51,10 @@ window.loadProfile = async function() {
         // Guardar ID para perfil público
         if (profile.id) localStorage.setItem('userId', profile.id);
 
-        // Cargar Mi red
+        // Resetear cache y cargar Mi red
+        _siguiendoCache = [];
+        _seguidoresCache = [];
+        _redTab = 'siguiendo';
         cargarMiRed();
 
         // Detectar si es cuenta Google y ajustar campo contraseña
@@ -1104,16 +1107,32 @@ window.seguirDesdeRed = async function(userId, btn) {
     } catch (e) {}
 };
 
-window.dejarDeSeguirDesdeRed = async function(userId, nombre, btn) {
-    if (!confirm(`¿Dejás de seguir a ${nombre}?`)) return;
+let _dejarSeguirRedUserId = null;
+
+window.dejarDeSeguirDesdeRed = function(userId, nombre, btn) {
+    _dejarSeguirRedUserId = userId;
+    document.getElementById('dejarSeguirRedNombre').textContent = nombre;
+    const modal = document.getElementById('modalDejarSeguirRed');
+    if (modal) modal.style.display = 'flex';
+};
+
+window.cerrarModalDejarSeguirRed = function() {
+    const modal = document.getElementById('modalDejarSeguirRed');
+    if (modal) modal.style.display = 'none';
+    _dejarSeguirRedUserId = null;
+};
+
+window.confirmarDejarSeguirRed = async function() {
+    if (!_dejarSeguirRedUserId) return;
+    window.cerrarModalDejarSeguirRed();
     const token = localStorage.getItem('token');
     try {
-        const res = await fetch(`${CONFIG.API_URL}/follows/${userId}`, {
+        const res = await fetch(`${CONFIG.API_URL}/follows/${_dejarSeguirRedUserId}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) return;
-        _siguiendoCache = _siguiendoCache.filter(u => u.id !== userId);
+        _siguiendoCache = _siguiendoCache.filter(u => u.id !== _dejarSeguirRedUserId);
         document.getElementById('countSiguiendo').textContent = _siguiendoCache.length;
         renderRedTab(_redTab);
     } catch (e) {}
