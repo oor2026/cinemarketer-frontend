@@ -240,7 +240,14 @@ async function loadModule(moduleName, element = null, updateHash = true) {
                 initFn();
             } else {
                 if (moduleName === 'feed-films' && typeof window.cargarPeliculasPopulares === 'function') {
-                    window.cargarPeliculasPopulares(1);
+                // Cargar recomendaciones.js si no está ya cargado
+                if (!document.getElementById('js-recomendaciones')) {
+                    const scriptRec = document.createElement('script');
+                    scriptRec.id = 'js-recomendaciones';
+                    scriptRec.src = `${JS_PATH}recomendaciones.js?v=1`;
+                    document.head.appendChild(scriptRec);
+                }
+                window.cargarPeliculasPopulares(1);
                 } else if (moduleName === 'mis-premios' && typeof window.cargarCanjeados === 'function') {
                     window.cargarCanjeados();
                 } else if (moduleName === 'mi-cuenta' && typeof window.loadProfile === 'function') {

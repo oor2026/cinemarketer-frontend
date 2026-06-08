@@ -85,7 +85,7 @@ window.cargarNovedades = async function() {
                 onmouseover="this.style.background='#f8f8f8'"
                 onmouseout="this.style.background='${n.read ? 'white' : '#f0f4ff'}'">
                 <div style="display:flex;align-items:flex-start;gap:0.5rem;">
-                    <span style="font-size:1rem;flex-shrink:0;">${n.type === 'BANCO' ? '👍' : n.type === 'MERECE_PUNTO' ? '⭐' : n.type === 'NEW_FOLLOWER' ? '👤' : '💬'}</span>
+                    <span style="font-size:1rem;flex-shrink:0;">${n.type === 'BANCO' ? '👍' : n.type === 'MERECE_PUNTO' ? '⭐' : n.type === 'NEW_FOLLOWER' ? '👤' : n.type === 'RECOMMENDATION_RATED' ? '🎬' : '💬'}</span>
                     <div style="flex:1;min-width:0;">
                         <div style="font-size:0.83rem;color:#333;line-height:1.4;">${n.message}</div>
                         <div style="font-size:0.75rem;color:#999;margin-top:0.2rem;">${new Date(n.createdAt).toLocaleDateString('es-ES')} ${new Date(n.createdAt).toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'})}</div>
@@ -251,7 +251,7 @@ window.cargarNovedadesMobile = async function() {
                 style="padding:0.75rem 1rem;border-bottom:1px solid #eee;cursor:pointer;
                        background:${n.read ? 'white' : '#f0f4ff'};">
                 <div style="display:flex;align-items:flex-start;gap:0.5rem;">
-                    <span style="font-size:1rem;flex-shrink:0;">${n.type === 'BANCO' ? '👍' : n.type === 'MERECE_PUNTO' ? '⭐' : n.type === 'NEW_FOLLOWER' ? '👤' : '💬'}</span>
+                    <span style="font-size:1rem;flex-shrink:0;">${n.type === 'BANCO' ? '👍' : n.type === 'MERECE_PUNTO' ? '⭐' : n.type === 'NEW_FOLLOWER' ? '👤' : n.type === 'RECOMMENDATION_RATED' ? '🎬' : '💬'}</span>
                     <div style="flex:1;min-width:0;">
                         <div style="font-size:0.83rem;color:#333;line-height:1.4;">${n.message}</div>
                         <div style="font-size:0.75rem;color:#999;margin-top:0.2rem;">${new Date(n.createdAt).toLocaleDateString('es-ES')} ${new Date(n.createdAt).toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'})}</div>

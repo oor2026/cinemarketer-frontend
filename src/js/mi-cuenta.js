@@ -56,6 +56,7 @@ window.loadProfile = async function() {
         _seguidoresCache = [];
         _redTab = 'siguiendo';
         cargarMiRed();
+        cargarMeRecomendaron();
 
         // Detectar si es cuenta Google y ajustar campo contraseña
         const isGoogleAccount = profile.googleId !== null && profile.googleId !== undefined;
@@ -1135,5 +1136,129 @@ window.confirmarDejarSeguirRed = async function() {
         _siguiendoCache = _siguiendoCache.filter(u => u.id !== _dejarSeguirRedUserId);
         document.getElementById('countSiguiendo').textContent = _siguiendoCache.length;
         renderRedTab(_redTab);
+    } catch (e) {}
+};
+
+// ==============================================
+// ME RECOMENDARON
+// ==============================================
+
+let _recomendacionesCache = [];
+let _recModalId = null;
+
+async function cargarMeRecomendaron() {
+    const token = localStorage.getItem('token');
+    const lista = document.getElementById('meRecomendaronLista');
+    if (!lista) return;
+    lista.innerHTML = '<div class="mi-red-vacio">Cargando...</div>';
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/recommendations/received`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        _recomendacionesCache = res.ok ? await res.json() : [];
+        renderMeRecomendaron();
+    } catch (e) {
+        lista.innerHTML = '<div class="mi-red-vacio">Error al cargar recomendaciones</div>';
+    }
+}
+
+function renderMeRecomendaron() {
+    const lista = document.getElementById('meRecomendaronLista');
+    if (!lista) return;
+
+    if (_recomendacionesCache.length === 0) {
+        lista.innerHTML = '<div class="mi-red-vacio">Todavía no te recomendaron ninguna película</div>';
+        return;
+    }
+
+    lista.innerHTML = _recomendacionesCache.map(r => {
+        const posterUrl = r.moviePosterPath
+            ? `https://image.tmdb.org/t/p/w92${r.moviePosterPath}`
+            : null;
+        const senderInicial = r.senderName?.charAt(0)?.toUpperCase() || '?';
+        const avatarHtml = r.senderAvatarUrl
+            ? `<img src="${r.senderAvatarUrl}" alt="${r.senderName}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+            : senderInicial;
+
+        const yaVista = !!r.seenAt;
+        const yaCalificada = !!r.rating;
+
+        const estrellas = [1,2,3,4,5].map(i => `
+            <span onclick="window.seleccionarEstrellaRec(${r.id}, ${i})"
+                  style="cursor:pointer;font-size:1.3rem;color:${yaCalificada && r.rating >= i ? '#E8A800' : '#ddd'};"
+                  data-rec-id="${r.id}" data-star="${i}">★</span>
+        `).join('');
+
+        return `
+            <div class="mi-red-usuario" style="align-items:flex-start;gap:0.75rem;padding:0.9rem 0;">
+                ${posterUrl
+                    ? `<img src="${posterUrl}" alt="${r.movieTitle}" style="width:40px;height:58px;object-fit:cover;border-radius:6px;flex-shrink:0;">`
+                    : `<div style="width:40px;height:58px;background:#1a3a6b;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:white;font-size:0.7rem;">🎬</div>`
+                }
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:0.9rem;font-weight:600;color:#333;margin-bottom:2px;">${r.movieTitle || 'Película'}</div>
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                        <div style="width:22px;height:22px;border-radius:50%;background:#1a3a6b;color:white;font-size:0.7rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">${avatarHtml}</div>
+                        <span style="font-size:0.8rem;color:#666;">Por <strong>${r.senderName}</strong></span>
+                        ${r.contextType ? `<span style="font-size:0.75rem;padding:2px 8px;border-radius:99px;background:#f0f0f0;color:#666;">${r.contextType}</span>` : ''}
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap;">
+                        ${!yaVista
+                            ? `<button onclick="window.marcarVistaRec(${r.id})"
+                                       style="font-size:0.8rem;padding:4px 12px;border-radius:8px;background:#1a3a6b;color:white;border:none;cursor:pointer;font-weight:500;">
+                                   ✓ Ya la vi
+                               </button>`
+                            : `<span style="font-size:0.75rem;color:#1d9e75;font-weight:500;">✓ Vista</span>`
+                        }
+                        ${yaVista && !yaCalificada
+                            ? `<div style="display:flex;align-items:center;gap:2px;">${estrellas}</div>`
+                            : ''
+                        }
+                        ${yaCalificada
+                            ? `<div style="display:flex;align-items:center;gap:2px;">${estrellas}</div>`
+                            : ''
+                        }
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+window.marcarVistaRec = async function(recId) {
+    const confirmed = confirm('¿Confirmás que ya viste esta película? Esta acción es irreversible.');
+    if (!confirmed) return;
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/recommendations/${recId}/seen`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            const rec = _recomendacionesCache.find(r => r.id === recId);
+            if (rec) rec.seenAt = new Date().toISOString();
+            renderMeRecomendaron();
+        }
+    } catch (e) {}
+};
+
+window.seleccionarEstrellaRec = async function(recId, rating) {
+    const rec = _recomendacionesCache.find(r => r.id === recId);
+    if (!rec || !rec.seenAt || rec.rating) return;
+
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/recommendations/${recId}/rate`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ rating })
+        });
+        if (res.ok) {
+            rec.rating = rating;
+            renderMeRecomendaron();
+        }
     } catch (e) {}
 };
