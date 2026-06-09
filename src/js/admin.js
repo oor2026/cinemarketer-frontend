@@ -536,8 +536,12 @@ const adminUI = {
     },
 
     renderGaleriaImagenes(images, premioId, tipo = 'COMMON') {
-        const galeriaEl = document.getElementById('galeriaImagenesGrid');
-        const wrapper   = document.getElementById('galeriaImagenes');
+        const galeriaEl = tipo === 'PREMIUM'
+            ? document.getElementById('galeriaImagenesPremiumGrid')
+            : document.getElementById('galeriaImagenesGrid');
+        const wrapper = tipo === 'PREMIUM'
+            ? document.getElementById('galeriaImagenesPremium')
+            : document.getElementById('galeriaImagenes');
         if (!galeriaEl || !wrapper) return;
         wrapper.style.display = 'block';
 
