@@ -230,11 +230,33 @@ const adminPremiosPremium = {
         document.getElementById('formPremiumWebsite').value  = '';
         document.getElementById('formPremiumTerminos').value = '';
         this.toggleCamposTipo('CANJEABLE');
-        document.getElementById('formPremiumDescuentoTipo').value  = 'PERCENTAGE';
-        document.getElementById('formPremiumDescuentoValor').value = '';
-        document.getElementById('formPremiumExperienciaTipo').value  = '';
-        document.getElementById('formPremiumEventoCupo').value       = '';
-        document.getElementById('formPremiumEventoUbicacion').value  = '';
+        document.getElementById('formPremiumDescuentoTipo').value      = 'PERCENTAGE';
+        document.getElementById('formPremiumDescuentoValor').value     = '';
+        document.getElementById('formPremiumCanalDescuento').value     = '';
+        document.getElementById('formPremiumCompraMinima').value       = '';
+        document.getElementById('formPremiumProductosAplicables').value = '';
+        document.getElementById('formPremiumAcumulable').value         = 'false';
+        document.getElementById('formPremiumExperienciaTipo').value    = '';
+        document.getElementById('formPremiumEventoCupo').value         = '';
+        document.getElementById('formPremiumEventoUbicacion').value    = '';
+        document.getElementById('formPremiumDuracion').value           = '';
+        document.getElementById('formPremiumIncluyeTraslado').value    = 'false';
+        document.getElementById('formPremiumAptoAcompanante').value    = 'false';
+        document.querySelectorAll('input[name="requisitoPremium"]').forEach(cb => cb.checked = false);
+        document.getElementById('formPremiumMarca').value      = '';
+        document.getElementById('formPremiumMaterial').value   = '';
+        document.getElementById('formPremiumColor').value      = '';
+        document.getElementById('formPremiumTalle').value      = '';
+        document.getElementById('formPremiumDimensiones').value = '';
+        document.getElementById('formPremiumPeso').value       = '';
+        document.getElementById('formPremiumOrigen').value     = '';
+        document.getElementById('formPremiumUnidades').value   = '';
+        document.getElementById('formPremiumCondicion').value  = '';
+        document.getElementById('formPremiumCadenaCine').value         = '';
+        document.getElementById('formPremiumFormatoCine').value        = '';
+        document.getElementById('formPremiumCantidadEntradas').value   = '';
+        document.getElementById('formPremiumIncluyeConsumicion').value = '';
+        document.getElementById('formPremiumRestriccionesCine').value  = '';
 
         if (id) {
                 titulo.textContent = 'Editar Premio Premium';
@@ -256,15 +278,46 @@ const adminPremiosPremium = {
                     document.getElementById('galeriaImagenesPremiumNuevo').style.display = 'none';
                     adminUI.cargarGaleriaImagenes(id, 'PREMIUM');
                     this.toggleCamposTipo(p.type);
+                    if (p.type === 'CANJEABLE') {
+                        document.getElementById('formPremiumMarca').value       = p.brand || '';
+                        document.getElementById('formPremiumMaterial').value    = p.material || '';
+                        document.getElementById('formPremiumColor').value       = p.color || '';
+                        document.getElementById('formPremiumTalle').value       = p.size || '';
+                        document.getElementById('formPremiumDimensiones').value = p.dimensions || '';
+                        document.getElementById('formPremiumPeso').value        = p.weight || '';
+                        document.getElementById('formPremiumOrigen').value      = p.origin || '';
+                        document.getElementById('formPremiumUnidades').value    = p.unitsIncluded || '';
+                        document.getElementById('formPremiumCondicion').value   = p.condition || '';
+                    }
+                    if (p.type === 'TICKET') {
+                        document.getElementById('formPremiumCadenaCine').value         = p.cinemaChain || '';
+                        document.getElementById('formPremiumFormatoCine').value        = p.cinemaFormat || '';
+                        document.getElementById('formPremiumCantidadEntradas').value   = p.ticketsIncluded || '';
+                        document.getElementById('formPremiumIncluyeConsumicion').value = p.includesSnack != null ? String(p.includesSnack) : '';
+                        document.getElementById('formPremiumRestriccionesCine').value  = p.cinemaRestrictions || '';
+                    }
                     if (p.type === 'DESCUENTO') {
-                        document.getElementById('formPremiumDescuentoTipo').value  = p.discountType || 'PERCENTAGE';
-                        document.getElementById('formPremiumDescuentoValor').value = p.discountValue || '';
+                        document.getElementById('formPremiumDescuentoTipo').value       = p.discountType || 'PERCENTAGE';
+                        document.getElementById('formPremiumDescuentoValor').value      = p.discountValue || '';
+                        document.getElementById('formPremiumCanalDescuento').value      = p.discountChannel || '';
+                        document.getElementById('formPremiumCompraMinima').value        = p.minimumPurchase || '';
+                        document.getElementById('formPremiumProductosAplicables').value = p.applicableProducts || '';
+                        document.getElementById('formPremiumAcumulable').value          = p.stackable != null ? String(p.stackable) : 'false';
                     }
                     if (p.type === 'EXPERIENCIA') {
-                        document.getElementById('formPremiumExperienciaTipo').value  = p.experienceType || '';
-                        document.getElementById('formPremiumEventoFecha').value      = p.eventDate ? p.eventDate.substring(0,16) : '';
-                        document.getElementById('formPremiumEventoCupo').value       = p.maxCapacity || '';
-                        document.getElementById('formPremiumEventoUbicacion').value  = p.location || '';
+                        document.getElementById('formPremiumExperienciaTipo').value    = p.experienceType || '';
+                        document.getElementById('formPremiumEventoFecha').value        = p.eventDate ? p.eventDate.substring(0,16) : '';
+                        document.getElementById('formPremiumEventoCupo').value         = p.maxCapacity || '';
+                        document.getElementById('formPremiumEventoUbicacion').value    = p.location || '';
+                        document.getElementById('formPremiumDuracion').value           = p.duration || '';
+                        document.getElementById('formPremiumIncluyeTraslado').value    = p.includesTransport != null ? String(p.includesTransport) : 'false';
+                        document.getElementById('formPremiumAptoAcompanante').value    = p.companionAllowed != null ? String(p.companionAllowed) : 'false';
+                        if (p.requirements) {
+                            const reqs = p.requirements.split(',').map(r => r.trim());
+                            document.querySelectorAll('input[name="requisitoPremium"]').forEach(cb => {
+                                cb.checked = reqs.includes(cb.value);
+                            });
+                        }
                     }
                 }
             } else {
@@ -285,17 +338,21 @@ const adminPremiosPremium = {
     },
 
     toggleCamposTipo(tipo) {
-        const campoPuntos      = document.getElementById('campoPremiumPuntos');
-        const campoSorteo      = document.getElementById('campoPremiumFechaSorteo');
-        const campoStock       = document.getElementById('campoPremiumStock');
-        const campoDescuento   = document.getElementById('campoPremiumDescuento');
-        const campoExperiencia = document.getElementById('campoPremiumExperiencia');
+        const campoPuntos        = document.getElementById('campoPremiumPuntos');
+        const campoSorteo        = document.getElementById('campoPremiumFechaSorteo');
+        const campoStock         = document.getElementById('campoPremiumStock');
+        const campoDescuento     = document.getElementById('campoPremiumDescuento');
+        const campoExperiencia   = document.getElementById('campoPremiumExperiencia');
+        const campoMerchandising = document.getElementById('campoPremiumMerchandising');
+        const campoTicket        = document.getElementById('campoPremiumTicket');
 
-        if (campoPuntos)      campoPuntos.style.display      = tipo !== 'SORTEO' ? 'block' : 'none';
-        if (campoSorteo)      campoSorteo.style.display      = tipo === 'SORTEO'  ? 'block' : 'none';
-        if (campoStock)       campoStock.style.display       = tipo !== 'SORTEO'  ? 'block' : 'none';
-        if (campoDescuento)   campoDescuento.style.display   = tipo === 'DESCUENTO'   ? 'block' : 'none';
-        if (campoExperiencia) campoExperiencia.style.display = tipo === 'EXPERIENCIA' ? 'block' : 'none';
+        if (campoPuntos)        campoPuntos.style.display        = tipo !== 'SORTEO'      ? 'block' : 'none';
+        if (campoSorteo)        campoSorteo.style.display        = tipo === 'SORTEO'      ? 'block' : 'none';
+        if (campoStock)         campoStock.style.display         = tipo !== 'SORTEO'      ? 'block' : 'none';
+        if (campoDescuento)     campoDescuento.style.display     = tipo === 'DESCUENTO'   ? 'block' : 'none';
+        if (campoExperiencia)   campoExperiencia.style.display   = tipo === 'EXPERIENCIA' ? 'block' : 'none';
+        if (campoMerchandising) campoMerchandising.style.display = tipo === 'CANJEABLE'   ? 'block' : 'none';
+        if (campoTicket)        campoTicket.style.display        = tipo === 'TICKET'      ? 'block' : 'none';
     },
 
     // ------------------------------------------
@@ -379,12 +436,34 @@ const adminPremiosPremium = {
             termsConditions: document.getElementById('formPremiumTerminos').value.trim() || null,
             drawDate:        tipo === 'SORTEO' && fechaSorteo ? fechaSorteo : null,
             active:          document.getElementById('formPremiumActivo').value === 'true',
-            discountValue:   tipo === 'DESCUENTO' ? parseFloat(document.getElementById('formPremiumDescuentoValor').value) || null : null,
-            discountType:    tipo === 'DESCUENTO' ? document.getElementById('formPremiumDescuentoTipo').value : null,
-            experienceType:  tipo === 'EXPERIENCIA' ? document.getElementById('formPremiumExperienciaTipo').value.trim() || null : null,
-            location:        tipo === 'EXPERIENCIA' ? document.getElementById('formPremiumEventoUbicacion').value.trim() || null : null,
-            eventDate:       null,
-            maxCapacity:     tipo === 'EXPERIENCIA' ? parseInt(document.getElementById('formPremiumEventoCupo').value) || null : null,
+            discountValue:        tipo === 'DESCUENTO' ? parseFloat(document.getElementById('formPremiumDescuentoValor').value) || null : null,
+            discountType:         tipo === 'DESCUENTO' ? document.getElementById('formPremiumDescuentoTipo').value : null,
+            discountChannel:      tipo === 'DESCUENTO' ? document.getElementById('formPremiumCanalDescuento').value || null : null,
+            minimumPurchase:      tipo === 'DESCUENTO' ? parseFloat(document.getElementById('formPremiumCompraMinima').value) || null : null,
+            applicableProducts:   tipo === 'DESCUENTO' ? document.getElementById('formPremiumProductosAplicables').value.trim() || null : null,
+            stackable:            tipo === 'DESCUENTO' ? document.getElementById('formPremiumAcumulable').value === 'true' : null,
+            experienceType:       tipo === 'EXPERIENCIA' ? document.getElementById('formPremiumExperienciaTipo').value.trim() || null : null,
+            location:             tipo === 'EXPERIENCIA' ? document.getElementById('formPremiumEventoUbicacion').value.trim() || null : null,
+            eventDate:            tipo === 'EXPERIENCIA' ? document.getElementById('formPremiumEventoFecha').value || null : null,
+            maxCapacity:          tipo === 'EXPERIENCIA' ? parseInt(document.getElementById('formPremiumEventoCupo').value) || null : null,
+            duration:             tipo === 'EXPERIENCIA' ? document.getElementById('formPremiumDuracion').value.trim() || null : null,
+            includesTransport:    tipo === 'EXPERIENCIA' ? document.getElementById('formPremiumIncluyeTraslado').value === 'true' : null,
+            requirements:         tipo === 'EXPERIENCIA' ? Array.from(document.querySelectorAll('input[name="requisitoPremium"]:checked')).map(cb => cb.value).join(', ') || null : null,
+            companionAllowed:     tipo === 'EXPERIENCIA' ? document.getElementById('formPremiumAptoAcompanante').value === 'true' : null,
+            brand:                tipo === 'CANJEABLE' ? document.getElementById('formPremiumMarca').value.trim() || null : null,
+            material:             tipo === 'CANJEABLE' ? document.getElementById('formPremiumMaterial').value.trim() || null : null,
+            color:                tipo === 'CANJEABLE' ? document.getElementById('formPremiumColor').value.trim() || null : null,
+            size:                 tipo === 'CANJEABLE' ? document.getElementById('formPremiumTalle').value.trim() || null : null,
+            dimensions:           tipo === 'CANJEABLE' ? document.getElementById('formPremiumDimensiones').value.trim() || null : null,
+            weight:               tipo === 'CANJEABLE' ? document.getElementById('formPremiumPeso').value.trim() || null : null,
+            origin:               tipo === 'CANJEABLE' ? document.getElementById('formPremiumOrigen').value.trim() || null : null,
+            unitsIncluded:        tipo === 'CANJEABLE' ? document.getElementById('formPremiumUnidades').value.trim() || null : null,
+            condition:            tipo === 'CANJEABLE' ? document.getElementById('formPremiumCondicion').value || null : null,
+            cinemaChain:          tipo === 'TICKET' ? document.getElementById('formPremiumCadenaCine').value.trim() || null : null,
+            cinemaFormat:         tipo === 'TICKET' ? document.getElementById('formPremiumFormatoCine').value || null : null,
+            cinemaRestrictions:   tipo === 'TICKET' ? document.getElementById('formPremiumRestriccionesCine').value.trim() || null : null,
+            ticketsIncluded:      tipo === 'TICKET' ? parseInt(document.getElementById('formPremiumCantidadEntradas').value) || null : null,
+            includesSnack:        tipo === 'TICKET' ? (document.getElementById('formPremiumIncluyeConsumicion').value !== '' ? document.getElementById('formPremiumIncluyeConsumicion').value === 'true' : null) : null,
         };
 
         const url    = this.editandoId ? `${CONFIG.API_URL}/admin/premium/rewards/${this.editandoId}` : `${CONFIG.API_URL}/admin/premium/rewards`;
