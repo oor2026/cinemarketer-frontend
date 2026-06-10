@@ -51,8 +51,10 @@ const adminPremiosPremium = {
         if (this.filtroEstado === 'activos')   resultado = resultado.filter(p => p.active);
         if (this.filtroEstado === 'inactivos') resultado = resultado.filter(p => !p.active);
 
-        if (this.filtroTipo === 'SORTEO')    resultado = resultado.filter(p => p.type === 'SORTEO');
-        if (this.filtroTipo === 'CANJEABLE') resultado = resultado.filter(p => p.type === 'CANJEABLE');
+        if (this.filtroTipo === 'SORTEO')      resultado = resultado.filter(p => p.type === 'SORTEO');
+        if (this.filtroTipo === 'CANJEABLE')   resultado = resultado.filter(p => p.type === 'CANJEABLE');
+        if (this.filtroTipo === 'DESCUENTO')   resultado = resultado.filter(p => p.type === 'DESCUENTO');
+        if (this.filtroTipo === 'EXPERIENCIA') resultado = resultado.filter(p => p.type === 'EXPERIENCIA');
 
         this.datosActuales = resultado;
         this.paginaActual  = 1;
@@ -89,7 +91,12 @@ const adminPremiosPremium = {
         }
 
         tbody.innerHTML = slice.map(p => {
-            const tipo   = p.type === 'SORTEO' ? '🎲 Sorteo' : '⭐ Premio';
+            // NEW
+            const tipo = p.type === 'SORTEO'      ? '🎲 Sorteo'
+                       : p.type === 'CANJEABLE'   ? '⭐ Premio'
+                       : p.type === 'DESCUENTO'   ? '🏷️ Descuento'
+                       : p.type === 'EXPERIENCIA' ? '🎟️ Experiencia'
+                       : '⭐ Premio';
             const estado = p.active ? '<span class="badge-activo">Activo</span>' : '<span class="badge-inactivo">Inactivo</span>';
             const puntos = p.type === 'SORTEO' ? '—' : `${p.pointsRequired} pts`;
             const fechaSorteo = p.type === 'SORTEO' && p.drawDate
