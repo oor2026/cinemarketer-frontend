@@ -981,10 +981,12 @@
                 </div>
                 <div class="form-group">
                     <label>Tipo <span class="required">*</span></label>
-                    <select id="inputTipo" required>
+                    <select id="inputTipo" required onchange="adminUI.toggleCamposTipoComun(this.value)">
                         <option value="">Seleccionar...</option>
                         <option value="TICKET">🎟️ Entrada</option>
                         <option value="MERCHANDISING">🎁 Merchandising</option>
+                        <option value="DESCUENTO">🏷️ Descuento</option>
+                        <option value="EXPERIENCIA">🎬 Experiencia</option>
                     </select>
                 </div>
             </div>
@@ -1032,6 +1034,47 @@
                 <label>Términos y condiciones</label>
                 <textarea id="inputTerminos" rows="2" placeholder="Términos específicos del premio..."></textarea>
             </div>
+            <!-- Campos DESCUENTO -->
+            <div id="campoDescuentoComun" style="display:none;">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tipo de descuento <span class="required">*</span></label>
+                        <select id="inputDescuentoTipo">
+                            <option value="PERCENTAGE">% Porcentaje</option>
+                            <option value="FIXED">$ Monto fijo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Valor <span class="required">*</span></label>
+                        <input type="number" id="inputDescuentoValor" min="0" step="0.01" placeholder="Ej: 20">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <small style="color:#999;"><i class="fas fa-info-circle"></i> El código de descuento se genera automáticamente al guardar.</small>
+                </div>
+            </div>
+
+            <!-- Campos EXPERIENCIA -->
+            <div id="campoExperienciaComun" style="display:none;">
+                <div class="form-group">
+                    <label>Tipo de experiencia <span class="required">*</span></label>
+                    <input type="text" id="inputExperienciaTipo" placeholder="Ej: Premiere, Visita a set, Proyección privada...">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Fecha y hora del evento</label>
+                        <input type="datetime-local" id="inputEventoFecha">
+                    </div>
+                    <div class="form-group">
+                        <label>Cupo máximo</label>
+                        <input type="number" id="inputEventoCupo" min="1" placeholder="Ej: 50">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Ubicación</label>
+                    <input type="text" id="inputEventoUbicacion" placeholder="Ej: Cine Hoyts Abasto, CABA">
+                </div>
+            </div>
         </form>
     </div>
     <div class="modal-footer">
@@ -1075,6 +1118,8 @@
                 <select id="formPremiumTipo" onchange="adminPremiosPremium.toggleCamposTipo(this.value)">
                     <option value="CANJEABLE">⭐ Premio canjeable</option>
                     <option value="SORTEO">🎲 Sorteo gratuito</option>
+                    <option value="DESCUENTO">🏷️ Descuento</option>
+                    <option value="EXPERIENCIA">🎬 Experiencia</option>
                 </select>
             </div>
             <div class="form-group" id="campoPremiumPuntos">
@@ -1108,6 +1153,41 @@
                     <option value="false">❌ Inactivo</option>
                 </select>
             </div>
+
+            <!-- Campos DESCUENTO -->
+            <div id="campoPremiumDescuento" style="display:none;">
+                <div class="form-group">
+                    <label>Tipo de descuento</label>
+                    <select id="formPremiumDescuentoTipo">
+                        <option value="PERCENTAGE">% Porcentaje</option>
+                        <option value="FIXED">$ Monto fijo</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Valor del descuento</label>
+                    <input type="number" id="formPremiumDescuentoValor" min="0" step="0.01" placeholder="Ej: 20">
+                </div>
+                <div class="form-group">
+                    <small style="color:#999;"><i class="fas fa-info-circle"></i> El código se genera automáticamente al guardar.</small>
+                </div>
+            </div>
+
+            <!-- Campos EXPERIENCIA -->
+            <div id="campoPremiumExperiencia" style="display:none;">
+                <div class="form-group">
+                    <label>Tipo de experiencia</label>
+                    <input type="text" id="formPremiumExperienciaTipo" placeholder="Ej: Premiere, Visita a set...">
+                </div>
+                <div class="form-group">
+                    <label>Ubicación</label>
+                    <input type="text" id="formPremiumEventoUbicacion" placeholder="Ej: Cine Hoyts Abasto, CABA">
+                </div>
+                <div class="form-group">
+                    <label>Cupo máximo</label>
+                    <input type="number" id="formPremiumEventoCupo" min="1" placeholder="Ej: 50">
+                </div>
+            </div>
+
         </div>
         <div class="modal-footer">
             <button class="btn-cancelar" onclick="adminPremiosPremium.cerrarFormulario()">Cancelar</button>

@@ -223,6 +223,11 @@ const adminPremiosPremium = {
         document.getElementById('formPremiumWebsite').value  = '';
         document.getElementById('formPremiumTerminos').value = '';
         this.toggleCamposTipo('CANJEABLE');
+        document.getElementById('formPremiumDescuentoTipo').value  = 'PERCENTAGE';
+        document.getElementById('formPremiumDescuentoValor').value = '';
+        document.getElementById('formPremiumExperienciaTipo').value  = '';
+        document.getElementById('formPremiumEventoCupo').value       = '';
+        document.getElementById('formPremiumEventoUbicacion').value  = '';
 
         if (id) {
                 titulo.textContent = 'Editar Premio Premium';
@@ -244,6 +249,16 @@ const adminPremiosPremium = {
                     document.getElementById('galeriaImagenesPremiumNuevo').style.display = 'none';
                     adminUI.cargarGaleriaImagenes(id, 'PREMIUM');
                     this.toggleCamposTipo(p.type);
+                    if (p.type === 'DESCUENTO') {
+                        document.getElementById('formPremiumDescuentoTipo').value  = p.discountType || 'PERCENTAGE';
+                        document.getElementById('formPremiumDescuentoValor').value = p.discountValue || '';
+                    }
+                    if (p.type === 'EXPERIENCIA') {
+                        document.getElementById('formPremiumExperienciaTipo').value  = p.experienceType || '';
+                        document.getElementById('formPremiumEventoFecha').value      = p.eventDate ? p.eventDate.substring(0,16) : '';
+                        document.getElementById('formPremiumEventoCupo').value       = p.maxCapacity || '';
+                        document.getElementById('formPremiumEventoUbicacion').value  = p.location || '';
+                    }
                 }
             } else {
                 titulo.textContent = 'Nuevo Premio Premium';
@@ -263,12 +278,17 @@ const adminPremiosPremium = {
     },
 
     toggleCamposTipo(tipo) {
-        const campoPuntos = document.getElementById('campoPremiumPuntos');
-        const campoSorteo = document.getElementById('campoPremiumFechaSorteo');
-        const campoStock  = document.getElementById('campoPremiumStock');
-        if (campoPuntos) campoPuntos.style.display = tipo === 'CANJEABLE' ? 'block' : 'none';
-        if (campoSorteo) campoSorteo.style.display = tipo === 'SORTEO'    ? 'block' : 'none';
-        if (campoStock)  campoStock.style.display  = tipo === 'CANJEABLE' ? 'block' : 'none';
+        const campoPuntos      = document.getElementById('campoPremiumPuntos');
+        const campoSorteo      = document.getElementById('campoPremiumFechaSorteo');
+        const campoStock       = document.getElementById('campoPremiumStock');
+        const campoDescuento   = document.getElementById('campoPremiumDescuento');
+        const campoExperiencia = document.getElementById('campoPremiumExperiencia');
+
+        if (campoPuntos)      campoPuntos.style.display      = tipo !== 'SORTEO' ? 'block' : 'none';
+        if (campoSorteo)      campoSorteo.style.display      = tipo === 'SORTEO'  ? 'block' : 'none';
+        if (campoStock)       campoStock.style.display       = tipo !== 'SORTEO'  ? 'block' : 'none';
+        if (campoDescuento)   campoDescuento.style.display   = tipo === 'DESCUENTO'   ? 'block' : 'none';
+        if (campoExperiencia) campoExperiencia.style.display = tipo === 'EXPERIENCIA' ? 'block' : 'none';
     },
 
     // ------------------------------------------
@@ -345,13 +365,19 @@ const adminPremiosPremium = {
             name:            nombre,
             description:     document.getElementById('formPremiumDescripcion').value.trim(),
             type:            tipo,
-            pointsRequired:  tipo === 'CANJEABLE' ? parseInt(document.getElementById('formPremiumPuntos').value) || 0 : 0,
+            pointsRequired:  tipo !== 'SORTEO' ? parseInt(document.getElementById('formPremiumPuntos').value) || 0 : 0,
             stock:           document.getElementById('formPremiumStock').value ? parseInt(document.getElementById('formPremiumStock').value) : null,
             partner:         document.getElementById('formPremiumPartner').value.trim() || null,
             website:         document.getElementById('formPremiumWebsite').value.trim() || null,
             termsConditions: document.getElementById('formPremiumTerminos').value.trim() || null,
             drawDate:        tipo === 'SORTEO' && fechaSorteo ? fechaSorteo : null,
-            active:          document.getElementById('formPremiumActivo').value === 'true'
+            active:          document.getElementById('formPremiumActivo').value === 'true',
+            discountValue:   tipo === 'DESCUENTO' ? parseFloat(document.getElementById('formPremiumDescuentoValor').value) || null : null,
+            discountType:    tipo === 'DESCUENTO' ? document.getElementById('formPremiumDescuentoTipo').value : null,
+            experienceType:  tipo === 'EXPERIENCIA' ? document.getElementById('formPremiumExperienciaTipo').value.trim() || null : null,
+            location:        tipo === 'EXPERIENCIA' ? document.getElementById('formPremiumEventoUbicacion').value.trim() || null : null,
+            eventDate:       null,
+            maxCapacity:     tipo === 'EXPERIENCIA' ? parseInt(document.getElementById('formPremiumEventoCupo').value) || null : null,
         };
 
         const url    = this.editandoId ? `${CONFIG.API_URL}/admin/premium/rewards/${this.editandoId}` : `${CONFIG.API_URL}/admin/premium/rewards`;
