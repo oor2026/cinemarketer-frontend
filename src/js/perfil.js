@@ -242,8 +242,8 @@ function actualizarBtnSeguir(esSeguido) {
     const btn = document.getElementById('btnSeguir');
     if (!btn) return;
     if (esSeguido) {
-        btn.className = 'btn-seguir siguiendo';
-        btn.innerHTML = '<i class="fas fa-user-check"></i> Siguiendo';
+        btn.className = 'btn-seguir';
+        btn.innerHTML = '<i class="fas fa-user-check" style="color:#1a3a6b;"></i> <span style="color:#1a3a6b;">Siguiendo</span>';
     } else {
         btn.className = 'btn-seguir';
         btn.innerHTML = '<i class="fas fa-user-plus"></i> Seguir';
@@ -253,7 +253,7 @@ function actualizarBtnSeguir(esSeguido) {
 window.toggleSeguir = async function() {
     const token = localStorage.getItem('token');
     const btn = document.getElementById('btnSeguir');
-    const esSiguiendo = btn.classList.contains('siguiendo');
+    const esSiguiendo = btn.querySelector('.fa-user-check') !== null;
 
     if (esSiguiendo) {
         const nombre = document.getElementById('perfilNombre').textContent;

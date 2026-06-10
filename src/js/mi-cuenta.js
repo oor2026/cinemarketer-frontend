@@ -978,8 +978,9 @@ window['init_mi-cuenta'] = function() {
     }
 
     window.loadProfile();
-    cargarPrecioPlan();
-};
+        cargarPrecioPlan();
+        cargarConteoRecomendaciones();
+    };
 
 async function cargarPrecioPlan() {
     try {
@@ -1071,18 +1072,18 @@ function renderRedTab(tab) {
         let btn = '';
         if (tab === 'siguiendo') {
             btn = `<button class="mi-red-btn"
-                           onclick="window.dejarDeSeguirDesdeRed(${u.id}, '${u.name}', this)">
+                           onclick="window.dejarDeSeguirDesdeRed(${u.id || u.userId}, '${u.name}', this)">
                        Siguiendo
                    </button>`;
         } else {
-            const yaSigo = _siguiendoCache.some(s => s.id === u.id);
+            const yaSigo = _siguiendoCache.some(s => String(s.id) === String(u.id));
             btn = yaSigo
                 ? `<button class="mi-red-btn"
-                           onclick="window.dejarDeSeguirDesdeRed(${u.id}, '${u.name}', this)">
+                           onclick="window.dejarDeSeguirDesdeRed(${u.id || u.userId}, '${u.name}', this)">
                        Siguiendo
                    </button>`
                 : `<button class="mi-red-btn seguir"
-                           onclick="window.seguirDesdeRed(${u.id}, this)">
+                           onclick="window.seguirDesdeRed(${u.id || u.userId}, this)">
                        Seguir
                    </button>`;
         }
@@ -1108,7 +1109,7 @@ window.seguirDesdeRed = async function(userId, btn) {
         });
         if (!res.ok) return;
         // Actualizar cache y re-render
-        const usuario = _seguidoresCache.find(u => u.id === userId);
+        const usuario = _seguidoresCache.find(u => String(u.id) === String(userId));
         if (usuario) _siguiendoCache.push(usuario);
         document.getElementById('countSiguiendo').textContent = _siguiendoCache.length;
         renderRedTab(_redTab);
@@ -1132,15 +1133,16 @@ window.cerrarModalDejarSeguirRed = function() {
 
 window.confirmarDejarSeguirRed = async function() {
     if (!_dejarSeguirRedUserId) return;
+    const userIdAEliminar = _dejarSeguirRedUserId;
     window.cerrarModalDejarSeguirRed();
     const token = localStorage.getItem('token');
     try {
-        const res = await fetch(`${CONFIG.API_URL}/follows/${_dejarSeguirRedUserId}`, {
+        const res = await fetch(`${CONFIG.API_URL}/follows/${userIdAEliminar}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) return;
-        _siguiendoCache = _siguiendoCache.filter(u => u.id !== _dejarSeguirRedUserId);
+        _siguiendoCache = _siguiendoCache.filter(u => u.id !== userIdAEliminar);
         document.getElementById('countSiguiendo').textContent = _siguiendoCache.length;
         renderRedTab(_redTab);
     } catch (e) {}
@@ -1152,6 +1154,19 @@ window.confirmarDejarSeguirRed = async function() {
 
 let _recomendacionesCache = [];
 window._recModalId = null;
+
+async function cargarConteoRecomendaciones() {
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/recommendations/received`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const countEl = document.getElementById('countRecomendaciones');
+        if (countEl) countEl.textContent = data.length;
+    } catch (e) {}
+}
 
 async function cargarMeRecomendaron() {
     const token = localStorage.getItem('token');
@@ -1220,7 +1235,7 @@ function renderMeRecomendaron() {
                     </div>
                     <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
                         <div style="width:22px;height:22px;border-radius:50%;background:#1a3a6b;color:white;font-size:0.7rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">${avatarHtml}</div>
-                        <span style="font-size:0.8rem;color:#666;">Por <strong>${r.senderName}</strong></span>
+                        <span style="font-size:0.8rem;color:#666;">Por <strong><a href="#" onclick="event.preventDefault(); window.abrirPerfilUsuario(${r.senderId})" style="color:#e50914;text-decoration:none;cursor:pointer;">${r.senderName}</a></strong></span>
                         ${r.contextType ? `<span style="font-size:0.75rem;padding:2px 8px;border-radius:99px;background:#f0f0f0;color:#666;">${r.contextType}</span>` : ''}
                     </div>
                     <div style="display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap;">
