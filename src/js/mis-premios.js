@@ -866,6 +866,100 @@ async function cargarPrecioPlanEspeciales() {
 // ==============================================
 let premioActual = null;
 
+// ================================================
+// TABS DE MODALES DE PREMIOS
+// ================================================
+window.switchModalTab = function(tipo, n) {
+    const prefix = tipo === 'premio' ? 'Premio' : 'Especial';
+    [1, 2, 3].forEach(i => {
+        const panel = document.getElementById(`panel${prefix}${i}`);
+        const tab   = document.getElementById(`tab${prefix}${i}`);
+        if (panel) panel.style.display = i === n ? 'block' : 'none';
+        if (tab) {
+            tab.classList.toggle('active', i === n);
+        }
+    });
+};
+
+function buildDetallesExtra(p, tipo) {
+    const items = [];
+
+    if (tipo === 'MERCHANDISING' || tipo === 'CANJEABLE') {
+        if (p.brand)        items.push(['fas fa-tag',         'Marca',              p.brand]);
+        if (p.material)     items.push(['fas fa-layer-group', 'Material',           p.material]);
+        if (p.color)        items.push(['fas fa-palette',     'Color(es)',          p.color]);
+        if (p.size)         items.push(['fas fa-ruler',       'Talle / Talla',      p.size]);
+        if (p.dimensions)   items.push(['fas fa-vector-square','Dimensiones',       p.dimensions]);
+        if (p.weight)       items.push(['fas fa-weight-hanging','Peso',             p.weight]);
+        if (p.origin)       items.push(['fas fa-globe-americas','Origen',           p.origin]);
+        if (p.unitsIncluded)items.push(['fas fa-boxes',       'Unidades incluidas', p.unitsIncluded]);
+        if (p.condition)    items.push(['fas fa-check-circle', 'Condición',         p.condition === 'NUEVO' ? 'Nuevo' : 'Reacondicionado']);
+    }
+
+    if (tipo === 'TICKET') {
+        if (p.cinemaChain)       items.push(['fas fa-film',        'Cadena de cine',    p.cinemaChain]);
+        if (p.cinemaFormat)      items.push(['fas fa-tv',          'Formato',           p.cinemaFormat]);
+        if (p.ticketsIncluded)   items.push(['fas fa-ticket-alt',  'Entradas incluidas',p.ticketsIncluded]);
+        if (p.includesSnack != null) items.push(['fas fa-coffee',  'Incluye consumición', p.includesSnack ? 'Sí' : 'No']);
+        if (p.cinemaRestrictions)items.push(['fas fa-exclamation-circle','Restricciones', p.cinemaRestrictions]);
+    }
+
+    if (tipo === 'DESCUENTO') {
+        if (p.discountValue != null) {
+            const val = p.discountType === 'PERCENTAGE' ? `${p.discountValue}%` : `$${p.discountValue}`;
+            items.push(['fas fa-percent', 'Descuento', val]);
+        }
+        if (p.discountCode)          items.push(['fas fa-barcode',     'Código',                  p.discountCode]);
+        if (p.discountChannel)       items.push(['fas fa-store',       'Canal',                   p.discountChannel]);
+        if (p.minimumPurchase != null) items.push(['fas fa-shopping-cart','Compra mínima',        `$${p.minimumPurchase}`]);
+        if (p.applicableProducts)    items.push(['fas fa-list',        'Productos incluidos/excluidos', p.applicableProducts]);
+        if (p.stackable != null)     items.push(['fas fa-layer-group', 'Acumulable',              p.stackable ? 'Sí' : 'No']);
+    }
+
+    if (tipo === 'EXPERIENCIA') {
+        if (p.experienceType)        items.push(['fas fa-star',        'Tipo de experiencia',     p.experienceType]);
+        if (p.eventDate)             items.push(['fas fa-calendar-alt','Fecha del evento',        new Date(p.eventDate).toLocaleDateString('es-AR', {day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})]);
+        if (p.location)              items.push(['fas fa-map-marker-alt','Ubicación',             p.location]);
+        if (p.maxCapacity)           items.push(['fas fa-users',       'Cupo máximo',             p.maxCapacity]);
+        if (p.duration)              items.push(['fas fa-clock',       'Duración',                p.duration]);
+        if (p.includesTransport != null) items.push(['fas fa-bus',     'Incluye traslado',        p.includesTransport ? 'Sí' : 'No']);
+        if (p.companionAllowed != null)  items.push(['fas fa-user-friends','Apto para acompañante', p.companionAllowed ? 'Sí' : 'No']);
+        if (p.requirements)          items.push(['fas fa-clipboard-list','Requisitos',            p.requirements]);
+    }
+
+    return items;
+}
+
+function renderTabsModal(p, tipoReward, prefixModal) {
+    const items = buildDetallesExtra(p, tipoReward);
+    const tab2  = document.getElementById(`tab${prefixModal}2`);
+    const tab3  = document.getElementById(`tab${prefixModal}3`);
+    const panel2 = document.getElementById(`panel${prefixModal}2`);
+
+    if (items.length > 0 && tab2) {
+        tab2.style.display = 'inline-block';
+        const grid = document.getElementById(`modal${prefixModal}DetallesExtra`);
+        if (grid) {
+            grid.innerHTML = items.map(([icon, label, value]) => `
+                <div class="modal-premio-detalle-item">
+                    <span class="detalle-label"><i class="${icon}"></i> ${label}</span>
+                    <span class="detalle-value" style="text-align:right;max-width:55%;word-break:break-word;">${value}</span>
+                </div>`).join('');
+        }
+    } else if (tab2) {
+        tab2.style.display = 'none';
+        if (panel2) panel2.style.display = 'none';
+    }
+
+    if (p.termsConditions && tab3) {
+        tab3.style.display = 'inline-block';
+    } else if (tab3) {
+        tab3.style.display = 'none';
+    }
+
+    window.switchModalTab(prefixModal === 'Premio' ? 'premio' : 'especial', 1);
+}
+
 window.abrirModalPremio = function(premio) {
     premioActual = premio;
 
@@ -922,15 +1016,14 @@ window.abrirModalPremio = function(premio) {
         websiteLink.textContent = '-';
     }
 
-    const termBox = document.getElementById('modalPremioTerminosBox');
     if (premio.termsConditions) {
-        termBox.style.display = 'block';
-        document.getElementById('modalPremioTerminos').textContent = premio.termsConditions;
-    } else {
-        termBox.style.display = 'none';
-    }
+            document.getElementById('modalPremioTerminos').textContent = premio.termsConditions;
+        }
 
-    const btn = document.getElementById('btnCanjearModal');
+        const rewardTipo = premio.rewardType || '';
+        renderTabsModal(premio, rewardTipo, 'Premio');
+
+        const btn = document.getElementById('btnCanjearModal');
     if (!premio.hasStock) {
         btn.textContent = 'Agotado'; btn.disabled = true;
     } else if (premio.isExpired) {
@@ -1067,16 +1160,14 @@ window.abrirModalEspecial = function(p, isPremium) {
         websiteLink.textContent   = '-';
     }
 
-    // Términos
-    const termBox = document.getElementById('modalEspecialTerminosBox');
     if (p.termsConditions) {
-        termBox.style.display = 'block';
-        document.getElementById('modalEspecialTerminos').textContent = p.termsConditions;
-    } else {
-        termBox.style.display = 'none';
-    }
+            document.getElementById('modalEspecialTerminos').textContent = p.termsConditions;
+        }
 
-    if (esSorteo) {
+        const especialTipo = p.type || '';
+        renderTabsModal(p, especialTipo, 'Especial');
+
+        if (esSorteo) {
         puntosRow.style.display    = 'none';
         stockRow.style.display     = 'none';
         fechaRow.style.display     = 'flex';

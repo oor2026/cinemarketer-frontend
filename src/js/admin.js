@@ -357,15 +357,46 @@ const adminUI = {
                 document.getElementById('inputWebsite').value          = premio.website || '';
 
                 adminUI.toggleCamposTipoComun(premio.rewardType);
+                if (premio.rewardType === 'MERCHANDISING') {
+                    document.getElementById('inputMarca').value      = premio.brand || '';
+                    document.getElementById('inputMaterial').value   = premio.material || '';
+                    document.getElementById('inputColor').value      = premio.color || '';
+                    document.getElementById('inputTalle').value      = premio.size || '';
+                    document.getElementById('inputDimensiones').value = premio.dimensions || '';
+                    document.getElementById('inputPeso').value       = premio.weight || '';
+                    document.getElementById('inputOrigen').value     = premio.origin || '';
+                    document.getElementById('inputUnidades').value   = premio.unitsIncluded || '';
+                    document.getElementById('inputCondicion').value  = premio.condition || '';
+                }
+                if (premio.rewardType === 'TICKET') {
+                    document.getElementById('inputCadenaCine').value          = premio.cinemaChain || '';
+                    document.getElementById('inputFormatoCine').value         = premio.cinemaFormat || '';
+                    document.getElementById('inputCantidadEntradas').value    = premio.ticketsIncluded || '';
+                    document.getElementById('inputIncluyeConsumicion').value  = premio.includesSnack != null ? String(premio.includesSnack) : '';
+                    document.getElementById('inputRestriccionesCine').value   = premio.cinemaRestrictions || '';
+                }
                 if (premio.rewardType === 'DESCUENTO') {
-                    document.getElementById('inputDescuentoTipo').value  = premio.discountType || 'PERCENTAGE';
-                    document.getElementById('inputDescuentoValor').value = premio.discountValue || '';
+                    document.getElementById('inputDescuentoTipo').value       = premio.discountType || 'PERCENTAGE';
+                    document.getElementById('inputDescuentoValor').value      = premio.discountValue || '';
+                    document.getElementById('inputCanalDescuento').value      = premio.discountChannel || '';
+                    document.getElementById('inputCompraMinima').value        = premio.minimumPurchase || '';
+                    document.getElementById('inputProductosAplicables').value = premio.applicableProducts || '';
+                    document.getElementById('inputAcumulable').value          = premio.stackable != null ? String(premio.stackable) : 'false';
                 }
                 if (premio.rewardType === 'EXPERIENCIA') {
                     document.getElementById('inputExperienciaTipo').value  = premio.experienceType || '';
                     document.getElementById('inputEventoFecha').value      = premio.eventDate ? premio.eventDate.substring(0,16) : '';
                     document.getElementById('inputEventoCupo').value       = premio.maxCapacity || '';
                     document.getElementById('inputEventoUbicacion').value  = premio.location || '';
+                    document.getElementById('inputDuracion').value         = premio.duration || '';
+                    document.getElementById('inputIncluyeTraslado').value  = premio.includesTransport != null ? String(premio.includesTransport) : 'false';
+                    document.getElementById('inputAptoAcompanante').value  = premio.companionAllowed != null ? String(premio.companionAllowed) : 'false';
+                    if (premio.requirements) {
+                        const reqs = premio.requirements.split(',').map(r => r.trim());
+                        document.querySelectorAll('input[name="requisito"]').forEach(cb => {
+                            cb.checked = reqs.includes(cb.value);
+                        });
+                    }
                 }
 
                 if (premio.imageUrl) {
@@ -401,14 +432,18 @@ const adminUI = {
     },
 
     toggleCamposTipoComun(tipo) {
-        const campoDescuento   = document.getElementById('campoDescuentoComun');
-        const campoExperiencia = document.getElementById('campoExperienciaComun');
-        const campoPuntos      = document.getElementById('inputPuntos')?.closest('.form-group');
-        const campoStock       = document.getElementById('inputStock')?.closest('.form-group');
-        const campoVenci       = document.getElementById('inputVencimiento')?.closest('.form-group');
+        const campoMerchandising = document.getElementById('campoMerchandisingComun');
+        const campoTicket        = document.getElementById('campoTicketComun');
+        const campoDescuento     = document.getElementById('campoDescuentoComun');
+        const campoExperiencia   = document.getElementById('campoExperienciaComun');
+        const campoPuntos        = document.getElementById('inputPuntos')?.closest('.form-group');
+        const campoStock         = document.getElementById('inputStock')?.closest('.form-group');
+        const campoVenci         = document.getElementById('inputVencimiento')?.closest('.form-group');
 
-        if (campoDescuento)   campoDescuento.style.display   = tipo === 'DESCUENTO'   ? 'block' : 'none';
-        if (campoExperiencia) campoExperiencia.style.display = tipo === 'EXPERIENCIA' ? 'block' : 'none';
+        if (campoMerchandising) campoMerchandising.style.display = tipo === 'MERCHANDISING' ? 'block' : 'none';
+        if (campoTicket)        campoTicket.style.display        = tipo === 'TICKET'        ? 'block' : 'none';
+        if (campoDescuento)     campoDescuento.style.display     = tipo === 'DESCUENTO'     ? 'block' : 'none';
+        if (campoExperiencia)   campoExperiencia.style.display   = tipo === 'EXPERIENCIA'   ? 'block' : 'none';
 
         if (campoPuntos) campoPuntos.style.display = 'block';
         if (campoStock)  campoStock.style.display  = 'block';
@@ -478,12 +513,34 @@ const adminUI = {
             active:          document.getElementById('inputActivo').value === 'true',
             partner:         document.getElementById('inputPartner').value.trim() || null,
             website:         document.getElementById('inputWebsite').value.trim() || null,
-            discountValue:   tipo === 'DESCUENTO' ? parseFloat(document.getElementById('inputDescuentoValor').value) || null : null,
-            discountType:    tipo === 'DESCUENTO' ? document.getElementById('inputDescuentoTipo').value : null,
-            experienceType:  tipo === 'EXPERIENCIA' ? document.getElementById('inputExperienciaTipo').value.trim() || null : null,
-            location:        tipo === 'EXPERIENCIA' ? document.getElementById('inputEventoUbicacion').value.trim() || null : null,
-            eventDate:       tipo === 'EXPERIENCIA' ? document.getElementById('inputEventoFecha').value || null : null,
-            maxCapacity:     tipo === 'EXPERIENCIA' ? parseInt(document.getElementById('inputEventoCupo').value) || null : null,
+            discountValue:        tipo === 'DESCUENTO' ? parseFloat(document.getElementById('inputDescuentoValor').value) || null : null,
+            discountType:         tipo === 'DESCUENTO' ? document.getElementById('inputDescuentoTipo').value : null,
+            discountChannel:      tipo === 'DESCUENTO' ? document.getElementById('inputCanalDescuento').value || null : null,
+            minimumPurchase:      tipo === 'DESCUENTO' ? parseFloat(document.getElementById('inputCompraMinima').value) || null : null,
+            applicableProducts:   tipo === 'DESCUENTO' ? document.getElementById('inputProductosAplicables').value.trim() || null : null,
+            stackable:            tipo === 'DESCUENTO' ? document.getElementById('inputAcumulable').value === 'true' : null,
+            experienceType:       tipo === 'EXPERIENCIA' ? document.getElementById('inputExperienciaTipo').value.trim() || null : null,
+            location:             tipo === 'EXPERIENCIA' ? document.getElementById('inputEventoUbicacion').value.trim() || null : null,
+            eventDate:            tipo === 'EXPERIENCIA' ? document.getElementById('inputEventoFecha').value || null : null,
+            maxCapacity:          tipo === 'EXPERIENCIA' ? parseInt(document.getElementById('inputEventoCupo').value) || null : null,
+            duration:             tipo === 'EXPERIENCIA' ? document.getElementById('inputDuracion').value.trim() || null : null,
+            includesTransport:    tipo === 'EXPERIENCIA' ? document.getElementById('inputIncluyeTraslado').value === 'true' : null,
+            requirements:         tipo === 'EXPERIENCIA' ? Array.from(document.querySelectorAll('input[name="requisito"]:checked')).map(cb => cb.value).join(', ') || null : null,
+            companionAllowed:     tipo === 'EXPERIENCIA' ? document.getElementById('inputAptoAcompanante').value === 'true' : null,
+            brand:                tipo === 'MERCHANDISING' ? document.getElementById('inputMarca').value.trim() || null : null,
+            material:             tipo === 'MERCHANDISING' ? document.getElementById('inputMaterial').value.trim() || null : null,
+            color:                tipo === 'MERCHANDISING' ? document.getElementById('inputColor').value.trim() || null : null,
+            size:                 tipo === 'MERCHANDISING' ? document.getElementById('inputTalle').value.trim() || null : null,
+            dimensions:           tipo === 'MERCHANDISING' ? document.getElementById('inputDimensiones').value.trim() || null : null,
+            weight:               tipo === 'MERCHANDISING' ? document.getElementById('inputPeso').value.trim() || null : null,
+            origin:               tipo === 'MERCHANDISING' ? document.getElementById('inputOrigen').value.trim() || null : null,
+            unitsIncluded:        tipo === 'MERCHANDISING' ? document.getElementById('inputUnidades').value.trim() || null : null,
+            condition:            tipo === 'MERCHANDISING' ? document.getElementById('inputCondicion').value || null : null,
+            cinemaChain:          tipo === 'TICKET' ? document.getElementById('inputCadenaCine').value.trim() || null : null,
+            cinemaFormat:         tipo === 'TICKET' ? document.getElementById('inputFormatoCine').value || null : null,
+            cinemaRestrictions:   tipo === 'TICKET' ? document.getElementById('inputRestriccionesCine').value.trim() || null : null,
+            ticketsIncluded:      tipo === 'TICKET' ? parseInt(document.getElementById('inputCantidadEntradas').value) || null : null,
+            includesSnack:        tipo === 'TICKET' ? (document.getElementById('inputIncluyeConsumicion').value !== '' ? document.getElementById('inputIncluyeConsumicion').value === 'true' : null) : null,
         };
 
         const btnGuardar = document.querySelector('.btn-guardar');

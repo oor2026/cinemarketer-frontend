@@ -192,50 +192,55 @@
 
                     <p class="modal-premio-descripcion" id="modalPremioDescripcion"></p>
 
-                    <div class="modal-premio-detalles">
-                        <!-- Puntos requeridos -->
-                        <div class="modal-premio-detalle-item">
-                            <span class="detalle-label"><i class="fas fa-coins"></i> Puntos requeridos</span>
-                            <span class="detalle-value puntos-requeridos" id="modalPremioPuntos">0</span>
-                        </div>
+                    <!-- TABS -->
+                    <div class="modal-tabs">
+                        <button class="modal-tab active" id="tabPremio1" onclick="window.switchModalTab('premio', 1)">Información</button>
+                        <button class="modal-tab" id="tabPremio2" onclick="window.switchModalTab('premio', 2)" style="display:none;">Detalles</button>
+                        <button class="modal-tab" id="tabPremio3" onclick="window.switchModalTab('premio', 3)" style="display:none;">Términos</button>
+                    </div>
 
-                        <!-- Stock disponible -->
-                        <div class="modal-premio-detalle-item">
-                            <span class="detalle-label"><i class="fas fa-boxes"></i> Stock disponible</span>
-                            <span class="detalle-value" id="modalPremioStock">0</span>
+                    <!-- TAB 1: Información -->
+                    <div id="panelPremio1" class="modal-tab-panel">
+                        <div class="modal-premio-detalles">
+                            <div class="modal-premio-detalle-item">
+                                <span class="detalle-label"><i class="fas fa-coins"></i> Puntos requeridos</span>
+                                <span class="detalle-value puntos-requeridos" id="modalPremioPuntos">0</span>
+                            </div>
+                            <div class="modal-premio-detalle-item">
+                                <span class="detalle-label"><i class="fas fa-boxes"></i> Stock disponible</span>
+                                <span class="detalle-value" id="modalPremioStock">0</span>
+                            </div>
+                            <div class="modal-premio-detalle-item" id="modalPremioVencimientoRow" style="display:none;">
+                                <span class="detalle-label"><i class="fas fa-calendar-alt"></i> Vence el</span>
+                                <span class="detalle-value" id="modalPremioVencimiento">-</span>
+                            </div>
+                            <div class="modal-premio-detalle-item" id="modalPremioPartnerRow" style="display:none;">
+                                <span class="detalle-label"><i class="fas fa-handshake"></i> Proveedor</span>
+                                <span class="detalle-value" id="modalPremioPartner">-</span>
+                            </div>
+                            <div class="modal-premio-detalle-item" id="modalPremioWebsiteRow" style="display:none;">
+                                <span class="detalle-label"><i class="fas fa-globe"></i> Sitio web</span>
+                                <span class="detalle-value">
+                                    <a href="#" target="_blank" id="modalPremioWebsiteLink" style="color:#e50914;text-decoration:none;">-</a>
+                                </span>
+                            </div>
                         </div>
-
-                        <!-- Vencimiento -->
-                        <div class="modal-premio-detalle-item" id="modalPremioVencimientoRow" style="display:none;">
-                            <span class="detalle-label"><i class="fas fa-calendar-alt"></i> Vence el</span>
-                            <span class="detalle-value" id="modalPremioVencimiento">-</span>
-                        </div>
-
-                        <!-- Proveedor -->
-                        <div class="modal-premio-detalle-item" id="modalPremioPartnerRow" style="display:none;">
-                            <span class="detalle-label"><i class="fas fa-handshake"></i> Proveedor</span>
-                            <span class="detalle-value" id="modalPremioPartner">-</span>
-                        </div>
-
-                        <!-- Sitio web -->
-                        <div class="modal-premio-detalle-item" id="modalPremioWebsiteRow" style="display:none;">
-                            <span class="detalle-label"><i class="fas fa-globe"></i> Sitio web</span>
-                            <span class="detalle-value" id="modalPremioWebsite">
-                                <a href="#" target="_blank" id="modalPremioWebsiteLink" style="color: #e50914; text-decoration: none;">-</a>
-                            </span>
+                        <div class="modal-premio-mis-puntos">
+                            <i class="fas fa-wallet"></i> Tus puntos actuales:
+                            <strong id="modalPremioMisPuntos">0</strong>
                         </div>
                     </div>
 
-                    <!-- Mis puntos actuales -->
-                    <div class="modal-premio-mis-puntos">
-                        <i class="fas fa-wallet"></i> Tus puntos actuales:
-                        <strong id="modalPremioMisPuntos">0</strong>
+                    <!-- TAB 2: Detalles específicos por tipo -->
+                    <div id="panelPremio2" class="modal-tab-panel" style="display:none;">
+                        <div class="modal-premio-detalles" id="modalPremioDetallesExtra"></div>
                     </div>
 
-                    <!-- Términos y condiciones -->
-                    <div class="modal-premio-terminos" id="modalPremioTerminosBox" style="display:none;">
-                        <strong><i class="fas fa-file-alt"></i> Términos y condiciones</strong>
-                        <p id="modalPremioTerminos" style="max-height:150px; overflow-y:auto; padding-right:0.5rem;"></p>
+                    <!-- TAB 3: Términos -->
+                    <div id="panelPremio3" class="modal-tab-panel" style="display:none;">
+                        <div class="modal-premio-terminos-panel">
+                            <p id="modalPremioTerminos" style="max-height:180px; overflow-y:auto; padding-right:0.5rem; font-size:0.85rem; color:#555; line-height:1.6;"></p>
+                        </div>
                     </div>
 
                 </div>
@@ -290,64 +295,63 @@
 
                     <p class="modal-premio-descripcion" id="modalEspecialDescripcion"></p>
 
-                    <div class="modal-premio-detalles">
-
-                        <!-- CANJEABLE: puntos -->
-                        <div class="modal-premio-detalle-item" id="modalEspecialPuntosRow">
-                            <span class="detalle-label"><i class="fas fa-coins"></i> Puntos requeridos</span>
-                            <span class="detalle-value puntos-requeridos" id="modalEspecialPuntos">0</span>
-                        </div>
-
-                        <!-- CANJEABLE: stock -->
-                        <div class="modal-premio-detalle-item" id="modalEspecialStockRow">
-                            <span class="detalle-label"><i class="fas fa-boxes"></i> Stock disponible</span>
-                            <span class="detalle-value" id="modalEspecialStock">0</span>
-                        </div>
-
-                        <!-- SORTEO: fecha -->
-                        <div class="modal-premio-detalle-item" id="modalEspecialFechaRow" style="display:none;">
-                            <span class="detalle-label"><i class="fas fa-calendar-alt"></i> Fecha del sorteo</span>
-                            <span class="detalle-value" id="modalEspecialFecha">—</span>
-                        </div>
-
-                        <!-- SORTEO: participantes -->
-                        <div class="modal-premio-detalle-item" id="modalEspecialParticipantesRow" style="display:none;">
-                            <span class="detalle-label"><i class="fas fa-users"></i> Participantes</span>
-                            <span class="detalle-value" id="modalEspecialParticipantes">0</span>
-                        </div>
-
-                        <!-- SORTEO: ganador (solo visible cuando el sorteo fue ejecutado) -->
-                        <div class="modal-premio-detalle-item" id="modalEspecialGanadorRow" style="display:none;">
-                            <span class="detalle-label"><i class="fas fa-trophy"></i> Ganador/a</span>
-                            <span class="detalle-value" id="modalEspecialGanador">—</span>
-                        </div>
-
-                        <!-- Proveedor -->
-                        <div class="modal-premio-detalle-item" id="modalEspecialPartnerRow" style="display:none;">
-                            <span class="detalle-label"><i class="fas fa-handshake"></i> Proveedor</span>
-                            <span class="detalle-value" id="modalEspecialPartner">-</span>
-                        </div>
-
-                        <!-- Sitio web -->
-                        <div class="modal-premio-detalle-item" id="modalEspecialWebsiteRow" style="display:none;">
-                            <span class="detalle-label"><i class="fas fa-globe"></i> Sitio web</span>
-                            <span class="detalle-value" id="modalEspecialWebsite">
-                                <a href="#" target="_blank" id="modalEspecialWebsiteLink" style="color:#e50914;text-decoration:none;">-</a>
-                            </span>
-                        </div>
-
+                    <!-- TABS -->
+                    <div class="modal-tabs">
+                        <button class="modal-tab active" id="tabEspecial1" onclick="window.switchModalTab('especial', 1)">Información</button>
+                        <button class="modal-tab" id="tabEspecial2" onclick="window.switchModalTab('especial', 2)" style="display:none;">Detalles</button>
+                        <button class="modal-tab" id="tabEspecial3" onclick="window.switchModalTab('especial', 3)" style="display:none;">Términos</button>
                     </div>
 
-                    <!-- Mis puntos (solo para canjeables) -->
-                    <div class="modal-premio-mis-puntos" id="modalEspecialMisPuntosBox">
-                        <i class="fas fa-wallet"></i> Tus puntos actuales:
-                        <strong id="modalEspecialMisPuntos">0</strong>
+                    <!-- TAB 1: Información -->
+                    <div id="panelEspecial1" class="modal-tab-panel">
+                        <div class="modal-premio-detalles">
+                            <div class="modal-premio-detalle-item" id="modalEspecialPuntosRow">
+                                <span class="detalle-label"><i class="fas fa-coins"></i> Puntos requeridos</span>
+                                <span class="detalle-value puntos-requeridos" id="modalEspecialPuntos">0</span>
+                            </div>
+                            <div class="modal-premio-detalle-item" id="modalEspecialStockRow">
+                                <span class="detalle-label"><i class="fas fa-boxes"></i> Stock disponible</span>
+                                <span class="detalle-value" id="modalEspecialStock">0</span>
+                            </div>
+                            <div class="modal-premio-detalle-item" id="modalEspecialFechaRow" style="display:none;">
+                                <span class="detalle-label"><i class="fas fa-calendar-alt"></i> Fecha del sorteo</span>
+                                <span class="detalle-value" id="modalEspecialFecha">—</span>
+                            </div>
+                            <div class="modal-premio-detalle-item" id="modalEspecialParticipantesRow" style="display:none;">
+                                <span class="detalle-label"><i class="fas fa-users"></i> Participantes</span>
+                                <span class="detalle-value" id="modalEspecialParticipantes">0</span>
+                            </div>
+                            <div class="modal-premio-detalle-item" id="modalEspecialGanadorRow" style="display:none;">
+                                <span class="detalle-label"><i class="fas fa-trophy"></i> Ganador/a</span>
+                                <span class="detalle-value" id="modalEspecialGanador">—</span>
+                            </div>
+                            <div class="modal-premio-detalle-item" id="modalEspecialPartnerRow" style="display:none;">
+                                <span class="detalle-label"><i class="fas fa-handshake"></i> Proveedor</span>
+                                <span class="detalle-value" id="modalEspecialPartner">-</span>
+                            </div>
+                            <div class="modal-premio-detalle-item" id="modalEspecialWebsiteRow" style="display:none;">
+                                <span class="detalle-label"><i class="fas fa-globe"></i> Sitio web</span>
+                                <span class="detalle-value">
+                                    <a href="#" target="_blank" id="modalEspecialWebsiteLink" style="color:#e50914;text-decoration:none;">-</a>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="modal-premio-mis-puntos" id="modalEspecialMisPuntosBox">
+                            <i class="fas fa-wallet"></i> Tus puntos actuales:
+                            <strong id="modalEspecialMisPuntos">0</strong>
+                        </div>
                     </div>
 
-                    <!-- Términos y condiciones -->
-                    <div class="modal-premio-terminos" id="modalEspecialTerminosBox" style="display:none;">
-                        <strong><i class="fas fa-file-alt"></i> Términos y condiciones</strong>
-                        <p id="modalEspecialTerminos" style="max-height:150px; overflow-y:auto; padding-right:0.5rem;"></p>
+                    <!-- TAB 2: Detalles específicos por tipo -->
+                    <div id="panelEspecial2" class="modal-tab-panel" style="display:none;">
+                        <div class="modal-premio-detalles" id="modalEspecialDetallesExtra"></div>
+                    </div>
+
+                    <!-- TAB 3: Términos -->
+                    <div id="panelEspecial3" class="modal-tab-panel" style="display:none;">
+                        <div class="modal-premio-terminos-panel">
+                            <p id="modalEspecialTerminos" style="max-height:180px; overflow-y:auto; padding-right:0.5rem; font-size:0.85rem; color:#555; line-height:1.6;"></p>
+                        </div>
                     </div>
 
                 </div>
@@ -363,4 +367,5 @@
 
         </div>
     </div>
+</div>
 </div>

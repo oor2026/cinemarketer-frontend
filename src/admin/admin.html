@@ -1034,8 +1034,105 @@
                 <label>Términos y condiciones</label>
                 <textarea id="inputTerminos" rows="2" placeholder="Términos específicos del premio..."></textarea>
             </div>
+            <!-- Campos MERCHANDISING -->
+            <div id="campoMerchandisingComun" style="display:none;">
+                <hr style="margin:0.5rem 0;border-color:#f0f0f0;">
+                <p style="font-size:0.8rem;color:#888;margin-bottom:0.5rem;">Detalles del producto — todos opcionales</p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Marca</label>
+                        <input type="text" id="inputMarca" placeholder="Ej: Adidas, Nike">
+                    </div>
+                    <div class="form-group">
+                        <label>Material</label>
+                        <input type="text" id="inputMaterial" placeholder="Ej: Algodón, Plástico">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Color(es)</label>
+                        <input type="text" id="inputColor" placeholder="Ej: Rojo, Negro">
+                    </div>
+                    <div class="form-group">
+                        <label>Talle / Talla</label>
+                        <input type="text" id="inputTalle" placeholder="Ej: M, L, 42">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Dimensiones</label>
+                        <input type="text" id="inputDimensiones" placeholder="Ej: 30x20x10 cm">
+                    </div>
+                    <div class="form-group">
+                        <label>Peso</label>
+                        <input type="text" id="inputPeso" placeholder="Ej: 500g, 2kg">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Origen / País</label>
+                        <input type="text" id="inputOrigen" placeholder="Ej: Argentina, China">
+                    </div>
+                    <div class="form-group">
+                        <label>Unidades incluidas</label>
+                        <input type="text" id="inputUnidades" placeholder="Ej: 1 par, pack x3">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Condición</label>
+                    <select id="inputCondicion">
+                        <option value="">Sin especificar</option>
+                        <option value="NUEVO">Nuevo</option>
+                        <option value="REACONDICIONADO">Reacondicionado</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Campos TICKET (Entrada de cine) -->
+            <div id="campoTicketComun" style="display:none;">
+                <hr style="margin:0.5rem 0;border-color:#f0f0f0;">
+                <p style="font-size:0.8rem;color:#888;margin-bottom:0.5rem;">Detalles de la entrada — todos opcionales</p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Cadena de cine</label>
+                        <input type="text" id="inputCadenaCine" placeholder="Ej: Cinépolis, Hoyts">
+                    </div>
+                    <div class="form-group">
+                        <label>Formato</label>
+                        <select id="inputFormatoCine">
+                            <option value="">Sin especificar</option>
+                            <option value="2D">2D</option>
+                            <option value="3D">3D</option>
+                            <option value="IMAX">IMAX</option>
+                            <option value="4DX">4DX</option>
+                            <option value="OTROS">Otros</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Cantidad de entradas</label>
+                        <input type="number" id="inputCantidadEntradas" min="1" placeholder="Ej: 2">
+                    </div>
+                    <div class="form-group">
+                        <label>Incluye consumición</label>
+                        <select id="inputIncluyeConsumicion">
+                            <option value="">Sin especificar</option>
+                            <option value="true">Sí</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Restricciones de función</label>
+                    <textarea id="inputRestriccionesCine" rows="2" placeholder="Ej: Solo fines de semana, no aplica en estrenos..."></textarea>
+                </div>
+            </div>
+
             <!-- Campos DESCUENTO -->
             <div id="campoDescuentoComun" style="display:none;">
+                <hr style="margin:0.5rem 0;border-color:#f0f0f0;">
+                <p style="font-size:0.8rem;color:#888;margin-bottom:0.5rem;">Detalles del descuento</p>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Tipo de descuento <span class="required">*</span></label>
@@ -1049,6 +1146,33 @@
                         <input type="number" id="inputDescuentoValor" min="0" step="0.01" placeholder="Ej: 20">
                     </div>
                 </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Canal de aplicación</label>
+                        <select id="inputCanalDescuento">
+                            <option value="">Sin especificar</option>
+                            <option value="WEB">Web</option>
+                            <option value="APP">App</option>
+                            <option value="LOCAL">Local físico</option>
+                            <option value="TELEFONICO">Telefónico</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Compra mínima</label>
+                        <input type="number" id="inputCompraMinima" min="0" step="0.01" placeholder="Ej: 10000">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Productos incluidos / excluidos</label>
+                    <textarea id="inputProductosAplicables" rows="2" placeholder="Ej: Solo remeras, no aplica en productos en oferta..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Acumulable con otras promociones <span class="required">*</span></label>
+                    <select id="inputAcumulable">
+                        <option value="true">Sí</option>
+                        <option value="false">No</option>
+                    </select>
+                </div>
                 <div class="form-group">
                     <small style="color:#999;"><i class="fas fa-info-circle"></i> El código de descuento se genera automáticamente al guardar.</small>
                 </div>
@@ -1056,8 +1180,10 @@
 
             <!-- Campos EXPERIENCIA -->
             <div id="campoExperienciaComun" style="display:none;">
+                <hr style="margin:0.5rem 0;border-color:#f0f0f0;">
+                <p style="font-size:0.8rem;color:#888;margin-bottom:0.5rem;">Detalles de la experiencia</p>
                 <div class="form-group">
-                    <label>Tipo de experiencia <span class="required">*</span></label>
+                    <label>Tipo de experiencia</label>
                     <input type="text" id="inputExperienciaTipo" placeholder="Ej: Premiere, Visita a set, Proyección privada...">
                 </div>
                 <div class="form-row">
@@ -1070,9 +1196,42 @@
                         <input type="number" id="inputEventoCupo" min="1" placeholder="Ej: 50">
                     </div>
                 </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Ubicación</label>
+                        <input type="text" id="inputEventoUbicacion" placeholder="Ej: Cine Hoyts Abasto, CABA">
+                    </div>
+                    <div class="form-group">
+                        <label>Duración</label>
+                        <input type="text" id="inputDuracion" placeholder="Ej: 2 horas">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Incluye traslado <span class="required">*</span></label>
+                        <select id="inputIncluyeTraslado">
+                            <option value="true">Sí</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Apto para acompañante <span class="required">*</span></label>
+                        <select id="inputAptoAcompanante">
+                            <option value="true">Sí</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="form-group">
-                    <label>Ubicación</label>
-                    <input type="text" id="inputEventoUbicacion" placeholder="Ej: Cine Hoyts Abasto, CABA">
+                    <label>Requisitos</label>
+                    <div style="display:flex;flex-direction:column;gap:0.4rem;padding:0.5rem;border:1px solid #ddd;border-radius:6px;">
+                        <label style="font-weight:normal;display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" name="requisito" value="Vestimenta formal"> Vestimenta formal</label>
+                        <label style="font-weight:normal;display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" name="requisito" value="Ropa deportiva"> Ropa deportiva</label>
+                        <label style="font-weight:normal;display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" name="requisito" value="Mayor de 18 años"> Mayor de 18 años</label>
+                        <label style="font-weight:normal;display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" name="requisito" value="Documento de identidad"> Documento de identidad</label>
+                        <label style="font-weight:normal;display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" name="requisito" value="Código de acceso"> Código de acceso</label>
+                        <label style="font-weight:normal;display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" name="requisito" value="Sin requisitos"> Sin requisitos</label>
+                    </div>
                 </div>
             </div>
         </form>
@@ -1154,37 +1313,156 @@
                 </select>
             </div>
 
+            <!-- Campos MERCHANDISING -->
+            <div id="campoPremiumMerchandising" style="display:none;">
+                <hr style="margin:0.5rem 0;border-color:#f0f0f0;">
+                <p style="font-size:0.8rem;color:#888;margin-bottom:0.5rem;">Detalles del producto — todos opcionales</p>
+                <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                        <div class="form-group"><label>Marca</label><input type="text" id="formPremiumMarca" placeholder="Ej: Adidas"></div>
+                        <div class="form-group"><label>Material</label><input type="text" id="formPremiumMaterial" placeholder="Ej: Algodón"></div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                        <div class="form-group"><label>Color(es)</label><input type="text" id="formPremiumColor" placeholder="Ej: Rojo, Negro"></div>
+                        <div class="form-group"><label>Talle / Talla</label><input type="text" id="formPremiumTalle" placeholder="Ej: M, L, 42"></div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                        <div class="form-group"><label>Dimensiones</label><input type="text" id="formPremiumDimensiones" placeholder="Ej: 30x20x10 cm"></div>
+                        <div class="form-group"><label>Peso</label><input type="text" id="formPremiumPeso" placeholder="Ej: 500g"></div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                        <div class="form-group"><label>Origen / País</label><input type="text" id="formPremiumOrigen" placeholder="Ej: Argentina"></div>
+                        <div class="form-group"><label>Unidades incluidas</label><input type="text" id="formPremiumUnidades" placeholder="Ej: 1 par"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Condición</label>
+                        <select id="formPremiumCondicion">
+                            <option value="">Sin especificar</option>
+                            <option value="NUEVO">Nuevo</option>
+                            <option value="REACONDICIONADO">Reacondicionado</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campos TICKET (Entrada de cine) -->
+            <div id="campoPremiumTicket" style="display:none;">
+                <hr style="margin:0.5rem 0;border-color:#f0f0f0;">
+                <p style="font-size:0.8rem;color:#888;margin-bottom:0.5rem;">Detalles de la entrada — todos opcionales</p>
+                <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                        <div class="form-group"><label>Cadena de cine</label><input type="text" id="formPremiumCadenaCine" placeholder="Ej: Hoyts, Cinépolis"></div>
+                        <div class="form-group">
+                            <label>Formato</label>
+                            <select id="formPremiumFormatoCine">
+                                <option value="">Sin especificar</option>
+                                <option value="2D">2D</option>
+                                <option value="3D">3D</option>
+                                <option value="IMAX">IMAX</option>
+                                <option value="4DX">4DX</option>
+                                <option value="OTROS">Otros</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                        <div class="form-group"><label>Cantidad de entradas</label><input type="number" id="formPremiumCantidadEntradas" min="1" placeholder="Ej: 2"></div>
+                        <div class="form-group">
+                            <label>Incluye consumición</label>
+                            <select id="formPremiumIncluyeConsumicion">
+                                <option value="">Sin especificar</option>
+                                <option value="true">Sí</option>
+                                <option value="false">No</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group"><label>Restricciones de función</label><textarea id="formPremiumRestriccionesCine" rows="2" placeholder="Ej: Solo fines de semana, no aplica en estrenos..."></textarea></div>
+                </div>
+            </div>
+
             <!-- Campos DESCUENTO -->
             <div id="campoPremiumDescuento" style="display:none;">
-                <div class="form-group">
-                    <label>Tipo de descuento</label>
-                    <select id="formPremiumDescuentoTipo">
-                        <option value="PERCENTAGE">% Porcentaje</option>
-                        <option value="FIXED">$ Monto fijo</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Valor del descuento</label>
-                    <input type="number" id="formPremiumDescuentoValor" min="0" step="0.01" placeholder="Ej: 20">
-                </div>
-                <div class="form-group">
-                    <small style="color:#999;"><i class="fas fa-info-circle"></i> El código se genera automáticamente al guardar.</small>
+                <hr style="margin:0.5rem 0;border-color:#f0f0f0;">
+                <p style="font-size:0.8rem;color:#888;margin-bottom:0.5rem;">Detalles del descuento</p>
+                <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                        <div class="form-group">
+                            <label>Tipo de descuento</label>
+                            <select id="formPremiumDescuentoTipo">
+                                <option value="PERCENTAGE">% Porcentaje</option>
+                                <option value="FIXED">$ Monto fijo</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Valor del descuento</label><input type="number" id="formPremiumDescuentoValor" min="0" step="0.01" placeholder="Ej: 20"></div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                        <div class="form-group">
+                            <label>Canal de aplicación</label>
+                            <select id="formPremiumCanalDescuento">
+                                <option value="">Sin especificar</option>
+                                <option value="WEB">Web</option>
+                                <option value="APP">App</option>
+                                <option value="LOCAL">Local físico</option>
+                                <option value="TELEFONICO">Telefónico</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Compra mínima</label><input type="number" id="formPremiumCompraMinima" min="0" step="0.01" placeholder="Ej: 10000"></div>
+                    </div>
+                    <div class="form-group"><label>Productos incluidos / excluidos</label><textarea id="formPremiumProductosAplicables" rows="2" placeholder="Ej: Solo remeras, no aplica en productos en oferta..."></textarea></div>
+                    <div class="form-group">
+                        <label>Acumulable con otras promociones <span class="required">*</span></label>
+                        <select id="formPremiumAcumulable">
+                            <option value="true">Sí</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><small style="color:#999;"><i class="fas fa-info-circle"></i> El código se genera automáticamente al guardar.</small></div>
                 </div>
             </div>
 
             <!-- Campos EXPERIENCIA -->
             <div id="campoPremiumExperiencia" style="display:none;">
-                <div class="form-group">
-                    <label>Tipo de experiencia</label>
-                    <input type="text" id="formPremiumExperienciaTipo" placeholder="Ej: Premiere, Visita a set...">
-                </div>
-                <div class="form-group">
-                    <label>Ubicación</label>
-                    <input type="text" id="formPremiumEventoUbicacion" placeholder="Ej: Cine Hoyts Abasto, CABA">
-                </div>
-                <div class="form-group">
-                    <label>Cupo máximo</label>
-                    <input type="number" id="formPremiumEventoCupo" min="1" placeholder="Ej: 50">
+                <hr style="margin:0.5rem 0;border-color:#f0f0f0;">
+                <p style="font-size:0.8rem;color:#888;margin-bottom:0.5rem;">Detalles de la experiencia</p>
+                <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                    <div class="form-group"><label>Tipo de experiencia</label><input type="text" id="formPremiumExperienciaTipo" placeholder="Ej: Premiere, Visita a set..."></div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                        <div class="form-group"><label>Ubicación</label><input type="text" id="formPremiumEventoUbicacion" placeholder="Ej: Cine Hoyts Abasto, CABA"></div>
+                        <div class="form-group"><label>Duración</label><input type="text" id="formPremiumDuracion" placeholder="Ej: 2 horas"></div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                        <div class="form-group"><label>Cupo máximo</label><input type="number" id="formPremiumEventoCupo" min="1" placeholder="Ej: 50"></div>
+                        <div class="form-group">
+                            <label>Fecha del evento</label>
+                            <input type="datetime-local" id="formPremiumEventoFecha">
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                        <div class="form-group">
+                            <label>Incluye traslado <span class="required">*</span></label>
+                            <select id="formPremiumIncluyeTraslado">
+                                <option value="true">Sí</option>
+                                <option value="false">No</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Apto para acompañante <span class="required">*</span></label>
+                            <select id="formPremiumAptoAcompanante">
+                                <option value="true">Sí</option>
+                                <option value="false">No</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Requisitos</label>
+                        <div style="display:flex;flex-direction:column;gap:0.4rem;padding:0.5rem;border:1px solid #ddd;border-radius:6px;">
+                            <label style="font-weight:normal;display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" name="requisitoPremium" value="Vestimenta formal"> Vestimenta formal</label>
+                            <label style="font-weight:normal;display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" name="requisitoPremium" value="Ropa deportiva"> Ropa deportiva</label>
+                            <label style="font-weight:normal;display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" name="requisitoPremium" value="Mayor de 18 años"> Mayor de 18 años</label>
+                            <label style="font-weight:normal;display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" name="requisitoPremium" value="Documento de identidad"> Documento de identidad</label>
+                            <label style="font-weight:normal;display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" name="requisitoPremium" value="Código de acceso"> Código de acceso</label>
+                            <label style="font-weight:normal;display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" name="requisitoPremium" value="Sin requisitos"> Sin requisitos</label>
+                        </div>
+                    </div>
                 </div>
             </div>
 
