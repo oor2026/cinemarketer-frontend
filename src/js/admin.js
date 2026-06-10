@@ -352,6 +352,18 @@ const adminUI = {
                 document.getElementById('inputPartner').value          = premio.partner || '';
                 document.getElementById('inputWebsite').value          = premio.website || '';
 
+                adminUI.toggleCamposTipoComun(premio.rewardType);
+                if (premio.rewardType === 'DESCUENTO') {
+                    document.getElementById('inputDescuentoTipo').value  = premio.discountType || 'PERCENTAGE';
+                    document.getElementById('inputDescuentoValor').value = premio.discountValue || '';
+                }
+                if (premio.rewardType === 'EXPERIENCIA') {
+                    document.getElementById('inputExperienciaTipo').value  = premio.experienceType || '';
+                    document.getElementById('inputEventoFecha').value      = premio.eventDate ? premio.eventDate.substring(0,16) : '';
+                    document.getElementById('inputEventoCupo').value       = premio.maxCapacity || '';
+                    document.getElementById('inputEventoUbicacion').value  = premio.location || '';
+                }
+
                 if (premio.imageUrl) {
                     document.getElementById('imagePreview').src            = premio.imageUrl;
                     document.getElementById('imagePreview').style.display  = 'block';
@@ -377,10 +389,26 @@ const adminUI = {
         document.getElementById('adminModal').classList.remove('open');
         adminState.premioEditandoId = null;
         adminState.imagenPendiente  = null;
+        adminUI.toggleCamposTipoComun('');
         const galeriaEl = document.getElementById('galeriaImagenesGrid');
         const wrapper   = document.getElementById('galeriaImagenes');
         if (galeriaEl) galeriaEl.innerHTML = '';
         if (wrapper)   wrapper.style.display = 'none';
+    },
+
+    toggleCamposTipoComun(tipo) {
+        const campoDescuento   = document.getElementById('campoDescuentoComun');
+        const campoExperiencia = document.getElementById('campoExperienciaComun');
+        const campoPuntos      = document.getElementById('inputPuntos')?.closest('.form-group');
+        const campoStock       = document.getElementById('inputStock')?.closest('.form-group');
+        const campoVenci       = document.getElementById('inputVencimiento')?.closest('.form-group');
+
+        if (campoDescuento)   campoDescuento.style.display   = tipo === 'DESCUENTO'   ? 'block' : 'none';
+        if (campoExperiencia) campoExperiencia.style.display = tipo === 'EXPERIENCIA' ? 'block' : 'none';
+
+        if (campoPuntos) campoPuntos.style.display = 'block';
+        if (campoStock)  campoStock.style.display  = 'block';
+        if (campoVenci)  campoVenci.style.display  = 'block';
     },
 
     // ------------------------------------------
@@ -426,7 +454,11 @@ const adminUI = {
             toast('El stock debe estar entre 0 y 99.999', 'error');
             return;
         }
-        if (!nombre || !tipo || !puntos || !stock) {
+        if (!nombre || !tipo) {
+            toast('Completá todos los campos obligatorios', 'error');
+            return;
+        }
+        if (tipo !== 'EXPERIENCIA' && (!puntos || !stock)) {
             toast('Completá todos los campos obligatorios', 'error');
             return;
         }
@@ -441,7 +473,13 @@ const adminUI = {
             termsConditions: document.getElementById('inputTerminos').value.trim(),
             active:          document.getElementById('inputActivo').value === 'true',
             partner:         document.getElementById('inputPartner').value.trim() || null,
-            website:         document.getElementById('inputWebsite').value.trim() || null
+            website:         document.getElementById('inputWebsite').value.trim() || null,
+            discountValue:   tipo === 'DESCUENTO' ? parseFloat(document.getElementById('inputDescuentoValor').value) || null : null,
+            discountType:    tipo === 'DESCUENTO' ? document.getElementById('inputDescuentoTipo').value : null,
+            experienceType:  tipo === 'EXPERIENCIA' ? document.getElementById('inputExperienciaTipo').value.trim() || null : null,
+            location:        tipo === 'EXPERIENCIA' ? document.getElementById('inputEventoUbicacion').value.trim() || null : null,
+            eventDate:       tipo === 'EXPERIENCIA' ? document.getElementById('inputEventoFecha').value || null : null,
+            maxCapacity:     tipo === 'EXPERIENCIA' ? parseInt(document.getElementById('inputEventoCupo').value) || null : null,
         };
 
         const btnGuardar = document.querySelector('.btn-guardar');
