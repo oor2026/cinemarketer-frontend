@@ -296,8 +296,12 @@ function renderDisponiblesPagina(pagina) {
             : `<i class="fas fa-gift" style="font-size:3rem;color:#e50914;"></i>`;
 
         const badgeTipo = p.rewardType === 'TICKET'
-            ? '<span class="premio-badge">🎟️ Entrada</span>'
-            : '<span class="premio-badge">🎁 Merchandising</span>';
+                    ? '<span class="premio-badge">🎟️ Entrada</span>'
+                    : p.rewardType === 'DESCUENTO'
+                    ? '<span class="premio-badge">🏷️ Descuento</span>'
+                    : p.rewardType === 'EXPERIENCIA'
+                    ? '<span class="premio-badge">🎟️ Experiencia</span>'
+                    : '<span class="premio-badge">🎁 Merchandising</span>';
 
         let btnLabel, btnDisabled;
         if (!p.hasStock) {
@@ -520,9 +524,10 @@ function renderCardEspecial(p, isPremium) {
 
     const esSorteo = p.type === 'SORTEO';
 
-    const badge = esSorteo
-        ? `<span class="premio-badge sorteo-badge">🎲 Sorteo gratuito</span>`
-        : `<span class="premio-badge">⭐ Premio exclusivo</span>`;
+    const badge = p.type === 'SORTEO'      ? `<span class="premio-badge sorteo-badge">🎲 Sorteo gratuito</span>`
+                : p.type === 'DESCUENTO'   ? `<span class="premio-badge">🏷️ Descuento</span>`
+                : p.type === 'EXPERIENCIA' ? `<span class="premio-badge">🎟️ Experiencia</span>`
+                : `<span class="premio-badge">⭐ Premio exclusivo</span>`;
 
     let infoExtra = '';
     if (esSorteo) {
@@ -656,6 +661,10 @@ function aplicarFiltroYOrden(premios) {
         resultado = resultado.filter(p => p.rewardType === 'TICKET');
     } else if (premiosState.filtroActual === 'merchandising') {
         resultado = resultado.filter(p => p.rewardType === 'MERCHANDISING');
+    } else if (premiosState.filtroActual === 'descuento') {
+        resultado = resultado.filter(p => p.rewardType === 'DESCUENTO');
+    } else if (premiosState.filtroActual === 'experiencia') {
+        resultado = resultado.filter(p => p.rewardType === 'EXPERIENCIA');
     }
 
     if (premiosState.ordenActual === 'puntos-menor') {
@@ -1007,7 +1016,11 @@ window.abrirModalEspecial = function(p, isPremium) {
     const esSorteo = p.type === 'SORTEO';
 
     document.getElementById('modalEspecialTitulo').textContent = p.name;
-    document.getElementById('modalEspecialBadge').textContent  = esSorteo ? '🎲 Sorteo gratuito' : '⭐ Premio exclusivo';
+    document.getElementById('modalEspecialBadge').textContent =
+            p.type === 'SORTEO'      ? '🎲 Sorteo gratuito'  :
+            p.type === 'DESCUENTO'   ? '🏷️ Descuento'        :
+            p.type === 'EXPERIENCIA' ? '🎟️ Experiencia'       :
+                                       '⭐ Premio exclusivo';
 
     // Imagen
     const img         = document.getElementById('modalEspecialImg');

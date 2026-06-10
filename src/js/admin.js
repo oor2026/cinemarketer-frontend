@@ -163,8 +163,12 @@ const adminUI = {
                 : `<div class="tabla-img-placeholder"><i class="fas fa-gift"></i></div>`;
 
             const tipoBadge = p.rewardType === 'TICKET'
-                ? `<span class="badge badge-ticket">🎟️ Entrada</span>`
-                : `<span class="badge badge-merch">🎁 Merch</span>`;
+                            ? `<span class="badge badge-ticket">🎟️ Entrada</span>`
+                            : p.rewardType === 'DESCUENTO'
+                            ? `<span class="badge badge-merch">🏷️ Descuento</span>`
+                            : p.rewardType === 'EXPERIENCIA'
+                            ? `<span class="badge badge-merch">🎟️ Experiencia</span>`
+                            : `<span class="badge badge-merch">🎁 Merch</span>`;
 
             let estadoBadge;
             if (!p.active) {
