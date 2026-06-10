@@ -564,14 +564,14 @@
                     <div class="modal-body">
                         <form id="formAvatar" onsubmit="return false;">
                             <div class="form-group image-upload-group">
-                                <label>Imagen del premio</label>
-                                <div class="image-upload-area" id="avatarUploadArea" onclick="document.getElementById('inputAvatarImagen').click()">
+                                <label>Imagen del avatar <span class="required">*</span></label>
+                                <div class="image-upload-area" id="avatarImageUploadArea" onclick="document.getElementById('inputAvatarImagen').click()">
                                     <div class="image-placeholder" id="avatarImagePlaceholder">
                                         <i class="fas fa-cloud-upload-alt"></i>
                                         <p>Hacé clic para subir una imagen</p>
                                         <small>JPG, PNG o WEBP — máx. 5MB</small>
                                     </div>
-                                    <img id="avatarImagePreview" src="" alt="Preview" style="display:none;">
+                                    <img id="avatarImagePreview" src="" alt="Preview" style="display:none; width:120px; height:120px; object-fit:cover; border-radius:50%; margin:0 auto;">
                                 </div>
                                 <input type="file" id="inputAvatarImagen" accept="image/*" style="display:none;" onchange="adminAvatares.previewImagen(this)">
                             </div>
@@ -1062,16 +1062,13 @@
                 <small style="color:#999;display:flex;justify-content:flex-end;margin-top:4px;"><span id="premiumDescCount">0</span>/165</small>
             </div>
             <div class="form-group image-upload-group">
-                <label>Imagen del premio</label>
-                <div class="image-upload-area" id="premiumImageUploadArea" onclick="document.getElementById('inputPremiumImagen').click()">
-                    <div class="image-placeholder" id="premiumImagePlaceholder">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <p>Hacé clic para subir una imagen</p>
-                        <small>JPG, PNG o WEBP — máx. 5MB</small>
-                    </div>
-                    <img id="premiumImagePreview" src="" alt="Preview" style="display:none; width:120px; height:120px; object-fit:cover; border-radius:8px; margin:0 auto;">
+                <label>Imágenes del premio <small style="color:#999;font-weight:normal;">(máx. 5)</small></label>
+                <div id="galeriaImagenesPremium" style="margin-top:0.5rem;min-height:20px;">
+                    <div id="galeriaImagenesPremiumGrid"></div>
                 </div>
-                <input type="file" id="inputPremiumImagen" accept="image/*" style="display:none;" onchange="adminPremiosPremium.previewImagen(this)">
+                <p id="galeriaImagenesPremiumNuevo" style="font-size:0.8rem;color:#999;margin-top:0.4rem;display:none;">
+                    Guardá el premio primero para agregar imágenes.
+                </p>
             </div>
             <div class="form-group">
                 <label>Tipo <span class="required">*</span></label>

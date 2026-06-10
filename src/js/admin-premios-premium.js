@@ -218,9 +218,6 @@ const adminPremiosPremium = {
         document.getElementById('formPremiumStock').value       = '';
         document.getElementById('formPremiumFechaSorteo').value = '';
         document.getElementById('formPremiumActivo').value      = 'true';
-        document.getElementById('inputPremiumImagen').value     = '';
-        document.getElementById('premiumImagePreview').style.display     = 'none';
-        document.getElementById('premiumImagePlaceholder').style.display = 'flex';
         document.getElementById('premiumDescCount').textContent = '0';
         document.getElementById('formPremiumPartner').value  = '';
         document.getElementById('formPremiumWebsite').value  = '';
@@ -228,41 +225,39 @@ const adminPremiosPremium = {
         this.toggleCamposTipo('CANJEABLE');
 
         if (id) {
-            titulo.textContent = 'Editar Premio Premium';
-            const p = this.premios.find(x => x.id === id);
-            if (p) {
-                document.getElementById('formPremiumNombre').value      = p.name || '';
-                document.getElementById('formPremiumDescripcion').value = p.description || '';
-                document.getElementById('premiumDescCount').textContent = (p.description || '').length;
-                document.getElementById('formPremiumTipo').value        = p.type || 'CANJEABLE';
-                document.getElementById('formPremiumPuntos').value      = p.pointsRequired || 0;
-                document.getElementById('formPremiumStock').value       = p.stock != null ? p.stock : '';
-                document.getElementById('formPremiumPartner').value  = p.partner || '';
-                document.getElementById('formPremiumWebsite').value  = p.website || '';
-                document.getElementById('formPremiumTerminos').value = p.termsConditions || '';
-                document.getElementById('formPremiumActivo').value      = p.active ? 'true' : 'false';
-                if (p.drawDate) {
-                    document.getElementById('formPremiumFechaSorteo').value = p.drawDate.substring(0, 16);
+                titulo.textContent = 'Editar Premio Premium';
+                const p = this.premios.find(x => x.id === id);
+                if (p) {
+                    document.getElementById('formPremiumNombre').value      = p.name || '';
+                    document.getElementById('formPremiumDescripcion').value = p.description || '';
+                    document.getElementById('premiumDescCount').textContent = (p.description || '').length;
+                    document.getElementById('formPremiumTipo').value        = p.type || 'CANJEABLE';
+                    document.getElementById('formPremiumPuntos').value      = p.pointsRequired || 0;
+                    document.getElementById('formPremiumStock').value       = p.stock != null ? p.stock : '';
+                    document.getElementById('formPremiumPartner').value  = p.partner || '';
+                    document.getElementById('formPremiumWebsite').value  = p.website || '';
+                    document.getElementById('formPremiumTerminos').value = p.termsConditions || '';
+                    document.getElementById('formPremiumActivo').value      = p.active ? 'true' : 'false';
+                    if (p.drawDate) {
+                        document.getElementById('formPremiumFechaSorteo').value = p.drawDate.substring(0, 16);
+                    }
+                    document.getElementById('galeriaImagenesPremiumNuevo').style.display = 'none';
+                    adminUI.cargarGaleriaImagenes(id, 'PREMIUM');
+                    this.toggleCamposTipo(p.type);
                 }
-                if (p.imageUrl) {
-                    document.getElementById('premiumImagePreview').src            = p.imageUrl;
-                    document.getElementById('premiumImagePreview').style.display  = 'block';
-                    document.getElementById('premiumImagePlaceholder').style.display = 'none';
-                }
-                this.toggleCamposTipo(p.type);
+            } else {
+                titulo.textContent = 'Nuevo Premio Premium';
+                document.getElementById('galeriaImagenesPremiumNuevo').style.display = 'block';
+                document.getElementById('galeriaImagenesPremiumGrid').innerHTML = '';
             }
-        } else {
-            titulo.textContent = 'Nuevo Premio Premium';
-        }
 
-        modal.style.display = 'flex';
-    },
+            modal.style.display = 'flex';
+        },
 
     cerrarFormulario() {
-        document.getElementById('modalPremiumOverlay').style.display     = 'none';
-        document.getElementById('premiumImagePreview').style.display     = 'none';
-        document.getElementById('premiumImagePlaceholder').style.display = 'flex';
-        document.getElementById('inputPremiumImagen').value              = '';
+        document.getElementById('modalPremiumOverlay').style.display = 'none';
+        document.getElementById('galeriaImagenesPremiumGrid').innerHTML = '';
+        document.getElementById('galeriaImagenesPremiumNuevo').style.display = 'none';
         this.editandoId      = null;
         this.imagenPendiente = null;
     },
@@ -371,10 +366,8 @@ const adminPremiosPremium = {
             if (!response.ok) throw new Error(`Error ${response.status}`);
             const saved = await response.json();
 
-            if (this.imagenPendiente) {
-                await this.subirImagen(saved.id, this.imagenPendiente);
-                this.imagenPendiente = null;
-            }
+            document.getElementById('galeriaImagenesPremiumNuevo').style.display = 'none';
+            await adminUI.cargarGaleriaImagenes(saved.id, 'PREMIUM');
 
             this.cerrarFormulario();
             await this.cargarPremios();
