@@ -2340,3 +2340,22 @@ function inicializarCarrusel() {
 
 window.irASlide          = irASlide;
 window.inicializarCarrusel = inicializarCarrusel;
+
+window.seleccionarTabFeed = function(tab, el) {
+    // por ahora solo existe Películas, no hace nada extra
+};
+
+window.mostrarTooltipComunidad = function(event) {
+    event.stopPropagation();
+    const btn = document.getElementById('tabComunidad');
+    btn.setAttribute('title', '¡Próximamente!');
+
+    // tooltip visual temporal
+    const tooltip = document.createElement('div');
+    tooltip.textContent = '¡Próximamente!';
+    tooltip.style.cssText = 'position:fixed;background:#333;color:white;padding:4px 10px;border-radius:6px;font-size:0.8rem;z-index:9999;pointer-events:none;';
+    tooltip.style.left = event.clientX + 'px';
+    tooltip.style.top = (event.clientY - 35) + 'px';
+    document.body.appendChild(tooltip);
+    setTimeout(() => tooltip.remove(), 1800);
+};
