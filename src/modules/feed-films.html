@@ -113,15 +113,19 @@
                 <!-- ============================================== -->
                 <!-- BOTONES VOTAR - DEBAJO DEL TRÁILER -->
                 <!-- ============================================== -->
+                <!-- LEYENDA DE PORCENTAJE -->
+                <div id="modalLeyendaPorcentaje" style="text-align:center;font-size:0.95rem;font-weight:600;color:#333;margin:0rem 0 0.25rem;white-space:nowrap;grid-column:1/-1;width:100%;display:block;"></div>
+
+                <!-- BOTONES VOTAR - DEBAJO DEL TRÁILER -->
                 <div class="modal-acciones">
-                    <button class="btn-like" onclick="window.votarPelicula(window.peliculaActualId, 'like', event)">
-                        <i class="fas fa-thumbs-up"></i> <span id="modalLikes">0</span>
+                    <button class="btn-like" onclick="window.votarPelicula(window.peliculaActualId, 'like', event)" title="Me gusta">
+                        <i class="fas fa-thumbs-up"></i> Te banco <span id="modalLikes">0</span>
                     </button>
-                    <button class="btn-dislike" onclick="window.votarPelicula(window.peliculaActualId, 'dislike', event)">
-                        <i class="fas fa-thumbs-down"></i> <span id="modalDislikes">0</span>
+                    <button class="btn-dislike" onclick="window.votarPelicula(window.peliculaActualId, 'dislike', event)" title="No me gusta">
+                        <i class="fas fa-thumbs-down"></i> No te banco <span id="modalDislikes">0</span>
                     </button>
-                    <button class="btn-recomendar" onclick="window.abrirPanelRecomendar(window.peliculaActualId, event)">
-                        <i class="fas fa-share"></i> Recomendar
+                    <button class="btn-recomendar" onclick="window.abrirPanelRecomendar(window.peliculaActualId, event)" title="Recomendar">
+                        <i class="fas fa-envelope"></i> Recomendar
                     </button>
                 </div>
 
