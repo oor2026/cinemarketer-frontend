@@ -80,7 +80,7 @@ window.generarTarjetasHTML = async function(peliculas) {
                 : 'Próximamente';
 
             const overview = pelicula.overview
-                ? pelicula.overview.substring(0, 120) + '...'
+                ? pelicula.overview.substring(0, 110) + '...'
                 : 'Sinopsis no disponible';
 
             return plantilla
