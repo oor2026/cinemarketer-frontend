@@ -2359,3 +2359,9 @@ window.mostrarTooltipComunidad = function(event) {
     document.body.appendChild(tooltip);
     setTimeout(() => tooltip.remove(), 1800);
 };
+
+window.abrirFiltrosMobile = function() {
+    if (typeof abrirFiltrosModal === 'function') {
+        abrirFiltrosModal();
+    }
+};
