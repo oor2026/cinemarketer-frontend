@@ -54,6 +54,20 @@ function cerrarTodosLosMenus() {
     }
 }
 
+function getNotifIcono(type) {
+    switch(type) {
+        case 'BANCO':                    return '👍';
+        case 'MERECE_PUNTO':             return '⭐';
+        case 'NEW_FOLLOWER':             return '👤';
+        case 'RECOMMENDATION_RATED':     return '🎬';
+        case 'NEW_RECOMMENDATION':       return '🎬';
+        case 'DRAW_WINNER':              return '🏆';
+        case 'PREMIUM_EXPIRING_SOON':    return '⏰';
+        case 'PREMIUM_EXPIRING_TOMORROW':return '⚠️';
+        default:                         return '💬';
+    }
+}
+
 window.cargarNovedades = async function() {
     const lista = document.getElementById('novedadesLista');
     const token = localStorage.getItem('token');
@@ -85,7 +99,7 @@ window.cargarNovedades = async function() {
                 onmouseover="this.style.background='#f8f8f8'"
                 onmouseout="this.style.background='${n.read ? 'white' : '#f0f4ff'}'">
                 <div style="display:flex;align-items:flex-start;gap:0.5rem;">
-                    <span style="font-size:1rem;flex-shrink:0;">${n.type === 'BANCO' ? '👍' : n.type === 'MERECE_PUNTO' ? '⭐' : n.type === 'NEW_FOLLOWER' ? '👤' : n.type === 'RECOMMENDATION_RATED' ? '🎬' : '💬'}</span>
+                    <span style="font-size:1rem;flex-shrink:0;">${getNotifIcono(n.type)}</span>
                     <div style="flex:1;min-width:0;">
                         <div style="font-size:0.83rem;color:#333;line-height:1.4;">${n.message}</div>
                         <div style="font-size:0.75rem;color:#999;margin-top:0.2rem;">${new Date(n.createdAt).toLocaleDateString('es-ES')} ${new Date(n.createdAt).toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'})}</div>
@@ -102,6 +116,7 @@ window.cargarNovedades = async function() {
 
 window.clickNovedad = async function(notificationId, movieId, commentId, replyId, type, yaLeida, actorId) {
      console.log('clickNovedad ejecutado, type:', type);
+     console.log('movieId:', movieId, 'abrirDetallePelicula:', typeof window.abrirDetallePelicula);
     const token = localStorage.getItem('token');
 
     // Cerrar todos los menús al inicio
@@ -137,8 +152,41 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
         return;
     }
 
-    // Navegar solo en respuestas
-    if (type === 'REPLY') {
+    // Abrir película al clickear recomendación nueva
+        if (type === 'NEW_RECOMMENDATION') {
+            if (movieId) {
+                if (typeof window.abrirDetallePelicula !== 'function') {
+                    await new Promise(resolve => {
+                        loadModule('feed-films', null, true);
+                        setTimeout(resolve, 1500);
+                    });
+                }
+                if (typeof window.abrirDetallePelicula === 'function') {
+                    window.abrirDetallePelicula(movieId);
+                }
+            }
+            return;
+        }
+
+        // Navegar a suscripción al clickear notif de vencimiento premium
+        if (type === 'PREMIUM_EXPIRING_SOON' || type === 'PREMIUM_EXPIRING_TOMORROW') {
+            if (typeof window.loadModule === 'function') {
+                loadModule('mi-cuenta');
+                setTimeout(() => {
+                    const bannerEl = document.querySelector('.subscription-banner, .premium-banner, #premiumBanner, [id*="premium"]');
+                    if (bannerEl) {
+                        bannerEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        bannerEl.style.transition = 'box-shadow 0.3s';
+                        bannerEl.style.boxShadow = '0 0 0 4px #e50914, 0 0 20px rgba(229,9,20,0.4)';
+                        setTimeout(() => { bannerEl.style.boxShadow = ''; }, 3000);
+                    }
+                }, 1000);
+            }
+            return;
+        }
+
+        // Navegar solo en respuestas
+        if (type === 'REPLY') {
             // Si el modal no está en el DOM, hay que cargar el feed primero
             if (!document.getElementById('movieModal')) {
                 await new Promise(resolve => {
@@ -251,7 +299,7 @@ window.cargarNovedadesMobile = async function() {
                 style="padding:0.75rem 1rem;border-bottom:1px solid #eee;cursor:pointer;
                        background:${n.read ? 'white' : '#f0f4ff'};">
                 <div style="display:flex;align-items:flex-start;gap:0.5rem;">
-                    <span style="font-size:1rem;flex-shrink:0;">${n.type === 'BANCO' ? '👍' : n.type === 'MERECE_PUNTO' ? '⭐' : n.type === 'NEW_FOLLOWER' ? '👤' : n.type === 'RECOMMENDATION_RATED' ? '🎬' : '💬'}</span>
+                    <span style="font-size:1rem;flex-shrink:0;">${getNotifIcono(n.type)}</span>
                     <div style="flex:1;min-width:0;">
                         <div style="font-size:0.83rem;color:#333;line-height:1.4;">${n.message}</div>
                         <div style="font-size:0.75rem;color:#999;margin-top:0.2rem;">${new Date(n.createdAt).toLocaleDateString('es-ES')} ${new Date(n.createdAt).toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'})}</div>
