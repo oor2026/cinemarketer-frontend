@@ -516,7 +516,7 @@ window.ordenarPeliculas = async function() {
                 porcentajeEl.textContent = stats.totalVotos === 0 ? '0%' : `${stats.porcentaje}%`;
             }
 
-            const comentariosEl = card.querySelector(`#comentarios-${movieId}`);
+            const comentariosEl = card.querySelector(`#comentarios-card-${movieId}`);
             if (comentariosEl) comentariosEl.textContent = stats.comentarios;
         }
     });
@@ -647,7 +647,7 @@ window.cargarEstadisticasVotacion = async function() {
                 });
                 if (commResponse.ok) {
                     const comentarios = await commResponse.json();
-                    const contadorEl = card.querySelector(`#comentarios-${movieId}`);
+                    const contadorEl = card.querySelector(`#comentarios-card-${movieId}`);
                     if (contadorEl) contadorEl.textContent = comentarios.length;
                 }
             } catch (ce) {}
@@ -981,6 +981,15 @@ window.cargarDatosPelicula = async function(id) {
             document.getElementById('modalLikes').textContent    = stats.likes || 0;
             document.getElementById('modalDislikes').textContent = stats.dislikes || 0;
 
+            const totalVotosModal = (stats.likes || 0) + (stats.dislikes || 0);
+            const porcentajeModal = totalVotosModal > 0 ? Math.round((stats.likes / totalVotosModal) * 100) : 0;
+            const leyendaEl = document.getElementById('modalLeyendaPorcentaje');
+            if (leyendaEl) {
+                leyendaEl.textContent = porcentajeModal > 0
+                    ? `Al ${porcentajeModal}% de los usuarios les gustó esta película`
+                    : '';
+            }
+
             const btnLike    = document.querySelector('#modalPelicula .btn-like');
             const btnDislike = document.querySelector('#modalPelicula .btn-dislike');
             btnLike?.classList.remove('votado');
@@ -1093,6 +1102,9 @@ window.cargarComentariosPelicula = async function(id) {
 
         const modalComentariosCount = document.getElementById('modalComentariosCount');
         if (modalComentariosCount) modalComentariosCount.textContent = `💬 ${comentarios.length} comentarios`;
+
+        const btnComentarios = document.getElementById('modalComentariosBtn');
+        if (btnComentarios) btnComentarios.textContent = comentarios.length;
 
         lista.innerHTML = '';
         if (comentarios.length === 0) {
@@ -2012,7 +2024,7 @@ window.enviarComentario = async function() {
         window._gifSeleccionado = null;
         window.cancelarComentario();
 
-        const contadorCard = document.getElementById(`comentarios-${movieId}`);
+        const contadorCard = document.getElementById(`comentarios-card-${movieId}`);
         if (contadorCard) {
             contadorCard.textContent = parseInt(contadorCard.textContent || '0') + 1;
         }
