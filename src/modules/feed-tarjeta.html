@@ -11,15 +11,9 @@
     <div class="pelicula-info">
         <h3 class="pelicula-titulo">{title}</h3>
 
-        <!-- DESCRIPCIÓN RESTAURADA -->
-        <p class="pelicula-descripcion">{overview}</p>
-
-        <div class="pelicula-metadata">
-            <span class="comentarios-info">
-                <i class="fas fa-comment"></i> Comentarios: <span class="comentarios-count" id="comentarios-{id}">0</span>
-            </span>
-            <span class="ver-mas" onclick="event.stopPropagation(); window.abrirDetallePelicula({id})">Ver más</span>
-        </div>
+        <p class="pelicula-descripcion">
+            {overview} <span class="ver-mas" onclick="event.stopPropagation(); window.abrirDetallePelicula({id})">Ver más</span>
+        </p>
 
         <!-- VOTACIÓN PROPIA DE CINEMARKETER -->
         <div class="votacion-container" id="votacion-{id}">
@@ -29,11 +23,17 @@
             </div>
 
             <div class="votacion-buttons">
-                <button class="btn-like" onclick="event.stopPropagation(); window.votarPelicula({id}, 'like', event)">
+                <button class="btn-like" onclick="event.stopPropagation(); window.votarPelicula({id}, 'like', event)" title="Me gusta">
                     <i class="fas fa-thumbs-up"></i> <span id="likes-{id}">0</span>
                 </button>
-                <button class="btn-dislike" onclick="event.stopPropagation(); window.votarPelicula({id}, 'dislike', event)">
+                <button class="btn-dislike" onclick="event.stopPropagation(); window.votarPelicula({id}, 'dislike', event)" title="No me gusta">
                     <i class="fas fa-thumbs-down"></i> <span id="dislikes-{id}">0</span>
+                </button>
+                <button class="btn-comentarios-card" onclick="event.stopPropagation(); window.abrirDetallePelicula({id})" title="Comentarios">
+                    <i class="fas fa-comment"></i> <span id="comentarios-card-{id}" class="comentarios-count">0</span>
+                </button>
+                <button class="btn-recomendar" onclick="event.stopPropagation(); window.abrirPanelRecomendar({id}, event)" title="Recomendar">
+                    <i class="fas fa-envelope"></i>
                 </button>
             </div>
         </div>
