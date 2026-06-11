@@ -102,6 +102,12 @@ body.modulo-mi-cuenta .ads-sidebar-right {
 
     .dashboard-layout {
         display: block;
+        padding: 0 !important;
+    }
+
+    .dashboard-layout #module-container {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
     }
 }
 

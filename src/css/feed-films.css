@@ -225,6 +225,16 @@
     width: 100%;
 }
 
+@media (max-width: 768px) {
+    .pelicula-card {
+        max-width: 100% !important;
+        justify-self: stretch !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        border-bottom: 8px solid #f0f0f0 !important;
+    }
+}
+
 .pelicula-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 25px rgba(0,0,0,0.15);
@@ -1135,6 +1145,18 @@
         display: none !important;
     }
 
+    #feedBannerHorizontal {
+        margin-left: -1rem !important;
+        margin-right: -1rem !important;
+        width: calc(100% + 2rem) !important;
+        margin-top: -1rem !important;
+        border-radius: 0 !important;
+    }
+
+    .feed-banner-img {
+        border-radius: 0 !important;
+    }
+
     .filtros-grid {
         grid-template-columns: 1fr;
     }
@@ -1147,8 +1169,9 @@
             grid-template-columns: 1fr;
             padding: 0 !important;
             gap: 0 !important;
-            margin-left: -1rem !important;
-            margin-right: -1rem !important;
+            margin-left: -2rem !important;
+            margin-right: -2rem !important;
+            width: calc(100% + 4rem) !important;
         }
 
         .pelicula-card {
@@ -1648,7 +1671,7 @@
     background: white;
     border-radius: 20px 20px 0 0;
     z-index: 1101;
-    max-height: 85vh;
+    max-height: 96vh;
     overflow-y: auto;
     transform: translateY(100%);
     transition: transform 0.3s ease;
@@ -1685,10 +1708,10 @@
 
 /* Body del modal */
 .filtros-modal-body {
-    padding: 1.5rem;
+    padding: 0.75rem 1.5rem;
     display: flex;
     flex-direction: column;
-    gap: 1.2rem;
+    gap: 0.3rem;
 }
 
 /* Footer del modal */
@@ -2231,16 +2254,24 @@
 
 @media (max-width: 600px) {
     .ordenar-pills {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
         gap: 0.5rem;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        padding-bottom: 0.25rem;
+    }
+
+    .ordenar-pills::-webkit-scrollbar {
+        display: none;
     }
 
     .pill-orden {
-        white-space: normal;
-        text-align: center;
-        padding: 0.55rem 0.5rem;
-        font-size: 0.80rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+        padding: 0.45rem 1rem;
+        font-size: 0.82rem;
     }
 }
 
@@ -2447,4 +2478,21 @@
 .feed-tab.disabled {
     color: #ccc;
     cursor: not-allowed;
+}
+
+.feed-tab-filtro {
+    margin-left: auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    font-size: 1.1rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.2s;
+}
+
+.feed-tab-filtro:hover {
+    color: #1a3a6b;
 }
