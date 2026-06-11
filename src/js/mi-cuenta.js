@@ -1224,7 +1224,14 @@ function renderMeRecomendaron() {
         `;
 
         return `
-            <div style="display:flex;align-items:flex-start;gap:0.85rem;padding:0.9rem 0;border-bottom:1px solid #f5f5f5;">
+            <div style="display:flex;align-items:flex-start;gap:0.85rem;padding:0.9rem 0;border-bottom:1px solid #f5f5f5;position:relative;">
+                            <button onclick="window.abrirModalEliminarRec(${r.id})"
+                                    title="Eliminar recomendación"
+                                    style="position:absolute;top:8px;right:0;background:none;border:none;cursor:pointer;color:#ccc;font-size:1rem;padding:4px;line-height:1;"
+                                    onmouseover="this.style.color='#e50914'"
+                                    onmouseout="this.style.color='#ccc'">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
                 ${posterUrl
                     ? `<img src="${posterUrl}" alt="${r.movieTitle || 'Película'}" style="width:85px;height:128px;object-fit:cover;border-radius:6px;flex-shrink:0;">`
                     : `<div style="width:85px;height:128px;background:#1a3a6b;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;">🎬</div>`
@@ -1302,6 +1309,40 @@ window.seleccionarEstrellaRec = async function(recId, rating) {
         });
         if (res.ok) {
             rec.rating = rating;
+            renderMeRecomendaron();
+        }
+    } catch (e) {}
+};
+
+// ── Eliminar recomendación ──────────────────────────────────────
+let _eliminarRecId = null;
+
+window.abrirModalEliminarRec = function(recId) {
+    _eliminarRecId = recId;
+    const modal = document.getElementById('modalEliminarRec');
+    if (modal) modal.style.display = 'flex';
+};
+
+window.cerrarModalEliminarRec = function() {
+    _eliminarRecId = null;
+    const modal = document.getElementById('modalEliminarRec');
+    if (modal) modal.style.display = 'none';
+};
+
+window.confirmarEliminarRec = async function() {
+    const recId = _eliminarRecId;
+    if (!recId) return;
+    window.cerrarModalEliminarRec();
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/recommendations/${recId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            _recomendacionesCache = _recomendacionesCache.filter(r => r.id !== recId);
+            const countEl = document.getElementById('countRecomendaciones');
+            if (countEl) countEl.textContent = _recomendacionesCache.length;
             renderMeRecomendaron();
         }
     } catch (e) {}
