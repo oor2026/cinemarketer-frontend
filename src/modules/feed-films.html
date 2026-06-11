@@ -19,8 +19,20 @@
     <div id="filtros-container"></div>
 
     <!-- RESULTADOS (PELÍCULAS) -->
-    <div class="resultados-header">
+    <div class="resultados-header" style="display:none;">
         <h3>Películas encontradas <span id="resultadosCount">3</span></h3>
+    </div>
+
+    <!-- TABS PELÍCULAS / COMUNIDAD -->
+    <div class="feed-tabs">
+        <button class="feed-tab active" id="tabPeliculas" onclick="window.seleccionarTabFeed('peliculas', this)">
+            🎬 Películas
+        </button>
+        <button class="feed-tab disabled" id="tabComunidad"
+                onclick="window.mostrarTooltipComunidad(event)"
+                title="¡Próximamente!">
+            💬 Comunidad
+        </button>
     </div>
 
     <!-- PILLS DE ORDENAMIENTO -->
