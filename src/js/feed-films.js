@@ -1242,12 +1242,18 @@ window.cargarComentariosPelicula = async function(id) {
                     </div>
                 `;
                 lista.appendChild(item);
-            });
+                });
+
+                // Aplicar color de borde según modo spoiler activo
+                if (modoSpoilerActivo) {
+                    const items = document.querySelectorAll('#modalPelicula .comentario-item');
+                    items.forEach(i => { i.style.borderLeftColor = '#6c63ff'; });
+                }
+            }
+        } catch (error) {
+            if (lista) lista.innerHTML = '<div class="sin-comentarios">Error al cargar comentarios</div>';
         }
-    } catch (error) {
-        if (lista) lista.innerHTML = '<div class="sin-comentarios">Error al cargar comentarios</div>';
-    }
-};
+    };
 
 // ==============================================
 // MODAL REPORTAR COMENTARIO
@@ -1885,6 +1891,12 @@ window.activarModoSpoiler = function activarModoSpoiler(activar) {
     if (aviso) aviso.style.display = modoSpoilerActivo ? 'block' : 'none';
     if (btnCom) btnCom.classList.toggle('spoiler-mode', modoSpoilerActivo);
     header?.classList.toggle('spoiler-mode', modoSpoilerActivo);
+
+    // Cambiar color de bordes de comentarios según modo spoiler
+    const items = document.querySelectorAll('#modalPelicula .comentario-item');
+    items.forEach(item => {
+        item.style.borderLeftColor = modoSpoilerActivo ? '#6c63ff' : '#e50914';
+    });
 
     if (textarea) {
         textarea.placeholder = modoSpoilerActivo
