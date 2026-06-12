@@ -62,6 +62,7 @@ function getNotifIcono(type) {
         case 'RECOMMENDATION_RATED':     return '🎬';
         case 'NEW_RECOMMENDATION':       return '🎬';
         case 'DRAW_WINNER':              return '🏆';
+        case 'POINTS_RELEASED':          return '🪙';
         case 'PREMIUM_EXPIRING_SOON':    return '⏰';
         case 'PREMIUM_EXPIRING_TOMORROW':return '⚠️';
         default:                         return '💬';
@@ -185,8 +186,14 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
             return;
         }
 
-        // Navegar solo en respuestas
-        if (type === 'REPLY') {
+        // Abrir modal premium al clickear notif de puntos liberados con techo superado
+            if (type === 'POINTS_RELEASED') {
+                if (typeof abrirDetallePlan === 'function') abrirDetallePlan();
+                return;
+            }
+
+            // Navegar solo en respuestas
+            if (type === 'REPLY') {
             // Si el modal no está en el DOM, hay que cargar el feed primero
             if (!document.getElementById('movieModal')) {
                 await new Promise(resolve => {
