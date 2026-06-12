@@ -2031,7 +2031,7 @@ window.enviarComentario = async function() {
             throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
 
-        const comentario = await response.json();
+        const data = await response.json();
 
         input.value = '';
         window._gifSeleccionado = null;
@@ -2043,7 +2043,12 @@ window.enviarComentario = async function() {
         }
 
         await window.cargarComentariosPelicula(movieId);
-        showToast('success', '¡Comentario enviado con éxito!');
+
+        if (data.limiteDiarioAlcanzado) {
+            mostrarMensajeLimiteDiario();
+        } else {
+            showToast('success', '¡Comentario enviado con éxito!');
+        }
 
     } catch (error) {
         showToast('error', 'No se pudo enviar el comentario. Intentá de nuevo.');
@@ -2388,3 +2393,37 @@ window.mostrarTooltipComunidad = function(event) {
 window.abrirFiltrosMobile = function() {
     abrirFiltrosModal();
 };
+
+// ── Mensaje límite diario de comentarios ────────────────────────────────
+function mostrarMensajeLimiteDiario() {
+    const existing = document.getElementById('modalLimiteDiario');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'modalLimiteDiario';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+    modal.innerHTML = `
+        <div style="background:white;border-radius:16px;padding:2rem;max-width:420px;width:100%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+            <div style="font-size:2.5rem;margin-bottom:0.75rem;">🎬</div>
+            <h3 style="margin:0 0 0.75rem;color:#333;font-size:1.1rem;font-weight:700;">Ya generaste todos tus puntos de hoy</h3>
+            <p style="color:#666;font-size:0.9rem;margin:0 0 1.5rem;line-height:1.6;text-align:left;">
+                Podés seguir comentando lo que quieras, pero estos comentarios no sumarán puntos.
+                <br>A las 00hs se renueva tu límite diario y volverás a ganar puntos con tus comentarios.
+            </p>
+            <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                <button onclick="document.getElementById('modalLimiteDiario').remove()"
+                    style="padding:0.75rem;border:1.5px solid #ddd;background:none;border-radius:8px;color:#666;cursor:pointer;font-size:0.9rem;">
+                    Entendido
+                </button>
+                <p style="color:#888;font-size:0.85rem;margin:0 0 0.75rem;">
+                    ¿Querés comentar sin límites y ganar puntos ilimitados?
+                </p>
+                <button onclick="document.getElementById('modalLimiteDiario').remove(); if(typeof cerrarModal==='function') cerrarModal(); if(typeof abrirDetallePlan==='function') abrirDetallePlan();"
+                    style="padding:0.75rem;background:#e50914;border:none;border-radius:8px;color:white;font-weight:600;cursor:pointer;font-size:0.9rem;width:100%;">
+                    Quiero ser Premium
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
