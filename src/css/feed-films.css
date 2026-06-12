@@ -1149,6 +1149,10 @@
         display: none !important;
     }
 
+    .btn-responder-label {
+        display: none;
+    }
+
     #feedBannerHorizontal {
         margin-left: -1rem !important;
         margin-right: -1rem !important;
