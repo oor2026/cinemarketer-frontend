@@ -1149,6 +1149,10 @@
         display: none !important;
     }
 
+    .reply-enviar-label {
+            display: none;
+        }
+
     .btn-responder-label {
         display: none;
     }

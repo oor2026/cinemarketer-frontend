@@ -1775,14 +1775,14 @@ window.abrirFormRespuesta = function(commentId, btn, replyId = null) {
     const form = document.createElement('div');
     form.className = 'reply-form';
     form.style.cssText = 'margin-top:0.5rem;display:flex;gap:0.5rem;';
-    form.innerHTML = `
+        form.innerHTML = `
             <div style="display:flex;flex-direction:column;gap:0.3rem;flex:1;">
-                <div style="display:flex;gap:0.4rem;align-items:center;">
-                    <input type="text" placeholder="Escribí tu respuesta..."
-                        style="flex:1;border:1px solid #e0e0e0;border-radius:20px;padding:0.4rem 0.75rem;font-size:0.85rem;outline:none;"
-                        id="reply-input-${commentId}"
-                        maxlength="2000"
-                        onkeydown="if(event.key==='Enter') window.enviarRespuesta(${commentId})">
+                <textarea placeholder="Escribí tu respuesta..."
+                style="flex:1;border:1px solid #e0e0e0;border-radius:12px;padding:0.4rem 0.75rem;font-size:0.85rem;outline:none;width:100%;box-sizing:border-box;resize:none;min-height:60px;font-family:inherit;"
+                id="reply-input-${commentId}"
+                maxlength="2000"
+                onkeydown="if(event.key==='Enter' && window.innerWidth > 768 && !event.shiftKey) { event.preventDefault(); const val=this.value; const start=this.selectionStart; const end=this.selectionEnd; this.value=val.substring(0,start)+'\n'+val.substring(end); this.selectionStart=this.selectionEnd=start+1; } else if(event.key==='Enter' && window.innerWidth <= 768) { event.preventDefault(); window.enviarRespuesta(${commentId}); }"></textarea>
+                <div style="display:flex;gap:0.4rem;align-items:center;justify-content:flex-end;">
                     <button type="button" id="emoji-trigger-reply-${commentId}"
                         class="cep-trigger-btn" title="Insertar emoji">😊</button>
                     <button type="button" id="gif-trigger-reply-${commentId}"
@@ -1790,8 +1790,9 @@ window.abrirFormRespuesta = function(commentId, btn, replyId = null) {
                         style="font-size:0.7rem;font-weight:700;color:#888;letter-spacing:-0.5px;"
                         title="Insertar GIF">GIF</button>
                     <button onclick="window.enviarRespuesta(${commentId})"
-                        style="background:#1a3a6b;color:white;border:none;border-radius:20px;padding:0.4rem 0.9rem;font-size:0.8rem;cursor:pointer;">
-                        Enviar
+                        style="background:#1a3a6b;color:white;border:none;border-radius:20px;padding:0.4rem 0.9rem;font-size:0.8rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;"
+                        title="Enviar">
+                        <i class="fas fa-paper-plane"></i> <span class="reply-enviar-label">Enviar</span>
                     </button>
                 </div>
                 <div id="gifPreviewReply-${commentId}" style="display:none;position:relative;padding:0.2rem 0;">
