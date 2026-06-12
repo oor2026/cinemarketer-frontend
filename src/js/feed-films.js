@@ -1332,7 +1332,13 @@ window.enviarReporte = async function() {
 window.abrirModalOcultar = function(commentId) {
     window._comentarioOcultandoId = commentId;
     const modal = document.getElementById('modalOcultarComentario');
-    if (modal) modal.style.display = 'flex';
+    if (modal) {
+        const titulo = modal.querySelector('h3');
+        const texto  = modal.querySelector('p');
+        if (titulo) titulo.textContent = 'Ocultar comentario';
+        if (texto)  texto.innerHTML = 'Tu comentario dejará de ser visible para otros usuarios. Esta acción es <strong>irreversible</strong>. Si el comentario tiene puntos ganados, reacciones o respuestas tuyas, todo se perderá al ocultarlo.';
+        modal.style.display = 'flex';
+    }
 };
 
 window.cerrarModalOcultar = function() {
@@ -2214,7 +2220,13 @@ window.abrirModalOcultarReply = function(replyId) {
     const btn = document.getElementById('btnConfirmarOcultar');
     if (btn) btn.onclick = window.confirmarOcultarReply;
     const modal = document.getElementById('modalOcultarComentario');
-    if (modal) modal.style.display = 'flex';
+    if (modal) {
+        const titulo = modal.querySelector('h3');
+        const texto  = modal.querySelector('p');
+        if (titulo) titulo.textContent = 'Ocultar respuesta';
+        if (texto)  texto.innerHTML = 'Tu respuesta dejará de ser visible para otros usuarios. Esta acción es <strong>irreversible</strong>. Si la respuesta tiene puntos ganados o reacciones, todo se perderá al ocultarla.';
+        modal.style.display = 'flex';
+    }
 };
 
 window.cerrarModalOcultarReply = function() {
@@ -2222,7 +2234,13 @@ window.cerrarModalOcultarReply = function() {
     const btn = document.getElementById('btnConfirmarOcultar');
     if (btn) btn.onclick = window.confirmarOcultar;
     const modal = document.getElementById('modalOcultarComentario');
-    if (modal) modal.style.display = 'none';
+    if (modal) {
+        const titulo = modal.querySelector('h3');
+        const texto  = modal.querySelector('p');
+        if (titulo) titulo.textContent = 'Ocultar comentario';
+        if (texto)  texto.innerHTML = 'Tu comentario dejará de ser visible para otros usuarios. Esta acción es <strong>irreversible</strong>. Si el comentario tiene puntos ganados, reacciones o respuestas tuyas, todo se perderá al ocultarlo.';
+        modal.style.display = 'none';
+    }
 };
 
 window.confirmarOcultarReply = async function() {
