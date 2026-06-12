@@ -970,13 +970,17 @@
     border-radius: 4px !important;
 }
 
+#modalPelicula .modal-header.spoiler-mode ~ .modal-body .comentarios-lista::-webkit-scrollbar-thumb {
+    background: #6c63ff !important;
+}
+
 /* Items de comentarios */
 #modalPelicula .comentario-item {
     background: #f8f9fa !important;
     border-radius: 8px !important;
     padding: 1rem !important;
     margin-bottom: 0.8rem !important;
-    border-left: 3px solid #e50914 !important;
+    border-left: 3px solid #e50914;
 }
 
 #modalPelicula .comentario-email {
