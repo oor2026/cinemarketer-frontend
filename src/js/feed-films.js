@@ -1181,7 +1181,7 @@ window.cargarComentariosPelicula = async function(id) {
                                     style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;font-size:0.8rem;color:#999;padding:0;transition:color 0.2s;"
                                     title="Responder">
                                     <i class="fas fa-reply"></i>
-                                    <span style="font-size:0.75rem;">Responder</span>
+                                    <span class="btn-responder-label" style="font-size:0.75rem;">Responder</span>
                                 </button>
                                 ${(c.replyCount || 0) > 0 ? `
                                 <button onclick="window.toggleRespuestas(${c.id}, this, false)"
@@ -1220,10 +1220,10 @@ window.cargarComentariosPelicula = async function(id) {
                                     style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;font-size:0.8rem;color:#999;padding:0;transition:color 0.2s;"
                                     title="Responder">
                                     <i class="fas fa-reply"></i>
-                                    <span style="font-size:0.75rem;">Responder</span>
-                                </button>
-                            </div>
-                            <div style="display:flex;align-items:center;justify-content:space-between;">
+                                        <span class="btn-responder-label" style="font-size:0.75rem;">Responder</span>
+                                    </button>
+                                </div>
+                                <div style="display:flex;align-items:center;justify-content:space-between;">
                                 <div class="comentario-fecha" style="font-size:0.75rem;color:#999;">${new Date(c.createdAt).toLocaleString('es-ES', {
                                                                                                           day: '2-digit', month: '2-digit', year: 'numeric',
                                                                                                           hour: '2-digit', minute: '2-digit',
