@@ -1613,10 +1613,10 @@
 }
 
 @media (min-width: 769px) {
-    .filtros-desktop { display: block; }
+    .filtros-desktop { display: none !important; }
     .filtros-mobile { display: none; }
-    .filtros-modal-overlay,
-    .filtros-modal-sheet { display: none !important; }
+    .filtros-modal-overlay { display: none; }
+    .filtros-modal-sheet { display: none; }
 }
 
 .feed-header {
@@ -1662,7 +1662,7 @@
     display: block;
 }
 
-/* Bottom sheet */
+/* Bottom sheet - mobile */
 .filtros-modal-sheet {
     display: none;
     position: fixed;
@@ -1681,6 +1681,26 @@
 .filtros-modal-sheet.active {
     display: block;
     transform: translateY(0);
+}
+
+/* Desktop - centrado */
+@media (min-width: 769px) {
+    .filtros-modal-sheet {
+        bottom: auto;
+        left: 50%;
+        right: auto;
+        top: 50px;
+        transform: translateX(-50%);
+        width: 500px;
+        max-width: 95vw;
+        max-height: 90vh;
+        border-radius: 16px !important;
+        transition: none;
+    }
+
+    .filtros-modal-sheet.force-show {
+        transform: translateX(-50%) !important;
+    }
 }
 
 /* Header del modal */
@@ -2496,4 +2516,19 @@
 
 .feed-tab-filtro:hover {
     color: #1a3a6b;
+}
+
+.feed-tab-filtro-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .feed-tab-filtro-label {
+        display: none;
+    }
+}
+
+.filtros-modal-overlay.force-show {
+    display: block !important;
 }

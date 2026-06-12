@@ -2267,14 +2267,26 @@ function abrirFiltrosModal() {
         anioMobile.innerHTML = anioDesktop.innerHTML;
     }
 
-    document.getElementById('filtrosModalOverlay').classList.add('active');
-    document.getElementById('filtrosModalSheet').classList.add('active');
+    const overlay = document.getElementById('filtrosModalOverlay');
+    const sheet = document.getElementById('filtrosModalSheet');
+    if (overlay) {
+        overlay.classList.add('active', 'force-show');
+    }
+    if (sheet) {
+        sheet.classList.add('active', 'force-show');
+    }
     document.body.style.overflow = 'hidden';
 }
 
 function cerrarFiltrosModal() {
-    document.getElementById('filtrosModalOverlay').classList.remove('active');
-    document.getElementById('filtrosModalSheet').classList.remove('active');
+    const overlay = document.getElementById('filtrosModalOverlay');
+    const sheet = document.getElementById('filtrosModalSheet');
+    if (overlay) {
+        overlay.classList.remove('active', 'force-show');
+    }
+    if (sheet) {
+        sheet.classList.remove('active', 'force-show');
+    }
     document.body.style.overflow = '';
 }
 
@@ -2361,7 +2373,5 @@ window.mostrarTooltipComunidad = function(event) {
 };
 
 window.abrirFiltrosMobile = function() {
-    if (typeof abrirFiltrosModal === 'function') {
-        abrirFiltrosModal();
-    }
+    abrirFiltrosModal();
 };
