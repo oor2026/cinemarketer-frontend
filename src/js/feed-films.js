@@ -1718,10 +1718,6 @@ window.enviarRespuesta = async function(commentId) {
             window.mostrarToast('Tu respuesta no cumple con nuestras políticas de convivencia.', 'error');
             return;
         }
-        if (res.status === 409) {
-            window.mostrarToast('No podés publicar la misma respuesta dos veces en una misma película.', 'error');
-            return;
-        }
         if (!res.ok) {
             window.mostrarToast(data.message || 'Error al enviar la respuesta.', 'error');
             return;
@@ -2021,12 +2017,6 @@ window.enviarComentario = async function() {
                 return;
             }
 
-            // Comentario duplicado — antispam
-            if (response.status === 409) {
-                showToast('error', 'No podés publicar el mismo comentario dos veces seguidas.');
-                return;
-            }
-
             // Comentario rechazado por moderación
             if (response.status === 422) {
                 const data = await response.json();
@@ -2050,7 +2040,9 @@ window.enviarComentario = async function() {
 
         await window.cargarComentariosPelicula(movieId);
 
-        if (data.limiteDiarioAlcanzado) {
+        if (data.comentarioDuplicado) {
+            showToast('info', 'Los comentarios repetidos no suman puntos.');
+        } else if (data.limiteDiarioAlcanzado) {
             mostrarMensajeLimiteDiario();
         } else {
             showToast('success', '¡Comentario enviado con éxito!');
