@@ -460,21 +460,22 @@
 
 .perfil-voto-badge {
     position: absolute;
-    bottom: 4px;
-    right: 4px;
-    width: 22px;
-    height: 22px;
+    bottom: 6px;
+    right: 6px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
     border: 2px solid white;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    color: white;
 }
 
-.perfil-voto-badge.like    { background: #2e7d32; color: white; }
-.perfil-voto-badge.dislike { background: #e50914; color: white; }
+.perfil-voto-badge.like    { background: #2e7d32; }
+.perfil-voto-badge.dislike { background: #e50914; }
 
 .perfil-voto-titulo {
     font-size: 0.72rem;
@@ -528,4 +529,16 @@
 .perfil-fin-votaciones i {
     font-size: 1.5rem;
     color: #ddd;
+}
+
+.perfil-comentarios-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 0.75rem;
+}
+
+@media (max-width: 768px) {
+    .perfil-comentarios-nav { display: none; }
 }

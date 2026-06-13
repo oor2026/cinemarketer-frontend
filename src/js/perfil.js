@@ -42,6 +42,8 @@ async function cargarPerfil(userId) {
         renderStats(perfil);
         renderVotaciones(perfil.ultimasVotaciones);
         renderComentarios(perfil.ultimosComentarios);
+        _comentariosTotal = perfil.totalComentarios || 0;
+        _actualizarNavComentarios();
 
     } catch (error) {
         document.getElementById('perfilContenido').innerHTML =
@@ -134,7 +136,7 @@ function buildVotoItem(v) {
             <div class="perfil-voto-poster">
                 ${poster}
                 <div class="perfil-voto-badge ${badgeClass}">
-                    <i class="fas ${badgeIcon}"></i>
+                    <i class="fas ${badgeIcon}" style="font-size:0.55rem;color:white;"></i>
                 </div>
             </div>
             <span class="perfil-voto-titulo">${v.movieTitle || '—'}</span>
@@ -203,21 +205,45 @@ function mostrarFinVotaciones(track) {
 }
 
 // ==============================================
-// RENDER COMENTARIOS
+// RENDER COMENTARIOS CON PAGINACIÓN
 // ==============================================
+let _comentariosPage   = 0;
+let _comentariosTotal  = 0;
+const _comentariosSize = 5;
+
 function renderComentarios(comentarios) {
-    const lista = document.getElementById('perfilComentariosList');
+    _comentariosPage  = 0;
+    _comentariosTotal = comentarios?.length || 0;
+
+    const seccion = document.getElementById('perfilComentariosList');
     if (!comentarios || comentarios.length === 0) {
-        lista.innerHTML = '<div class="perfil-vacio">Sin comentarios aún</div>';
+        seccion.innerHTML = '<div class="perfil-vacio">Sin comentarios aún</div>';
         return;
     }
 
+    seccion.innerHTML = `
+        <div id="perfilComentariosItems"></div>
+        <div class="perfil-comentarios-nav" id="perfilComentariosNav">
+            <button class="perfil-carrusel-arrow left" onclick="window.cambiarPaginaComentarios(-1)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <span id="perfilComentariosInfo" style="font-size:0.8rem;color:#999;"></span>
+            <button class="perfil-carrusel-arrow right" onclick="window.cambiarPaginaComentarios(1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    `;
+
+    _renderItemsComentarios(comentarios);
+}
+
+function _renderItemsComentarios(comentarios) {
+    const lista = document.getElementById('perfilComentariosItems');
+    if (!lista) return;
+
     lista.innerHTML = comentarios.map(c => {
         const textoClass = c.spoiler ? 'perfil-comentario-texto spoiler' : 'perfil-comentario-texto';
-        const spoilerTag = c.spoiler
-            ? '<span class="perfil-tag-spoiler">spoiler</span>'
-            : '';
-
+        const spoilerTag = c.spoiler ? '<span class="perfil-tag-spoiler">spoiler</span>' : '';
         return `
             <div class="perfil-comentario-item">
                 <div class="perfil-comentario-poster">
@@ -233,6 +259,41 @@ function renderComentarios(comentarios) {
                 </div>
             </div>`;
     }).join('');
+}
+
+window.cambiarPaginaComentarios = async function(dir) {
+    const nuevaPagina = _comentariosPage + dir;
+    const totalPaginas = Math.ceil(_comentariosTotal / _comentariosSize);
+    if (nuevaPagina < 0 || nuevaPagina >= totalPaginas) return;
+
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(
+            `${CONFIG.API_URL}/users/${perfilUsuarioId}/comentarios?page=${nuevaPagina}&size=${_comentariosSize}`,
+            { headers: { 'Authorization': `Bearer ${token}` } }
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+
+        _comentariosPage  = nuevaPagina;
+        _comentariosTotal = data.total;
+
+        _renderItemsComentarios(data.comentarios);
+        _actualizarNavComentarios();
+
+    } catch(e) {}
+};
+
+function _actualizarNavComentarios() {
+    const totalPaginas = Math.ceil(_comentariosTotal / _comentariosSize);
+    const info = document.getElementById('perfilComentariosInfo');
+    if (info) info.textContent = `${_comentariosPage + 1} / ${totalPaginas}`;
+
+    const nav = document.getElementById('perfilComentariosNav');
+    if (!nav) return;
+    const btns = nav.querySelectorAll('.perfil-carrusel-arrow');
+    btns[0].disabled = _comentariosPage <= 0;
+    btns[1].disabled = _comentariosPage >= totalPaginas - 1;
 }
 
 // ==============================================
