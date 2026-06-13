@@ -136,7 +136,10 @@ window.abrirDetallePlan = function() {
                     <ul class="premium-modal-lista">
                         <li><span class="premium-check"></span>Acceso a premios exclusivos para suscriptores</li>
                         <li><span class="premium-check"></span>Participación gratuita en sorteos mensuales</li>
-                        <li><span class="premium-check"></span>Puntos x2 en votos y comentarios</li>
+                        <li><span class="premium-check"></span>Puntos x2 en votos, comentarios y recomendaciones</li>
+                        <li><span class="premium-check"></span>Sin límite diario de comentarios ni recomendaciones con puntos</li>
+                        <li><span class="premium-check"></span>Sin tope mensual — cobrás todo lo que acumulás</li>
+                        <li><span class="premium-check"></span>Tus puntos nunca vencen</li>
                         <li><span class="premium-check"></span>Cancelás cuando quieras</li>
                     </ul>
                 </div>
