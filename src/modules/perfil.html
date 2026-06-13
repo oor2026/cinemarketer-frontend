@@ -2,44 +2,60 @@
 
     <!-- HEADER: identidad -->
     <div class="perfil-header">
-        <div class="perfil-avatar-wrap">
-            <div class="perfil-avatar" id="perfilAvatar">
-                <i class="fas fa-user-circle"></i>
-            </div>
-        </div>
-        <div class="perfil-identidad">
-            <h1 class="perfil-nombre" id="perfilNombre">Cargando...</h1>
-            <div class="perfil-level-badge" id="perfilLevelBadge">
-                <span class="level-icon" id="perfilLevelEmoji">🟢</span>
-                <span class="level-name" id="perfilLevelName">Amateur</span>
-            </div>
+        <!-- Miembro arriba a la derecha -->
+        <div class="perfil-header-badges">
             <p class="perfil-miembro" id="perfilMiembro"></p>
         </div>
-        <div class="perfil-accion">
-            <button class="btn-seguir" id="btnSeguir" onclick="window.toggleSeguir()" style="display:none;">
-                <i class="fas fa-user-plus"></i> Seguir
-            </button>
+
+        <!-- Abajo: avatar + nombre + botón -->
+        <div class="perfil-header-bottom">
+            <div class="perfil-avatar-wrap">
+                <div class="perfil-avatar" id="perfilAvatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+            </div>
+            <div class="perfil-identidad">
+                <h1 class="perfil-nombre" id="perfilNombre">Cargando...</h1>
+                <p class="perfil-tagline">Bienvenido a mi sala de cine</p>
+                <div class="perfil-level-badge" id="perfilLevelBadge">
+                    <span class="level-icon" id="perfilLevelEmoji">🟢</span>
+                    <span class="level-name" id="perfilLevelName">Amateur</span>
+                </div>
+            </div>
+            <div class="perfil-accion">
+                <button class="btn-seguir" id="btnSeguir" onclick="window.toggleSeguir()" style="display:none;">
+                    <i class="fas fa-user-plus"></i> Seguir
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- STATS -->
-    <div class="perfil-stats">
-        <div class="perfil-stat">
-            <span class="perfil-stat-num" id="perfilSeguidores">0</span>
-            <span class="perfil-stat-label">seguidores</span>
+    <!-- STATS — CINTA DE PELÍCULA -->
+    <div class="perfil-cinta">
+        <div class="perfil-cinta-perforados"></div>
+        <div class="perfil-cinta-contenido">
+            <div class="perfil-cinta-stat">
+                <span class="perfil-cinta-num" id="perfilSeguidores">0</span>
+                <div class="perfil-cinta-linea"></div>
+                <span class="perfil-cinta-label">Seguidores</span>
+            </div>
+            <div class="perfil-cinta-stat">
+                <span class="perfil-cinta-num" id="perfilSiguiendo">0</span>
+                <div class="perfil-cinta-linea"></div>
+                <span class="perfil-cinta-label">Siguiendo</span>
+            </div>
+            <div class="perfil-cinta-stat">
+                <span class="perfil-cinta-num" id="perfilVotaciones">0</span>
+                <div class="perfil-cinta-linea"></div>
+                <span class="perfil-cinta-label">Votaciones</span>
+            </div>
+            <div class="perfil-cinta-stat">
+                <span class="perfil-cinta-num" id="perfilComentarios">0</span>
+                <div class="perfil-cinta-linea"></div>
+                <span class="perfil-cinta-label">Comentarios</span>
+            </div>
         </div>
-        <div class="perfil-stat">
-            <span class="perfil-stat-num" id="perfilSiguiendo">0</span>
-            <span class="perfil-stat-label">siguiendo</span>
-        </div>
-        <div class="perfil-stat">
-            <span class="perfil-stat-num" id="perfilVotaciones">0</span>
-            <span class="perfil-stat-label">votaciones</span>
-        </div>
-        <div class="perfil-stat">
-            <span class="perfil-stat-num" id="perfilComentarios">0</span>
-            <span class="perfil-stat-label">comentarios</span>
-        </div>
+        <div class="perfil-cinta-perforados"></div>
     </div>
 
     <!-- ÚLTIMAS VOTACIONES -->
