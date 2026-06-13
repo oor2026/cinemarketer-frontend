@@ -148,6 +148,7 @@ function getIconForAction(action) {
         VOTE_MOVIE:           'fa-thumbs-up',
         VOTE_CINEMA:          'fa-building',
         COMMENT_MOVIE:        'fa-comment',
+        RECOMMEND_MOVIE:      'fa-share',
         REWARD_REDEMPTION:    'fa-ticket-alt',
         RECEIVE_MERECE_PUNTO: 'fa-star'
     };
@@ -159,6 +160,7 @@ function getLabelForAction(action) {
         VOTE_MOVIE:           'Voto en película',
         VOTE_CINEMA:          'Voto en cine',
         COMMENT_MOVIE:        'Comentario en película',
+        RECOMMEND_MOVIE:      'Recomendación de película',
         REWARD_REDEMPTION:    'Canje de premio',
         RECEIVE_MERECE_PUNTO: '¡Merecés un punto!'
     };

@@ -311,35 +311,50 @@ window.enviarRecomendacion = async function() {
     btn.textContent = 'Enviando...';
 
     try {
-        const promises = Array.from(window._recSeleccionados).map(receiverId =>
-            fetch(`${CONFIG.API_URL}/recommendations`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    movieId: window._recMovieId,
-                    receiverId: receiverId,
-                    contextType: window._recContextoSeleccionado || null
-                })
-            })
-        );
+            const responses = await Promise.all(
+                Array.from(window._recSeleccionados).map(receiverId =>
+                    fetch(`${CONFIG.API_URL}/recommendations`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            movieId: window._recMovieId,
+                            receiverId: receiverId,
+                            contextType: window._recContextoSeleccionado || null
+                        })
+                    }).then(async r => ({ ok: r.ok, data: await r.json(), receiverId }))
+                )
+            );
 
-        await Promise.all(promises);
+            const exitosas  = responses.filter(r => r.ok);
+            const duplicadas = responses.filter(r => !r.ok && r.data?.error?.includes('Ya le recomendaste'));
+            const sinPuntos  = exitosas.some(r => r.data?.sinPuntos === true);
 
-        const cantidad = window._recSeleccionados.size;
-        window.cerrarPanelRecomendar();
-        _mostrarToast(cantidad === 1
-            ? 'Recomendación enviada'
-            : `${cantidad} recomendaciones enviadas`
-        );
+            window.cerrarPanelRecomendar();
 
-    } catch(e) {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-share"></i> Enviar recomendación';
-        _mostrarToast('Error al enviar. Intentá de nuevo.', true);
-    }
+            if (duplicadas.length > 0 && exitosas.length === 0) {
+                // Todas duplicadas
+                const nombres = Array.from(document.querySelectorAll('.rec-usuario-chip.selected'))
+                    .map(c => c.dataset.nombre).join(', ');
+                _mostrarToast(`Ya le recomendaste esta película a ${nombres}.`, true);
+            } else if (sinPuntos) {
+                _mostrarModalLimiteRecomendacion();
+            } else if (exitosas.length > 0) {
+                _mostrarToast(exitosas.length === 1
+                    ? 'Recomendación enviada'
+                    : `${exitosas.length} recomendaciones enviadas`
+                );
+            }
+
+        } catch(e) {
+                _mostrarToast('Error al enviar. Intentá de nuevo.', true);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Enviar recomendación';
+                _actualizarBotonEnviar();
+            }
 };
 
 // -----------------------------------------------
@@ -368,6 +383,42 @@ function _mostrarToast(mensaje, esError = false) {
         toast.style.opacity = '0';
         setTimeout(() => toast.remove(), 300);
     }, 3000);
+}
+
+// -----------------------------------------------
+// MODAL LÍMITE DIARIO DE RECOMENDACIONES
+// -----------------------------------------------
+function _mostrarModalLimiteRecomendacion() {
+    const existing = document.getElementById('modalLimiteRecomendacion');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'modalLimiteRecomendacion';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+    modal.innerHTML = `
+        <div style="background:white;border-radius:16px;padding:2rem;max-width:420px;width:100%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+            <div style="font-size:2.5rem;margin-bottom:0.75rem;">🎬</div>
+            <h3 style="margin:0 0 0.75rem;color:#333;font-size:1.1rem;font-weight:700;">Ya generaste todos tus puntos de recomendaciones por hoy</h3>
+            <p style="color:#666;font-size:0.9rem;margin:0 0 1.5rem;line-height:1.6;text-align:left;">
+                Podés seguir recomendando películas, pero estas no sumarán puntos.
+                <br>A las 00hs se renueva tu límite diario y volverás a ganar puntos con tus recomendaciones.
+            </p>
+            <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                <button onclick="document.getElementById('modalLimiteRecomendacion').remove()"
+                    style="padding:0.75rem;border:1.5px solid #ddd;background:none;border-radius:8px;color:#666;cursor:pointer;font-size:0.9rem;">
+                    Entendido
+                </button>
+                <p style="color:#888;font-size:0.85rem;margin:0 0 0.25rem;">
+                    ¿Querés recomendar sin límites y ganar puntos ilimitados?
+                </p>
+                <button onclick="document.getElementById('modalLimiteRecomendacion').remove(); if(typeof cerrarModal==='function') cerrarModal(); if(typeof abrirDetallePlan==='function') abrirDetallePlan();"
+                    style="padding:0.75rem;background:#e50914;border:none;border-radius:8px;color:white;font-weight:600;cursor:pointer;font-size:0.9rem;width:100%;">
+                    Quiero ser Premium
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
 }
 
 // Cerrar al click en overlay
