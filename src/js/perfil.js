@@ -21,6 +21,27 @@ window['init_perfil'] = async function(userId) {
 
     perfilUsuarioId = userId;
     sessionStorage.setItem('perfilUsuarioId', userId);
+
+    // Insertar botón volver si viene desde mi cuenta
+    if (sessionStorage.getItem('perfilDesdeMiCuenta') === '1') {
+            console.log('ENTRÓ al bloque desdeMiCuenta');
+            sessionStorage.removeItem('perfilDesdeMiCuenta');
+            const btnExistente = document.getElementById('btnVolverMiCuenta');
+            if (!btnExistente) {
+                const btn = document.createElement('div');
+                btn.id = 'btnVolverMiCuenta';
+                btn.style.cssText = 'margin-bottom:1rem; text-align:right;';
+                btn.innerHTML = `
+                    <button onclick="if(typeof loadModule==='function') loadModule('mi-cuenta');"
+                        style="background:none;border:1.5px solid #1a3a6b;color:#1a3a6b;padding:0.45rem 1.1rem;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:0.5rem;">
+                        <i class="fas fa-arrow-left"></i> Volver a Mi Cuenta
+                    </button>`;
+                const hero = document.querySelector('.perfil-hero');
+                const card = document.querySelector('.perfil-card');
+                if (card && hero) card.insertBefore(btn, hero);
+            }
+        }
+
     await cargarPerfil(userId);
 };
 
@@ -39,10 +60,11 @@ async function cargarPerfil(userId) {
         const perfil = await response.json();
 
         renderIdentidad(perfil);
-        renderStats(perfil);
-        renderVotaciones(perfil.ultimasVotaciones);
-        renderComentarios(perfil.ultimosComentarios);
-        _comentariosTotal = perfil.totalComentarios || 0;
+                renderStats(perfil);
+                renderVotaciones(perfil.ultimasVotaciones);
+                renderComentarios(perfil.ultimosComentarios);
+
+                _comentariosTotal = perfil.totalComentarios || 0;
         _actualizarNavComentarios();
 
     } catch (error) {
@@ -74,11 +96,17 @@ function renderIdentidad(perfil) {
         perfil.miembroDesde ? `Miembro desde ${perfil.miembroDesde}` : '';
 
     const miId = localStorage.getItem('userId');
-    const btnSeguir = document.getElementById('btnSeguir');
-    if (miId && String(miId) !== String(perfil.id)) {
-        btnSeguir.style.display = 'flex';
-        actualizarBtnSeguir(perfil.esSeguido);
-    }
+        const btnSeguir = document.getElementById('btnSeguir');
+        const btnBanner = document.getElementById('btnCambiarBanner');
+
+        if (miId && String(miId) !== String(perfil.id)) {
+            btnSeguir.style.display = 'flex';
+            actualizarBtnSeguir(perfil.esSeguido);
+            if (btnBanner) btnBanner.style.display = 'none';
+        } else {
+            if (btnSeguir) btnSeguir.style.display = 'none';
+            if (btnBanner) btnBanner.style.display = 'block';
+        }
 }
 
 // ==============================================
@@ -353,3 +381,41 @@ window.confirmarDejarSeguir = async function() {
         document.getElementById('perfilSeguidores').textContent = data.followersCount;
     } catch (e) {}
 };
+
+window.subirBanner = async function(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    // Validar tamaño máx 2MB
+    if (file.size > 2 * 1024 * 1024) {
+        alert('La imagen no puede superar los 2MB.');
+        return;
+    }
+
+    const token = localStorage.getItem('token');
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/users/me/banner`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+        });
+
+        if (!res.ok) throw new Error();
+
+        const data = await res.json();
+
+        // Actualizar el header visualmente sin recargar
+        const header = document.querySelector('.perfil-header');
+                if (header && data.bannerUrl) {
+                    header.style.backgroundImage = `url('${data.bannerUrl}')`;
+                }
+
+                alert('Banner actualizado correctamente.');
+
+            } catch(e) {
+                alert('Error al subir el banner. Intentá de nuevo.');
+            }
+        };

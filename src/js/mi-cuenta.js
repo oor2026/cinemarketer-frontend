@@ -1347,3 +1347,12 @@ window.confirmarEliminarRec = async function() {
         }
     } catch (e) {}
 };
+
+window.verMiSala = function() {
+    const userId = localStorage.getItem('userId');
+    if (!userId) return;
+    window._perfilUsuarioId = userId;
+    sessionStorage.setItem('perfilUsuarioId', userId);
+    sessionStorage.setItem('perfilDesdeMiCuenta', '1');
+    if (typeof loadModule === 'function') loadModule('perfil');
+};
