@@ -458,7 +458,9 @@ window.cambiarPagina = async function(direccion) {
                     await window.cargarPeliculasPopulares(nuevaPagina);
                 }
             }
-    document.querySelector('.resultados-header')?.scrollIntoView({ behavior: 'smooth' });
+    if (window.innerWidth > 768) {
+            document.getElementById('ordenarPills')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
 };
 
 // ==============================================
