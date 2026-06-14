@@ -27,9 +27,9 @@
     padding: 1.5rem;
     min-height: 260px;
     background: #0d0d1a url('../assets/images/headerpublico.png') center center / cover no-repeat;
-    border-radius: 15px;
+    border-radius: 0;
     color: white;
-    margin-bottom: 2rem;
+    margin-bottom: 0;
     position: relative;
 }
 
@@ -124,105 +124,79 @@
     background: rgba(255,255,255,0.25);
 }
 
-/* ── Stats — Cinta de película ───────────────── */
-.perfil-cinta {
-    margin-bottom: 2rem;
-    background: #111111;
-    border-radius: 10px;
+/* ── Stats ──────────────────────────────────── */
+.perfil-hero {
+    border-radius: 15px;
     overflow: hidden;
-    border: 0.5px solid #333;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 }
 
-.perfil-cinta-perforados {
-    height: 22px;
-    background: #111111;
-    background-image: repeating-linear-gradient(
-        90deg,
-        white 0px,
-                white 18px,
-        transparent 18px,
-        transparent 28px
-    );
-    background-position: 10px 4px;
-    background-repeat: repeat-x;
-    background-size: 28px 14px;
-}
-
-.perfil-cinta-contenido {
+.perfil-stats {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    padding: 0;
+    background: #324C89;
+    border-top: 1px solid rgba(255,255,255,0.06);
 }
 
-.perfil-cinta-stat {
+.perfil-stat {
     text-align: center;
-    padding: 1rem 0.5rem;
-    border-right: 1px solid #3d3d60;
+    padding: 0.9rem 0.5rem;
+    border-right: 1px solid rgba(255,255,255,0.12);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.3rem;
+    justify-content: center;
+    gap: 0.25rem;
 }
 
-.perfil-cinta-stat:last-child {
+.perfil-stat:last-child {
     border-right: none;
 }
 
-.perfil-cinta-num {
-    font-size: 1.8rem;
-    font-weight: 500;
+.perfil-stat-num {
+    font-size: 1.5rem;
+    font-weight: 600;
     color: white;
     line-height: 1;
 }
 
-.perfil-cinta-linea {
-    width: 40px;
-    height: 2px;
-    background: #e50914;
-    border-radius: 1px;
-}
-
-.perfil-cinta-label {
+.perfil-stat-label {
     font-size: 0.7rem;
-    color: rgba(255,255,255,0.55);
+    color: rgba(255,255,255,0.4);
     text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-@media (max-width: 600px) {
-    .perfil-cinta-contenido {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    .perfil-cinta-stat:nth-child(2) {
-        border-right: none;
-    }
-    .perfil-cinta-stat:nth-child(3) {
-        border-top: 1px solid #3d3d60;
-    }
-    .perfil-cinta-stat:nth-child(4) {
-        border-top: 1px solid #3d3d60;
-        border-right: none;
-    }
+    letter-spacing: 0.8px;
 }
 
 /* ── Secciones ──────────────────────────────── */
 .perfil-seccion {
     margin-bottom: 2rem;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1.5px solid #324C89;
 }
 
 .perfil-seccion-titulo {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #333;
-    margin: 0 0 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+    padding: 0.6rem 1.25rem;
+    background: #324C89;
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid #f0f0f0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .perfil-seccion-titulo i { color: #e50914; }
+
+.perfil-seccion > *:not(.perfil-seccion-titulo) {
+    padding: 1rem 1.25rem;
+}
 
 .perfil-loading {
     text-align: center;
