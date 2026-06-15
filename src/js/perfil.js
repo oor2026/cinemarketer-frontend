@@ -290,25 +290,63 @@ function renderComentarios(comentarios) {
     }
 }
 
+function _comentarioItemHTML(c) {
+    const textoClass = c.spoiler ? 'perfil-comentario-texto spoiler' : 'perfil-comentario-texto';
+    const spoilerTag = c.spoiler ? '<span class="perfil-tag-spoiler">spoiler</span>' : '';
+    const poster = c.posterPath
+        ? `<img src="https://image.tmdb.org/t/p/w92${c.posterPath}" alt="${c.movieTitle || ''}" style="width:100%;height:100%;object-fit:cover;">`
+        : `<i class="fas fa-film"></i>`;
+    const banco      = c.bancoCount       || 0;
+    const merece     = c.merecePuntoCount || 0;
+    const respuestas = c.replyCount       || 0;
+    const uid        = `cmnt-${c.commentId}`;
+
+    const CHARS_LIMIT = window.innerWidth <= 600 ? 150 : 300;
+    const contenido   = c.contenido || '';
+    const esMuyLargo = contenido.length > CHARS_LIMIT;
+    const textoCorto = esMuyLargo ? contenido.substring(0, CHARS_LIMIT) + '...' : contenido;
+
+    if (esMuyLargo) {
+            window[`_verMas_${uid}`] = function(btn) {
+                const el = document.getElementById(`txt-${uid}`);
+                if (btn.dataset.expanded === '1') {
+                    el.textContent = textoCorto;
+                    btn.textContent = 'Ver más';
+                    btn.dataset.expanded = '0';
+                } else {
+                    el.textContent = contenido;
+                    btn.textContent = 'Ver menos';
+                    btn.dataset.expanded = '1';
+                }
+            };
+        }
+
+        const textoHTML = esMuyLargo ? `
+            <p class="${textoClass}" id="txt-${uid}">${textoCorto}</p>
+            <span class="perfil-ver-mas" onclick="window['_verMas_${uid}'](this)" data-expanded="0">Ver más</span>
+        ` : `<p class="${textoClass}">${contenido}</p>`;
+
+    return `
+        <div class="perfil-comentario-item">
+            <div class="perfil-comentario-poster">${poster}</div>
+            <div class="perfil-comentario-body">
+                <p class="perfil-comentario-pelicula">${c.movieTitle || 'Película no disponible'}</p>
+                ${textoHTML}
+                <div class="perfil-comentario-meta">
+                    <span>${c.fechaRelativa || ''}</span>
+                    ${spoilerTag}
+                </div>
+                <div class="perfil-comentario-reacciones">
+                    <span title="Te banco"><i class="fas fa-thumbs-up"></i> ${banco}</span>
+                    <span title="Merecés un punto"><i class="fas fa-star"></i> ${merece}</span>
+                    <span title="Respuestas"><i class="fas fa-reply"></i> ${respuestas}</span>
+                </div>
+            </div>
+        </div>`;
+}
+
 function _buildSlideHTML(grupo) {
-    return `<div class="perfil-swipe-slide">${grupo.map(c => {
-        const textoClass = c.spoiler ? 'perfil-comentario-texto spoiler' : 'perfil-comentario-texto';
-        const spoilerTag = c.spoiler ? '<span class="perfil-tag-spoiler">spoiler</span>' : '';
-        return `
-            <div class="perfil-comentario-item">
-                <div class="perfil-comentario-poster">
-                    <i class="fas fa-film"></i>
-                </div>
-                <div class="perfil-comentario-body">
-                    <p class="perfil-comentario-pelicula">${c.movieTitle || 'Película no disponible'}</p>
-                    <p class="${textoClass}">${c.contenido || ''}</p>
-                    <div class="perfil-comentario-meta">
-                        <span>${c.fechaRelativa || ''}</span>
-                        ${spoilerTag}
-                    </div>
-                </div>
-            </div>`;
-    }).join('')}</div>`;
+    return `<div class="perfil-swipe-slide">${grupo.map(c => _comentarioItemHTML(c)).join('')}</div>`;
 }
 
 async function _renderSwipeComentarios(comentarios) {
@@ -369,25 +407,7 @@ async function _renderSwipeComentarios(comentarios) {
 function _renderItemsComentarios(comentarios) {
     const lista = document.getElementById('perfilComentariosItems');
     if (!lista) return;
-
-    lista.innerHTML = comentarios.map(c => {
-        const textoClass = c.spoiler ? 'perfil-comentario-texto spoiler' : 'perfil-comentario-texto';
-        const spoilerTag = c.spoiler ? '<span class="perfil-tag-spoiler">spoiler</span>' : '';
-        return `
-            <div class="perfil-comentario-item">
-                <div class="perfil-comentario-poster">
-                    <i class="fas fa-film"></i>
-                </div>
-                <div class="perfil-comentario-body">
-                    <p class="perfil-comentario-pelicula">${c.movieTitle || 'Película no disponible'}</p>
-                    <p class="${textoClass}">${c.contenido || ''}</p>
-                    <div class="perfil-comentario-meta">
-                        <span>${c.fechaRelativa || ''}</span>
-                        ${spoilerTag}
-                    </div>
-                </div>
-            </div>`;
-    }).join('');
+    lista.innerHTML = comentarios.map(c => _comentarioItemHTML(c)).join('');
 }
 
 window.cambiarPaginaComentarios = async function(dir) {

@@ -537,3 +537,29 @@
     background: #324C89;
     transform: scale(1.2);
 }
+
+.perfil-comentario-reacciones {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.4rem;
+    font-size: 0.78rem;
+    color: #aaa;
+}
+
+.perfil-comentario-reacciones i {
+    font-size: 0.72rem;
+    margin-right: 2px;
+}
+
+.perfil-ver-mas {
+    font-size: 0.78rem;
+    color: #324C89;
+    cursor: pointer;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 2px;
+}
+
+.perfil-ver-mas:hover {
+    text-decoration: underline;
+}
