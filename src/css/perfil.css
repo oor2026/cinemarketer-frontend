@@ -611,3 +611,76 @@
             align-self: flex-start;
         }
 }
+
+/* ── Secciones de mi cuenta ─────────────────── */
+.cuenta-seccion {
+    margin-bottom: 1.5rem;
+}
+
+.cuenta-seccion-titulo {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 0.75rem;
+    padding: 0.6rem 1.25rem;
+    background: #324C89;
+    border-radius: 10px 10px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.cuenta-seccion-titulo i { color: #e50914; }
+
+.cuenta-seccion .stats-grid,
+.cuenta-seccion .mi-red-seccion,
+.cuenta-seccion .datos-grid {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+/* ── Historial tabs visual ───────────────────── */
+.historial-tabs-visual {
+    display: flex;
+    gap: 0;
+    border: 1px solid #e0e0e0;
+    border-radius: 0 0 10px 10px;
+    overflow: hidden;
+}
+
+.historial-tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 1.25rem 1rem;
+    background: white;
+    border-right: 1px solid #e0e0e0;
+}
+
+.historial-tab-item:last-child {
+    border-right: none;
+}
+
+.historial-tab-item i {
+    font-size: 1.1rem;
+    color: #324C89;
+}
+
+.historial-tab-numero {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    line-height: 1;
+}
+
+.historial-tab-label {
+    font-size: 0.75rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
