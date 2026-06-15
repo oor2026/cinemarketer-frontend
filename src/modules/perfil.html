@@ -1,63 +1,63 @@
 <div class="perfil-card" id="perfilContenido">
 
-    <!-- HEADER + STATS FUSIONADOS -->
-    <div class="perfil-hero">
+    <!-- BANNER -->
+    <div class="perfil-banner">
+        <div id="btnCambiarBanner" style="display:none;">
+            <label for="inputBanner" class="perfil-banner-btn">
+                <i class="fas fa-paperclip"></i> Cambiar banner
+            </label>
+            <input type="file" id="inputBanner" accept="image/*" style="display:none;" onchange="window.subirBanner(this)">
+        </div>
+        <div class="perfil-accion">
+            <button class="btn-seguir" id="btnSeguir" onclick="window.toggleSeguir()" style="display:none;">
+                <i class="fas fa-user-plus"></i> Seguir
+            </button>
+        </div>
+    </div>
 
-        <div class="perfil-header">
-            <!-- Badges arriba a la derecha -->
-            <div class="perfil-header-badges">
-                <p class="perfil-miembro" id="perfilMiembro"></p>
+    <!-- FILA: avatar izq + info der -->
+    <div class="perfil-info-row" style="position:relative;">
+        <!-- Botón editar bio — esquina superior derecha -->
+        <button id="btnEditarBio" onclick="window.abrirModalBio()"
+                style="display:none; position:absolute; top:1rem; right:1rem; background:none; border:none; cursor:pointer; color:#aaa; padding:0; font-size:0.82rem; align-items:center; gap:0.4rem;">
+            <i class="fas fa-pencil-alt"></i>
+        </button>
+        <!-- COL IZQUIERDA: avatar + insignia -->
+        <div class="perfil-col-avatar">
+            <div class="perfil-avatar" id="perfilAvatar">
+                <i class="fas fa-user-circle"></i>
             </div>
-
-            <!-- Botón cambiar banner — solo visible en vista propia -->
-            <div id="btnCambiarBanner" style="display:none; position:absolute; top:1rem; left:1rem;">
-                <label for="inputBanner" style="background:rgba(0,0,0,0.5);color:white;padding:0.4rem 0.75rem;border-radius:8px;font-size:0.8rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.2);">
-                    <i class="fas fa-paperclip"></i> Cambiar banner
-                </label>
-                <input type="file" id="inputBanner" accept="image/*" style="display:none;" onchange="window.subirBanner(this)">
-            </div>
-            <div class="perfil-header-bottom">
-                <div class="perfil-avatar-wrap">
-                    <div class="perfil-avatar" id="perfilAvatar">
-                        <i class="fas fa-user-circle"></i>
-                    </div>
-                </div>
-                <div class="perfil-identidad">
-                    <h1 class="perfil-nombre" id="perfilNombre">Cargando...</h1>
-                    <p class="perfil-tagline">Bienvenido a mi sala de cine</p>
-                    <div class="perfil-level-badge" id="perfilLevelBadge">
-                        <span class="level-icon" id="perfilLevelEmoji">🟢</span>
-                        <span class="level-name" id="perfilLevelName">Amateur</span>
-                    </div>
-                </div>
-                <div class="perfil-accion">
-                    <button class="btn-seguir" id="btnSeguir" onclick="window.toggleSeguir()" style="display:none;">
-                        <i class="fas fa-user-plus"></i> Seguir
-                    </button>
-                </div>
+            <div class="perfil-level-badge" id="perfilLevelBadge">
+                <span class="level-icon" id="perfilLevelEmoji">🟢</span>
+                <span class="level-name" id="perfilLevelName">Amateur</span>
             </div>
         </div>
 
-        <!-- STATS fusionados -->
-        <div class="perfil-stats">
-            <div class="perfil-stat">
-                <span class="perfil-stat-num" id="perfilSeguidores">0</span>
-                <span class="perfil-stat-label">seguidores</span>
-            </div>
-            <div class="perfil-stat">
-                <span class="perfil-stat-num" id="perfilSiguiendo">0</span>
-                <span class="perfil-stat-label">siguiendo</span>
-            </div>
-            <div class="perfil-stat">
-                <span class="perfil-stat-num" id="perfilVotaciones">0</span>
-                <span class="perfil-stat-label">votaciones</span>
-            </div>
-            <div class="perfil-stat">
-                <span class="perfil-stat-num" id="perfilComentarios">0</span>
-                <span class="perfil-stat-label">comentarios</span>
-            </div>
-        </div>
+        <!-- COL DERECHA: nombre + stats + bio -->
+        <div class="perfil-col-info">
 
+            <!-- NOMBRE -->
+            <h1 class="perfil-nombre" id="perfilNombre">Cargando...</h1>
+
+            <!-- STATS -->
+            <div class="perfil-stats-inline">
+                <span class="perfil-stat-inline"><strong id="perfilVotaciones">0</strong> votaciones</span>
+                <span class="perfil-stat-inline"><strong id="perfilComentarios">0</strong> comentarios</span>
+                <span class="perfil-stat-inline perfil-stat-clickable" onclick="window.abrirModalSeguidores('seguidores')">
+                    <strong id="perfilSeguidores">0</strong> seguidores
+                </span>
+                <span class="perfil-stat-inline perfil-stat-clickable" onclick="window.abrirModalSeguidores('seguidos')">
+                    <strong id="perfilSiguiendo">0</strong> seguidos
+                </span>
+            </div>
+
+            <!-- BIO -->
+            <div class="perfil-bio" id="perfilBio" style="display:none;">
+                <p class="perfil-bio-titulo" id="perfilBioTitulo"></p>
+                <p class="perfil-bio-texto" id="perfilBioTexto"></p>
+            </div>
+
+        </div>
     </div>
 
     <!-- ÚLTIMAS VOTACIONES -->
@@ -98,4 +98,61 @@
         </div>
     </div>
 
+    <!-- MODAL EDITAR BIO -->
+    <div id="modalEditarBio" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
+        <div style="background:white; border-radius:16px; padding:2rem; max-width:460px; width:100%;" onclick="event.stopPropagation()">
+            <h3 style="margin:0 0 1.25rem; font-size:1rem; color:#333;">
+                <i class="fas fa-pencil-alt" style="color:#324C89;"></i> Editar biografía
+            </h3>
+
+            <div style="margin-bottom:1rem;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                    <label style="font-size:0.82rem; font-weight:600; color:#555;">Título</label>
+                    <span id="contadorBioTitulo" style="font-size:0.75rem; color:#aaa;">0/50</span>
+                </div>
+                <input type="text" id="inputBioTitulo" maxlength="50"
+                       placeholder="Ej: Amante del cine de autor"
+                       oninput="window._actualizarContadoresBio && window._actualizarContadoresBio()"
+                       style="width:100%; box-sizing:border-box; padding:0.6rem 0.8rem; border:1.5px solid #e0e0e0; border-radius:8px; font-size:0.88rem; font-family:inherit;">
+            </div>
+
+            <div style="margin-bottom:1.5rem;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                    <label style="font-size:0.82rem; font-weight:600; color:#555;">Descripción</label>
+                    <span id="contadorBioTexto" style="font-size:0.75rem; color:#aaa;">0/180</span>
+                </div>
+                <textarea id="inputBioTexto" maxlength="180" rows="4"
+                          placeholder="Contale a otros usuarios quién sos y qué tipo de películas te apasionan..."
+                          oninput="window._actualizarContadoresBio && window._actualizarContadoresBio()"
+                          style="width:100%; box-sizing:border-box; padding:0.6rem 0.8rem; border:1.5px solid #e0e0e0; border-radius:8px; font-size:0.88rem; font-family:inherit; resize:none;"></textarea>
+            </div>
+
+            <div style="display:flex; gap:0.75rem;">
+                <button onclick="window.cerrarModalBio()"
+                        style="flex:1; padding:0.7rem; border:1.5px solid #ddd; background:none; border-radius:8px; color:#666; cursor:pointer; font-size:0.9rem;">
+                    Cancelar
+                </button>
+                <button id="btnGuardarBio" onclick="window.guardarBio()"
+                        style="flex:2; padding:0.7rem; background:#324C89; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer; font-size:0.9rem;">
+                    Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SEGUIDORES / SEGUIDOS -->
+    <div id="modalSeguidores" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
+        <div style="background:white; border-radius:16px; padding:1.5rem; max-width:420px; width:100%; max-height:80vh; display:flex; flex-direction:column;" onclick="event.stopPropagation()">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 id="modalSeguidoresTitulo" style="margin:0; font-size:1rem; color:#333;">Seguidores</h3>
+                <button onclick="window.cerrarModalSeguidores()" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#666;">×</button>
+            </div>
+            <input type="text" id="buscarSeguidor" placeholder="Buscar..."
+                   oninput="window.filtrarSeguidores(this.value)"
+                   style="padding:0.5rem 0.8rem; border:1.5px solid #e0e0e0; border-radius:8px; font-size:0.88rem; margin-bottom:1rem; font-family:inherit;">
+            <div id="listaSeguidores" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:0.5rem;">
+                <div style="text-align:center; color:#ccc; padding:2rem;">Cargando...</div>
+            </div>
+        </div>
+    </div>
 </div>

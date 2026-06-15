@@ -299,71 +299,122 @@ window.cargarMas = async function() {
     const grid = document.getElementById('peliculasGrid');
 
     try {
-        const token = localStorage.getItem('token');
-        const busqueda    = document.getElementById('busquedaInput')?.value.trim() || '';
-        const genero      = document.getElementById('filtroGenero')?.value || 'todos';
-        const anio        = document.getElementById('filtroAnio')?.value || 'todos';
-        const idioma      = document.getElementById('filtroIdioma')?.value || 'todos';
-        const popularidad = document.getElementById('filtroPopularidad')?.value || 'todas';
-        const duracion    = document.getElementById('filtroDuracion')?.value || 'todos';
-        const director    = window._directorSeleccionadoId || '';
+            const token = localStorage.getItem('token');
+            const busqueda    = document.getElementById('busquedaInput')?.value.trim() || '';
+            const genero      = document.getElementById('filtroGenero')?.value || 'todos';
+            const anio        = document.getElementById('filtroAnio')?.value || 'todos';
+            const idioma      = document.getElementById('filtroIdioma')?.value || 'todos';
+            const popularidad = document.getElementById('filtroPopularidad')?.value || 'todas';
+            const duracion    = document.getElementById('filtroDuracion')?.value || 'todos';
+            const director    = window._directorSeleccionadoId || '';
 
-        const hayFiltros = busqueda || genero !== 'todos' || anio !== 'todos' ||
-                           idioma !== 'todos' || popularidad !== 'todas' ||
-                           duracion !== 'todos' || director;
+            const hayFiltros = busqueda || genero !== 'todos' || anio !== 'todos' ||
+                               idioma !== 'todos' || popularidad !== 'todas' ||
+                               duracion !== 'todos' || director;
 
-        let data;
-        if (hayFiltros) {
-            const params = new URLSearchParams();
-            params.append('page', siguientePagina);
-            if (busqueda)           params.append('query', busqueda);
-            if (genero !== 'todos') params.append('withGenres', genero);
-            if (anio !== 'todos')   params.append('year', anio);
-            if (idioma !== 'todos') params.append('language', idioma);
-            if (director)           params.append('withCrew', director);
-            if (popularidad === 'alta')  { params.append('voteAverageGte', '7.5'); }
-            if (popularidad === 'media') { params.append('voteAverageGte', '5'); params.append('voteAverageLte', '7.4'); }
-            if (popularidad === 'baja')  { params.append('voteAverageLte', '4.9'); }
-            if (duracion === 'corta')  params.append('withRuntimeLte', '89');
-            if (duracion === 'media')  { params.append('withRuntimeGte', '90'); params.append('withRuntimeLte', '120'); }
-            if (duracion === 'larga')  params.append('withRuntimeGte', '121');
+            let data;
+            if (hayFiltros) {
+                const params = new URLSearchParams();
+                params.append('page', siguientePagina);
+                if (busqueda)           params.append('query', busqueda);
+                if (genero !== 'todos') params.append('withGenres', genero);
+                if (anio !== 'todos')   params.append('year', anio);
+                if (idioma !== 'todos') params.append('language', idioma);
+                if (director)           params.append('withCrew', director);
+                if (popularidad === 'alta')  { params.append('voteAverageGte', '7.5'); }
+                if (popularidad === 'media') { params.append('voteAverageGte', '5'); params.append('voteAverageLte', '7.4'); }
+                if (popularidad === 'baja')  { params.append('voteAverageLte', '4.9'); }
+                if (duracion === 'corta')  params.append('withRuntimeLte', '89');
+                if (duracion === 'media')  { params.append('withRuntimeGte', '90'); params.append('withRuntimeLte', '120'); }
+                if (duracion === 'larga')  params.append('withRuntimeGte', '121');
 
-            const response = await fetch(`${CONFIG.API_URL}/movies/search?${params.toString()}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (!response.ok) throw new Error(`Error ${response.status}`);
-            data = await response.json();
-        } else {
-            const criterioOrden = window._criterioOrden || 'fecha';
-            let sortParam = '';
-            if (criterioOrden === 'fecha') sortParam = '&sortBy=primary_release_date.desc';
-            if (criterioOrden === 'proximamente') sortParam = '&sortBy=primary_release_date.asc&releaseDateGte=' + (new Date().getFullYear() + 1);
-            const response = await fetch(`${CONFIG.API_URL}/movies/popular?page=${siguientePagina}${sortParam}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (!response.ok) throw new Error(`Error ${response.status}`);
-            data = await response.json();
+                const response = await fetch(`${CONFIG.API_URL}/movies/search?${params.toString()}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error(`Error ${response.status}`);
+                data = await response.json();
+
+                window.estadoPaginacion.paginaActual = data.page;
+                window.estadoPaginacion.totalPaginas = data.total_pages;
+                window.estadoPaginacion.totalResultados = data.total_results;
+
+                const nuevoHTML = await window.generarTarjetasHTML(data.results);
+                grid.insertAdjacentHTML('beforeend', nuevoHTML);
+
+            } else {
+                const criterioOrden = window._criterioOrden || 'fecha';
+                let sortParam = '';
+                if (criterioOrden === 'fecha') sortParam = '&sortBy=primary_release_date.desc';
+                if (criterioOrden === 'proximamente') sortParam = '&sortBy=primary_release_date.asc&releaseDateGte=' + (new Date().getFullYear() + 1);
+
+                const cursorTmdb = criterioOrden === 'proximamente'
+                    ? (window.estadoPaginacion._ultimaPaginaTmdb || 1) + 1
+                    : siguientePagina;
+
+                const response = await fetch(`${CONFIG.API_URL}/movies/popular?page=${cursorTmdb}${sortParam}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error(`Error ${response.status}`);
+                data = await response.json();
+
+                if (criterioOrden === 'proximamente') {
+                    const anioActual = new Date().getFullYear();
+                    const esValida = (p) => {
+                        if (!p.poster_path) return false;
+                        if (!p.overview || p.overview.trim() === '') return false;
+                        const soloLatinos = /^[a-zA-ZÀ-ÿ0-9\s\-:,.!?'"()\u00C0-\u024F\u1E00-\u1EFF]+$/;
+                        if (!p.title || !soloLatinos.test(p.title.trim())) return false;
+                        const anio = p.release_date ? new Date(p.release_date).getFullYear() : null;
+                        return anio > anioActual;
+                    };
+
+                    let acumulados = [...data.results];
+                    let paginaExtra = cursorTmdb;
+
+                    while (acumulados.filter(esValida).length < 6 && paginaExtra < data.total_pages) {
+                        paginaExtra++;
+                        try {
+                            const token2 = localStorage.getItem('token');
+                            const resExtra = await fetch(`${CONFIG.API_URL}/movies/popular?page=${paginaExtra}${sortParam}`, {
+                                headers: { 'Authorization': `Bearer ${token2}` }
+                            });
+                            if (!resExtra.ok) break;
+                            const dataExtra = await resExtra.json();
+                            acumulados = [...acumulados, ...dataExtra.results];
+                        } catch(e) { break; }
+                    }
+
+                    window.estadoPaginacion._ultimaPaginaTmdb = paginaExtra;
+                    window.estadoPaginacion.paginaActual = window.estadoPaginacion.paginaActual + 1;
+                    window.estadoPaginacion.totalPaginas = paginaExtra < data.total_pages
+                        ? window.estadoPaginacion.paginaActual + 1
+                        : window.estadoPaginacion.paginaActual;
+                    window.estadoPaginacion.totalResultados = data.total_results;
+
+                    const nuevoHTML = await window.generarTarjetasHTML(acumulados);
+                    grid.insertAdjacentHTML('beforeend', nuevoHTML);
+
+                } else {
+                    window.estadoPaginacion.paginaActual = data.page;
+                    window.estadoPaginacion.totalPaginas = data.total_pages;
+                    window.estadoPaginacion.totalResultados = data.total_results;
+
+                    const nuevoHTML = await window.generarTarjetasHTML(data.results);
+                    grid.insertAdjacentHTML('beforeend', nuevoHTML);
+                }
+            }
+
+            if (typeof window.cargarEstadisticasVotacion === 'function') {
+                window.cargarEstadisticasVotacion();
+            }
+
+            window.actualizarBotonesPaginacion();
+
+        } catch (error) {
+        } finally {
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-plus"></i> Cargar más'; }
         }
-
-        window.estadoPaginacion.paginaActual    = data.page;
-        window.estadoPaginacion.totalPaginas    = data.total_pages;
-        window.estadoPaginacion.totalResultados = data.total_results;
-
-        // Acumular — agregar al grid sin reemplazar
-        const nuevoHTML = await window.generarTarjetasHTML(data.results);
-        grid.insertAdjacentHTML('beforeend', nuevoHTML);
-
-        if (typeof window.cargarEstadisticasVotacion === 'function') {
-            window.cargarEstadisticasVotacion();
-        }
-
-        window.actualizarBotonesPaginacion();
-
-    } catch (error) {
-    } finally {
-        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-plus"></i> Cargar más'; }
-    }
-};
+    };
 
 window.cambiarPagina = async function(direccion) {
     if (window.estadoPaginacion.cargando) return;
@@ -407,7 +458,9 @@ window.cambiarPagina = async function(direccion) {
                     await window.cargarPeliculasPopulares(nuevaPagina);
                 }
             }
-    document.querySelector('.resultados-header')?.scrollIntoView({ behavior: 'smooth' });
+    if (window.innerWidth > 768) {
+            document.getElementById('ordenarPills')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
 };
 
 // ==============================================
@@ -419,6 +472,11 @@ window.seleccionarOrden = async function(criterio, btn) {
     document.querySelectorAll('.pill-orden').forEach(p => p.classList.remove('active'));
     if (btn) btn.classList.add('active');
     window._criterioOrden = criterio;
+
+    // Resetear estado de paginación al cambiar criterio
+    window.estadoPaginacion.paginaActual = 1;
+    window.estadoPaginacion.totalPaginas = 1;
+    window.estadoPaginacion._ultimaPaginaTmdb = 1;
 
     if (criterio === 'fecha' || criterio === 'proximamente') {
         await window.cargarPeliculasPopulares(1);
@@ -1151,14 +1209,14 @@ window.cargarComentariosPelicula = async function(id) {
                 item.innerHTML = `
                     <div class="comentario-avatar" style="flex-shrink:0;">
                         ${c.avatarUrl
-                            ? `<img src="${c.avatarUrl}" alt="${c.userName}" style="width:36px;height:36px;object-fit:cover;border-radius:50%;cursor:pointer;" onclick="event.stopPropagation(); window.abrirPerfilUsuario(${c.userId})">`
-                            : `<div style="width:36px;height:36px;background:#1a3a6b;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:0.85rem;cursor:pointer;" onclick="event.stopPropagation(); window.abrirPerfilUsuario(${c.userId})">${c.userName?.charAt(0) || 'U'}</div>`
+                            ? `<img src="${c.avatarUrl}" alt="${c.userName}" style="width:36px;height:36px;object-fit:cover;border-radius:50%;cursor:pointer;" onclick="event.stopPropagation(); window.cerrarModal(); window.abrirPerfilUsuario(${c.userId})">`
+                            : `<div style="width:36px;height:36px;background:#1a3a6b;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:0.85rem;cursor:pointer;" onclick="event.stopPropagation(); window.cerrarModal(); window.abrirPerfilUsuario(${c.userId})">${c.userName?.charAt(0) || 'U'}</div>`
                         }
                     </div>
                     <div class="comentario-contenido" style="flex:1;min-width:0;width:100%;">
                         <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
                             <span class="comentario-autor" style="font-weight:600;font-size:0.85rem;color:#333;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;"
-                                  onclick="event.stopPropagation(); window.abrirPerfilUsuario(${c.userId})">${c.userName || 'Usuario'}</span>
+                                  onclick="event.stopPropagation(); window.cerrarModal(); window.abrirPerfilUsuario(${c.userId})">${c.userName || 'Usuario'}</span>
                             <div style="display:flex;align-items:center;gap:0.2rem;flex-shrink:0;">
                                 ${btnReporte}
                                 ${btnOcultar}
@@ -1631,7 +1689,7 @@ window.cargarRespuestas = async function(commentId, offset) {
                         </div>
                         <div style="flex:1;min-width:0;">
                             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
-                                <span style="font-weight:600;font-size:0.8rem;color:#333;">${r.userName}</span>
+                                <span style="font-weight:600;font-size:0.8rem;color:#333;cursor:pointer;" onclick="event.stopPropagation(); window.cerrarModal(); window.abrirPerfilUsuario(${r.userId})">${r.userName}</span>
                                 <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
                                     ${!r.ownReply ? `
                                     <button onclick="window.abrirModalReporteReply(${r.id})"
