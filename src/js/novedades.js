@@ -59,6 +59,8 @@ function getNotifIcono(type) {
         case 'BANCO':                    return '👍';
         case 'MERECE_PUNTO':             return '⭐';
         case 'NEW_FOLLOWER':             return '👤';
+        case 'FOLLOW_REQUEST':           return '👤';
+        case 'FOLLOW_REQUEST_ACCEPTED':  return '👤';
         case 'RECOMMENDATION_RATED':     return '🎬';
         case 'NEW_RECOMMENDATION':       return '🎬';
         case 'DRAW_WINNER':              return '🏆';
@@ -92,23 +94,39 @@ window.cargarNovedades = async function() {
             return;
         }
 
-        lista.innerHTML = novedades.map(n => `
-            <div onclick="window.clickNovedad(${n.id}, ${n.movieId}, ${n.commentId}, ${n.replyId || 'null'}, '${n.type}', ${n.read}, ${n.actorId || 'null'})"
-                style="padding:0.75rem 1rem;border-bottom:1px solid #f5f5f5;cursor:pointer;
-                       background:${n.read ? 'white' : '#f0f4ff'};
-                       transition:background 0.2s;"
-                onmouseover="this.style.background='#f8f8f8'"
-                onmouseout="this.style.background='${n.read ? 'white' : '#f0f4ff'}'">
-                <div style="display:flex;align-items:flex-start;gap:0.5rem;">
-                    <span style="font-size:1rem;flex-shrink:0;">${getNotifIcono(n.type)}</span>
-                    <div style="flex:1;min-width:0;">
-                        <div style="font-size:0.83rem;color:#333;line-height:1.4;">${n.message}</div>
-                        <div style="font-size:0.75rem;color:#999;margin-top:0.2rem;">${new Date(n.createdAt).toLocaleDateString('es-ES')} ${new Date(n.createdAt).toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'})}</div>
+        lista.innerHTML = novedades.map(n => {
+            const esFollowRequest = n.type === 'FOLLOW_REQUEST';
+            const botonesFollow = esFollowRequest ? `
+                <div style="display:flex;gap:0.5rem;margin-top:0.5rem;" onclick="event.stopPropagation()">
+                    <button onclick="window.responderFollowRequest(${n.actorId}, true, ${n.id}, this.closest('[data-notif-id]'))"
+                        style="background:#324C89;color:white;border:none;border-radius:6px;padding:0.3rem 0.8rem;cursor:pointer;font-size:0.8rem;font-weight:600;">
+                        ✓ Aceptar
+                    </button>
+                    <button onclick="window.responderFollowRequest(${n.actorId}, false, ${n.id}, this.closest('[data-notif-id]'))"
+                        style="background:none;color:#e50914;border:1.5px solid #e50914;border-radius:6px;padding:0.3rem 0.8rem;cursor:pointer;font-size:0.8rem;font-weight:600;">
+                        ✕ Rechazar
+                    </button>
+                </div>` : '';
+
+            return `
+                <div data-notif-id="${n.id}"
+                    onclick="window.clickNovedad(${n.id}, ${n.movieId}, ${n.commentId}, ${n.replyId || 'null'}, '${n.type}', ${n.read}, ${n.actorId || 'null'})"
+                    style="padding:0.75rem 1rem;border-bottom:1px solid #f5f5f5;cursor:pointer;
+                           background:${n.read ? 'white' : '#f0f4ff'};
+                           transition:background 0.2s;"
+                    onmouseover="this.style.background='#f8f8f8'"
+                    onmouseout="this.style.background='${n.read ? 'white' : '#f0f4ff'}'">
+                    <div style="display:flex;align-items:flex-start;gap:0.5rem;">
+                        <span style="font-size:1rem;flex-shrink:0;">${getNotifIcono(n.type)}</span>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-size:0.83rem;color:#333;line-height:1.4;">${n.message}</div>
+                            <div style="font-size:0.75rem;color:#999;margin-top:0.2rem;">${new Date(n.createdAt).toLocaleDateString('es-ES')} ${new Date(n.createdAt).toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'})}</div>
+                            ${botonesFollow}
+                        </div>
+                        ${!n.read ? '<span style="width:8px;height:8px;background:#e50914;border-radius:50%;flex-shrink:0;margin-top:4px;"></span>' : ''}
                     </div>
-                    ${!n.read ? '<span style="width:8px;height:8px;background:#e50914;border-radius:50%;flex-shrink:0;margin-top:4px;"></span>' : ''}
-                </div>
-            </div>
-        `).join('');
+                </div>`;
+        }).join('');
 
     } catch(e) {
         lista.innerHTML = '<div style="padding:1rem;text-align:center;color:#999;font-size:0.85rem;">Error al cargar novedades</div>';
@@ -146,12 +164,12 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
     }
 
     // Navegar a perfil del seguidor
-    if (type === 'NEW_FOLLOWER') {
-        if (actorId && typeof window.abrirPerfilUsuario === 'function') {
-            window.abrirPerfilUsuario(actorId);
+        if (type === 'NEW_FOLLOWER' || type === 'FOLLOW_REQUEST' || type === 'FOLLOW_REQUEST_ACCEPTED') {
+            if (actorId && typeof window.abrirPerfilUsuario === 'function') {
+                window.abrirPerfilUsuario(actorId);
+            }
+            return;
         }
-        return;
-    }
 
     // Abrir película al clickear recomendación nueva
         if (type === 'NEW_RECOMMENDATION') {
@@ -320,3 +338,64 @@ window.cargarNovedadesMobile = async function() {
         lista.innerHTML = '<div style="padding:1rem;text-align:center;color:#999;font-size:0.85rem;">Error al cargar novedades</div>';
     }
 };
+
+window.responderFollowRequest = async function(followerId, aceptar, notifId, notifEl) {
+    const token = localStorage.getItem('token');
+    try {
+        // Buscar el follow pendiente
+        const resBuscar = await fetch(`${CONFIG.API_URL}/follows/pending/${followerId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!resBuscar.ok) return;
+        const follow = await resBuscar.json();
+
+        // Obtener nombre del actor desde la notificación en el DOM
+        const actorNombre = notifEl?.querySelector('[data-actor-name]')?.dataset.actorName
+            || notifEl?.querySelector('.notif-message')?.textContent?.split(' ')[0]
+            || 'El usuario';
+
+        const endpoint = aceptar
+            ? `${CONFIG.API_URL}/follows/${follow.id}/accept`
+            : `${CONFIG.API_URL}/follows/${follow.id}/reject`;
+
+        const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+
+        // Marcar notificación como leída
+        await fetch(`${CONFIG.API_URL}/notifications/${notifId}/read`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (aceptar) {
+            // Ocultar solo los botones, mantener la notificación
+            const btns = notifEl?.querySelector('div[onclick*="stopPropagation"]');
+            if (btns) btns.remove();
+            _mostrarToastNovedades(`Ahora ${follow.actorName || actorNombre} te sigue`);
+        } else {
+            // Eliminar la notificación completa
+            if (notifEl) notifEl.remove();
+            _mostrarToastNovedades(`Rechazaste la solicitud de ${follow.actorName || actorNombre}`);
+        }
+
+        window.cargarNovedades();
+
+    } catch(e) {}
+};
+
+function _mostrarToastNovedades(mensaje) {
+    const t = document.createElement('div');
+    t.textContent = mensaje;
+    t.style.cssText = `
+        position:fixed; bottom:2rem; left:50%; transform:translateX(-50%);
+        background:#324C89; color:white; padding:0.75rem 1.5rem;
+        border-radius:24px; font-size:0.88rem; font-weight:600;
+        z-index:9999999; box-shadow:0 4px 16px rgba(0,0,0,0.2);
+        white-space:nowrap;
+    `;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+}

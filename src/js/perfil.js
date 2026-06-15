@@ -114,9 +114,14 @@ function renderIdentidad(perfil) {
 
         if (miId && String(miId) !== String(perfil.id)) {
             btnSeguir.style.display = 'flex';
-            actualizarBtnSeguir(perfil.esSeguido);
+            actualizarBtnSeguir(perfil.followStatus);
             if (btnBanner) btnBanner.style.display = 'none';
             if (btnEditBio) btnEditBio.style.display = 'none';
+
+            // Si perfil privado y no aceptado → ocultar contenido
+            if (perfil.esPrivado && perfil.followStatus !== 'ACCEPTED') {
+                _mostrarPerfilPrivado();
+            }
         } else {
             if (btnSeguir) btnSeguir.style.display = 'none';
             if (btnBanner) btnBanner.style.display = 'block';
@@ -451,12 +456,15 @@ function _actualizarNavComentarios() {
 // ==============================================
 // SEGUIR / DEJAR DE SEGUIR
 // ==============================================
-function actualizarBtnSeguir(esSeguido) {
+function actualizarBtnSeguir(followStatus) {
     const btn = document.getElementById('btnSeguir');
     if (!btn) return;
-    if (esSeguido) {
+    if (followStatus === 'ACCEPTED') {
         btn.className = 'btn-seguir';
         btn.innerHTML = '<i class="fas fa-user-check" style="color:#1a3a6b;"></i> <span style="color:#1a3a6b;">Siguiendo</span>';
+    } else if (followStatus === 'PENDING') {
+        btn.className = 'btn-seguir';
+        btn.innerHTML = '<i class="fas fa-clock" style="color:#888;"></i> <span style="color:#888;">Invitación enviada</span>';
     } else {
         btn.className = 'btn-seguir';
         btn.innerHTML = '<i class="fas fa-user-plus"></i> Seguir';
@@ -467,6 +475,9 @@ window.toggleSeguir = async function() {
     const token = localStorage.getItem('token');
     const btn = document.getElementById('btnSeguir');
     const esSiguiendo = btn.querySelector('.fa-user-check') !== null;
+    const esPendiente = btn.querySelector('.fa-clock') !== null;
+
+    if (esPendiente) return; // No hacer nada si está pendiente
 
     if (esSiguiendo) {
         const nombre = document.getElementById('perfilNombre').textContent;
@@ -482,8 +493,10 @@ window.toggleSeguir = async function() {
         });
         if (!res.ok) return;
         const data = await res.json();
-        actualizarBtnSeguir(true);
-        document.getElementById('perfilSeguidores').textContent = data.followersCount;
+        actualizarBtnSeguir(data.status);
+        if (data.followersCount !== undefined) {
+            document.getElementById('perfilSeguidores').textContent = data.followersCount;
+        }
     } catch (e) {}
 };
 
@@ -500,9 +513,10 @@ window.confirmarDejarSeguir = async function() {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) return;
-        const data = await res.json();
-        actualizarBtnSeguir(false);
-        document.getElementById('perfilSeguidores').textContent = data.followersCount;
+
+        // Recargar perfil completo para reflejar estado privado
+        await cargarPerfil(perfilUsuarioId);
+
     } catch (e) {}
 };
 
@@ -679,4 +693,56 @@ window.subirBanner = async function(input) {
                         </div>
                     </div>`;
             }).join('');
+        }
+
+        // ==============================================
+        // PERFIL PRIVADO
+        // ==============================================
+        function _mostrarPerfilPrivado() {
+            // Ocultar secciones de contenido
+            document.querySelectorAll('.perfil-seccion').forEach(s => s.style.display = 'none');
+
+            // Ocultar banner y avatar
+            const banner = document.querySelector('.perfil-banner');
+            if (banner) {
+                banner.style.background = '#e0e0e0';
+                banner.style.backgroundImage = 'none';
+            }
+            const avatar = document.getElementById('perfilAvatar');
+            if (avatar) {
+                avatar.innerHTML = '';
+                avatar.style.background = '#ccc';
+            }
+
+            // Ocultar seguidores y seguidos — quitar clickeable y mostrar solo números sin modal
+            const statsClickables = document.querySelectorAll('.perfil-stat-clickable');
+            statsClickables.forEach(s => {
+                s.classList.remove('perfil-stat-clickable');
+                s.style.cursor = 'default';
+                s.style.color = '';
+                s.onclick = null;
+            });
+
+            // Mostrar seguidores/seguidos pero sin clickeable ni modal
+            const seguidoresEl = document.getElementById('perfilSeguidores');
+            const siguiendoEl  = document.getElementById('perfilSiguiendo');
+            if (seguidoresEl) seguidoresEl.textContent = '—';
+            if (siguiendoEl)  siguiendoEl.textContent  = '—';
+
+            // Insertar mensaje de perfil privado
+            const card = document.getElementById('perfilContenido');
+            const existente = document.getElementById('perfilPrivadoMsg');
+            if (existente) return;
+
+            const msg = document.createElement('div');
+            msg.id = 'perfilPrivadoMsg';
+            msg.style.cssText = 'text-align:center; padding:3rem 1.5rem; color:#888;';
+            msg.innerHTML = `
+                <div style="font-size:2.5rem; margin-bottom:1rem;">🔒</div>
+                <p style="font-size:1rem; font-weight:600; color:#333; margin:0 0 0.5rem;">Este perfil es privado</p>
+                <p style="font-size:0.88rem; color:#aaa; margin:0 0 1.5rem; line-height:1.6;">
+                    Para ver el contenido de este perfil,<br>enviá una invitación y esperá que sea aceptada.
+                </p>
+            `;
+            card.appendChild(msg);
         }

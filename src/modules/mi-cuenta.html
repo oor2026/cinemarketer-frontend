@@ -2,7 +2,13 @@
     <!-- ============================================== -->
     <!-- NUEVO: SECCIÓN DE AVATAR Y NIVEL -->
     <!-- ============================================== -->
-    <div class="profile-header">
+    <div class="profile-header" style="position:relative;">
+        <!-- Botón configuración -->
+        <button onclick="window.abrirConfiguracion()"
+                style="position:absolute; top:0; right:0; background:none; border:none; cursor:pointer; color:#aaa; font-size:1.1rem; padding:0.5rem;"
+                title="Configuración de cuenta">
+            <i class="fas fa-cog"></i>
+        </button>
         <div class="welcome-badge">
             <h1>¡Hola, <span id="userName"></span>!</h1>
             <p id="memberSince"></p>
@@ -557,6 +563,45 @@
                     Eliminar
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIGURACIÓN -->
+    <div id="modalConfiguracion" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
+        <div style="background:white; border-radius:16px; padding:2rem; max-width:460px; width:100%;" onclick="event.stopPropagation()">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                <h3 style="margin:0; font-size:1rem; color:#333;"><i class="fas fa-cog" style="color:#324C89;"></i> Configuración de cuenta</h3>
+                <button onclick="window.cerrarConfiguracion()" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#666;">×</button>
+            </div>
+
+            <!-- Privacidad del perfil -->
+            <div style="border:1px solid #f0f0f0; border-radius:12px; padding:1.25rem; margin-bottom:1rem;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:1rem;">
+                    <div>
+                        <p style="margin:0 0 4px; font-size:0.9rem; font-weight:600; color:#333;">Privacidad del perfil</p>
+                        <p style="margin:0; font-size:0.8rem; color:#aaa; line-height:1.5;" id="privacidadDesc">
+                            Tu perfil es público. Cualquier usuario puede ver tu contenido.
+                        </p>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.5rem; flex-shrink:0;">
+                        <span style="font-size:0.8rem; color:#aaa;" id="privacidadLabel">Público</span>
+                        <div id="togglePrivacidad" onclick="window.togglePrivacidad()"
+                             style="width:44px; height:24px; border-radius:12px; background:#ddd; cursor:pointer; position:relative; transition:background 0.2s;">
+                            <div id="togglePrivacidadDot"
+                                 style="width:20px; height:20px; border-radius:50%; background:white; position:absolute; top:2px; left:2px; transition:left 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p style="font-size:0.75rem; color:#ccc; margin:0 0 1.5rem; line-height:1.5;">
+                Más opciones de configuración próximamente.
+            </p>
+
+            <button onclick="window.cerrarConfiguracion()"
+                    style="width:100%; padding:0.7rem; background:#324C89; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer; font-size:0.9rem;">
+                Listo
+            </button>
         </div>
     </div>
 </div>
