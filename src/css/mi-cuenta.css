@@ -1091,3 +1091,18 @@
 }
 
 .mi-red-btn.seguir:hover { background: #c00; }
+
+.mi-red-btn-bloquear {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #ccc;
+    font-size: 0.9rem;
+    padding: 0.3rem;
+    border-radius: 6px;
+    transition: color 0.2s;
+}
+
+.mi-red-btn-bloquear:hover {
+    color: #e50914;
+}

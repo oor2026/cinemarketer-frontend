@@ -45,9 +45,10 @@
 
 /* Botón seguir — superpuesto banner abajo derecha */
 .perfil-accion {
-    position: absolute;
-    bottom: 1rem;
-    right: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
 }
 
 .btn-seguir {
@@ -449,12 +450,14 @@
         }
 
         .perfil-info-row {
-                flex-direction: column;
-            }
+            flex-direction: column;
+            gap: 0.25rem;
+        }
 
         .perfil-col-info {
-                width: 100%;
-            }
+            width: 100%;
+            padding-top: 0;
+        }
 
     .perfil-banner {
         height: 140px;
@@ -462,12 +465,13 @@
     }
 
     .perfil-col-avatar {
-            flex-direction: row;
-            align-items: center;
-            gap: 0.75rem;
-            margin-top: -32px;
-            width: 100%;
-        }
+        flex-direction: row;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: -32px;
+        width: 100%;
+        margin-bottom: -0.75rem;
+    }
 
     .perfil-avatar {
         width: 64px;
@@ -488,9 +492,11 @@
     }
 
     .perfil-accion {
-        bottom: 0.75rem;
-        right: 0.75rem;
-    }
+            position: static;
+            margin-top: 0.5rem;
+            width: 100%;
+            justify-content: flex-end;
+        }
 
     .btn-seguir {
         font-size: 0.78rem;
@@ -584,4 +590,24 @@
 
 .perfil-stat-clickable:hover strong {
     color: #324C89;
+}
+
+.perfil-nombre-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+}
+
+@media (max-width: 600px) {
+    .perfil-nombre-row {
+            flex-direction: column-reverse;
+            align-items: flex-start;
+            gap: 0.25rem;
+        }
+
+        .perfil-nombre-row .perfil-accion {
+            align-self: flex-start;
+        }
 }
