@@ -43,8 +43,12 @@
             <div class="perfil-stats-inline">
                 <span class="perfil-stat-inline"><strong id="perfilVotaciones">0</strong> votaciones</span>
                 <span class="perfil-stat-inline"><strong id="perfilComentarios">0</strong> comentarios</span>
-                <span class="perfil-stat-inline"><strong id="perfilSeguidores">0</strong> seguidores</span>
-                <span class="perfil-stat-inline"><strong id="perfilSiguiendo">0</strong> seguidos</span>
+                <span class="perfil-stat-inline perfil-stat-clickable" onclick="window.abrirModalSeguidores('seguidores')">
+                    <strong id="perfilSeguidores">0</strong> seguidores
+                </span>
+                <span class="perfil-stat-inline perfil-stat-clickable" onclick="window.abrirModalSeguidores('seguidos')">
+                    <strong id="perfilSiguiendo">0</strong> seguidos
+                </span>
             </div>
 
             <!-- BIO -->
@@ -136,4 +140,19 @@
         </div>
     </div>
 
+    <!-- MODAL SEGUIDORES / SEGUIDOS -->
+    <div id="modalSeguidores" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
+        <div style="background:white; border-radius:16px; padding:1.5rem; max-width:420px; width:100%; max-height:80vh; display:flex; flex-direction:column;" onclick="event.stopPropagation()">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 id="modalSeguidoresTitulo" style="margin:0; font-size:1rem; color:#333;">Seguidores</h3>
+                <button onclick="window.cerrarModalSeguidores()" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#666;">×</button>
+            </div>
+            <input type="text" id="buscarSeguidor" placeholder="Buscar..."
+                   oninput="window.filtrarSeguidores(this.value)"
+                   style="padding:0.5rem 0.8rem; border:1.5px solid #e0e0e0; border-radius:8px; font-size:0.88rem; margin-bottom:1rem; font-family:inherit;">
+            <div id="listaSeguidores" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:0.5rem;">
+                <div style="text-align:center; color:#ccc; padding:2rem;">Cargando...</div>
+            </div>
+        </div>
+    </div>
 </div>

@@ -615,3 +615,68 @@ window.subirBanner = async function(input) {
                 if (btn) { btn.disabled = false; btn.textContent = 'Guardar'; }
             }
         };
+
+        // ==============================================
+        // MODAL SEGUIDORES / SEGUIDOS
+        // ==============================================
+        let _seguidoresList = [];
+
+        window.abrirModalSeguidores = async function(tipo) {
+            const modal  = document.getElementById('modalSeguidores');
+            const titulo = document.getElementById('modalSeguidoresTitulo');
+            const lista  = document.getElementById('listaSeguidores');
+            const buscar = document.getElementById('buscarSeguidor');
+
+            titulo.textContent = tipo === 'seguidores' ? 'Seguidores' : 'Seguidos';
+            buscar.value = '';
+            lista.innerHTML = '<div style="text-align:center;color:#ccc;padding:2rem;"><i class="fas fa-spinner fa-spin"></i></div>';
+            modal.style.display = 'flex';
+
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${CONFIG.API_URL}/users/${perfilUsuarioId}/${tipo}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error();
+                _seguidoresList = await res.json();
+                _renderListaSeguidores(_seguidoresList);
+            } catch(e) {
+                lista.innerHTML = '<div style="text-align:center;color:#e50914;padding:2rem;">Error al cargar</div>';
+            }
+        };
+
+        window.cerrarModalSeguidores = function() {
+            document.getElementById('modalSeguidores').style.display = 'none';
+            _seguidoresList = [];
+        };
+
+        window.filtrarSeguidores = function(query) {
+            const filtrado = _seguidoresList.filter(u =>
+                u.nombre.toLowerCase().includes(query.toLowerCase())
+            );
+            _renderListaSeguidores(filtrado);
+        };
+
+        function _renderListaSeguidores(usuarios) {
+            const lista = document.getElementById('listaSeguidores');
+            if (!usuarios.length) {
+                lista.innerHTML = '<div style="text-align:center;color:#ccc;padding:2rem;">Sin resultados</div>';
+                return;
+            }
+            lista.innerHTML = usuarios.map(u => {
+                const avatar = u.avatarUrl
+                    ? `<img src="${u.avatarUrl}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">`
+                    : `<div style="width:40px;height:40px;border-radius:50%;background:#324C89;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:0.9rem;">${u.nombre?.charAt(0) || 'U'}</div>`;
+                return `
+                    <div onclick="window.cerrarModalSeguidores(); window.abrirPerfilUsuario(${u.id})"
+                        style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.5rem;border-radius:8px;cursor:pointer;transition:background 0.15s;"
+                        onmouseover="this.style.background='#f5f5f5'"
+                        onmouseout="this.style.background='none'">
+                        ${avatar}
+                        <div>
+                            <p style="margin:0;font-size:0.9rem;font-weight:600;color:#333;">${u.nombre}</p>
+                            <p style="margin:0;font-size:0.75rem;color:#aaa;">${u.nivel}</p>
+                        </div>
+                    </div>`;
+            }).join('');
+        }

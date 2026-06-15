@@ -496,6 +496,14 @@
         font-size: 0.78rem;
         padding: 0.4rem 0.9rem;
     }
+
+    .perfil-stat-clickable strong {
+            color: #324C89;
+        }
+
+        .perfil-stat-clickable {
+            color: #324C89;
+        }
 }
 
 /* ── Swipe mobile comentarios ────────────────── */
@@ -562,4 +570,18 @@
 
 .perfil-ver-mas:hover {
     text-decoration: underline;
+}
+
+.perfil-stat-clickable {
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.perfil-stat-clickable:hover {
+    color: #324C89;
+}
+
+.perfil-stat-clickable:hover strong {
+    color: #324C89;
 }
