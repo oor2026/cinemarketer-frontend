@@ -10,8 +10,15 @@
             <i class="fas fa-cog"></i>
         </button>
         <div class="welcome-badge">
-            <h1>¡Hola, <span id="userName"></span>!</h1>
-            <p id="memberSince"></p>
+            <div class="welcome-badge-texto">
+                <h1>¡Hola, <span id="userName"></span>!</h1>
+                <p id="memberSince"></p>
+            </div>
+            <div style="text-align:right; margin-top:0;">
+                <button onclick="window.verMiSala()" style="background:none;border:1.5px solid rgba(255,255,255,0.6);color:white;padding:0.45rem 1.1rem;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:0.5rem;transition:background 0.2s,border-color 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)';this.style.borderColor='white'" onmouseout="this.style.background='none';this.style.borderColor='rgba(255,255,255,0.6)'">
+                    <i class="fas fa-door-open"></i> Ver mi sala
+                </button>
+            </div>
         </div>
         <div class="profile-avatar-section">
             <div class="profile-avatar-container">
@@ -44,24 +51,6 @@
         </div>
     </div>
 
-    <!-- BOTÓN MI SALA -->
-    <div style="text-align:right; margin-bottom:1rem;">
-        <button onclick="window.verMiSala()" style="background:none;border:1.5px solid #1a3a6b;color:#1a3a6b;padding:0.45rem 1.1rem;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:0.5rem;transition:background 0.2s,color 0.2s;" onmouseover="this.style.background='#1a3a6b';this.style.color='white'" onmouseout="this.style.background='none';this.style.color='#1a3a6b'">
-            <i class="fas fa-door-open"></i> Ver mi sala
-        </button>
-    </div>
-
-    <div class="stats-grid">
-        <div class="stat-box">
-            <div class="stat-number" id="reviewsCountFormatted">0</div>
-            <div class="stat-label">Historial Votaciones</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-number" id="redemptionsCount">0</div>
-            <div class="stat-label">Historial Comentarios</div>
-        </div>
-    </div>
-
     <!-- ============================================== -->
     <!-- PANEL PREMIUM -->
     <!-- ============================================== -->
@@ -89,14 +78,17 @@
                 <div class="premium-banner-badge">★ Exclusivo</div>
                 <p class="premium-banner-title">Cinemarketer Premium</p>
                 <div class="premium-banner-price"><span id="premiumPlanPrice">$999</span> <span>/ mes</span></div>
-                <ul class="premium-banner-benefits">
-                    <li><span class="premium-check"></span>Premios y sorteos exclusivos solo para miembros</li>
-                    <li><span class="premium-check"></span><strong>Puntos x2</strong>&nbsp;en votos, comentarios y recomendaciones</li>
-                    <li><span class="premium-check"></span>Sin límite diario de comentarios ni recomendaciones</li>
-                    <li><span class="premium-check"></span>Sin tope mensual de puntos acumulados</li>
-                    <li><span class="premium-check"></span>Tus puntos <strong>nunca vencen</strong></li>
-                    <li><span class="premium-check"></span>Cobrás todo lo que acumulás el 1° de cada mes</li>
-                </ul>
+                <div class="premium-benefits-wrapper">
+                    <ul class="premium-banner-benefits" id="premiumBenefitsList">
+                        <li><span class="premium-check"></span>Premios y sorteos exclusivos solo para miembros</li>
+                        <li><span class="premium-check"></span><strong>Puntos x2</strong>&nbsp;en votos, comentarios y recomendaciones</li>
+                        <li><span class="premium-check"></span>Sin límite diario de comentarios ni recomendaciones</li>
+                        <li><span class="premium-check"></span>Sin tope mensual de puntos acumulados</li>
+                        <li><span class="premium-check"></span>Tus puntos <strong>nunca vencen</strong></li>
+                        <li><span class="premium-check"></span>Cobrás todo lo que acumulás el 1° de cada mes</li>
+                    </ul>
+                    <div class="premium-benefits-dots" id="premiumBenefitsDots"></div>
+                </div>
                 <button class="btn-suscribirse" onclick="window.abrirDetallePlan()">
                     Quiero ser Premium
                 </button>
@@ -183,13 +175,39 @@
 
     </div>
 
+    <!-- MI ACTIVIDAD -->
+    <div class="cuenta-seccion">
+        <h3 class="cuenta-seccion-titulo"><i class="fas fa-chart-bar"></i> Mi actividad</h3>
+        <div class="historial-tabs-visual">
+            <div class="historial-tab-item">
+                <i class="fas fa-thumbs-up"></i>
+                <span class="historial-tab-numero" id="reviewsCountFormatted">0</span>
+                <span class="historial-tab-label">Votaciones</span>
+            </div>
+            <div class="historial-tab-item">
+                <i class="fas fa-comment"></i>
+                <span class="historial-tab-numero" id="redemptionsCount">0</span>
+                <span class="historial-tab-label">Comentarios</span>
+            </div>
+            <div class="historial-tab-item">
+                <i class="fas fa-paper-plane"></i>
+                <span class="historial-tab-numero" id="recomendadasCount">0</span>
+                <span class="historial-tab-label">Recomendadas</span>
+            </div>
+            <div class="historial-tab-item">
+                <i class="fas fa-star"></i>
+                <span class="historial-tab-numero" id="puntosCount">0</span>
+                <span class="historial-tab-label">Pts merecidos</span>
+            </div>
+        </div>
+    </div>
+
     <!-- ============================================== -->
     <!-- MI RED — SIGUIENDO / SEGUIDORES               -->
     <!-- ============================================== -->
-    <div class="mi-red-seccion">
-        <div class="mi-red-header">
-            <h3 class="mi-red-titulo"><i class="fas fa-users"></i> Mi red</h3>
-        </div>
+    <div class="cuenta-seccion">
+        <h3 class="cuenta-seccion-titulo"><i class="fas fa-users"></i> Mi red</h3>
+        <div class="mi-red-seccion">
         <div class="mi-red-tabs">
             <button class="mi-red-tab active" id="tabSiguiendo"
                     onclick="window.switchRedTab('siguiendo')">
@@ -200,16 +218,19 @@
                 Seguidores (<span id="countSeguidores">0</span>)
             </button>
         </div>
-        <div id="miRedLista">
-            <div class="mi-red-loading"><i class="fas fa-spinner fa-spin"></i></div>
+            <div id="miRedLista">
+                <div class="mi-red-loading"><i class="fas fa-spinner fa-spin"></i></div>
+            </div>
         </div>
     </div>
 
     <!-- ============================================== -->
-    <!-- MI LISTA / RECOMENDACIONES                    -->
+    <!-- MIS PREFERENCIAS -->
     <!-- ============================================== -->
-    <div class="mi-red-seccion">
-        <div class="mi-red-tabs">
+    <div class="cuenta-seccion">
+        <h3 class="cuenta-seccion-titulo"><i class="fas fa-heart"></i> Mis preferencias</h3>
+        <div class="mi-red-seccion">
+            <div class="mi-red-tabs">
             <button class="mi-red-tab active" id="tabMiLista"
                     onclick="window.switchListaTab('mi-lista')">
                 Mi lista (<span id="countMiLista">0</span>)
@@ -229,9 +250,13 @@
                 <div class="mi-red-loading"><i class="fas fa-spinner fa-spin"></i></div>
             </div>
         </div>
-    </div>
+        </div>
+    </div><!-- /cuenta-seccion mis preferencias -->
 
-    <div class="datos-grid">
+    <!-- DATOS PERSONALES -->
+    <div class="cuenta-seccion">
+            <h3 class="cuenta-seccion-titulo"><i class="fas fa-id-card"></i> Datos personales</h3>
+            <div class="datos-grid">
         <div class="dato-card">
             <div class="dato-icon"><i class="fas fa-user" aria-hidden="true"></i></div>
             <div class="dato-body">
@@ -301,12 +326,12 @@
         </div>
     </div>
 
-    <!-- BOTÓN ELIMINAR CUENTA -->
-    <div style="text-align:center; margin-top: 1.5rem;">
+        <!-- BOTÓN ELIMINAR CUENTA -->    <div style="text-align:center; margin-top: 1.5rem;">
         <button class="btn-eliminar-cuenta" onclick="window.abrirEliminarCuenta()">
             <i class="fas fa-trash-alt"></i> Eliminar mi cuenta
         </button>
     </div>
+    </div><!-- /cuenta-seccion datos personales -->
 
     <!-- MODAL SELECTOR DE AVATAR (NUEVO) -->
     <div id="modalSelectorAvatar" class="modal-edicion" style="display:none;">

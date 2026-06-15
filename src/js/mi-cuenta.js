@@ -21,6 +21,8 @@ window.loadProfile = async function() {
         document.getElementById('userPhone').textContent        = profile.phone || '—';
         // Puntos — los detalles se muestran en el módulo Mis Puntos
         document.getElementById('redemptionsCount').textContent = profile.commentsCount ?? 0;
+        document.getElementById('recomendadasCount').textContent = profile.recommendationsCount ?? 0;
+        document.getElementById('puntosCount').textContent = profile.merecePuntosCount ?? 0;
 
         const reviewsSpan = document.getElementById('reviewsCountFormatted');
         if (reviewsSpan) reviewsSpan.textContent = formatearVotos(profile.reviewsCount ?? 0);
@@ -1498,3 +1500,48 @@ window.confirmarBloquear = async function() {
         if (btn) { btn.disabled = false; btn.textContent = 'Sí, bloquear'; }
     }
 };
+
+// ── Premium benefits carrusel mobile ──────────
+(function() {
+    if (window.innerWidth > 480) return;
+
+    const list   = document.getElementById('premiumBenefitsList');
+    const dots   = document.getElementById('premiumBenefitsDots');
+    if (!list || !dots) return;
+
+    const items       = Array.from(list.querySelectorAll('li'));
+    const perPage     = 3;
+    const totalPages  = Math.ceil(items.length / perPage);
+    let current       = 0;
+
+    // Crear dots
+    for (let i = 0; i < totalPages; i++) {
+        const d = document.createElement('span');
+        d.className = 'premium-benefit-dot' + (i === 0 ? ' active' : '');
+        d.onclick = () => goTo(i);
+        dots.appendChild(d);
+    }
+
+    function goTo(page) {
+        current = page;
+        items.forEach((li, idx) => {
+            li.style.display = (idx >= page * perPage && idx < (page + 1) * perPage) ? '' : 'none';
+        });
+        dots.querySelectorAll('.premium-benefit-dot').forEach((d, i) => {
+            d.classList.toggle('active', i === page);
+        });
+    }
+
+    goTo(0);
+
+    // Swipe support
+    let startX = 0;
+    list.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+    list.addEventListener('touchend', e => {
+        const diff = startX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 40) {
+            if (diff > 0 && current < totalPages - 1) goTo(current + 1);
+            if (diff < 0 && current > 0) goTo(current - 1);
+        }
+    });
+})();
