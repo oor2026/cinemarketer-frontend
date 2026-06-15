@@ -604,4 +604,29 @@
             </button>
         </div>
     </div>
+    <!-- MODAL BLOQUEAR USUARIO -->
+    <div id="modalBloquearUsuario" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
+        <div style="background:white; border-radius:16px; padding:2rem; max-width:400px; width:100%;" onclick="event.stopPropagation()">
+            <h3 style="margin:0 0 0.5rem; color:#333; font-size:1rem;">
+                <i class="fas fa-ban" style="color:#e50914;"></i> Bloquear usuario
+            </h3>
+            <p style="color:#888; font-size:0.85rem; margin:0 0 1.25rem; line-height:1.5;">
+                ¿Querés bloquear a <strong id="bloquearNombre"></strong>? Dejarás de seguirlo y él dejará de seguirte. No podrá ver tu perfil.
+            </p>
+            <label style="display:flex; align-items:center; gap:0.6rem; font-size:0.85rem; color:#555; margin-bottom:1.5rem; cursor:pointer;">
+                <input type="checkbox" id="checkReportarAlBloquear" style="accent-color:#e50914; width:16px; height:16px;">
+                También quiero reportar a este usuario
+            </label>
+            <div style="display:flex; gap:0.75rem;">
+                <button onclick="window.cerrarModalBloquear()"
+                        style="flex:1; padding:0.7rem; border:1.5px solid #ddd; background:none; border-radius:8px; color:#666; cursor:pointer;">
+                    Cancelar
+                </button>
+                <button id="btnConfirmarBloquear" onclick="window.confirmarBloquear()"
+                        style="flex:1; padding:0.7rem; background:#e50914; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer;">
+                    Sí, bloquear
+                </button>
+            </div>
+        </div>
+    </div>
 </div>

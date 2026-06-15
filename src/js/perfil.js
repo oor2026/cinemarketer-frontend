@@ -51,6 +51,17 @@ window['init_perfil'] = async function(userId) {
 async function cargarPerfil(userId) {
     const token = localStorage.getItem('token');
 
+    // Reset visual por si venía de perfil bloqueado o privado
+    document.querySelectorAll('.perfil-seccion').forEach(s => s.style.display = '');
+    document.getElementById('perfilBloqueadoMsg')?.remove();
+    document.getElementById('perfilPrivadoMsg')?.remove();
+    const btnDes = document.getElementById('btnDesbloquear');
+        if (btnDes) btnDes.style.display = 'none';
+    const bannerReset = document.querySelector('.perfil-banner');
+    if (bannerReset) { bannerReset.style.background = ''; bannerReset.style.backgroundImage = ''; }
+    const avatarReset = document.getElementById('perfilAvatar');
+    if (avatarReset) { avatarReset.style.background = ''; }
+
     try {
         const response = await fetch(`${CONFIG.API_URL}/users/${userId}/profile`, {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -69,9 +80,10 @@ async function cargarPerfil(userId) {
                 _actualizarNavComentarios();
 
     } catch (error) {
-        document.getElementById('perfilContenido').innerHTML =
-            '<div style="text-align:center;padding:3rem;color:#e50914;">Error al cargar el perfil</div>';
-    }
+            console.error('Error en cargarPerfil:', error);
+            document.getElementById('perfilContenido').innerHTML =
+                '<div style="text-align:center;padding:3rem;color:#e50914;">Error al cargar el perfil</div>';
+        }
 }
 
 // ==============================================
@@ -112,17 +124,25 @@ function renderIdentidad(perfil) {
         const btnBanner = document.getElementById('btnCambiarBanner');
         const btnEditBio = document.getElementById('btnEditarBio');
 
-        if (miId && String(miId) !== String(perfil.id)) {
-            btnSeguir.style.display = 'flex';
-            actualizarBtnSeguir(perfil.followStatus);
-            if (btnBanner) btnBanner.style.display = 'none';
-            if (btnEditBio) btnEditBio.style.display = 'none';
+        const btnBloquearPerfil = document.getElementById('btnBloquearPerfil');
 
-            // Si perfil privado y no aceptado → ocultar contenido
-            if (perfil.esPrivado && perfil.followStatus !== 'ACCEPTED') {
-                _mostrarPerfilPrivado();
-            }
-        } else {
+                if (miId && String(miId) !== String(perfil.id)) {
+                    if (btnBanner) btnBanner.style.display = 'none';
+                    if (btnEditBio) btnEditBio.style.display = 'none';
+                    if (btnBloquearPerfil && !perfil.bloqueado) btnBloquearPerfil.style.display = 'flex';
+
+                if (perfil.bloqueado) {
+                    if (btnSeguir) btnSeguir.style.display = 'none';
+                    _mostrarPerfilBloqueado(perfil.bloqueadoPorMi);
+                } else if (perfil.esPrivado && perfil.followStatus !== 'ACCEPTED') {
+                    btnSeguir.style.display = 'flex';
+                    actualizarBtnSeguir(perfil.followStatus);
+                    _mostrarPerfilPrivado();
+                } else {
+                    btnSeguir.style.display = 'flex';
+                    actualizarBtnSeguir(perfil.followStatus);
+                }
+            } else {
             if (btnSeguir) btnSeguir.style.display = 'none';
             if (btnBanner) btnBanner.style.display = 'block';
             if (btnEditBio) btnEditBio.style.display = 'inline-flex';
@@ -745,4 +765,150 @@ window.subirBanner = async function(input) {
                 </p>
             `;
             card.appendChild(msg);
-        }
+                    }
+
+            window.desbloquearUsuario = function() {
+                document.getElementById('modalDesbloquear').style.display = 'flex';
+            };
+
+            window.confirmarDesbloquear = async function() {
+                document.getElementById('modalDesbloquear').style.display = 'none';
+                const token = localStorage.getItem('token');
+                try {
+                    const res = await fetch(`${CONFIG.API_URL}/users/${perfilUsuarioId}/unblock`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) return;
+
+                    const btnDesbloquear = document.getElementById('btnDesbloquear');
+                    if (btnDesbloquear) btnDesbloquear.style.display = 'none';
+                    document.getElementById('perfilBloqueadoMsg')?.remove();
+                    await cargarPerfil(perfilUsuarioId);
+                } catch(e) {}
+            };
+
+        function _mostrarPerfilBloqueado(bloqueadoPorMi) {
+            // Ocultar secciones
+            document.querySelectorAll('.perfil-seccion').forEach(s => s.style.display = 'none');
+
+            // Ocultar bio, stats clickeables
+            const bioEl = document.getElementById('perfilBio');
+            if (bioEl) bioEl.style.display = 'none';
+
+            const statsClickables = document.querySelectorAll('.perfil-stat-clickable');
+            statsClickables.forEach(s => {
+                s.onclick = null;
+                s.style.cursor = 'default';
+            });
+
+            // Ocultar números de seguidores/seguidos
+            const segEl = document.getElementById('perfilSeguidores')?.closest('.perfil-stat-inline');
+            const sigEl = document.getElementById('perfilSiguiendo')?.closest('.perfil-stat-inline');
+            if (segEl) segEl.style.display = 'none';
+            if (sigEl) sigEl.style.display = 'none';
+
+            // Ocultar votaciones y comentarios stats
+            const votEl = document.getElementById('perfilVotaciones')?.closest('.perfil-stat-inline');
+            const comEl = document.getElementById('perfilComentarios')?.closest('.perfil-stat-inline');
+            if (votEl) votEl.style.display = 'none';
+            if (comEl) comEl.style.display = 'none';
+
+            // Ocultar banner y avatar
+            const banner = document.querySelector('.perfil-banner');
+            if (banner) {
+                banner.style.background = '#e0e0e0';
+                banner.style.backgroundImage = 'none';
+            }
+            const avatar = document.getElementById('perfilAvatar');
+            if (avatar) {
+                avatar.innerHTML = '';
+                avatar.style.background = '#ccc';
+            }
+
+            // Mensaje central
+            const card = document.getElementById('perfilContenido');
+            const existente = document.getElementById('perfilBloqueadoMsg');
+            if (existente) return;
+
+            const msg = document.createElement('div');
+                        msg.id = 'perfilBloqueadoMsg';
+                        msg.style.cssText = 'text-align:center; padding:3rem 1.5rem; color:#888;';
+                        msg.innerHTML = bloqueadoPorMi ? `
+                                <div style="font-size:2.5rem; margin-bottom:1rem;">🚫</div>
+                                <p style="font-size:1rem; font-weight:600; color:#333; margin:0 0 0.5rem;">Bloqueaste a este usuario</p>
+                                <p style="font-size:0.88rem; color:#aaa; margin:0 0 1.5rem; line-height:1.6;">
+                                    No podés ver el contenido de este perfil.
+                                </p>
+                            ` : `
+                            <div style="font-size:2.5rem; margin-bottom:1rem;">🚫</div>
+                            <p style="font-size:1rem; font-weight:600; color:#333; margin:0 0 0.5rem;">No podés ver este perfil</p>
+                            <p style="font-size:0.88rem; color:#aaa; margin:0 0 1.5rem; line-height:1.6;">
+                                Este usuario no permite que veas su contenido.
+                            </p>
+                        `;
+                        card.appendChild(msg);
+
+                        if (bloqueadoPorMi) {
+                            const btnDesbloquear = document.getElementById('btnDesbloquear');
+                            if (btnDesbloquear) btnDesbloquear.style.display = 'flex';
+                        }
+                    }
+
+                    window.desbloquearUsuario = async function() {
+                        const token = localStorage.getItem('token');
+                        try {
+                            const res = await fetch(`${CONFIG.API_URL}/users/${perfilUsuarioId}/unblock`, {
+                                method: 'POST',
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (!res.ok) return;
+
+                            const btnDes = document.getElementById('btnDesbloquear');
+                                if (btnDes) btnDes.style.display = 'none';
+                            document.getElementById('perfilBloqueadoMsg')?.remove();
+                            await cargarPerfil(perfilUsuarioId);
+                        } catch(e) {}
+                    };
+// ==============================================
+// BLOQUEAR DESDE PERFIL
+// ==============================================
+window.abrirModalBloquearPerfil = function() {
+    const nombre = document.getElementById('perfilNombre')?.textContent || 'este usuario';
+    document.getElementById('bloquearNombrePerfil').textContent = nombre;
+    const chk = document.getElementById('checkReportarAlBloquearPerfil');
+    if (chk) chk.checked = false;
+    document.getElementById('modalBloquearPerfil').style.display = 'flex';
+};
+
+window.cerrarModalBloquearPerfil = function() {
+    document.getElementById('modalBloquearPerfil').style.display = 'none';
+};
+
+window.confirmarBloquearPerfil = async function() {
+    const token = localStorage.getItem('token');
+    const reportar = document.getElementById('checkReportarAlBloquearPerfil')?.checked || false;
+
+    const btn = document.getElementById('btnConfirmarBloquearPerfil');
+    if (btn) { btn.disabled = true; btn.textContent = 'Bloqueando...'; }
+
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/users/${perfilUsuarioId}/block`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ reportar, reason: reportar ? 'Reportado al bloquear' : null })
+        });
+        if (!res.ok) throw new Error();
+
+        window.cerrarModalBloquearPerfil();
+        await cargarPerfil(perfilUsuarioId);
+
+    } catch(e) {
+        alert('Error al bloquear. Intentá de nuevo.');
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Sí, bloquear'; }
+    }
+};

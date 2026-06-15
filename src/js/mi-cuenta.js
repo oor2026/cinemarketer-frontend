@@ -1088,17 +1088,27 @@ function renderRedTab(tab) {
                    </button>`;
         }
 
-        return `
-            <div class="mi-red-usuario">
-                <div class="mi-red-avatar" onclick="window.abrirPerfilUsuario(${u.id})">${avatar}</div>
-                <div class="mi-red-info" onclick="window.abrirPerfilUsuario(${u.id})">
-                    <p class="mi-red-nombre">${u.name}</p>
-                    <p class="mi-red-nivel">${u.levelEmoji || ''} ${u.levelDisplayName || u.level || ''}</p>
-                </div>
-                ${btn}
-            </div>`;
-    }).join('');
-}
+        const btnBloquear = `
+                    <button class="mi-red-btn-bloquear"
+                        onclick="window.abrirModalBloquear(${u.id || u.userId}, '${(u.name || '').replace(/'/g, "\\'")}', this)"
+                        title="Bloquear usuario">
+                        <i class="fas fa-ban"></i>
+                    </button>`;
+
+                return `
+                    <div class="mi-red-usuario" id="mi-red-user-${u.id}">
+                        <div class="mi-red-avatar" onclick="window.abrirPerfilUsuario(${u.id})">${avatar}</div>
+                        <div class="mi-red-info" onclick="window.abrirPerfilUsuario(${u.id})">
+                            <p class="mi-red-nombre">${u.name}</p>
+                            <p class="mi-red-nivel">${u.levelEmoji || ''} ${u.levelDisplayName || u.level || ''}</p>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:0.5rem;">
+                            ${btn}
+                            ${btnBloquear}
+                        </div>
+                    </div>`;
+            }).join('');
+        }
 
 window.seguirDesdeRed = async function(userId, btn) {
     const token = localStorage.getItem('token');
@@ -1420,5 +1430,71 @@ window.togglePrivacidad = async function() {
         _actualizarTogglePrivacidad();
     } catch(e) {
         alert('Error al actualizar la privacidad. Intentá de nuevo.');
+    }
+};
+
+// ==============================================
+// BLOQUEAR USUARIO
+// ==============================================
+let _bloquearUserId = null;
+let _bloquearNombre = null;
+
+window.abrirModalBloquear = function(userId, nombre) {
+    _bloquearUserId = userId;
+    _bloquearNombre = nombre;
+    document.getElementById('bloquearNombre').textContent = nombre;
+    const chk = document.getElementById('checkReportarAlBloquear');
+    if (chk) chk.checked = false;
+    document.getElementById('modalBloquearUsuario').style.display = 'flex';
+};
+
+window.cerrarModalBloquear = function() {
+    document.getElementById('modalBloquearUsuario').style.display = 'none';
+    _bloquearUserId = null;
+    _bloquearNombre = null;
+};
+
+window.confirmarBloquear = async function() {
+    if (!_bloquearUserId) return;
+    const token = localStorage.getItem('token');
+    const reportar = document.getElementById('checkReportarAlBloquear')?.checked || false;
+
+    const btn = document.getElementById('btnConfirmarBloquear');
+    if (btn) { btn.disabled = true; btn.textContent = 'Bloqueando...'; }
+
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/users/${_bloquearUserId}/block`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ reportar, reason: reportar ? 'Reportado al bloquear' : null })
+        });
+        if (!res.ok) throw new Error();
+
+        // Eliminar de la lista visual
+        const el = document.getElementById(`mi-red-user-${_bloquearUserId}`);
+        if (el) el.remove();
+
+        // Actualizar caches
+        _siguiendoCache = _siguiendoCache.filter(u => String(u.id) !== String(_bloquearUserId));
+        _seguidoresCache = _seguidoresCache.filter(u => String(u.id) !== String(_bloquearUserId));
+        document.getElementById('countSiguiendo').textContent = _siguiendoCache.length;
+        document.getElementById('countSeguidores').textContent = _seguidoresCache.length;
+
+        window.cerrarModalBloquear();
+
+        // Toast
+        const t = document.createElement('div');
+        t.textContent = `Bloqueaste a ${_bloquearNombre || 'el usuario'}`;
+        t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#333;color:white;padding:0.75rem 1.5rem;border-radius:24px;font-size:0.88rem;font-weight:600;z-index:9999999;';
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+
+    } catch(e) {
+        alert('Error al bloquear. Intentá de nuevo.');
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Sí, bloquear'; }
     }
 };
