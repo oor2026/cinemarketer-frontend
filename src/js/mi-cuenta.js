@@ -1356,3 +1356,69 @@ window.verMiSala = function() {
     sessionStorage.setItem('perfilDesdeMiCuenta', '1');
     if (typeof loadModule === 'function') loadModule('perfil');
 };
+
+// ==============================================
+// CONFIGURACIÓN DE CUENTA
+// ==============================================
+let _perfilEsPrivado = false;
+
+window.abrirConfiguracion = async function() {
+    const modal = document.getElementById('modalConfiguracion');
+    modal.style.display = 'flex';
+
+    // Cargar estado actual de privacidad
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/users/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        _perfilEsPrivado = data.profileVisibility === 'PRIVATE';
+        _actualizarTogglePrivacidad();
+    } catch(e) {}
+};
+
+window.cerrarConfiguracion = function() {
+    document.getElementById('modalConfiguracion').style.display = 'none';
+};
+
+function _actualizarTogglePrivacidad() {
+    const toggle = document.getElementById('togglePrivacidad');
+    const dot    = document.getElementById('togglePrivacidadDot');
+    const label  = document.getElementById('privacidadLabel');
+    const desc   = document.getElementById('privacidadDesc');
+
+    if (_perfilEsPrivado) {
+        toggle.style.background = '#324C89';
+        dot.style.left = '22px';
+        label.textContent = 'Privado';
+        desc.textContent = 'Tu perfil es privado. Solo usuarios aprobados pueden ver tu contenido.';
+    } else {
+        toggle.style.background = '#ddd';
+        dot.style.left = '2px';
+        label.textContent = 'Público';
+        desc.textContent = 'Tu perfil es público. Cualquier usuario puede ver tu contenido.';
+    }
+}
+
+window.togglePrivacidad = async function() {
+    const nuevaVisibilidad = _perfilEsPrivado ? 'PUBLIC' : 'PRIVATE';
+    const token = localStorage.getItem('token');
+
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/follows/privacy`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ visibility: nuevaVisibilidad })
+        });
+        if (!res.ok) return;
+        _perfilEsPrivado = nuevaVisibilidad === 'PRIVATE';
+        _actualizarTogglePrivacidad();
+    } catch(e) {
+        alert('Error al actualizar la privacidad. Intentá de nuevo.');
+    }
+};
