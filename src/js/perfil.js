@@ -62,10 +62,11 @@ async function cargarPerfil(userId) {
         renderIdentidad(perfil);
                 renderStats(perfil);
                 renderVotaciones(perfil.ultimasVotaciones);
+                window._perfilTotalComentarios = perfil.totalComentarios || 0;
                 renderComentarios(perfil.ultimosComentarios);
 
                 _comentariosTotal = perfil.totalComentarios || 0;
-        _actualizarNavComentarios();
+                _actualizarNavComentarios();
 
     } catch (error) {
         document.getElementById('perfilContenido').innerHTML =
@@ -92,20 +93,34 @@ function renderIdentidad(perfil) {
     document.getElementById('perfilLevelEmoji').textContent = perfil.nivelEmoji || '🟢';
     document.getElementById('perfilLevelName').textContent = perfil.nivelDisplayName || 'Amateur';
 
-    document.getElementById('perfilMiembro').textContent =
-        perfil.miembroDesde ? `Miembro desde ${perfil.miembroDesde}` : '';
+    const miembroEl = document.getElementById('perfilMiembro');
+        if (miembroEl) miembroEl.textContent =
+            perfil.miembroDesde ? `Miembro desde ${perfil.miembroDesde}` : '';
 
-    const miId = localStorage.getItem('userId');
+    // Bio
+        const bioEl = document.getElementById('perfilBio');
+        const bioTitulo = document.getElementById('perfilBioTitulo');
+        const bioTexto = document.getElementById('perfilBioTexto');
+        if (bioEl && (perfil.bioTitulo || perfil.bioTexto)) {
+            if (bioTitulo) bioTitulo.textContent = perfil.bioTitulo || '';
+            if (bioTexto) bioTexto.textContent = perfil.bioTexto || '';
+            bioEl.style.display = 'block';
+        }
+
+        const miId = localStorage.getItem('userId');
         const btnSeguir = document.getElementById('btnSeguir');
         const btnBanner = document.getElementById('btnCambiarBanner');
+        const btnEditBio = document.getElementById('btnEditarBio');
 
         if (miId && String(miId) !== String(perfil.id)) {
             btnSeguir.style.display = 'flex';
             actualizarBtnSeguir(perfil.esSeguido);
             if (btnBanner) btnBanner.style.display = 'none';
+            if (btnEditBio) btnEditBio.style.display = 'none';
         } else {
             if (btnSeguir) btnSeguir.style.display = 'none';
             if (btnBanner) btnBanner.style.display = 'block';
+            if (btnEditBio) btnEditBio.style.display = 'inline-flex';
         }
 }
 
@@ -241,7 +256,7 @@ const _comentariosSize = 5;
 
 function renderComentarios(comentarios) {
     _comentariosPage  = 0;
-    _comentariosTotal = comentarios?.length || 0;
+    _comentariosTotal = window._perfilTotalComentarios || comentarios?.length || 0;
 
     const seccion = document.getElementById('perfilComentariosList');
     if (!comentarios || comentarios.length === 0) {
@@ -249,20 +264,106 @@ function renderComentarios(comentarios) {
         return;
     }
 
-    seccion.innerHTML = `
-        <div id="perfilComentariosItems"></div>
-        <div class="perfil-comentarios-nav" id="perfilComentariosNav">
-            <button class="perfil-carrusel-arrow left" onclick="window.cambiarPaginaComentarios(-1)">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <span id="perfilComentariosInfo" style="font-size:0.8rem;color:#999;"></span>
-            <button class="perfil-carrusel-arrow right" onclick="window.cambiarPaginaComentarios(1)">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        </div>
-    `;
+    const esMobile = window.innerWidth <= 600;
 
-    _renderItemsComentarios(comentarios);
+    if (esMobile) {
+        seccion.innerHTML = `
+            <div class="perfil-comentarios-swipe" id="perfilComentariosSwipe"></div>
+            <div class="perfil-comentarios-dots" id="perfilComentariosDots"></div>
+        `;
+        _renderSwipeComentarios(comentarios);
+    } else {
+        seccion.innerHTML = `
+            <div id="perfilComentariosItems"></div>
+            <div class="perfil-comentarios-nav" id="perfilComentariosNav">
+                <button class="perfil-carrusel-arrow left" onclick="window.cambiarPaginaComentarios(-1)">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <span id="perfilComentariosInfo" style="font-size:0.8rem;color:#999;"></span>
+                <button class="perfil-carrusel-arrow right" onclick="window.cambiarPaginaComentarios(1)">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        `;
+        _renderItemsComentarios(comentarios);
+        _actualizarNavComentarios();
+    }
+}
+
+function _buildSlideHTML(grupo) {
+    return `<div class="perfil-swipe-slide">${grupo.map(c => {
+        const textoClass = c.spoiler ? 'perfil-comentario-texto spoiler' : 'perfil-comentario-texto';
+        const spoilerTag = c.spoiler ? '<span class="perfil-tag-spoiler">spoiler</span>' : '';
+        return `
+            <div class="perfil-comentario-item">
+                <div class="perfil-comentario-poster">
+                    <i class="fas fa-film"></i>
+                </div>
+                <div class="perfil-comentario-body">
+                    <p class="perfil-comentario-pelicula">${c.movieTitle || 'Película no disponible'}</p>
+                    <p class="${textoClass}">${c.contenido || ''}</p>
+                    <div class="perfil-comentario-meta">
+                        <span>${c.fechaRelativa || ''}</span>
+                        ${spoilerTag}
+                    </div>
+                </div>
+            </div>`;
+    }).join('')}</div>`;
+}
+
+async function _renderSwipeComentarios(comentarios) {
+    const swipe = document.getElementById('perfilComentariosSwipe');
+    const dots  = document.getElementById('perfilComentariosDots');
+    if (!swipe) return;
+
+    // Cargar todas las páginas disponibles
+    let todos = [...comentarios];
+    const totalPags = Math.ceil(_comentariosTotal / _comentariosSize);
+    const token = localStorage.getItem('token');
+
+    for (let p = 1; p < totalPags; p++) {
+        try {
+            const res = await fetch(
+                `${CONFIG.API_URL}/users/${perfilUsuarioId}/comentarios?page=${p}&size=${_comentariosSize}`,
+                { headers: { 'Authorization': `Bearer ${token}` } }
+            );
+            if (!res.ok) break;
+            const data = await res.json();
+            todos = [...todos, ...data.comentarios];
+        } catch(e) { break; }
+    }
+
+    // Agrupar de a 5
+    const grupos = [];
+    for (let i = 0; i < todos.length; i += _comentariosSize) {
+        grupos.push(todos.slice(i, i + _comentariosSize));
+    }
+
+    swipe.innerHTML = grupos.map(g => _buildSlideHTML(g)).join('');
+
+    // Dots
+    const totalGrupos = grupos.length;
+
+        const _actualizarDots = (idx) => {
+            if (!dots) return;
+            if (totalGrupos <= 1) { dots.innerHTML = ''; return; }
+
+            const maxDots = totalGrupos === 2 ? 2 : 3;
+            let activoDot;
+            if (idx === 0) activoDot = 0;
+            else if (idx >= totalGrupos - 1) activoDot = maxDots - 1;
+            else activoDot = maxDots === 2 ? 1 : 1;
+
+            dots.innerHTML = Array.from({length: maxDots}, (_, i) =>
+                `<span class="perfil-dot${i === activoDot ? ' active' : ''}"></span>`
+            ).join('');
+        };
+        _actualizarDots(0);
+
+        swipe.addEventListener('scroll', () => {
+            const idx = Math.round(swipe.scrollLeft / swipe.offsetWidth);
+            _actualizarDots(idx);
+        }, { passive: true });
 }
 
 function _renderItemsComentarios(comentarios) {
@@ -313,6 +414,9 @@ window.cambiarPaginaComentarios = async function(dir) {
 };
 
 function _actualizarNavComentarios() {
+    const esMobile = window.innerWidth <= 600;
+    if (esMobile) return;
+
     const totalPaginas = Math.ceil(_comentariosTotal / _comentariosSize);
     const info = document.getElementById('perfilComentariosInfo');
     if (info) info.textContent = `${_comentariosPage + 1} / ${totalPaginas}`;
@@ -417,5 +521,77 @@ window.subirBanner = async function(input) {
 
             } catch(e) {
                 alert('Error al subir el banner. Intentá de nuevo.');
+            }
+        };
+
+        // ==============================================
+        // BIO — MODAL EDITAR
+        // ==============================================
+        window.abrirModalBio = function() {
+            const titulo = document.getElementById('perfilBioTitulo')?.textContent || '';
+            const texto  = document.getElementById('perfilBioTexto')?.textContent || '';
+
+            document.getElementById('inputBioTitulo').value = titulo;
+            document.getElementById('inputBioTexto').value  = texto;
+            _actualizarContadoresBio();
+
+            document.getElementById('modalEditarBio').style.display = 'flex';
+        };
+
+        window.cerrarModalBio = function() {
+            document.getElementById('modalEditarBio').style.display = 'none';
+        };
+
+        window._actualizarContadoresBio = function _actualizarContadoresBio() {
+            const t = document.getElementById('inputBioTitulo')?.value.length || 0;
+            const d = document.getElementById('inputBioTexto')?.value.length  || 0;
+            const ct = document.getElementById('contadorBioTitulo');
+            const cd = document.getElementById('contadorBioTexto');
+            if (ct) ct.textContent = `${t}/50`;
+            if (cd) cd.textContent = `${d}/180`;
+        }
+
+        window.guardarBio = async function() {
+            const bioTitulo = document.getElementById('inputBioTitulo')?.value.trim() || '';
+            const bioTexto  = document.getElementById('inputBioTexto')?.value.trim()  || '';
+
+            if (bioTitulo.length > 50)  { alert('El título no puede superar los 50 caracteres.'); return; }
+            if (bioTexto.length  > 180) { alert('La descripción no puede superar los 180 caracteres.'); return; }
+
+            const btn = document.getElementById('btnGuardarBio');
+            if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
+
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${CONFIG.API_URL}/users/me/bio`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ bioTitulo, bioTexto })
+                });
+
+                if (!res.ok) throw new Error();
+
+                // Actualizar visualmente sin recargar
+                const bioEl     = document.getElementById('perfilBio');
+                const tituloEl  = document.getElementById('perfilBioTitulo');
+                const textoEl   = document.getElementById('perfilBioTexto');
+
+                if (bioTitulo || bioTexto) {
+                    if (tituloEl) tituloEl.textContent = bioTitulo;
+                    if (textoEl)  textoEl.textContent  = bioTexto;
+                    if (bioEl)    bioEl.style.display   = 'block';
+                } else {
+                    if (bioEl) bioEl.style.display = 'none';
+                }
+
+                window.cerrarModalBio();
+
+            } catch(e) {
+                alert('Error al guardar la biografía. Intentá de nuevo.');
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = 'Guardar'; }
             }
         };

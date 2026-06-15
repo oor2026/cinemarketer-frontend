@@ -3,11 +3,11 @@
    ============================================== */
 
 .perfil-card {
-    max-width: 800px;
+    max-width: 860px;
     margin: 0 auto;
     background: white;
-    border-radius: 20px;
-    padding: 2rem;
+    border-radius: 16px;
+    overflow: visible;
     box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     animation: fadeIn 0.3s ease;
 }
@@ -17,107 +17,37 @@
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Hero ────────────────────────────────────── */
-.perfil-hero {
-    border-radius: 15px;
-    overflow: hidden;
-    margin-bottom: 2rem;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-}
-
-/* ── Header ─────────────────────────────────── */
-.perfil-header {
+/* ── Banner ──────────────────────────────────── */
+.perfil-banner {
     position: relative;
-    min-height: 220px;
+    height: 200px;
     background: #0d0d1a url('../assets/images/headerpublico.png') center center / cover no-repeat;
-    color: white;
-    margin-bottom: 0;
-    padding: 1.25rem 1.5rem;
+    border-radius: 16px 16px 0 0;
+    z-index: 1;
 }
 
-/* Avatar + nombre + insignia — arriba izquierda */
-.perfil-header-bottom {
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
+.perfil-banner-btn {
     position: absolute;
-    top: 1.25rem;
-    left: 1.5rem;
-}
-
-.perfil-avatar-wrap { flex-shrink: 0; }
-
-.perfil-avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    overflow: hidden;
-    background: rgba(255,255,255,0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 3px solid white;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-}
-
-.perfil-avatar i { font-size: 2.5rem; color: white; }
-
-.perfil-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.perfil-identidad-accion {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-}
-
-.perfil-identidad {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-}
-
-.perfil-nombre {
-    font-size: 1.3rem;
-    font-weight: 700;
+    top: 1rem;
+    left: 1rem;
+    background: rgba(0,0,0,0.5);
     color: white;
-    margin: 0;
-    line-height: 1.2;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
-}
-
-.perfil-tagline {
+    padding: 0.4rem 0.75rem;
+    border-radius: 8px;
     font-size: 0.8rem;
-    color: rgba(255,255,255,0.55);
-    margin: 0;
-}
-
-.perfil-level-badge {
-    display: inline-flex;
+    cursor: pointer;
+    display: flex;
     align-items: center;
-    gap: 0.3rem;
-    padding: 0.2rem 0.65rem;
-    border-radius: 99px;
-    border: 0.5px solid rgba(255,255,255,0.2);
-    width: fit-content;
+    gap: 0.4rem;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.2);
 }
 
-.perfil-level-badge.level-AMATEUR      { background: linear-gradient(135deg, #4caf50, #2e7d32); }
-.perfil-level-badge.level-COLABORADOR  { background: linear-gradient(135deg, #2196f3, #1565c0); }
-.perfil-level-badge.level-CRITICO      { background: linear-gradient(135deg, #9c27b0, #6a1b9a); }
-.perfil-level-badge.level-JURADO_EXPERTO { background: linear-gradient(135deg, #ff9800, #e65100); border: 2px solid gold; }
-
-.level-icon { font-size: 0.7rem; }
-.level-name { font-size: 0.7rem; color: white; }
-
-/* Botón seguir — abajo derecha */
+/* Botón seguir — superpuesto banner abajo derecha */
 .perfil-accion {
     position: absolute;
-    bottom: 1.25rem;
-    right: 1.5rem;
+    bottom: 1rem;
+    right: 1.25rem;
 }
 
 .btn-seguir {
@@ -134,68 +64,131 @@
     gap: 0.4rem;
     transition: background 0.2s, color 0.2s;
     white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
-.btn-seguir:hover { background: rgba(255,255,255,0.85); }
+.btn-seguir:hover { background: rgba(255,255,255,0.88); }
 
-/* Miembro desde — arriba derecha */
-.perfil-header-badges {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
+/* ── Fila info: avatar + datos ───────────────── */
+.perfil-info-row {
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    gap: 1.5rem;
+    padding: 0 1.75rem 1.5rem;
+    align-items: flex-start;
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 1.5rem;
 }
 
-.perfil-miembro {
-    font-size: 0.78rem;
-    color: rgba(255,255,255,0.75);
-    margin: 0;
-    background: rgba(255,255,255,0.1);
-    border: 0.5px solid rgba(255,255,255,0.2);
-    padding: 3px 12px;
-    border-radius: 99px;
-}
-
-/* ── Stats ──────────────────────────────────── */
-.perfil-stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    background: #324C89;
-    border-top: 1px solid rgba(255,255,255,0.06);
-}
-
-.perfil-stat {
-    text-align: center;
-    padding: 0.9rem 0.5rem;
-    border-right: 1px solid rgba(255,255,255,0.12);
+/* ── Col izquierda: avatar + badge ──────────── */
+.perfil-col-avatar {
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    margin-top: -44px;
+    position: relative;
+    z-index: 2;
+}
+
+.perfil-avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #e0e0e0;
+    display: flex;
+    align-items: center;
     justify-content: center;
-    gap: 0.25rem;
+    border: 4px solid white;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
 }
 
-.perfil-stat:last-child { border-right: none; }
+.perfil-avatar i { font-size: 2.8rem; color: #aaa; }
 
-.perfil-stat-num {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: white;
-    line-height: 1;
+.perfil-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.perfil-stat-label {
-    font-size: 0.7rem;
-    color: rgba(255,255,255,0.4);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
+.perfil-level-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.65rem;
+    border-radius: 99px;
+    width: fit-content;
+    white-space: nowrap;
+}
+
+.perfil-level-badge.level-AMATEUR      { background: linear-gradient(135deg, #4caf50, #2e7d32); }
+.perfil-level-badge.level-COLABORADOR  { background: linear-gradient(135deg, #2196f3, #1565c0); }
+.perfil-level-badge.level-CRITICO      { background: linear-gradient(135deg, #9c27b0, #6a1b9a); }
+.perfil-level-badge.level-JURADO_EXPERTO { background: linear-gradient(135deg, #ff9800, #e65100); border: 2px solid gold; }
+
+.level-icon { font-size: 0.7rem; }
+.level-name { font-size: 0.72rem; color: white; font-weight: 600; }
+
+/* ── Col derecha: nombre + stats + bio ───────── */
+.perfil-col-info {
+    flex: 1;
+    min-width: 0;
+    padding-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.perfil-nombre {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0;
+    line-height: 1.2;
+}
+
+/* ── Stats inline ────────────────────────────── */
+.perfil-stats-inline {
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.perfil-stat-inline {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+.perfil-stat-inline strong {
+    color: #1a1a1a;
+    font-weight: 700;
+    margin-right: 2px;
+}
+
+/* ── Bio ─────────────────────────────────────── */
+.perfil-bio {
+    padding-top: 0.5rem;
+    border-top: 1px solid #f0f0f0;
+}
+
+.perfil-bio-titulo {
+    margin: 0 0 3px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.perfil-bio-texto {
+    margin: 0;
+    font-size: 0.82rem;
+    color: #666;
+    line-height: 1.5;
 }
 
 /* ── Secciones ──────────────────────────────── */
 .perfil-seccion {
-    margin-bottom: 2rem;
+    margin: 0 1.75rem 1.75rem;
     background: white;
     border-radius: 12px;
     overflow: hidden;
@@ -445,45 +438,102 @@
 /* ── Mobile ─────────────────────────────────── */
 @media (max-width: 600px) {
     .perfil-card {
-        padding: 0.75rem;
         border-radius: 12px;
     }
 
-    .perfil-header {
-        min-height: 180px;
-        padding: 1rem;
+    .perfil-bio {
+            width: 100%;
+            margin-top: 0.5rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .perfil-info-row {
+                flex-direction: column;
+            }
+
+        .perfil-col-info {
+                width: 100%;
+            }
+
+    .perfil-banner {
+        height: 140px;
+        border-radius: 12px 12px 0 0;
     }
 
-    .perfil-header-bottom {
-        top: 1rem;
-        left: 1rem;
-        gap: 0.6rem;
-    }
+    .perfil-col-avatar {
+            flex-direction: row;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: -32px;
+            width: 100%;
+        }
 
     .perfil-avatar {
-        width: 56px;
-        height: 56px;
+        width: 64px;
+        height: 64px;
     }
 
-    .perfil-nombre { font-size: 0.95rem; }
-    .perfil-tagline { font-size: 0.72rem; }
+    .perfil-nombre { font-size: 1rem; }
+
+    .perfil-stats-inline {
+            flex-wrap: wrap;
+            gap: 0.4rem 1rem;
+        }
+
+    .perfil-stat-inline { font-size: 0.78rem; }
+
+    .perfil-seccion {
+        margin: 0 1rem 1.25rem;
+    }
 
     .perfil-accion {
-        bottom: 1rem;
-        right: 1rem;
+        bottom: 0.75rem;
+        right: 0.75rem;
     }
 
     .btn-seguir {
-        font-size: 0.75rem;
-        padding: 0.35rem 0.8rem;
+        font-size: 0.78rem;
+        padding: 0.4rem 0.9rem;
     }
+}
 
-    .perfil-stats {
-        grid-template-columns: repeat(2, 1fr);
-    }
+/* ── Swipe mobile comentarios ────────────────── */
+.perfil-comentarios-swipe {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0;
+}
 
-    .perfil-header-badges {
-        top: 0.5rem;
-        right: 0.5rem;
-    }
+.perfil-comentarios-swipe::-webkit-scrollbar { display: none; }
+
+.perfil-swipe-slide {
+    min-width: 100%;
+    scroll-snap-align: start;
+    box-sizing: border-box;
+    padding: 0 0.25rem;
+}
+
+.perfil-comentarios-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 0.75rem 0 0.25rem;
+}
+
+.perfil-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #ddd;
+    transition: background 0.2s, transform 0.2s;
+    display: inline-block;
+}
+
+.perfil-dot.active {
+    background: #324C89;
+    transform: scale(1.2);
 }
