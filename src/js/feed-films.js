@@ -1842,7 +1842,7 @@ window.abrirFormRespuesta = function(commentId, btn, replyId = null) {
     const container = document.querySelector(`.replies-container-${commentId}`);
     if (!container) return;
 
-    // Si ya hay un form abierto, lo quitamos 
+    // Si ya hay un form abierto, lo quitamos
     const existing = container.querySelector('.reply-form');
     if (existing) {
         existing.remove();

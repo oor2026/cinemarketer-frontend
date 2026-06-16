@@ -5,7 +5,7 @@
 let _watchlistCache = [];
 let _watchlistModalId = null;
 
-// ── Toggle guardar desde card o modal ──────────────────────────
+// ── Toggle guardar desde card o modal ─────────────────────────
 window.toggleWatchlist = async function(movieId, event) {
     if (event) event.stopPropagation();
 
