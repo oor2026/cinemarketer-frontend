@@ -24,12 +24,14 @@ window.loadProfile = async function() {
         document.getElementById('userProvincia').textContent    = profile.provincia || '—';
         document.getElementById('userLocalidad').textContent    = profile.localidad || '—';
         // Puntos — los detalles se muestran en el módulo Mis Puntos
-        document.getElementById('redemptionsCount').textContent = profile.commentsCount ?? 0;
-        document.getElementById('recomendadasCount').textContent = profile.recommendationsCount ?? 0;
-        document.getElementById('puntosCount').textContent = profile.merecePuntosCount ?? 0;
-
-        const reviewsSpan = document.getElementById('reviewsCountFormatted');
-        if (reviewsSpan) reviewsSpan.textContent = formatearVotos(profile.reviewsCount ?? 0);
+        const redemptionsEl = document.getElementById('redemptionsCount');
+                if (redemptionsEl) redemptionsEl.textContent = profile.commentsCount ?? 0;
+                const recomendadasEl = document.getElementById('recomendadasCount');
+                if (recomendadasEl) recomendadasEl.textContent = profile.recommendationsCount ?? 0;
+                const puntosEl = document.getElementById('puntosCount');
+                if (puntosEl) puntosEl.textContent = profile.merecePuntosCount ?? 0;
+                const reviewsSpan = document.getElementById('reviewsCountFormatted');
+                        if (reviewsSpan) reviewsSpan.textContent = formatearVotos(profile.reviewsCount ?? 0);
 
         document.getElementById('emailVerified').innerHTML = profile.emailVerified ? '✅ Sí' : '❌ No';
 
@@ -1075,10 +1077,12 @@ window['init_mi-cuenta'] = function() {
         });
     }
 
-    window.loadProfile();
+    setTimeout(() => {
+            window.loadProfile();
             cargarPrecioPlan();
             cargarConteoRecomendaciones();
             if (typeof window.cargarMiLista === 'function') window.cargarMiLista();
+        }, 50);
         };
 
 async function cargarPrecioPlan() {

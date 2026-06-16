@@ -209,13 +209,13 @@ async function loadModule(moduleName, element = null, updateHash = true) {
 
         // CSS
         const cssId = `css-${moduleName}`;
-        if (!document.getElementById(cssId)) {
-            const link = document.createElement('link');
-            link.id = cssId;
-            link.rel = 'stylesheet';
-            link.href = `${CSS_PATH}${moduleName}.css`;
-            document.head.appendChild(link);
-        }
+        const existingCss = document.getElementById(cssId);
+        if (existingCss) existingCss.remove();
+        const link = document.createElement('link');
+        link.id = cssId;
+        link.rel = 'stylesheet';
+        link.href = `${CSS_PATH}${moduleName}.css?v=${Date.now()}`;
+        document.head.appendChild(link);
 
         // JS
         const jsId = `js-${moduleName}`;
@@ -249,7 +249,7 @@ async function loadModule(moduleName, element = null, updateHash = true) {
                     window.loadTransactions();
                 }
             }
-        }, 100);
+        }, 200);
 
         // ACTUALIZAR HASH
         if (updateHash) {
