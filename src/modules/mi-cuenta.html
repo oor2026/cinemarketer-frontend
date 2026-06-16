@@ -1,64 +1,59 @@
 <div class="profile-card">
-    <!-- ============================================== -->
-    <!-- NUEVO: SECCIÓN DE AVATAR Y NIVEL -->
-    <!-- ============================================== -->
-    <div class="profile-header" style="position:relative;">
-        <!-- Botón configuración -->
-        <button onclick="window.abrirConfiguracion()"
-                style="position:absolute; top:0; right:0; background:none; border:none; cursor:pointer; color:#aaa; font-size:1.1rem; padding:0.5rem;"
-                title="Configuración de cuenta">
-            <i class="fas fa-cog"></i>
-        </button>
+
+    <div class="profile-header">
+
+        <!-- BANNER AZUL -->
         <div class="welcome-badge">
-            <div class="welcome-badge-texto">
-                <h1>¡Hola, <span id="userName"></span>!</h1>
-                <p id="memberSince"></p>
-            </div>
-            <div style="text-align:right; margin-top:0;">
-                <button onclick="window.verMiSala()" style="background:none;border:1.5px solid rgba(255,255,255,0.6);color:white;padding:0.45rem 1.1rem;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:0.5rem;transition:background 0.2s,border-color 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)';this.style.borderColor='white'" onmouseout="this.style.background='none';this.style.borderColor='rgba(255,255,255,0.6)'">
+            <h1>¡Hola, <span id="userName"></span>!</h1>
+            <div style="display:flex;align-items:center;gap:0.75rem;flex-shrink:0;">
+                <button onclick="window.verMiSala()"
+                        style="background:none;border:1.5px solid rgba(255,255,255,0.6);color:white;padding:0.45rem 1.1rem;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:0.5rem;"
+                        onmouseover="this.style.background='rgba(255,255,255,0.15)'"
+                        onmouseout="this.style.background='none'">
                     <i class="fas fa-door-open"></i> Ver mi sala
+                </button>
+                <button onclick="window.abrirConfiguracion()"
+                        style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.7);font-size:1.1rem;padding:0.3rem;display:flex;align-items:center;"
+                        title="Configuración de cuenta">
+                    <i class="fas fa-cog"></i>
                 </button>
             </div>
         </div>
+
+        <!-- PANEL ROJO -->
         <div class="profile-avatar-section">
             <div class="profile-avatar-container">
                 <div class="profile-avatar" id="profileAvatar">
-                    <i class="fas fa-user-circle"></i> <!-- Placeholder -->
+                    <i class="fas fa-user-circle"></i>
                 </div>
                 <button class="btn-change-avatar" onclick="window.abrirSelectorAvatar()" title="Cambiar avatar">
                     <i class="fas fa-camera"></i>
                 </button>
             </div>
 
-            <div class="profile-level-info">
+            <div class="profile-level-info" style="flex:1;min-width:0;">
                 <div class="profile-level-badge" id="profileLevelBadge">
                     <span class="level-label">NIVEL:</span>
                     <span class="level-icon">🟢</span>
                     <span class="level-name">Amateur</span>
                 </div>
-                <div class="profile-level-progress" id="profileLevelProgress">
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 0%;"></div>
-                    </div>
-                    <span class="progress-text">0% al siguiente nivel</span>
-                </div>
-                <div class="profile-next-level" id="profileNextLevel">
-                    <span class="next-level-label">Próximo nivel:</span>
-                    <span class="next-level-name">Colaborador</span>
-                    <span class="next-level-points">(faltan 100 pts)</span>
-                </div>
+                <button onclick="window.abrirModalProgreso()" class="btn-ver-progreso"
+                        onmouseover="this.style.background='rgba(255,255,255,0.25)'"
+                        onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+                    <i class="fas fa-award"></i> Ver progreso
+                </button>
+                <span id="memberSince" style="font-size:0.78rem;color:rgba(255,255,255,0.75);"></span>
             </div>
         </div>
+
+        <div class="profile-level-progress" id="profileLevelProgress" style="display:none;"></div>
+        <div class="profile-next-level" id="profileNextLevel" style="display:none;"></div>
     </div>
 
-    <!-- ============================================== -->
     <!-- PANEL PREMIUM -->
-    <!-- ============================================== -->
     <div class="cuenta-premium-panel" id="cuentaPremiumPanel">
 
-        <!-- Estado: NO suscrito — banner -->
         <div class="premium-banner" id="premiumBanner">
-
             <div class="premium-banner-lateral">
                 <div class="premium-merch-item">
                     <div class="premium-merch-icon"><i class="ti ti-shirt" aria-hidden="true"></i></div>
@@ -108,10 +103,8 @@
                     <span class="premium-merch-label">Descuentos<br>y promociones</span>
                 </div>
             </div>
-
         </div>
 
-        <!-- Estado: SUSCRITO activo -->
         <div class="premium-activo" id="premiumActivo" style="display:none;">
             <div class="premium-activo-header">
                 <span class="premium-activo-nombre">Premium</span>
@@ -149,7 +142,6 @@
             </button>
         </div>
 
-        <!-- Estado: CANCELADA con acceso vigente -->
         <div class="premium-cancelado" id="premiumCancelado" style="display:none;">
             <div class="premium-cancelado-header">
                 <span class="premium-cancelado-titulo">Suscripción cancelada</span>
@@ -202,180 +194,172 @@
         </div>
     </div>
 
-    <!-- ============================================== -->
-    <!-- MI RED — SIGUIENDO / SEGUIDORES               -->
-    <!-- ============================================== -->
+    <!-- MI RED -->
     <div class="cuenta-seccion">
         <h3 class="cuenta-seccion-titulo"><i class="fas fa-users"></i> Mi red</h3>
         <div class="mi-red-seccion">
-        <div class="mi-red-tabs">
-            <button class="mi-red-tab active" id="tabSiguiendo"
-                    onclick="window.switchRedTab('siguiendo')">
-                Siguiendo (<span id="countSiguiendo">0</span>)
-            </button>
-            <button class="mi-red-tab" id="tabSeguidores"
-                    onclick="window.switchRedTab('seguidores')">
-                Seguidores (<span id="countSeguidores">0</span>)
-            </button>
-        </div>
+            <div class="mi-red-tabs">
+                <button class="mi-red-tab active" id="tabSiguiendo" onclick="window.switchRedTab('siguiendo')">
+                    Siguiendo (<span id="countSiguiendo">0</span>)
+                </button>
+                <button class="mi-red-tab" id="tabSeguidores" onclick="window.switchRedTab('seguidores')">
+                    Seguidores (<span id="countSeguidores">0</span>)
+                </button>
+            </div>
             <div id="miRedLista">
                 <div class="mi-red-loading"><i class="fas fa-spinner fa-spin"></i></div>
             </div>
         </div>
     </div>
 
-    <!-- ============================================== -->
-    <!-- MIS PREFERENCIAS  -->
-    <!-- ============================================== -->
+    <!-- MIS PREFERENCIAS -->
     <div class="cuenta-seccion">
         <h3 class="cuenta-seccion-titulo"><i class="fas fa-heart"></i> Mis preferencias</h3>
         <div class="mi-red-seccion">
             <div class="mi-red-tabs">
-            <button class="mi-red-tab active" id="tabMiLista"
-                    onclick="window.switchListaTab('mi-lista')">
-                Mi lista (<span id="countMiLista">0</span>)
-            </button>
-            <button class="mi-red-tab" id="tabRecomendaciones"
-                    onclick="window.switchListaTab('recomendaciones')">
-                Recomendaciones (<span id="countRecomendaciones">0</span>)
-            </button>
-        </div>
-
-        <div id="panelMiLista">
-            <div class="mi-red-vacio">Tu lista de películas guardadas aparecerá acá.</div>
-        </div>
-
-        <div id="panelRecomendaciones" style="display:none;">
-            <div id="meRecomendaronLista">
-                <div class="mi-red-loading"><i class="fas fa-spinner fa-spin"></i></div>
+                <button class="mi-red-tab active" id="tabMiLista" onclick="window.switchListaTab('mi-lista')">
+                    Mi lista (<span id="countMiLista">0</span>)
+                </button>
+                <button class="mi-red-tab" id="tabRecomendaciones" onclick="window.switchListaTab('recomendaciones')">
+                    Recomendaciones (<span id="countRecomendaciones">0</span>)
+                </button>
+            </div>
+            <div id="panelMiLista">
+                <div class="mi-red-vacio">Tu lista de películas guardadas aparecerá acá.</div>
+            </div>
+            <div id="panelRecomendaciones" style="display:none;">
+                <div id="meRecomendaronLista">
+                    <div class="mi-red-loading"><i class="fas fa-spinner fa-spin"></i></div>
+                </div>
             </div>
         </div>
-        </div>
-    </div><!-- /cuenta-seccion mis preferencias -->
+    </div>
 
     <!-- DATOS PERSONALES -->
     <div class="cuenta-seccion">
-            <h3 class="cuenta-seccion-titulo"><i class="fas fa-id-card"></i> Datos personales</h3>
-            <div class="datos-grid">
-        <div class="dato-card">
-            <div class="dato-icon"><i class="fas fa-user" aria-hidden="true"></i></div>
-            <div class="dato-body">
-                <div class="dato-label">Nombre completo</div>
-                <div class="dato-valor" id="userFullName"></div>
+        <h3 class="cuenta-seccion-titulo"><i class="fas fa-id-card"></i> Datos personales</h3>
+        <div class="datos-grid">
+            <div class="dato-card">
+                <div class="dato-icon"><i class="fas fa-user" aria-hidden="true"></i></div>
+                <div class="dato-body">
+                    <div class="dato-label">Nombre completo</div>
+                    <div class="dato-valor" id="userFullName"></div>
+                </div>
+                <button class="dato-edit-btn" onclick="window.abrirEdicion('name')" title="Editar nombre">
+                    <i class="fas fa-pencil-alt"></i>
+                </button>
             </div>
-            <button class="dato-edit-btn" onclick="window.abrirEdicion('name')" title="Editar nombre">
-                <i class="fas fa-pencil-alt"></i>
-            </button>
+
+            <div class="dato-card">
+                <div class="dato-icon"><i class="fas fa-envelope" aria-hidden="true"></i></div>
+                <div class="dato-body">
+                    <div class="dato-label">Email</div>
+                    <div class="dato-valor" id="userEmail"></div>
+                </div>
+                <button class="dato-edit-btn" onclick="window.abrirEdicion('email')" title="Editar email">
+                    <i class="fas fa-pencil-alt"></i>
+                </button>
+            </div>
+
+            <div class="dato-card">
+                <div class="dato-icon"><i class="fas fa-id-card" aria-hidden="true"></i></div>
+                <div class="dato-body">
+                    <div class="dato-label">DNI</div>
+                    <div class="dato-valor" id="userDni">—</div>
+                </div>
+            </div>
+
+            <div class="dato-card">
+                <div class="dato-icon"><i class="fas fa-phone" aria-hidden="true"></i></div>
+                <div class="dato-body">
+                    <div class="dato-label">Teléfono</div>
+                    <div class="dato-valor" id="userPhone">—</div>
+                </div>
+                <button class="dato-edit-btn" onclick="window.abrirEdicion('phone')" title="Editar teléfono">
+                    <i class="fas fa-pencil-alt"></i>
+                </button>
+            </div>
+
+            <div class="dato-card">
+                <div class="dato-icon"><i class="fas fa-birthday-cake" aria-hidden="true"></i></div>
+                <div class="dato-body">
+                    <div class="dato-label">Fecha de nacimiento</div>
+                    <div class="dato-valor" id="userBirthDate">—</div>
+                </div>
+                <button class="dato-edit-btn" onclick="window.abrirEdicion('birthDate')" title="Editar fecha de nacimiento">
+                    <i class="fas fa-pencil-alt"></i>
+                </button>
+            </div>
+
+            <div class="dato-card">
+                <div class="dato-icon"><i class="fas fa-venus-mars" aria-hidden="true"></i></div>
+                <div class="dato-body">
+                    <div class="dato-label">Sexo</div>
+                    <div class="dato-valor" id="userSexo">—</div>
+                </div>
+                <button class="dato-edit-btn" onclick="window.abrirEdicion('sexo')" title="Editar sexo">
+                    <i class="fas fa-pencil-alt"></i>
+                </button>
+            </div>
+
+            <div class="dato-card">
+                <div class="dato-icon"><i class="fas fa-map-marker-alt" aria-hidden="true"></i></div>
+                <div class="dato-body">
+                    <div class="dato-label">Provincia</div>
+                    <div class="dato-valor" id="userProvincia">—</div>
+                </div>
+                <button class="dato-edit-btn" onclick="window.abrirEdicion('provincia')" title="Editar provincia">
+                    <i class="fas fa-pencil-alt"></i>
+                </button>
+            </div>
+
+            <div class="dato-card">
+                <div class="dato-icon"><i class="fas fa-city" aria-hidden="true"></i></div>
+                <div class="dato-body">
+                    <div class="dato-label">Localidad</div>
+                    <div class="dato-valor" id="userLocalidad">—</div>
+                </div>
+                <button class="dato-edit-btn" onclick="window.abrirEdicion('localidad')" title="Editar localidad">
+                    <i class="fas fa-pencil-alt"></i>
+                </button>
+            </div>
+
+            <div class="dato-card">
+                <div class="dato-icon"><i class="fas fa-check-circle" aria-hidden="true"></i></div>
+                <div class="dato-body">
+                    <div class="dato-label">Email verificado</div>
+                    <div class="dato-valor" id="emailVerified"></div>
+                </div>
+            </div>
+
+            <div class="dato-card" id="passwordInfoItem">
+                <div class="dato-icon"><i class="fas fa-lock" aria-hidden="true"></i></div>
+                <div class="dato-body">
+                    <div class="dato-label">Contraseña</div>
+                    <div class="dato-valor" id="passwordDisplay">••••••••</div>
+                </div>
+                <button class="dato-edit-btn" id="btnCambiarPassword" onclick="window.abrirCambiarPassword()" title="Cambiar contraseña">
+                    <i class="fas fa-pencil-alt"></i>
+                </button>
+            </div>
+
+            <div class="dato-card dato-card-full">
+                <div class="dato-icon"><i class="fas fa-clock" aria-hidden="true"></i></div>
+                <div class="dato-body">
+                    <div class="dato-label">Último acceso</div>
+                    <div class="dato-valor" id="lastLogin"></div>
+                </div>
+            </div>
         </div>
 
-        <div class="dato-card">
-            <div class="dato-icon"><i class="fas fa-envelope" aria-hidden="true"></i></div>
-            <div class="dato-body">
-                <div class="dato-label">Email</div>
-                <div class="dato-valor" id="userEmail"></div>
-            </div>
-            <button class="dato-edit-btn" onclick="window.abrirEdicion('email')" title="Editar email">
-                <i class="fas fa-pencil-alt"></i>
+        <div style="text-align:center; margin-top: 1.5rem;">
+            <button class="btn-eliminar-cuenta" onclick="window.abrirEliminarCuenta()">
+                <i class="fas fa-trash-alt"></i> Eliminar mi cuenta
             </button>
-        </div>
-
-        <div class="dato-card">
-            <div class="dato-icon"><i class="fas fa-id-card" aria-hidden="true"></i></div>
-            <div class="dato-body">
-                <div class="dato-label">DNI</div>
-                <div class="dato-valor" id="userDni">—</div>
-            </div>
-        </div>
-
-        <div class="dato-card">
-            <div class="dato-icon"><i class="fas fa-phone" aria-hidden="true"></i></div>
-            <div class="dato-body">
-                <div class="dato-label">Teléfono</div>
-                <div class="dato-valor" id="userPhone">—</div>
-            </div>
-            <button class="dato-edit-btn" onclick="window.abrirEdicion('phone')" title="Editar teléfono">
-                <i class="fas fa-pencil-alt"></i>
-            </button>
-        </div>
-        <div class="dato-card">
-            <div class="dato-icon"><i class="fas fa-birthday-cake" aria-hidden="true"></i></div>
-            <div class="dato-body">
-                <div class="dato-label">Fecha de nacimiento</div>
-                <div class="dato-valor" id="userBirthDate">—</div>
-            </div>
-            <button class="dato-edit-btn" onclick="window.abrirEdicion('birthDate')" title="Editar fecha de nacimiento">
-                <i class="fas fa-pencil-alt"></i>
-            </button>
-        </div>
-
-        <div class="dato-card">
-            <div class="dato-icon"><i class="fas fa-venus-mars" aria-hidden="true"></i></div>
-            <div class="dato-body">
-                <div class="dato-label">Sexo</div>
-                <div class="dato-valor" id="userSexo">—</div>
-            </div>
-            <button class="dato-edit-btn" onclick="window.abrirEdicion('sexo')" title="Editar sexo">
-                <i class="fas fa-pencil-alt"></i>
-            </button>
-        </div>
-
-        <div class="dato-card">
-            <div class="dato-icon"><i class="fas fa-map-marker-alt" aria-hidden="true"></i></div>
-            <div class="dato-body">
-                <div class="dato-label">Provincia</div>
-                <div class="dato-valor" id="userProvincia">—</div>
-            </div>
-            <button class="dato-edit-btn" onclick="window.abrirEdicion('provincia')" title="Editar provincia">
-                <i class="fas fa-pencil-alt"></i>
-            </button>
-        </div>
-
-        <div class="dato-card">
-            <div class="dato-icon"><i class="fas fa-city" aria-hidden="true"></i></div>
-            <div class="dato-body">
-                <div class="dato-label">Localidad</div>
-                <div class="dato-valor" id="userLocalidad">—</div>
-            </div>
-            <button class="dato-edit-btn" onclick="window.abrirEdicion('localidad')" title="Editar localidad">
-                <i class="fas fa-pencil-alt"></i>
-            </button>
-        </div>
-        <div class="dato-card">
-            <div class="dato-icon"><i class="fas fa-check-circle" aria-hidden="true"></i></div>
-            <div class="dato-body">
-                <div class="dato-label">Email verificado</div>
-                <div class="dato-valor" id="emailVerified"></div>
-            </div>
-        </div>
-
-        <div class="dato-card" id="passwordInfoItem">
-            <div class="dato-icon"><i class="fas fa-lock" aria-hidden="true"></i></div>
-            <div class="dato-body">
-                <div class="dato-label">Contraseña</div>
-                <div class="dato-valor" id="passwordDisplay">••••••••</div>
-            </div>
-            <button class="dato-edit-btn" id="btnCambiarPassword" onclick="window.abrirCambiarPassword()" title="Cambiar contraseña">
-                <i class="fas fa-pencil-alt"></i>
-            </button>
-        </div>
-
-        <div class="dato-card dato-card-full">
-            <div class="dato-icon"><i class="fas fa-clock" aria-hidden="true"></i></div>
-            <div class="dato-body">
-                <div class="dato-label">Último acceso</div>
-                <div class="dato-valor" id="lastLogin"></div>
-            </div>
         </div>
     </div>
 
-        <!-- BOTÓN ELIMINAR CUENTA -->    <div style="text-align:center; margin-top: 1.5rem;">
-        <button class="btn-eliminar-cuenta" onclick="window.abrirEliminarCuenta()">
-            <i class="fas fa-trash-alt"></i> Eliminar mi cuenta
-        </button>
-    </div>
-    </div><!-- /cuenta-seccion datos personales -->
-
-    <!-- MODAL SELECTOR DE AVATAR (NUEVO) -->
+    <!-- MODAL SELECTOR DE AVATAR -->
     <div id="modalSelectorAvatar" class="modal-edicion" style="display:none;">
         <div class="modal-edicion-overlay" onclick="window.cerrarSelectorAvatar()"></div>
         <div class="modal-edicion-caja modal-avatar-caja">
@@ -388,12 +372,9 @@
                     <button class="avatar-tab active" onclick="window.cambiarCategoriaAvatar('predefinidos', this)">Predefinidos</button>
                     <button class="avatar-tab" onclick="window.cambiarCategoriaAvatar('personalizado', this)">Subir propio</button>
                 </div>
-
                 <div id="avatarPredefinidos" class="avatar-grid">
-                    <!-- Se cargarán dinámicamente -->
                     <div class="avatar-loading">Cargando avatares...</div>
                 </div>
-
                 <div id="avatarPersonalizado" style="display:none;">
                     <div class="avatar-upload-area" onclick="document.getElementById('avatarFileInput').click()">
                         <i class="fas fa-cloud-upload-alt"></i>
@@ -405,7 +386,6 @@
                         <img id="avatarPreviewImg" src="" alt="Preview">
                     </div>
                 </div>
-
                 <p id="avatarError" class="modal-edicion-error" style="display:none;"></p>
             </div>
             <div class="modal-edicion-footer">
@@ -479,11 +459,9 @@
                     Ingresá tu contraseña para confirmar
                 </label>
                 <div class="password-wrapper" style="position:relative;">
-                    <input type="password" id="inputEliminarPassword"
-                           class="modal-edicion-input" placeholder="••••••••" maxlength="30"/>
+                    <input type="password" id="inputEliminarPassword" class="modal-edicion-input" placeholder="••••••••" maxlength="30"/>
                     <button type="button" id="toggleEliminarPassword"
-                            style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);
-                                   background:none;border:none;color:#999;cursor:pointer;font-size:1rem;">
+                            style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);background:none;border:none;color:#999;cursor:pointer;font-size:1rem;">
                         <i class="fas fa-eye"></i>
                     </button>
                 </div>
@@ -510,8 +488,6 @@
             <div class="modal-edicion-body">
                 <label id="modalEdicionLabel"></label>
                 <input type="text" id="modalEdicionInput" class="modal-edicion-input" maxlength="50"/>
-
-                <!-- INPUT TELÉFONO CON PREFIJO (solo visible cuando campo = phone) -->
                 <div id="modalPhoneWrapper" style="display:none;">
                     <label style="display:block;font-size:0.85rem;font-weight:600;color:#555;margin-bottom:0.4rem;">Teléfono</label>
                     <div class="phone-wrapper" style="position:relative;display:flex;">
@@ -529,7 +505,6 @@
                         <div class="phone-prefix-list" id="cuentaPhonePrefixList"></div>
                     </div>
                 </div>
-
                 <p id="modalEdicionError" class="modal-edicion-error" style="display:none;"></p>
             </div>
             <div class="modal-edicion-footer">
@@ -580,55 +555,40 @@
             </div>
         </div>
     </div>
+
     <!-- MODAL DEJAR DE SEGUIR -->
     <div id="modalDejarSeguirRed" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
         <div style="background:white; border-radius:16px; padding:2rem; max-width:380px; width:100%;" onclick="event.stopPropagation()">
             <h3 style="margin:0 0 0.75rem; font-size:1rem; color:#333;">¿Dejás de seguir a <span id="dejarSeguirRedNombre"></span>?</h3>
             <p style="color:#888; font-size:0.88rem; margin:0 0 1.5rem;">Podés volver a seguirlo cuando quieras.</p>
             <div style="display:flex; gap:0.75rem;">
-                <button onclick="window.cerrarModalDejarSeguirRed()"
-                        style="flex:1; padding:0.7rem; border:1.5px solid #ddd; background:none; border-radius:8px; color:#666; cursor:pointer;">
-                    Cancelar
-                </button>
-                <button onclick="window.confirmarDejarSeguirRed()"
-                        style="flex:1; padding:0.7rem; background:#e50914; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer;">
-                    Dejar de seguir
-                </button>
+                <button onclick="window.cerrarModalDejarSeguirRed()" style="flex:1; padding:0.7rem; border:1.5px solid #ddd; background:none; border-radius:8px; color:#666; cursor:pointer;">Cancelar</button>
+                <button onclick="window.confirmarDejarSeguirRed()" style="flex:1; padding:0.7rem; background:#e50914; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer;">Dejar de seguir</button>
             </div>
         </div>
     </div>
+
     <!-- MODAL YA LA VI -->
     <div id="modalYaLaVi" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
         <div style="background:white; border-radius:16px; padding:2rem; max-width:380px; width:100%;" onclick="event.stopPropagation()">
             <h3 style="margin:0 0 0.75rem; font-size:1rem; color:#333;">¿Ya viste esta película?</h3>
             <p style="color:#888; font-size:0.88rem; margin:0 0 1.5rem;">Esta acción es <strong>irreversible</strong>. Una vez marcada como vista no podrás deshacerlo.</p>
             <div style="display:flex; gap:0.75rem;">
-                <button onclick="window.cerrarModalYaLaVi()"
-                        style="flex:1; padding:0.7rem; border:1.5px solid #ddd; background:none; border-radius:8px; color:#666; cursor:pointer;">
-                    Cancelar
-                </button>
-                <button onclick="window.confirmarYaLaVi()"
-                        style="flex:1; padding:0.7rem; background:#1a3a6b; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer;">
-                    Sí, ya la vi
-                </button>
+                <button onclick="window.cerrarModalYaLaVi()" style="flex:1; padding:0.7rem; border:1.5px solid #ddd; background:none; border-radius:8px; color:#666; cursor:pointer;">Cancelar</button>
+                <button onclick="window.confirmarYaLaVi()" style="flex:1; padding:0.7rem; background:#1a3a6b; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer;">Sí, ya la vi</button>
             </div>
         </div>
     </div>
-    <!-- Modal eliminar recomendación -->
+
+    <!-- MODAL ELIMINAR RECOMENDACIÓN -->
     <div id="modalEliminarRec" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
-        <div style="background:white;border-radius:12px;padding:2rem;max-width:380px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+        <div style="background:white;border-radius:12px;padding:2rem;max-width:380px;width:90%;text-align:center;">
             <div style="font-size:2rem;margin-bottom:0.5rem;">🗑️</div>
             <h3 style="margin:0 0 0.5rem;color:#333;font-size:1.1rem;">¿Eliminar recomendación?</h3>
             <p style="color:#666;font-size:0.9rem;margin:0 0 1.5rem;">Esta acción es permanente. La recomendación desaparecerá de tu bandeja.</p>
             <div style="display:flex;gap:0.75rem;justify-content:center;">
-                <button onclick="window.cerrarModalEliminarRec()"
-                        style="padding:0.5rem 1.25rem;border-radius:8px;border:1px solid #ddd;background:white;color:#666;cursor:pointer;font-size:0.9rem;">
-                    Cancelar
-                </button>
-                <button onclick="window.confirmarEliminarRec()"
-                        style="padding:0.5rem 1.25rem;border-radius:8px;border:none;background:#e50914;color:white;cursor:pointer;font-size:0.9rem;font-weight:600;">
-                    Eliminar
-                </button>
+                <button onclick="window.cerrarModalEliminarRec()" style="padding:0.5rem 1.25rem;border-radius:8px;border:1px solid #ddd;background:white;color:#666;cursor:pointer;font-size:0.9rem;">Cancelar</button>
+                <button onclick="window.confirmarEliminarRec()" style="padding:0.5rem 1.25rem;border-radius:8px;border:none;background:#e50914;color:white;cursor:pointer;font-size:0.9rem;font-weight:600;">Eliminar</button>
             </div>
         </div>
     </div>
@@ -640,60 +600,51 @@
                 <h3 style="margin:0; font-size:1rem; color:#333;"><i class="fas fa-cog" style="color:#324C89;"></i> Configuración de cuenta</h3>
                 <button onclick="window.cerrarConfiguracion()" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#666;">×</button>
             </div>
-
-            <!-- Privacidad del perfil -->
             <div style="border:1px solid #f0f0f0; border-radius:12px; padding:1.25rem; margin-bottom:1rem;">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:1rem;">
                     <div>
                         <p style="margin:0 0 4px; font-size:0.9rem; font-weight:600; color:#333;">Privacidad del perfil</p>
-                        <p style="margin:0; font-size:0.8rem; color:#aaa; line-height:1.5;" id="privacidadDesc">
-                            Tu perfil es público. Cualquier usuario puede ver tu contenido.
-                        </p>
+                        <p style="margin:0; font-size:0.8rem; color:#aaa; line-height:1.5;" id="privacidadDesc">Tu perfil es público. Cualquier usuario puede ver tu contenido.</p>
                     </div>
                     <div style="display:flex; align-items:center; gap:0.5rem; flex-shrink:0;">
                         <span style="font-size:0.8rem; color:#aaa;" id="privacidadLabel">Público</span>
                         <div id="togglePrivacidad" onclick="window.togglePrivacidad()"
                              style="width:44px; height:24px; border-radius:12px; background:#ddd; cursor:pointer; position:relative; transition:background 0.2s;">
-                            <div id="togglePrivacidadDot"
-                                 style="width:20px; height:20px; border-radius:50%; background:white; position:absolute; top:2px; left:2px; transition:left 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
+                            <div id="togglePrivacidadDot" style="width:20px; height:20px; border-radius:50%; background:white; position:absolute; top:2px; left:2px; transition:left 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <p style="font-size:0.75rem; color:#ccc; margin:0 0 1.5rem; line-height:1.5;">
-                Más opciones de configuración próximamente.
-            </p>
-
-            <button onclick="window.cerrarConfiguracion()"
-                    style="width:100%; padding:0.7rem; background:#324C89; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer; font-size:0.9rem;">
-                Listo
-            </button>
+            <p style="font-size:0.75rem; color:#ccc; margin:0 0 1.5rem; line-height:1.5;">Más opciones de configuración próximamente.</p>
+            <button onclick="window.cerrarConfiguracion()" style="width:100%; padding:0.7rem; background:#324C89; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer; font-size:0.9rem;">Listo</button>
         </div>
     </div>
+
     <!-- MODAL BLOQUEAR USUARIO -->
     <div id="modalBloquearUsuario" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
         <div style="background:white; border-radius:16px; padding:2rem; max-width:400px; width:100%;" onclick="event.stopPropagation()">
-            <h3 style="margin:0 0 0.5rem; color:#333; font-size:1rem;">
-                <i class="fas fa-ban" style="color:#e50914;"></i> Bloquear usuario
-            </h3>
-            <p style="color:#888; font-size:0.85rem; margin:0 0 1.25rem; line-height:1.5;">
-                ¿Querés bloquear a <strong id="bloquearNombre"></strong>? Dejarás de seguirlo y él dejará de seguirte. No podrá ver tu perfil.
-            </p>
+            <h3 style="margin:0 0 0.5rem; color:#333; font-size:1rem;"><i class="fas fa-ban" style="color:#e50914;"></i> Bloquear usuario</h3>
+            <p style="color:#888; font-size:0.85rem; margin:0 0 1.25rem; line-height:1.5;">¿Querés bloquear a <strong id="bloquearNombre"></strong>? Dejarás de seguirlo y él dejará de seguirte. No podrá ver tu perfil.</p>
             <label style="display:flex; align-items:center; gap:0.6rem; font-size:0.85rem; color:#555; margin-bottom:1.5rem; cursor:pointer;">
                 <input type="checkbox" id="checkReportarAlBloquear" style="accent-color:#e50914; width:16px; height:16px;">
                 También quiero reportar a este usuario
             </label>
             <div style="display:flex; gap:0.75rem;">
-                <button onclick="window.cerrarModalBloquear()"
-                        style="flex:1; padding:0.7rem; border:1.5px solid #ddd; background:none; border-radius:8px; color:#666; cursor:pointer;">
-                    Cancelar
-                </button>
-                <button id="btnConfirmarBloquear" onclick="window.confirmarBloquear()"
-                        style="flex:1; padding:0.7rem; background:#e50914; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer;">
-                    Sí, bloquear
-                </button>
+                <button onclick="window.cerrarModalBloquear()" style="flex:1; padding:0.7rem; border:1.5px solid #ddd; background:none; border-radius:8px; color:#666; cursor:pointer;">Cancelar</button>
+                <button id="btnConfirmarBloquear" onclick="window.confirmarBloquear()" style="flex:1; padding:0.7rem; background:#e50914; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer;">Sí, bloquear</button>
             </div>
         </div>
     </div>
+
+    <!-- MODAL PROGRESO DE INSIGNIA -->
+    <div id="modalProgreso" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
+        <div style="background:white; border-radius:16px; max-width:440px; width:100%; overflow:hidden;" onclick="event.stopPropagation()">
+            <div style="background:#324C89; padding:1rem 1.25rem; display:flex; align-items:center; gap:10px;">
+                <i class="fas fa-award" style="color:#e50914; font-size:18px;"></i>
+                <span style="color:white; font-size:15px; font-weight:600;">Mi progreso</span>
+            </div>
+            <div style="padding:1.25rem;" id="modalProgresoBody"></div>
+        </div>
+    </div>
+
 </div>
