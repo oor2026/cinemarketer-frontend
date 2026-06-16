@@ -52,6 +52,8 @@ window.loadProfile = async function() {
             document.getElementById('lastLogin').textContent = 'Primer inicio de sesión';
         }
 
+        window._perfilNivel = profile.level || 'AMATEUR';
+        window._perfilData  = profile;
         cargarAvatarYNivel(profile);
 
         // Guardar ID para perfil público
@@ -773,9 +775,10 @@ document.addEventListener('keydown', function(e) {
         window.cerrarEliminarCuenta();
         window.cerrarCambiarPassword();
         window.cerrarSelectorAvatar();
-    if (typeof window.cerrarDetallePlan === 'function') window.cerrarDetallePlan();
-            if (typeof window.cerrarCancelarSuscripcion === 'function') window.cerrarCancelarSuscripcion();
-        }
+        if (typeof window.cerrarDetallePlan === 'function') window.cerrarDetallePlan();
+        if (typeof window.cerrarCancelarSuscripcion === 'function') window.cerrarCancelarSuscripcion();
+        if (typeof window.cerrarModalProgreso === 'function') window.cerrarModalProgreso();
+    }
 });
 
 // ==============================================
@@ -1640,3 +1643,111 @@ window.confirmarBloquear = async function() {
         }
     });
 })();
+
+// ── Modal progreso de insignia ──────────────────────────────────
+window.abrirModalProgreso = function() {
+    const modal = document.getElementById('modalProgreso');
+    const body  = document.getElementById('modalProgresoBody');
+    if (!modal || !body) return;
+
+    const nivel = window._perfilNivel || 'AMATEUR';
+    const profile = window._perfilData || {};
+
+    body.innerHTML = _renderProgresoBody(nivel, profile);
+    modal.style.display = 'flex';
+};
+
+window.cerrarModalProgreso = function() {
+    const modal = document.getElementById('modalProgreso');
+    if (modal) modal.style.display = 'none';
+};
+
+function _check(cumple) {
+    return cumple
+        ? `<i class="fas fa-check-circle" style="color:#2e7d32;font-size:17px;flex-shrink:0;"></i>`
+        : `<i class="far fa-circle" style="color:#ccc;font-size:17px;flex-shrink:0;"></i>`;
+}
+
+function _item(cumple, texto) {
+    const color = cumple ? 'color:#333;' : 'color:#999;';
+    return `<div style="display:flex;align-items:center;gap:10px;font-size:13px;margin-bottom:8px;">
+        ${_check(cumple)}
+        <span style="${color}">${texto}</span>
+    </div>`;
+}
+
+function _renderProgresoBody(nivel, p) {
+    const btnAceptar = `<button onclick="window.cerrarModalProgreso()"
+        style="width:100%;background:#324C89;border:none;color:white;padding:0.65rem;border-radius:8px;font-size:14px;cursor:pointer;margin-top:1.25rem;">
+        Aceptar
+    </button>`;
+
+    if (nivel === 'JURADO_EXPERTO') {
+        return `
+            <div style="text-align:center;padding:0.5rem 0;">
+                <div style="font-size:36px;margin-bottom:0.75rem;">🏆</div>
+                <div style="font-size:17px;font-weight:600;color:#333;margin-bottom:0.5rem;">¡Sos Jurado Experto!</div>
+                <div style="font-size:13px;color:#888;line-height:1.6;margin-bottom:0.5rem;">
+                    Alcanzaste el nivel más alto de Cinemarketer. Tu dedicación y pasión por el cine te llevaron hasta acá. ¡Seguí siendo parte de nuestra comunidad!
+                </div>
+            </div>
+            ${btnAceptar}`;
+    }
+
+    let titulo = '';
+    let emoji  = '';
+    let items  = '';
+
+    if (nivel === 'AMATEUR') {
+        titulo = 'Colaborador'; emoji = '🔵';
+        const emailOk     = p.emailVerified || !!p.googleId;
+        const perfilOk    = !!(p.name && p.dni && p.phone && p.avatarUrl && p.provincia && p.localidad);
+        const peliculasOk = (p.reviewsCount || 0) >= 100;
+        const comentOk    = (p.commentsCount || 0) >= 50;
+        items = _item(emailOk,     'Email verificado') +
+                _item(perfilOk,    'Perfil completo al 100%') +
+                _item(peliculasOk, '100 películas únicas votadas') +
+                _item(comentOk,    '50 comentarios en películas distintas');
+    }
+
+    if (nivel === 'COLABORADOR') {
+        titulo = 'Crítico'; emoji = '🟣';
+        const peliculasOk = (p.reviewsCount || 0) >= 200;
+        const comentOk    = (p.commentsCount || 0) >= 100;
+        const puntosOk    = (p.totalRedeemedPoints || 0) >= 2000;
+        items = _item(peliculasOk, '200 películas únicas votadas') +
+                _item(comentOk,    '100 comentarios en películas distintas') +
+                _item(false,       '25 usuarios seguidos') +
+                _item(false,       '60 días activos en la plataforma') +
+                _item(false,       '30 recomendaciones enviadas') +
+                _item(false,       '20 "Te banco" de usuarios distintos') +
+                _item(puntosOk,    '2.000 puntos canjeados');
+    }
+
+    if (nivel === 'CRITICO') {
+        titulo = 'Jurado Experto'; emoji = '🏆';
+        const premiumOk   = !!p.isPremium;
+        const peliculasOk = (p.reviewsCount || 0) >= 500;
+        const comentOk    = (p.commentsCount || 0) >= 300;
+        const puntosOk    = (p.totalRedeemedPoints || 0) >= 10000;
+        items = _item(premiumOk,   'Suscripción Premium activa') +
+                _item(peliculasOk, '500 películas únicas votadas') +
+                _item(comentOk,    '300 comentarios en películas distintas') +
+                _item(false,       '100 usuarios seguidos') +
+                _item(false,       '120 días activos en la plataforma') +
+                _item(false,       '200 recomendaciones enviadas') +
+                _item(false,       '100 "Te banco" de usuarios distintos') +
+                _item(false,       '100 "Merecés un punto" recibidos') +
+                _item(false,       '100 seguidores ganados') +
+                _item(puntosOk,    '10.000 puntos canjeados');
+    }
+
+    return `
+        <div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Próximo objetivo</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:1.25rem;">
+            <span style="font-size:20px;">${emoji}</span>
+            <span style="font-size:17px;font-weight:600;color:#333;">${titulo}</span>
+        </div>
+        ${items}
+        ${btnAceptar}`;
+}

@@ -25,10 +25,10 @@
 
 .profile-avatar-section {
     display: flex;
-    gap: 2rem;
+    gap: 1.5rem;
     align-items: center;
     margin-bottom: 2rem;
-    padding: 1.5rem;
+    padding: 1rem 1.5rem;
     background: #E50914;
     border-radius: 15px;
     color: white;
@@ -36,8 +36,8 @@
 
 .profile-avatar-container {
     position: relative;
-    width: 120px;
-    height: 120px;
+    width: 80px;
+    height: 80px;
     flex-shrink: 0;
 }
 
@@ -55,7 +55,7 @@
 }
 
 .profile-avatar i {
-    font-size: 5rem;
+    font-size: 3rem;
     color: white;
 }
 
@@ -69,11 +69,11 @@
     position: absolute;
     bottom: 0;
     right: 0;
-    width: 36px;
-    height: 36px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
     background: #e50914;
-    border: 3px solid white;
+    border: 2px solid white;
     color: white;
     display: flex;
     align-items: center;
@@ -89,12 +89,17 @@
 }
 
 .btn-change-avatar i {
-    font-size: 1rem;
+    font-size: 0.75rem;
     color: white;
 }
 
 .profile-level-info {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    min-width: 0;
 }
 
 .profile-level-badge {
@@ -104,9 +109,10 @@
     padding: 0.5rem 1.2rem;
     background: rgba(255,255,255,0.2);
     border-radius: 30px;
-    margin-bottom: 1rem;
+    margin-bottom: 0;
     font-weight: 600;
     backdrop-filter: blur(5px);
+    flex-shrink: 0;
 }
 
 .profile-level-badge.level-AMATEUR      { background: linear-gradient(135deg, #4caf50, #2e7d32); box-shadow: 0 2px 8px rgba(76,175,80,0.3); }
@@ -159,6 +165,52 @@
 .next-level-label  { opacity: 0.8; }
 .next-level-name   { font-weight: 600; }
 .next-level-points { opacity: 0.8; font-size: 0.8rem; }
+
+/* ==============================================
+   BTN VER PROGRESO
+   ============================================== */
+
+.btn-ver-progreso {
+    background: rgba(255,255,255,0.15);
+    border: 1.5px solid rgba(255,255,255,0.5);
+    color: white;
+    padding: 0.4rem 1rem;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+    transition: background 0.2s;
+}
+
+.btn-ver-progreso:hover {
+    background: rgba(255,255,255,0.25);
+}
+
+/* ==============================================
+   WELCOME BADGE
+   ============================================== */
+
+.welcome-badge {
+    background: #324C89;
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 15px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.welcome-badge h1 {
+    font-size: 1.3rem;
+    margin: 0;
+    font-weight: 500;
+}
 
 /* ==============================================
    MODAL AVATAR
@@ -254,22 +306,7 @@
 }
 
 /* ==============================================
-   WELCOME BADGE
-   ============================================== */
-
-.welcome-badge {
-    background: #324C89;
-    color: white;
-    padding: 2rem;
-    border-radius: 15px;
-    margin-bottom: 2rem;
-    text-align: center;
-}
-
-.welcome-badge h1 { font-size: 2rem; margin-bottom: 0.5rem; }
-
-/* ==============================================
-   STATS GRID (legacy, no se usa en Mi actividad)
+   STATS GRID
    ============================================== */
 
 .stats-grid {
@@ -317,26 +354,52 @@
 }
 
 .dato-card {
-    background: #fff;
-    border: 0.5px solid #e8e8e8;
+    background: var(--color-background-primary, white);
+    border: 0.5px solid #e0e0e0;
     border-radius: 12px;
-    padding: 1rem 1.25rem;
+    padding: 0.9rem 1.1rem;
     display: flex;
     align-items: center;
     gap: 12px;
     position: relative;
-    transition: border-color 0.2s;
 }
 
-.dato-card:hover    { border-color: #ccc; }
-.dato-card-full     { grid-column: 1 / -1; }
+.dato-card-full { grid-column: 1 / -1; }
 
-.dato-icon { width: 40px; height: 40px; border-radius: 8px; background: #fff0f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.dato-icon i { font-size: 18px; color: #e50914; }
+.dato-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #fff0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #e50914;
+    font-size: 16px;
+}
 
-.dato-body  { flex: 1; min-width: 0; }
-.dato-label { font-size: 11px; color: #999; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 2px; }
-.dato-valor { font-size: 14px; color: #333; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dato-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.dato-label {
+    font-size: 10px;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 2px;
+}
+
+.dato-valor {
+    font-size: 13px;
+    color: #333;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 
 .dato-edit-btn {
     position: absolute;
@@ -348,210 +411,342 @@
     color: #e50914;
     font-size: 13px;
     opacity: 0.5;
+    padding: 0;
     transition: opacity 0.2s;
-    padding: 2px;
 }
 
 .dato-edit-btn:hover { opacity: 1; }
 
 /* ==============================================
-   BOTONES
+   MODAL DE EDICIÓN
    ============================================== */
 
-.btn-edit { background: none; border: none; color: #ccc; cursor: pointer; padding: 0.4rem; border-radius: 50%; transition: color 0.2s, background 0.2s; font-size: 0.9rem; line-height: 1; }
-.btn-edit:hover { color: #e50914; background: #fff0f0; }
-
-.btn-eliminar-cuenta {
-    background: #e50914;
-    border: none;
-    color: white;
-    padding: 0.6rem 1.5rem;
-    border-radius: 10px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.15s, box-shadow 0.15s;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.btn-eliminar-cuenta:hover  { background: #b2070f; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(229,9,20,0.25); }
-.btn-eliminar-cuenta:active { transform: translateY(0); box-shadow: none; }
-
-.btn-eliminar-confirmar {
-    padding: 0.7rem 1.4rem;
-    background: #e50914;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
+.modal-edicion {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 999999;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: center;
+    padding: 1rem;
 }
 
-.btn-eliminar-confirmar:hover:not(:disabled) { background: #b2070f; }
-.btn-eliminar-confirmar:disabled { opacity: 0.6; cursor: not-allowed; }
-
-/* ==============================================
-   MODAL EDICIÓN
-   ============================================== */
-
-.modal-edicion { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 9999; }
-.modal-edicion-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.45); }
+.modal-edicion-overlay {
+    position: absolute;
+    inset: 0;
+}
 
 .modal-edicion-caja {
-    position: relative;
     background: white;
     border-radius: 16px;
+    padding: 0;
+    max-width: 480px;
     width: 100%;
-    max-width: 420px;
-    margin: 1rem;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-    animation: fadeIn 0.2s ease;
+    position: relative;
     z-index: 1;
-    overflow: visible !important;
+    overflow: hidden;
 }
 
-.modal-edicion-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid #f0f0f0; }
-.modal-edicion-header h3 { font-size: 1.1rem; color: #333; margin: 0; }
-.modal-edicion-cerrar { background: none; border: none; font-size: 1.5rem; color: #999; cursor: pointer; line-height: 1; padding: 0 0.25rem; }
-.modal-edicion-cerrar:hover { color: #e50914; }
-.modal-edicion-body { padding: 1.5rem; overflow: visible !important; }
-.modal-edicion-body label { display: block; font-size: 0.9rem; font-weight: 600; color: #555; margin-bottom: 0.5rem; }
+.modal-edicion-header {
+    background: #324C89;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modal-edicion-header h3 {
+    color: white;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.modal-edicion-cerrar {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    opacity: 0.8;
+}
+
+.modal-edicion-cerrar:hover { opacity: 1; }
+
+.modal-edicion-body {
+    padding: 1.25rem;
+}
+
+.modal-edicion-body label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 0.5rem;
+}
 
 .modal-edicion-input {
     width: 100%;
-    padding: 0.85rem 1rem;
-    border: 2px solid #e0e0e0;
-    border-radius: 10px;
-    font-size: 1rem;
-    transition: border-color 0.2s;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.95rem;
     outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+    font-family: inherit;
 }
 
-.modal-edicion-input:focus { border-color: #e50914; box-shadow: 0 0 0 3px rgba(229,9,20,0.1); }
+.modal-edicion-input:focus { border-color: #324C89; }
+
+select.modal-edicion-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+    cursor: pointer;
+}
 
 .modal-edicion-error {
-    margin-top: 0.6rem;
-    font-size: 0.85rem;
     color: #e50914;
-    background: #fff5f5;
-    border-left: 3px solid #e50914;
-    padding: 0.5rem 0.75rem;
-    border-radius: 0 6px 6px 0;
+    font-size: 0.82rem;
+    margin-top: 0.5rem;
+    line-height: 1.4;
 }
 
-.modal-edicion-footer { display: flex; justify-content: flex-end; gap: 0.75rem; padding: 1rem 1.5rem; border-top: 1px solid #f0f0f0; }
+.modal-edicion-footer {
+    padding: 1rem 1.25rem;
+    display: flex;
+    gap: 0.75rem;
+    border-top: 1px solid #f0f0f0;
+}
 
-.btn-cancelar-edicion { padding: 0.7rem 1.4rem; border: 2px solid #e0e0e0; background: white; border-radius: 10px; font-size: 0.95rem; cursor: pointer; color: #666; transition: all 0.2s; }
-.btn-cancelar-edicion:hover { border-color: #ccc; background: #f5f5f5; }
+.btn-cancelar-edicion {
+    flex: 1;
+    padding: 0.7rem;
+    border: 1.5px solid #ddd;
+    background: none;
+    border-radius: 8px;
+    color: #666;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
 
-.btn-guardar-edicion { padding: 0.7rem 1.4rem; background: #e50914; color: white; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 0.5rem; }
-.btn-guardar-edicion:hover:not(:disabled) { background: #b2070f; }
+.btn-guardar-edicion {
+    flex: 1;
+    padding: 0.7rem;
+    background: #324C89;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-guardar-edicion:hover { background: #1a2d5e; }
 .btn-guardar-edicion:disabled { opacity: 0.6; cursor: not-allowed; }
 
-/* ==============================================
-   SELECTOR PREFIJO TELEFÓNICO
-   ============================================== */
-
-#modalPhoneWrapper .phone-wrapper {
+.btn-eliminar-confirmar {
+    flex: 1;
+    padding: 0.7rem;
+    background: #e50914;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
     display: flex;
-    align-items: stretch;
-    border: 2px solid #e0e0e0;
-    border-radius: 10px;
-    overflow: visible;
-    transition: border-color 0.2s;
-    position: relative;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
-#modalPhoneWrapper .phone-wrapper:focus-within { border-color: #e50914; box-shadow: 0 0 0 3px rgba(229,9,20,0.1); }
+/* ==============================================
+   PHONE PREFIX
+   ============================================== */
 
 .phone-prefix-btn {
     display: flex;
     align-items: center;
-    gap: 0.35rem;
-    padding: 0.75rem 0.85rem;
-    background: #f5f5f5;
-    border: none;
-    border-right: 2px solid #e0e0e0;
+    gap: 6px;
+    padding: 0.75rem 0.75rem;
+    border: 1.5px solid #e0e0e0;
+    border-right: none;
     border-radius: 8px 0 0 8px;
+    background: #f9f9f9;
     cursor: pointer;
     font-size: 0.9rem;
-    font-weight: 600;
-    color: #333;
-    white-space: nowrap;
-    user-select: none;
-    transition: background 0.2s;
     min-width: 90px;
+    white-space: nowrap;
 }
 
-.phone-prefix-btn:hover { background: #ececec; }
-.phone-chevron { font-size: 0.7rem; color: #888; margin-left: 2px; }
-
-#modalPhoneWrapper .modal-edicion-input { border: none !important; border-radius: 0 8px 8px 0 !important; box-shadow: none !important; flex: 1; min-width: 0; }
-#modalPhoneWrapper .modal-edicion-input:focus { border: none !important; box-shadow: none !important; outline: none; }
+.phone-chevron { font-size: 0.7rem; color: #999; }
 
 .phone-prefix-dropdown {
     position: absolute;
-    top: calc(100% + 4px);
+    top: 100%;
     left: 0;
-    width: 100%;
-    min-width: 260px;
+    width: 280px;
     background: white;
     border: 1px solid #e0e0e0;
-    border-radius: 10px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-    z-index: 99999;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 1000;
+    max-height: 240px;
     overflow: hidden;
 }
 
-.phone-prefix-search { width: 100%; padding: 0.7rem 1rem; border: none; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; outline: none; box-sizing: border-box; }
-.phone-prefix-list   { max-height: 200px; overflow-y: auto; }
+.phone-prefix-search {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: none;
+    border-bottom: 1px solid #e0e0e0;
+    outline: none;
+    font-size: 0.85rem;
+    box-sizing: border-box;
+}
 
-.phone-prefix-option { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 1rem; cursor: pointer; font-size: 0.9rem; transition: background 0.15s; }
-.phone-prefix-option:hover { background: #fff0f0; }
-.phone-prefix-option .option-name { flex: 1; color: #333; }
-.phone-prefix-option .option-code { color: #999; font-size: 0.85rem; font-weight: 600; }
+.phone-prefix-list {
+    max-height: 192px;
+    overflow-y: auto;
+}
+
+.phone-prefix-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.phone-prefix-option:hover { background: #f5f5f5; }
+.option-name { flex: 1; }
+.option-code { color: #999; font-size: 0.8rem; }
+
+/* ==============================================
+   ELIMINAR CUENTA
+   ============================================== */
+
+.btn-eliminar-cuenta {
+    background: #e50914;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem 2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.2s;
+}
+
+.btn-eliminar-cuenta:hover { background: #b2070f; }
 
 /* ==============================================
    MI RED
    ============================================== */
 
-.mi-red-seccion { margin: 1.5rem 0; background: white; border: 0.5px solid #f0f0f0; border-radius: 14px; overflow: hidden; }
-.mi-red-header  { padding: 1rem 1.25rem 0; }
-.mi-red-titulo  { font-size: 0.95rem; font-weight: 700; color: #333; margin: 0 0 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
-.mi-red-titulo i { color: #e50914; }
+.mi-red-seccion {
+    padding: 0.75rem 1rem;
+}
 
-.mi-red-tabs { display: flex; border-bottom: 1px solid #f0f0f0; padding: 0 1.25rem; gap: 0; }
+.mi-red-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
 
-.mi-red-tab { padding: 0.6rem 0; margin-right: 1.5rem; font-size: 0.85rem; color: #999; background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; transition: color 0.2s, border-color 0.2s; }
-.mi-red-tab.active { color: #e50914; border-bottom-color: #e50914; font-weight: 600; }
+.mi-red-tab {
+    padding: 0.4rem 1rem;
+    border: 1.5px solid #e0e0e0;
+    background: none;
+    border-radius: 20px;
+    color: #666;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
 
-.mi-red-loading { text-align: center; padding: 1.5rem; color: #ccc; }
-.mi-red-vacio   { text-align: center; padding: 1.5rem; color: #ccc; font-size: 0.88rem; }
+.mi-red-tab:hover  { border-color: #324C89; color: #324C89; }
+.mi-red-tab.active { background: #324C89; color: white; border-color: #324C89; }
 
-.mi-red-usuario { display: flex; align-items: center; gap: 12px; padding: 10px 1.25rem; border-bottom: 1px solid #f9f9f9; transition: background 0.15s; }
+.mi-red-usuario {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid #f5f5f5;
+}
+
 .mi-red-usuario:last-child { border-bottom: none; }
-.mi-red-usuario:hover { background: #fafafa; }
 
-.mi-red-avatar { width: 38px; height: 38px; border-radius: 50%; background: #1a3a6b; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 600; color: white; overflow: hidden; flex-shrink: 0; cursor: pointer; }
-.mi-red-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.mi-red-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #1a3a6b;
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    cursor: pointer;
+}
 
-.mi-red-info   { flex: 1; min-width: 0; cursor: pointer; }
-.mi-red-nombre { font-size: 0.88rem; font-weight: 600; color: #333; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mi-red-nivel  { font-size: 0.75rem; color: #999; margin: 0; }
+.mi-red-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
-.mi-red-btn { font-size: 0.78rem; padding: 4px 12px; border-radius: 6px; border: 1px solid #ddd; background: none; color: #666; cursor: pointer; transition: border-color 0.2s, color 0.2s; flex-shrink: 0; }
-.mi-red-btn:hover { border-color: #e50914; color: #e50914; }
-.mi-red-btn.seguir { background: #e50914; color: white; border-color: #e50914; }
-.mi-red-btn.seguir:hover { background: #c00; }
+.mi-red-info { flex: 1; min-width: 0; cursor: pointer; }
+.mi-red-nombre { font-size: 0.88rem; font-weight: 600; color: #333; margin: 0; }
+.mi-red-nivel  { font-size: 0.75rem; color: #888; margin: 0; }
 
-.mi-red-btn-bloquear { background: none; border: none; cursor: pointer; color: #ccc; font-size: 0.9rem; padding: 0.3rem; border-radius: 6px; transition: color 0.2s; }
+.mi-red-btn {
+    padding: 0.35rem 0.85rem;
+    border: 1.5px solid #324C89;
+    background: none;
+    border-radius: 20px;
+    color: #324C89;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.mi-red-btn:hover       { background: #324C89; color: white; }
+.mi-red-btn.seguir      { background: #324C89; color: white; }
+.mi-red-btn.seguir:hover { background: #e50914; border-color: #e50914; }
+
+.mi-red-vacio   { padding: 1.5rem; text-align: center; color: #aaa; font-size: 0.88rem; }
+.mi-red-loading { padding: 1.5rem; text-align: center; color: #aaa; }
+
+.mi-red-btn-bloquear {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #ddd;
+    font-size: 0.9rem;
+    padding: 4px;
+    transition: color 0.2s;
+}
+
 .mi-red-btn-bloquear:hover { color: #e50914; }
 
 /* ==============================================
@@ -621,7 +816,6 @@
 
 .historial-tab-label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
 
-
 /* ==============================================
    RESPONSIVE 768px
    ============================================== */
@@ -638,83 +832,82 @@
 
 @media (max-width: 480px) {
 
+    #memberSince {
+        display: none;
+    }
+
     .btn-suscribirse {
-            display: block;
-            margin: 0 auto;
-        }
+        display: block;
+        margin: 0 auto;
+    }
 
-    /* ── Contenedor general ── */
     .profile-card {
-            padding: 1rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-    /* ── Banner azul compacto en una línea ── */
-    .welcome-badge {
-            border-radius: 15px;;
-            margin-bottom: 0;
-            padding: 0.75rem 1rem;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            text-align: left;
-            gap: 0.25rem;
-        }
-
-        .welcome-badge > div:last-child {
-            align-self: flex-end;
-            margin-top: 0.25rem;
-        }
-
-    .welcome-badge > div:first-child {
-        flex: 1;
-        min-width: 0;
+        padding: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         display: flex;
         flex-direction: column;
-        gap: 2px;
+        gap: 1rem;
+    }
+
+    /* ── Banner azul ── */
+    .welcome-badge {
+        border-radius: 15px;
+        margin-bottom: 0;
+        padding: 0.75rem 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.5rem;
+    }
+
+    .welcome-badge > div {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        width: 100%;
     }
 
     .welcome-badge h1 {
-        font-size: 0.9rem;
-        margin-bottom: 2px;
+        font-size: 0.95rem;
+        margin: 0;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
     }
 
-    .welcome-badge p {
-        font-size: 0.68rem;
-        margin: 0;
-        opacity: 0.85;
-    }
-
-    .welcome-badge > div:last-child {
-        margin-top: 0;
-        flex-shrink: 0;
-    }
-
-    /* ── Panel rojo horizontal compacto ── */
+    /* ── Panel rojo horizontal ── */
     .profile-header {
         margin-bottom: 0;
     }
 
     .profile-avatar-section {
         border-radius: 15px;
-        margin-top: 1rem;
+        margin-top: 0.75rem;
         margin-bottom: 0;
         padding: 0.75rem 1rem;
         flex-direction: row;
+        align-items: center;
         gap: 0.75rem;
-        text-align: left;
+    }
+
+    .profile-level-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.3rem;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .btn-ver-progreso {
+        align-self: flex-start;
     }
 
     .profile-avatar-container {
-        width: 56px;
-        height: 56px;
+        width: 72px;
+        height: 72px;
         flex-shrink: 0;
     }
 
@@ -726,14 +919,9 @@
 
     .btn-change-avatar i { font-size: 0.65rem; }
 
-    .profile-level-info { flex: 1; min-width: 0; }
-
     .profile-level-badge {
-        flex-direction: row;
         padding: 3px 10px;
         gap: 5px;
-        margin-bottom: 5px;
-        display: inline-flex;
     }
 
     .level-label { font-size: 0.75rem; }
@@ -829,5 +1017,31 @@
     .premium-benefit-dot.active {
         background: white;
         transform: scale(1.2);
+    }
+}
+
+@media (min-width: 481px) {
+    .profile-avatar-section {
+        align-items: flex-start;
+    }
+
+    .profile-level-info {
+        flex-direction: row;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+
+    .profile-level-info .profile-level-badge {
+        flex: 0 0 auto;
+    }
+
+    .profile-level-info #memberSince {
+        flex: 0 0 100%;
+    }
+
+    .btn-ver-progreso {
+        margin-left: auto;
+        align-self: flex-start;
     }
 }
