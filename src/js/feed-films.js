@@ -561,9 +561,9 @@ window.ordenarPeliculas = async function() {
     cards.forEach(card => grid.appendChild(card));
 
     cards.forEach(card => {
-        const movieId = card.dataset.id;
-        const stats = statsMap[movieId];
-        if (stats) {
+            const movieId = card.dataset.id;
+            const stats = statsMap[movieId];
+            if (stats) {
             const btnLike = card.querySelector('.btn-like');
             const btnDislike = card.querySelector('.btn-dislike');
             if (btnLike) btnLike.innerHTML = `<i class="fas fa-thumbs-up"></i> ${stats.likes}`;
@@ -575,10 +575,15 @@ window.ordenarPeliculas = async function() {
             }
 
             const comentariosEl = card.querySelector(`#comentarios-card-${movieId}`);
-            if (comentariosEl) comentariosEl.textContent = stats.comentarios;
-        }
-    });
-};
+                        if (comentariosEl) comentariosEl.textContent = stats.comentarios;
+                    }
+                });
+
+                // Marcar estado watchlist en todas las cards recién insertadas
+                if (typeof window.marcarWatchlistEnFeed === 'function') {
+                    window.marcarWatchlistEnFeed();
+                }
+            };
 
 // ==============================================
 // VOTAR PELÍCULA
@@ -1029,9 +1034,12 @@ window.cargarDatosPelicula = async function(id) {
                 : 'No especificado';
         }
 
-        const statsResponse = await fetch(`${CONFIG.API_URL}/reviews/movies/${id}/stats`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+        // Verificar estado watchlist
+                window.verificarEstadoWatchlist(id);
+
+                const statsResponse = await fetch(`${CONFIG.API_URL}/reviews/movies/${id}/stats`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
 
         if (statsResponse.ok) {
             const stats = await statsResponse.json();

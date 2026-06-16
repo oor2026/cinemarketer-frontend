@@ -5,7 +5,15 @@
              onerror="this.src='https://via.placeholder.com/300x450?text=Error+imagen'">
         <div class="pelicula-overlay">
             <span class="total-votos" id="totalVotos-{id}">0</span>
-            <span class="año">{year}</span>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+                <span class="año">{year}</span>
+                <button class="btn-watchlist" data-movie-id="{id}"
+                        onclick="event.stopPropagation(); window.toggleWatchlist({id}, event)"
+                        title="Guardar en mi lista"
+                        style="background:rgba(0,0,0,0.5);border:none;color:white;width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);transition:background 0.2s;">
+                    <i class="fas fa-bookmark" style="font-size:0.85rem;"></i>
+                </button>
+            </div>
         </div>
     </div>
     <div class="pelicula-info">
