@@ -1,5 +1,5 @@
 // ==============================================
-// mi-cuenta.js - Módulo de perfil de usuario
+// mi-cuenta.js -  Módulo de perfil de usuario
 // ==============================================
 
 function formatearVotos(cantidad) {
