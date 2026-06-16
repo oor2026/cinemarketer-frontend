@@ -2287,6 +2287,10 @@
 }
 
 @media (max-width: 600px) {
+
+    .editar-label { display: none; }
+    }
+
     .ordenar-pills {
         display: flex;
         flex-wrap: nowrap;
@@ -2544,4 +2548,12 @@
 
 .filtros-modal-overlay.force-show {
     display: block !important;
+}
+
+@media (max-width: 600px) {
+    .reply-cancelar-label { display: none; }
+}
+
+@media (min-width: 601px) {
+    .reply-cancelar-x { display: none; }
 }
