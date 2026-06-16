@@ -980,9 +980,10 @@ window['init_mi-cuenta'] = function() {
     }
 
     window.loadProfile();
-        cargarPrecioPlan();
-        cargarConteoRecomendaciones();
-    };
+            cargarPrecioPlan();
+            cargarConteoRecomendaciones();
+            if (typeof window.cargarMiLista === 'function') window.cargarMiLista();
+        };
 
 async function cargarPrecioPlan() {
     try {
@@ -1049,6 +1050,7 @@ window.switchListaTab = function(tab) {
     document.getElementById('panelMiLista').style.display = tab === 'mi-lista' ? 'block' : 'none';
     document.getElementById('panelRecomendaciones').style.display = tab === 'recomendaciones' ? 'block' : 'none';
     if (tab === 'recomendaciones') cargarMeRecomendaron();
+    if (tab === 'mi-lista') window.cargarMiLista();
 };
 
 function renderRedTab(tab) {

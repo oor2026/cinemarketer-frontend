@@ -561,9 +561,9 @@ window.ordenarPeliculas = async function() {
     cards.forEach(card => grid.appendChild(card));
 
     cards.forEach(card => {
-        const movieId = card.dataset.id;
-        const stats = statsMap[movieId];
-        if (stats) {
+            const movieId = card.dataset.id;
+            const stats = statsMap[movieId];
+            if (stats) {
             const btnLike = card.querySelector('.btn-like');
             const btnDislike = card.querySelector('.btn-dislike');
             if (btnLike) btnLike.innerHTML = `<i class="fas fa-thumbs-up"></i> ${stats.likes}`;
@@ -575,10 +575,15 @@ window.ordenarPeliculas = async function() {
             }
 
             const comentariosEl = card.querySelector(`#comentarios-card-${movieId}`);
-            if (comentariosEl) comentariosEl.textContent = stats.comentarios;
-        }
-    });
-};
+                        if (comentariosEl) comentariosEl.textContent = stats.comentarios;
+                    }
+                });
+
+                // Marcar estado watchlist en todas las cards recién insertadas
+                if (typeof window.marcarWatchlistEnFeed === 'function') {
+                    window.marcarWatchlistEnFeed();
+                }
+            };
 
 // ==============================================
 // VOTAR PELÍCULA
@@ -1029,9 +1034,12 @@ window.cargarDatosPelicula = async function(id) {
                 : 'No especificado';
         }
 
-        const statsResponse = await fetch(`${CONFIG.API_URL}/reviews/movies/${id}/stats`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+        // Verificar estado watchlist
+                window.verificarEstadoWatchlist(id);
+
+                const statsResponse = await fetch(`${CONFIG.API_URL}/reviews/movies/${id}/stats`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
 
         if (statsResponse.ok) {
             const stats = await statsResponse.json();
@@ -1248,13 +1256,22 @@ window.cargarComentariosPelicula = async function(id) {
                                     <span style="font-size:0.75rem;">— Ver respuestas (<span class="reply-count-btn-${c.id}">${c.replyCount}</span>)</span>
                                 </button>` : `<span class="reply-count-${c.id}" style="display:none;">${c.replyCount || 0}</span>`}
                             </div>
-                            <div class="comentario-fecha" style="font-size:0.75rem;color:#999;">${new Date(c.createdAt).toLocaleString('es-ES', {
-                                                                                                      day: '2-digit', month: '2-digit', year: 'numeric',
-                                                                                                      hour: '2-digit', minute: '2-digit',
-                                                                                                      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-                                                                                                  })}</div>
-                        </div>
-                        ` : `
+                            <div style="display:flex;align-items:center;gap:0.5rem;">
+                                    <div class=\"comentario-fecha\" style=\"font-size:0.75rem;color:#999;\">${new Date(c.createdAt).toLocaleString('es-ES', {
+                                                                                                          day: '2-digit', month: '2-digit', year: 'numeric',
+                                                                                                          hour: '2-digit', minute: '2-digit',
+                                                                                                          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                                                                                                      })}${c.editedAt ? ' <span style="font-size:0.7rem;color:#bbb;">(editado)</span>' : ''}</div>
+                                    ${c.canEdit ? `
+                                    <button onclick="window.editarComentario(${c.id}, this)"
+                                        style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;font-size:0.75rem;color:#aaa;padding:0;transition:color 0.2s;"
+                                        title="Editar comentario">
+                                        <i class="fas fa-pencil-alt"></i>
+                                        <span class="editar-label">Editar</span>
+                                    </button>` : ''}
+                                </div>
+                            </div>
+                            ` : `
                         <div style="margin-top:0.4rem;">
                             <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.35rem;">
                                 <button onclick="window.toggleBanco(${c.id}, this)"
@@ -1849,11 +1866,8 @@ window.abrirFormRespuesta = function(commentId, btn, replyId = null) {
                         class="cep-trigger-btn gif-trigger-btn"
                         style="font-size:0.7rem;font-weight:700;color:#888;letter-spacing:-0.5px;"
                         title="Insertar GIF">GIF</button>
-                    <button onclick="window.enviarRespuesta(${commentId})"
-                        style="background:#1a3a6b;color:white;border:none;border-radius:20px;padding:0.4rem 0.9rem;font-size:0.8rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;"
-                        title="Enviar">
-                        <i class="fas fa-paper-plane"></i> <span class="reply-enviar-label">Enviar</span>
-                    </button>
+                    <button onclick="window.cerrarCajaRespuesta(${commentId})" style="background:none;border:1px solid #ddd;border-radius:20px;padding:0.4rem 0.9rem;font-size:0.8rem;cursor:pointer;color:#888;display:flex;align-items:center;gap:0.4rem;" title="Cancelar"><span class="reply-cancelar-label">Cancelar</span><span class="reply-cancelar-x">✕</span></button>
+                    <button onclick="window.enviarRespuesta(${commentId})" style="background:#1a3a6b;color:white;border:none;border-radius:20px;padding:0.4rem 0.9rem;font-size:0.8rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;" title="Enviar"><i class="fas fa-paper-plane"></i> <span class="reply-enviar-label">Enviar</span></button>
                 </div>
                 <div id="gifPreviewReply-${commentId}" style="display:none;position:relative;padding:0.2rem 0;">
                     <img id="gifPreviewImgReply-${commentId}" src="" alt="GIF"
@@ -2495,3 +2509,91 @@ function mostrarMensajeLimiteDiario() {
     `;
     document.body.appendChild(modal);
 }
+
+// ── Editar comentario ──────────────────────────────────────────
+window.editarComentario = function(commentId, btn) {
+    const contenedorTexto = btn.closest('[style*="justify-content:space-between"]')
+                               .previousElementSibling;
+    if (!contenedorTexto) return;
+
+    const textoActual = contenedorTexto.textContent.trim();
+
+    // Reemplazar texto por textarea inline
+    contenedorTexto.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:0.4rem;width:100%;">
+            <textarea id="editTextarea-${commentId}"
+                style="width:100%;box-sizing:border-box;padding:0.5rem;border:1.5px solid #324C89;border-radius:8px;font-size:0.88rem;font-family:inherit;resize:none;min-height:60px;"
+                maxlength="2000">${textoActual}</textarea>
+            <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+                <button onclick="window.cancelarEdicionComentario(${commentId}, '${textoActual.replace(/'/g, "\\'")}')"
+                    style="padding:0.3rem 0.75rem;border:1px solid #ddd;background:none;border-radius:6px;font-size:0.78rem;cursor:pointer;color:#666;">
+                    Cancelar
+                </button>
+                <button onclick="window.guardarEdicionComentario(${commentId})"
+                    style="padding:0.3rem 0.75rem;background:#324C89;border:none;border-radius:6px;font-size:0.78rem;cursor:pointer;color:white;font-weight:600;">
+                    Guardar
+                </button>
+            </div>
+        </div>
+    `;
+    document.getElementById(`editTextarea-${commentId}`)?.focus();
+};
+
+window.cancelarEdicionComentario = function(commentId, textoOriginal) {
+    const textarea = document.getElementById(`editTextarea-${commentId}`);
+    if (!textarea) return;
+    const contenedor = textarea.closest('[style*="flex-direction:column"]').parentElement;
+    contenedor.innerHTML = `<span>${textoOriginal}</span>`;
+};
+
+window.guardarEdicionComentario = async function(commentId) {
+    const textarea = document.getElementById(`editTextarea-${commentId}`);
+    if (!textarea) return;
+    const nuevoContenido = textarea.value.trim();
+    if (!nuevoContenido) return;
+
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/comments/${commentId}/edit`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ content: nuevoContenido })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            alert(data.error || 'No se pudo guardar la edición');
+            return;
+        }
+
+        // Actualizar el texto en el DOM
+        const contenedor = textarea.closest('[style*="flex-direction:column"]').parentElement;
+        contenedor.innerHTML = `<span>${data.content}</span>`;
+
+        // Mostrar etiqueta editado en la fecha
+        const fechaEl = contenedor.closest('.comentario-item, [data-id]')
+                                  ?.querySelector('.comentario-fecha');
+        if (fechaEl && !fechaEl.querySelector('.editado-label')) {
+            fechaEl.insertAdjacentHTML('beforeend',
+                ' <span class="editado-label" style="font-size:0.7rem;color:#bbb;">(editado)</span>');
+        }
+
+        // Ocultar botón editar (ya fue editado o venció el tiempo)
+        const btnEditar = contenedor.closest('[data-id], .comentario-item')
+                                    ?.querySelector('button[title="Editar comentario"]');
+        if (btnEditar) btnEditar.remove();
+
+    } catch (e) {
+        alert('Error al guardar la edición');
+    }
+};
+
+window.cerrarCajaRespuesta = function(commentId) {
+    const form = document.querySelector(`#replies-${commentId} .reply-form`) ||
+                 document.querySelector(`.reply-form`);
+    if (form) form.remove();
+};
