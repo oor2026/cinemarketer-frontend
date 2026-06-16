@@ -19,6 +19,10 @@ window.loadProfile = async function() {
         document.getElementById('userEmail').textContent        = profile.email || '';
         document.getElementById('userDni').textContent          = profile.dni   || '—';
         document.getElementById('userPhone').textContent        = profile.phone || '—';
+        document.getElementById('userBirthDate').textContent    = profile.birthDate ? new Date(profile.birthDate).toLocaleDateString('es-AR') : '—';
+        document.getElementById('userSexo').textContent         = profile.sexo === 'M' ? 'Masculino' : profile.sexo === 'F' ? 'Femenino' : profile.sexo === 'O' ? 'Otro' : '—';
+        document.getElementById('userProvincia').textContent    = profile.provincia || '—';
+        document.getElementById('userLocalidad').textContent    = profile.localidad || '—';
         // Puntos — los detalles se muestran en el módulo Mis Puntos
         document.getElementById('redemptionsCount').textContent = profile.commentsCount ?? 0;
         document.getElementById('recomendadasCount').textContent = profile.recommendationsCount ?? 0;
@@ -419,9 +423,13 @@ window.guardarAvatar = async function() {
 // ==============================================
 
 const CAMPOS_EDICION = {
-    name:  { titulo: 'Editar nombre completo', label: 'Nombre completo',    tipo: 'text',  spanId: 'userFullName' },
-    email: { titulo: 'Editar email',           label: 'Correo electrónico', tipo: 'email', spanId: 'userEmail'    },
-    phone: { titulo: 'Editar teléfono',        label: 'Teléfono',           tipo: 'tel',   spanId: 'userPhone'    }
+    name:      { titulo: 'Editar nombre completo',     label: 'Nombre completo',    tipo: 'text',     spanId: 'userFullName'  },
+    email:     { titulo: 'Editar email',               label: 'Correo electrónico', tipo: 'email',    spanId: 'userEmail'     },
+    phone:     { titulo: 'Editar teléfono',            label: 'Teléfono',           tipo: 'tel',      spanId: 'userPhone'     },
+    birthDate: { titulo: 'Editar fecha de nacimiento', label: 'Fecha de nacimiento',tipo: 'date',     spanId: 'userBirthDate' },
+    sexo:      { titulo: 'Editar sexo',                label: 'Sexo',               tipo: 'select',   spanId: 'userSexo',     opciones: [{v:'M',l:'Masculino'},{v:'F',l:'Femenino'},{v:'O',l:'Otro'}] },
+    provincia: { titulo: 'Editar provincia',           label: 'Provincia',          tipo: 'provincia',spanId: 'userProvincia' },
+    localidad: { titulo: 'Editar localidad',           label: 'Localidad',          tipo: 'localidad',spanId: 'userLocalidad' }
 };
 
 const PHONE_PREFIXES_CUENTA = [
@@ -494,42 +502,109 @@ function renderPrefixListCuenta(filter = '') {
     });
 }
 
+const _PROVINCIAS = ['Buenos Aires','Catamarca','Chaco','Chubut','Córdoba','Corrientes','Entre Ríos','Formosa','Jujuy','La Pampa','La Rioja','Mendoza','Misiones','Neuquén','Río Negro','Salta','San Juan','San Luis','Santa Cruz','Santa Fe','Santiago del Estero','Tierra del Fuego','Tucumán','Ciudad Autónoma de Buenos Aires'];
+
+const _LOCALIDADES = {
+    'Buenos Aires': ['La Plata','Mar del Plata','Bahía Blanca','Quilmes','Lanús','Lomas de Zamora','Almirante Brown','Berazategui','Florencio Varela','Tigre','San Isidro','Vicente López','General San Martín','Tres de Febrero','Morón','Hurlingham','Ituzaingó','Merlo','Moreno','General Rodríguez','Luján','Campana','Zárate','San Nicolás','Tandil','Azul','Olavarría','Necochea','Junín','Pergamino','Pehuajó','Trenque Lauquen','Chivilcoy','Mercedes','Lobos','Chascomús','Dolores','Pinamar','Villa Gesell','Miramar'],
+    'Córdoba': ['Córdoba','Villa Carlos Paz','Río Cuarto','San Francisco','Villa María','Alta Gracia','Jesús María','Bell Ville','Río Tercero','Cosquín','La Falda','Cruz del Eje','Laboulaye','Marcos Juárez','Villa Dolores'],
+    'Santa Fe': ['Rosario','Santa Fe','Rafaela','Venado Tuerto','Santo Tomé','Reconquista','Villa Constitución','Casilda','Cañada de Gómez','Esperanza','Las Rosas','Firmat'],
+    'Mendoza': ['Mendoza','San Rafael','Godoy Cruz','Luján de Cuyo','Maipú','Guaymallén','Las Heras','Rivadavia','General Alvear','Malargüe','Tunuyán'],
+    'Tucumán': ['San Miguel de Tucumán','Yerba Buena','Tafí Viejo','Concepción','Aguilares','Banda del Río Salí','Famailla'],
+    'Salta': ['Salta','San Ramón de la Nueva Orán','Tartagal','Rosario de la Frontera','Metán','Cafayate'],
+    'Misiones': ['Posadas','Oberá','Eldorado','Puerto Iguazú','Apóstoles','Leandro N. Alem'],
+    'Chaco': ['Resistencia','Presidencia Roque Sáenz Peña','Villa Ángela','Charata','General San Martín'],
+    'Entre Ríos': ['Paraná','Concordia','Gualeguaychú','Concepción del Uruguay','Colón','Victoria','La Paz'],
+    'Corrientes': ['Corrientes','Goya','Paso de los Libres','Mercedes','Curuzú Cuatiá'],
+    'Jujuy': ['San Salvador de Jujuy','Palpalá','San Pedro de Jujuy','Libertador General San Martín','Humahuaca'],
+    'Río Negro': ['Viedma','San Carlos de Bariloche','Cipolletti','Allen','Roca','El Bolsón'],
+    'Neuquén': ['Neuquén','San Martín de los Andes','Zapala','Cutral Có','Centenario'],
+    'Formosa': ['Formosa','Clorinda','Pirané','El Colorado'],
+    'La Pampa': ['Santa Rosa','General Pico','Realicó','Eduardo Castex'],
+    'San Juan': ['San Juan','Rivadavia','Pocito','Chimbas','Rawson','Caucete'],
+    'San Luis': ['San Luis','Villa Mercedes','Merlo','Quines'],
+    'Santiago del Estero': ['Santiago del Estero','La Banda','Termas de Río Hondo','Añatuya','Frías'],
+    'Catamarca': ['San Fernando del Valle de Catamarca','Andalgalá','Belén','Tinogasta'],
+    'La Rioja': ['La Rioja','Chilecito','Aimogasta','Chepes'],
+    'Chubut': ['Rawson','Comodoro Rivadavia','Puerto Madryn','Trelew','Esquel','Rada Tilly'],
+    'Santa Cruz': ['Río Gallegos','Caleta Olivia','El Calafate','Pico Truncado','Puerto Deseado'],
+    'Tierra del Fuego': ['Ushuaia','Río Grande','Tolhuin'],
+    'Ciudad Autónoma de Buenos Aires': ['Palermo','Belgrano','Caballito','Flores','San Telmo','La Boca','Recoleta','Almagro','Boedo','Villa Crespo','Núñez','Colegiales','Chacarita','Villa del Parque','Liniers','Mataderos','Parque Patricios','Barracas','San Cristóbal','Monserrat']
+};
+
 window.abrirEdicion = function(campo) {
-    campoActual = campo;
     const config = CAMPOS_EDICION[campo];
-    const valorActual = document.getElementById(config.spanId).textContent;
+    if (!config) return;
+
+    campoActual = campo;
 
     document.getElementById('modalEdicionTitulo').textContent = config.titulo;
+    document.getElementById('modalEdicionLabel').textContent  = config.label;
     document.getElementById('modalEdicionError').style.display = 'none';
 
-    if (campo === 'phone') {
-        document.getElementById('modalEdicionInput').style.display = 'none';
-        document.getElementById('modalEdicionLabel').style.display = 'none';
-        document.getElementById('modalPhoneWrapper').style.display = 'block';
+    // Ocultar inputs por defecto
+    document.getElementById('modalEdicionInput').style.display = 'none';
+    document.getElementById('modalPhoneWrapper').style.display = 'none';
 
+    // Limpiar selects previos
+    document.querySelectorAll('.select-edicion-dinamico').forEach(el => el.remove());
+
+    if (config.tipo === 'tel') {
+        document.getElementById('modalPhoneWrapper').style.display = 'block';
+        const valorActual = document.getElementById(config.spanId).textContent;
         const parsed = parsearTelefono(valorActual === '—' ? '' : valorActual);
         selectedPrefixCuenta = parsed.prefix;
         document.getElementById('cuentaPhonePrefixFlag').textContent = selectedPrefixCuenta.flag;
         document.getElementById('cuentaPhonePrefixCode').textContent = selectedPrefixCuenta.code;
         document.getElementById('cuentaPhoneNumber').value = parsed.numero;
         document.getElementById('cuentaPhoneNumber').maxLength = selectedPrefixCuenta.max;
-
         renderPrefixListCuenta();
         setTimeout(() => document.getElementById('cuentaPhoneNumber').focus(), 50);
+    } else if (config.tipo === 'select') {
+        const sel = document.createElement('select');
+        sel.id = 'modalEdicionSelect';
+        sel.className = 'modal-edicion-input select-edicion-dinamico';
+        sel.innerHTML = `<option value="">Seleccionar...</option>` +
+            config.opciones.map(o => `<option value="${o.v}">${o.l}</option>`).join('');
+        document.getElementById('modalEdicionInput').insertAdjacentElement('afterend', sel);
+    } else if (config.tipo === 'provincia') {
+        const sel = document.createElement('select');
+        sel.id = 'modalEdicionSelect';
+        sel.className = 'modal-edicion-input select-edicion-dinamico';
+        const provinciaActual = document.getElementById('userProvincia').textContent;
+        sel.innerHTML = `<option value="">Seleccioná una provincia...</option>` +
+            _PROVINCIAS.map(p => `<option value="${p}" ${p === provinciaActual ? 'selected' : ''}>${p}</option>`).join('');
+        document.getElementById('modalEdicionInput').insertAdjacentElement('afterend', sel);
+    } else if (config.tipo === 'localidad') {
+        const provinciaActual = document.getElementById('userProvincia').textContent;
+        if (!provinciaActual || provinciaActual === '—') {
+            alert('Primero seleccioná una provincia');
+            return;
+        }
+        const sel = document.createElement('select');
+        sel.id = 'modalEdicionSelect';
+        sel.className = 'modal-edicion-input select-edicion-dinamico';
+        const locs = _LOCALIDADES[provinciaActual] || [];
+        sel.innerHTML = `<option value="">Seleccioná una localidad...</option>` +
+            locs.map(l => `<option value="${l}">${l}</option>`).join('');
+        document.getElementById('modalEdicionInput').insertAdjacentElement('afterend', sel);
     } else {
-        document.getElementById('modalEdicionInput').style.display = 'block';
-        document.getElementById('modalEdicionLabel').style.display = 'block';
-        document.getElementById('modalPhoneWrapper').style.display = 'none';
-
-        document.getElementById('modalEdicionLabel').textContent = config.label;
         const input = document.getElementById('modalEdicionInput');
-        input.type  = config.tipo;
-        input.value = valorActual === '—' ? '' : valorActual;
-        setTimeout(() => input.focus(), 50);
+        input.style.display = 'block';
+        input.type = config.tipo;
+        input.value = '';
     }
 
     document.getElementById('modalEdicion').style.display = 'flex';
-};
+        campoActual = campo;
+    };
+
+function _actualizarLocalidades(provincia) {
+    const locs = _LOCALIDADES[provincia] || [];
+    const sel = document.getElementById('modalEdicionSelect');
+    if (!sel) return;
+    sel.innerHTML = `<option value="">Seleccioná una localidad...</option>` +
+        locs.map(l => `<option value="${l}">${l}</option>`).join('');
+}
 
 window.cerrarEdicion = function() {
     document.getElementById('modalEdicion').style.display = 'none';
@@ -554,12 +629,15 @@ window.guardarEdicion = async function() {
         }
         valor = `${selectedPrefixCuenta.code} ${numero}`;
     } else {
-        valor = document.getElementById('modalEdicionInput').value.trim();
+            const selectDin = document.getElementById('modalEdicionSelect');
+            valor = selectDin
+                ? selectDin.value
+                : document.getElementById('modalEdicionInput').value.trim();
 
-        if (!valor) {
-            mostrarErrorEdicion('Este campo no puede estar vacío.');
-            return;
-        }
+            if (!valor) {
+                mostrarErrorEdicion('Este campo no puede estar vacío.');
+                return;
+            }
 
         if (campoActual === 'email') {
             const parteLocal = valor.split('@')[0] || '';
@@ -614,9 +692,24 @@ window.guardarEdicion = async function() {
                 return;
             }
 
-            document.getElementById(config.spanId).textContent = valor;
+            let valorDisplay = valor;
+            if (campoActual === 'sexo') {
+                valorDisplay = valor === 'M' ? 'Masculino' : valor === 'F' ? 'Femenino' : 'Otro';
+            }
+            document.getElementById(config.spanId).textContent = valorDisplay;
             if (campoActual === 'name') {
                 document.getElementById('userName').textContent = valor;
+            }
+            // Si cambió la provincia, blanquear localidad
+            if (campoActual === 'provincia') {
+                document.getElementById('userLocalidad').textContent = '—';
+                // Blanquear también en el backend
+                const token2 = localStorage.getItem('token');
+                fetch(`${CONFIG.API_URL}/users/me`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token2}` },
+                    body: JSON.stringify({ localidad: '' })
+                }).catch(() => {});
             }
             window.cerrarEdicion();
         } else {
