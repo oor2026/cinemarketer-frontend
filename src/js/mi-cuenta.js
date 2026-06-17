@@ -1528,8 +1528,9 @@ window.abrirConfiguracion = async function() {
     const modal = document.getElementById('modalConfiguracion');
     modal.style.display = 'flex';
 
-    // Cargar estado actual de privacidad
     const token = localStorage.getItem('token');
+
+    // Cargar estado actual de privacidad
     try {
         const res = await fetch(`${CONFIG.API_URL}/users/me`, {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -1539,6 +1540,62 @@ window.abrirConfiguracion = async function() {
         _perfilEsPrivado = data.profileVisibility === 'PRIVATE';
         _actualizarTogglePrivacidad();
     } catch(e) {}
+
+    // Cargar lista de bloqueados
+    _cargarBloqueadosEnConfig();
+};
+
+async function _cargarBloqueadosEnConfig() {
+    const lista = document.getElementById('configBloqueadosLista');
+    if (!lista) return;
+    const token = localStorage.getItem('token');
+    lista.innerHTML = '<div style="text-align:center;padding:0.75rem;color:#999;font-size:0.82rem;"><i class="fas fa-spinner fa-spin"></i></div>';
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/users/me/blocked`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error();
+        const bloqueados = await res.json();
+        if (bloqueados.length === 0) {
+            lista.innerHTML = '<div style="text-align:center;padding:0.75rem;color:#bbb;font-size:0.82rem;">No bloqueaste a ningún usuario.</div>';
+            return;
+        }
+        lista.innerHTML = bloqueados.map(u => `
+            <div id="config-bloqueado-${u.id}" style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f0f0f0;">
+                <span style="font-size:0.85rem;color:#333;font-weight:500;">${u.name || u.username || 'Usuario'}</span>
+                <button onclick="window.desbloquearDesdeConfig(${u.id}, this)"
+                    style="background:none;border:1.5px solid #e50914;color:#e50914;border-radius:6px;padding:0.25rem 0.7rem;font-size:0.78rem;font-weight:600;cursor:pointer;">
+                    Desbloquear
+                </button>
+            </div>
+        `).join('');
+    } catch(e) {
+        lista.innerHTML = '<div style="text-align:center;padding:0.75rem;color:#bbb;font-size:0.82rem;">Error al cargar.</div>';
+    }
+}
+
+window.desbloquearDesdeConfig = async function(userId, btn) {
+    const token = localStorage.getItem('token');
+    btn.disabled = true;
+    btn.textContent = '...';
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/users/${userId}/unblock`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error();
+        const fila = document.getElementById(`config-bloqueado-${userId}`);
+        if (fila) fila.remove();
+        // Si quedó vacía la lista
+        const lista = document.getElementById('configBloqueadosLista');
+        if (lista && lista.children.length === 0) {
+            lista.innerHTML = '<div style="text-align:center;padding:0.75rem;color:#bbb;font-size:0.82rem;">No bloqueaste a ningún usuario.</div>';
+        }
+    } catch(e) {
+        btn.disabled = false;
+        btn.textContent = 'Desbloquear';
+        alert('Error al desbloquear. Intentá de nuevo.');
+    }
 };
 
 window.cerrarConfiguracion = function() {
