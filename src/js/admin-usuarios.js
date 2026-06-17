@@ -30,6 +30,8 @@ const adminUsuarios = {
             document.getElementById('statUsuariosVerificados').textContent = stats.verified;
             const blockedEl = document.getElementById('statUsuariosBloqueados');
             if (blockedEl) blockedEl.textContent = stats.blocked || 0;
+            const reportedEl = document.getElementById('statUsuariosReportados');
+            if (reportedEl) reportedEl.textContent = stats.reported || 0;
 
             // Badge en sidebar
             const badge = document.getElementById('adminUsuariosBadge');
@@ -113,6 +115,13 @@ const adminUsuarios = {
                    </span>`
                 : '';
 
+            const reportedBadge = u.reportedByCount > 0
+                ? `<span class="badge badge-reportado" title="${u.reportedByCount} usuario(s) lo reportaron"
+                       style="background:#fff3e0;color:#e65100;margin-left:4px;">
+                       ⚠️ ${u.reportedByCount}
+                   </span>`
+                : '';
+
             const acciones = `
                 <div class="tabla-acciones">
                     <button class="btn-accion btn-ver" title="Ver detalle"
@@ -150,7 +159,7 @@ const adminUsuarios = {
                     <td>${u.phone || '-'}</td>
                     <td><span class="badge ${rolClass}">${u.role}</span></td>
                     <td><strong>${u.totalPoints}</strong> pts</td>
-                    <td><span class="badge ${estadoClass}">${estadoText}</span> ${blockedBadge}</td>
+                    <td><span class="badge ${estadoClass}">${estadoText}</span> ${blockedBadge}${reportedBadge}</td>
                     <td>${acciones}</td>
                 </tr>`;
         }).join('');
@@ -504,11 +513,18 @@ cargarBloqueadores: async function(id) {
             <div style="margin-bottom:0.75rem;color:#555;font-size:0.85rem;">
                 ${blockers.length} usuario(s) lo bloquearon.
             </div>
-            <button onclick="adminUsuarios.abrirModalDesbloquear(${id})"
-                style="background:#e50914;color:white;border:none;border-radius:8px;
-                       padding:0.5rem 1.25rem;font-size:0.85rem;font-weight:600;cursor:pointer;">
-                <i class="fas fa-unlock"></i> Desbloquear
-            </button>
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+                <button onclick="adminUsuarios.abrirModalDesbloquear(${id})"
+                    style="background:#e50914;color:white;border:none;border-radius:8px;
+                           padding:0.5rem 1.25rem;font-size:0.85rem;font-weight:600;cursor:pointer;">
+                    <i class="fas fa-unlock"></i> Desbloquear
+                </button>
+                <button onclick="adminUsuarios.abrirModalReportes(${id})"
+                    style="background:#fff3e0;color:#e65100;border:1.5px solid #e65100;border-radius:8px;
+                           padding:0.5rem 1.25rem;font-size:0.85rem;font-weight:600;cursor:pointer;">
+                    <i class="fas fa-flag"></i> Ver reportes
+                </button>
+            </div>
         `;
     } catch(e) {
         cont.innerHTML = '<span style="color:#e50914;">Error al cargar.</span>';
@@ -583,6 +599,40 @@ confirmarDesbloquear: async function() {
     } finally {
         btn.disabled = false;
         btn.textContent = 'Confirmar desbloqueo';
+    }
+},
+
+abrirModalReportes: async function(id) {
+    const lista = document.getElementById('reportesLista');
+    lista.innerHTML = '<div style="color:#999;padding:1rem;">Cargando...</div>';
+    document.getElementById('modalReportesOverlay').style.display = 'flex';
+
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/admin/users/${id}/reporters`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const reporters = await res.json();
+        if (reporters.length === 0) {
+            lista.innerHTML = '<div style="color:#999;padding:1rem;">Este usuario no fue reportado.</div>';
+            return;
+        }
+        lista.innerHTML = reporters.map(r => `
+            <div style="display:flex;align-items:center;gap:1rem;padding:0.6rem 0;
+                        border-bottom:1px solid #f0f0f0;">
+                <div style="flex:1;">
+                    <strong style="font-size:0.88rem;">${r.reporterName}</strong>
+                    <span style="color:#999;font-size:0.8rem;margin-left:6px;">${r.reporterEmail}</span>
+                </div>
+                <span style="font-size:0.78rem;color:#888;white-space:nowrap;">
+                    ${new Date(r.reportedAt).toLocaleString('es-AR', {
+                        day:'2-digit', month:'2-digit', year:'numeric',
+                        hour:'2-digit', minute:'2-digit'
+                    })}
+                </span>
+            </div>
+        `).join('');
+    } catch(e) {
+        lista.innerHTML = '<div style="color:#e50914;padding:1rem;">Error al cargar reportes.</div>';
     }
 },
 
