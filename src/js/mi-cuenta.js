@@ -1802,3 +1802,5 @@ function _renderProgresoBody(nivel, p) {
         ${items}
         ${btnAceptar}`;
 }
+
+document.body.classList.remove('modal-open');

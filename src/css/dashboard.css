@@ -430,16 +430,15 @@ body {
     .logo {
         width: 160px;
         padding: 0.5rem 1rem;
-        align: left;
     }
-
-/* Cruz de cierre - oculta en desktop */
-.nav-menu-close {
-    display: none;
-}
-
-@media (min-width: 769px) {
+    .nav-menu-close {
+        display: none;
+    }
     .nav-text-hide-desktop {
         display: none;
     }
+}
+
+body.modal-open {
+    overflow: hidden;
 }

@@ -44,6 +44,7 @@ if (dashToggle && dashMenu) {
         const icon = dashToggle.querySelector('i');
         icon.classList.toggle('fa-bars');
         icon.classList.toggle('fa-times');
+        document.body.style.overflow = dashMenu.classList.contains('active') ? 'hidden' : '';
     });
 
     // Cerrar al hacer click en cualquier opción
@@ -56,6 +57,7 @@ if (dashToggle && dashMenu) {
             const icon = dashToggle.querySelector('i');
             icon.classList.add('fa-bars');
             icon.classList.remove('fa-times');
+            document.body.style.overflow = '';
         });
     });
 
@@ -66,6 +68,21 @@ if (dashToggle && dashMenu) {
             const icon = dashToggle.querySelector('i');
             icon.classList.add('fa-bars');
             icon.classList.remove('fa-times');
+            document.body.style.overflow = '';
         }
     });
 }
+
+// ── Bloquear scroll cuando hay modales abiertos ──────────
+const modalObserver = new MutationObserver(() => {
+    const hayModalAbierto = document.querySelector(
+        '[id^="modal"][style*="display: flex"], [id^="modal"][style*="display:flex"]'
+    );
+    document.body.classList.toggle('modal-open', !!hayModalAbierto);
+});
+
+modalObserver.observe(document.body, {
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['style']
+});
