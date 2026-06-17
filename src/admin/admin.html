@@ -373,6 +373,10 @@
                     <span class="stat-num" id="statUsuariosVerificados">0</span>
                     <span class="stat-label">Verificados</span>
                 </div>
+                <div class="admin-stat-box">
+                    <span class="stat-num" id="statUsuariosBloqueados">0</span>
+                    <span class="stat-label">Bloqueados</span>
+                </div>
             </div>
             <div class="admin-card" style="margin-bottom: 1rem;">
                 <div class="card-header">
@@ -382,6 +386,7 @@
                             <option value="todos">Todos</option>
                             <option value="activos">Activos</option>
                             <option value="suspendidos">Suspendidos</option>
+                            <option value="bloqueados">Bloqueados</option>
                         </select>
                     </div>
                 </div>
@@ -1850,6 +1855,40 @@
 <script src="../js/admin-suscripciones.js"></script>
 <!-- ── NUEVO ── -->
 <script src="../js/admin-comercial.js"></script>
+
+<!-- MODAL DESBLOQUEAR USUARIO -->
+<div id="modalDesbloquearOverlay" style="display:none;position:fixed;inset:0;
+     background:rgba(0,0,0,0.5);z-index:99999;align-items:center;justify-content:center;padding:1rem;">
+    <div style="background:white;border-radius:16px;width:100%;max-width:480px;overflow:hidden;">
+        <div style="background:#1a3a6b;padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;">
+            <h3 style="color:white;margin:0;font-size:1rem;"><i class="fas fa-unlock"></i> Desbloquear usuario</h3>
+            <button onclick="document.getElementById('modalDesbloquearOverlay').style.display='none'"
+                    style="background:rgba(255,255,255,0.2);border:none;color:white;width:28px;height:28px;
+                       border-radius:50%;cursor:pointer;font-size:0.9rem;">✕</button>
+        </div>
+        <div style="padding:1.5rem;">
+            <p style="font-size:0.88rem;color:#666;margin-bottom:1rem;">
+                Seleccioná los bloqueos a eliminar. El admin actúa en nombre del usuario bloqueante.
+            </p>
+            <label style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;
+                          font-size:0.85rem;font-weight:600;cursor:pointer;">
+                <input type="checkbox" checked onchange="adminUsuarios.seleccionarTodosBlockers(this.checked)">
+                Seleccionar todos
+            </label>
+            <div id="desbloquearLista" style="max-height:240px;overflow-y:auto;"></div>
+        </div>
+        <div style="padding:1rem 1.5rem;border-top:1px solid #f0f0f0;display:flex;gap:0.75rem;justify-content:flex-end;">
+            <button onclick="document.getElementById('modalDesbloquearOverlay').style.display='none'"
+                    style="padding:0.6rem 1.25rem;border:1px solid #ddd;background:none;border-radius:8px;
+                       color:#666;cursor:pointer;font-size:0.88rem;">Cancelar</button>
+            <button id="btnConfirmarDesbloquear" onclick="adminUsuarios.confirmarDesbloquear()"
+                    style="padding:0.6rem 1.25rem;background:#e50914;border:none;border-radius:8px;
+                       color:white;font-weight:600;cursor:pointer;font-size:0.88rem;">
+                Confirmar desbloqueo
+            </button>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
