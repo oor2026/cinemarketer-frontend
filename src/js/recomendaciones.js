@@ -33,7 +33,8 @@ window.abrirPanelRecomendar = async function(movieId, event) {
     document.getElementById('btnEnviarRecomendacion').style.cursor = 'not-allowed';
 
     const panel = document.getElementById('panelRecomendar');
-    panel.style.display = 'flex';
+        panel.style.display = 'flex';
+        document.body.classList.add('modal-open');
 
     try {
         const token = localStorage.getItem('token');
@@ -60,6 +61,7 @@ window.abrirPanelRecomendar = async function(movieId, event) {
 // -----------------------------------------------
 window.cerrarPanelRecomendar = function() {
     document.getElementById('panelRecomendar').style.display = 'none';
+    document.body.classList.remove('modal-open');
     window._recMovieId = null;
     window._recTodosUsuarios = [];
     window._recSeleccionados = new Set();
