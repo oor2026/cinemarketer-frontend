@@ -242,14 +242,15 @@
 
 .pelicula-poster {
     position: relative;
-    height: 320px;
     overflow: hidden;
+    background: #000;
+    aspect-ratio: 0.88;
 }
 
 .pelicula-poster img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
 }
 
 .pelicula-overlay {
