@@ -442,3 +442,7 @@ body {
 body.modal-open {
     overflow: hidden;
 }
+
+body.menu-open {
+    overflow: hidden;
+}

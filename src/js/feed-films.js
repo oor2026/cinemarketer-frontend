@@ -865,13 +865,14 @@ window.abrirDetallePelicula = function(id) {
     }
 
     setTimeout(() => {
-        window.cargarDatosPelicula(id);
-        window.cargarComentariosPelicula(id);
-        modal.style.display = 'flex';
-        inicializarContadorCaracteres();
-        inicializarCarrusel();
-        irASlide(0);
-    }, 200);
+            window.cargarDatosPelicula(id);
+            window.cargarComentariosPelicula(id);
+            modal.style.display = 'flex';
+            document.body.classList.add('modal-open');
+            inicializarContadorCaracteres();
+            inicializarCarrusel();
+            irASlide(0);
+        }, 200);
 };
 
 function igualarAlturaSlides() {
@@ -927,6 +928,7 @@ window.cerrarModal = function() {
     const modal = document.getElementById('modalPelicula');
     if (modal) {
         modal.style.display = 'none';
+        document.body.classList.remove('modal-open');
 
         // Reset modo spoiler
         activarModoSpoiler(false);

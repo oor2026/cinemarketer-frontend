@@ -1527,6 +1527,7 @@ let _perfilEsPrivado = false;
 window.abrirConfiguracion = async function() {
     const modal = document.getElementById('modalConfiguracion');
     modal.style.display = 'flex';
+    document.body.classList.add('modal-open');
 
     const token = localStorage.getItem('token');
 
@@ -1600,6 +1601,7 @@ window.desbloquearDesdeConfig = async function(userId, btn) {
 
 window.cerrarConfiguracion = function() {
     document.getElementById('modalConfiguracion').style.display = 'none';
+    document.body.classList.remove('modal-open');
 };
 
 function _actualizarTogglePrivacidad() {

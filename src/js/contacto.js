@@ -12,6 +12,7 @@ function contacto_toggleFaq(item) {
 
 function contacto_abrirSoporte() {
     document.getElementById('soporteOverlay').style.display = 'flex';
+    document.body.classList.add('modal-open');
     document.getElementById('soporteTexto').value = '';
     document.getElementById('soporteCount').textContent = '0';
     setTimeout(() => document.getElementById('soporteTexto').focus(), 100);
@@ -20,6 +21,7 @@ function contacto_abrirSoporte() {
 function contacto_cerrarSoporte(event) {
     if (event && event.target !== document.getElementById('soporteOverlay')) return;
     document.getElementById('soporteOverlay').style.display = 'none';
+    document.body.classList.remove('modal-open');
 }
 
 async function contacto_enviarSoporte() {
@@ -57,7 +59,8 @@ async function contacto_enviarSoporte() {
         if (!response.ok) throw new Error(`Error ${response.status}`);
 
         document.getElementById('soporteOverlay').style.display = 'none';
-        showToast('success', '¡Consulta recibida! Nos pondremos en contacto a la brevedad.');
+                document.body.classList.remove('modal-open');
+                showToast('success', '¡Consulta recibida! Nos pondremos en contacto a la brevedad.');
 
     } catch (error) {
         showToast('error', 'Error al enviar la consulta. Intentá nuevamente.');
