@@ -154,12 +154,14 @@ window.abrirDetallePlan = function() {
     }
 
     modal.classList.add('open');
-};
+        document.body.classList.add('modal-open');
+    };
 
-window.cerrarDetallePlan = function() {
-    const modal = document.getElementById('premiumModalDetalle');
-    if (modal) modal.classList.remove('open');
-};
+    window.cerrarDetallePlan = function() {
+        const modal = document.getElementById('premiumModalDetalle');
+        if (modal) modal.classList.remove('open');
+        document.body.classList.remove('modal-open');
+    };
 
 // ==============================================
 // INICIAR SUSCRIPCIÓN → llama al backend
@@ -213,11 +215,13 @@ window.iniciarSuscripcion = async function() {
 window.abrirCancelarSuscripcion = function() {
     const modal = document.getElementById('premiumModalCancelar');
     if (modal) modal.classList.add('open');
+    document.body.classList.add('modal-open');
 };
 
 window.cerrarCancelarSuscripcion = function() {
     const modal = document.getElementById('premiumModalCancelar');
     if (modal) modal.classList.remove('open');
+    document.body.classList.remove('modal-open');
 };
 
 // ==============================================

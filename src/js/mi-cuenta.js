@@ -1770,11 +1770,13 @@ window.abrirModalProgreso = function() {
 
     body.innerHTML = _renderProgresoBody(nivel, profile);
     modal.style.display = 'flex';
+    document.body.classList.add('modal-open');
 };
 
 window.cerrarModalProgreso = function() {
     const modal = document.getElementById('modalProgreso');
     if (modal) modal.style.display = 'none';
+    document.body.classList.remove('modal-open');
 };
 
 function _check(cumple) {
