@@ -1394,14 +1394,15 @@ function renderMeRecomendaron() {
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                 ${posterUrl
-                    ? `<img src="${posterUrl}" alt="${r.movieTitle || 'Película'}" style="width:85px;height:128px;object-fit:cover;border-radius:6px;flex-shrink:0;">`
-                    : `<div style="width:85px;height:128px;background:#1a3a6b;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;">🎬</div>`
+                    ? `<img src="${posterUrl}" alt="${r.movieTitle || 'Película'}" onclick="window.abrirDetallePeliculaDesdeWatchlist(${r.movieId})" style="width:85px;height:128px;object-fit:cover;border-radius:6px;flex-shrink:0;cursor:pointer;">`
+                    : `<div onclick="window.abrirDetallePeliculaDesdeWatchlist(${r.movieId})" style="width:85px;height:128px;background:#1a3a6b;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;cursor:pointer;">🎬</div>`
                 }
                 <div style="flex:1;min-width:0;">
                     <div style="font-size:0.92rem;font-weight:600;color:#333;margin-bottom:4px;">
-                        Película: ${r.movieTitle || '—'}
-                    </div>
-                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+                            Película: ${r.movieTitle || '—'}
+                        </div>
+                        ${r.movieOverview ? `<p style="font-size:0.78rem;color:#666;margin:4px 0 6px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${r.movieOverview}</p>` : ''}
+                        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
                         <div style="width:22px;height:22px;border-radius:50%;background:#1a3a6b;color:white;font-size:0.7rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">${avatarHtml}</div>
                         <span style="font-size:0.8rem;color:#666;">Por <strong><a href="#" onclick="event.preventDefault(); window.abrirPerfilUsuario(${r.senderId})" style="color:#e50914;text-decoration:none;cursor:pointer;">${r.senderName}</a></strong></span>
                         ${r.contextType ? `<span style="font-size:0.75rem;padding:2px 8px;border-radius:99px;background:#f0f0f0;color:#666;">${r.contextType}</span>` : ''}
@@ -1526,9 +1527,11 @@ let _perfilEsPrivado = false;
 window.abrirConfiguracion = async function() {
     const modal = document.getElementById('modalConfiguracion');
     modal.style.display = 'flex';
+    document.body.classList.add('modal-open');
+
+    const token = localStorage.getItem('token');
 
     // Cargar estado actual de privacidad
-    const token = localStorage.getItem('token');
     try {
         const res = await fetch(`${CONFIG.API_URL}/users/me`, {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -1538,10 +1541,67 @@ window.abrirConfiguracion = async function() {
         _perfilEsPrivado = data.profileVisibility === 'PRIVATE';
         _actualizarTogglePrivacidad();
     } catch(e) {}
+
+    // Cargar lista de bloqueados
+    _cargarBloqueadosEnConfig();
+};
+
+async function _cargarBloqueadosEnConfig() {
+    const lista = document.getElementById('configBloqueadosLista');
+    if (!lista) return;
+    const token = localStorage.getItem('token');
+    lista.innerHTML = '<div style="text-align:center;padding:0.75rem;color:#999;font-size:0.82rem;"><i class="fas fa-spinner fa-spin"></i></div>';
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/users/me/blocked`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error();
+        const bloqueados = await res.json();
+        if (bloqueados.length === 0) {
+            lista.innerHTML = '<div style="text-align:center;padding:0.75rem;color:#bbb;font-size:0.82rem;">No bloqueaste a ningún usuario.</div>';
+            return;
+        }
+        lista.innerHTML = bloqueados.map(u => `
+            <div id="config-bloqueado-${u.id}" style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f0f0f0;">
+                <span style="font-size:0.85rem;color:#333;font-weight:500;">${u.name || u.username || 'Usuario'}</span>
+                <button onclick="window.desbloquearDesdeConfig(${u.id}, this)"
+                    style="background:none;border:1.5px solid #e50914;color:#e50914;border-radius:6px;padding:0.25rem 0.7rem;font-size:0.78rem;font-weight:600;cursor:pointer;">
+                    Desbloquear
+                </button>
+            </div>
+        `).join('');
+    } catch(e) {
+        lista.innerHTML = '<div style="text-align:center;padding:0.75rem;color:#bbb;font-size:0.82rem;">Error al cargar.</div>';
+    }
+}
+
+window.desbloquearDesdeConfig = async function(userId, btn) {
+    const token = localStorage.getItem('token');
+    btn.disabled = true;
+    btn.textContent = '...';
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/users/${userId}/unblock`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error();
+        const fila = document.getElementById(`config-bloqueado-${userId}`);
+        if (fila) fila.remove();
+        // Si quedó vacía la lista
+        const lista = document.getElementById('configBloqueadosLista');
+        if (lista && lista.children.length === 0) {
+            lista.innerHTML = '<div style="text-align:center;padding:0.75rem;color:#bbb;font-size:0.82rem;">No bloqueaste a ningún usuario.</div>';
+        }
+    } catch(e) {
+        btn.disabled = false;
+        btn.textContent = 'Desbloquear';
+        alert('Error al desbloquear. Intentá de nuevo.');
+    }
 };
 
 window.cerrarConfiguracion = function() {
     document.getElementById('modalConfiguracion').style.display = 'none';
+    document.body.classList.remove('modal-open');
 };
 
 function _actualizarTogglePrivacidad() {

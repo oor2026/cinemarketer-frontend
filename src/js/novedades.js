@@ -319,20 +319,36 @@ window.cargarNovedadesMobile = async function() {
             return;
         }
 
-        lista.innerHTML = novedades.map(n => `
-            <div onclick="window.clickNovedad(${n.id}, ${n.movieId}, ${n.commentId}, ${n.replyId || 'null'}, '${n.type}', ${n.read}, ${n.actorId || 'null'})"
-                style="padding:0.75rem 1rem;border-bottom:1px solid #eee;cursor:pointer;
-                       background:${n.read ? 'white' : '#f0f4ff'};">
-                <div style="display:flex;align-items:flex-start;gap:0.5rem;">
-                    <span style="font-size:1rem;flex-shrink:0;">${getNotifIcono(n.type)}</span>
-                    <div style="flex:1;min-width:0;">
-                        <div style="font-size:0.83rem;color:#333;line-height:1.4;">${n.message}</div>
-                        <div style="font-size:0.75rem;color:#999;margin-top:0.2rem;">${new Date(n.createdAt).toLocaleDateString('es-ES')} ${new Date(n.createdAt).toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'})}</div>
-                    </div>
-                    ${!n.read ? '<span style="width:8px;height:8px;background:#e50914;border-radius:50%;flex-shrink:0;margin-top:4px;"></span>' : ''}
-                </div>
-            </div>
-        `).join('');
+        lista.innerHTML = novedades.map(n => {
+                    const esFollowRequest = n.type === 'FOLLOW_REQUEST';
+                    const botonesFollow = esFollowRequest ? `
+                        <div style="display:flex;gap:0.5rem;margin-top:0.5rem;" onclick="event.stopPropagation()">
+                            <button onclick="window.responderFollowRequestMobile(${n.actorId}, true, ${n.id}, this.closest('[data-notif-id-mobile]'))"
+                                style="background:#324C89;color:white;border:none;border-radius:6px;padding:0.3rem 0.8rem;cursor:pointer;font-size:0.8rem;font-weight:600;">
+                                ✓ Aceptar
+                            </button>
+                            <button onclick="window.responderFollowRequestMobile(${n.actorId}, false, ${n.id}, this.closest('[data-notif-id-mobile]'))"
+                                style="background:none;color:#e50914;border:1.5px solid #e50914;border-radius:6px;padding:0.3rem 0.8rem;cursor:pointer;font-size:0.8rem;font-weight:600;">
+                                ✕ Rechazar
+                            </button>
+                        </div>` : '';
+
+                    return `
+                        <div data-notif-id-mobile="${n.id}"
+                            onclick="window.clickNovedad(${n.id}, ${n.movieId}, ${n.commentId}, ${n.replyId || 'null'}, '${n.type}', ${n.read}, ${n.actorId || 'null'})"
+                            style="padding:0.75rem 1rem;border-bottom:1px solid #eee;cursor:pointer;
+                                   background:${n.read ? 'white' : '#f0f4ff'};">
+                            <div style="display:flex;align-items:flex-start;gap:0.5rem;">
+                                <span style="font-size:1rem;flex-shrink:0;">${getNotifIcono(n.type)}</span>
+                                <div style="flex:1;min-width:0;">
+                                    <div style="font-size:0.83rem;color:#333;line-height:1.4;">${n.message}</div>
+                                    <div style="font-size:0.75rem;color:#999;margin-top:0.2rem;">${new Date(n.createdAt).toLocaleDateString('es-ES')} ${new Date(n.createdAt).toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'})}</div>
+                                    ${botonesFollow}
+                                </div>
+                                ${!n.read ? '<span style="width:8px;height:8px;background:#e50914;border-radius:50%;flex-shrink:0;margin-top:4px;"></span>' : ''}
+                            </div>
+                        </div>`;
+                }).join('');
 
     } catch(e) {
         lista.innerHTML = '<div style="padding:1rem;text-align:center;color:#999;font-size:0.85rem;">Error al cargar novedades</div>';
@@ -399,3 +415,41 @@ function _mostrarToastNovedades(mensaje) {
     document.body.appendChild(t);
     setTimeout(() => t.remove(), 3000);
 }
+
+window.responderFollowRequestMobile = async function(followerId, aceptar, notifId, notifEl) {
+    const token = localStorage.getItem('token');
+    try {
+        const resBuscar = await fetch(`${CONFIG.API_URL}/follows/pending/${followerId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!resBuscar.ok) return;
+        const follow = await resBuscar.json();
+
+        const endpoint = aceptar
+            ? `${CONFIG.API_URL}/follows/${follow.id}/accept`
+            : `${CONFIG.API_URL}/follows/${follow.id}/reject`;
+
+        const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+
+        await fetch(`${CONFIG.API_URL}/notifications/${notifId}/read`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (aceptar) {
+            const btns = notifEl?.querySelector('div[onclick*="stopPropagation"]');
+            if (btns) btns.remove();
+            _mostrarToastNovedades(`Ahora ${follow.actorName || 'el usuario'} te sigue`);
+        } else {
+            if (notifEl) notifEl.remove();
+            _mostrarToastNovedades(`Rechazaste la solicitud de ${follow.actorName || 'el usuario'}`);
+        }
+
+        window.cargarNovedadesMobile();
+
+    } catch(e) {}
+};

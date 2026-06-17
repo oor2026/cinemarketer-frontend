@@ -352,7 +352,7 @@ window.enviarRecomendacion = async function() {
                 _mostrarToast('Error al enviar. Intentá de nuevo.', true);
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'Enviar recomendación';
+                btn.innerHTML = '<i class="fas fa-envelope"></i> Recomendar';
                 _actualizarBotonEnviar();
             }
 };

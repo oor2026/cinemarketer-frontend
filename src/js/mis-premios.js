@@ -292,7 +292,7 @@ function renderDisponiblesPagina(pagina) {
 
     grid.innerHTML = slice.map(p => {
         const imagen = p.imageUrl
-            ? `<img src="${p.imageUrl}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;">`
+            ? `<img src="${p.imageUrl}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;padding:0.5rem;">`
             : `<i class="fas fa-gift" style="font-size:3rem;color:#e50914;"></i>`;
 
         const badgeTipo = p.rewardType === 'TICKET'
@@ -519,7 +519,7 @@ window.cambiarPaginaEspeciales = async function(pagina) {
 
 function renderCardEspecial(p, isPremium) {
     const imagen = p.imageUrl
-        ? `<img src="${p.imageUrl}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;">`
+        ? `<img src="${p.imageUrl}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;padding:0.5rem;">`
         : `<i class="fas fa-star" style="font-size:3rem;color:#1a3a6b;"></i>`;
 
     const esSorteo = p.type === 'SORTEO';
@@ -1037,16 +1037,20 @@ window.abrirModalPremio = function(premio) {
     }
 
     const modal = document.getElementById('modalPremio');
-    modal.style.display = 'flex';
-    setTimeout(() => modal.classList.add('open'), 10);
-};
+        modal.style.display = 'flex';
+        document.body.classList.add('modal-open');
+        setTimeout(() => modal.classList.add('open'), 10);
+    };
 
-window.cerrarModalPremio = function() {
-    const modal = document.getElementById('modalPremio');
-    modal.classList.remove('open');
-    setTimeout(() => { modal.style.display = 'none'; }, 250);
-    premioActual = null;
-};
+    window.cerrarModalPremio = function() {
+        const modal = document.getElementById('modalPremio');
+        modal.classList.remove('open');
+        setTimeout(() => {
+            modal.style.display = 'none';
+            document.body.classList.remove('modal-open');
+        }, 260);
+        premioActual = null;
+    };
 
 window.canjearDesdeModal = async function() {
     if (!premioActual) return;
@@ -1248,14 +1252,18 @@ window.abrirModalEspecial = function(p, isPremium) {
     }
 
     const modal = document.getElementById('modalEspecial');
-    modal.style.display = 'flex';
-    setTimeout(() => modal.classList.add('open'), 10);
+        modal.style.display = 'flex';
+        document.body.classList.add('modal-open');
+        setTimeout(() => modal.classList.add('open'), 10);
 };
 
 window.cerrarModalEspecial = function() {
     const modal = document.getElementById('modalEspecial');
     modal.classList.remove('open');
-    setTimeout(() => { modal.style.display = 'none'; }, 250);
+    setTimeout(() => {
+        modal.style.display = 'none';
+        document.body.classList.remove('modal-open');
+    }, 260);
     especialActual = null;
 };
 

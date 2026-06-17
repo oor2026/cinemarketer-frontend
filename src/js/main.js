@@ -44,45 +44,33 @@ if (dashToggle && dashMenu) {
         const icon = dashToggle.querySelector('i');
         icon.classList.toggle('fa-bars');
         icon.classList.toggle('fa-times');
-        document.body.style.overflow = dashMenu.classList.contains('active') ? 'hidden' : '';
-    });
+        document.body.classList.toggle('menu-open', dashMenu.classList.contains('active'));
+            });
 
-    // Cerrar al hacer click en cualquier opción
-    dashMenu.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', function() {
-            const esMobile = window.innerWidth <= 768;
-            const esNovedades = link.getAttribute('onclick') && link.getAttribute('onclick').includes('toggleNovedades');
-            if (esMobile && esNovedades) return;
-            dashMenu.classList.remove('active');
-            const icon = dashToggle.querySelector('i');
-            icon.classList.add('fa-bars');
-            icon.classList.remove('fa-times');
-            document.body.style.overflow = '';
-        });
-    });
+            // Cerrar al hacer click en cualquier opción
+            dashMenu.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function() {
+                    const esMobile = window.innerWidth <= 768;
+                    const esNovedades = link.getAttribute('onclick') && link.getAttribute('onclick').includes('toggleNovedades');
+                    if (esMobile && esNovedades) return;
+                    dashMenu.classList.remove('active');
+                    const icon = dashToggle.querySelector('i');
+                    icon.classList.add('fa-bars');
+                    icon.classList.remove('fa-times');
+                    document.body.classList.remove('menu-open');
+                });
+            });
 
-    // Cerrar al hacer click fuera
-    document.addEventListener('click', function(e) {
-        if (!dashToggle.contains(e.target) && !dashMenu.contains(e.target)) {
-            dashMenu.classList.remove('active');
-            const icon = dashToggle.querySelector('i');
-            icon.classList.add('fa-bars');
-            icon.classList.remove('fa-times');
-            document.body.style.overflow = '';
-        }
-    });
+            // Cerrar al hacer click fuera
+            document.addEventListener('click', function(e) {
+                if (!dashToggle.contains(e.target) && !dashMenu.contains(e.target)) {
+                    dashMenu.classList.remove('active');
+                    const icon = dashToggle.querySelector('i');
+                    icon.classList.add('fa-bars');
+                    icon.classList.remove('fa-times');
+                    document.body.classList.remove('menu-open');
+                }
+            });
 }
 
 // ── Bloquear scroll cuando hay modales abiertos ──────────
-const modalObserver = new MutationObserver(() => {
-    const hayModalAbierto = document.querySelector(
-        '[id^="modal"][style*="display: flex"], [id^="modal"][style*="display:flex"]'
-    );
-    document.body.classList.toggle('modal-open', !!hayModalAbierto);
-});
-
-modalObserver.observe(document.body, {
-    subtree: true,
-    attributes: true,
-    attributeFilter: ['style']
-});

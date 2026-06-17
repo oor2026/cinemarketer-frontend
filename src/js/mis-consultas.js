@@ -275,6 +275,7 @@ async function consultasEliminarTicket(ticketId) {
 // ── Modal nueva consulta ──────────────────────────────────────────────────────
 function consultasAbrirNueva() {
     document.getElementById('nuevaConsultaOverlay').style.display = 'flex';
+    document.body.classList.add('modal-open');
     document.getElementById('nuevaConsultaAsunto').value = '';
     document.getElementById('nuevaConsultaTexto').value = '';
     document.getElementById('nuevaConsultaCount').textContent = '0';
@@ -285,6 +286,7 @@ function consultasAbrirNueva() {
 function consultasCerrarNueva(event) {
     if (event && event.target !== document.getElementById('nuevaConsultaOverlay')) return;
     document.getElementById('nuevaConsultaOverlay').style.display = 'none';
+    document.body.classList.remove('modal-open');
 }
 
 async function consultasEnviarNueva() {
@@ -336,7 +338,8 @@ async function consultasEnviarNueva() {
         if (!response.ok) throw new Error(`Error ${response.status}`);
 
         document.getElementById('nuevaConsultaOverlay').style.display = 'none';
-        showToast('success', '¡Consulta enviada! Te responderemos a la brevedad.');
+                document.body.classList.remove('modal-open');
+                showToast('success', '¡Consulta enviada! Te responderemos a la brevedad.');
         consultasCargarLista();
 
     } catch (error) {
