@@ -1130,6 +1130,7 @@ window['init_mi-cuenta'] = function() {
             cargarConteoRecomendaciones();
             if (typeof window.cargarMiLista === 'function') window.cargarMiLista();
         }, 50);
+        inicializarPremiumCarrusel();
         };
 
 async function cargarPrecioPlan() {
@@ -1711,12 +1712,15 @@ window.confirmarBloquear = async function() {
 };
 
 // ── Premium benefits carrusel mobile ──────────
-(function() {
+function inicializarPremiumCarrusel() {
     if (window.innerWidth > 480) return;
 
     const list   = document.getElementById('premiumBenefitsList');
     const dots   = document.getElementById('premiumBenefitsDots');
     if (!list || !dots) return;
+
+    // Limpiar dots previos
+    dots.innerHTML = '';
 
     const items       = Array.from(list.querySelectorAll('li'));
     const perPage     = 3;
@@ -1753,7 +1757,7 @@ window.confirmarBloquear = async function() {
             if (diff < 0 && current > 0) goTo(current - 1);
         }
     });
-})();
+}
 
 // ── Modal progreso de insignia ──────────────────────────────────
 window.abrirModalProgreso = function() {
