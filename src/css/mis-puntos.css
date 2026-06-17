@@ -105,7 +105,10 @@
 }
 
 .points-stats .stat-label {
-    font-size: 0.9rem;
+    font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
     color: #ffffff !important;
 }
 
@@ -372,7 +375,7 @@
     }
 
     #accumulatedPoints ~ .stat-label::after { content: 'Acumulados'; font-size: 0.62rem; }
-    #redeemedThisMonth ~ .stat-label::after { content: 'Disponibles'; font-size: 0.62rem; }
+    #redeemedThisMonth ~ .stat-label::after { content: 'Canjes del mes'; font-size: 0.62rem; }
     #totalRedeemed ~ .stat-label::after { content: 'Canjeados'; font-size: 0.62rem; }
 
     /* Header rediseñado */
@@ -458,12 +461,12 @@
 
         .stat-item i {
             font-size: 1.2rem;
-            color: #1a3a6b !important;
+            color: #e50914 !important;
         }
 
         .stat-value {
             font-size: 1.2rem;
-            color: #1a3a6b !important;
+            color: #e50914 !important;
         }
 
         .points-stats .stat-label {
@@ -579,7 +582,7 @@
     .points-stats-wrapper::before {
         content: '🏦 BALANCE DE PUNTOS';
         display: block;
-        background: #1a3a6b;
+        background: #e50914;
         color: white;
         font-size: 11px;
         font-weight: 700;
@@ -593,4 +596,39 @@
         margin-bottom: 0;
         padding: 12px;
         gap: 8px;
+    }
+
+    /* ========== DESKTOP REDESIGN - STATS ========== */
+    @media (min-width: 769px) {
+
+        .stat-item {
+            background: white;
+            border: 1px solid #f0f0f0;
+            box-shadow: none;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 4px;
+        }
+
+        .stat-item:hover {
+            transform: none;
+            box-shadow: none;
+            background: #fafafa;
+        }
+
+        .stat-item i {
+            color: #e50914 !important;
+        }
+
+        .stat-value {
+            color: #e50914 !important;
+        }
+
+        .points-stats .stat-label {
+            color: #999 !important;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.3px;
+        }
     }

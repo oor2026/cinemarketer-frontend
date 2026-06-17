@@ -810,9 +810,9 @@ select.modal-edicion-input {
 }
 
 .historial-tab-item:last-child { border-right: none; }
-.historial-tab-item i { font-size: 1.1rem; color: #324C89; }
+.historial-tab-item i { font-size: 1.1rem; color: #e50914; }
 
-.historial-tab-numero { font-size: 1.6rem; font-weight: 700; color: #1a1a1a; line-height: 1; }
+.historial-tab-numero { font-size: 1.6rem; font-weight: 700; color: #e50914; line-height: 1; }
 
 .historial-tab-label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
 
@@ -1044,4 +1044,12 @@ select.modal-edicion-input {
         margin-left: auto;
         align-self: flex-start;
     }
+}
+
+.cuenta-seccion-titulo--rojo {
+    background: #e50914;
+}
+
+.cuenta-seccion-titulo--rojo i {
+    color: white;
 }
