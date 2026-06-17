@@ -408,9 +408,10 @@ window.cargarEspeciales = async function() {
     }
 
     const bannerNoPremium = document.getElementById('especialesBannerNoPremium');
-    const contenido       = document.getElementById('especialesContenido');
-    if (bannerNoPremium) bannerNoPremium.style.display = isPremium ? 'none' : 'block';
-    if (contenido)       contenido.style.display       = 'block';
+        const contenido       = document.getElementById('especialesContenido');
+        if (bannerNoPremium) bannerNoPremium.style.display = isPremium ? 'none' : 'block';
+        if (contenido)       contenido.style.display       = 'block';
+        if (!isPremium) inicializarEspecialesBannerCarrusel();
 
     try {
         const url = premiosState.especialesFiltro !== 'todos'
@@ -832,6 +833,50 @@ window.irASuscripcion = function() {
     }
 };
 
+function inicializarEspecialesBannerCarrusel() {
+    if (window.innerWidth > 480) return;
+
+    const list = document.getElementById('especialesBenefitsList');
+    const dots = document.getElementById('especialesBenefitsDots');
+    if (!list || !dots) return;
+
+    dots.innerHTML = '';
+
+    const items      = Array.from(list.querySelectorAll('li'));
+    const perPage    = 3;
+    const totalPages = Math.ceil(items.length / perPage);
+    let current      = 0;
+
+    for (let i = 0; i < totalPages; i++) {
+        const d = document.createElement('span');
+        d.className = 'premium-benefit-dot' + (i === 0 ? ' active' : '');
+        d.onclick = () => goTo(i);
+        dots.appendChild(d);
+    }
+
+    function goTo(page) {
+        current = page;
+        items.forEach((li, idx) => {
+            li.style.display = (idx >= page * perPage && idx < (page + 1) * perPage) ? '' : 'none';
+        });
+        dots.querySelectorAll('.premium-benefit-dot').forEach((d, i) => {
+            d.classList.toggle('active', i === page);
+        });
+    }
+
+    goTo(0);
+
+    let startX = 0;
+    list.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+    list.addEventListener('touchend', e => {
+        const diff = startX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 40) {
+            if (diff > 0 && current < totalPages - 1) goTo(current + 1);
+            if (diff < 0 && current > 0) goTo(current - 1);
+        }
+    });
+}
+
 // ==============================================
 // INICIALIZACIÓN
 // ==============================================
@@ -839,6 +884,7 @@ window['init_mis-premios'] = function() {
     cargarPuntosUsuario();
     window.cargarCanjeados();
     cargarPrecioPlanEspeciales();
+    inicializarEspecialesBannerCarrusel();
 };
 
 async function cargarPrecioPlanEspeciales() {

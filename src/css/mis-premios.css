@@ -1336,3 +1336,135 @@
     padding: 0.75rem 1rem;
     border: 1px solid #eee;
 }
+
+/* ── Premium benefit dots (banner especiales mobile) ── */
+.premium-benefit-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.35);
+    cursor: pointer;
+    transition: background 0.2s;
+    display: inline-block;
+}
+
+.premium-benefit-dot.active {
+    background: white;
+}
+
+#especialesPlanPrice {
+    font-size: 30px;
+    font-weight: 800;
+    color: white;
+}
+
+#especialesPlanPrice + span {
+    font-size: 30px;
+    font-weight: 400;
+    opacity: 0.8;
+    color: white;
+}
+
+/* ========== MOBILE REDESIGN ========== */
+@media (max-width: 768px) {
+
+    /* Header rediseñado */
+    .premios-header {
+        flex-direction: row;
+        text-align: left;
+        padding: 14px 16px;
+        border-radius: 12px;
+        margin-bottom: 10px;
+        gap: 10px;
+        flex-wrap: nowrap;
+    }
+
+    .header-icon {
+        width: 40px;
+        height: 40px;
+        background: #e50914;
+        flex-shrink: 0;
+    }
+
+    .header-icon i {
+        font-size: 1.2rem;
+    }
+
+    .header-text {
+        flex: 1;
+    }
+
+    .header-text h2 {
+        font-size: 1rem;
+        margin-bottom: 1px;
+    }
+
+    .header-text p {
+        font-size: 0.75rem;
+        opacity: 0.75;
+    }
+
+    .puntos-disponibles {
+        padding: 8px 12px;
+        border-radius: 10px;
+        flex-shrink: 0;
+    }
+
+    .puntos-label {
+        font-size: 0.7rem;
+        margin-bottom: 1px;
+    }
+
+    .puntos-valor {
+        font-size: 1.3rem;
+    }
+
+    /* Tabs rediseñadas */
+    .premios-tabs {
+        flex-direction: row;
+        gap: 0;
+        border-bottom: none;
+        padding-bottom: 0;
+        margin-bottom: 10px;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #eee;
+    }
+
+    .tab-btn {
+        flex: 1;
+        padding: 9px 4px;
+        font-size: 10px;
+        font-weight: 600;
+        text-align: center;
+        color: #888;
+        background: white;
+        border-right: 1px solid #eee;
+        width: auto;
+    }
+
+    .tab-btn:last-child {
+        border-right: none;
+    }
+
+    .tab-btn:hover {
+        color: #e50914;
+        background: white;
+    }
+
+    .tab-btn.active {
+        background: #e50914;
+        color: white;
+    }
+
+    .tab-btn.active::after {
+        display: none;
+    }
+
+    .tab-btn-premium {
+        background: white !important;
+        color: #888 !important;
+    }
+
+    .tab-btn-premium.active {
