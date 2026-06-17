@@ -24,12 +24,14 @@ window.loadProfile = async function() {
         document.getElementById('userProvincia').textContent    = profile.provincia || '—';
         document.getElementById('userLocalidad').textContent    = profile.localidad || '—';
         // Puntos — los detalles se muestran en el módulo Mis Puntos
-        document.getElementById('redemptionsCount').textContent = profile.commentsCount ?? 0;
-        document.getElementById('recomendadasCount').textContent = profile.recommendationsCount ?? 0;
-        document.getElementById('puntosCount').textContent = profile.merecePuntosCount ?? 0;
-
-        const reviewsSpan = document.getElementById('reviewsCountFormatted');
-        if (reviewsSpan) reviewsSpan.textContent = formatearVotos(profile.reviewsCount ?? 0);
+        const redemptionsEl = document.getElementById('redemptionsCount');
+                if (redemptionsEl) redemptionsEl.textContent = profile.commentsCount ?? 0;
+                const recomendadasEl = document.getElementById('recomendadasCount');
+                if (recomendadasEl) recomendadasEl.textContent = profile.recommendationsCount ?? 0;
+                const puntosEl = document.getElementById('puntosCount');
+                if (puntosEl) puntosEl.textContent = profile.merecePuntosCount ?? 0;
+                const reviewsSpan = document.getElementById('reviewsCountFormatted');
+                        if (reviewsSpan) reviewsSpan.textContent = formatearVotos(profile.reviewsCount ?? 0);
 
         document.getElementById('emailVerified').innerHTML = profile.emailVerified ? '✅ Sí' : '❌ No';
 
@@ -1033,6 +1035,53 @@ function mostrarToast(mensaje, tipo = 'info') {
 // El module-loader llama a esta función cuando el HTML ya está en el DOM
 window['init_mi-cuenta'] = function() {
 
+    // ── Carrusel datos personales mobile ──────────
+    if (window.innerWidth <= 480) {
+        const grid = document.querySelector('.datos-grid');
+        if (grid) {
+            const cards = Array.from(grid.querySelectorAll('.dato-card'));
+            if (cards.length > 0) {
+                const grupos = [ cards.slice(0, 6), cards.slice(6) ];
+                cards.forEach(c => c.style.display = 'none');
+                grupos[0].forEach(c => c.style.display = 'flex');
+
+                const dotsWrapper = document.createElement('div');
+                dotsWrapper.style.cssText = 'display:flex;justify-content:center;gap:6px;margin:0.5rem 0;';
+
+                let currentPage = 0;
+
+                function goTo(page) {
+                    currentPage = page;
+                    cards.forEach(c => c.style.display = 'none');
+                    grupos[page].forEach(c => c.style.display = 'flex');
+                    dotsWrapper.querySelectorAll('.dato-dot').forEach((d, i) => {
+                        d.style.background = i === page ? '#324C89' : 'rgba(0,0,0,0.15)';
+                    });
+                }
+
+                grupos.forEach((_, i) => {
+                    const d = document.createElement('span');
+                    d.className = 'dato-dot';
+                    d.style.cssText = `width:7px;height:7px;border-radius:50%;cursor:pointer;transition:background 0.2s;background:${i === 0 ? '#324C89' : 'rgba(0,0,0,0.15)'};`;
+                    d.onclick = () => goTo(i);
+                    dotsWrapper.appendChild(d);
+                });
+
+                grid.insertAdjacentElement('afterend', dotsWrapper);
+
+                let startX = 0;
+                grid.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+                grid.addEventListener('touchend', e => {
+                    const diff = startX - e.changedTouches[0].clientX;
+                    if (Math.abs(diff) > 40) {
+                        if (diff > 0 && currentPage < grupos.length - 1) goTo(currentPage + 1);
+                        if (diff < 0 && currentPage > 0) goTo(currentPage - 1);
+                    }
+                });
+            }
+        }
+    }
+
     // Toggle contraseña modal eliminar cuenta
     const toggle = document.getElementById('toggleEliminarPassword');
     if (toggle) {
@@ -1075,10 +1124,12 @@ window['init_mi-cuenta'] = function() {
         });
     }
 
-    window.loadProfile();
+    setTimeout(() => {
+            window.loadProfile();
             cargarPrecioPlan();
             cargarConteoRecomendaciones();
             if (typeof window.cargarMiLista === 'function') window.cargarMiLista();
+        }, 50);
         };
 
 async function cargarPrecioPlan() {
@@ -1751,3 +1802,5 @@ function _renderProgresoBody(nivel, p) {
         ${items}
         ${btnAceptar}`;
 }
+
+document.body.classList.remove('modal-open');
