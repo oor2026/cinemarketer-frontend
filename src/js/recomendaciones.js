@@ -61,7 +61,10 @@ window.abrirPanelRecomendar = async function(movieId, event) {
 // -----------------------------------------------
 window.cerrarPanelRecomendar = function() {
     document.getElementById('panelRecomendar').style.display = 'none';
-    document.body.classList.remove('modal-open');
+    const modalPelicula = document.getElementById('modalPelicula');
+    if (!modalPelicula || modalPelicula.style.display === 'none') {
+        document.body.classList.remove('modal-open');
+    }
     window._recMovieId = null;
     window._recTodosUsuarios = [];
     window._recSeleccionados = new Set();
