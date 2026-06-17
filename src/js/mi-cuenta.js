@@ -1394,14 +1394,15 @@ function renderMeRecomendaron() {
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                 ${posterUrl
-                    ? `<img src="${posterUrl}" alt="${r.movieTitle || 'Película'}" style="width:85px;height:128px;object-fit:cover;border-radius:6px;flex-shrink:0;">`
-                    : `<div style="width:85px;height:128px;background:#1a3a6b;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;">🎬</div>`
+                    ? `<img src="${posterUrl}" alt="${r.movieTitle || 'Película'}" onclick="window.abrirDetallePeliculaDesdeWatchlist(${r.movieId})" style="width:85px;height:128px;object-fit:cover;border-radius:6px;flex-shrink:0;cursor:pointer;">`
+                    : `<div onclick="window.abrirDetallePeliculaDesdeWatchlist(${r.movieId})" style="width:85px;height:128px;background:#1a3a6b;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;cursor:pointer;">🎬</div>`
                 }
                 <div style="flex:1;min-width:0;">
                     <div style="font-size:0.92rem;font-weight:600;color:#333;margin-bottom:4px;">
-                        Película: ${r.movieTitle || '—'}
-                    </div>
-                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+                            Película: ${r.movieTitle || '—'}
+                        </div>
+                        ${r.movieOverview ? `<p style="font-size:0.78rem;color:#666;margin:4px 0 6px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${r.movieOverview}</p>` : ''}
+                        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
                         <div style="width:22px;height:22px;border-radius:50%;background:#1a3a6b;color:white;font-size:0.7rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">${avatarHtml}</div>
                         <span style="font-size:0.8rem;color:#666;">Por <strong><a href="#" onclick="event.preventDefault(); window.abrirPerfilUsuario(${r.senderId})" style="color:#e50914;text-decoration:none;cursor:pointer;">${r.senderName}</a></strong></span>
                         ${r.contextType ? `<span style="font-size:0.75rem;padding:2px 8px;border-radius:99px;background:#f0f0f0;color:#666;">${r.contextType}</span>` : ''}

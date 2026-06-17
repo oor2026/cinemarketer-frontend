@@ -159,9 +159,9 @@ function renderMiLista() {
                 </button>
                 ${posterUrl
                     ? `<img src="${posterUrl}" alt="${w.movieTitle || 'Película'}"
-                            onclick="window.abrirDetallePelicula(${w.movieId})"
-                            style="width:85px;height:128px;object-fit:cover;border-radius:6px;flex-shrink:0;cursor:pointer;">`
-                    : `<div onclick="window.abrirDetallePelicula(${w.movieId})"
+                                    onclick="window.abrirDetallePeliculaDesdeWatchlist(${w.movieId})"
+                                    style="width:85px;height:128px;object-fit:cover;border-radius:6px;flex-shrink:0;cursor:pointer;">`
+                            : `<div onclick="window.abrirDetallePeliculaDesdeWatchlist(${w.movieId})"
                              style="width:85px;height:128px;background:#1a3a6b;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;cursor:pointer;">🎬</div>`
                 }
                 <div style="flex:1;min-width:0;">
@@ -304,4 +304,28 @@ window.marcarWatchlistEnFeed = async function() {
             _actualizarBtnWatchlist(btn, savedIds.includes(movieId));
         });
     } catch (e) {}
+};
+
+window.abrirDetallePeliculaDesdeWatchlist = function(movieId) {
+    const modalExiste = !!document.getElementById('modalPelicula');
+
+    if (typeof window.abrirDetallePelicula === 'function' && modalExiste) {
+        window.abrirDetallePelicula(movieId);
+        return;
+    }
+
+    // Navegar al feed y esperar que el modal esté en el DOM
+    if (typeof loadModule === 'function') {
+        loadModule('feed-films', null, true);
+        let intentos = 0;
+        const interval = setInterval(() => {
+            intentos++;
+            const modal = document.getElementById('modalPelicula');
+            if (typeof window.abrirDetallePelicula === 'function' && modal) {
+                clearInterval(interval);
+                setTimeout(() => window.abrirDetallePelicula(movieId), 300);
+            }
+            if (intentos > 100) clearInterval(interval);
+        }, 100);
+    }
 };
