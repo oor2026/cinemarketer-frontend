@@ -28,6 +28,8 @@ const adminUsuarios = {
             document.getElementById('statUsuariosActivos').textContent = stats.active;
             document.getElementById('statUsuariosSuspendidos').textContent = stats.suspended;
             document.getElementById('statUsuariosVerificados').textContent = stats.verified;
+            const blockedEl = document.getElementById('statUsuariosBloqueados');
+            if (blockedEl) blockedEl.textContent = stats.blocked || 0;
 
             // Badge en sidebar
             const badge = document.getElementById('adminUsuariosBadge');
@@ -105,6 +107,12 @@ const adminUsuarios = {
                 estadoText = 'Inactivo';
             }
 
+            const blockedBadge = u.blockedByCount > 0
+                ? `<span class="badge badge-bloqueado" title="${u.blockedByCount} usuario(s) lo bloquearon">
+                       🚫 ${u.blockedByCount}
+                   </span>`
+                : '';
+
             const acciones = `
                 <div class="tabla-acciones">
                     <button class="btn-accion btn-ver" title="Ver detalle"
@@ -142,7 +150,7 @@ const adminUsuarios = {
                     <td>${u.phone || '-'}</td>
                     <td><span class="badge ${rolClass}">${u.role}</span></td>
                     <td><strong>${u.totalPoints}</strong> pts</td>
-                    <td><span class="badge ${estadoClass}">${estadoText}</span></td>
+                    <td><span class="badge ${estadoClass}">${estadoText}</span> ${blockedBadge}</td>
                     <td>${acciones}</td>
                 </tr>`;
         }).join('');
@@ -150,10 +158,9 @@ const adminUsuarios = {
 
     // Filtrar por estado
     filtrarPorEstado: function(estado) {
-        this.currentFilter = estado;
-        // TODO: Implementar filtro en backend
-        this.cargarUsuarios(0);
-    },
+            this.currentFilter = estado;
+            this.cargarUsuarios(0);
+        },
 
     // Buscar
     buscar: function(query) {
@@ -383,6 +390,7 @@ eliminarUsuario: async function(id) {
 ,
 
 verDetalle: async function(id) {
+    this._detalleUserId = id;
     try {
         const response = await fetch(`${CONFIG.API_URL}/admin/users/${id}/detail`, {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -462,13 +470,119 @@ verDetalle: async function(id) {
                     <tbody>${listadoPremios}</tbody>
                 </table>
             </div>` : ''}
+
+            <div class="detalle-seccion" style="margin-top:1rem;" id="seccionBloqueadores">
+                <h4><i class="fas fa-ban"></i> Bloqueado por</h4>
+                <div id="bloqueadoresList" style="color:#999;font-size:0.9rem;">Cargando...</div>
+            </div>
         `;
+
+        // Cargar bloqueadores
+        adminUsuarios.cargarBloqueadores(id);
 
         document.getElementById('modalDetalleUsuarioOverlay').classList.add('open');
         document.getElementById('modalDetalleUsuario').classList.add('open');
 
     } catch (error) {
         toast('Error al cargar el detalle del usuario', 'error');
+    }
+},
+
+cargarBloqueadores: async function(id) {
+    const cont = document.getElementById('bloqueadoresList');
+    if (!cont) return;
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/admin/users/${id}/blockers`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const blockers = await res.json();
+        if (blockers.length === 0) {
+            cont.innerHTML = '<span style="color:#999;">Este usuario no fue bloqueado por nadie.</span>';
+            return;
+        }
+        cont.innerHTML = `
+            <div style="margin-bottom:0.75rem;color:#555;font-size:0.85rem;">
+                ${blockers.length} usuario(s) lo bloquearon.
+            </div>
+            <button onclick="adminUsuarios.abrirModalDesbloquear(${id})"
+                style="background:#e50914;color:white;border:none;border-radius:8px;
+                       padding:0.5rem 1.25rem;font-size:0.85rem;font-weight:600;cursor:pointer;">
+                <i class="fas fa-unlock"></i> Desbloquear
+            </button>
+        `;
+    } catch(e) {
+        cont.innerHTML = '<span style="color:#e50914;">Error al cargar.</span>';
+    }
+},
+
+abrirModalDesbloquear: async function(id) {
+    this._detalleUserId = id;
+    const lista = document.getElementById('desbloquearLista');
+    lista.innerHTML = '<div style="color:#999;">Cargando...</div>';
+    document.getElementById('modalDesbloquearOverlay').style.display = 'flex';
+
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/admin/users/${id}/blockers`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        this._blockers = await res.json();
+        lista.innerHTML = this._blockers.map(b => `
+            <label style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0;
+                          border-bottom:1px solid #f0f0f0;cursor:pointer;">
+                <input type="checkbox" value="${b.blockerId}" checked
+                       style="width:16px;height:16px;cursor:pointer;">
+                <span style="flex:1;font-size:0.88rem;">
+                    <strong>${b.blockerName}</strong>
+                    <span style="color:#999;font-size:0.8rem;margin-left:6px;">${b.blockerEmail}</span>
+                </span>
+                <span style="font-size:0.75rem;color:#bbb;">
+                    ${new Date(b.blockedAt).toLocaleDateString('es-AR')}
+                </span>
+            </label>
+        `).join('');
+    } catch(e) {
+        lista.innerHTML = '<div style="color:#e50914;">Error al cargar.</div>';
+    }
+},
+
+seleccionarTodosBlockers: function(checked) {
+    document.querySelectorAll('#desbloquearLista input[type="checkbox"]')
+        .forEach(cb => cb.checked = checked);
+},
+
+confirmarDesbloquear: async function() {
+    const seleccionados = [...document.querySelectorAll('#desbloquearLista input[type="checkbox"]:checked')]
+        .map(cb => parseInt(cb.value));
+
+    if (seleccionados.length === 0) {
+        toast('Seleccioná al menos un usuario', 'warning');
+        return;
+    }
+
+    const btn = document.getElementById('btnConfirmarDesbloquear');
+    btn.disabled = true;
+    btn.textContent = 'Desbloqueando...';
+
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/admin/users/${this._detalleUserId}/blocks`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ blockerIds: seleccionados })
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        document.getElementById('modalDesbloquearOverlay').style.display = 'none';
+        toast(`${data.desbloqueados} bloqueo(s) eliminado(s) correctamente`, 'success');
+        adminUsuarios.cargarBloqueadores(this._detalleUserId);
+        adminUsuarios.cargarUsuarios(0);
+    } catch(e) {
+        toast('Error al desbloquear', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Confirmar desbloqueo';
     }
 },
 
