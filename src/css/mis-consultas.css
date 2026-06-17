@@ -386,3 +386,108 @@
         justify-content: center;
     }
 }
+
+/* ========== MOBILE REDESIGN ========== */
+@media (max-width: 768px) {
+
+    /* Header rediseñado */
+    .consultas-header {
+        flex-direction: row;
+        align-items: center;
+        text-align: left;
+        padding: 14px 16px;
+        border-radius: 12px;
+        margin-bottom: 10px;
+        gap: 10px;
+        flex-wrap: nowrap;
+    }
+
+    .consultas-header-left {
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+    }
+
+    .consultas-header .header-icon {
+        width: 40px;
+        height: 40px;
+        background: #e50914;
+        flex-shrink: 0;
+    }
+
+    .consultas-header .header-icon i {
+        font-size: 1.2rem;
+    }
+
+    .consultas-header .header-text h2 {
+        font-size: 1rem;
+        margin-bottom: 1px;
+    }
+
+    .consultas-header .header-text p {
+        font-size: 0.75rem;
+        opacity: 0.75;
+    }
+
+    .btn-nueva-consulta {
+        width: auto;
+        justify-content: center;
+        padding: 0.5rem 1rem;
+        font-size: 0.82rem;
+        border-radius: 20px;
+        flex-shrink: 0;
+    }
+
+    /* Sección lista con header */
+    .consultas-lista-section {
+        border-radius: 12px;
+        box-shadow: none;
+        border: 1px solid #f0f0f0;
+    }
+
+    .consultas-lista-section::before {
+        content: '';
+        display: block;
+        background: #1a3a6b;
+        color: white;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        padding: 10px 14px;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .consultas-lista-section::before {
+        content: '📬 MIS CONSULTAS';
+    }
+
+    /* Tickets */
+    .ticket-item {
+        padding: 10px 12px;
+        gap: 8px;
+    }
+
+    .ticket-icono {
+        width: 36px;
+        height: 36px;
+        font-size: 0.95rem;
+    }
+
+    .ticket-asunto {
+        font-size: 0.85rem;
+    }
+
+    .ticket-preview {
+        font-size: 0.78rem;
+    }
+
+    .ticket-fecha {
+        font-size: 0.72rem;
+    }
+
+    .ticket-estado {
+        font-size: 0.7rem;
+        padding: 2px 6px;
+    }
+}
