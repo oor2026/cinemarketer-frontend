@@ -469,6 +469,16 @@ const adminEstadisticas = {
                     </div>
                 </td>
             </tr>
+            <tr>
+                <td><strong>Distribución de puntos por acción</strong></td>
+                <td colspan="2">
+                    <div class="stats-top">
+                        <ul>${(p.distribucionPorAccion || []).map(a =>
+                            `<li><strong>${a.action}</strong>: ${a.totalPoints} pts (${a.count} veces)</li>`
+                        ).join('') || '<li>Sin datos</li>'}</ul>
+                    </div>
+                </td>
+            </tr>
         `;
         document.getElementById('stats-puntos-body').innerHTML = html;
     },
