@@ -160,6 +160,16 @@ const adminEstadisticas = {
                 <td class="stat-valor">${this.formatearNumero(u.inactiveUsers)}</td>
                 <td colspan="2"></td>
             </tr>
+            <tr>
+                <td><strong>Usuarios bloqueados</strong></td>
+                <td class="stat-valor">${this.formatearNumero(u.blockedUsers)}</td>
+                <td colspan="2"></td>
+            </tr>
+            <tr>
+                <td><strong>Usuarios reportados</strong></td>
+                <td class="stat-valor">${this.formatearNumero(u.reportedUsers)}</td>
+                <td colspan="2"></td>
+            </tr>
         `;
         document.getElementById('stats-usuarios-body').innerHTML = html;
     },
