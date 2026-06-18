@@ -793,6 +793,7 @@
                 <button class="tab-btn active" onclick="adminEstadisticas.cambiarPestana('usuarios', this)">👥 Usuarios</button>
                 <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('votos', this)">👍 Votaciones</button>
                 <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('comentarios', this)">💬 Comentarios</button>
+                <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('recomendaciones', this)">🎬 Recomendaciones</button>
                 <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('premios', this)">🎁 Premios y Canjes</button>
                 <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('premium', this)">🏆 Premium y Sorteos</button>
                 <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('suscripciones', this)">👑 Suscripciones</button>
@@ -822,6 +823,14 @@
                         <table class="stats-tabla">
                             <thead><tr><th>KPI</th><th>Valor</th><th>Top/Ranking</th></tr></thead>
                             <tbody id="stats-comentarios-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="stats-recomendaciones" class="stats-panel">
+                    <div class="stats-tabla-container">
+                        <table class="stats-tabla">
+                            <thead><tr><th>KPI</th><th>Valor</th><th>Detalle</th></tr></thead>
+                            <tbody id="stats-recomendaciones-body"></tbody>
                         </table>
                     </div>
                 </div>
