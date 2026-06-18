@@ -244,7 +244,7 @@
     position: relative;
     overflow: hidden;
     background: #000;
-    aspect-ratio: 1.1;
+    aspect-ratio: 1/1;
 }
 
 .pelicula-poster img {
@@ -2572,5 +2572,37 @@
     .pelicula-titulo {
         font-size: 1rem;
         margin-bottom: 0.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .pelicula-info {
+        padding: 0.6rem 0.75rem;
+    }
+
+    .pelicula-titulo {
+        font-size: 0.95rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .pelicula-metadata {
+        font-size: 0.78rem;
+        gap: 0.5rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .pelicula-descripcion {
+        font-size: 0.8rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .pelicula-director {
+        font-size: 0.78rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .votacion-container {
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
     }
 }
