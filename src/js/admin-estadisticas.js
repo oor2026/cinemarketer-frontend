@@ -52,6 +52,7 @@ const adminEstadisticas = {
             this.renderizarUsuarios();
             this.renderizarVotos();
             this.renderizarComentarios();
+            this.renderizarRecomendaciones();
             this.renderizarPremios();
             this.renderizarPuntos();
             this.renderizarSoporte();
@@ -160,6 +161,16 @@ const adminEstadisticas = {
                 <td class="stat-valor">${this.formatearNumero(u.inactiveUsers)}</td>
                 <td colspan="2"></td>
             </tr>
+            <tr>
+                <td><strong>Usuarios bloqueados</strong></td>
+                <td class="stat-valor">${this.formatearNumero(u.blockedUsers)}</td>
+                <td colspan="2"></td>
+            </tr>
+            <tr>
+                <td><strong>Usuarios reportados</strong></td>
+                <td class="stat-valor">${this.formatearNumero(u.reportedUsers)}</td>
+                <td colspan="2"></td>
+            </tr>
         `;
         document.getElementById('stats-usuarios-body').innerHTML = html;
     },
@@ -247,6 +258,66 @@ const adminEstadisticas = {
         `;
         document.getElementById('stats-comentarios-body').innerHTML = html;
     },
+
+    renderizarRecomendaciones: function() {
+            const r = this.datos.recommendations;
+            if (!r) return;
+
+            const topPeliculas = (r.topPeliculas || [])
+                .map((p, i) => `${i + 1}. ${p.titulo} (${p.total})`)
+                .join(' | ') || '—';
+
+            const topContextos = (r.topContextos || [])
+                .map((c, i) => `${i + 1}. ${c.contexto} (${c.total})`)
+                .join(' | ') || '—';
+
+            const html = `
+                <tr>
+                    <td><strong>Total enviadas</strong></td>
+                    <td class="stat-valor">${this.formatearNumero(r.totalEnviadas)}</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><strong>Total vistas (Ya la ví)</strong></td>
+                    <td class="stat-valor">${this.formatearNumero(r.totalVistas)}</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><strong>Tasa de visualización</strong></td>
+                    <td class="stat-valor">${r.tasaVisualizacion?.toFixed(1)}%</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><strong>Total calificadas</strong></td>
+                    <td class="stat-valor">${this.formatearNumero(r.totalCalificadas)}</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><strong>Tasa de calificación</strong></td>
+                    <td class="stat-valor">${r.tasaCalificacion?.toFixed(1)}%</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><strong>Recomendaciones con contexto</strong></td>
+                    <td class="stat-valor">${this.formatearNumero(r.totalConContexto)}</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><strong>Tasa de contexto</strong></td>
+                    <td class="stat-valor">${r.tasaContexto?.toFixed(1)}%</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><strong>Top 5 películas más recomendadas</strong></td>
+                    <td colspan="2" class="stat-valor" style="font-size:0.82rem;">${topPeliculas}</td>
+                </tr>
+                <tr>
+                    <td><strong>Top 5 contextos más usados</strong></td>
+                    <td colspan="2" class="stat-valor" style="font-size:0.82rem;">${topContextos}</td>
+                </tr>
+            `;
+            document.getElementById('stats-recomendaciones-body').innerHTML = html;
+        },
 
     // Renderizar tabla de premios y canjes
     renderizarPremios: function() {
