@@ -73,4 +73,36 @@ if (dashToggle && dashMenu) {
             });
 }
 
-// ── Bloquear scroll cuando hay modales abiertos ──────────
+// ── Hide/show navbar on scroll (solo mobile y solo en feed-films) ──
+(function() {
+    let lastScrollY = 0;
+    let ticking = false;
+
+    window.addEventListener('scroll', function() {
+        if (window.innerWidth > 768) return;
+
+        const hash = window.location.hash.replace('#', '') || 'feed-films';
+        if (hash !== 'feed-films') return;
+
+        const currentScrollY = window.scrollY;
+
+        if (!ticking) {
+            requestAnimationFrame(function() {
+                const navbar = document.querySelector('.navbar');
+                if (!navbar) { ticking = false; return; }
+
+                if (currentScrollY > lastScrollY && currentScrollY > 60) {
+                    // Scroll hacia abajo — ocultar
+                    navbar.classList.add('navbar-hidden');
+                } else {
+                    // Scroll hacia arriba — mostrar
+                    navbar.classList.remove('navbar-hidden');
+                }
+
+                lastScrollY = currentScrollY;
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }, { passive: true });
+})();

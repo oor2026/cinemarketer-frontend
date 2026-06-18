@@ -54,6 +54,11 @@ body {
     position: sticky;
     top: 0;
     z-index: 1000;
+    transition: transform 0.3s ease;
+}
+
+.navbar.navbar-hidden {
+    transform: translateY(-100%);
 }
 
 .nav-container {
