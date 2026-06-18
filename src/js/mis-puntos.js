@@ -150,7 +150,9 @@ function getIconForAction(action) {
         COMMENT_MOVIE:        'fa-comment',
         RECOMMEND_MOVIE:      'fa-share',
         REWARD_REDEMPTION:    'fa-ticket-alt',
-        RECEIVE_MERECE_PUNTO: 'fa-star'
+        RECEIVE_MERECE_PUNTO: 'fa-star',
+        REVERT_MERECE_PUNTO:  'fa-star',
+        ADMIN_GRANT:          'fa-gift'
     };
     return icons[action] || 'fa-coins';
 }
@@ -162,7 +164,9 @@ function getLabelForAction(action) {
         COMMENT_MOVIE:        'Comentario en película',
         RECOMMEND_MOVIE:      'Recomendación de película',
         REWARD_REDEMPTION:    'Canje de premio',
-        RECEIVE_MERECE_PUNTO: '¡Merecés un punto!'
+        RECEIVE_MERECE_PUNTO: '¡Merecés un punto!',
+        REVERT_MERECE_PUNTO:  'Reversión de punto',
+        ADMIN_GRANT:          'Regalo de puntos'
     };
     return labels[action] || action;
 }

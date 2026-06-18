@@ -783,7 +783,7 @@
                         <option value="mes">Este mes</option>
                         <option value="semana">Esta semana</option>
                         <option value="trimestre">Últimos 3 meses</option>
-                        <option value="año">Este año</option>
+                        <option value="anio">Este año</option>
                         <option value="personalizado">Personalizado</option>
                     </select>
                 </div>
@@ -1927,6 +1927,53 @@
         </div>
     </div>
 </div>
-
+<!-- MODAL OTORGAR PUNTOS -->
+<div id="modalOtorgarPuntosOverlay" style="display:none;position:fixed;inset:0;
+     background:rgba(0,0,0,0.5);z-index:99999;align-items:center;justify-content:center;padding:1rem;">
+    <div style="background:white;border-radius:16px;width:100%;max-width:420px;overflow:hidden;">
+        <div style="background:#2e7d32;padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;">
+            <h3 style="color:white;margin:0;font-size:1rem;"><i class="fas fa-coins"></i> Otorgar puntos</h3>
+            <button onclick="document.getElementById('modalOtorgarPuntosOverlay').style.display='none'"
+                    style="background:rgba(255,255,255,0.2);border:none;color:white;width:28px;height:28px;
+                       border-radius:50%;cursor:pointer;font-size:0.9rem;">✕</button>
+        </div>
+        <div style="padding:1.5rem;">
+            <p style="font-size:0.88rem;color:#555;margin-bottom:1.25rem;">
+                Otorgando puntos a: <strong id="otorgarPuntosNombre"></strong>
+            </p>
+            <div style="margin-bottom:1rem;">
+                <label style="display:block;font-size:0.85rem;font-weight:600;color:#555;margin-bottom:0.4rem;">
+                    Cantidad de puntos
+                </label>
+                <input type="number" id="otorgarPuntosInput" min="1"
+                       placeholder="Ej: 100"
+                       style="width:100%;padding:0.7rem;border:1.5px solid #ddd;border-radius:8px;
+                           font-size:0.95rem;outline:none;box-sizing:border-box;">
+            </div>
+            <div style="margin-bottom:1rem;">
+                <label style="display:block;font-size:0.85rem;font-weight:600;color:#555;margin-bottom:0.4rem;">
+                    Tipo de puntos
+                </label>
+                <select id="otorgarPuntosTipo"
+                        style="width:100%;padding:0.7rem;border:1.5px solid #ddd;border-radius:8px;
+                           font-size:0.95rem;outline:none;box-sizing:border-box;background:white;">
+                    <option value="disponibles">Puntos disponibles</option>
+                    <option value="acumulados">Puntos acumulados</option>
+                </select>
+            </div>
+            <div id="otorgarPuntosError" style="display:none;color:#e50914;font-size:0.82rem;margin-bottom:0.5rem;"></div>
+        </div>
+        <div style="padding:1rem 1.5rem;border-top:1px solid #f0f0f0;display:flex;gap:0.75rem;justify-content:flex-end;">
+            <button onclick="document.getElementById('modalOtorgarPuntosOverlay').style.display='none'"
+                    style="padding:0.6rem 1.25rem;border:1px solid #ddd;background:none;border-radius:8px;
+                       color:#666;cursor:pointer;font-size:0.88rem;">Cancelar</button>
+            <button id="btnConfirmarOtorgarPuntos" onclick="adminUsuarios.confirmarOtorgarPuntos()"
+                    style="padding:0.6rem 1.25rem;background:#2e7d32;border:none;border-radius:8px;
+                       color:white;font-weight:600;cursor:pointer;font-size:0.88rem;">
+                Confirmar
+            </button>
+        </div>
+    </div>
+</div>
 </body>
 </html>

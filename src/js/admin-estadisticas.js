@@ -15,9 +15,44 @@ const adminEstadisticas = {
 
     // Cambiar período
     cambiarPeriodo: function(periodo) {
-        this.periodoActual = periodo;
-        this.cargarEstadisticas();
-    },
+            this.periodoActual = periodo;
+
+            const hoy = new Date();
+            let inicio, fin;
+
+            fin = hoy.toISOString().split('T')[0];
+
+            switch (periodo) {
+                case 'semana':
+                    inicio = new Date(hoy);
+                    inicio.setDate(hoy.getDate() - 7);
+                    inicio = inicio.toISOString().split('T')[0];
+                    break;
+                case 'mes':
+                    inicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1)
+                        .toISOString().split('T')[0];
+                    break;
+                case 'trimestre':
+                    inicio = new Date(hoy);
+                    inicio.setMonth(hoy.getMonth() - 3);
+                    inicio = inicio.toISOString().split('T')[0];
+                    break;
+                case 'anio':
+                    inicio = new Date(hoy.getFullYear(), 0, 1)
+                        .toISOString().split('T')[0];
+                    break;
+                case 'todo':
+                    inicio = '2000-01-01';
+                    break;
+                default:
+                    inicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1)
+                        .toISOString().split('T')[0];
+            }
+
+            this.fechaInicio = inicio;
+            this.fechaFin = fin;
+            this.cargarEstadisticas();
+        },
 
     // Cambiar pestaña
     cambiarPestana: function(pestana, element) {
@@ -244,6 +279,11 @@ const adminEstadisticas = {
                 </td>
             </tr>
             <tr>
+                <td><strong>Total de respuestas</strong></td>
+                <td class="stat-valor">${this.formatearNumero(c.totalReplies)}</td>
+                <td></td>
+            </tr>
+            <tr>
                 <td><strong>Comentarios por día</strong></td>
                 <td class="stat-valor">${c.commentsPerDay.toFixed(1)}</td>
             </tr>
@@ -254,6 +294,26 @@ const adminEstadisticas = {
                         <ul>${topUsers}</ul>
                     </div>
                 </td>
+            </tr>
+            <tr>
+                <td><strong>GIFs en comentarios</strong></td>
+                <td class="stat-valor">${this.formatearNumero(c.gifsEnComentarios)}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><strong>GIFs en respuestas</strong></td>
+                <td class="stat-valor">${this.formatearNumero(c.gifsEnRespuestas)}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><strong>Tasa de GIF en comentarios</strong></td>
+                <td class="stat-valor">${c.tasaGifComentarios?.toFixed(1)}%</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><strong>Tasa de GIF en respuestas</strong></td>
+                <td class="stat-valor">${c.tasaGifRespuestas?.toFixed(1)}%</td>
+                <td></td>
             </tr>
         `;
         document.getElementById('stats-comentarios-body').innerHTML = html;
@@ -406,6 +466,16 @@ const adminEstadisticas = {
                 <td>
                     <div class="stats-top">
                         <ul>${topAcciones}</ul>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Distribución de puntos por acción</strong></td>
+                <td colspan="2">
+                    <div class="stats-top">
+                        <ul>${(p.distribucionPorAccion || []).map(a =>
+                            `<li><strong>${a.action}</strong>: ${a.totalPoints} pts (${a.count} veces)</li>`
+                        ).join('') || '<li>Sin datos</li>'}</ul>
                     </div>
                 </td>
             </tr>
