@@ -65,6 +65,7 @@ function getNotifIcono(type) {
         case 'NEW_RECOMMENDATION':       return '🎬';
         case 'DRAW_WINNER':              return '🏆';
         case 'POINTS_RELEASED':          return '🪙';
+        case 'ADMIN_GRANT_POINTS':       return '🪙';
         case 'PREMIUM_EXPIRING_SOON':    return '⏰';
         case 'PREMIUM_EXPIRING_TOMORROW':return '⚠️';
         default:                         return '💬';
@@ -207,6 +208,11 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
         // Abrir modal premium al clickear notif de puntos liberados con techo superado
             if (type === 'POINTS_RELEASED') {
                 if (typeof abrirDetallePlan === 'function') abrirDetallePlan();
+                return;
+            }
+
+            if (type === 'ADMIN_GRANT_POINTS') {
+                if (typeof loadModule === 'function') loadModule('mis-puntos');
                 return;
             }
 

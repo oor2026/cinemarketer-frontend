@@ -132,6 +132,11 @@ const adminUsuarios = {
                             onclick="adminUsuarios.abrirFormulario(${u.id})">
                         <i class="fas fa-pen"></i>
                     </button>
+                    <button class="btn-accion" title="Otorgar puntos"
+                            style="background:#2e7d32;color:white;"
+                            onclick="adminUsuarios.abrirModalOtorgarPuntos(${u.id}, '${u.name}')">
+                        <i class="fas fa-coins"></i>
+                    </button>
                     ${!u.suspended ? `
                         <button class="btn-accion btn-suspender" title="Suspender"
                                 onclick="adminUsuarios.suspenderUsuario(${u.id})">
@@ -633,6 +638,53 @@ abrirModalReportes: async function(id) {
         `).join('');
     } catch(e) {
         lista.innerHTML = '<div style="color:#e50914;padding:1rem;">Error al cargar reportes.</div>';
+    }
+},
+
+abrirModalOtorgarPuntos: function(userId, nombre) {
+    this._otorgarUserId = userId;
+    document.getElementById('otorgarPuntosNombre').textContent = nombre;
+    document.getElementById('otorgarPuntosInput').value = '';
+    document.getElementById('otorgarPuntosTipo').value = 'disponibles';
+    document.getElementById('otorgarPuntosError').style.display = 'none';
+    document.getElementById('modalOtorgarPuntosOverlay').style.display = 'flex';
+},
+
+confirmarOtorgarPuntos: async function() {
+    const puntos = parseInt(document.getElementById('otorgarPuntosInput').value);
+    const tipo = document.getElementById('otorgarPuntosTipo').value;
+    const errorEl = document.getElementById('otorgarPuntosError');
+    errorEl.style.display = 'none';
+
+    if (!puntos || puntos <= 0) {
+        errorEl.textContent = 'Ingresá un valor mayor a 0.';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    const btn = document.getElementById('btnConfirmarOtorgarPuntos');
+    btn.disabled = true;
+    btn.textContent = 'Otorgando...';
+
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/admin/users/${this._otorgarUserId}/grant-points`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ points: puntos, type: tipo })
+        });
+        if (!res.ok) throw new Error();
+        document.getElementById('modalOtorgarPuntosOverlay').style.display = 'none';
+        toast(`${puntos} puntos otorgados correctamente`, 'success');
+        adminUsuarios.cargarUsuarios(0);
+    } catch(e) {
+        errorEl.textContent = 'Error al otorgar puntos. Intentá de nuevo.';
+        errorEl.style.display = 'block';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Confirmar';
     }
 },
 
