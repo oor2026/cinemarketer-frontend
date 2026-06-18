@@ -244,6 +244,11 @@ const adminEstadisticas = {
                 </td>
             </tr>
             <tr>
+                <td><strong>Total de respuestas</strong></td>
+                <td class="stat-valor">${this.formatearNumero(c.totalReplies)}</td>
+                <td></td>
+            </tr>
+            <tr>
                 <td><strong>Comentarios por día</strong></td>
                 <td class="stat-valor">${c.commentsPerDay.toFixed(1)}</td>
             </tr>
@@ -254,6 +259,26 @@ const adminEstadisticas = {
                         <ul>${topUsers}</ul>
                     </div>
                 </td>
+            </tr>
+            <tr>
+                <td><strong>GIFs en comentarios</strong></td>
+                <td class="stat-valor">${this.formatearNumero(c.gifsEnComentarios)}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><strong>GIFs en respuestas</strong></td>
+                <td class="stat-valor">${this.formatearNumero(c.gifsEnRespuestas)}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><strong>Tasa de GIF en comentarios</strong></td>
+                <td class="stat-valor">${c.tasaGifComentarios?.toFixed(1)}%</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><strong>Tasa de GIF en respuestas</strong></td>
+                <td class="stat-valor">${c.tasaGifRespuestas?.toFixed(1)}%</td>
+                <td></td>
             </tr>
         `;
         document.getElementById('stats-comentarios-body').innerHTML = html;
