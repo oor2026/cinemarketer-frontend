@@ -15,9 +15,44 @@ const adminEstadisticas = {
 
     // Cambiar período
     cambiarPeriodo: function(periodo) {
-        this.periodoActual = periodo;
-        this.cargarEstadisticas();
-    },
+            this.periodoActual = periodo;
+
+            const hoy = new Date();
+            let inicio, fin;
+
+            fin = hoy.toISOString().split('T')[0];
+
+            switch (periodo) {
+                case 'semana':
+                    inicio = new Date(hoy);
+                    inicio.setDate(hoy.getDate() - 7);
+                    inicio = inicio.toISOString().split('T')[0];
+                    break;
+                case 'mes':
+                    inicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1)
+                        .toISOString().split('T')[0];
+                    break;
+                case 'trimestre':
+                    inicio = new Date(hoy);
+                    inicio.setMonth(hoy.getMonth() - 3);
+                    inicio = inicio.toISOString().split('T')[0];
+                    break;
+                case 'anio':
+                    inicio = new Date(hoy.getFullYear(), 0, 1)
+                        .toISOString().split('T')[0];
+                    break;
+                case 'todo':
+                    inicio = '2000-01-01';
+                    break;
+                default:
+                    inicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1)
+                        .toISOString().split('T')[0];
+            }
+
+            this.fechaInicio = inicio;
+            this.fechaFin = fin;
+            this.cargarEstadisticas();
+        },
 
     // Cambiar pestaña
     cambiarPestana: function(pestana, element) {
