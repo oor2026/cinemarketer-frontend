@@ -1117,3 +1117,16 @@ select.modal-edicion-input {
         opacity: 0;
     }
 }
+
+@media (min-width: 769px) {
+    .premium-banner-toggle-row {
+        display: none !important;
+    }
+
+    .premium-banner-colapsable {
+        display: contents !important;
+        max-height: none !important;
+        opacity: 1 !important;
+        overflow: visible !important;
+    }
+}
