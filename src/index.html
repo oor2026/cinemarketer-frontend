@@ -149,30 +149,46 @@
     <section id="inicio" class="hero">
         <img src="assets/images/pochoclo.webp" alt="" class="hero-deco hero-deco-left" width="200" height="200" loading="lazy">
         <img src="assets/images/proyector.webp" alt="" class="hero-deco hero-deco-right" width="200" height="200" loading="lazy">
-        <div class="hero-content">
-            <h1 class="hero-title">Lo mejor del cine está en vos</h1>
-            <p class="hero-subtitle">La red social que estabas esperando para compartir y llevarte lo mejor del cine.</p>
 
-            <div class="hero-buttons">
-                <a href="register.html" class="btn btn-large btn-primary">
-                    <i class="fas fa-film"></i>
-                    Crear cuenta gratis
-                </a>
+        <div class="hero-inner">
+            <!-- Texto superior -->
+            <div class="hero-content">
+                <h1 class="hero-title">⭐ Lo mejor del cine está en vos ⭐</h1>
+                <p class="hero-subtitle">La red social que estabas esperando para compartir y llevarte lo mejor del cine.</p>
             </div>
 
-            <!-- Stats -->
-            <div class="hero-stats">
-                <div class="stat-item">
-                    <span class="stat-number">N°1</span>
-                    <span class="stat-label">Red social argentina</span>
+            <!-- Carrusel TMDb — ancho propio, fuera del hero-content -->
+            <div class="hero-carrusel" id="heroCarrusel">
+                <div class="hero-carrusel-track" id="heroCarruselTrack"></div>
+                <div class="hero-carrusel-overlay">
+                    <span class="hero-carrusel-tag">🎬 En cines ahora</span>
                 </div>
-                <div class="stat-item">
-                    <span class="stat-number">+10</span>
-                    <span class="stat-label">Socios estratégicos</span>
+                <div class="hero-carrusel-dots" id="heroCarruselDots"></div>
+            </div>
+
+            <!-- Botón y stats -->
+            <div class="hero-content">
+                <div class="hero-buttons">
+                    <a href="register.html" class="btn btn-large btn-primary">
+                        <i class="fas fa-film"></i>
+                        Crear cuenta gratis
+                    </a>
                 </div>
-                <div class="stat-item">
-                    <span class="stat-number">+1K</span>
-                    <span class="stat-label">Premios a entregar</span>
+
+                <!-- Stats -->
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">N°1</span>
+                        <span class="stat-label">Red social argentina</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">+10</span>
+                        <span class="stat-label">Socios estratégicos</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">+1K</span>
+                        <span class="stat-label">Premios a entregar</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -229,6 +245,11 @@
                             </div>
                         </div>
                     </div>
+                    <div class="carousel-dots quienes-dots">
+                        <button class="carousel-dot active"></button>
+                        <button class="carousel-dot"></button>
+                        <button class="carousel-dot"></button>
+                    </div>
 
                     <!-- Cuadro comparativo FREE vs PREMIUM -->
                     <div class="planes-comparativo">
@@ -240,18 +261,17 @@
                             </div>
                             <ul class="plan-rows">
                                 <ul class="plan-rows">
-                                    <li><span class="plan-row-label">Puntos por voto</span><span class="plan-row-val">10 pts</span></li>
-                                    <li><span class="plan-row-label">Puntos por recomendar</span><span class="plan-row-val">25 pts</span></li>
-                                    <li><span class="plan-row-label">Puntos por comentario</span><span class="plan-row-val">40 pts</span></li>
-                                    <li><span class="plan-row-label">Límite diario comentarios</span><span class="plan-row-val plan-muted">10 con puntos</span></li>
-                                    <li><span class="plan-row-label">Límite diario recomendaciones</span><span class="plan-row-val plan-muted">3 con puntos</span></li>
-                                    <li><span class="plan-row-label">Tope mensual</span><span class="plan-row-val">5.000 pts</span></li>
-                                    <li><span class="plan-row-label">Vencimiento de puntos</span><span class="plan-row-val plan-muted">6 meses</span></li>
-                                    <li><span class="plan-row-label">Cobro de puntos</span><span class="plan-row-val">1° de cada mes</span></li>
-                                    <li><span class="plan-row-label">Recomendaciones a amigos</span><span class="plan-row-val plan-check">&#10003;</span></li>
-                                    <li><span class="plan-row-label">Premios estándar</span><span class="plan-row-val plan-check">&#10003;</span></li>
-                                    <li><span class="plan-row-label">Premios y sorteos exclusivos</span><span class="plan-row-val plan-cross">&#10005;</span></li>
-                                    <li><span class="plan-row-label">Descuentos, promociones y regalos</span><span class="plan-row-val plan-cross">&#10005;</span></li>
+                                    <li><span class="plan-row-label"><span class="label-desktop">Puntos por voto</span><span class="label-mobile">Votar</span></span><span class="plan-row-val">10 pts</span></li>
+                                    <li><span class="plan-row-label"><span class="label-desktop">Puntos por recomendar</span><span class="label-mobile">Recomendar</span></span><span class="plan-row-val">25 pts</span></li>
+                                    <li><span class="plan-row-label"><span class="label-desktop">Puntos por comentario</span><span class="label-mobile">Comentar</span></span><span class="plan-row-val">40 pts</span></li>
+                                    <li><span class="plan-row-label"><span class="label-desktop">Límite diario comentarios</span><span class="label-mobile">Límite diario comentar</span></span><span class="plan-row-val plan-muted">10 con puntos</span></li>
+                                    <li><span class="plan-row-label"><span class="label-desktop">Límite diario recomendaciones</span><span class="label-mobile">Límite diario recomendar</span></span><span class="plan-row-val plan-muted">3 con puntos</span></li>
+                                    <li><span class="plan-row-label"><span class="label-desktop">Tope mensual</span><span class="label-mobile">Tope mensual</span></span><span class="plan-row-val">5.000 pts</span></li>
+                                    <li><span class="plan-row-label"><span class="label-desktop">Vencimiento de puntos</span><span class="label-mobile">Vencimiento</span></span><span class="plan-row-val plan-muted">6 meses</span></li>
+                                    <li><span class="plan-row-label"><span class="label-desktop">Cobro de puntos</span><span class="label-mobile">Cobro</span></span><span class="plan-row-val">1° de cada mes</span></li>
+                                    <li><span class="plan-row-label"><span class="label-desktop">Premios estándar</span><span class="label-mobile">Premios estándar</span></span><span class="plan-row-val plan-check">&#10003;</span></li>
+                                    <li><span class="plan-row-label"><span class="label-desktop">Premios y sorteos exclusivos</span><span class="label-mobile">Premios exclusivos</span></span><span class="plan-row-val plan-cross">&#10005;</span></li>
+                                    <li><span class="plan-row-label"><span class="label-desktop">Descuentos, promociones y regalos</span><span class="label-mobile">Promociones y regalos</span></span><span class="plan-row-val plan-cross">&#10005;</span></li>
                                 </ul>
                             </ul>
                             <a href="register.html" class="plan-btn plan-btn-free">Registrate gratis</a>
@@ -265,22 +285,25 @@
                             </div>
                             <ul class="plan-rows">
                                 <ul class="plan-rows">
-                                    <li><span class="plan-row-label">Puntos por voto</span><span class="plan-row-val plan-highlight">20 pts &times;2</span></li>
-                                    <li><span class="plan-row-label">Puntos por recomendar</span><span class="plan-row-val plan-highlight">50 pts &times;2</span></li>
-                                    <li><span class="plan-row-label">Puntos por comentario</span><span class="plan-row-val plan-highlight">80 pts &times;2</span></li>
-                                    <li><span class="plan-row-label">Límite diario comentarios</span><span class="plan-row-val plan-highlight">Sin límite</span></li>
-                                    <li><span class="plan-row-label">Límite diario recomendaciones</span><span class="plan-row-val plan-highlight">Sin límite</span></li>
-                                    <li><span class="plan-row-label">Tope mensual</span><span class="plan-row-val plan-highlight">Sin tope</span></li>
-                                    <li><span class="plan-row-label">Vencimiento de puntos</span><span class="plan-row-val plan-highlight">Nunca vencen</span></li>
-                                    <li><span class="plan-row-label">Cobro de puntos</span><span class="plan-row-val">1° de cada mes</span></li>
-                                    <li><span class="plan-row-label">Recomendaciones a amigos</span><span class="plan-row-val plan-check">&#10003;</span></li>
-                                    <li><span class="plan-row-label">Premios estándar</span><span class="plan-row-val plan-check">&#10003;</span></li>
-                                    <li><span class="plan-row-label">Premios y sorteos exclusivos</span><span class="plan-row-val plan-check">&#10003;</span></li>
-                                    <li><span class="plan-row-label">Descuentos, promociones y regalos</span><span class="plan-row-val plan-check">&#10003;</span></li>
+                                    <li><span class="plan-row-label"><span class="label-desktop">Puntos por voto</span><span class="label-mobile">Votar</span></span><span class="plan-row-val plan-highlight">20 pts &times;2</span></li>
+                                    <li><span class="plan-row-label"><span class="label-desktop">Puntos por recomendar</span><span class="label-mobile">Recomendar</span></span><span class="plan-row-val plan-highlight">50 pts &times;2</span></li>
+                                    <li><span class="plan-row-label"><span class="label-desktop">Puntos por comentario</span><span class="label-mobile">Comentar</span></span><span class="plan-row-val plan-highlight">80 pts &times;2</span></li>
+                                    <li><span class="plan-row-label"><span class="label-desktop">Límite diario comentarios</span><span class="label-mobile">Límite diario comentar</span></span><span class="plan-row-val plan-highlight">Sin límite</span></li>
+                                    <li><span class="plan-row-label"><span class="label-desktop">Límite diario recomendaciones</span><span class="label-mobile">Límite diario recomendar</span></span><span class="plan-row-val plan-highlight">Sin límite</span></li>
+                                    <li><span class="plan-row-label"><span class="label-desktop">Tope mensual</span><span class="label-mobile">Tope mensual</span></span><span class="plan-row-val plan-highlight">Sin tope</span></li>
+                                    <li><span class="plan-row-label"><span class="label-desktop">Vencimiento de puntos</span><span class="label-mobile">Vencimiento</span></span><span class="plan-row-val plan-highlight">Nunca vencen</span></li>
+                                    <li><span class="plan-row-label"><span class="label-desktop">Cobro de puntos</span><span class="label-mobile">Cobro</span></span><span class="plan-row-val">1° de cada mes</span></li>
+                                    <li><span class="plan-row-label"><span class="label-desktop">Premios estándar</span><span class="label-mobile">Premios estándar</span></span><span class="plan-row-val plan-check">&#10003;</span></li>
+                                    <li><span class="plan-row-label"><span class="label-desktop">Premios y sorteos exclusivos</span><span class="label-mobile">Premios exclusivos</span></span><span class="plan-row-val plan-check">&#10003;</span></li>
+                                    <li><span class="plan-row-label"><span class="label-desktop">Descuentos, promociones y regalos</span><span class="label-mobile">Promociones y regalos</span></span><span class="plan-row-val plan-check">&#10003;</span></li>
                                 </ul>
                             </ul>
                             <a href="register.html" class="plan-btn plan-btn-premium">Quiero ser Premium</a>
                         </div>
+                    </div>
+                    <div class="carousel-dots planes-dots">
+                        <button class="carousel-dot active"></button>
+                        <button class="carousel-dot"></button>
                     </div>
                 </div>
 
@@ -414,7 +437,7 @@
                 <button onclick="footerModal.abrir('ayuda')">Centro de Ayuda</button>
                 <button onclick="footerModal.abrir('avisoLegal')">Aviso Legal</button>
             </nav>
-            <p>&copy; 2026 Cinemarketer. Todos los derechos reservados.</p>
+            <p>&copy; 2026 Cinemarketer. Todos los derechos reservados. &nbsp;|&nbsp; Datos de películas provistos por <a href="https://www.themoviedb.org" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.5); text-decoration:underline;">TMDb</a></p>
         </div>
     </div>
 </footer>
@@ -448,6 +471,28 @@
             dots.forEach(function(d, i) { d.classList.toggle('active', i === idx); });
         });
     })();
+</script>
+<script src="js/hero-carrusel.js" defer></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const featuresList = document.querySelector('.features-list');
+        const quienesDots = document.querySelectorAll('.quienes-dots .carousel-dot');
+        if (featuresList && quienesDots.length) {
+            featuresList.addEventListener('scroll', () => {
+                const index = Math.round(featuresList.scrollLeft / featuresList.offsetWidth);
+                quienesDots.forEach((d, i) => d.classList.toggle('active', i === index));
+            });
+        }
+
+        const planesList = document.querySelector('.planes-comparativo');
+        const planesDots = document.querySelectorAll('.planes-dots .carousel-dot');
+        if (planesList && planesDots.length) {
+            planesList.addEventListener('scroll', () => {
+                const index = Math.round(planesList.scrollLeft / planesList.offsetWidth);
+                planesDots.forEach((d, i) => d.classList.toggle('active', i === index));
+            });
+        }
+    });
 </script>
 </body>
 </html>
