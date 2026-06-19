@@ -53,6 +53,27 @@ async function cargarPuntosUsuario() {
     }
 }
 
+function actualizarContadorDisponibles() {
+    const comunes    = (premiosState.premiosOriginalCache || []).length;
+    const especiales = (premiosState.especialesCache || []).length;
+    const el = document.getElementById('totalPremiosDisponibles');
+    if (el) el.textContent = comunes + especiales;
+}
+
+function actualizarBadgesTabs() {
+    const canjeados   = (premiosState.canjeadosCache || []).length;
+    const disponibles = (premiosState.premiosOriginalCache || []).length;
+    const especiales  = (premiosState.especialesCache || []).length;
+
+    const elC = document.getElementById('tituloCountCanjeados');
+    const elD = document.getElementById('tituloCountDisponibles');
+    const elE = document.getElementById('tituloCountEspeciales');
+
+    if (elC) elC.textContent = canjeados   > 0 ? `(${canjeados})`   : '';
+    if (elD) elD.textContent = disponibles > 0 ? `(${disponibles})` : '';
+    if (elE) elE.textContent = especiales  > 0 ? `(${especiales})`  : '';
+}
+
 // ==============================================
 // CARGAR PREMIOS CANJEADOS
 // ==============================================
@@ -107,6 +128,7 @@ window.cargarCanjeados = async function(pagina = 1) {
         premiosState.canjeadosPagina = pagina;
 
         if (countEl) countEl.textContent = `${todos.length} premios`;
+        actualizarBadgesTabs();
 
         if (todos.length === 0) {
             lista.style.display = 'none';
@@ -268,6 +290,7 @@ window.cargarDisponibles = async function(pagina = 1) {
         }
 
         renderDisponiblesPagina(pagina);
+        actualizarContadorDisponibles();
 
     } catch (error) {
         grid.innerHTML = '<div style="text-align:center;padding:3rem;color:#e50914;">Error al cargar los premios</div>';
@@ -437,11 +460,12 @@ window.cargarEspeciales = async function() {
         }
 
         renderEspecialesPagina(1, isPremium);
+                actualizarContadorDisponibles();
 
-    } catch (error) {
-        grid.innerHTML = '<div style="text-align:center;padding:3rem;color:#e50914;">Error al cargar los premios especiales</div>';
-    }
-};
+            } catch (error) {
+                grid.innerHTML = '<div style="text-align:center;padding:3rem;color:#e50914;">Error al cargar los premios especiales</div>';
+            }
+        };
 
 // ==============================================
 // RENDER DE PÁGINA DE ESPECIALES
@@ -885,6 +909,12 @@ window['init_mis-premios'] = function() {
     window.cargarCanjeados();
     cargarPrecioPlanEspeciales();
     inicializarEspecialesBannerCarrusel();
+
+    // Cargar contador de premios disponibles al iniciar
+    Promise.all([
+        window.cargarDisponibles(),
+        window.cargarEspeciales()
+    ]).then(() => actualizarContadorDisponibles());
 };
 
 async function cargarPrecioPlanEspeciales() {
