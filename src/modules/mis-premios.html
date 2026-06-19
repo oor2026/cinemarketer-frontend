@@ -9,8 +9,8 @@
             <p>Canjea tus puntos por experiencias únicas</p>
         </div>
         <div class="puntos-disponibles">
-            <span class="puntos-label">Tus premios</span>
-            <span class="puntos-valor" id="puntosActuales">0</span>
+            <span class="puntos-label">Premios disponibles</span>
+            <span class="puntos-valor" id="totalPremiosDisponibles">0</span>
         </div>
     </div>
 
@@ -26,7 +26,7 @@
     <!-- SECCIÓN: PREMIOS CANJEADOS -->
     <div id="canjeados-section" class="tab-content active">
         <div class="canjeados-header">
-            <h3>Historial de canjes</h3>
+            <h3>Historial de canjes <span id="tituloCountCanjeados" style="font-weight:normal;opacity:0.7;font-size:0.9em;"></span></h3>
         </div>
 
         <!-- Lista de premios canjeados -->
@@ -48,7 +48,7 @@
     <!-- SECCIÓN: PREMIOS DISPONIBLES -->
     <div id="disponibles-section" class="tab-content">
         <div class="disponibles-header">
-            <h3>Premios para canjear</h3>
+            <h3>Premios para canjear <span id="tituloCountDisponibles" style="font-weight:normal;opacity:0.7;font-size:0.9em;"></span></h3>
             <div class="filtros-premios">
                 <select class="filtro-select" onchange="window.filtrarPremios(this.value)">
                     <option value="todos">Todos</option>
@@ -134,7 +134,7 @@
         <!-- Contenido para premium activo -->
         <div id="especialesContenido">
             <div class="disponibles-header">
-                <h3>Premios y sorteos exclusivos</h3>
+                <h3>Premios y sorteos exclusivos <span id="tituloCountEspeciales" style="font-weight:normal;opacity:0.7;font-size:0.9em;"></span></h3>
                 <div class="filtros-premios">
                     <select class="filtro-select" onchange="window.filtrarEspeciales(this.value)">
                         <option value="todos">Todos</option>
