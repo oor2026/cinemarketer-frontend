@@ -382,15 +382,19 @@ const adminUI = {
                     document.getElementById('inputCompraMinima').value        = premio.minimumPurchase || '';
                     document.getElementById('inputProductosAplicables').value = premio.applicableProducts || '';
                     document.getElementById('inputAcumulable').value          = premio.stackable != null ? String(premio.stackable) : 'false';
+                    document.getElementById('inputMetodoCanje').value         = premio.redeemMethod || '';
                 }
                 if (premio.rewardType === 'EXPERIENCIA') {
-                    document.getElementById('inputExperienciaTipo').value  = premio.experienceType || '';
-                    document.getElementById('inputEventoFecha').value      = premio.eventDate ? premio.eventDate.substring(0,16) : '';
-                    document.getElementById('inputEventoCupo').value       = premio.maxCapacity || '';
-                    document.getElementById('inputEventoUbicacion').value  = premio.location || '';
-                    document.getElementById('inputDuracion').value         = premio.duration || '';
-                    document.getElementById('inputIncluyeTraslado').value  = premio.includesTransport != null ? String(premio.includesTransport) : 'false';
-                    document.getElementById('inputAptoAcompanante').value  = premio.companionAllowed != null ? String(premio.companionAllowed) : 'false';
+                    document.getElementById('inputExperienciaTipo').value       = premio.experienceType || '';
+                    document.getElementById('inputEventoFecha').value           = premio.eventDate ? premio.eventDate.substring(0,16) : '';
+                    document.getElementById('inputEventoCupo').value            = premio.maxCapacity || '';
+                    document.getElementById('inputEventoUbicacion').value       = premio.location || '';
+                    document.getElementById('inputDuracion').value              = premio.duration || '';
+                    document.getElementById('inputIncluyeTraslado').value       = premio.includesTransport != null ? String(premio.includesTransport) : 'false';
+                    document.getElementById('inputAptoAcompanante').value       = premio.companionAllowed != null ? String(premio.companionAllowed) : 'false';
+                    document.getElementById('inputRequiereConfirmacion').value  = premio.requiresConfirmation != null ? String(premio.requiresConfirmation) : 'false';
+                    document.getElementById('inputTransferible').value          = premio.transferable != null ? String(premio.transferable) : 'false';
+                    document.getElementById('inputResponsableOrganizacion').value = premio.organizer || '';
                     if (premio.requirements) {
                         const reqs = premio.requirements.split(',').map(r => r.trim());
                         document.querySelectorAll('input[name="requisito"]').forEach(cb => {
@@ -399,7 +403,13 @@ const adminUI = {
                     }
                 }
 
-                if (premio.imageUrl) {
+                // Campos de entrega comunes
+                    document.getElementById('inputModalidadEntrega').value = premio.deliveryMethod || '';
+                    document.getElementById('inputCostoEntrega').value     = premio.deliveryCost || '';
+                    document.getElementById('inputPuntoRetiro').value      = premio.pickupPoint || '';
+                    adminUI.togglePuntoRetiro(premio.deliveryMethod || '');
+
+                    if (premio.imageUrl) {
                     document.getElementById('imagePreview').src            = premio.imageUrl;
                     document.getElementById('imagePreview').style.display  = 'block';
                     document.getElementById('imagePlaceholder').style.display = 'none';
@@ -432,23 +442,30 @@ const adminUI = {
     },
 
     toggleCamposTipoComun(tipo) {
-        const campoMerchandising = document.getElementById('campoMerchandisingComun');
-        const campoTicket        = document.getElementById('campoTicketComun');
-        const campoDescuento     = document.getElementById('campoDescuentoComun');
-        const campoExperiencia   = document.getElementById('campoExperienciaComun');
-        const campoPuntos        = document.getElementById('inputPuntos')?.closest('.form-group');
-        const campoStock         = document.getElementById('inputStock')?.closest('.form-group');
-        const campoVenci         = document.getElementById('inputVencimiento')?.closest('.form-group');
+            const campoMerchandising = document.getElementById('campoMerchandisingComun');
+            const campoTicket        = document.getElementById('campoTicketComun');
+            const campoDescuento     = document.getElementById('campoDescuentoComun');
+            const campoExperiencia   = document.getElementById('campoExperienciaComun');
+            const campoEntrega       = document.getElementById('campoEntregaComun');
+            const campoPuntos        = document.getElementById('inputPuntos')?.closest('.form-group');
+            const campoStock         = document.getElementById('inputStock')?.closest('.form-group');
+            const campoVenci         = document.getElementById('inputVencimiento')?.closest('.form-group');
 
-        if (campoMerchandising) campoMerchandising.style.display = tipo === 'MERCHANDISING' ? 'block' : 'none';
-        if (campoTicket)        campoTicket.style.display        = tipo === 'TICKET'        ? 'block' : 'none';
-        if (campoDescuento)     campoDescuento.style.display     = tipo === 'DESCUENTO'     ? 'block' : 'none';
-        if (campoExperiencia)   campoExperiencia.style.display   = tipo === 'EXPERIENCIA'   ? 'block' : 'none';
+            if (campoMerchandising) campoMerchandising.style.display = tipo === 'MERCHANDISING' ? 'block' : 'none';
+            if (campoTicket)        campoTicket.style.display        = tipo === 'TICKET'        ? 'block' : 'none';
+            if (campoDescuento)     campoDescuento.style.display     = tipo === 'DESCUENTO'     ? 'block' : 'none';
+            if (campoExperiencia)   campoExperiencia.style.display   = tipo === 'EXPERIENCIA'   ? 'block' : 'none';
+            if (campoEntrega)       campoEntrega.style.display       = tipo ? 'block' : 'none';
 
-        if (campoPuntos) campoPuntos.style.display = 'block';
-        if (campoStock)  campoStock.style.display  = 'block';
-        if (campoVenci)  campoVenci.style.display  = 'block';
-    },
+            if (campoPuntos) campoPuntos.style.display = 'block';
+            if (campoStock)  campoStock.style.display  = 'block';
+            if (campoVenci)  campoVenci.style.display  = 'block';
+        },
+
+        togglePuntoRetiro(modalidad) {
+            const campo = document.getElementById('campoPuntoRetiro');
+            if (campo) campo.style.display = modalidad === 'RETIRO_PRESENCIAL' ? 'block' : 'none';
+        },
 
     // ------------------------------------------
     // PREVIEW DE IMAGEN (antes de guardar)
@@ -541,6 +558,13 @@ const adminUI = {
             cinemaRestrictions:   tipo === 'TICKET' ? document.getElementById('inputRestriccionesCine').value.trim() || null : null,
             ticketsIncluded:      tipo === 'TICKET' ? parseInt(document.getElementById('inputCantidadEntradas').value) || null : null,
             includesSnack:        tipo === 'TICKET' ? (document.getElementById('inputIncluyeConsumicion').value !== '' ? document.getElementById('inputIncluyeConsumicion').value === 'true' : null) : null,
+            redeemMethod:         tipo === 'DESCUENTO' ? document.getElementById('inputMetodoCanje').value || null : null,
+            requiresConfirmation: tipo === 'EXPERIENCIA' ? document.getElementById('inputRequiereConfirmacion').value === 'true' : null,
+            transferable:         tipo === 'EXPERIENCIA' ? document.getElementById('inputTransferible').value === 'true' : null,
+            organizer:            tipo === 'EXPERIENCIA' ? document.getElementById('inputResponsableOrganizacion').value.trim() || null : null,
+            deliveryMethod:       document.getElementById('inputModalidadEntrega').value || null,
+            deliveryCost:         document.getElementById('inputCostoEntrega').value || null,
+            pickupPoint:          document.getElementById('inputModalidadEntrega').value === 'RETIRO_PRESENCIAL' ? document.getElementById('inputPuntoRetiro').value.trim() || null : null,
         };
 
         const btnGuardar = document.querySelector('.btn-guardar');

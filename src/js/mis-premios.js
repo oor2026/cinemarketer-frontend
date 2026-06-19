@@ -951,29 +951,43 @@ function buildDetallesExtra(p, tipo) {
     }
 
     if (tipo === 'DESCUENTO') {
-        if (p.discountValue != null) {
-            const val = p.discountType === 'PERCENTAGE' ? `${p.discountValue}%` : `$${p.discountValue}`;
-            items.push(['fas fa-percent', 'Descuento', val]);
+            if (p.discountValue != null) {
+                const val = p.discountType === 'PERCENTAGE' ? `${p.discountValue}%` : `$${p.discountValue}`;
+                items.push(['fas fa-percent', 'Descuento', val]);
+            }
+            if (p.discountCode)          items.push(['fas fa-barcode',     'Código',                  p.discountCode]);
+            if (p.discountChannel)       items.push(['fas fa-store',       'Canal',                   p.discountChannel]);
+            if (p.minimumPurchase != null) items.push(['fas fa-shopping-cart','Compra mínima',        `$${p.minimumPurchase}`]);
+            if (p.applicableProducts)    items.push(['fas fa-list',        'Productos incluidos/excluidos', p.applicableProducts]);
+            if (p.stackable != null)     items.push(['fas fa-layer-group', 'Acumulable',              p.stackable ? 'Sí' : 'No']);
+            if (p.redeemMethod) {
+                const metodos = { CODIGO_DIGITAL: '💻 Código digital', LINK_PROMOCIONAL: '🔗 Link promocional', PRESENTAR_USUARIO: '👤 Presentar usuario', AUTOMATICO: '⚡ Automático' };
+                items.push(['fas fa-exchange-alt', 'Método de canje', metodos[p.redeemMethod] || p.redeemMethod]);
+            }
         }
-        if (p.discountCode)          items.push(['fas fa-barcode',     'Código',                  p.discountCode]);
-        if (p.discountChannel)       items.push(['fas fa-store',       'Canal',                   p.discountChannel]);
-        if (p.minimumPurchase != null) items.push(['fas fa-shopping-cart','Compra mínima',        `$${p.minimumPurchase}`]);
-        if (p.applicableProducts)    items.push(['fas fa-list',        'Productos incluidos/excluidos', p.applicableProducts]);
-        if (p.stackable != null)     items.push(['fas fa-layer-group', 'Acumulable',              p.stackable ? 'Sí' : 'No']);
-    }
 
-    if (tipo === 'EXPERIENCIA') {
-        if (p.experienceType)        items.push(['fas fa-star',        'Tipo de experiencia',     p.experienceType]);
-        if (p.eventDate)             items.push(['fas fa-calendar-alt','Fecha del evento',        new Date(p.eventDate).toLocaleDateString('es-AR', {day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})]);
-        if (p.location)              items.push(['fas fa-map-marker-alt','Ubicación',             p.location]);
-        if (p.maxCapacity)           items.push(['fas fa-users',       'Cupo máximo',             p.maxCapacity]);
-        if (p.duration)              items.push(['fas fa-clock',       'Duración',                p.duration]);
-        if (p.includesTransport != null) items.push(['fas fa-bus',     'Incluye traslado',        p.includesTransport ? 'Sí' : 'No']);
-        if (p.companionAllowed != null)  items.push(['fas fa-user-friends','Apto para acompañante', p.companionAllowed ? 'Sí' : 'No']);
-        if (p.requirements)          items.push(['fas fa-clipboard-list','Requisitos',            p.requirements]);
-    }
+        if (tipo === 'EXPERIENCIA') {
+            if (p.experienceType)        items.push(['fas fa-star',        'Tipo de experiencia',     p.experienceType]);
+            if (p.eventDate)             items.push(['fas fa-calendar-alt','Fecha del evento',        new Date(p.eventDate).toLocaleDateString('es-AR', {day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})]);
+            if (p.location)              items.push(['fas fa-map-marker-alt','Ubicación',             p.location]);
+            if (p.maxCapacity)           items.push(['fas fa-users',       'Cupo máximo',             p.maxCapacity]);
+            if (p.duration)              items.push(['fas fa-clock',       'Duración',                p.duration]);
+            if (p.includesTransport != null) items.push(['fas fa-bus',     'Incluye traslado',        p.includesTransport ? 'Sí' : 'No']);
+            if (p.companionAllowed != null)  items.push(['fas fa-user-friends','Apto para acompañante', p.companionAllowed ? 'Sí' : 'No']);
+            if (p.requirements)          items.push(['fas fa-clipboard-list','Requisitos',            p.requirements]);
+            if (p.requiresConfirmation != null) items.push(['fas fa-envelope-open-text', 'Requiere confirmación', p.requiresConfirmation ? 'Sí' : 'No']);
+            if (p.transferable != null)  items.push(['fas fa-exchange-alt', 'Transferible',           p.transferable ? 'Sí' : 'No']);
+            if (p.organizer)             items.push(['fas fa-building',    'Responsable',             p.organizer]);
+        }
 
-    return items;
+        // Campos de entrega comunes (todos los tipos)
+        const modalidadMap = { RETIRO_PRESENCIAL: '📍 Retiro presencial', ENTREGA_DIGITAL: '📧 Entrega digital', COORDINACION_TERCERO: '🤝 Coordinación con tercero', ENVIO_DOMICILIO: '🚚 Envío a domicilio' };
+        const costoMap     = { GRATUITO: '✅ Gratuito', A_CARGO_GANADOR: '💸 A cargo del ganador', COORDINAR_TERCERO: '🤝 Coordinar con tercero' };
+        if (p.deliveryMethod)  items.push(['fas fa-truck', 'Modalidad de entrega', modalidadMap[p.deliveryMethod] || p.deliveryMethod]);
+        if (p.pickupPoint && p.deliveryMethod === 'RETIRO_PRESENCIAL') items.push(['fas fa-map-marker-alt', 'Punto de retiro', p.pickupPoint]);
+        if (p.deliveryCost)    items.push(['fas fa-dollar-sign', 'Costo de entrega', costoMap[p.deliveryCost] || p.deliveryCost]);
+
+        return items;
 }
 
 function renderTabsModal(p, tipoReward, prefixModal) {
