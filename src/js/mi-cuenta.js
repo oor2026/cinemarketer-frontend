@@ -1759,6 +1759,24 @@ function inicializarPremiumCarrusel() {
     });
 }
 
+window.togglePremiumBanner = function() {
+    const colapsable = document.getElementById('premiumBannerColapsable');
+    const chevron    = document.getElementById('premiumBannerChevron');
+    const label      = document.querySelector('.premium-banner-toggle-label');
+
+    const estaColapsado = colapsable.classList.contains('collapsed');
+
+    if (estaColapsado) {
+        colapsable.classList.remove('collapsed');
+        chevron.className = 'fas fa-chevron-up';
+        if (label) label.style.visibility = 'hidden';
+    } else {
+        colapsable.classList.add('collapsed');
+        chevron.className = 'fas fa-chevron-down';
+        if (label) label.style.visibility = 'visible';
+    }
+};
+
 // ── Modal progreso de insignia ──────────────────────────────────
 window.abrirModalProgreso = function() {
     const modal = document.getElementById('modalProgreso');

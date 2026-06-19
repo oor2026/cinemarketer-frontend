@@ -1053,3 +1053,67 @@ select.modal-edicion-input {
 .cuenta-seccion-titulo--rojo i {
     color: white;
 }
+
+/* Toggle banner premium — solo mobile */
+.premium-banner-toggle {
+    display: none;
+}
+
+.premium-banner-toggle-row {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .premium-banner {
+        position: relative;
+    }
+
+    .premium-banner-toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.4rem 0.5rem;
+    }
+
+    .premium-banner-toggle-label {
+        color: white;
+        font-size: 1.2rem;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        visibility: hidden;
+    }
+
+    .premium-banner-toggle {
+        display: flex;
+        position: static;
+        background: rgba(255,255,255,0.2);
+        border: none;
+        color: white;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+        font-size: 0.8rem;
+        transition: background 0.2s;
+        flex-shrink: 0;
+    }
+
+    .premium-banner-toggle:hover {
+        background: rgba(255,255,255,0.35);
+    }
+
+    .premium-banner-colapsable {
+        overflow: hidden;
+        max-height: 1000px;
+        transition: max-height 0.35s ease, opacity 0.3s ease;
+        opacity: 1;
+    }
+
+    .premium-banner-colapsable.collapsed {
+        max-height: 0;
+        opacity: 0;
+    }
+}
