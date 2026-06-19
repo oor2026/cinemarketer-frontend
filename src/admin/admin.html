@@ -1053,6 +1053,37 @@
                 <label>Términos y condiciones</label>
                 <textarea id="inputTerminos" rows="2" placeholder="Términos específicos del premio..."></textarea>
             </div>
+            <!-- Campos ENTREGA (comunes a todos los tipos) -->
+            <div id="campoEntregaComun" style="display:none;">
+                <hr style="margin:0.5rem 0;border-color:#f0f0f0;">
+                <p style="font-size:0.8rem;color:#888;margin-bottom:0.5rem;">Modalidad de entrega</p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Modalidad de entrega</label>
+                        <select id="inputModalidadEntrega" onchange="adminUI.togglePuntoRetiro(this.value)">
+                            <option value="">Sin especificar</option>
+                            <option value="RETIRO_PRESENCIAL">📍 Retiro presencial</option>
+                            <option value="ENTREGA_DIGITAL">📧 Entrega digital</option>
+                            <option value="COORDINACION_TERCERO">🤝 Coordinación con tercero</option>
+                            <option value="ENVIO_DOMICILIO">🚚 Envío a domicilio</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Costo de entrega</label>
+                        <select id="inputCostoEntrega">
+                            <option value="">Sin especificar</option>
+                            <option value="GRATUITO">✅ Gratuito</option>
+                            <option value="A_CARGO_GANADOR">💸 A cargo del ganador</option>
+                            <option value="COORDINAR_TERCERO">🤝 Coordinar con tercero</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" id="campoPuntoRetiro" style="display:none;">
+                    <label>Punto de retiro</label>
+                    <input type="text" id="inputPuntoRetiro" placeholder="Ej: Ciudad Autónoma de Buenos Aires / A coordinar por correo">
+                </div>
+            </div>
+
             <!-- Campos MERCHANDISING -->
             <div id="campoMerchandisingComun" style="display:none;">
                 <hr style="margin:0.5rem 0;border-color:#f0f0f0;">
@@ -1193,6 +1224,16 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label>Método de canje</label>
+                    <select id="inputMetodoCanje">
+                        <option value="">Sin especificar</option>
+                        <option value="CODIGO_DIGITAL">💻 Código digital</option>
+                        <option value="LINK_PROMOCIONAL">🔗 Link promocional</option>
+                        <option value="PRESENTAR_USUARIO">👤 Presentar usuario</option>
+                        <option value="AUTOMATICO">⚡ Automático</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <small style="color:#999;"><i class="fas fa-info-circle"></i> El código de descuento se genera automáticamente al guardar.</small>
                 </div>
             </div>
@@ -1251,6 +1292,26 @@
                         <label style="font-weight:normal;display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" name="requisito" value="Código de acceso"> Código de acceso</label>
                         <label style="font-weight:normal;display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" name="requisito" value="Sin requisitos"> Sin requisitos</label>
                     </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Requiere confirmación previa</label>
+                        <select id="inputRequiereConfirmacion">
+                            <option value="false">No</option>
+                            <option value="true">Sí</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Transferible</label>
+                        <select id="inputTransferible">
+                            <option value="false">No</option>
+                            <option value="true">Sí</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Responsable de la organización</label>
+                    <input type="text" id="inputResponsableOrganizacion" placeholder="Ej: Distribuidora XYZ, Productora ABC">
                 </div>
             </div>
         </form>
