@@ -632,3 +632,44 @@
             letter-spacing: 0.3px;
         }
     }
+
+    /* Paginación mobile dots */
+    .pagination-dots {
+        display: none;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .pagination-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #d0cec8;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        transition: all 0.25s;
+    }
+
+    .pagination-dot.active {
+        background: var(--primary, #e50914);
+        width: 20px;
+        border-radius: 4px;
+    }
+
+    .pagination-dot.inactive {
+        background: #e8e8e8;
+        cursor: default;
+    }
+
+    @media (max-width: 768px) {
+        .pagination {
+            display: none !important;
+        }
+
+        .pagination-dots {
+            display: flex;
+        }
+    }

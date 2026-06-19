@@ -62,10 +62,13 @@ window.loadTransactions = async function(page = 1, filter = 'all') {
         const totalRedEl = document.getElementById('totalRedeemed');
         if (totalRedEl) totalRedEl.textContent = fmt(data.totalRedeemed ?? data.totalSpent ?? 0);
 
-        // Actualizar paginación
+        // Actualizar paginación desktop
         document.getElementById('pageInfo').textContent = `Página ${data.currentPage} de ${data.totalPages || 1}`;
         document.querySelector('.page-btn:first-child').disabled = data.currentPage <= 1;
         document.querySelector('.page-btn:last-child').disabled  = data.currentPage >= data.totalPages;
+
+        // Actualizar dots mobile
+        actualizarDotsPuntos(data.currentPage, data.totalPages || 1);
 
         // Sin transacciones
         if (!data.transactions || data.transactions.length === 0) {
@@ -203,6 +206,81 @@ window.changePage = function(direction) {
     window.loadTransactions(newPage, puntosState.currentFilter);
     document.querySelector('.points-container')?.scrollIntoView({ behavior: 'smooth' });
 };
+
+// ==============================================
+// DOTS MOBILE
+// ==============================================
+function actualizarDotsPuntos(paginaActual, totalPaginas) {
+    const contenedor = document.getElementById('paginationDots');
+    if (!contenedor) return;
+
+    contenedor.innerHTML = '';
+
+    // Dot izquierdo (anterior)
+    const dotPrev = document.createElement('button');
+    dotPrev.className = 'pagination-dot' + (paginaActual === 1 ? ' inactive' : '');
+    dotPrev.addEventListener('click', () => {
+        if (puntosState.currentPage > 1) {
+            puntosState.currentPage--;
+            window.loadTransactions(puntosState.currentPage, puntosState.currentFilter);
+        }
+    });
+    contenedor.appendChild(dotPrev);
+
+    // Dot central (activo siempre)
+    const dotCurrent = document.createElement('button');
+    dotCurrent.className = 'pagination-dot active';
+    contenedor.appendChild(dotCurrent);
+
+    // Dot derecho (siguiente)
+    const dotNext = document.createElement('button');
+    dotNext.className = 'pagination-dot' + (paginaActual === totalPaginas ? ' inactive' : '');
+    dotNext.addEventListener('click', () => {
+        if (puntosState.currentPage < puntosState.totalPages) {
+            puntosState.currentPage++;
+            window.loadTransactions(puntosState.currentPage, puntosState.currentFilter);
+        }
+    });
+    contenedor.appendChild(dotNext);
+}
+
+// ==============================================
+// SWIPE TÁCTIL MOBILE
+// ==============================================
+(function() {
+    let startX = 0;
+    let startY = 0;
+
+    document.addEventListener('touchstart', function(e) {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+    }, { passive: true });
+
+    document.addEventListener('touchend', function(e) {
+        const lista = document.getElementById('transactionsList');
+        if (!lista) return;
+
+        const diffX = startX - e.changedTouches[0].clientX;
+        const diffY = Math.abs(startY - e.changedTouches[0].clientY);
+
+        // Solo swipe horizontal (no vertical scroll)
+        if (Math.abs(diffX) < 50 || diffY > Math.abs(diffX)) return;
+
+        if (diffX > 0) {
+            // Swipe izquierda → siguiente
+            if (puntosState.currentPage < puntosState.totalPages) {
+                puntosState.currentPage++;
+                window.loadTransactions(puntosState.currentPage, puntosState.currentFilter);
+            }
+        } else {
+            // Swipe derecha → anterior
+            if (puntosState.currentPage > 1) {
+                puntosState.currentPage--;
+                window.loadTransactions(puntosState.currentPage, puntosState.currentFilter);
+            }
+        }
+    }, { passive: true });
+})();
 
 // ==============================================
 // INICIALIZACIÓN

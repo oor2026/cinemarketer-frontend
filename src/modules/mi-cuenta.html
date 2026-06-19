@@ -54,56 +54,64 @@
     <div class="cuenta-premium-panel" id="cuentaPremiumPanel">
 
         <div class="premium-banner" id="premiumBanner">
-            <div class="premium-banner-lateral">
-                <div class="premium-merch-item">
-                    <div class="premium-merch-icon"><i class="ti ti-shirt" aria-hidden="true"></i></div>
-                    <span class="premium-merch-label">Remeras<br>de películas</span>
-                </div>
-                <div class="premium-merch-item">
-                    <div class="premium-merch-icon"><i class="ti ti-mug" aria-hidden="true"></i></div>
-                    <span class="premium-merch-label">Tazas<br>temáticas</span>
-                </div>
-                <div class="premium-merch-item">
-                    <div class="premium-merch-icon"><i class="ti ti-backpack" aria-hidden="true"></i></div>
-                    <span class="premium-merch-label">Accesorios<br>de cine</span>
-                </div>
-            </div>
-
-            <div class="premium-banner-centro">
-                <div class="premium-banner-badge">★ Exclusivo</div>
-                <p class="premium-banner-title">Cinemarketer Premium</p>
-                <div class="premium-banner-price"><span id="premiumPlanPrice">$999</span> <span>/ mes</span></div>
-                <div class="premium-benefits-wrapper">
-                    <ul class="premium-banner-benefits" id="premiumBenefitsList">
-                        <li><span class="premium-check"></span>Premios y sorteos exclusivos solo para miembros</li>
-                        <li><span class="premium-check"></span><strong>Puntos x2</strong>&nbsp;en votos, comentarios y recomendaciones</li>
-                        <li><span class="premium-check"></span>Sin límite diario de comentarios ni recomendaciones</li>
-                        <li><span class="premium-check"></span>Sin tope mensual de puntos acumulados</li>
-                        <li><span class="premium-check"></span>Tus puntos <strong>nunca vencen</strong></li>
-                        <li><span class="premium-check"></span>Cobrás todo lo que acumulás el 1° de cada mes</li>
-                    </ul>
-                    <div class="premium-benefits-dots" id="premiumBenefitsDots"></div>
-                </div>
-                <button class="btn-suscribirse" onclick="window.abrirDetallePlan()">
-                    Quiero ser Premium
+            <div class="premium-banner-toggle-row">
+                <span class="premium-banner-toggle-label">★ Cinemarketer Premium</span>
+                <button class="premium-banner-toggle" id="premiumBannerToggle" onclick="togglePremiumBanner()" aria-label="Colapsar banner">
+                    <i class="fas fa-chevron-up" id="premiumBannerChevron"></i>
                 </button>
             </div>
+            <div class="premium-banner-colapsable" id="premiumBannerColapsable">
+                <div class="premium-banner-lateral">
+                    <div class="premium-merch-item">
+                        <div class="premium-merch-icon"><i class="ti ti-shirt" aria-hidden="true"></i></div>
+                        <span class="premium-merch-label">Remeras<br>de películas</span>
+                    </div>
+                    <div class="premium-merch-item">
+                        <div class="premium-merch-icon"><i class="ti ti-mug" aria-hidden="true"></i></div>
+                        <span class="premium-merch-label">Tazas<br>temáticas</span>
+                    </div>
+                    <div class="premium-merch-item">
+                        <div class="premium-merch-icon"><i class="ti ti-backpack" aria-hidden="true"></i></div>
+                        <span class="premium-merch-label">Accesorios<br>de cine</span>
+                    </div>
+                </div><!-- /premium-banner-lateral izq -->
 
-            <div class="premium-banner-lateral">
-                <div class="premium-merch-item">
-                    <div class="premium-merch-icon"><i class="ti ti-ticket" aria-hidden="true"></i></div>
-                    <span class="premium-merch-label">Entradas<br>de cine</span>
-                </div>
-                <div class="premium-merch-item">
-                    <div class="premium-merch-icon"><i class="ti ti-calendar-event" aria-hidden="true"></i></div>
-                    <span class="premium-merch-label">Experiencias<br>exclusivas</span>
-                </div>
-                <div class="premium-merch-item">
-                    <div class="premium-merch-icon"><i class="ti ti-discount" aria-hidden="true"></i></div>
-                    <span class="premium-merch-label">Descuentos<br>y promociones</span>
-                </div>
-            </div>
-        </div>
+                <div class="premium-banner-centro">
+                    <div class="premium-banner-badge">★ Exclusivo</div>
+                    <p class="premium-banner-title">Cinemarketer Premium</p>
+                    <div class="premium-banner-price"><span id="premiumPlanPrice">$999</span> <span>/ mes</span></div>
+                    <div class="premium-benefits-wrapper">
+                        <ul class="premium-banner-benefits" id="premiumBenefitsList">
+                            <li><span class="premium-check"></span>Premios y sorteos exclusivos solo para miembros</li>
+                            <li><span class="premium-check"></span><strong>Puntos x2</strong>&nbsp;en votos, comentarios y recomendaciones</li>
+                            <li><span class="premium-check"></span>Sin límite diario de comentarios ni recomendaciones</li>
+                            <li><span class="premium-check"></span>Sin tope mensual de puntos acumulados</li>
+                            <li><span class="premium-check"></span>Tus puntos <strong>nunca vencen</strong></li>
+                            <li><span class="premium-check"></span>Cobrás todo lo que acumulás el 1° de cada mes</li>
+                        </ul>
+                        <div class="premium-benefits-dots" id="premiumBenefitsDots"></div>
+                    </div>
+                    <button class="btn-suscribirse" onclick="window.abrirDetallePlan()">
+                        Quiero ser Premium
+                    </button>
+                </div><!-- /premium-banner-centro -->
+
+                <div class="premium-banner-lateral">
+                    <div class="premium-merch-item">
+                        <div class="premium-merch-icon"><i class="ti ti-ticket" aria-hidden="true"></i></div>
+                        <span class="premium-merch-label">Entradas<br>de cine</span>
+                    </div>
+                    <div class="premium-merch-item">
+                        <div class="premium-merch-icon"><i class="ti ti-calendar-event" aria-hidden="true"></i></div>
+                        <span class="premium-merch-label">Experiencias<br>exclusivas</span>
+                    </div>
+                    <div class="premium-merch-item">
+                        <div class="premium-merch-icon"><i class="ti ti-discount" aria-hidden="true"></i></div>
+                        <span class="premium-merch-label">Descuentos<br>y promociones</span>
+                    </div>
+                </div><!-- /premium-banner-lateral der -->
+            </div><!-- /premium-banner-colapsable -->
+        </div><!-- /premium-banner -->
 
         <div class="premium-activo" id="premiumActivo" style="display:none;">
             <div class="premium-activo-header">
