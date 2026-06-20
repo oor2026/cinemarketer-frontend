@@ -66,7 +66,9 @@ async function mostrarSplashMobile(moduleName) {
 
         img.src   = banner.imageUrl;
         img.alt   = banner.nombreMarca || 'Publicidad';
-        link.href = banner.linkDestino || '#';
+        link.href = banner.linkDestino || null;
+                if (!banner.linkDestino) link.style.pointerEvents = 'none';
+                else link.style.pointerEvents = '';
 
         overlay.style.display = 'flex';
         sessionStorage.setItem(splashKey(moduleName), '1');
@@ -143,7 +145,9 @@ async function cargarBanners(moduleName) {
                 imgLeft.src           = banner.imageUrl;
                 imgLeft.alt           = banner.nombreMarca || 'Publicidad';
                 imgLeft.style.display = 'block';
-                linkLeft.href         = banner.linkDestino || '#';
+                linkLeft.href         = banner.linkDestino || null;
+                                if (!banner.linkDestino) linkLeft.style.pointerEvents = 'none';
+                                else linkLeft.style.pointerEvents = '';
                 sidebarLeft.classList.remove('ad-empty');
             }
 
@@ -151,7 +155,9 @@ async function cargarBanners(moduleName) {
                 imgRight.src           = banner.imageUrl;
                 imgRight.alt           = banner.nombreMarca || 'Publicidad';
                 imgRight.style.display = 'block';
-                linkRight.href         = banner.linkDestino || '#';
+                linkRight.href         = banner.linkDestino || null;
+                                if (!banner.linkDestino) linkRight.style.pointerEvents = 'none';
+                                else linkRight.style.pointerEvents = '';
                 sidebarRight.classList.remove('ad-empty');
             }
 
@@ -163,7 +169,9 @@ async function cargarBanners(moduleName) {
                 if (bloque && img && link) {
                     img.src              = banner.imageUrl;
                     img.alt              = banner.nombreMarca || 'Publicidad';
-                    link.href            = banner.linkDestino || '#';
+                    link.href            = banner.linkDestino || null;
+                                        if (!banner.linkDestino) link.style.pointerEvents = 'none';
+                                        else link.style.pointerEvents = '';
                     bloque.style.display = 'block';
                 }
             }
