@@ -1467,21 +1467,39 @@ function actualizarCarrusel(tipo) {
     }
 }
 
+// Handlers globales únicos por tipo — evita acumulación de listeners
+const _carruselHandlers = {};
+
 function iniciarDragCarrusel(imgEl, tipo) {
+    // Remover listeners anteriores si existen
+    if (_carruselHandlers[tipo]) {
+        imgEl.removeEventListener('touchstart', _carruselHandlers[tipo].start);
+        imgEl.removeEventListener('touchend',   _carruselHandlers[tipo].end);
+    }
+
     let startX   = 0;
+    let startY   = 0;
     let dragging = false;
 
-    imgEl.addEventListener('touchstart', (e) => {
+    const onStart = (e) => {
         startX   = e.touches[0].clientX;
+        startY   = e.touches[0].clientY;
         dragging = true;
-    }, { passive: true });
+    };
 
-    imgEl.addEventListener('touchend', (e) => {
+    const onEnd = (e) => {
         if (!dragging) return;
-        dragging  = false;
-        const diff = startX - e.changedTouches[0].clientX;
-        if (Math.abs(diff) > 40) {
-            moverCarrusel(tipo, diff > 0 ? 1 : -1);
+        dragging = false;
+        const diffX = startX - e.changedTouches[0].clientX;
+        const diffY = Math.abs(startY - e.changedTouches[0].clientY);
+        // Solo swipe horizontal (ignorar si hay más movimiento vertical)
+        if (Math.abs(diffX) > 40 && diffY < Math.abs(diffX)) {
+            moverCarrusel(tipo, diffX > 0 ? 1 : -1);
         }
-    }, { passive: true });
+    };
+
+    _carruselHandlers[tipo] = { start: onStart, end: onEnd };
+
+    imgEl.addEventListener('touchstart', onStart, { passive: true });
+    imgEl.addEventListener('touchend',   onEnd,   { passive: true });
 }
