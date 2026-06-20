@@ -24,8 +24,13 @@ window['init_perfil'] = async function(userId) {
 
     // Insertar botón volver si viene desde mi cuenta
     if (sessionStorage.getItem('perfilDesdeMiCuenta') === '1') {
-            console.log('ENTRÓ al bloque desdeMiCuenta');
-            sessionStorage.removeItem('perfilDesdeMiCuenta');
+                console.log('ENTRÓ al bloque desdeMiCuenta');
+                sessionStorage.removeItem('perfilDesdeMiCuenta');
+                setTimeout(() => {
+                    if (typeof showToast === 'function') {
+                        showToast('info', 'Vista pública de tu perfil — así aparecés ante otros cinéfilos.');
+                    }
+                }, 600);
             const btnExistente = document.getElementById('btnVolverMiCuenta');
             if (!btnExistente) {
                 const btn = document.createElement('div');

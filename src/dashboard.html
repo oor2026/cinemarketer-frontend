@@ -66,7 +66,7 @@
     <!-- HEADER / NAVBAR -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="#feed-films" class="logo">
+            <a href="#feed-films" class="logo" onclick="if(window.location.hash==='#feed-films'){event.preventDefault();if(typeof loadModule==='function')loadModule('feed-films');}">
                 <img src="assets/images/isologotipo.webp" alt="Cinemarketer" class="logo-img">
             </a>
             <button class="dash-menu-toggle" id="dashMenuToggle"><i class="fas fa-bars"></i></button>
