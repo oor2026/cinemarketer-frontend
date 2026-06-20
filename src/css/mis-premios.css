@@ -482,14 +482,55 @@
     }
 
     .canjeado-item {
+        flex-direction: row;
+        text-align: left;
+        gap: 0.75rem;
+        padding: 1rem;
+        align-items: flex-start;
+        position: relative;
+    }
+
+    .canjeado-imagen {
+        width: 60px;
+        height: 60px;
+        flex-shrink: 0;
+    }
+
+    .canjeado-imagen i {
+        font-size: 1.8rem;
+    }
+
+    .canjeado-info {
+        display: flex;
         flex-direction: column;
-        text-align: center;
-        gap: 1rem;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .canjeado-titulo {
+            font-size: 1rem;
+            padding-right: 85px;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+    .canjeado-descripcion {
+        font-size: 0.82rem;
     }
 
     .canjeado-metadata {
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.25rem;
+        font-size: 0.78rem;
+    }
+
+    .canjeado-estado {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        min-width: unset;
+        font-size: 0.75rem;
+        padding: 0.2rem 0.6rem;
     }
 
     .filtros-premios {
@@ -504,7 +545,6 @@
     .premios-grid {
         grid-template-columns: 1fr;
     }
-
 }
 @media (max-width: 768px) {
     .premium-banner {
