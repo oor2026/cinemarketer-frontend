@@ -520,19 +520,20 @@
     }
 
     function manejarClickGoogle() {
-        if (!isInstagramBrowser()) {
-            window.googleAuth.iniciar();
-            return;
-        }
-
-        const loginUrl = 'https://cinemarketer.com.ar/login.html';
-
-        if (/android/i.test(navigator.userAgent)) {
-            window.location.href = 'intent://' + loginUrl.replace('https://', '') + '#Intent;scheme=https;package=com.android.chrome;end';
-        } else {
-            mostrarAvisoIOS();
-        }
+    if (!isInstagramBrowser()) {
+        // Browser normal — flujo original sin cambios
+        window.googleAuth.iniciar();
+        return;
     }
+
+    const loginUrl = 'https://cinemarketer.com.ar/login.html';
+
+    if (/android/i.test(navigator.userAgent)) {
+        window.location.href = 'intent://' + loginUrl.replace('https://', '') + '#Intent;scheme=https;package=com.android.chrome;end';
+    } else {
+        mostrarAvisoIOS();
+    }
+}
 
     function mostrarAvisoIOS() {
         if (document.getElementById('iabAviso')) return;
