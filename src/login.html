@@ -135,9 +135,9 @@
             <!-- Opciones de login social -->
             <!-- Opciones de login social -->
             <div class="social-login">
-                <div id="googleLoginBtn"
-                     class="social-btn google"
-                     onclick="window.googleAuth.iniciar()">
+            <div id="googleLoginBtn"
+                 class="social-btn google"
+                 onclick="manejarClickGoogle()">
                     <svg width="18" height="18" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -511,6 +511,71 @@
     // Función para mostrar notificaciones
     function showNotification(message, type) {
         alert(message); // Temporal, reemplazar con tu sistema
+    }
+
+    // ========== IAB INSTAGRAM: FORZAR APERTURA EN BROWSER EXTERNO ==========
+    function isInstagramBrowser() {
+        const ua = navigator.userAgent || '';
+        return ua.includes('Instagram') || ua.includes('FBAN') || ua.includes('FBAV');
+    }
+
+    function manejarClickGoogle() {
+        if (!isInstagramBrowser()) {
+            window.googleAuth.iniciar();
+            return;
+        }
+
+        const loginUrl = 'https://cinemarketer.com.ar/login.html';
+
+        if (/android/i.test(navigator.userAgent)) {
+            window.location.href = 'intent://' + loginUrl.replace('https://', '') + '#Intent;scheme=https;package=com.android.chrome;end';
+        } else {
+            mostrarAvisoIOS();
+        }
+    }
+
+    function mostrarAvisoIOS() {
+        if (document.getElementById('iabAviso')) return;
+
+        const overlay = document.createElement('div');
+        overlay.id = 'iabAviso';
+        overlay.style.cssText = `
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+            z-index: 999999; display: flex; align-items: flex-end;
+            justify-content: center; padding: 1rem;
+        `;
+
+        overlay.innerHTML = `
+            <div style="
+                background: #fff; border-radius: 16px; padding: 1.5rem;
+                width: 100%; max-width: 420px; text-align: center;
+            ">
+                <div style="font-size: 2rem; margin-bottom: 0.75rem;">🌐</div>
+                <h3 style="margin: 0 0 0.5rem; color: #1a1a1a; font-size: 1rem;">
+                    Abrí en Safari para usar Google
+                </h3>
+                <p style="margin: 0 0 1.25rem; color: #555; font-size: 0.875rem; line-height: 1.5;">
+                    El navegador de Instagram no es compatible con el inicio de sesión de Google.<br><br>
+                    Tocá los <strong>tres puntos</strong> (···) arriba a la derecha
+                    y elegí <strong>"Abrir en Safari"</strong> o <strong>"Abrir en navegador"</strong>.
+                </p>
+                <button onclick="document.getElementById('iabAviso').remove()"
+                    style="
+                        background: #e50914; color: #fff; border: none;
+                        border-radius: 50px; padding: 0.75rem 2rem;
+                        font-size: 0.95rem; font-weight: 600; cursor: pointer;
+                        width: 100%;
+                    ">
+                    Entendido
+                </button>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) overlay.remove();
+        });
     }
 </script>
 </body>
