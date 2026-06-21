@@ -9,16 +9,43 @@ window.googleAuth = {
     _initialized: false,
 
     iniciar: function() {
-        if (!window.googleAuth._initialized) {
-            google.accounts.id.initialize({
-                client_id: '842892243934-ug8f2tn79ohm9nqvca01kjt84i5q6vic.apps.googleusercontent.com',
-                callback: window.googleAuth._handleCredential,
-                ux_mode: 'popup'
+            if (!window.googleAuth._initialized) {
+                google.accounts.id.initialize({
+                    client_id: '842892243934-ug8f2tn79ohm9nqvca01kjt84i5q6vic.apps.googleusercontent.com',
+                    callback: window.googleAuth._handleCredential,
+                    ux_mode: 'popup',
+                    use_fedcm_for_prompt: false
+                });
+                window.googleAuth._initialized = true;
+            }
+
+            // Crear contenedor temporal invisible para renderButton
+            let tempDiv = document.getElementById('_googleBtnTemp');
+            if (!tempDiv) {
+                tempDiv = document.createElement('div');
+                tempDiv.id = '_googleBtnTemp';
+                tempDiv.style.cssText = 'position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden;';
+                document.body.appendChild(tempDiv);
+            }
+
+            // Renderizar botón real de Google y hacer click automático
+            google.accounts.id.renderButton(tempDiv, {
+                type: 'standard',
+                theme: 'outline',
+                size: 'large'
             });
-            window.googleAuth._initialized = true;
-        }
-        google.accounts.id.prompt();
-    },
+
+            // Hacer click en el botón real que Google renderizó
+            setTimeout(() => {
+                const googleBtn = tempDiv.querySelector('div[role="button"]');
+                if (googleBtn) {
+                    googleBtn.click();
+                } else {
+                    // Fallback: intentar prompt de todas formas
+                    google.accounts.id.prompt();
+                }
+            }, 100);
+        },
 
     _handleCredential: async function(googleResponse) {
         const btn = document.getElementById('googleLoginBtn');

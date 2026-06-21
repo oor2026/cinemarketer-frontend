@@ -94,6 +94,7 @@ const adminEstadisticas = {
             this.renderizarCrecimiento();
             this.renderizarPremiumSorteos();
             this.renderizarSuscripciones();
+            this.renderizarGuardadas();
 
         } catch (error) {
             toast('Error al cargar estadísticas', 'error');
@@ -679,8 +680,70 @@ const adminEstadisticas = {
         document.getElementById('stats-suscripciones-body').innerHTML = html;
     },
 
-    // Formatear números grandes (ej: 1234 → 1.2K)
-    formatearNumero: function(num) {
+    // Renderizar tabla de guardadas
+        renderizarGuardadas: function() {
+            const w = this.datos.watchlist;
+            if (!w) return;
+
+            const topPeliculasHtml = (w.topPeliculas || []).length > 0
+                ? w.topPeliculas.map((p, i) => `
+                    <tr>
+                        <td>${i + 1}. ${p.titulo}</td>
+                        <td class="stat-valor">${p.total} usuarios</td>
+                    </tr>`).join('')
+                : '<tr><td colspan="2" style="color:#999;">Sin datos aún</td></tr>';
+
+            const generosHtml = (w.generos || []).length > 0
+                ? w.generos.map(g => `
+                    <tr>
+                        <td><strong>${g.genero}</strong></td>
+                        <td class="stat-valor">${g.total}</td>
+                        <td class="stat-valor">${g.porcentaje}%</td>
+                    </tr>`).join('')
+                : '<tr><td colspan="3" style="color:#999;">Sin datos aún</td></tr>';
+
+            const html = `
+                <tr>
+                    <td><strong>Total películas guardadas</strong></td>
+                    <td class="stat-valor">${this.formatearNumero(w.totalGuardadas)}</td>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td><strong>Usuarios con lista</strong></td>
+                    <td class="stat-valor">${this.formatearNumero(w.usuariosConLista)}</td>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td><strong>Promedio por usuario</strong></td>
+                    <td class="stat-valor">${w.promedioPorUsuario}</td>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div class="stats-grid">
+                            <div class="stats-col">
+                                <h4>🎬 Top 10 películas más guardadas</h4>
+                                <table class="admin-table" style="margin-top:0.5rem;">
+                                    <thead><tr><th>Película</th><th>Usuarios</th></tr></thead>
+                                    <tbody>${topPeliculasHtml}</tbody>
+                                </table>
+                            </div>
+                            <div class="stats-col">
+                                <h4>🎭 Géneros más guardados</h4>
+                                <table class="admin-table" style="margin-top:0.5rem;">
+                                    <thead><tr><th>Género</th><th>Total</th><th>%</th></tr></thead>
+                                    <tbody>${generosHtml}</tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            document.getElementById('stats-guardadas-body').innerHTML = html;
+        },
+
+        // Formatear números grandes (ej: 1234 → 1.2K)
+        formatearNumero: function(num) {
         if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
         if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
         return num?.toLocaleString() || '0';

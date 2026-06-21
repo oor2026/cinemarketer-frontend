@@ -221,6 +221,10 @@ const adminUsuarios = {
         document.getElementById('inputUsuarioEmail').value = '';
         document.getElementById('inputUsuarioDni').value = '';
         document.getElementById('inputUsuarioTelefono').value = '';
+        document.getElementById('inputUsuarioFechaNacimiento').value = '';
+        document.getElementById('inputUsuarioSexo').value = '';
+        document.getElementById('inputUsuarioProvincia').value = '';
+        document.getElementById('inputUsuarioLocalidad').value = '';
         document.getElementById('inputUsuarioRol').value = 'USER';
         document.getElementById('inputUsuarioActivo').value = 'true';
 
@@ -235,6 +239,10 @@ const adminUsuarios = {
                 document.getElementById('inputUsuarioEmail').value = user.email || '';
                 document.getElementById('inputUsuarioDni').value = user.dni || '';
                 document.getElementById('inputUsuarioTelefono').value = user.phone || '';
+                document.getElementById('inputUsuarioFechaNacimiento').value = user.birthDate || '';
+                document.getElementById('inputUsuarioSexo').value = user.sexo || '';
+                document.getElementById('inputUsuarioProvincia').value = user.provincia || '';
+                document.getElementById('inputUsuarioLocalidad').value = user.localidad || '';
                 document.getElementById('inputUsuarioRol').value = user.role || 'USER';
                 document.getElementById('inputUsuarioActivo').value = String(user.active);
             } catch (error) {
@@ -272,6 +280,10 @@ const adminUsuarios = {
             email: email,
             dni: dni,
             phone: telefono,
+            birthDate: document.getElementById('inputUsuarioFechaNacimiento').value || null,
+            sexo: document.getElementById('inputUsuarioSexo').value || null,
+            provincia: document.getElementById('inputUsuarioProvincia').value.trim() || null,
+            localidad: document.getElementById('inputUsuarioLocalidad').value.trim() || null,
             role: rol,
             active: activo
         };
@@ -444,6 +456,10 @@ verDetalle: async function(id) {
                     <div class="detalle-fila"><span>Email</span><strong>${d.email}</strong></div>
                     <div class="detalle-fila"><span>DNI</span><strong>${d.dni || '—'}</strong></div>
                     <div class="detalle-fila"><span>Teléfono</span><strong>${d.telefono || '—'}</strong></div>
+                    <div class="detalle-fila"><span>Fecha de nacimiento</span><strong>${d.fechaNacimiento ? fmtFecha(d.fechaNacimiento) : '—'}</strong></div>
+                    <div class="detalle-fila"><span>Sexo</span><strong>${d.sexo || '—'}</strong></div>
+                    <div class="detalle-fila"><span>Provincia</span><strong>${d.provincia || '—'}</strong></div>
+                    <div class="detalle-fila"><span>Localidad</span><strong>${d.localidad || '—'}</strong></div>
                     <div class="detalle-fila"><span>Email verificado</span><strong>${d.emailVerificado ? '✅ Sí' : '❌ No'}</strong></div>
                     <div class="detalle-fila"><span>Autenticación</span><strong>${d.googleAuth ? '🔵 Google' : '🔑 Contraseña'}</strong></div>
                     <div class="detalle-fila"><span>Miembro desde</span><strong>${fmt(d.creadoEn)}</strong></div>
@@ -469,6 +485,9 @@ verDetalle: async function(id) {
                     <h4><i class="fas fa-chart-bar"></i> Actividad</h4>
                     <div class="detalle-fila"><span>Votaciones</span><strong>${d.totalVotaciones}</strong></div>
                     <div class="detalle-fila"><span>Comentarios</span><strong>${d.totalComentarios}</strong></div>
+                    <div class="detalle-fila"><span>Recomendaciones</span><strong>${d.totalRecomendaciones}</strong></div>
+                    <div class="detalle-fila"><span>Merece un punto</span><strong>${d.totalMereceUnPunto}</strong></div>
+                    <div class="detalle-fila"><span>Mi lista (guardadas)</span><strong>${d.totalGuardadas}</strong></div>
                     <div class="detalle-fila"><span>Premios canjeados</span><strong>${d.premios.totalCanjeados}</strong></div>
                     <div class="detalle-fila"><span>— Entradas</span><strong>${d.premios.entradas}</strong></div>
                     <div class="detalle-fila"><span>— Merchandising</span><strong>${d.premios.merchandising}</strong></div>
