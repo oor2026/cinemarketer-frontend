@@ -95,6 +95,7 @@ const adminEstadisticas = {
             this.renderizarPremiumSorteos();
             this.renderizarSuscripciones();
             this.renderizarGuardadas();
+            this.renderizarGanancias();
 
         } catch (error) {
             toast('Error al cargar estadísticas', 'error');
@@ -680,7 +681,78 @@ const adminEstadisticas = {
         document.getElementById('stats-suscripciones-body').innerHTML = html;
     },
 
-    // Renderizar tabla de guardadas
+    // Renderizar tabla de ganancias
+        renderizarGanancias: function() {
+            const r = this.datos.revenue;
+            if (!r) return;
+
+            const tendenciaHtml = (r.tendenciaMensual || []).length > 0
+                ? r.tendenciaMensual.map(m => `
+                    <tr>
+                        <td>${m.mes}</td>
+                        <td class="stat-valor">$${Number(m.total).toLocaleString('es-AR')}</td>
+                    </tr>`).join('')
+                : '<tr><td colspan="2" style="color:#999;">Sin datos aún</td></tr>';
+
+            const html = `
+                <tr>
+                    <td><strong>Ingreso total histórico</strong></td>
+                    <td class="stat-valor">$${Number(r.ingresoTotalHistorico).toLocaleString('es-AR')}</td>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td><strong>Ingreso del período</strong></td>
+                    <td class="stat-valor">$${Number(r.ingresoPeriodo).toLocaleString('es-AR')}</td>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td><strong>MRR (ingreso mensual recurrente)</strong></td>
+                    <td class="stat-valor">$${Number(r.mrr).toLocaleString('es-AR')}</td>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td><strong>Pagos aprobados (período)</strong></td>
+                    <td class="stat-valor">${r.pagosAprobadosPeriodo}</td>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td><strong>Pagos rechazados (período)</strong></td>
+                    <td class="stat-valor">${r.pagosRechazadosPeriodo}</td>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td><strong>Pagos pendientes (período)</strong></td>
+                    <td class="stat-valor">${r.pagosPendientesPeriodo}</td>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td><strong>Tasa de aprobación</strong></td>
+                    <td class="stat-valor">${r.tasaAprobacion.toFixed(1)}%</td>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td><strong>Pagos aprobados histórico</strong></td>
+                    <td class="stat-valor">${r.pagosAprobadosTotal}</td>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div class="stats-grid">
+                            <div class="stats-col">
+                                <h4>📅 Tendencia mensual (últimos 12 meses)</h4>
+                                <table class="admin-table" style="margin-top:0.5rem;">
+                                    <thead><tr><th>Mes</th><th>Recaudado</th></tr></thead>
+                                    <tbody>${tendenciaHtml}</tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            document.getElementById('stats-ganancias-body').innerHTML = html;
+        },
+
+        // Renderizar tabla de guardadas
         renderizarGuardadas: function() {
             const w = this.datos.watchlist;
             if (!w) return;

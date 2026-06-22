@@ -798,6 +798,7 @@
                 <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('premios', this)">🎁 Premios y Canjes</button>
                 <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('premium', this)">🏆 Premium y Sorteos</button>
                 <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('suscripciones', this)">👑 Suscripciones</button>
+                <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('ganancias', this)">💰 Ganancias</button>
                 <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('puntos', this)">💰 Puntos</button>
                 <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('soporte', this)">🎫 Soporte</button>
                 <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('crecimiento', this)">📈 Crecimiento</button>
@@ -872,6 +873,19 @@
                             <tbody id="stats-suscripciones-body"></tbody>
                         </table>
                     </div>
+                </div>
+                <!-- Panel Ganancias -->
+                <div id="stats-ganancias" class="stats-panel">
+                    <table class="admin-table">
+                        <thead>
+                        <tr><th>KPI</th><th>VALOR</th><th colspan="2"></th></tr>
+                        </thead>
+                        <tbody id="stats-ganancias-body">
+                        <tr><td colspan="4" class="loading-row">
+                            <i class="fas fa-spinner fa-spin"></i> Cargando...
+                        </td></tr>
+                        </tbody>
+                    </table>
                 </div>
                 <div id="stats-puntos" class="stats-panel">
                     <div class="stats-tabla-container">
