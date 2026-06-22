@@ -798,6 +798,7 @@
                 <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('premios', this)">🎁 Premios y Canjes</button>
                 <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('premium', this)">🏆 Premium y Sorteos</button>
                 <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('suscripciones', this)">👑 Suscripciones</button>
+                <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('ganancias', this)">💰 Ganancias</button>
                 <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('puntos', this)">💰 Puntos</button>
                 <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('soporte', this)">🎫 Soporte</button>
                 <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('crecimiento', this)">📈 Crecimiento</button>
@@ -872,6 +873,19 @@
                             <tbody id="stats-suscripciones-body"></tbody>
                         </table>
                     </div>
+                </div>
+                <!-- Panel Ganancias -->
+                <div id="stats-ganancias" class="stats-panel">
+                    <table class="admin-table">
+                        <thead>
+                        <tr><th>KPI</th><th>VALOR</th><th colspan="2"></th></tr>
+                        </thead>
+                        <tbody id="stats-ganancias-body">
+                        <tr><td colspan="4" class="loading-row">
+                            <i class="fas fa-spinner fa-spin"></i> Cargando...
+                        </td></tr>
+                        </tbody>
+                    </table>
                 </div>
                 <div id="stats-puntos" class="stats-panel">
                     <div class="stats-tabla-container">
@@ -1010,7 +1024,7 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Nombre <span class="required">*</span></label>
-                    <input type="text" id="inputNombre" placeholder="Ej: Entrada 2D" required>
+                    <input type="text" id="inputNombre" placeholder="Ej: Entrada 2D" maxlength="200" required>
                 </div>
                 <div class="form-group">
                     <label>Tipo <span class="required">*</span></label>
@@ -1033,11 +1047,11 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Puntos requeridos <span class="required">*</span></label>
-                    <input type="number" id="inputPuntos" min="1" placeholder="Ej: 500" required>
+                    <input type="number" id="inputPuntos" min="1" max="999999" placeholder="Ej: 500" required>
                 </div>
                 <div class="form-group">
                     <label>Stock inicial <span class="required">*</span></label>
-                    <input type="number" id="inputStock" min="0" placeholder="Ej: 50" required>
+                    <input type="number" id="inputStock" min="0" max="99999" placeholder="Ej: 50" required>
                 </div>
             </div>
             <div class="form-row">
@@ -1056,16 +1070,16 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Socio / Marca</label>
-                    <input type="text" id="inputPartner" placeholder="Ej: Coca-Cola, Disney, etc.">
+                    <input type="text" id="inputPartner" placeholder="Ej: Coca-Cola, Disney, etc." maxlength="255">
                 </div>
                 <div class="form-group">
                     <label>Sitio web</label>
-                    <input type="url" id="inputWebsite" placeholder="https://ejemplo.com">
+                    <input type="url" id="inputWebsite" placeholder="https://ejemplo.com" maxlength="500">
                 </div>
             </div>
             <div class="form-group">
                 <label>Términos y condiciones</label>
-                <textarea id="inputTerminos" rows="2" placeholder="Términos específicos del premio..."></textarea>
+                <textarea id="inputTerminos" rows="2" maxlength="2000" placeholder="Términos específicos del premio..."></textarea>
             </div>
             <!-- Campos ENTREGA (comunes a todos los tipos) -->
             <div id="campoEntregaComun" style="display:none;">
@@ -1094,7 +1108,7 @@
                 </div>
                 <div class="form-group" id="campoPuntoRetiro" style="display:none;">
                     <label>Punto de retiro</label>
-                    <input type="text" id="inputPuntoRetiro" placeholder="Ej: Ciudad Autónoma de Buenos Aires / A coordinar por correo">
+                    <input type="text" id="inputPuntoRetiro" placeholder="Ej: Ciudad Autónoma de Buenos Aires / A coordinar por correo" maxlength="300">
                 </div>
             </div>
             <!-- Campos MERCHANDISING -->
@@ -1104,41 +1118,41 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Marca</label>
-                        <input type="text" id="inputMarca" placeholder="Ej: Adidas, Nike">
+                        <input type="text" id="inputMarca" placeholder="Ej: Adidas, Nike" maxlength="100">
                     </div>
                     <div class="form-group">
                         <label>Material</label>
-                        <input type="text" id="inputMaterial" placeholder="Ej: Algodón, Plástico">
+                        <input type="text" id="inputMaterial" placeholder="Ej: Algodón, Plástico" maxlength="100">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Color(es)</label>
-                        <input type="text" id="inputColor" placeholder="Ej: Rojo, Negro">
+                        <input type="text" id="inputColor" placeholder="Ej: Rojo, Negro" maxlength="100">
                     </div>
                     <div class="form-group">
                         <label>Talle / Talla</label>
-                        <input type="text" id="inputTalle" placeholder="Ej: M, L, 42">
+                        <input type="text" id="inputTalle" placeholder="Ej: M, L, 42" maxlength="50">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Dimensiones</label>
-                        <input type="text" id="inputDimensiones" placeholder="Ej: 30x20x10 cm">
+                        <input type="text" id="inputDimensiones" placeholder="Ej: 30x20x10 cm" maxlength="100">
                     </div>
                     <div class="form-group">
                         <label>Peso</label>
-                        <input type="text" id="inputPeso" placeholder="Ej: 500g, 2kg">
+                        <input type="text" id="inputPeso" placeholder="Ej: 500g, 2kg" maxlength="50">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Origen / País</label>
-                        <input type="text" id="inputOrigen" placeholder="Ej: Argentina, China">
+                        <input type="text" id="inputOrigen" placeholder="Ej: Argentina, China" maxlength="100">
                     </div>
                     <div class="form-group">
                         <label>Unidades incluidas</label>
-                        <input type="text" id="inputUnidades" placeholder="Ej: 1 par, pack x3">
+                        <input type="text" id="inputUnidades" placeholder="Ej: 1 par, pack x3" maxlength="50">
                     </div>
                 </div>
                 <div class="form-group">
@@ -1158,7 +1172,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Cadena de cine</label>
-                        <input type="text" id="inputCadenaCine" placeholder="Ej: Cinépolis, Hoyts">
+                        <input type="text" id="inputCadenaCine" placeholder="Ej: Cinépolis, Hoyts" maxlength="100">
                     </div>
                     <div class="form-group">
                         <label>Formato</label>
@@ -1175,7 +1189,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Cantidad de entradas</label>
-                        <input type="number" id="inputCantidadEntradas" min="1" placeholder="Ej: 2">
+                        <input type="number" id="inputCantidadEntradas" min="1" max="20" placeholder="Ej: 2">
                     </div>
                     <div class="form-group">
                         <label>Incluye consumición</label>
@@ -1188,7 +1202,7 @@
                 </div>
                 <div class="form-group">
                     <label>Restricciones de función</label>
-                    <textarea id="inputRestriccionesCine" rows="2" placeholder="Ej: Solo fines de semana, no aplica en estrenos..."></textarea>
+                    <textarea id="inputRestriccionesCine" rows="2" maxlength="500" placeholder="Ej: Solo fines de semana, no aplica en estrenos..."></textarea>
                 </div>
             </div>
 
@@ -1227,7 +1241,7 @@
                 </div>
                 <div class="form-group">
                     <label>Productos incluidos / excluidos</label>
-                    <textarea id="inputProductosAplicables" rows="2" placeholder="Ej: Solo remeras, no aplica en productos en oferta..."></textarea>
+                    <textarea id="inputProductosAplicables" rows="2" maxlength="500" placeholder="Ej: Solo remeras, no aplica en productos en oferta..."></textarea>
                 </div>
                 <div class="form-group">
                     <label>Acumulable con otras promociones <span class="required">*</span></label>
@@ -1257,7 +1271,7 @@
                 <p style="font-size:0.8rem;color:#888;margin-bottom:0.5rem;">Detalles de la experiencia</p>
                 <div class="form-group">
                     <label>Tipo de experiencia</label>
-                    <input type="text" id="inputExperienciaTipo" placeholder="Ej: Premiere, Visita a set, Proyección privada...">
+                    <input type="text" id="inputExperienciaTipo" placeholder="Ej: Premiere, Visita a set, Proyección privada..." maxlength="200">
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -1266,17 +1280,17 @@
                     </div>
                     <div class="form-group">
                         <label>Cupo máximo</label>
-                        <input type="number" id="inputEventoCupo" min="1" placeholder="Ej: 50">
+                        <input type="number" id="inputEventoCupo" min="1" max="9999" placeholder="Ej: 50">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Ubicación</label>
-                        <input type="text" id="inputEventoUbicacion" placeholder="Ej: Cine Hoyts Abasto, CABA">
+                        <input type="text" id="inputEventoUbicacion" placeholder="Ej: Cine Hoyts Abasto, CABA" maxlength="300">
                     </div>
                     <div class="form-group">
                         <label>Duración</label>
-                        <input type="text" id="inputDuracion" placeholder="Ej: 2 horas">
+                        <input type="text" id="inputDuracion" placeholder="Ej: 2 horas" maxlength="100">
                     </div>
                 </div>
                 <div class="form-row">
@@ -1324,7 +1338,7 @@
                 </div>
                 <div class="form-group">
                     <label>Responsable de la organización</label>
-                    <input type="text" id="inputResponsableOrganizacion" placeholder="Ej: Distribuidora XYZ, Productora ABC">
+                    <input type="text" id="inputResponsableOrganizacion" placeholder="Ej: Distribuidora XYZ, Productora ABC" maxlength="200">
                 </div>
             </div>
         </form>
@@ -1347,7 +1361,7 @@
         <div class="modal-body" style="display:flex;flex-direction:column;gap:1rem;">
             <div class="form-group">
                 <label>Nombre <span class="required">*</span></label>
-                <input type="text" id="formPremiumNombre" placeholder="Nombre del premio o sorteo">
+                <input type="text" id="formPremiumNombre" placeholder="Nombre del premio o sorteo" maxlength="200">
             </div>
             <div class="form-group">
                 <label>Descripción <small style="color:#999;font-weight:normal;">(máx. 165 caracteres)</small></label>
@@ -1376,7 +1390,7 @@
             </div>
             <div class="form-group" id="campoPremiumPuntos">
                 <label>Puntos requeridos</label>
-                <input type="number" id="formPremiumPuntos" value="0" min="0">
+                <input type="number" id="formPremiumPuntos" value="0" min="0" max="999999">
             </div>
             <div class="form-group" id="campoPremiumFechaSorteo" style="display:none;">
                 <label>Fecha y hora del sorteo</label>
@@ -1384,19 +1398,19 @@
             </div>
             <div class="form-group" id="campoPremiumStock">
                 <label>Stock (vacío = ilimitado)</label>
-                <input type="number" id="formPremiumStock" placeholder="Ej: 10" min="0">
+                <input type="number" id="formPremiumStock" placeholder="Ej: 10" min="0" max="99999">
             </div>
             <div class="form-group">
                 <label>Socio / Marca</label>
-                <input type="text" id="formPremiumPartner" placeholder="Ej: Coca-Cola, Disney...">
+                <input type="text" id="formPremiumPartner" placeholder="Ej: Coca-Cola, Disney..." maxlength="200">
             </div>
             <div class="form-group">
                 <label>Sitio web</label>
-                <input type="url" id="formPremiumWebsite" placeholder="https://ejemplo.com">
+                <input type="url" id="formPremiumWebsite" placeholder="https://ejemplo.com" maxlength="500">
             </div>
             <div class="form-group">
                 <label>Términos y condiciones</label>
-                <textarea id="formPremiumTerminos" rows="2" placeholder="Términos específicos..."></textarea>
+                <textarea id="formPremiumTerminos" rows="2" maxlength="2000" placeholder="Términos específicos..."></textarea>
             </div>
             <div class="form-group">
                 <label>Estado</label>
@@ -1412,20 +1426,20 @@
                 <p style="font-size:0.8rem;color:#888;margin-bottom:0.5rem;">Detalles del producto — todos opcionales</p>
                 <div style="display:flex;flex-direction:column;gap:0.75rem;">
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
-                        <div class="form-group"><label>Marca</label><input type="text" id="formPremiumMarca" placeholder="Ej: Adidas"></div>
-                        <div class="form-group"><label>Material</label><input type="text" id="formPremiumMaterial" placeholder="Ej: Algodón"></div>
+                        <div class="form-group"><label>Marca</label><input type="text" id="formPremiumMarca" placeholder="Ej: Adidas" maxlength="100"></div>
+                        <div class="form-group"><label>Material</label><input type="text" id="formPremiumMaterial" placeholder="Ej: Algodón" maxlength="100"></div>
                     </div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
-                        <div class="form-group"><label>Color(es)</label><input type="text" id="formPremiumColor" placeholder="Ej: Rojo, Negro"></div>
-                        <div class="form-group"><label>Talle / Talla</label><input type="text" id="formPremiumTalle" placeholder="Ej: M, L, 42"></div>
+                        <div class="form-group"><label>Color(es)</label><input type="text" id="formPremiumColor" placeholder="Ej: Rojo, Negro" maxlength="100"></div>
+                        <div class="form-group"><label>Talle / Talla</label><input type="text" id="formPremiumTalle" placeholder="Ej: M, L, 42" maxlength="50"></div>
                     </div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
-                        <div class="form-group"><label>Dimensiones</label><input type="text" id="formPremiumDimensiones" placeholder="Ej: 30x20x10 cm"></div>
-                        <div class="form-group"><label>Peso</label><input type="text" id="formPremiumPeso" placeholder="Ej: 500g"></div>
+                        <div class="form-group"><label>Dimensiones</label><input type="text" id="formPremiumDimensiones" placeholder="Ej: 30x20x10 cm" maxlength="100"></div>
+                        <div class="form-group"><label>Peso</label><input type="text" id="formPremiumPeso" placeholder="Ej: 500g" maxlength="50"></div>
                     </div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
-                        <div class="form-group"><label>Origen / País</label><input type="text" id="formPremiumOrigen" placeholder="Ej: Argentina"></div>
-                        <div class="form-group"><label>Unidades incluidas</label><input type="text" id="formPremiumUnidades" placeholder="Ej: 1 par"></div>
+                        <div class="form-group"><label>Origen / País</label><input type="text" id="formPremiumOrigen" placeholder="Ej: Argentina" maxlength="100"></div>
+                        <div class="form-group"><label>Unidades incluidas</label><input type="text" id="formPremiumUnidades" placeholder="Ej: 1 par" maxlength="50"></div>
                     </div>
                     <div class="form-group">
                         <label>Condición</label>
@@ -1444,7 +1458,7 @@
                 <p style="font-size:0.8rem;color:#888;margin-bottom:0.5rem;">Detalles de la entrada — todos opcionales</p>
                 <div style="display:flex;flex-direction:column;gap:0.75rem;">
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
-                        <div class="form-group"><label>Cadena de cine</label><input type="text" id="formPremiumCadenaCine" placeholder="Ej: Hoyts, Cinépolis"></div>
+                        <div class="form-group"><label>Cadena de cine</label><input type="text" id="formPremiumCadenaCine" placeholder="Ej: Hoyts, Cinépolis" maxlength="100"></div>
                         <div class="form-group">
                             <label>Formato</label>
                             <select id="formPremiumFormatoCine">
@@ -1458,7 +1472,7 @@
                         </div>
                     </div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
-                        <div class="form-group"><label>Cantidad de entradas</label><input type="number" id="formPremiumCantidadEntradas" min="1" placeholder="Ej: 2"></div>
+                        <div class="form-group"><label>Cantidad de entradas</label><input type="number" id="formPremiumCantidadEntradas" min="1" max="20" placeholder="Ej: 2"></div>
                         <div class="form-group">
                             <label>Incluye consumición</label>
                             <select id="formPremiumIncluyeConsumicion">
@@ -1468,7 +1482,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="form-group"><label>Restricciones de función</label><textarea id="formPremiumRestriccionesCine" rows="2" placeholder="Ej: Solo fines de semana, no aplica en estrenos..."></textarea></div>
+                    <div class="form-group"><label>Restricciones de función</label><textarea id="formPremiumRestriccionesCine" rows="2" maxlength="500" placeholder="Ej: Solo fines de semana, no aplica en estrenos..."></textarea></div>
                 </div>
             </div>
 
@@ -1500,7 +1514,7 @@
                         </div>
                         <div class="form-group"><label>Compra mínima</label><input type="number" id="formPremiumCompraMinima" min="0" step="0.01" placeholder="Ej: 10000"></div>
                     </div>
-                    <div class="form-group"><label>Productos incluidos / excluidos</label><textarea id="formPremiumProductosAplicables" rows="2" placeholder="Ej: Solo remeras, no aplica en productos en oferta..."></textarea></div>
+                    <div class="form-group"><label>Productos incluidos / excluidos</label><textarea id="formPremiumProductosAplicables" rows="2" maxlength="500" placeholder="Ej: Solo remeras, no aplica en productos en oferta..."></textarea></div>
                     <div class="form-group">
                         <label>Acumulable con otras promociones <span class="required">*</span></label>
                         <select id="formPremiumAcumulable">
@@ -1517,13 +1531,13 @@
                 <hr style="margin:0.5rem 0;border-color:#f0f0f0;">
                 <p style="font-size:0.8rem;color:#888;margin-bottom:0.5rem;">Detalles de la experiencia</p>
                 <div style="display:flex;flex-direction:column;gap:0.75rem;">
-                    <div class="form-group"><label>Tipo de experiencia</label><input type="text" id="formPremiumExperienciaTipo" placeholder="Ej: Premiere, Visita a set..."></div>
+                    <div class="form-group"><label>Tipo de experiencia</label><input type="text" id="formPremiumExperienciaTipo" placeholder="Ej: Premiere, Visita a set..." maxlength="200"></div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
-                        <div class="form-group"><label>Ubicación</label><input type="text" id="formPremiumEventoUbicacion" placeholder="Ej: Cine Hoyts Abasto, CABA"></div>
-                        <div class="form-group"><label>Duración</label><input type="text" id="formPremiumDuracion" placeholder="Ej: 2 horas"></div>
+                        <div class="form-group"><label>Ubicación</label><input type="text" id="formPremiumEventoUbicacion" placeholder="Ej: Cine Hoyts Abasto, CABA" maxlength="300"></div>
+                        <div class="form-group"><label>Duración</label><input type="text" id="formPremiumDuracion" placeholder="Ej: 2 horas" maxlength="100"></div>
                     </div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
-                        <div class="form-group"><label>Cupo máximo</label><input type="number" id="formPremiumEventoCupo" min="1" placeholder="Ej: 50"></div>
+                        <div class="form-group"><label>Cupo máximo</label><input type="number" id="formPremiumEventoCupo" min="1" max="9999" placeholder="Ej: 50"></div>
                         <div class="form-group">
                             <label>Fecha del evento</label>
                             <input type="datetime-local" id="formPremiumEventoFecha">
@@ -1686,21 +1700,21 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Nombre <span class="required">*</span></label>
-                    <input type="text" id="inputUsuarioNombre" placeholder="Nombre completo" required>
+                    <input type="text" id="inputUsuarioNombre" placeholder="Nombre completo" maxlength="100" required>
                 </div>
                 <div class="form-group">
                     <label>Email <span class="required">*</span></label>
-                    <input type="email" id="inputUsuarioEmail" placeholder="email@ejemplo.com" required>
+                    <input type="email" id="inputUsuarioEmail" placeholder="email@ejemplo.com" maxlength="150" required>
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
                     <label>DNI</label>
-                    <input type="text" id="inputUsuarioDni" placeholder="12345678">
+                    <input type="text" id="inputUsuarioDni" placeholder="12345678" maxlength="20" inputmode="numeric">
                 </div>
                 <div class="form-group">
                     <label>Teléfono</label>
-                    <input type="text" id="inputUsuarioTelefono" placeholder="+54 11 1234-5678">
+                    <input type="text" id="inputUsuarioTelefono" placeholder="+54 11 1234-5678" maxlength="30">
                 </div>
             </div>
             <div class="form-row">
@@ -1722,11 +1736,11 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Provincia</label>
-                    <input type="text" id="inputUsuarioProvincia" placeholder="Ej: Buenos Aires">
+                    <input type="text" id="inputUsuarioProvincia" placeholder="Ej: Buenos Aires" maxlength="100">
                 </div>
                 <div class="form-group">
                     <label>Localidad</label>
-                    <input type="text" id="inputUsuarioLocalidad" placeholder="Ej: Belgrano">
+                    <input type="text" id="inputUsuarioLocalidad" placeholder="Ej: Belgrano" maxlength="100">
                 </div>
             </div>
             <div class="form-row">
