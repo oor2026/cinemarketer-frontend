@@ -1544,8 +1544,11 @@ window.abrirConfiguracion = async function() {
     } catch(e) {}
 
     // Cargar lista de bloqueados
-    _cargarBloqueadosEnConfig();
-};
+        _cargarBloqueadosEnConfig();
+
+        // Inicializar estado del toggle de notificaciones push
+        _actualizarTogglePush();
+    };
 
 async function _cargarBloqueadosEnConfig() {
     const lista = document.getElementById('configBloqueadosLista');
@@ -1642,6 +1645,83 @@ window.togglePrivacidad = async function() {
         _actualizarTogglePrivacidad();
     } catch(e) {
         alert('Error al actualizar la privacidad. Intentá de nuevo.');
+    }
+};
+
+// ==============================================
+// NOTIFICACIONES PUSH
+// ==============================================
+
+function _actualizarTogglePush() {
+    const toggle  = document.getElementById('togglePushNotif');
+    const dot     = document.getElementById('togglePushNotifDot');
+    const label   = document.getElementById('pushNotifLabel');
+    const msg     = document.getElementById('pushNotifBrowserMsg');
+    if (!toggle) return;
+
+    // Si el browser no soporta push, deshabilitar
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        toggle.style.opacity = '0.4';
+        toggle.style.pointerEvents = 'none';
+        label.textContent = 'No disponible';
+        if (msg) { msg.style.display = 'block'; msg.textContent = 'Tu navegador no soporta notificaciones push.'; }
+        return;
+    }
+
+    const permiso = Notification.permission;
+
+    if (permiso === 'denied') {
+        toggle.style.opacity = '0.4';
+        toggle.style.pointerEvents = 'none';
+        label.textContent = 'Bloqueado';
+        if (msg) { msg.style.display = 'block'; msg.textContent = 'Bloqueaste las notificaciones en este navegador. Para activarlas, cambiá el permiso en la configuración del navegador.'; }
+        return;
+    }
+
+    // Verificar si ya tiene suscripción activa
+    navigator.serviceWorker.ready.then(reg => {
+        reg.pushManager.getSubscription().then(sub => {
+            const activo = !!sub && permiso === 'granted';
+            if (activo) {
+                toggle.style.background = '#324C89';
+                dot.style.left = '22px';
+                label.textContent = 'Activo';
+            } else {
+                toggle.style.background = '#ddd';
+                dot.style.left = '2px';
+                label.textContent = 'Inactivo';
+            }
+        });
+    });
+}
+
+window.togglePushNotificaciones = async function() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+    const permiso = Notification.permission;
+    const reg = await navigator.serviceWorker.ready;
+    const subActual = await reg.pushManager.getSubscription();
+
+    if (subActual) {
+        // Ya está suscripto → desuscribir
+        await window.PushNotifications.desuscribir();
+        _actualizarTogglePush();
+    } else {
+        // No está suscripto → pedir permiso y suscribir
+        if (permiso === 'denied') return; // ya bloqueado, no hacer nada
+
+        const ok = await window.PushNotifications.solicitarPermiso();
+        if (ok) {
+            _actualizarTogglePush();
+        } else if (Notification.permission === 'denied') {
+            // El usuario denegó en este intento
+            const msg = document.getElementById('pushNotifBrowserMsg');
+            if (msg) {
+                msg.style.display = 'block';
+                msg.textContent = 'Denegaste el permiso. Para activarlo, cambiá el permiso en la configuración del navegador.';
+            }
+            _actualizarTogglePush();
+        }
     }
 };
 

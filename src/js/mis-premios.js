@@ -822,13 +822,59 @@ function mostrarExito(rewardName, code, onClose = null) {
     setTimeout(() => overlay.classList.add('visible'), 10);
 
     document.getElementById('popupCerrarExito').onclick = () => {
-        overlay.classList.remove('visible');
-        setTimeout(() => {
-            overlay.remove();
-            if (typeof onClose === 'function') onClose();
-        }, 250);
-    };
-}
+            overlay.classList.remove('visible');
+            setTimeout(() => {
+                overlay.remove();
+                if (typeof onClose === 'function') onClose();
+                // Sugerir activar notificaciones push (solo mobile, solo si no está activo)
+                _sugerirActivarPush();
+            }, 250);
+        };
+    }
+
+    // Sugerir push después del canje — solo mobile, solo una vez por sesión
+    async function _sugerirActivarPush() {
+        // Solo mobile
+        if (window.innerWidth > 768) return;
+        // Solo si el browser soporta push
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+        // Solo si no está ya activo o bloqueado
+        if (Notification.permission === 'granted' || Notification.permission === 'denied') return;
+        // Solo una vez por sesión
+        if (sessionStorage.getItem('pushSugerido')) return;
+        sessionStorage.setItem('pushSugerido', '1');
+
+        // Pequeña pausa para no solapar con la animación del modal anterior
+        await new Promise(resolve => setTimeout(resolve, 400));
+
+        const overlay = document.createElement('div');
+        overlay.className = 'premio-popup-overlay';
+        overlay.innerHTML = `
+            <div class="premio-popup">
+                <div class="premio-popup-icon">🔔</div>
+                <h3>¡No te pierdas el próximo premio!</h3>
+                <p>Activá las notificaciones para enterarte antes que nadie cuando haya nuevos premios, sorteos y novedades exclusivas.</p>
+                <div class="premio-popup-btns">
+                    <button class="premio-popup-btn-cancelar" id="pushSugerirNo">Por ahora no</button>
+                    <button class="premio-popup-btn-confirmar" id="pushSugerirSi">🔔 Sí, activar</button>
+                </div>
+            </div>`;
+        document.body.appendChild(overlay);
+        setTimeout(() => overlay.classList.add('visible'), 10);
+
+        document.getElementById('pushSugerirNo').onclick = () => {
+            overlay.classList.remove('visible');
+            setTimeout(() => overlay.remove(), 250);
+        };
+
+        document.getElementById('pushSugerirSi').onclick = async () => {
+            overlay.classList.remove('visible');
+            setTimeout(() => overlay.remove(), 250);
+            if (typeof window.PushNotifications !== 'undefined') {
+                await window.PushNotifications.solicitarPermiso();
+            }
+        };
+    }
 
 // ==============================================
 // HELPERS
