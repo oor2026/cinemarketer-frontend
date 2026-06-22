@@ -623,6 +623,23 @@
                     </div>
                 </div>
             </div>
+            <!-- NOTIFICACIONES PUSH -->
+            <div style="border:1px solid #f0f0f0; border-radius:12px; padding:1.25rem; margin-bottom:1rem;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:1rem;">
+                    <div>
+                        <p style="margin:0 0 4px; font-size:0.9rem; font-weight:600; color:#333;">Notificaciones en tu dispositivo</p>
+                        <p style="margin:0; font-size:0.8rem; color:#aaa; line-height:1.5;" id="pushNotifDesc">Activá para recibir avisos de nuevos premios, sorteos y más, aunque no estés en la app.</p>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.5rem; flex-shrink:0;">
+                        <span style="font-size:0.8rem; color:#aaa;" id="pushNotifLabel">Inactivo</span>
+                        <div id="togglePushNotif" onclick="window.togglePushNotificaciones()"
+                             style="width:44px; height:24px; border-radius:12px; background:#ddd; cursor:pointer; position:relative; transition:background 0.2s;">
+                            <div id="togglePushNotifDot" style="width:20px; height:20px; border-radius:50%; background:white; position:absolute; top:2px; left:2px; transition:left 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
+                        </div>
+                    </div>
+                </div>
+                <p id="pushNotifBrowserMsg" style="display:none; margin:0.5rem 0 0; font-size:0.75rem; color:#e50914;"></p>
+            </div>
             <div style="border:1px solid #f0f0f0; border-radius:12px; padding:1.25rem; margin-bottom:1.5rem;">
                 <p style="margin:0 0 0.75rem; font-size:0.9rem; font-weight:600; color:#333;">Usuarios bloqueados</p>
                 <div id="configBloqueadosLista" style="max-height:180px; overflow-y:auto; padding-right:2px;">

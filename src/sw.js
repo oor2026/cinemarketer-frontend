@@ -4,7 +4,6 @@
 
 const CACHE_NAME = 'cinemarketer-v1';
 
-// Archivos estáticos a cachear para instalación
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -21,45 +20,36 @@ const STATIC_ASSETS = [
     '/assets/images/favicon.png'
 ];
 
-// ── Install: cachear assets estáticos ────────────────────────────────────────
+// ── Install ───────────────────────────────────────────────────────────────────
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(STATIC_ASSETS);
-        })
+        caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
     );
     self.skipWaiting();
 });
 
-// ── Activate: limpiar caches viejos ──────────────────────────────────────────
+// ── Activate ──────────────────────────────────────────────────────────────────
 self.addEventListener('activate', (event) => {
     event.waitUntil(
-        caches.keys().then((keys) => {
-            return Promise.all(
-                keys
-                    .filter(key => key !== CACHE_NAME)
-                    .map(key => caches.delete(key))
-            );
-        })
+        caches.keys().then((keys) => Promise.all(
+            keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+        ))
     );
     self.clients.claim();
 });
 
-// ── Fetch: network first para API, cache first para estáticos ────────────────
+// ── Fetch ─────────────────────────────────────────────────────────────────────
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
 
-    // Siempre ir a la red para llamadas a la API
     if (url.pathname.startsWith('/api/')) {
         event.respondWith(fetch(event.request));
         return;
     }
 
-    // Para assets estáticos: network first, fallback a cache
     event.respondWith(
         fetch(event.request)
             .then((response) => {
-                // Guardar copia en cache si es exitosa
                 if (response && response.status === 200) {
                     const responseClone = response.clone();
                     caches.open(CACHE_NAME).then((cache) => {
@@ -68,9 +58,59 @@ self.addEventListener('fetch', (event) => {
                 }
                 return response;
             })
-            .catch(() => {
-                // Si no hay red, intentar desde cache
-                return caches.match(event.request);
-            })
+            .catch(() => caches.match(event.request))
+    );
+});
+
+// ── Push: recibir notificación del backend ────────────────────────────────────
+self.addEventListener('push', (event) => {
+    let data = { title: 'Cinemarketer', body: 'Tenés una novedad', icon: '/assets/images/icon-192.png' };
+
+    if (event.data) {
+        try {
+            data = event.data.json();
+        } catch (e) {
+            data.body = event.data.text();
+        }
+    }
+
+    const options = {
+        body: data.body,
+        icon: data.icon || '/assets/images/icon-192.png',
+        badge: '/assets/images/icon-192.png',
+        vibrate: [200, 100, 200],
+        data: { url: data.url || '/dashboard.html' },
+        actions: [
+            { action: 'open', title: 'Ver' },
+            { action: 'close', title: 'Cerrar' }
+        ]
+    };
+
+    event.waitUntil(
+        self.registration.showNotification(data.title, options)
+    );
+});
+
+// ── Click en la notificación ──────────────────────────────────────────────────
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+
+    if (event.action === 'close') return;
+
+    const urlToOpen = event.notification.data?.url || '/dashboard.html';
+
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+            // Si ya hay una pestaña abierta, enfocarla
+            for (const client of clientList) {
+                if (client.url.includes('dashboard.html') && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            // Si no, abrir una nueva
+            if (clients.openWindow) {
+                return clients.openWindow(urlToOpen);
+            }
+        })
     );
 });
