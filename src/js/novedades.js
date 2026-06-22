@@ -54,7 +54,17 @@ function cerrarTodosLosMenus() {
     }
 }
 
-function getNotifIcono(type) {
+function getNotifIcono(type, referenceType) {
+    if (type === 'NEW_REWARD' || type === 'NEW_PREMIUM_REWARD') {
+        switch(referenceType) {
+            case 'TICKET':        return '🎟️';
+            case 'MERCHANDISING': return '🎁';
+            case 'DESCUENTO':     return '🏷️';
+            case 'EXPERIENCIA':   return '🎬';
+            case 'SORTEO':        return '🎲';
+            default:              return '🎁';
+        }
+    }
     switch(type) {
         case 'BANCO':                    return '👍';
         case 'MERECE_PUNTO':             return '⭐';
@@ -118,7 +128,7 @@ window.cargarNovedades = async function() {
                     onmouseover="this.style.background='#f8f8f8'"
                     onmouseout="this.style.background='${n.read ? 'white' : '#f0f4ff'}'">
                     <div style="display:flex;align-items:flex-start;gap:0.5rem;">
-                        <span style="font-size:1rem;flex-shrink:0;">${getNotifIcono(n.type)}</span>
+                        <span style="font-size:1rem;flex-shrink:0;">${getNotifIcono(n.type, n.referenceType)}</span>
                         <div style="flex:1;min-width:0;">
                             <div style="font-size:0.83rem;color:#333;line-height:1.4;">${n.message}</div>
                             <div style="font-size:0.75rem;color:#999;margin-top:0.2rem;">${new Date(n.createdAt).toLocaleDateString('es-ES')} ${new Date(n.createdAt).toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'})}</div>
@@ -213,6 +223,16 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
 
             if (type === 'ADMIN_GRANT_POINTS') {
                 if (typeof loadModule === 'function') loadModule('mis-puntos');
+                return;
+            }
+
+            if (type === 'NEW_REWARD') {
+                if (typeof loadModule === 'function') loadModule('mis-premios');
+                return;
+            }
+
+            if (type === 'NEW_PREMIUM_REWARD') {
+                if (typeof loadModule === 'function') loadModule('mis-premios');
                 return;
             }
 
@@ -345,7 +365,7 @@ window.cargarNovedadesMobile = async function() {
                             style="padding:0.75rem 1rem;border-bottom:1px solid #eee;cursor:pointer;
                                    background:${n.read ? 'white' : '#f0f4ff'};">
                             <div style="display:flex;align-items:flex-start;gap:0.5rem;">
-                                <span style="font-size:1rem;flex-shrink:0;">${getNotifIcono(n.type)}</span>
+                                <span style="font-size:1rem;flex-shrink:0;">${getNotifIcono(n.type, n.referenceType)}</span>
                                 <div style="flex:1;min-width:0;">
                                     <div style="font-size:0.83rem;color:#333;line-height:1.4;">${n.message}</div>
                                     <div style="font-size:0.75rem;color:#999;margin-top:0.2rem;">${new Date(n.createdAt).toLocaleDateString('es-ES')} ${new Date(n.createdAt).toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'})}</div>
