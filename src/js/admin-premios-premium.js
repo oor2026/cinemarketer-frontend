@@ -110,9 +110,14 @@ const adminPremiosPremium = {
                 ? `<button class="btn-accion btn-ejecutar" onclick="adminPremiosPremium.verParticipantes(${p.id})" title="Ver participantes">
                        <i class="fas fa-users"></i>
                    </button>
-                   ${!p.drawExecuted ? `<button class="btn-accion" style="background:#1a3a6b;color:white;" onclick="adminPremiosPremium.ejecutarSorteo(${p.id}, '${p.name}')" title="Ejecutar sorteo">
-                       <i class="fas fa-random"></i>
-                   </button>` : `<span style="font-size:11px;color:#2e7d32;">✓ Ejecutado</span>`}`
+                   ${p.drawExecuted
+                       ? `<button class="btn-accion" style="background:#1a3a6b;color:white;" onclick="adminPremiosPremium.verResultados(${p.id}, '${p.name}')" title="Ver resultados">
+                              <i class="fas fa-trophy"></i>
+                          </button>`
+                       : `<button class="btn-accion" style="background:#1a3a6b;color:white;" onclick="adminPremiosPremium.ejecutarSorteo(${p.id}, '${p.name}')" title="Ejecutar sorteo">
+                              <i class="fas fa-random"></i>
+                          </button>`
+                   }`
                 : '';
 
             return `
@@ -571,19 +576,115 @@ const adminPremiosPremium = {
     // ------------------------------------------
     // EJECUTAR SORTEO
     // ------------------------------------------
-    async ejecutarSorteo(id, nombre) {
-        if (!confirm(`¿Ejecutar el sorteo de "${nombre}"? Esta acción no se puede deshacer.`)) return;
-        try {
-            const response = await fetch(`${CONFIG.API_URL}/admin/premium/rewards/${id}/draw`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (!response.ok) throw new Error();
-            const result = await response.json();
-            alert(`🏆 Sorteo ejecutado!\nGanador: ${result.winnerName} (${result.winnerEmail})\nTotal participantes: ${result.totalParticipants}`);
-            await this.cargarPremios();
-        } catch {
-            alert('Error al ejecutar el sorteo');
+    async verResultados(id, nombre) {
+            try {
+                const response = await fetch(`${CONFIG.API_URL}/admin/premium/rewards/${id}/draw/results`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error();
+                const results = await response.json();
+                adminPremiosPremium._mostrarResultadosSorteo(results, id);
+            } catch {
+                alert('Error al cargar los resultados del sorteo');
+            }
+        },
+
+        async ejecutarSorteo(id, nombre) {
+            if (!confirm(`¿Ejecutar el sorteo de "${nombre}"? Esta acción no se puede deshacer.`)) return;
+            try {
+                const response = await fetch(`${CONFIG.API_URL}/admin/premium/rewards/${id}/draw`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error();
+                const result = await response.json();
+                adminPremiosPremium._mostrarResultadosSorteo(result, id);
+                await this.cargarPremios();
+            } catch {
+                alert('Error al ejecutar el sorteo');
+            }
+        },
+
+        _mostrarResultadosSorteo(result, rewardId) {
+            // Construir filas de seleccionados
+            const seleccionados = [
+                { pos: 1, label: '🏆 Ganador/a',   id: result.winnerId,    name: result.winnerName,    email: result.winnerEmail },
+                { pos: 2, label: '🥈 Suplente 1',  id: result.suplente1Id, name: result.suplente1Name, email: '' },
+                { pos: 3, label: '🥉 Suplente 2',  id: result.suplente2Id, name: result.suplente2Name, email: '' },
+            ].filter(s => s.id);
+
+            const filas = seleccionados.map(s => `
+                <tr id="fila-resultado-${s.pos}">
+                    <td style="padding:0.75rem; font-weight:600;">${s.label}</td>
+                    <td style="padding:0.75rem;">${s.name || '—'}</td>
+                    <td style="padding:0.75rem; color:#888; font-size:0.85rem;">${s.email || '—'}</td>
+                    <td style="padding:0.75rem;">
+                        ${s.pos === 1 ? `
+                            <button onclick="adminPremiosPremium._descalificarGanador(${rewardId}, ${s.pos})"
+                                style="background:#e50914;color:white;border:none;border-radius:6px;padding:0.4rem 0.8rem;cursor:pointer;font-size:0.82rem;">
+                                Descalificar
+                            </button>` : '—'}
+                    </td>
+                </tr>`).join('');
+
+            // Crear modal
+            let modal = document.getElementById('modalResultadosSorteo');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'modalResultadosSorteo';
+                modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+                document.body.appendChild(modal);
+            }
+
+            modal.innerHTML = `
+                <div style="background:white;border-radius:16px;width:100%;max-width:600px;overflow:hidden;">
+                    <div style="background:#1a3a6b;padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;">
+                        <h3 style="color:white;margin:0;font-size:1rem;">🏆 Resultado del sorteo</h3>
+                        <button onclick="document.getElementById('modalResultadosSorteo').remove()"
+                            style="background:rgba(255,255,255,0.2);border:none;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;">✕</button>
+                    </div>
+                    <div style="padding:1.5rem;">
+                        <p style="margin:0 0 1rem;font-size:0.88rem;color:#555;">
+                            Total participantes: <strong>${result.totalParticipants}</strong> —
+                            Elegibles premium: <strong>${result.elegibles || '—'}</strong>
+                        </p>
+                        <table style="width:100%;border-collapse:collapse;font-size:0.88rem;">
+                            <thead>
+                                <tr style="background:#f5f5f5;">
+                                    <th style="padding:0.75rem;text-align:left;">Posición</th>
+                                    <th style="padding:0.75rem;text-align:left;">Usuario</th>
+                                    <th style="padding:0.75rem;text-align:left;">Email</th>
+                                    <th style="padding:0.75rem;text-align:left;">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyResultados">${filas}</tbody>
+                        </table>
+                    </div>
+                    <div style="padding:1rem 1.5rem;border-top:1px solid #f0f0f0;text-align:right;">
+                        <button onclick="document.getElementById('modalResultadosSorteo').remove()"
+                            style="padding:0.6rem 1.25rem;border:1px solid #ddd;background:none;border-radius:8px;color:#666;cursor:pointer;">
+                            Cerrar
+                        </button>
+                    </div>
+                </div>`;
+
+            modal.style.display = 'flex';
+        },
+
+        async _descalificarGanador(rewardId, position) {
+            if (!confirm('¿Descalificar a este seleccionado? El siguiente suplente pasará a ser ganador.')) return;
+            try {
+                const response = await fetch(
+                    `${CONFIG.API_URL}/admin/premium/rewards/${rewardId}/draw/descalificar/${position}`,
+                    { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } }
+                );
+                if (!response.ok) throw new Error();
+                const result = await response.json();
+                alert(`✅ Descalificación aplicada.\nNuevo ganador: ${result.nuevoGanadorName}`);
+                document.getElementById('modalResultadosSorteo')?.remove();
+                await this.cargarPremios();
+            } catch {
+                alert('Error al descalificar');
+            }
         }
-    }
-};
+    };

@@ -301,6 +301,7 @@
                         <button class="modal-tab active" id="tabEspecial1" onclick="window.switchModalTab('especial', 1)">Información</button>
                         <button class="modal-tab" id="tabEspecial2" onclick="window.switchModalTab('especial', 2)" style="display:none;">Detalles</button>
                         <button class="modal-tab" id="tabEspecial3" onclick="window.switchModalTab('especial', 3)" style="display:none;">Términos</button>
+                        <button class="modal-tab" id="tabEspecial4" onclick="window.switchModalTab('especial', 4)" style="display:none;">Resultados</button>
                     </div>
 
                     <!-- TAB 1: Información -->
@@ -354,7 +355,37 @@
                             <p id="modalEspecialTerminos" style="max-height:180px; overflow-y:auto; padding-right:0.5rem; font-size:0.85rem; color:#555; line-height:1.6;"></p>
                         </div>
                     </div>
-
+                    <div id="panelEspecial4" class="modal-tab-panel" style="display:none;">
+                        <div id="modalEspecialResultados" style="padding:0.5rem 0;">
+                            <div id="resultadosPendiente" style="text-align:center; padding:1.5rem; color:#999;">
+                                <div style="font-size:2rem; margin-bottom:0.5rem;">🎲</div>
+                                <p style="margin:0; font-size:0.9rem;">El sorteo aún no fue realizado.<br>¡Seguí participando!</p>
+                            </div>
+                            <div id="resultadosEjecutado" style="display:none;">
+                                <div id="resultadoGanador" style="display:flex; align-items:center; gap:0.75rem; padding:0.75rem; background:#fff8e1; border-radius:10px; margin-bottom:0.5rem; cursor:pointer;">
+                                    <span style="font-size:1.5rem;">🏆</span>
+                                    <div>
+                                        <div style="font-size:0.75rem; color:#999; font-weight:600; text-transform:uppercase;">Ganador/a</div>
+                                        <div id="resultadoGanadorNombre" style="font-size:0.95rem; font-weight:700; color:#e50914;"></div>
+                                    </div>
+                                </div>
+                                <div id="resultadoSuplente1" style="display:flex; align-items:center; gap:0.75rem; padding:0.75rem; background:#f5f5f5; border-radius:10px; margin-bottom:0.5rem; cursor:pointer;">
+                                    <span style="font-size:1.2rem;">🥈</span>
+                                    <div>
+                                        <div style="font-size:0.75rem; color:#999; font-weight:600; text-transform:uppercase;">Suplente 1</div>
+                                        <div id="resultadoSuplente1Nombre" style="font-size:0.9rem; font-weight:600; color:#555;"></div>
+                                    </div>
+                                </div>
+                                <div id="resultadoSuplente2" style="display:flex; align-items:center; gap:0.75rem; padding:0.75rem; background:#f5f5f5; border-radius:10px; cursor:pointer;">
+                                    <span style="font-size:1.2rem;">🥉</span>
+                                    <div>
+                                        <div style="font-size:0.75rem; color:#999; font-weight:600; text-transform:uppercase;">Suplente 2</div>
+                                        <div id="resultadoSuplente2Nombre" style="font-size:0.9rem; font-weight:600; color:#555;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- BOTÓN ACCIÓN -->

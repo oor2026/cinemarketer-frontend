@@ -1088,13 +1088,84 @@ function renderTabsModal(p, tipoReward, prefixModal) {
     }
 
     if (p.termsConditions && tab3) {
-        tab3.style.display = 'inline-block';
-    } else if (tab3) {
-        tab3.style.display = 'none';
+            tab3.style.display = 'inline-block';
+        } else if (tab3) {
+            tab3.style.display = 'none';
+        }
+
+        // Tab Resultados — solo para sorteos
+        const tab4 = document.getElementById(`tab${prefixModal}4`);
+        if (tab4) {
+            if (p.type === 'SORTEO') {
+                tab4.style.display = 'inline-block';
+                _renderResultados(p);
+            } else {
+                tab4.style.display = 'none';
+            }
+        }
+
+        window.switchModalTab(prefixModal === 'Premio' ? 'premio' : 'especial', 1);
     }
 
-    window.switchModalTab(prefixModal === 'Premio' ? 'premio' : 'especial', 1);
-}
+    function _renderResultados(p) {
+        const pendiente  = document.getElementById('resultadosPendiente');
+        const ejecutado  = document.getElementById('resultadosEjecutado');
+        if (!pendiente || !ejecutado) return;
+
+        if (!p.drawExecuted) {
+            pendiente.style.display  = 'block';
+            ejecutado.style.display  = 'none';
+            return;
+        }
+
+        pendiente.style.display = 'none';
+        ejecutado.style.display = 'block';
+
+        // Ganador
+        const ganadorNombre = document.getElementById('resultadoGanadorNombre');
+        const ganadorEl     = document.getElementById('resultadoGanador');
+        if (p.winner1Name) {
+            ganadorNombre.textContent = p.winner1Name;
+            ganadorEl.onclick = () => {
+                if (p.winner1Id && typeof window.abrirPerfilUsuario === 'function') {
+                    window.cerrarModalEspecial();
+                    window.abrirPerfilUsuario(p.winner1Id);
+                }
+            };
+        } else {
+            ganadorEl.style.display = 'none';
+        }
+
+        // Suplente 1
+        const suplente1Nombre = document.getElementById('resultadoSuplente1Nombre');
+        const suplente1El     = document.getElementById('resultadoSuplente1');
+        if (p.winner2Name) {
+            suplente1Nombre.textContent = p.winner2Name;
+            suplente1El.onclick = () => {
+                if (p.winner2Id && typeof window.abrirPerfilUsuario === 'function') {
+                    window.cerrarModalEspecial();
+                    window.abrirPerfilUsuario(p.winner2Id);
+                }
+            };
+        } else {
+            suplente1El.style.display = 'none';
+        }
+
+        // Suplente 2
+        const suplente2Nombre = document.getElementById('resultadoSuplente2Nombre');
+        const suplente2El     = document.getElementById('resultadoSuplente2');
+        if (p.winner3Name) {
+            suplente2Nombre.textContent = p.winner3Name;
+            suplente2El.onclick = () => {
+                if (p.winner3Id && typeof window.abrirPerfilUsuario === 'function') {
+                    window.cerrarModalEspecial();
+                    window.abrirPerfilUsuario(p.winner3Id);
+                }
+            };
+        } else {
+            suplente2El.style.display = 'none';
+        }
+    }
 
 window.abrirModalPremio = function(premio) {
     premioActual = premio;
