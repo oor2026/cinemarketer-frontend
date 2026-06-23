@@ -242,10 +242,15 @@ async function loadModule(moduleName, element = null, updateHash = true) {
 
         // Inicializadores específicos
         setTimeout(() => {
-            const initFn = window[`init_${moduleName}`];
+                    const initFn = window[`init_${moduleName}`];
 
             if (typeof initFn === 'function') {
-                initFn();
+                if (moduleName === 'perfil') {
+                    const uid = window._perfilUsuarioId || sessionStorage.getItem('perfilUsuarioId');
+                    initFn(uid);
+                } else {
+                    initFn();
+                }
             } else {
                 if (moduleName === 'feed-films' && typeof window.cargarPeliculasPopulares === 'function') {
                                     window.cargarPeliculasPopulares(1);
