@@ -205,15 +205,17 @@ function buildVotoItem(v) {
     const badgeClass = v.voto === 'LIKE' ? 'like' : 'dislike';
     const badgeIcon  = v.voto === 'LIKE' ? 'fa-thumbs-up' : 'fa-thumbs-down';
     return `
-        <div class="perfil-voto-item" title="${v.movieTitle || ''}">
-            <div class="perfil-voto-poster">
-                ${poster}
-                <div class="perfil-voto-badge ${badgeClass}">
-                    <i class="fas ${badgeIcon}" style="font-size:0.55rem;color:white;"></i>
-                </div>
+    <div class="perfil-voto-item" title="${v.movieTitle || ''}"
+         onclick="window._abrirPeliculaDesdePerfil(${v.movieId})"
+         style="cursor:pointer;">
+        <div class="perfil-voto-poster">
+            ${poster}
+            <div class="perfil-voto-badge ${badgeClass}">
+                <i class="fas ${badgeIcon}" style="font-size:0.55rem;color:white;"></i>
             </div>
-            <span class="perfil-voto-titulo">${v.movieTitle || '—'}</span>
-        </div>`;
+        </div>
+        <span class="perfil-voto-titulo">${v.movieTitle || '—'}</span>
+    </div>`;
 }
 
 window.scrollCarrusel = async function(dir) {
@@ -357,7 +359,9 @@ function _comentarioItemHTML(c) {
         ` : `<p class="${textoClass}">${contenido}</p>`;
 
     return `
-        <div class="perfil-comentario-item">
+        <div class="perfil-comentario-item"
+             onclick="window._abrirPeliculaDesdeComentario(${c.movieId}, ${c.commentId}, ${c.spoiler || false})"
+             style="cursor:pointer;">
             <div class="perfil-comentario-poster">${poster}</div>
             <div class="perfil-comentario-body">
                 <p class="perfil-comentario-pelicula">${c.movieTitle || 'Película no disponible'}</p>
@@ -916,4 +920,95 @@ window.confirmarBloquearPerfil = async function() {
     } finally {
         if (btn) { btn.disabled = false; btn.textContent = 'Sí, bloquear'; }
     }
+};
+
+window._abrirPeliculaDesdePerfil = async function(movieId) {
+    if (!movieId) return;
+    // Si el feed ya está cargado y tiene abrirDetallePelicula disponible
+    if (typeof window.abrirDetallePelicula === 'function') {
+        window.abrirDetallePelicula(movieId);
+        return;
+    }
+    // Si no, cargar el feed primero y luego abrir la película
+    await new Promise(resolve => {
+        loadModule('feed-films', null, false);
+        setTimeout(resolve, 1500);
+    });
+    if (typeof window.abrirDetallePelicula === 'function') {
+        window.abrirDetallePelicula(movieId);
+    }
+};
+
+window._abrirPeliculaDesdeComentario = async function(movieId, commentId, esSpoiler) {
+    if (!movieId) return;
+
+    // Asegurar que el feed y su modal estén disponibles
+        const modalEnDOM = !!document.getElementById('modalPelicula');
+        if (typeof window.abrirDetallePelicula !== 'function' || !modalEnDOM) {
+            await new Promise(resolve => {
+                loadModule('feed-films', null, false);
+                setTimeout(resolve, 1500);
+            });
+        }
+
+    if (typeof window.abrirDetallePelicula !== 'function') return;
+
+    // Activar modo spoiler si corresponde
+    if (esSpoiler && typeof window.activarModoSpoiler === 'function') {
+        window.modoSpoilerActivo = true;
+    }
+ console.log('[DEBUG] movieId:', movieId, 'commentId:', commentId, 'tipo:', typeof commentId);
+    window.abrirDetallePelicula(movieId);
+console.log('[DEBUG] if commentId?', !!commentId);
+    if (commentId) {
+            setTimeout(async () => {
+                if (esSpoiler && typeof window.activarModoSpoiler === 'function') {
+                    window.activarModoSpoiler(true);
+                }
+                await new Promise(r => setTimeout(r, 600));
+
+                // En mobile, ir al slide de datos donde están los comentarios
+                if (typeof window.irASlide === 'function') {
+                    window.irASlide(1);
+                    await new Promise(r => setTimeout(r, 400));
+                }
+
+               // Esperar a que los comentarios carguen en el modal
+               let intentos = 0;
+               const buscarYResaltar = () => {
+                   const comentarioEl = document.getElementById(`comment-${commentId}`);
+                   console.log(`[intento ${intentos}] comment-${commentId}:`, comentarioEl);
+                   if (comentarioEl) {
+                       const scrollContainer = document.querySelector('#modalPelicula .modal-body')
+                                           || document.querySelector('#modalPelicula .modal-contenido');
+                       console.log('scrollContainer:', scrollContainer);
+                               console.log('scrollContainer.scrollHeight:', scrollContainer?.scrollHeight);
+                               console.log('scrollContainer.clientHeight:', scrollContainer?.clientHeight);
+                               console.log('comentarioEl.getBoundingClientRect():', comentarioEl.getBoundingClientRect());
+
+                       if (scrollContainer) {
+                           const containerRect = scrollContainer.getBoundingClientRect();
+                           const elRect = comentarioEl.getBoundingClientRect();
+                           const offset = elRect.top - containerRect.top + scrollContainer.scrollTop - (scrollContainer.clientHeight / 2) + (elRect.height / 2);
+                           scrollContainer.scrollTo({ top: offset, behavior: 'smooth' });
+                       } else {
+                           comentarioEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                       }
+                       comentarioEl.style.transition = 'none';
+                      comentarioEl.style.background = '#ffe066';
+                      comentarioEl.style.borderRadius = '8px';
+                      comentarioEl.style.outline = '2px solid #e50914';
+                      setTimeout(() => {
+                          comentarioEl.style.transition = 'background 0.8s, outline 0.8s';
+                          comentarioEl.style.background = '';
+                          comentarioEl.style.outline = '';
+                      }, 1500);
+                   } else if (intentos < 10) {
+                       intentos++;
+                       setTimeout(buscarYResaltar, 300);
+                   }
+               };
+               buscarYResaltar();
+            }, 800);
+        }
 };

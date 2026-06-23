@@ -451,3 +451,9 @@ body.modal-open {
 body.menu-open {
     overflow: hidden;
 }
+
+@media (max-width: 768px) {
+    .navbar.navbar-hidden {
+        transform: none !important;
+    }
+}
