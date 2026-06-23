@@ -1215,6 +1215,7 @@ window.cargarComentariosPelicula = async function(id) {
 
                 const item = document.createElement('div');
                 item.className = 'comentario-item';
+                item.id = `comment-${c.id}`;
                 item.style.cssText = 'display:flex; gap:0.75rem; padding:0.75rem 0; border-bottom:1px solid #f0f0f0; align-items:flex-start;';
                 item.innerHTML = `
                     <div class="comentario-avatar" style="flex-shrink:0;">
