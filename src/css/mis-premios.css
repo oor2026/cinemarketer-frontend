@@ -890,19 +890,36 @@
         padding: 1.25rem;
     }
 
-    .modal-premio-imagen {
-            min-height: 260px;
-            width: calc(100% + 2.5rem);
-            margin-left: -1.25rem;
-            margin-right: -1.25rem;
-            border-radius: 0;
-            aspect-ratio: unset;
-        }
+    /* DESPUÉS */
+        .modal-premio-imagen {
+                min-height: 320px;
+                width: calc(100% + 2.5rem);
+                margin-left: -1.25rem;
+                margin-right: -1.25rem;
+                border-radius: 0;
+                aspect-ratio: unset;
+                padding: 0;
+            }
 
-        .modal-premio-imagen img {
-            object-fit: cover;
-            padding: 0;
-        }
+            .modal-premio-imagen img {
+                object-fit: cover;
+                padding: 0;
+                width: 100%;
+            }
+
+            .premio-carrusel {
+                width: 100%;
+                height: 300px;
+                margin: 0;
+                padding: 0;
+            }
+
+            .premio-carrusel img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                padding: 0;
+            }
 
     .modal-premio-header h2 {
         font-size: 1.2rem;
@@ -1201,8 +1218,8 @@
     }
 
     .modal-premio-imagen {
-        height: 220px;
-    }
+            height: 300px;
+        }
 }
 
 /* ========== CARDS PREMIUM — ALINEACIÓN CONSISTENTE ========== */
@@ -1288,11 +1305,18 @@
     .premio-carrusel {
         overflow: hidden;
         touch-action: pan-y;
+        width: 100%;
+        height: 300px;
+        flex: 1;
     }
 
     .premio-carrusel img {
         user-select: none;
         -webkit-user-drag: none;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        padding: 0;
     }
 
     .carrusel-btn {
@@ -1311,12 +1335,14 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        height: auto !important;
-    }
-
-    .premio-carrusel {
-        width: 100%;
-        height: 220px;
+        min-height: 300px;
+        width: calc(100% + 2.5rem);
+        margin-left: -1.25rem;
+        margin-right: -1.25rem;
+        border-radius: 0;
+        padding: 0;
+        aspect-ratio: unset;
+        height: auto;
     }
 }
 
