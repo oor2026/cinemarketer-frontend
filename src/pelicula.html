@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinemarketer — La red social del cine</title>
+
+    <!-- Meta OG estáticas de fallback (el backend las pisa con las dinámicas) -->
+    <meta property="og:site_name" content="Cinemarketer">
+    <meta property="og:type" content="website">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="/assets/images/favicon.png" type="image/png">
+
+    <style>
+        /* =============================================
+           RESET & BASE
+        ============================================= */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --rojo: #e50914;
+            --rojo-dark: #b2070f;
+            --azul: #1a3a6b;
+            --oscuro: #221f1f;
+            --gris: #7f7f7f;
+            --claro: #f5f5f1;
+            --blanco: #ffffff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--claro);
+            color: var(--oscuro);
+            min-height: 100vh;
+        }
+
+        /* =============================================
+           HEADER
+        ============================================= */
+        .pub-header {
+            background: var(--blanco);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .pub-logo img {
+            height: 48px;
+            width: auto;
+            display: block;
+        }
+
+        .pub-header-btns {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .btn-login {
+            padding: 0.5rem 1.1rem;
+            border: 2px solid var(--azul);
+            background: transparent;
+            color: var(--azul);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s;
+        }
+        .btn-login:hover { background: var(--azul); color: white; }
+
+        .btn-registro {
+            padding: 0.5rem 1.1rem;
+            background: var(--rojo);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .btn-registro:hover { background: var(--rojo-dark); }
+
+        /* =============================================
+           LOADING
+        ============================================= */
+        #pubLoading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            gap: 1rem;
+            color: var(--gris);
+        }
+        #pubLoading i { font-size: 2.5rem; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* =============================================
+           ERROR
+        ============================================= */
+        #pubError {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            gap: 1rem;
+            text-align: center;
+            padding: 2rem;
+        }
+        #pubError i { font-size: 3rem; color: var(--rojo); }
+        #pubError h2 { color: var(--oscuro); }
+        #pubError p { color: var(--gris); max-width: 400px; }
+
+        /* =============================================
+           CONTENIDO PRINCIPAL
+        ============================================= */
+        #pubContenido { display: none; }
+
+        .pub-main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1.5rem 1rem 3rem;
+        }
+
+        /* =============================================
+           FILA SUPERIOR: poster + info
+        ============================================= */
+        .pub-fila-superior {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 600px) {
+            .pub-fila-superior {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Poster */
+        .pub-poster-wrap {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+            aspect-ratio: 2/3;
+            background: #ddd;
+        }
+        .pub-poster-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .pub-poster-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e0e0e0;
+            color: #999;
+            font-size: 3rem;
+        }
+
+        /* Info derecha */
+        .pub-info { display: flex; flex-direction: column; gap: 0.75rem; }
+
+        .pub-titulo {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: var(--oscuro);
+            line-height: 1.2;
+        }
+
+        .pub-generos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+        .pub-genero-tag {
+            background: var(--azul);
+            color: white;
+            padding: 0.2rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .pub-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            font-size: 0.88rem;
+            color: #555;
+        }
+        .pub-meta span strong { color: var(--oscuro); }
+
+        .pub-sinopsis {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem 1.1rem;
+            font-size: 0.92rem;
+            line-height: 1.65;
+            color: #444;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .pub-sinopsis strong {
+            display: block;
+            margin-bottom: 0.4rem;
+            color: var(--oscuro);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* =============================================
+           VOTOS DE LA COMUNIDAD
+        ============================================= */
+        .pub-votos-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+            margin-bottom: 1.5rem;
+        }
+
+        .pub-votos-titulo {
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--gris);
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .pub-votos-barra-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .pub-votos-barra {
+            flex: 1;
+            height: 10px;
+            background: #f0f0f0;
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .pub-votos-barra-fill {
+            height: 100%;
+            border-radius: 99px;
+            background: linear-gradient(90deg, #4caf50, #81c784);
+            transition: width 0.6s ease;
+        }
+
+        .pub-votos-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            color: #666;
+            margin-top: 0.4rem;
+        }
+
+        .pub-votos-like { color: #4caf50; font-weight: 700; }
+        .pub-votos-dislike { color: var(--rojo); font-weight: 700; }
+
+        .pub-votos-nums {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 0.75rem;
+        }
+        .pub-voto-num {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        .pub-voto-num i { font-size: 1rem; }
+        .pub-voto-num.like i { color: #4caf50; }
+        .pub-voto-num.dislike i { color: var(--rojo); }
+
+        /* =============================================
+           TRAILER
+        ============================================= */
+        .pub-trailer-wrap {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            margin-bottom: 1.5rem;
+            background: #000;
+            aspect-ratio: 16/9;
+        }
+        .pub-trailer-wrap iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+        .pub-trailer-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 0.5rem;
+            color: #666;
+            font-size: 0.9rem;
+            background: #f0f0f0;
+            min-height: 200px;
+        }
+        .pub-trailer-placeholder i { font-size: 2.5rem; color: #ccc; }
+
+        /* =============================================
+           COMENTARIOS
+        ============================================= */
+        .pub-comentarios-seccion {
+            margin-top: 0.5rem;
+        }
+
+        .pub-seccion-titulo {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--oscuro);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .pub-seccion-titulo i { color: var(--rojo); }
+
+        .pub-comentario-item {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem 1.1rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .pub-comentario-header {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .pub-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--azul);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .pub-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+        .pub-comentario-autor {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--oscuro);
+        }
+        .pub-comentario-fecha {
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-left: auto;
+        }
+
+        .pub-comentario-texto {
+            font-size: 0.9rem;
+            color: #444;
+            line-height: 1.6;
+        }
+
+        .pub-comentario-reacciones {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.6rem;
+        }
+        .pub-reaccion {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.78rem;
+            color: #888;
+        }
+        .pub-reaccion i { font-size: 0.8rem; }
+
+        .pub-sin-comentarios {
+            text-align: center;
+            color: #aaa;
+            padding: 2rem;
+            font-size: 0.9rem;
+        }
+
+        /* =============================================
+           CTA BANNER (sticky abajo en mobile)
+        ============================================= */
+        .pub-cta-banner {
+            background: linear-gradient(135deg, var(--azul), #0e2347);
+            color: white;
+            border-radius: 14px;
+            padding: 1.5rem 1.5rem;
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .pub-cta-banner h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .pub-cta-banner p {
+            font-size: 0.88rem;
+            opacity: 0.85;
+            max-width: 380px;
+        }
+
+        .pub-cta-btns {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .pub-cta-registro {
+            background: var(--rojo);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.4rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .pub-cta-registro:hover { background: var(--rojo-dark); }
+
+        .pub-cta-login {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: 1.5px solid rgba(255,255,255,0.4);
+            padding: 0.7rem 1.4rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .pub-cta-login:hover { background: rgba(255,255,255,0.25); }
+
+        /* =============================================
+           MODAL CTA (al intentar interactuar)
+        ============================================= */
+        #modalCTA {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        #modalCTA.open { display: flex; }
+
+        .modal-cta-contenido {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem 1.75rem;
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            animation: popIn 0.25s ease;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.92); opacity: 0; }
+            to   { transform: scale(1);    opacity: 1; }
+        }
+
+        .modal-cta-cerrar {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: #aaa;
+            line-height: 1;
+        }
+        .modal-cta-cerrar:hover { color: #555; }
+
+        .modal-cta-emoji { font-size: 2.5rem; margin-bottom: 0.5rem; }
+
+        .modal-cta-titulo {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--oscuro);
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+
+        .modal-cta-desc {
+            font-size: 0.88rem;
+            color: #666;
+            margin-bottom: 1.25rem;
+            line-height: 1.5;
+        }
+
+        .modal-cta-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .modal-cta-btns a {
+            display: block;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.92rem;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .modal-cta-btns .btn-primary {
+            background: var(--rojo);
+            color: white;
+        }
+        .modal-cta-btns .btn-primary:hover { background: var(--rojo-dark); }
+
+        .modal-cta-btns .btn-secondary {
+            background: #f0f0f0;
+            color: var(--oscuro);
+        }
+        .modal-cta-btns .btn-secondary:hover { background: #e0e0e0; }
+
+        /* =============================================
+           RESPONSIVE
+        ============================================= */
+        @media (max-width: 600px) {
+            .pub-titulo { font-size: 1.3rem; }
+            .pub-main { padding: 1rem 0.75rem 2rem; }
+            .pub-header-btns .btn-login { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="pub-header">
+    <a href="/" class="pub-logo">
+        <img src="assets/images/isologotipo.webp" alt="Cinemarketer">
+    </a>
+    <div class="pub-header-btns">
+        <a href="/login" class="btn-login">Iniciar sesión</a>
+        <a href="/register" class="btn-registro">Registrarme gratis</a>
+    </div>
+</header>
+
+<!-- LOADING -->
+<div id="pubLoading">
+    <i class="fas fa-spinner"></i>
+    <p>Cargando película...</p>
+</div>
+
+<!-- ERROR -->
+<div id="pubError">
+    <i class="fas fa-film"></i>
+    <h2>Película no encontrada</h2>
+    <p>El link puede estar roto o la película ya no está disponible.</p>
+    <a href="/" class="btn-registro" style="margin-top:0.5rem;">Ir a Cinemarketer</a>
+</div>
+
+<!-- CONTENIDO -->
+<div id="pubContenido">
+    <main class="pub-main">
+
+        <!-- FILA SUPERIOR -->
+        <div class="pub-fila-superior">
+            <div class="pub-poster-wrap" id="pubPosterWrap">
+                <div class="pub-poster-placeholder"><i class="fas fa-film"></i></div>
+            </div>
+
+            <div class="pub-info">
+                <h1 class="pub-titulo" id="pubTitulo">—</h1>
+                <div class="pub-generos" id="pubGeneros"></div>
+                <div class="pub-meta" id="pubMeta"></div>
+                <div class="pub-sinopsis" id="pubSinopsis">
+                    <strong>Sinopsis</strong>
+                    <span id="pubSinopsisTexto">Cargando...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- VOTOS COMUNIDAD -->
+        <div class="pub-votos-card">
+            <div class="pub-votos-titulo">Lo que opina la comunidad</div>
+            <div class="pub-votos-barra-wrap">
+                <span class="pub-votos-like" id="pubPctLike">0%</span>
+                <div class="pub-votos-barra">
+                    <div class="pub-votos-barra-fill" id="pubBarraFill" style="width:0%"></div>
+                </div>
+                <span class="pub-votos-dislike" id="pubPctDislike">0%</span>
+            </div>
+            <div class="pub-votos-nums">
+                <span class="pub-voto-num like"><i class="fas fa-thumbs-up"></i> <span id="pubLikes">0</span> les bancó</span>
+                <span class="pub-voto-num dislike"><i class="fas fa-thumbs-down"></i> <span id="pubDislikes">0</span> no le bancó</span>
+            </div>
+        </div>
+
+        <!-- TRAILER -->
+        <div class="pub-trailer-wrap" id="pubTrailerWrap">
+            <div class="pub-trailer-placeholder">
+                <i class="fas fa-film"></i>
+                <span>Tráiler no disponible</span>
+            </div>
+        </div>
+
+        <!-- COMENTARIOS -->
+        <div class="pub-comentarios-seccion">
+            <div class="pub-seccion-titulo">
+                <i class="fas fa-comments"></i>
+                Comentarios de la comunidad
+            </div>
+            <div id="pubComentariosList">
+                <div class="pub-sin-comentarios">Cargando comentarios...</div>
+            </div>
+        </div>
+
+        <!-- CTA BANNER -->
+        <div class="pub-cta-banner">
+            <h3>🎬 ¿Querés votar, comentar y ganar puntos?</h3>
+            <p>Unite a Cinemarketer, la red social del cine argentina. Es gratis y en minutos estás participando.</p>
+            <div class="pub-cta-btns">
+                <a href="/register" class="pub-cta-registro">Registrarme gratis</a>
+                <a href="/login" class="pub-cta-login">Ya tengo cuenta</a>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- MODAL CTA (al intentar interactuar) -->
+<div id="modalCTA">
+    <div class="modal-cta-contenido">
+        <button class="modal-cta-cerrar" onclick="cerrarModalCTA()">×</button>
+        <div class="modal-cta-emoji">🎬</div>
+        <div class="modal-cta-titulo">Unite a la comunidad de Cinemarketer</div>
+        <div class="modal-cta-desc">Para votar, comentar y ganar puntos necesitás una cuenta. ¡Es gratis!</div>
+        <div class="modal-cta-btns">
+            <a href="/register" class="btn-primary">Registrarme gratis</a>
+            <a href="/login" class="btn-secondary">Ya tengo cuenta</a>
+        </div>
+    </div>
+</div>
+
+<script src="js/pelicula.js"></script>
+</body>
+</html>
