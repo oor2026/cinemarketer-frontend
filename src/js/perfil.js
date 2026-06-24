@@ -924,12 +924,13 @@ window.confirmarBloquearPerfil = async function() {
 
 window._abrirPeliculaDesdePerfil = async function(movieId) {
     if (!movieId) return;
-    // Si el feed ya está cargado y tiene abrirDetallePelicula disponible
-    if (typeof window.abrirDetallePelicula === 'function') {
+
+    const modalEnDOM = !!document.getElementById('modalPelicula');
+    if (typeof window.abrirDetallePelicula === 'function' && modalEnDOM) {
         window.abrirDetallePelicula(movieId);
         return;
     }
-    // Si no, cargar el feed primero y luego abrir la película
+
     await new Promise(resolve => {
         loadModule('feed-films', null, false);
         setTimeout(resolve, 1500);
