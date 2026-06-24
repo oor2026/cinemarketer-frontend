@@ -17,6 +17,7 @@
     { "source": "/mi-cuenta", "destination": "/modules/mi-cuenta.html" },
     { "source": "/mis-consultas", "destination": "/modules/mis-consultas.html" },
     { "source": "/mis-premios", "destination": "/modules/mis-premios.html" },
-    { "source": "/mis-puntos", "destination": "/modules/mis-puntos.html" }
+    { "source": "/mis-puntos", "destination": "/modules/mis-puntos.html" },
+    { "source": "/pelicula", "destination": "/pelicula.html" }
   ]
 }

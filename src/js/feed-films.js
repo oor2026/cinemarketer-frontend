@@ -2595,6 +2595,29 @@ window.guardarEdicionComentario = async function(commentId) {
     }
 };
 
+window.compartirPelicula = async function(movieId, titulo) {
+    const url = `https://cinemarketer.com.ar/api/movies/og/${movieId}`;
+    const texto = `Mirá lo que opina la comunidad sobre "${titulo}" 🎬`;
+
+    if (navigator.share) {
+        try {
+            await navigator.share({ title: titulo, text: texto, url });
+        } catch (e) {
+            // usuario canceló, no hacer nada
+        }
+    } else {
+        // Fallback: copiar al portapapeles
+        try {
+            await navigator.clipboard.writeText(url);
+            if (typeof showToast === 'function') {
+                showToast('success', '¡Link copiado al portapapeles!');
+            }
+        } catch (e) {
+            prompt('Copiá este link:', url);
+        }
+    }
+};
+
 window.cerrarCajaRespuesta = function(commentId) {
     const form = document.querySelector(`#replies-${commentId} .reply-form`) ||
                  document.querySelector(`.reply-form`);
