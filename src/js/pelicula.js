@@ -2,7 +2,7 @@
 // pelicula.js — Landing pública de película
 // ==============================================
 
-const API_URL = 'https://cinemarketer-production.up.railway.app';
+const API_URL = 'https://cinemarketer-backend-production.up.railway.app';
 const TMDB_IMG = 'https://image.tmdb.org/t/p/w500';
 
 let _peliculaId = null;
