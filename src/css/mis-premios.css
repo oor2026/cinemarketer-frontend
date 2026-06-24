@@ -1210,7 +1210,27 @@
     }
 
     #modalEspecial .modal-premio-imagen {
-        min-height: 200px;
+        min-height: 300px;
+        width: calc(100% + 2.5rem);
+        margin-left: -1.25rem;
+        margin-right: -1.25rem;
+        border-radius: 0;
+        padding: 0;
+        aspect-ratio: unset;
+        height: auto;
+    }
+
+    #modalEspecial .premio-carrusel {
+        width: 100%;
+        height: 300px;
+        flex: 1;
+    }
+
+    #modalEspecial .premio-carrusel img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        padding: 0;
     }
 
     #modalEspecial .modal-premio-header h2 {
