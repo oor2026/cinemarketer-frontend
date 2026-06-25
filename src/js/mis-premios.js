@@ -993,7 +993,7 @@ let premioActual = null;
 // ================================================
 window.switchModalTab = function(tipo, n) {
     const prefix = tipo === 'premio' ? 'Premio' : 'Especial';
-    [1, 2, 3].forEach(i => {
+    [1, 2, 3, 4, 5].forEach(i => {
         const panel = document.getElementById(`panel${prefix}${i}`);
         const tab   = document.getElementById(`tab${prefix}${i}`);
         if (panel) panel.style.display = i === n ? 'block' : 'none';
@@ -1094,15 +1094,29 @@ function renderTabsModal(p, tipoReward, prefixModal) {
         }
 
         // Tab Resultados — solo para sorteos
-        const tab4 = document.getElementById(`tab${prefixModal}4`);
-        if (tab4) {
-            if (p.type === 'SORTEO') {
-                tab4.style.display = 'inline-block';
-                _renderResultados(p);
-            } else {
-                tab4.style.display = 'none';
-            }
-        }
+                const tab4 = document.getElementById(`tab${prefixModal}4`);
+                if (tab4) {
+                    if (p.type === 'SORTEO') {
+                        tab4.style.display = 'inline-block';
+                        _renderResultados(p);
+                    } else {
+                        tab4.style.display = 'none';
+                    }
+                }
+
+                // Tab Detalles del premio — solo para sorteos con prizeDetails
+                const tab5 = document.getElementById(`tab${prefixModal}5`);
+                const panel5 = document.getElementById(`panel${prefixModal}5`);
+                if (tab5) {
+                    if (p.type === 'SORTEO' && p.prizeDetails) {
+                        tab5.style.display = 'inline-block';
+                        const el = document.getElementById(`modal${prefixModal}DetallesPremio`);
+                        if (el) el.innerHTML = p.prizeDetails.replace(/\n/g, '<br>');
+                    } else {
+                        tab5.style.display = 'none';
+                        if (panel5) panel5.style.display = 'none';
+                    }
+                }
 
         window.switchModalTab(prefixModal === 'Premio' ? 'premio' : 'especial', 1);
     }
@@ -1416,6 +1430,7 @@ window.abrirModalEspecial = function(p, isPremium) {
 
     // Botón acción
     const btn = document.getElementById('btnEspecialAccion');
+    const btnDesktop = document.getElementById('btnEspecialAccionDesktop');
     btn.style.color = 'white';
     if (!isPremium) {
         btn.textContent      = '🔒 Solo Premium';
@@ -1458,11 +1473,18 @@ window.abrirModalEspecial = function(p, isPremium) {
         }
     }
 
-    const modal = document.getElementById('modalEspecial');
-        modal.style.display = 'flex';
-        document.body.classList.add('modal-open');
-        setTimeout(() => modal.classList.add('open'), 10);
-};
+    if (btnDesktop) {
+            btnDesktop.textContent      = btn.textContent;
+            btnDesktop.disabled         = btn.disabled;
+            btnDesktop.style.background = btn.style.background;
+            btnDesktop.style.color      = btn.style.color;
+        }
+
+        const modal = document.getElementById('modalEspecial');
+            modal.style.display = 'flex';
+            document.body.classList.add('modal-open');
+            setTimeout(() => modal.classList.add('open'), 10);
+    };
 
 window.cerrarModalEspecial = function() {
     const modal = document.getElementById('modalEspecial');

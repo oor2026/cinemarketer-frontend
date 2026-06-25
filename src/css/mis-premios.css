@@ -1562,5 +1562,20 @@
         background: white !important;
         color: #888 !important;
     }
+}
+/* Botón modal especial — desktop bajo imagen, mobile en columna derecha */
+.modal-premio-imagen-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
 
-    .tab-btn-premium.active {
+@media (min-width: 769px) {
+    .modal-premio-acciones-mobile { display: none; }
+    .modal-premio-acciones-desktop { display: block; }
+}
+
+@media (max-width: 768px) {
+    .modal-premio-acciones-desktop { display: none; }
+    .modal-premio-acciones-mobile { display: block; }
+}

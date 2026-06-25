@@ -276,18 +276,27 @@
         <!-- BODY -->
         <div class="modal-premio-body">
 
-            <!-- COLUMNA IZQUIERDA: imagen -->
-            <div class="modal-premio-imagen">
-                <div class="premio-carrusel" id="especialCarrusel">
-                    <img id="modalEspecialImg" src="" alt="Premio" style="display:none;">
-                    <div class="modal-premio-img-placeholder" id="modalEspecialImgPlaceholder">
-                        <i class="fas fa-star"></i>
+            <!-- COLUMNA IZQUIERDA: imagen + botón desktop -->
+            <div class="modal-premio-imagen-wrap">
+                <div class="modal-premio-imagen">
+                    <div class="premio-carrusel" id="especialCarrusel">
+                        <img id="modalEspecialImg" src="" alt="Premio" style="display:none;">
+                        <div class="modal-premio-img-placeholder" id="modalEspecialImgPlaceholder">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <button class="carrusel-btn carrusel-prev" id="especialBtnPrev" onclick="cambiarImagenEspecial(-1)" style="display:none;">&#8249;</button>
+                        <button class="carrusel-btn carrusel-next" id="especialBtnNext" onclick="cambiarImagenEspecial(1)" style="display:none;">&#8250;</button>
                     </div>
-                    <button class="carrusel-btn carrusel-prev" id="especialBtnPrev" onclick="cambiarImagenEspecial(-1)" style="display:none;">&#8249;</button>
-                    <button class="carrusel-btn carrusel-next" id="especialBtnNext" onclick="cambiarImagenEspecial(1)" style="display:none;">&#8250;</button>
+                    <div class="carrusel-miniaturas" id="especialMiniaturas" style="display:none;"></div>
+                    <div class="carrusel-dots" id="especialDots"></div>
                 </div>
-                <div class="carrusel-miniaturas" id="especialMiniaturas" style="display:none;"></div>
-                <div class="carrusel-dots" id="especialDots"></div>
+                <!-- Botón visible solo en desktop -->
+                <div class="modal-premio-acciones modal-premio-acciones-desktop">
+                    <button class="btn-canjear-modal" id="btnEspecialAccionDesktop"
+                            onclick="window.accionDesdeModalEspecial()">
+                        Participar
+                    </button>
+                </div>
             </div>
 
             <!-- COLUMNA DERECHA -->
@@ -299,6 +308,7 @@
                     <!-- TABS -->
                     <div class="modal-tabs">
                         <button class="modal-tab active" id="tabEspecial1" onclick="window.switchModalTab('especial', 1)">Información</button>
+                        <button class="modal-tab" id="tabEspecial5" onclick="window.switchModalTab('especial', 5)" style="display:none;">Detalles</button>
                         <button class="modal-tab" id="tabEspecial2" onclick="window.switchModalTab('especial', 2)" style="display:none;">Detalles</button>
                         <button class="modal-tab" id="tabEspecial3" onclick="window.switchModalTab('especial', 3)" style="display:none;">Términos</button>
                         <button class="modal-tab" id="tabEspecial4" onclick="window.switchModalTab('especial', 4)" style="display:none;">Resultados</button>
@@ -355,6 +365,7 @@
                             <p id="modalEspecialTerminos" style="max-height:180px; overflow-y:auto; padding-right:0.5rem; font-size:0.85rem; color:#555; line-height:1.6;"></p>
                         </div>
                     </div>
+                    <!-- TAB 4: Resultados (solo sorteos) -->
                     <div id="panelEspecial4" class="modal-tab-panel" style="display:none;">
                         <div id="modalEspecialResultados" style="padding:0.5rem 0;">
                             <div id="resultadosPendiente" style="text-align:center; padding:1.5rem; color:#999;">
@@ -388,13 +399,20 @@
                     </div>
                 </div>
 
-                <!-- BOTÓN ACCIÓN -->
-                <div class="modal-premio-acciones">
-                    <button class="btn-canjear-modal" id="btnEspecialAccion"
-                            onclick="window.accionDesdeModalEspecial()">
-                        Participar
-                    </button>
+                <!-- TAB 5: Detalles del premio (solo sorteos) -->
+                <div id="panelEspecial5" class="modal-tab-panel" style="display:none;">
+                    <div style="padding:0.5rem 0; font-size:0.9rem; color:#444; line-height:1.7;" id="modalEspecialDetallesPremio"></div>
                 </div>
+
+            </div>
+
+            <!-- BOTÓN ACCIÓN (solo mobile) -->
+            <div class="modal-premio-acciones modal-premio-acciones-mobile">
+                <button class="btn-canjear-modal" id="btnEspecialAccion"
+                        onclick="window.accionDesdeModalEspecial()">
+                    Participar
+                </button>
+            </div>
             </div>
 
         </div>

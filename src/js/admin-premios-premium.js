@@ -229,6 +229,7 @@ const adminPremiosPremium = {
         document.getElementById('formPremiumPuntos').value      = '0';
         document.getElementById('formPremiumStock').value       = '';
         document.getElementById('formPremiumFechaSorteo').value = '';
+        document.getElementById('formPremiumDetallesPremio').value = '';
         document.getElementById('formPremiumActivo').value      = 'true';
         document.getElementById('premiumDescCount').textContent = '0';
         document.getElementById('formPremiumPartner').value  = '';
@@ -280,6 +281,7 @@ const adminPremiosPremium = {
                     if (p.drawDate) {
                         document.getElementById('formPremiumFechaSorteo').value = p.drawDate.substring(0, 16);
                     }
+                    document.getElementById('formPremiumDetallesPremio').value = p.prizeDetails || '';
                     document.getElementById('galeriaImagenesPremiumNuevo').style.display = 'none';
                     adminUI.cargarGaleriaImagenes(id, 'PREMIUM');
                     this.toggleCamposTipo(p.type);
@@ -353,6 +355,8 @@ const adminPremiosPremium = {
 
         if (campoPuntos)        campoPuntos.style.display        = tipo !== 'SORTEO'      ? 'block' : 'none';
         if (campoSorteo)        campoSorteo.style.display        = tipo === 'SORTEO'      ? 'block' : 'none';
+        const campoDetallesPremio = document.getElementById('campoPremiumDetallesPremio');
+        if (campoDetallesPremio) campoDetallesPremio.style.display = tipo === 'SORTEO' ? 'block' : 'none';
         if (campoStock)         campoStock.style.display         = tipo !== 'SORTEO'      ? 'block' : 'none';
         if (campoDescuento)     campoDescuento.style.display     = tipo === 'DESCUENTO'   ? 'block' : 'none';
         if (campoExperiencia)   campoExperiencia.style.display   = tipo === 'EXPERIENCIA' ? 'block' : 'none';
@@ -440,6 +444,7 @@ const adminPremiosPremium = {
             website:         document.getElementById('formPremiumWebsite').value.trim() || null,
             termsConditions: document.getElementById('formPremiumTerminos').value.trim() || null,
             drawDate:        tipo === 'SORTEO' && fechaSorteo ? fechaSorteo : null,
+                        prizeDetails:    tipo === 'SORTEO' ? document.getElementById('formPremiumDetallesPremio').value.trim() || null : null,
             active:          document.getElementById('formPremiumActivo').value === 'true',
             discountValue:        tipo === 'DESCUENTO' ? parseFloat(document.getElementById('formPremiumDescuentoValor').value) || null : null,
             discountType:         tipo === 'DESCUENTO' ? document.getElementById('formPremiumDescuentoTipo').value : null,
