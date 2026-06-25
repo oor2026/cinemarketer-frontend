@@ -2596,7 +2596,7 @@ window.guardarEdicionComentario = async function(commentId) {
 };
 
 window.compartirPelicula = async function(movieId, titulo) {
-    const url = `https://cinemarketer-backend-production.up.railway.app/api/movies/og/${movieId}`;
+    const url = `https://cinemarketer.com.ar/pelicula?id=${movieId}`;
     const texto = `Mirá lo que opina la comunidad sobre "${titulo}" 🎬`;
 
     if (navigator.share) {
