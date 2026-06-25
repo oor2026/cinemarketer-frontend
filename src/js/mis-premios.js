@@ -1031,7 +1031,7 @@ function buildDetallesExtra(p, tipo) {
                 const val = p.discountType === 'PERCENTAGE' ? `${p.discountValue}%` : `$${p.discountValue}`;
                 items.push(['fas fa-percent', 'Descuento', val]);
             }
-            if (p.discountCode)          items.push(['fas fa-barcode',     'Código',                  p.discountCode]);
+            // Código solo se muestra post-canje, no en el modal de preview
             if (p.discountChannel)       items.push(['fas fa-store',       'Canal',                   p.discountChannel]);
             if (p.minimumPurchase != null) items.push(['fas fa-shopping-cart','Compra mínima',        `$${p.minimumPurchase}`]);
             if (p.applicableProducts)    items.push(['fas fa-list',        'Productos incluidos/excluidos', p.applicableProducts]);
