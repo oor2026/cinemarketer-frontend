@@ -143,12 +143,27 @@ window.abrirDetallePlan = function() {
                         <li><span class="premium-check"></span>Cancelás cuando quieras</li>
                     </ul>
                 </div>
-                <div class="premium-modal-footer">
-                    <button class="btn-modal-cancelar" onclick="window.cerrarDetallePlan()">Ahora no</button>
-                    <button class="btn-modal-continuar" onclick="window.iniciarSuscripcion()">
-                        Suscribirme ahora
-                    </button>
-                </div>
+                <div class="premium-modal-aviso" style="
+                                    background: #fff8e1;
+                                    border: 1px solid #ffe082;
+                                    border-radius: 8px;
+                                    padding: 0.75rem 1rem;
+                                    margin: 0 0 1rem 0;
+                                    font-size: 0.82rem;
+                                    color: #666;
+                                    display: flex;
+                                    gap: 0.5rem;
+                                    align-items: flex-start;
+                                    line-height: 1.5;">
+                                    <span style="font-size:1rem;flex-shrink:0;">⚠️</span>
+                                    <span>Para que tu suscripción se active automáticamente, pagá con la cuenta de Mercado Pago que tenga el mismo email con el que estás registrado en Cinemarketer. Si usás otro email, contactanos a <strong>info@cinemarketer.com.ar</strong> para activarla manualmente.</span>
+                                </div>
+                                <div class="premium-modal-footer">
+                                    <button class="btn-modal-cancelar" onclick="window.cerrarDetallePlan()">Ahora no</button>
+                                    <button class="btn-modal-continuar" onclick="window.iniciarSuscripcion()">
+                                        Suscribirme ahora
+                                    </button>
+                                </div>
             </div>`;
         document.body.appendChild(modal);
     }
