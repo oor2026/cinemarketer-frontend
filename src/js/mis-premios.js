@@ -1186,7 +1186,10 @@ window.abrirModalPremio = function(premio) {
 
     document.getElementById('modalPremioTitulo').textContent = premio.name;
     document.getElementById('modalPremioBadge').textContent =
-        premio.rewardType === 'TICKET' ? '🎟️ Entrada' : '🎁 Merchandising';
+            premio.rewardType === 'TICKET'      ? '🎟️ Entrada'      :
+            premio.rewardType === 'DESCUENTO'   ? '🏷️ Descuento'    :
+            premio.rewardType === 'EXPERIENCIA' ? '🎟️ Experiencia'   :
+                                                  '🎁 Merchandising';
 
     const img         = document.getElementById('modalPremioImg');
     const placeholder = document.getElementById('modalPremioImgPlaceholder');
