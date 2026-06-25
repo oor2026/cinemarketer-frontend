@@ -2596,24 +2596,24 @@ window.guardarEdicionComentario = async function(commentId) {
 };
 
 window.compartirPelicula = async function(movieId, titulo) {
-    const url = `https://cinemarketer.com.ar/pelicula?id=${movieId}`;
+    const urlOg  = `https://cinemarketer-backend-production.up.railway.app/api/movies/og/${movieId}`;
+    const urlFront = `https://cinemarketer.com.ar/pelicula?id=${movieId}`;
     const texto = `Mirá lo que opina la comunidad sobre "${titulo}" 🎬`;
 
     if (navigator.share) {
         try {
-            await navigator.share({ title: titulo, text: texto, url });
+            await navigator.share({ title: titulo, text: texto, url: urlOg });
         } catch (e) {
             // usuario canceló, no hacer nada
         }
     } else {
-        // Fallback: copiar al portapapeles
         try {
-            await navigator.clipboard.writeText(url);
+            await navigator.clipboard.writeText(urlFront);
             if (typeof showToast === 'function') {
                 showToast('success', '¡Link copiado al portapapeles!');
             }
         } catch (e) {
-            prompt('Copiá este link:', url);
+            prompt('Copiá este link:', urlFront);
         }
     }
 };
