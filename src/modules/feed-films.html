@@ -156,8 +156,25 @@
                     </button>
                 </div>
 
+                <!-- PELÍCULAS SIMILARES -->
+                <div class="similares-seccion similares-seccion-inline" style="display:none;">
+                    <h4 class="similares-titulo-seccion">🎬 Películas similares</h4>
+                    <div class="similares-carrusel-outer">
+                        <button class="similares-arrow" id="similares-arrow-left" onclick="window.scrollSimilares(-1)">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div id="similares-container" class="similares-container"></div>
+                        <button class="similares-arrow" id="similares-arrow-right" onclick="window.scrollSimilares(1)">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- FILA INFERIOR: caja de comentarios (ancho completo) -->
                 <div class="modal-fila-comentarios">
+
+                    <!-- Título comentarios -->
+                    <h4 class="comentarios-seccion-titulo" id="comentariosTitulo">💬 Comentarios</h4>
 
                     <!-- Switch modo spoiler -->
                     <div class="spoiler-switch-row" id="spoilerSwitchRow">

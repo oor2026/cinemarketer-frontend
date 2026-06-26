@@ -1506,18 +1506,25 @@
 
 #modalPelicula .modal-fila-comentarios,
 #modalPelicula .modal-fila-boton {
-    grid-column: 1 / -1 !important; /* Ocupar todo el ancho del grid */
+    grid-column: 1 / -1 !important;
 }
 
 #modalPelicula .modal-fila-comentarios {
-    border-top: 1px solid #eee !important;
-    padding-top: 1.5rem !important;
+    margin-bottom: -1rem !important;
+}
+
+#modalPelicula .modal-fila-comentarios {
+    background: #fdf4f4 !important;
+    border-top: 1px solid #f5dada !important;
+    padding: 1rem 1.5rem 0 !important;
 }
 
 #modalPelicula .modal-fila-boton {
     display: flex !important;
     justify-content: center !important;
-    padding-bottom: 0.5rem !important;
+    background: #fdf4f4 !important;
+    border-top: none !important;
+    padding: 0 1.5rem 1rem !important;
 }
 
 /* ========== BOTONES DE VOTO SIEMPRE AL FONDO DE LA TARJETA ========== */
@@ -2605,4 +2612,164 @@
         margin-top: 0.5rem;
         padding-top: 0.5rem;
     }
+}
+
+/* =============================================
+   PELÍCULAS SIMILARES
+   ============================================= */
+.similares-seccion {
+    padding: 1rem 1.5rem 1rem;
+    border-top: 1px solid #e0e6f0;
+    border-bottom: 1px solid #e0e6f0;
+}
+
+.similares-titulo-seccion {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 0.75rem 0;
+}
+
+.similares-container {
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: #ddd transparent;
+}
+
+.similares-container::-webkit-scrollbar {
+    height: 4px;
+}
+
+.similares-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.similares-container::-webkit-scrollbar-thumb {
+    background: #ddd;
+    border-radius: 4px;
+}
+
+.similar-card {
+    flex-shrink: 0;
+    width: 80px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.similar-card:hover {
+    transform: scale(1.05);
+}
+
+.similar-card img {
+    width: 80px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    display: block;
+    flex-shrink: 0;
+}
+
+@media (min-width: 769px) {
+    .similar-card {
+        width: 110px;
+    }
+
+    .similar-card img {
+        width: 110px;
+        height: 165px;
+    }
+
+    .similares-seccion-inline {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+}
+
+.similar-card-info {
+    margin-top: 0.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.similar-titulo {
+    font-size: 0.72rem;
+    color: #333;
+    font-weight: 600;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.similar-anio {
+    font-size: 0.68rem;
+    color: #999;
+}
+
+.similares-loading {
+    color: #999;
+    font-size: 0.85rem;
+    padding: 0.5rem 0;
+}
+
+.similares-carrusel-outer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.similares-arrow {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: #e50914;
+    color: white;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.2s, transform 0.15s;
+    box-shadow: 0 2px 8px rgba(229,9,20,0.3);
+    z-index: 2;
+}
+
+.similares-arrow:hover {
+    background: #b2070f;
+    transform: scale(1.08);
+}
+
+@media (max-width: 768px) {
+    .similares-arrow {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .similares-seccion {
+        padding: 1rem 1rem 0.5rem;
+    }
+}
+
+.comentarios-seccion-titulo {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 0.75rem 0;
+    padding-top: 1rem;
+}
+
+#modalPelicula .modal-fila-comentarios.spoiler-mode,
+#modalPelicula .modal-fila-boton.spoiler-mode {
+    background: #f4f6fb !important;
+    border-top-color: #e0e6f0 !important;
 }
