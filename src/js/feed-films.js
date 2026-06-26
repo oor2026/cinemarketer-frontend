@@ -985,6 +985,8 @@ window.cargarDatosPelicula = async function(id) {
         const pelicula = await response.json();
 
         document.getElementById('modalTitulo').textContent = pelicula.title || 'Título no disponible';
+        const tituloComentarios = document.getElementById('comentariosTitulo');
+        if (tituloComentarios) tituloComentarios.textContent = `💬 Comentarios de ${pelicula.title || 'esta película'}`;
         const posterEl = document.getElementById('modalPoster');
         const posterSrc = pelicula.poster_path
             ? `https://image.tmdb.org/t/p/w500${pelicula.poster_path}`
@@ -1069,12 +1071,70 @@ window.cargarDatosPelicula = async function(id) {
             }
         }
         if (typeof window.cargarTrailerPelicula === 'function') {
-                    window.cargarTrailerPelicula(id);
+                            window.cargarTrailerPelicula(id);
+                        }
+                window.cargarPeliculasSimilares(id);
+            } catch (error) {
+                document.getElementById('modalTitulo').textContent = 'Error al cargar';
+            }
+        };
+
+        // ==============================================
+        // PELÍCULAS SIMILARES
+        // ==============================================
+        window.cargarPeliculasSimilares = async function(movieId) {
+            const contenedor = document.getElementById('similares-container');
+            if (!contenedor) return;
+
+            contenedor.innerHTML = '<div class="similares-loading"><i class="fas fa-spinner fa-spin"></i></div>';
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${CONFIG.API_URL}/movies/${movieId}/similar`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error();
+
+                const data = await response.json();
+                const soloLatinos = /^[a-zA-ZÀ-ÿ0-9\s\-:,.!?'"()\u00C0-\u024F\u1E00-\u1EFF]+$/;
+
+                const peliculas = (data.results || [])
+                    .filter(p => p.poster_path && p.title && soloLatinos.test(p.title.trim()))
+                    .slice(0, 10);
+
+                if (peliculas.length === 0) {
+                    contenedor.closest('.similares-seccion').style.display = 'none';
+                    return;
                 }
-    } catch (error) {
-        document.getElementById('modalTitulo').textContent = 'Error al cargar';
-    }
-};
+
+                contenedor.closest('.similares-seccion').style.display = 'block';
+                contenedor.innerHTML = peliculas.map(p => {
+                    const poster = `https://image.tmdb.org/t/p/w185${p.poster_path}`;
+                    const anio = p.release_date ? new Date(p.release_date).getFullYear() : '';
+                    return `
+                        <div class="similar-card" onclick="window.abrirDetallePelicula(${p.id}); setTimeout(() => { const mb = document.querySelector('#modalPelicula .modal-body'); if(mb) mb.scrollTo({ top: 0, behavior: 'smooth' }); }, 250);" title="${p.title}">
+                            <img src="${poster}" alt="${p.title}" onerror="this.src='https://via.placeholder.com/100x150?text=Sin+imagen'">
+                            <div class="similar-card-info">
+                                <span class="similar-titulo">${p.title}</span>
+                                ${anio ? `<span class="similar-anio">${anio}</span>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (e) {
+                    const seccion = contenedor.closest('.similares-seccion');
+                    if (seccion) seccion.style.display = 'none';
+                }
+            };
+
+            window.scrollSimilares = function(direccion) {
+                const track = document.getElementById('similares-container');
+                if (!track) return;
+                const card = track.querySelector('.similar-card');
+                const cardWidth = card ? card.offsetWidth + 14 : 130; // ancho + gap
+                track.scrollBy({ left: direccion * cardWidth * 3, behavior: 'smooth' });
+            };
 
 // ==============================================
 // CARGAR TRÁILER DE LA PELÍCULA
@@ -1971,10 +2031,16 @@ window.activarModoSpoiler = function activarModoSpoiler(activar) {
     header?.classList.toggle('spoiler-mode', modoSpoilerActivo);
 
     // Cambiar color de bordes de comentarios según modo spoiler
-    const items = document.querySelectorAll('#modalPelicula .comentario-item');
-    items.forEach(item => {
-        item.style.borderLeftColor = modoSpoilerActivo ? '#6c63ff' : '#e50914';
-    });
+        const items = document.querySelectorAll('#modalPelicula .comentario-item');
+        items.forEach(item => {
+            item.style.borderLeftColor = modoSpoilerActivo ? '#6c63ff' : '#e50914';
+        });
+
+    // Cambiar fondo sección comentarios y botón según modo spoiler
+        const filaComentarios = document.querySelector('#modalPelicula .modal-fila-comentarios');
+        const filaBoton = document.querySelector('#modalPelicula .modal-fila-boton');
+        if (filaComentarios) filaComentarios.classList.toggle('spoiler-mode', modoSpoilerActivo);
+        if (filaBoton) filaBoton.classList.toggle('spoiler-mode', modoSpoilerActivo);
 
     if (textarea) {
         textarea.placeholder = modoSpoilerActivo
