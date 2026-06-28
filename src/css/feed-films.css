@@ -734,7 +734,7 @@
     background: rgba(0, 0, 0, 0.8) !important;
     align-items: center !important;
     justify-content: center !important;
-    z-index: 999999 !important;
+    z-index: 9000 !important;
 }
 
 .modal[style*="display: flex"] {
@@ -2772,4 +2772,48 @@
 #modalPelicula .modal-fila-boton.spoiler-mode {
     background: #f4f6fb !important;
     border-top-color: #e0e6f0 !important;
+}
+
+/* =============================================
+   DÓNDE VERLA — botón card feed
+   ============================================= */
+.btn-donde-verla {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #f4f6fb;
+    border: 1.5px solid #c8d4f0;
+    color: #324C89;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-bottom: 0.5rem;
+    width: fit-content;
+}
+
+.btn-donde-verla:hover {
+    background: #e0e6f8;
+}
+
+.btn-donde-verla-overlay {
+    background: rgba(0,0,0,0.55);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    transition: background 0.2s;
+    font-size: 0.85rem;
+}
+
+.btn-donde-verla-overlay:hover {
+    background: rgba(50, 76, 137, 0.8);
 }

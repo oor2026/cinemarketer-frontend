@@ -127,7 +127,10 @@ function generarTarjetasFallback(peliculas) {
                         <span><i class="fas fa-clock"></i> Popularidad: ${Math.round(pelicula.popularity)}</span>
                     </div>
                     <div class="votacion-container">
-                        <div class="votacion-buttons">
+                            <button class="btn-donde-verla" onclick="event.stopPropagation(); window.abrirDondeVerla(${pelicula.id}, event)" title="Dónde verla">
+                                <i class="fas fa-tv"></i> Dónde verla
+                            </button>
+                            <div class="votacion-buttons">
                             <button class="btn-like" onclick="window.votarPelicula(${pelicula.id}, 'like')">
                                 <i class="fas fa-thumbs-up"></i> ${pelicula.vote_count}
                             </button>
@@ -2688,4 +2691,97 @@ window.cerrarCajaRespuesta = function(commentId) {
     const form = document.querySelector(`#replies-${commentId} .reply-form`) ||
                  document.querySelector(`.reply-form`);
     if (form) form.remove();
+};
+
+// ==============================================
+// DÓNDE VERLA
+// ==============================================
+window.abrirDondeVerla = async function(movieId, event) {
+    if (event) event.stopPropagation();
+
+    const overlay = document.getElementById('dondeVerlaOverlay');
+    const panel   = document.getElementById('dondeVerlaPanel');
+    const contenido = document.getElementById('dondeVerlaContenido');
+
+    // Mover al body para escapar del stacking context del modal principal
+    document.body.appendChild(overlay);
+    document.body.appendChild(panel);
+
+    // Centrado siempre en mobile o desde el modal; cerca del click en desktop desde el feed
+    const desdeModal = event && event.currentTarget && event.currentTarget.id === 'btnDondeVerlaModal';
+    const esMobile = window.innerWidth <= 768;
+    if (event && !desdeModal && !esMobile) {
+        const rect = event.currentTarget.getBoundingClientRect();
+        const panelW = 320;
+        let left = rect.left;
+        let top  = rect.bottom + 8;
+        if (left + panelW > window.innerWidth - 16) left = window.innerWidth - panelW - 16;
+        if (top + 300 > window.innerHeight) top = rect.top - 8 - 300;
+        panel.style.left = left + 'px';
+        panel.style.top  = top + 'px';
+        panel.style.transform = 'none';
+    } else {
+        panel.style.left = '50%';
+        panel.style.top  = '50%';
+        panel.style.transform = 'translate(-50%, -50%)';
+    }
+
+    overlay.style.display = 'block';
+    panel.style.display   = 'block';
+    document.body.style.overflow = 'hidden';
+    contenido.innerHTML   = '<div style="text-align:center;padding:1rem;color:#ccc;"><i class="fas fa-spinner fa-spin"></i></div>';
+
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${CONFIG.API_URL}/movies/${movieId}/watch-providers`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+
+        const ar = data.results && data.results.AR;
+        if (!ar) {
+            contenido.innerHTML = '<p style="text-align:center;color:#999;font-size:0.88rem;padding:0.5rem 0;">No hay información de disponibilidad para Argentina.</p>';
+            return;
+        }
+
+        const categorias = [
+            { key: 'flatrate', label: 'Streaming' },
+            { key: 'rent',     label: 'Alquiler'  },
+            { key: 'buy',      label: 'Compra'    }
+        ];
+
+        let html = '';
+        categorias.forEach(({ key, label }) => {
+            if (!ar[key] || ar[key].length === 0) return;
+            html += `<div style="margin-bottom:1rem;">
+                <p style="font-size:0.75rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 0.5rem;">${label}</p>
+                <div style="display:flex;flex-wrap:wrap;gap:0.6rem;">
+                    ${ar[key].map(p => `
+                        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;width:60px;">
+                            <img src="https://image.tmdb.org/t/p/w92${p.logo_path}" alt="${p.provider_name}"
+                                 style="width:44px;height:44px;border-radius:10px;object-fit:cover;box-shadow:0 2px 6px rgba(0,0,0,0.15);"
+                                 onerror="this.style.display='none'">
+                            <span style="font-size:0.65rem;color:#555;text-align:center;line-height:1.2;">${p.provider_name}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>`;
+        });
+
+        if (!html) {
+            contenido.innerHTML = '<p style="text-align:center;color:#999;font-size:0.88rem;padding:0.5rem 0;">No hay información de disponibilidad para Argentina.</p>';
+        } else {
+            contenido.innerHTML = html;
+        }
+
+    } catch(e) {
+        contenido.innerHTML = '<p style="text-align:center;color:#999;font-size:0.88rem;padding:0.5rem 0;">No se pudo cargar la información.</p>';
+    }
+};
+
+window.cerrarDondeVerla = function() {
+    document.getElementById('dondeVerlaOverlay').style.display = 'none';
+    document.getElementById('dondeVerlaPanel').style.display   = 'none';
+    document.body.style.overflow = '';
 };
