@@ -2912,9 +2912,10 @@ window.abrirActorModal = async function(personId, nombre, movieId) {
         const det  = detRes.ok  ? await detRes.json()  : {};
         const cred = credRes.ok ? await credRes.json() : {};
 
-        const foto = det.profile_path
-            ? `<img src="https://image.tmdb.org/t/p/w185${det.profile_path}" style="width:80px;height:110px;object-fit:cover;border-radius:10px;" onerror="this.style.display='none'">`
-            : `<div style="width:80px;height:110px;border-radius:10px;background:#e0e0e0;display:flex;align-items:center;justify-content:center;font-size:2rem;color:#999;">${(det.name||nombre||'?').charAt(0)}</div>`;
+        const fotoSrc = det.profile_path ? `https://image.tmdb.org/t/p/w185${det.profile_path}` : null;
+        const foto = fotoSrc
+        ? `<img src="${fotoSrc}" style="width:80px;height:110px;object-fit:cover;border-radius:10px;cursor:zoom-in;" onclick="window.abrirFotoActor('https://image.tmdb.org/t/p/w342${det.profile_path}', '${(det.name||nombre).replace(/'/g,"\\'")}')" onerror="this.style.display='none'">`
+        : `<div style="width:80px;height:110px;border-radius:10px;background:#e0e0e0;display:flex;align-items:center;justify-content:center;font-size:2rem;color:#999;">${(det.name||nombre||'?').charAt(0)}</div>`;
 
         const bio = det.biography
             ? (det.biography.length > 300 ? det.biography.substring(0, 300) + '...' : det.biography)
@@ -3098,4 +3099,22 @@ window.scrollFilmografia = function(dir) {
     const item = track.querySelector('div');
     const w = item ? item.offsetWidth + 8 : 64;
     track.scrollBy({ left: dir * w * 3, behavior: 'smooth' });
+};
+
+window.abrirFotoActor = function(src, nombre) {
+    const overlay = document.createElement('div');
+    overlay.id = 'fotoActorOverlay';
+    overlay.onclick = () => overlay.remove();
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:200000;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:1rem;';
+
+    overlay.innerHTML = `
+        <div style="position:relative;max-width:320px;width:100%;">
+            <button onclick="document.getElementById('fotoActorOverlay').remove()"
+                    style="position:absolute;top:-14px;right:-14px;width:32px;height:32px;border-radius:50%;background:white;border:none;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#333;box-shadow:0 2px 8px rgba(0,0,0,0.3);z-index:1;">×</button>
+            <img src="${src}" alt="${nombre}"
+                 style="width:100%;border-radius:12px;display:block;box-shadow:0 8px 32px rgba(0,0,0,0.4);">
+            <p style="text-align:center;color:white;font-size:0.85rem;font-weight:600;margin:0.6rem 0 0;">${nombre}</p>
+        </div>`;
+
+    document.body.appendChild(overlay);
 };
