@@ -132,6 +132,22 @@
                 <!-- ============================================== -->
                 <!-- CONTENEDOR PROPIO DEL TRÁILER -->
                 <!-- ============================================== -->
+                <!-- ELENCO & DIRECCIÓN -->
+                <div class="elenco-seccion" id="elencoSeccion" style="display:none;">
+                    <div class="elenco-header">
+                        <span class="elenco-titulo-seccion">👥 Elenco y dirección</span>
+                        <div class="elenco-tabs">
+                            <button class="elenco-tab active" id="tabElenco" onclick="window.switchElencoTab('cast')">Elenco</button>
+                            <button class="elenco-tab" id="tabDireccion" onclick="window.switchElencoTab('crew')">Dirección</button>
+                        </div>
+                    </div>
+                    <div class="elenco-carrusel-outer">
+                        <button class="elenco-arrow" onclick="window.scrollElenco(-1)"><i class="fas fa-chevron-left"></i></button>
+                        <div class="elenco-track" id="elencoTrack"></div>
+                        <button class="elenco-arrow" onclick="window.scrollElenco(1)"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+
                 <div class="trailer-propio-container" id="trailerPropioContainer">
                     <div class="trailer-propio-wrapper">
                         <div class="modal-trailer-container" id="modalTrailerContainer">
@@ -142,9 +158,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- ============================================== -->
-                <!-- BOTONES VOTAR - DEBAJO DEL TRÁILER -->
                 <!-- ============================================== -->
                 <!-- LEYENDA DE PORCENTAJE -->
                 <div id="modalLeyendaPorcentaje" style="text-align:center;font-size:0.95rem;font-weight:600;color:#333;margin:0rem 0 0.25rem;white-space:nowrap;grid-column:1/-1;width:100%;display:block;"></div>
@@ -509,6 +522,18 @@
     </div>
 
 </div>
+<!-- MINI MODAL ACTOR -->
+<div id="actorOverlay" onclick="window.cerrarActorModal()" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.4);"></div>
+<div id="actorPanel" style="display:none;position:fixed;z-index:100000;background:white;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.2);min-width:300px;max-width:420px;max-height:80vh;overflow-y:auto;">
+    <div id="actorPanelHeader" style="background:#324C89;padding:0.75rem 1rem;border-radius:16px 16px 0 0;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:1;">
+        <span id="actorPanelNombre" style="color:white;font-size:0.9rem;font-weight:700;"></span>
+        <button onclick="window.cerrarActorModal()" style="background:none;border:none;color:rgba(255,255,255,0.8);font-size:1.3rem;cursor:pointer;line-height:1;">×</button>
+    </div>
+    <div id="actorPanelContenido" style="padding:1rem;">
+        <div style="text-align:center;padding:1rem;color:#ccc;"><i class="fas fa-spinner fa-spin"></i></div>
+    </div>
+</div>
+
 <!-- MINI MODAL DÓNDE VERLA -->
 <div id="dondeVerlaOverlay" onclick="window.cerrarDondeVerla()" style="display:none;position:fixed;inset:0;z-index:99000;background:rgba(0,0,0,0.4);"></div>
 <div id="dondeVerlaPanel" style="display:none;position:fixed;z-index:99001;background:white;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.2);padding:1.25rem 1.5rem;min-width:280px;max-width:360px;">
