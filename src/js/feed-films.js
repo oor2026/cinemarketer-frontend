@@ -1077,9 +1077,10 @@ window.cargarDatosPelicula = async function(id) {
                             window.cargarTrailerPelicula(id);
                         }
                 window.cargarPeliculasSimilares(id);
-            } catch (error) {
-                document.getElementById('modalTitulo').textContent = 'Error al cargar';
-            }
+                    window.cargarElenco(id);
+                } catch (error) {
+                    document.getElementById('modalTitulo').textContent = 'Error al cargar';
+                }
         };
 
         // ==============================================
@@ -2784,4 +2785,317 @@ window.cerrarDondeVerla = function() {
     document.getElementById('dondeVerlaOverlay').style.display = 'none';
     document.getElementById('dondeVerlaPanel').style.display   = 'none';
     document.body.style.overflow = '';
+};
+
+// ==============================================
+// ELENCO & DIRECCIÓN
+// ==============================================
+window._elencoData = { cast: [], crew: [] };
+window._elencoTab = 'cast';
+
+window.cargarElenco = async function(movieId) {
+    const seccion = document.getElementById('elencoSeccion');
+    const track = document.getElementById('elencoTrack');
+    if (!seccion || !track) return;
+
+    track.innerHTML = '<div style="padding:1rem;color:#ccc;"><i class="fas fa-spinner fa-spin"></i></div>';
+    seccion.style.display = 'block';
+
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${CONFIG.API_URL}/movies/${movieId}/credits`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+
+        const cast = (data.cast || []).slice(0, 12);
+        const crew = (data.crew || [])
+            .filter(p => ['Director', 'Producer', 'Screenplay', 'Writer', 'Director of Photography', 'Original Music Composer'].includes(p.job))
+            .slice(0, 12);
+
+        if (cast.length === 0 && crew.length === 0) {
+            seccion.style.display = 'none';
+            return;
+        }
+
+        window._elencoData = { cast, crew };
+        window._elencoTab = 'cast';
+        window.renderElencoTab('cast');
+
+    } catch(e) {
+        seccion.style.display = 'none';
+    }
+};
+
+window.renderElencoTab = function(tab) {
+    const track = document.getElementById('elencoTrack');
+    if (!track) return;
+
+    const personas = window._elencoData[tab] || [];
+    if (personas.length === 0) {
+        track.innerHTML = '<p style="font-size:0.82rem;color:#999;padding:0.5rem;">Sin información disponible.</p>';
+        return;
+    }
+
+    track.innerHTML = personas.map(p => {
+        const foto = p.profile_path
+            ? `https://image.tmdb.org/t/p/w185${p.profile_path}`
+            : null;
+        const inicial = (p.name || '?').charAt(0).toUpperCase();
+        const avatarHtml = foto
+            ? `<img src="${foto}" alt="${p.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+               <div class="elenco-inicial" style="display:none;">${inicial}</div>`
+            : `<div class="elenco-inicial">${inicial}</div>`;
+        const subtitulo = tab === 'cast' ? (p.character || '') : (p.job || '');
+                const mid = window.peliculaActualId || 0;
+                return `
+                <div class="elenco-item" onclick="window.abrirActorModal(${p.id}, '${(p.name||'').replace(/'/g,"\\'")}', ${mid})">
+                <div class="elenco-foto">${avatarHtml}</div>
+                <p class="elenco-nombre">${p.name || ''}</p>
+                <p class="elenco-rol">${subtitulo}</p>
+            </div>`;
+    }).join('');
+};
+
+window.switchElencoTab = function(tab) {
+    window._elencoTab = tab;
+    document.getElementById('tabElenco').classList.toggle('active', tab === 'cast');
+    document.getElementById('tabDireccion').classList.toggle('active', tab === 'crew');
+    window.renderElencoTab(tab);
+};
+
+window.scrollElenco = function(dir) {
+    const track = document.getElementById('elencoTrack');
+    if (!track) return;
+    const item = track.querySelector('.elenco-item');
+    const w = item ? item.offsetWidth + 10 : 90;
+    track.scrollBy({ left: dir * w * 3, behavior: 'smooth' });
+};
+
+// ==============================================
+// MINI MODAL ACTOR
+// ==============================================
+window._elencoMovieId = null;
+
+window.abrirActorModal = async function(personId, nombre, movieId) {
+    const overlay  = document.getElementById('actorOverlay');
+    const panel    = document.getElementById('actorPanel');
+    const nombreEl = document.getElementById('actorPanelNombre');
+    const contenido = document.getElementById('actorPanelContenido');
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(panel);
+
+    const desdeModal = !!window.peliculaActualId;
+    const volverBtn = (movieId && !desdeModal)
+        ? `<button onclick="window.volverAlElenco(${movieId})" style="background:none;border:none;color:rgba(255,255,255,0.8);font-size:0.8rem;cursor:pointer;display:flex;align-items:center;gap:4px;padding:0;"><i class="fas fa-arrow-left"></i> Volver</button>`
+        : '';
+
+    nombreEl.innerHTML = `<div style="display:flex;align-items:center;gap:10px;">${volverBtn}<span>${nombre}</span></div>`;
+    overlay.style.display = 'block';
+    panel.style.display   = 'block';
+    panel.style.left = '50%';
+    panel.style.top  = '50%';
+    panel.style.transform = 'translate(-50%, -50%)';
+    document.body.style.overflow = 'hidden';
+
+    contenido.innerHTML = '<div style="text-align:center;padding:2rem;color:#ccc;"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
+
+    try {
+        const token = localStorage.getItem('token');
+        const [detRes, credRes] = await Promise.all([
+            fetch(`${CONFIG.API_URL}/movies/person/${personId}`, { headers: { 'Authorization': `Bearer ${token}` } }),
+            fetch(`${CONFIG.API_URL}/movies/person/${personId}/credits`, { headers: { 'Authorization': `Bearer ${token}` } })
+        ]);
+
+        const det  = detRes.ok  ? await detRes.json()  : {};
+        const cred = credRes.ok ? await credRes.json() : {};
+
+        const foto = det.profile_path
+            ? `<img src="https://image.tmdb.org/t/p/w185${det.profile_path}" style="width:80px;height:110px;object-fit:cover;border-radius:10px;" onerror="this.style.display='none'">`
+            : `<div style="width:80px;height:110px;border-radius:10px;background:#e0e0e0;display:flex;align-items:center;justify-content:center;font-size:2rem;color:#999;">${(det.name||nombre||'?').charAt(0)}</div>`;
+
+        const bio = det.biography
+            ? (det.biography.length > 300 ? det.biography.substring(0, 300) + '...' : det.biography)
+            : 'Sin biografía disponible.';
+
+        const peliculas = (cred.cast || [])
+            .filter(p => p.poster_path)
+            .sort((a,b) => (b.popularity||0) - (a.popularity||0))
+            .slice(0, 8);
+
+        const filmografiaHtml = peliculas.length > 0
+            ? `<div style="margin-top:1rem;">
+                <p style="font-size:0.75rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 0.5rem;">Filmografía destacada</p>
+                <div style="display:flex;align-items:center;gap:6px;">
+                    <button class="elenco-arrow" id="filmografiaArrowLeft" onclick="window.scrollFilmografia(-1)" style="display:none;">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div id="filmografiaTrack" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;flex:1;">
+                        ${peliculas.map(p => `
+                            <div style="flex-shrink:0;width:56px;cursor:pointer;" onclick="window.cerrarActorModal();setTimeout(()=>window.abrirDetallePelicula(${p.id}),200)">
+                                <img src="https://image.tmdb.org/t/p/w92${p.poster_path}" style="width:56px;height:82px;object-fit:cover;border-radius:6px;display:block;">
+                                <p style="margin:4px 0 0;font-size:0.65rem;color:#555;text-align:center;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${p.title||''}</p>
+                            </div>`).join('')}
+                    </div>
+                    <button class="elenco-arrow" id="filmografiaArrowRight" onclick="window.scrollFilmografia(1)" style="display:none;">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+               </div>`
+            : '';
+
+        const nacimiento = det.birthday
+            ? `<p style="margin:2px 0;font-size:0.78rem;color:#888;"><i class="fas fa-birthday-cake" style="width:14px;color:#324C89;"></i> ${det.birthday}</p>`
+            : '';
+        const lugar = det.place_of_birth
+            ? `<p style="margin:2px 0;font-size:0.78rem;color:#888;"><i class="fas fa-map-marker-alt" style="width:14px;color:#324C89;"></i> ${det.place_of_birth}</p>`
+            : '';
+
+        contenido.innerHTML = `
+            <div style="display:flex;gap:12px;margin-bottom:0.75rem;">
+                ${foto}
+                <div style="flex:1;">
+                    <p style="margin:0 0 6px;font-size:1rem;font-weight:700;color:#1a1a1a;">${det.name || nombre}</p>
+                    ${nacimiento}${lugar}
+                </div>
+            </div>
+            <div style="border-top:1px solid #f0f0f0;padding-top:0.75rem;">
+                <p style="font-size:0.75rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 0.4rem;">Biografía</p>
+                <p style="font-size:0.82rem;color:#555;line-height:1.6;margin:0;">${bio}</p>
+            </div>
+            ${filmografiaHtml}
+        `;
+
+    // Mostrar flechas solo en desktop
+            if (window.innerWidth > 768) {
+                const arrowL = document.getElementById('filmografiaArrowLeft');
+                const arrowR = document.getElementById('filmografiaArrowRight');
+                if (arrowL) arrowL.style.display = 'flex';
+                if (arrowR) arrowR.style.display = 'flex';
+            }
+
+        } catch(e) {
+            contenido.innerHTML = '<p style="text-align:center;color:#999;font-size:0.88rem;padding:1rem;">No se pudo cargar la información.</p>';
+        }
+    };
+
+window.cerrarActorModal = function() {
+    document.getElementById('actorOverlay').style.display = 'none';
+    document.getElementById('actorPanel').style.display   = 'none';
+    document.body.style.overflow = '';
+};
+
+window.abrirElencoCard = async function(movieId, event) {
+    if (event) event.stopPropagation();
+    window._elencoCardMovieId = movieId;
+
+    const overlay  = document.getElementById('actorOverlay');
+    const panel    = document.getElementById('actorPanel');
+    const nombreEl = document.getElementById('actorPanelNombre');
+    const contenido = document.getElementById('actorPanelContenido');
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(panel);
+
+    nombreEl.textContent = 'Elenco y dirección';
+    overlay.style.display = 'block';
+    panel.style.display   = 'block';
+    panel.style.left = '50%';
+    panel.style.top  = '50%';
+    panel.style.transform = 'translate(-50%, -50%)';
+    document.body.style.overflow = 'hidden';
+
+    contenido.innerHTML = '<div style="text-align:center;padding:2rem;color:#ccc;"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
+
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${CONFIG.API_URL}/movies/${movieId}/credits`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+
+        const cast = (data.cast || []).slice(0, 12);
+        const crew = (data.crew || [])
+            .filter(p => ['Director','Producer','Screenplay','Writer','Director of Photography','Original Music Composer'].includes(p.job))
+            .slice(0, 12);
+
+        window._elencoData = { cast, crew };
+        contenido.innerHTML = `
+            <div style="margin-bottom:0.75rem;">
+                <div style="display:flex;gap:0;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;width:fit-content;margin-bottom:0.75rem;">
+                    <button id="elencoCardTabCast" onclick="window.renderElencoCardTab('cast')" style="padding:4px 14px;font-size:0.78rem;font-weight:600;border:none;background:#324C89;color:white;cursor:pointer;">Elenco</button>
+                    <button id="elencoCardTabCrew" onclick="window.renderElencoCardTab('crew')" style="padding:4px 14px;font-size:0.78rem;font-weight:600;border:none;background:white;color:#888;cursor:pointer;">Dirección</button>
+                </div>
+                <div id="elencoCardTrack" style="display:flex;flex-wrap:wrap;gap:12px;"></div>
+            </div>`;
+
+        window.renderElencoCardTab('cast');
+
+    } catch(e) {
+        contenido.innerHTML = '<p style="text-align:center;color:#999;font-size:0.88rem;padding:1rem;">No se pudo cargar el elenco.</p>';
+    }
+};
+
+window.renderElencoCardTab = function(tab) {
+    document.getElementById('elencoCardTabCast').style.background = tab === 'cast' ? '#324C89' : 'white';
+    document.getElementById('elencoCardTabCast').style.color = tab === 'cast' ? 'white' : '#888';
+    document.getElementById('elencoCardTabCrew').style.background = tab === 'crew' ? '#324C89' : 'white';
+    document.getElementById('elencoCardTabCrew').style.color = tab === 'crew' ? 'white' : '#888';
+
+    const personas = window._elencoData[tab] || [];
+    const track = document.getElementById('elencoCardTrack');
+    if (!track) return;
+
+    if (personas.length === 0) {
+        track.innerHTML = '<p style="font-size:0.82rem;color:#999;">Sin información disponible.</p>';
+        return;
+    }
+
+    track.innerHTML = personas.map(p => {
+        const foto = p.profile_path
+            ? `<img src="https://image.tmdb.org/t/p/w185${p.profile_path}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">`
+            : '';
+        const inicial = (p.name || '?').charAt(0).toUpperCase();
+        const subtitulo = tab === 'cast' ? (p.character || '') : (p.job || '');
+        return `
+            <div onclick="window.abrirActorModal(${p.id}, '${(p.name||'').replace(/'/g,"\\'")}', window._elencoCardMovieId)
+" style="display:flex;flex-direction:column;align-items:center;gap:4px;width:64px;cursor:pointer;">
+                <div style="width:52px;height:52px;border-radius:50%;overflow:hidden;border:2px solid #e0e0e0;background:#324C89;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;color:white;">
+                    ${foto || inicial}
+                </div>
+                <p style="margin:0;font-size:0.68rem;font-weight:600;color:#333;text-align:center;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;width:64px;">${p.name||''}</p>
+                <p style="margin:0;font-size:0.62rem;color:#999;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:64px;">${subtitulo}</p>
+            </div>`;
+    }).join('');
+};
+
+window.volverAlElenco = async function(movieId) {
+    if (window._elencoCardMovieId === movieId) {
+        await window.abrirElencoCard(movieId, null);
+    } else {
+        const panel    = document.getElementById('actorPanel');
+        const nombreEl = document.getElementById('actorPanelNombre');
+        const contenido = document.getElementById('actorPanelContenido');
+        nombreEl.innerHTML = '👥 Elenco y dirección';
+        contenido.innerHTML = `
+            <div style="margin-bottom:0.75rem;">
+                <div style="display:flex;gap:0;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;width:fit-content;margin-bottom:0.75rem;">
+                    <button id="elencoCardTabCast" onclick="window.renderElencoCardTab('cast')" style="padding:4px 14px;font-size:0.78rem;font-weight:600;border:none;background:#324C89;color:white;cursor:pointer;">Elenco</button>
+                    <button id="elencoCardTabCrew" onclick="window.renderElencoCardTab('crew')" style="padding:4px 14px;font-size:0.78rem;font-weight:600;border:none;background:white;color:#888;cursor:pointer;">Dirección</button>
+                </div>
+                <div id="elencoCardTrack" style="display:flex;flex-wrap:wrap;gap:12px;"></div>
+            </div>`;
+        window.renderElencoCardTab(window._elencoTab || 'cast');
+    }
+};
+
+window.scrollFilmografia = function(dir) {
+    const track = document.getElementById('filmografiaTrack');
+    if (!track) return;
+    const item = track.querySelector('div');
+    const w = item ? item.offsetWidth + 8 : 64;
+    track.scrollBy({ left: dir * w * 3, behavior: 'smooth' });
 };
