@@ -452,7 +452,7 @@
             ? `<span class="com-editado">· editado</span>` : '';
 
         return `
-                            <div class="com-card" data-id="${pub.id}" data-created="${pub.createdAt || ''}" data-autor-id="${autor.id || ''}" data-video-uid="${pub.videoUid || ''}">
+            <div class="com-card" data-id="${pub.id}" data-created="${pub.createdAt || ''}" data-autor-id="${autor.id || ''}" data-autor-creator="${pub.authorWasCreator ? 'true' : 'false'}" data-video-uid="${pub.videoUid || ''}">
             <div class="com-card-header">
                 <div class="com-card-avatar" onclick="window.abrirPerfilUsuario(${autor.id})">${avatarHtml}</div>
                 <div class="com-card-meta">
@@ -1006,6 +1006,10 @@
         function renderComentarioPub(c, pubId) {
             const myId = parseInt(localStorage.getItem('userId'));
             const esPropio = c.user?.id === myId;
+            const cardPub = document.querySelector(`.com-card[data-id="${pubId}"]`);
+            const autorPubId = cardPub?.dataset.autorId;
+            const autorEsCreator = cardPub?.dataset.autorCreator === 'true';
+            const esAutorPub = autorEsCreator && c.user?.id != null && autorPubId && String(c.user.id) === String(autorPubId);
             const inicial = (c.user?.name || 'U').charAt(0).toUpperCase();
             const avatarHtml = c.user?.avatarUrl
                 ? `<img src="${c.user.avatarUrl}" style="width:32px;height:32px;object-fit:cover;border-radius:50%;">`
@@ -1023,8 +1027,11 @@
                 <div style="flex-shrink:0;">${avatarHtml}</div>
                 <div style="flex:1;min-width:0;">
                     <div style="display:flex;justify-content:space-between;align-items:center;">
-                        <span style="font-weight:600;font-size:0.83rem;color:#333;">${c.user?.name || 'Usuario'}</span>
-                        ${esPropio
+                                <span style="display:flex;align-items:center;gap:5px;">
+                                    <span style="font-weight:600;font-size:0.83rem;color:#333;">${c.user?.name || 'Usuario'}</span>
+                                    ${esAutorPub ? `<span style="background:#e50914;color:white;font-size:0.62rem;font-weight:700;padding:1px 7px;border-radius:99px;letter-spacing:0.3px;">AUTOR</span>` : ''}
+                                </span>
+                                ${esPropio
                             ? `<button onclick="window.ocultarComentarioPub(${c.id}, ${pubId})"
                                        style="background:none;border:none;cursor:pointer;color:#ccc;font-size:0.75rem;padding:2px 4px;" title="Ocultar">
                                    <i class="fas fa-ban"></i>
