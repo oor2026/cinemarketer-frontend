@@ -175,6 +175,7 @@
                                                         <li><span class="premium-check creator-theme"></span>Publicá con imagen y también con video/reels</li>
                                                         <li><span class="premium-check creator-theme"></span>Hasta 10 imágenes por publicación</li>
                                                         <li><span class="premium-check creator-theme"></span>Hasta 60 seg de reels por publicación</li>
+                                                        <li><span class="premium-check creator-theme"></span>Publicá con encuestas, votaciones y mucho más</li>
                                                     </ul>
                                                 </div>
                                                 <button class="btn-suscribirse creator-theme" onclick="window.abrirDetallePlanCreator()">
