@@ -53,7 +53,11 @@
     <!-- PANEL PREMIUM -->
     <div class="cuenta-premium-panel" id="cuentaPremiumPanel">
 
-        <div class="premium-banner" id="premiumBanner">
+        <div class="plan-carousel">
+            <div class="plan-carousel-track" id="planCarouselTrack">
+                <div class="plan-carousel-slide">
+
+                    <div class="premium-banner" id="premiumBanner">
             <div class="premium-banner-toggle-row">
                 <span class="premium-banner-toggle-label">★ Cinemarketer Premium</span>
                 <button class="premium-banner-toggle" id="premiumBannerToggle" onclick="togglePremiumBanner()" aria-label="Colapsar banner">
@@ -82,12 +86,10 @@
                     <div class="premium-banner-price"><span id="premiumPlanPrice">$999</span> <span>/ mes</span></div>
                     <div class="premium-benefits-wrapper">
                         <ul class="premium-banner-benefits" id="premiumBenefitsList">
+                            <li><span class="premium-check"></span>Duplicás tus puntos en cada una de tus interacciones</li>
+                            <li><span class="premium-check"></span>Generá puntos comentando/recomendando sin limites</li>
+                            <li><span class="premium-check"></span>Acumulá puntos sin tope mensual y que nunca vencen</li>
                             <li><span class="premium-check"></span>Premios y sorteos exclusivos solo para miembros</li>
-                            <li><span class="premium-check"></span><strong>Puntos x2</strong>&nbsp;en votos, comentarios y recomendaciones</li>
-                            <li><span class="premium-check"></span>Sin límite diario de comentarios ni recomendaciones</li>
-                            <li><span class="premium-check"></span>Sin tope mensual de puntos acumulados</li>
-                            <li><span class="premium-check"></span>Tus puntos <strong>nunca vencen</strong></li>
-                            <li><span class="premium-check"></span>Cobrás todo lo que acumulás el 1° de cada mes</li>
                         </ul>
                         <div class="premium-benefits-dots" id="premiumBenefitsDots"></div>
                     </div>
@@ -136,13 +138,19 @@
             </div>
             <div class="premium-activo-benefits">
                 <div class="premium-benefit-item">
+                    <span class="premium-check blue"></span>Puntos x2 activos en cada interacción
+                </div>
+                <div class="premium-benefit-item">
+                    <span class="premium-check blue"></span>Sin límite diario de puntos (comentar/recomendar)
+                </div>
+                <div class="premium-benefit-item">
+                    <span class="premium-check blue"></span>Sin tope mensual — tus puntos nunca vencen
+                </div>
+                <div class="premium-benefit-item">
                     <span class="premium-check blue"></span>Premios exclusivos activos
                 </div>
                 <div class="premium-benefit-item">
                     <span class="premium-check blue"></span>Sorteos gratuitos activos
-                </div>
-                <div class="premium-benefit-item">
-                    <span class="premium-check blue"></span>Puntos x2 activos
                 </div>
             </div>
             <button class="btn-cancelar-suscripcion" onclick="window.abrirCancelarSuscripcion()">
@@ -172,6 +180,120 @@
                 </div>
             </div>
         </div>
+
+                </div><!-- /slide premium -->
+
+                <div class="plan-carousel-slide">
+
+                    <div class="premium-banner creator-theme" id="creatorBanner">
+                        <div class="premium-banner-toggle-row">
+                            <span class="premium-banner-toggle-label">🎬 Cinemarketer Creator</span>
+                            <button class="premium-banner-toggle" id="creatorBannerToggle" onclick="toggleCreatorBanner()" aria-label="Colapsar banner">
+                                <i class="fas fa-chevron-up" id="creatorBannerChevron"></i>
+                            </button>
+                        </div>
+                        <div class="premium-banner-colapsable" id="creatorBannerColapsable">
+                            <div class="premium-banner-lateral">
+                                <div class="premium-merch-item">
+                                    <div class="premium-merch-icon creator-theme"><i class="ti ti-video" aria-hidden="true"></i></div>
+                                    <span class="premium-merch-label">Publicá<br>con video</span>
+                                </div>
+                                <div class="premium-merch-item">
+                                    <div class="premium-merch-icon creator-theme"><i class="ti ti-photo" aria-hidden="true"></i></div>
+                                    <span class="premium-merch-label">Y también<br>con fotos</span>
+                                </div>
+                                <div class="premium-merch-item">
+                                    <div class="premium-merch-icon creator-theme"><i class="ti ti-photo-plus" aria-hidden="true"></i></div>
+                                    <span class="premium-merch-label">10 imágenes<br>por post</span>
+                                </div>
+                            </div>
+
+                            <div class="premium-banner-centro">
+                                <div class="premium-banner-badge">🎬 Para creadores</div>
+                                <p class="premium-banner-title">Cinemarketer Creator</p>
+                                <div class="premium-banner-price"><span id="creatorPlanPrice">$1999</span> <span>/ mes</span></div>
+                                <div class="premium-benefits-wrapper">
+                                    <ul class="premium-banner-benefits" id="creatorBenefitsList">
+                                        <li><span class="premium-check creator-theme"></span>Publicá con imagen y también con video/reels</li>
+                                        <li><span class="premium-check creator-theme"></span>Hasta 10 imágenes por publicación</li>
+                                        <li><span class="premium-check creator-theme"></span>Hasta 60 seg de reels por publicación</li>
+                                        <li><span class="premium-check creator-theme"></span>Publicá con encuestas, votaciones y mucho más</li>
+                                    </ul>
+                                    <div class="premium-benefits-dots" id="creatorBenefitsDots"></div>
+                                </div>
+                                <button class="btn-suscribirse creator-theme" onclick="window.abrirDetallePlanCreator()">
+                                    Quiero ser Creator
+                                </button>
+                            </div>
+
+                            <div class="premium-banner-lateral">
+                                <div class="premium-merch-item">
+                                    <div class="premium-merch-icon creator-theme"><i class="ti ti-movie" aria-hidden="true"></i></div>
+                                    <span class="premium-merch-label">Formato<br>reel</span>
+                                </div>
+                                <div class="premium-merch-item">
+                                    <div class="premium-merch-icon creator-theme"><i class="ti ti-users" aria-hidden="true"></i></div>
+                                    <span class="premium-merch-label">Comunidad<br>Cinemarketer</span>
+                                </div>
+                                <div class="premium-merch-item">
+                                    <div class="premium-merch-icon creator-theme"><i class="ti ti-medal" aria-hidden="true"></i></div>
+                                    <span class="premium-merch-label">Estatus<br>Creator</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="premium-activo" id="creatorActivo" style="display:none;">
+                        <div class="premium-activo-header creator-theme">
+                            <span class="premium-activo-nombre">Creator</span>
+                            <span class="premium-activo-badge creator-theme">
+                    <span class="premium-activo-dot creator-theme"></span>Activo
+                </span>
+                        </div>
+                        <div class="premium-activo-rows">
+                            <div class="premium-activo-row">
+                                <span class="pa-label">Tipo</span>
+                                <span class="pa-value">Mensual</span>
+                            </div>
+                            <div class="premium-activo-row">
+                                <span class="pa-label">Medio de pago</span>
+                                <span class="pa-value">Mercado Pago</span>
+                            </div>
+                            <div class="premium-activo-row">
+                                <span class="pa-label">Acceso hasta</span>
+                                <span class="pa-value" id="creatorVencimiento">—</span>
+                            </div>
+                        </div>
+                        <div class="premium-activo-benefits">
+                            <div class="premium-benefit-item creator-theme">
+                                <span class="premium-check creator-theme"></span>Publicación con video/reels activa
+                            </div>
+                            <div class="premium-benefit-item creator-theme">
+                                <span class="premium-check creator-theme"></span>Hasta 10 imágenes por publicación
+                            </div>
+                            <div class="premium-benefit-item creator-theme">
+                                <span class="premium-check creator-theme"></span>Hasta 60 seg de reel por publicación
+                            </div>
+                            <div class="premium-benefit-item creator-theme">
+                                <span class="premium-check creator-theme"></span>Herramientas para publicar mejor
+                            </div>
+                            <div class="premium-benefit-item creator-theme">
+                                <span class="premium-check creator-theme"></span>Combinable con Premium
+                            </div>
+                        </div>
+                        <button class="btn-cancelar-suscripcion" onclick="window.abrirCancelarSuscripcionCreator()">
+                            Cancelar suscripción
+                        </button>
+                    </div>
+
+                </div><!-- /slide creator -->
+            </div><!-- /plan-carousel-track -->
+
+            <div class="plan-carousel-dots">
+                <button class="plan-carousel-dot active" onclick="window.irASlidePlan(0)" aria-label="Ver Premium"></button>
+                <button class="plan-carousel-dot" onclick="window.irASlidePlan(1)" aria-label="Ver Creator"></button>
+            </div>
+        </div><!-- /plan-carousel -->
 
     </div>
 
@@ -558,6 +680,20 @@
             <div class="premium-cancel-btns">
                 <button class="btn-cancel-no" onclick="window.cerrarCancelarSuscripcion()">No, mantener</button>
                 <button class="btn-cancel-si" id="btnConfirmarCancelacion" onclick="window.confirmarCancelacion()">
+                    Sí, cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMAR CANCELACIÓN CREATOR -->
+    <div class="premium-cancel-modal-overlay" id="creatorModalCancelar">
+        <div class="premium-cancel-caja">
+            <h3>¿Cancelar tu suscripción Creator?</h3>
+            <p>Mantenés el acceso a video/reels y las demás herramientas hasta el fin del período pagado. Podés volver a suscribirte cuando quieras.</p>
+            <div class="premium-cancel-btns">
+                <button class="btn-cancel-no" onclick="window.cerrarCancelarSuscripcionCreator()">No, mantener</button>
+                <button class="btn-cancel-si" id="btnConfirmarCancelacionCreator" onclick="window.confirmarCancelacionCreator()">
                     Sí, cancelar
                 </button>
             </div>

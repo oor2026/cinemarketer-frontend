@@ -91,12 +91,19 @@
     opacity: 0.8;
 }
 
+.premium-benefits-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .premium-banner-benefits {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     gap: 10px;
 }
 
@@ -106,6 +113,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    min-width: 0;
 }
 
 .premium-check {
@@ -777,4 +785,103 @@
     font-size: 11px;
     font-weight: 700;
     color: white;
+}
+
+/* ===== CARRUSEL DE PLANES (Premium / Creator) ===== */
+.plan-carousel {
+    position: relative;
+}
+
+.plan-carousel-track {
+    display: flex;
+    align-items: flex-start;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    transition: height 0.3s ease;
+}
+
+.plan-carousel-track::-webkit-scrollbar {
+    display: none;
+}
+
+.plan-carousel-slide {
+    flex: 0 0 100%;
+    min-width: 100%;
+    scroll-snap-align: start;
+}
+
+.plan-carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 0.85rem;
+}
+
+.plan-carousel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ddd;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.plan-carousel-dot.active {
+    background: #333;
+    transform: scale(1.3);
+}
+
+/* ===== TEMA CREATOR (violeta) — mismo layout que Premium, distinto color ===== */
+.premium-banner.creator-theme,
+#creatorBanner.creator-theme {
+    background: #241242;
+}
+
+.premium-merch-icon.creator-theme,
+.premium-check.creator-theme {
+    background: #7c3aed;
+}
+
+.premium-activo-header.creator-theme {
+    background: #241242;
+}
+
+.premium-activo-badge.creator-theme {
+    background: #f3ecff;
+    color: #7c3aed;
+}
+
+.premium-activo-dot.creator-theme {
+    background: #7c3aed;
+}
+
+.premium-benefit-item.creator-theme {
+    color: #4c1d95;
+}
+
+.btn-suscribirse.creator-theme {
+    background: #7c3aed;
+}
+
+.btn-suscribirse.creator-theme:hover {
+    background: #6025d9;
+}
+
+#creatorPlanPrice,
+#creatorPlanPrice + span {
+    font-size: 30px;
+    color: white;
+}
+
+#creatorPlanPrice {
+    font-weight: 800;
+}
+
+#creatorPlanPrice + span {
+    font-weight: 400;
+    opacity: 0.8;
 }

@@ -76,13 +76,15 @@ async function cargarPerfil(userId) {
         const perfil = await response.json();
 
         renderIdentidad(perfil);
-                renderStats(perfil);
-                renderVotaciones(perfil.ultimasVotaciones);
-                window._perfilTotalComentarios = perfil.totalComentarios || 0;
-                renderComentarios(perfil.ultimosComentarios);
+        renderStats(perfil);
+        renderVotaciones(perfil.ultimasVotaciones);
+        window._perfilTotalComentarios = perfil.totalComentarios || 0;
+        renderComentarios(perfil.ultimosComentarios);
 
-                _comentariosTotal = perfil.totalComentarios || 0;
-                _actualizarNavComentarios();
+        _comentariosTotal = perfil.totalComentarios || 0;
+        _actualizarNavComentarios();
+
+        cargarPublicacionesPerfil(userId);
 
     } catch (error) {
             console.error('Error en cargarPerfil:', error);
@@ -599,11 +601,13 @@ window.subirBanner = async function(input) {
             _actualizarContadoresBio();
 
             document.getElementById('modalEditarBio').style.display = 'flex';
-        };
+                document.body.classList.add('modal-open');
+            };
 
-        window.cerrarModalBio = function() {
-            document.getElementById('modalEditarBio').style.display = 'none';
-        };
+            window.cerrarModalBio = function() {
+                document.getElementById('modalEditarBio').style.display = 'none';
+                document.body.classList.remove('modal-open');
+            };
 
         window._actualizarContadoresBio = function _actualizarContadoresBio() {
             const t = document.getElementById('inputBioTitulo')?.value.length || 0;
@@ -925,16 +929,9 @@ window.confirmarBloquearPerfil = async function() {
 window._abrirPeliculaDesdePerfil = async function(movieId) {
     if (!movieId) return;
 
-    const modalEnDOM = !!document.getElementById('modalPelicula');
-    if (typeof window.abrirDetallePelicula === 'function' && modalEnDOM) {
-        window.abrirDetallePelicula(movieId);
-        return;
+    if (typeof window._asegurarModalPeliculaEnDOM === 'function') {
+        await window._asegurarModalPeliculaEnDOM();
     }
-
-    await new Promise(resolve => {
-        loadModule('feed-films', null, false);
-        setTimeout(resolve, 1500);
-    });
     if (typeof window.abrirDetallePelicula === 'function') {
         window.abrirDetallePelicula(movieId);
     }
@@ -943,14 +940,10 @@ window._abrirPeliculaDesdePerfil = async function(movieId) {
 window._abrirPeliculaDesdeComentario = async function(movieId, commentId, esSpoiler) {
     if (!movieId) return;
 
-    // Asegurar que el feed y su modal estén disponibles
-        const modalEnDOM = !!document.getElementById('modalPelicula');
-        if (typeof window.abrirDetallePelicula !== 'function' || !modalEnDOM) {
-            await new Promise(resolve => {
-                loadModule('feed-films', null, false);
-                setTimeout(resolve, 1500);
-            });
-        }
+    // Asegurar que el modal de película esté disponible, sin reemplazar la vista actual
+    if (typeof window._asegurarModalPeliculaEnDOM === 'function') {
+        await window._asegurarModalPeliculaEnDOM();
+    }
 
     if (typeof window.abrirDetallePelicula !== 'function') return;
 
@@ -1013,3 +1006,337 @@ console.log('[DEBUG] if commentId?', !!commentId);
             }, 800);
         }
 };
+// ==============================================
+// PUBLICACIONES EN COMUNIDAD — PERFIL
+// ==============================================
+async function cargarPublicacionesPerfil(userId) {
+    const lista = document.getElementById('perfilPublicacionesList');
+    if (!lista) return;
+
+    try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(
+                `${CONFIG.API_URL}/publications/user/${userId}?page=0&size=9`,
+                { headers: { 'Authorization': `Bearer ${token}` } }
+            );
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            const pubs = data.content || [];
+
+            if (pubs.length === 0) {
+                lista.innerHTML = '<div class="perfil-vacio">Todavía no hay publicaciones.</div>';
+                return;
+            }
+
+            lista.innerHTML = `<div class="perfil-pub-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">
+                        ${pubs.map(pub => renderTilePublicacionPerfil(pub)).join('')}
+                    </div>`;
+
+                        // Botón ver más si hay más de 9 — abre la vista completa con scroll infinito
+                        if (!data.last) {
+                            lista.insertAdjacentHTML('beforeend', `
+                                <div style="text-align:center;padding:0.75rem;">
+                                    <span onclick="window.abrirTodasLasPublicacionesPerfil(${userId})"
+                                          style="font-size:0.82rem;color:#324C89;cursor:pointer;font-weight:600;">
+                                        Ver todas las publicaciones →
+                                    </span>
+                                </div>`);
+                        }
+
+            // Cargar contadores reales (banco + comentarios) de cada tile
+            pubs.forEach(pub => cargarContadoresTilePerfil(pub.id));
+
+            } catch(e) {
+                const lista = document.getElementById('perfilPublicacionesList');
+                if (lista) lista.innerHTML = '<div class="perfil-vacio">No se pudieron cargar las publicaciones.</div>';
+            }
+        }
+
+        // Paleta, ícono y nombre por territorio — el label usa la misma
+        // redacción que el formulario de creación ("¿De qué va tu publicación?"),
+        // para que el usuario reconozca la categoría de un vistazo.
+        function estiloTerritorioPerfil(key) {
+            const map = {
+                PELICULAS_SERIES: { bg: '#eef1fb', text: '#324C89', icon: 'fa-film', label: 'Películas y series' },
+                LO_QUE_VIENE:     { bg: '#f5eefc', text: '#6b3fa0', icon: 'fa-calendar-alt', label: 'Lo que se viene' },
+                GENTE_CINE:       { bg: '#fff4e5', text: '#b06a00', icon: 'fa-theater-masks', label: 'Gente de cine' },
+                PREMIOS:          { bg: '#eafaf0', text: '#1e8a4c', icon: 'fa-trophy', label: 'Premios y reconocimientos' },
+                INDUSTRIA:        { bg: '#fff0f0', text: '#c0392b', icon: 'fa-dollar-sign', label: 'Industria y negocio' },
+                EXPERIENCIA:      { bg: '#e8f6f3', text: '#0f7a68', icon: 'fa-couch', label: 'La experiencia cinéfila' },
+                ARTE_CULTURA:     { bg: '#f5eefc', text: '#6b3fa0', icon: 'fa-graduation-cap', label: 'Arte y cultura' },
+                EVENTOS:          { bg: '#fdeef5', text: '#b0316b', icon: 'fa-users', label: 'Eventos y comunidad' }
+            };
+            return map[key] || { bg: '#f2f2f2', text: '#666', icon: 'fa-comment-alt', label: 'Publicación' };
+        }
+
+        function escapeHtmlPerfil(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function renderTilePublicacionPerfil(pub) {
+                    const tieneImagen = pub.imageUrls && pub.imageUrls.length > 0;
+                    // Igual criterio que el feed público: el video solo se considera
+                    // "visible" cuando ya está aprobado (videoUrl se completa recién
+                    // ahí). videoUid solo, sin videoUrl, significa que el video
+                    // todavía está pendiente/procesando — no corresponde mostrarlo.
+                    const tieneVideo = !!pub.videoUid && !!pub.videoUrl;
+
+                    if (tieneVideo) {
+                        return `
+                            <div class="perfil-pub-tile" data-perfil-pub-id="${pub.id}" onclick="window.abrirPublicacionDesdePerfi(${pub.id})"
+                                style="aspect-ratio:1;border-radius:8px;overflow:hidden;position:relative;cursor:pointer;background:#000;">
+                                <img src="https://videodelivery.net/${pub.videoUid}/thumbnails/thumbnail.jpg" alt=""
+                                     style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;opacity:0.85;">
+                                <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+                                    <div style="width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,0.5);
+                                                display:flex;align-items:center;justify-content:center;">
+                                        <i class="fas fa-play" style="color:white;font-size:0.9rem;margin-left:2px;"></i>
+                                    </div>
+                                </div>
+                                <div style="position:absolute;top:6px;right:6px;color:white;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.6));">
+                                    <i class="fas fa-video" style="font-size:0.8rem;"></i>
+                                </div>
+                                <div class="perfil-pub-overlay"
+                                 style="position:absolute;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;
+                                        justify-content:center;gap:14px;opacity:0;transition:opacity .15s;">
+                                <span style="color:white;font-size:0.8rem;font-weight:600;">
+                                    <i class="fas fa-thumbs-up"></i> <span id="perfilPubBanco-${pub.id}">0</span>
+                                </span>
+                                <span style="color:white;font-size:0.8rem;font-weight:600;">
+                                    <i class="fas fa-comment"></i> <span id="perfilPubComent-${pub.id}">0</span>
+                                </span>
+                                <span style="color:white;font-size:0.8rem;font-weight:600;">
+                                    <i class="fas fa-star"></i> <span id="perfilPubPunto-${pub.id}">0</span>
+                                </span>
+                            </div>
+                        </div>`;
+                }
+
+                    if (tieneImagen) {
+                return `
+                    <div class="perfil-pub-tile" data-perfil-pub-id="${pub.id}" onclick="window.abrirPublicacionDesdePerfi(${pub.id})"
+                        style="aspect-ratio:1;border-radius:8px;overflow:hidden;position:relative;cursor:pointer;background:#f0f0f0;">
+                        <img src="${pub.imageUrls[0]}" alt=""
+                             style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+                        ${pub.imageUrls.length > 1
+                            ? `<div style="position:absolute;top:6px;right:6px;color:white;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.6));">
+                                    <i class="fas fa-clone" style="font-size:0.8rem;"></i>
+                               </div>` : ''}
+                        <div class="perfil-pub-overlay"
+                         style="position:absolute;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;
+                                justify-content:center;gap:14px;opacity:0;transition:opacity .15s;">
+                        <span style="color:white;font-size:0.8rem;font-weight:600;">
+                            <i class="fas fa-thumbs-up"></i> <span id="perfilPubBanco-${pub.id}">0</span>
+                        </span>
+                        <span style="color:white;font-size:0.8rem;font-weight:600;">
+                            <i class="fas fa-star"></i> <span id="perfilPubPunto-${pub.id}">0</span>
+                        </span>
+                        <span style="color:white;font-size:0.8rem;font-weight:600;">
+                            <i class="fas fa-comment"></i> <span id="perfilPubComent-${pub.id}">0</span>
+                        </span>
+                    </div>
+                </div>`;
+        }
+
+            const estilo = estiloTerritorioPerfil(pub.territoryGroup);
+            const textoTile = pub.spoiler
+                ? 'Contiene spoilers'
+                : (pub.title || pub.content || '').substring(0, 70) + ((pub.title || pub.content || '').length > 70 ? '...' : '');
+
+            return `
+                <div class="perfil-pub-tile" data-perfil-pub-id="${pub.id}" onclick="window.abrirPublicacionDesdePerfi(${pub.id})"
+                     style="aspect-ratio:1;border-radius:8px;overflow:hidden;position:relative;cursor:pointer;
+                            background:${estilo.bg};display:flex;flex-direction:column;">
+                    <div style="padding:8px 10px;text-align:center;">
+                        <span style="font-size:0.66rem;font-weight:800;color:${estilo.text};text-transform:uppercase;
+                                     letter-spacing:0.3px;">
+                            ${estilo.label}
+                        </span>
+                    </div>
+                    <div style="flex:1;padding:10px 14px;display:flex;flex-direction:column;
+                                align-items:center;justify-content:center;text-align:center;gap:8px;">
+                        <i class="fas ${estilo.icon}" style="font-size:2.2rem;color:${estilo.text};opacity:0.9;"></i>
+                        <p style="font-size:0.74rem;font-weight:600;color:${estilo.text};margin:0;line-height:1.3;
+                                   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+                            ${escapeHtmlPerfil(textoTile)}
+                        </p>
+                    </div>
+                    <div style="display:flex;justify-content:center;align-items:center;gap:14px;font-size:0.82rem;font-weight:700;color:${estilo.text};">
+                        <span style="display:flex;align-items:center;"><i class="fas fa-thumbs-up" style="margin-right:4px;"></i><span id="perfilPubBanco-${pub.id}">0</span></span>
+                        <span style="display:flex;align-items:center;"><i class="fas fa-comment" style="margin-right:4px;"></i><span id="perfilPubComent-${pub.id}">0</span></span>
+                        <span style="display:flex;align-items:center;"><i class="fas fa-star" style="margin-right:4px;"></i><span id="perfilPubPunto-${pub.id}">0</span></span>
+                    </div>
+                </div>`;
+        }
+
+        async function cargarContadoresTilePerfil(pubId) {
+                    try {
+                        const token = localStorage.getItem('token');
+                        const [reacRes, comentRes] = await Promise.all([
+                            fetch(`${CONFIG.API_URL}/publications/${pubId}/reactions/count`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            }),
+                            fetch(`${CONFIG.API_URL}/publications/${pubId}/comments/count`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            })
+                        ]);
+                        if (reacRes.ok) {
+                            const counts = await reacRes.json();
+                            const elBanco = document.getElementById(`perfilPubBanco-${pubId}`);
+                            if (elBanco) elBanco.textContent = counts.banco || 0;
+                            const elPunto = document.getElementById(`perfilPubPunto-${pubId}`);
+                            if (elPunto) elPunto.textContent = counts.punto || 0;
+                        }
+                        if (comentRes.ok) {
+                            const dataC = await comentRes.json();
+                            const el = document.getElementById(`perfilPubComent-${pubId}`);
+                            if (el) el.textContent = dataC.count || 0;
+                        }
+                    } catch(e) {}
+                }
+
+                // ==============================================
+                // TODAS LAS PUBLICACIONES — pantalla completa con scroll infinito
+                // ==============================================
+                let _perfilPubsFullState = null;
+
+                window.abrirTodasLasPublicacionesPerfil = function(userId) {
+                    let overlay = document.getElementById('perfilPubsOverlay');
+                    if (overlay) overlay.remove();
+
+                    const nombreUsuario = document.getElementById('perfilNombre')?.textContent?.trim() || 'este usuario';
+
+                    overlay = document.createElement('div');
+                    overlay.id = 'perfilPubsOverlay';
+                    overlay.style.cssText = 'position:fixed;inset:0;background:white;z-index:999999;overflow-y:auto;';
+                    const esMobile = window.innerWidth <= 768;
+                    const primerNombre = nombreUsuario.split(' ')[0];
+                    const textoVolver = esMobile ? '←' : '← Volver';
+                    const textoNombre = esMobile ? primerNombre : nombreUsuario;
+                    const colsHeader = esMobile ? '36px 1fr 36px' : '90px 1fr 90px';
+
+                    overlay.innerHTML = `
+                        <div style="position:sticky;top:0;background:#324C89;padding:0.75rem 1.25rem;
+                                    display:grid;grid-template-columns:${colsHeader};align-items:center;z-index:2;">
+                            <a href="javascript:void(0)" onclick="window.cerrarTodasLasPublicacionesPerfil()"
+                               style="color:white;font-size:${esMobile ? '1.3rem' : '0.88rem'};font-weight:700;
+                                      text-decoration:none;line-height:1;white-space:nowrap;">
+                                ${textoVolver}
+                            </a>
+                            <h2 style="margin:0;font-size:0.9rem;font-weight:600;color:white;text-align:center;
+                                       text-transform:uppercase;letter-spacing:0.5px;overflow:hidden;
+                                       text-overflow:ellipsis;white-space:nowrap;">
+                                <i class="fas fa-pen-alt" style="color:#e50914;"></i> Publicaciones de ${escapeHtmlPerfil(textoNombre)}
+                            </h2>
+                            <span></span>
+                        </div>
+                        <div style="max-width:900px;margin:0 auto;padding:1.25rem;">
+                            <div id="perfilPubsGridFull" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;"></div>
+                            <div id="perfilPubsFullLoading" style="text-align:center;padding:1.5rem;color:#ccc;">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                            <div id="perfilPubsFullFin" style="display:none;text-align:center;padding:1.5rem;color:#bbb;font-size:0.85rem;">
+                                Ya viste todas las publicaciones.
+                            </div>
+                        </div>`;
+
+                    document.body.appendChild(overlay);
+                    document.body.style.overflow = 'hidden';
+
+                    _perfilPubsFullState = { userId, page: 0, size: 21, loading: false, hasMore: true };
+                    cargarPaginaPublicacionesFull();
+
+                    const sentinel = document.getElementById('perfilPubsFullLoading');
+                    const observer = new IntersectionObserver((entries) => {
+                        if (entries[0].isIntersecting && _perfilPubsFullState.hasMore && !_perfilPubsFullState.loading) {
+                            cargarPaginaPublicacionesFull();
+                        }
+                    }, { root: overlay, rootMargin: '200px' });
+                    observer.observe(sentinel);
+                    overlay._observer = observer;
+                };
+
+                window.cerrarTodasLasPublicacionesPerfil = function() {
+                    const overlay = document.getElementById('perfilPubsOverlay');
+                    if (overlay) {
+                        if (overlay._observer) overlay._observer.disconnect();
+                        overlay.remove();
+                    }
+                    document.body.style.overflow = '';
+                };
+
+                async function cargarPaginaPublicacionesFull() {
+                    if (!_perfilPubsFullState || _perfilPubsFullState.loading || !_perfilPubsFullState.hasMore) return;
+                    _perfilPubsFullState.loading = true;
+
+                    const grid = document.getElementById('perfilPubsGridFull');
+                    const loadingEl = document.getElementById('perfilPubsFullLoading');
+                    const finEl = document.getElementById('perfilPubsFullFin');
+                    if (!grid) { _perfilPubsFullState.loading = false; return; }
+
+                    try {
+                        const token = localStorage.getItem('token');
+                        const { userId, page, size } = _perfilPubsFullState;
+                        const res = await fetch(
+                            `${CONFIG.API_URL}/publications/user/${userId}?page=${page}&size=${size}`,
+                            { headers: { 'Authorization': `Bearer ${token}` } }
+                        );
+                        if (!res.ok) throw new Error();
+                        const data = await res.json();
+                        const pubs = data.content || [];
+
+                        pubs.forEach(pub => {
+                            grid.insertAdjacentHTML('beforeend', renderTilePublicacionPerfil(pub));
+                            cargarContadoresTilePerfil(pub.id);
+                        });
+
+                        _perfilPubsFullState.hasMore = !data.last;
+                        _perfilPubsFullState.page++;
+
+                        if (!_perfilPubsFullState.hasMore) {
+                            if (loadingEl) loadingEl.style.display = 'none';
+                            if (finEl) finEl.style.display = 'block';
+                        }
+                    } catch(e) {
+                        if (loadingEl) loadingEl.innerHTML = '<span style="color:#e50914;font-size:0.85rem;">Error al cargar más publicaciones.</span>';
+                    } finally {
+                        _perfilPubsFullState.loading = false;
+                    }
+                }
+
+        window.abrirPublicacionDesdePerfi = function(pubId) {
+        if (typeof window.abrirPublicacion === 'function') {
+            window.abrirPublicacion(pubId);
+        } else {
+            window.open(`/publicacion?id=${pubId}`, '_blank');
+        }
+    };
+
+function tiempoRelativoPerfil(fechaStr) {
+    if (!fechaStr) return '';
+    const diff = Math.floor((Date.now() - new Date(fechaStr).getTime()) / 1000);
+    if (diff < 60) return 'hace un momento';
+    if (diff < 3600) return `hace ${Math.floor(diff / 60)} min`;
+    if (diff < 86400) return `hace ${Math.floor(diff / 3600)}h`;
+    if (diff < 604800) return `hace ${Math.floor(diff / 86400)} días`;
+    return new Date(fechaStr).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
+}
+
+function formatTeritorioPerfil(key) {
+    const map = {
+        PELICULAS_SERIES: '🎬 Películas',
+        LO_QUE_VIENE: '📅 Estrenos',
+        GENTE_CINE: '🎭 Gente de cine',
+        PREMIOS: '🏆 Premios',
+        INDUSTRIA: '💰 Industria',
+        EXPERIENCIA: '🍿 Experiencia',
+        ARTE_CULTURA: '🎓 Arte y cultura',
+        EVENTOS: '🎪 Eventos'
+    };
+    return map[key] || key;
+}

@@ -68,6 +68,11 @@ function getNotifIcono(type, referenceType) {
     switch(type) {
         case 'BANCO':                    return '👍';
         case 'MERECE_PUNTO':             return '⭐';
+        case 'PUB_BANCO':               return '👍';
+        case 'PUB_MERECE_PUNTO':        return '⭐';
+        case 'PUB_COMENTARIO':          return '💬';
+        case 'PUB_BANCO_COMENTARIO':    return '👍';
+        case 'PUB_RESPUESTA':           return '↩️';
         case 'NEW_FOLLOWER':             return '👤';
         case 'FOLLOW_REQUEST':           return '👤';
         case 'FOLLOW_REQUEST_ACCEPTED':  return '👤';
@@ -78,6 +83,11 @@ function getNotifIcono(type, referenceType) {
         case 'ADMIN_GRANT_POINTS':       return '🪙';
         case 'PREMIUM_EXPIRING_SOON':    return '⏰';
         case 'PREMIUM_EXPIRING_TOMORROW':return '⚠️';
+        case 'PUB_APROBADA':             return '✅';
+        case 'PUB_PENDIENTE_REVISION':   return '🕓';
+        case 'VIDEO_APROBADO':           return '🎬';
+        case 'VIDEO_PENDIENTE_REVISION': return '🕓';
+        case 'VIDEO_RECHAZADO':          return '⛔';
         default:                         return '💬';
     }
 }
@@ -121,7 +131,7 @@ window.cargarNovedades = async function() {
 
             return `
                 <div data-notif-id="${n.id}"
-                    onclick="window.clickNovedad(${n.id}, ${n.movieId}, ${n.commentId}, ${n.replyId || 'null'}, '${n.type}', ${n.read}, ${n.actorId || 'null'})"
+                    onclick="window.clickNovedad(${n.id}, ${n.movieId}, ${n.commentId}, ${n.replyId || 'null'}, '${n.type}', ${n.read}, ${n.actorId || 'null'}, ${n.publicationId || 'null'})"
                     style="padding:0.75rem 1rem;border-bottom:1px solid #f5f5f5;cursor:pointer;
                            background:${n.read ? 'white' : '#f0f4ff'};
                            transition:background 0.2s;"
@@ -144,7 +154,7 @@ window.cargarNovedades = async function() {
     }
 };
 
-window.clickNovedad = async function(notificationId, movieId, commentId, replyId, type, yaLeida, actorId) {
+window.clickNovedad = async function(notificationId, movieId, commentId, replyId, type, yaLeida, actorId, publicationId) {
      console.log('clickNovedad ejecutado, type:', type);
      console.log('movieId:', movieId, 'abrirDetallePelicula:', typeof window.abrirDetallePelicula);
     const token = localStorage.getItem('token');
@@ -236,7 +246,34 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
                 return;
             }
 
-            // Navegar solo en respuestas
+            // Notificaciones de publicaciones en Comunidad
+            if (type === 'PUB_BANCO') {
+                await window.abrirPublicacion(publicationId, false, null);
+                return;
+            }
+            if (type === 'PUB_MERECE_PUNTO') {
+                await window.abrirPublicacion(publicationId, false, null);
+                return;
+            }
+            if (type === 'PUB_BANCO_COMENTARIO') {
+                await window.abrirPublicacion(publicationId, true, null);
+                return;
+            }
+            if (type === 'PUB_COMENTARIO') {
+                await window.abrirPublicacion(publicationId, true, commentId);
+                return;
+            }
+            if (type === 'PUB_RESPUESTA') {
+                await window.abrirPublicacion(publicationId, true, commentId);
+                return;
+            }
+            if (type === 'PUB_APROBADA' || type === 'PUB_PENDIENTE_REVISION'
+                || type === 'VIDEO_APROBADO' || type === 'VIDEO_PENDIENTE_REVISION'
+                || type === 'VIDEO_RECHAZADO') {
+                await window.abrirPublicacion(publicationId, false, null);
+                return;
+            }
+
             if (type === 'REPLY') {
             // Si el modal no está en el DOM, hay que cargar el feed primero
             if (!document.getElementById('movieModal')) {
@@ -361,7 +398,7 @@ window.cargarNovedadesMobile = async function() {
 
                     return `
                         <div data-notif-id-mobile="${n.id}"
-                            onclick="window.clickNovedad(${n.id}, ${n.movieId}, ${n.commentId}, ${n.replyId || 'null'}, '${n.type}', ${n.read}, ${n.actorId || 'null'})"
+                            onclick="window.clickNovedad(${n.id}, ${n.movieId}, ${n.commentId}, ${n.replyId || 'null'}, '${n.type}', ${n.read}, ${n.actorId || 'null'}, ${n.publicationId || 'null'})"
                             style="padding:0.75rem 1rem;border-bottom:1px solid #eee;cursor:pointer;
                                    background:${n.read ? 'white' : '#f0f4ff'};">
                             <div style="display:flex;align-items:flex-start;gap:0.5rem;">
@@ -478,4 +515,276 @@ window.responderFollowRequestMobile = async function(followerId, aceptar, notifI
         window.cargarNovedadesMobile();
 
     } catch(e) {}
+};
+
+// Abre la película vinculada reemplazando visualmente el modal de publicación,
+// y lo restaura automáticamente cuando se cierra el modal de película (efecto "Volver").
+// Trae solo el <div id="modalPelicula"> de feed-films.html e inyecta su CSS/JS,
+// SIN tocar #module-container — así nunca reemplaza la vista actual (perfil, etc.)
+async function _asegurarModalPeliculaEnDOM() {
+    if (document.getElementById('modalPelicula')) return true;
+    try {
+        const res = await fetch('modules/feed-films.html');
+        if (!res.ok) return false;
+        const html = await res.text();
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+
+        // Todo lo que el modal de película necesita para funcionar, no solo el propio modal
+        const idsNecesarios = [
+            'modalPelicula', 'modalReportarComentario', 'modalMerecePunto',
+            'modalOcultarComentario', 'panelRecomendar', 'modalSpoilerWarning',
+            'dondeVerlaOverlay', 'dondeVerlaPanel', 'actorOverlay', 'actorPanel'
+        ];
+
+        let encontroPrincipal = false;
+        idsNecesarios.forEach(id => {
+            const el = temp.querySelector(`#${id}`);
+            if (el && !document.getElementById(id)) {
+                el.dataset.bgAsset = 'feed-films'; // marca de origen, para poder limpiarlos después
+                document.body.appendChild(el);
+                if (id === 'modalPelicula') encontroPrincipal = true;
+            }
+        });
+        if (!encontroPrincipal) return false;
+
+        // Estilos embebidos inline en feed-films.html (no viven en feed-films.css)
+        if (!document.getElementById('style-feed-films-inline')) {
+            const estilosInline = temp.querySelectorAll('style');
+            estilosInline.forEach((styleTag, i) => {
+                const nuevoStyle = document.createElement('style');
+                nuevoStyle.id = i === 0 ? 'style-feed-films-inline' : `style-feed-films-inline-${i}`;
+                nuevoStyle.dataset.bgAsset = 'feed-films';
+                nuevoStyle.textContent = styleTag.textContent;
+                document.head.appendChild(nuevoStyle);
+            });
+        }
+
+        if (!document.getElementById('css-feed-films')) {
+            const link = document.createElement('link');
+            link.id = 'css-feed-films';
+            link.rel = 'stylesheet';
+            link.href = `css/feed-films.css?v=${Date.now()}`;
+            document.head.appendChild(link);
+        }
+        if (!document.getElementById('js-feed-films')) {
+            await new Promise(resolve => {
+                const script = document.createElement('script');
+                script.id = 'js-feed-films';
+                script.src = `js/feed-films.js?v=${Date.now()}`;
+                script.onload = resolve;
+                script.onerror = resolve;
+                document.head.appendChild(script);
+            });
+        }
+        // Margen para que el script recién cargado registre sus funciones globales
+        await new Promise(r => setTimeout(r, 300));
+        return true;
+    } catch(e) {
+        return false;
+    }
+}
+window._asegurarModalPeliculaEnDOM = _asegurarModalPeliculaEnDOM;
+
+window._abrirPeliculaDesdeModalPublicacion = async function(movieId) {
+    if (!movieId) return;
+
+    const modalPub = document.getElementById('modalPublicacion');
+    // Solo lo marcamos para "volver" si realmente estaba abierto/visible en este momento
+    // (el elemento puede seguir existiendo en el DOM, oculto, de un uso anterior).
+    const modalPubEstabaAbierto = modalPub && modalPub.style.display !== 'none' && modalPub.style.display !== '';
+    if (modalPubEstabaAbierto) {
+        modalPub.style.display = 'none';
+        modalPub.dataset.reabrirTrasPelicula = 'true';
+    }
+
+    // Si estamos dentro de "Ver todas las publicaciones" del perfil, también hay
+    // que ocultarla, si no la película quedaría tapada por ese overlay.
+    const overlayPerfil = document.getElementById('perfilPubsOverlay');
+    if (overlayPerfil && overlayPerfil.style.display !== 'none') {
+        overlayPerfil.style.display = 'none';
+        overlayPerfil.dataset.reabrirTrasPelicula = 'true';
+    }
+
+    // Envolvemos cerrarModal (del modal de película) una sola vez, para que al
+    // cerrarla vuelvan a mostrarse el modal de publicación y/o el overlay de perfil.
+    // No afecta ningún otro flujo: solo actúa cuando esos flags están en 'true'.
+    if (typeof window.cerrarModal === 'function' && !window.cerrarModal._envuelvePublicacion) {
+        const cerrarModalOriginal = window.cerrarModal;
+        window.cerrarModal = function() {
+            cerrarModalOriginal();
+            const modalPubActual = document.getElementById('modalPublicacion');
+            if (modalPubActual && modalPubActual.dataset.reabrirTrasPelicula === 'true') {
+                modalPubActual.dataset.reabrirTrasPelicula = 'false';
+                modalPubActual.style.display = 'flex';
+            }
+            const overlayActual = document.getElementById('perfilPubsOverlay');
+            if (overlayActual && overlayActual.dataset.reabrirTrasPelicula === 'true') {
+                overlayActual.dataset.reabrirTrasPelicula = 'false';
+                overlayActual.style.display = 'block';
+            }
+        };
+        window.cerrarModal._envuelvePublicacion = true;
+    }
+
+    await _asegurarModalPeliculaEnDOM();
+
+    if (typeof window.abrirDetallePelicula === 'function') {
+        window.abrirDetallePelicula(movieId);
+    }
+};
+
+async function _asegurarComunidadJsCargado() {
+    // OJO: no usar toggleBanco como indicador de "ya está cargado" — existe
+    // TAMBIÉN en feed-films.js (banco de comentario de película, cargado
+    // siempre por defecto en el dashboard), así que da un falso positivo
+    // apenas carga la página, antes de que comunidad.js exista de verdad.
+    // renderPublicacionModal es exclusivo de comunidad.js, sin colisión.
+    if (typeof window.renderPublicacionModal === 'function') return true;
+
+    if (!document.getElementById('css-comunidad')) {
+        const link = document.createElement('link');
+        link.id = 'css-comunidad';
+        link.rel = 'stylesheet';
+        link.href = `css/comunidad.css?v=${Date.now()}`;
+        document.head.appendChild(link);
+    }
+
+    if (!document.getElementById('js-comunidad')) {
+        const script = document.createElement('script');
+        script.id = 'js-comunidad';
+        script.src = `js/comunidad.js?v=${Date.now()}`;
+        document.head.appendChild(script);
+    }
+
+    await new Promise(resolve => {
+        if (typeof window.renderPublicacionModal === 'function') { resolve(); return; }
+        const check = setInterval(() => {
+            if (typeof window.renderPublicacionModal === 'function') {
+                clearInterval(check);
+                resolve();
+            }
+        }, 100);
+        setTimeout(() => { clearInterval(check); resolve(); }, 5000);
+    });
+
+    return true;
+}
+
+window.abrirPublicacion = async function(pubId, abrirComentarios, comentarioId) {
+    await _asegurarComunidadJsCargado();
+
+    if (!document.getElementById('modalPublicacion')) {
+        document.body.insertAdjacentHTML('beforeend', `
+            <div id="modalPublicacion" style="display:none; position:fixed; inset:0; z-index:999999; align-items:center; justify-content:center; padding:1rem; background:rgba(0,0,0,0.6);">
+                <div class="modal-overlay" onclick="window.cerrarModalPublicacion()"></div>
+                <div class="modal-pub-contenido" style="position:relative;z-index:1;background:white;border-radius:16px;width:100%;max-width:680px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;">
+                    <div class="modal-pub-header" style="display:flex;justify-content:flex-end;padding:0.5rem 0.75rem 0;flex-shrink:0;">
+                        <button onclick="window.cerrarModalPublicacion()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#999;line-height:1;">×</button>
+                    </div>
+                    <div id="modalPublicacionContenido" style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch;">
+                        <div style="text-align:center;padding:2rem;color:#ccc;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>`);
+    }
+
+    const modal = document.getElementById('modalPublicacion');
+    const contenido = document.getElementById('modalPublicacionContenido');
+    if (!modal || !contenido) return;
+
+    // Siempre al final del <body>, así queda por encima de cualquier
+    // otro overlay abierto (ej: la vista "Ver todas las publicaciones" del perfil)
+    document.body.appendChild(modal);
+
+    modal.style.display = 'flex';
+    document.body.classList.add('modal-open');
+    contenido.innerHTML = '<div style="text-align:center;padding:2rem;color:#ccc;"><i class="fas fa-spinner fa-spin"></i></div>';
+
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${CONFIG.API_URL}/publications/${pubId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.status === 404) {
+                    contenido.innerHTML = '<div style="text-align:center;padding:3rem 1.5rem;color:#999;"><i class="fas fa-eye-slash" style="font-size:1.8rem;display:block;margin-bottom:0.75rem;color:#ccc;"></i>Esta publicación no está disponible por el momento (fue ocultada, o todavía está en revisión).</div>';
+                    return;
+                }
+                if (!res.ok) throw new Error();
+                const pub = await res.json();
+
+        const imagenesHtml = pub.imageUrls && pub.imageUrls.length > 0
+            ? `<div class="com-card-imagenes">${pub.imageUrls.map(url =>
+                `<img src="${url}" alt="imagen" style="width:100%;max-height:480px;object-fit:cover;">`
+              ).join('')}</div>`
+            : '';
+
+        // Reutilizamos el mismo render que usa el feed oficial de Comunidad
+                // (renderCard, expuesto como window.renderPublicacionModal), en vez de
+                // mantener una plantilla propia que se desincroniza cada vez que se
+                // agrega algo nuevo a la tarjeta (título, hashtags, menú de 3 puntos, etc.)
+                contenido.innerHTML = (typeof window.renderPublicacionModal === 'function')
+                    ? window.renderPublicacionModal(pub)
+                    : `<div style="text-align:center;padding:2rem;color:#ccc;">No se pudo mostrar la publicación.</div>`;
+
+        // Cargar reacciones
+        const tokenR = localStorage.getItem('token');
+        Promise.all([
+            fetch(`${CONFIG.API_URL}/publications/${pubId}/reactions/count`, { headers: { 'Authorization': `Bearer ${tokenR}` } }),
+            fetch(`${CONFIG.API_URL}/publications/${pubId}/my-reactions`, { headers: { 'Authorization': `Bearer ${tokenR}` } }),
+            fetch(`${CONFIG.API_URL}/publications/${pubId}/comments/count`, { headers: { 'Authorization': `Bearer ${tokenR}` } })
+        ]).then(async ([countRes, myRes, comentRes]) => {
+            if (countRes.ok) {
+                const counts = await countRes.json();
+                const el = document.getElementById(`bancoCount-${pubId}`);
+                if (el) el.textContent = counts.banco || 0;
+            }
+            if (myRes.ok) {
+                const my = await myRes.json();
+                if (my.banco) {
+                    const btn = document.getElementById(`btnBanco-${pubId}`);
+                    if (btn) btn.classList.add('com-accion-active');
+                }
+            }
+            if (comentRes.ok) {
+                const dataC = await comentRes.json();
+                const el = document.getElementById(`comentCount-${pubId}`);
+                if (el && dataC.count > 0) el.textContent = dataC.count;
+            }
+        }).catch(() => {});
+
+        // Abrir comentarios si corresponde
+            if (abrirComentarios) {
+                // Cargar comunidad.js si no está disponible
+                if (typeof window.abrirComentariosPub !== 'function') {
+                    await new Promise(resolve => {
+                        const s = document.createElement('script');
+                        s.src = `js/comunidad.js?v=${Date.now()}`;
+                        s.onload = resolve;
+                        s.onerror = resolve;
+                        document.head.appendChild(s);
+                    });
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                }
+                if (typeof window.abrirComentariosPub === 'function') {
+                    window.abrirComentariosPub(pubId);
+
+                    if (comentarioId) {
+                        await new Promise(resolve => setTimeout(resolve, 800));
+                        const comentEl = document.getElementById(`pubComment-${comentarioId}`);
+                        if (comentEl) {
+                            comentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            comentEl.style.transition = 'background 0.3s';
+                            comentEl.style.background = '#eef1f8';
+                            setTimeout(() => { comentEl.style.background = ''; }, 2500);
+                        }
+                    }
+                }
+        }
+
+    } catch(e) {
+        contenido.innerHTML = '<div style="text-align:center;padding:2rem;color:#ccc;">No se pudo cargar la publicación.</div>';
+    }
 };

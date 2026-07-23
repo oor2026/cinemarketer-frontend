@@ -7,3 +7,5 @@ const CONFIG = {
         ? 'http://localhost:8080/api'
         : 'https://cinemarketer-backend-production.up.railway.app/api'
 };
+
+window.CONFIG = CONFIG;

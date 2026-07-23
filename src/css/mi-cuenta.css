@@ -986,6 +986,7 @@ select.modal-edicion-input {
     .premium-banner-benefits {
         display: flex;
         flex-direction: column;
+        align-items: flex-start;
         gap: 0.4rem;
         padding: 0;
         margin: 0 0 0.5rem;
@@ -994,7 +995,7 @@ select.modal-edicion-input {
     }
 
     .premium-banner-benefits li {
-        min-width: 100%;
+        min-width: 0;
         font-size: 0.82rem;
     }
 
@@ -1069,23 +1070,32 @@ select.modal-edicion-input {
     }
 
     .premium-banner-toggle-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0.4rem 0.5rem;
-    }
+            display: block;
+            height: 0;
+            padding: 0;
+            margin: 0;
+        }
 
     .premium-banner-toggle-label {
+        position: absolute;
+        top: 0.6rem;
+        left: 0.6rem;
+        right: 2.5rem;
         color: white;
         font-size: 1.2rem;
         font-weight: 600;
         letter-spacing: 0.3px;
-        visibility: hidden;
+        display: none;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .premium-banner-toggle {
         display: flex;
-        position: static;
+        position: absolute;
+        top: 0.6rem;
+        right: 0.6rem;
         background: rgba(255,255,255,0.2);
         border: none;
         color: white;

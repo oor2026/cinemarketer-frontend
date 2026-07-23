@@ -1,0 +1,238 @@
+/* ==============================================
+   publicacion-publica.css
+   ============================================== */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1a1a1a; }
+
+/* ── Navbar ─────────────────────────────────── */
+.pub-navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.5rem;
+    background: #e50914;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.pub-navbar-logo img { height: 32px; }
+
+.pub-navbar-actions { display: flex; gap: 0.75rem; align-items: center; }
+
+.pub-btn-login {
+    color: white;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.pub-btn-register {
+    background: white;
+    color: #e50914;
+    padding: 0.4rem 1rem;
+    border-radius: 99px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+/* ── Main ───────────────────────────────────── */
+.pub-main {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+/* ── Loading / Error ────────────────────────── */
+.pub-loading {
+    text-align: center;
+    padding: 4rem;
+    font-size: 2rem;
+    color: #ccc;
+}
+
+.pub-error {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    text-align: center;
+    padding: 4rem;
+    color: #e50914;
+}
+
+.pub-error i { font-size: 3rem; }
+.pub-error p { color: #666; font-size: 0.95rem; }
+.pub-error a { color: #324C89; font-weight: 600; text-decoration: none; }
+
+/* ── Card ───────────────────────────────────── */
+.pub-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    margin-bottom: 1.25rem;
+}
+
+.pub-card-header {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: 1.25rem 1.25rem 0.75rem;
+}
+
+.pub-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #324C89;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.pub-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.pub-avatar span { color: white; font-size: 1rem; font-weight: 600; }
+
+.pub-card-meta { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+
+.pub-autor { font-size: 0.95rem; font-weight: 700; color: #1a1a1a; }
+
+.pub-badges { display: flex; gap: 5px; flex-wrap: wrap; }
+
+.pub-badge-territory {
+    font-size: 0.72rem;
+    padding: 2px 9px;
+    border-radius: 99px;
+    background: #eef1f8;
+    color: #324C89;
+    font-weight: 600;
+}
+
+.pub-badge-tone {
+    font-size: 0.72rem;
+    padding: 2px 9px;
+    border-radius: 99px;
+    background: #f5f5f5;
+    color: #666;
+}
+
+.pub-tiempo { font-size: 0.78rem; color: #bbb; }
+
+.pub-pelicula-vinculada {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    background: #f8f9ff;
+    border-top: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.82rem;
+    color: #324C89;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.pub-pelicula-vinculada:hover { background: #eef1f8; }
+
+.pub-contenido-texto {
+    padding: 1rem 1.25rem;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: #333;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.pub-imagenes {
+    display: flex;
+    gap: 4px;
+    padding: 0 1.25rem 1rem;
+    overflow-x: auto;
+}
+
+.pub-imagenes img {
+    height: 200px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.pub-spoiler-mask {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 2rem 1.25rem;
+    background: #f5f5f5;
+    text-align: center;
+}
+
+.pub-spoiler-mask i { font-size: 1.5rem; color: #e50914; }
+.pub-spoiler-mask span { font-size: 0.88rem; color: #666; }
+.pub-spoiler-mask button {
+    padding: 6px 16px;
+    border-radius: 99px;
+    border: 1.5px solid #e50914;
+    background: none;
+    color: #e50914;
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+
+/* ── CTA registro ───────────────────────────── */
+.pub-cta {
+    background: linear-gradient(135deg, #324C89, #1a2d5a);
+    border-radius: 16px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    color: white;
+}
+
+.pub-cta-logo { font-size: 2.5rem; margin-bottom: 0.75rem; }
+
+.pub-cta h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.pub-cta p {
+    font-size: 0.88rem;
+    opacity: 0.85;
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+}
+
+.pub-cta-btns { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+
+.pub-cta-btn-primary {
+    background: #e50914;
+    color: white;
+    padding: 0.65rem 1.5rem;
+    border-radius: 99px;
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+.pub-cta-btn-secondary {
+    background: rgba(255,255,255,0.15);
+    color: white;
+    padding: 0.65rem 1.5rem;
+    border-radius: 99px;
+    text-decoration: none;
+    font-size: 0.88rem;
+    border: 1.5px solid rgba(255,255,255,0.3);
+}
+
+@media (max-width: 480px) {
+    .pub-main { margin: 1rem auto; }
+    .pub-navbar { padding: 0.65rem 1rem; }
+    .pub-cta-btns { flex-direction: column; align-items: center; }
+}

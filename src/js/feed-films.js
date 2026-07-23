@@ -875,6 +875,16 @@ window.abrirDetallePelicula = function(id) {
             inicializarContadorCaracteres();
             inicializarCarrusel();
             irASlide(0);
+
+            // Al navegar de película en película dentro del mismo modal,
+            // siempre arrancar viendo el detalle desde arriba.
+            // El scroll real vive en .modal-body, no en #modalPelicula.
+            const modalBody = modal.querySelector('.modal-body');
+            if (modalBody && typeof modalBody.scrollTo === 'function') {
+                modalBody.scrollTo({ top: 0, behavior: 'smooth' });
+            } else if (modalBody) {
+                modalBody.scrollTop = 0;
+            }
         }, 200);
 };
 
@@ -970,6 +980,25 @@ window.cerrarModal = function() {
         window.peliculaActualId = null;
         window.modalActualId = null;
         window.cancelarComentario();
+    }
+};
+
+window.abrirWorkflowDesdeModal = function() {
+    const movieId = window.peliculaActualId;
+    const titulo = document.getElementById('modalTitulo')?.textContent || '';
+
+    // Cargar comunidad.js si no está cargado aún
+    if (typeof window.abrirWorkflowPublicacion !== 'function') {
+        window.cargarModuloComunidad();
+        // Esperar a que cargue y luego abrir
+        const intervalo = setInterval(() => {
+            if (typeof window.abrirWorkflowPublicacion === 'function') {
+                clearInterval(intervalo);
+                window.abrirWorkflowPublicacion(movieId, titulo);
+            }
+        }, 100);
+    } else {
+        window.abrirWorkflowPublicacion(movieId, titulo);
     }
 };
 
@@ -2321,6 +2350,11 @@ function poblarFiltroAnio() {
 window['init_feed-films'] = async function() {
     limpiarModalesDuplicados();
 
+    // El módulo siempre arranca mostrando Películas por defecto — sincronizamos
+    // el estado global para que los botones flotantes (crear publicación, etc.)
+    // no sigan pensando que estamos en Comunidad de una carga anterior.
+    window._tabActivo = 'peliculas';
+
     await cargarComponente('modules/feed-filtros.html', 'filtros-container');
     await cargarComponente('modules/feed-paginacion.html', 'paginacion-container');
 
@@ -2526,23 +2560,81 @@ function inicializarCarrusel() {
 window.irASlide          = irASlide;
 window.inicializarCarrusel = inicializarCarrusel;
 
+window._tabActivo = 'peliculas';
+
 window.seleccionarTabFeed = function(tab, el) {
-    // por ahora solo existe Películas, no hace nada extra
+    const mismoTab = window._tabActivo === tab;
+    window._tabActivo = tab;
+
+    // Si es comunidad y ya estaba activo, reinicializar igual
+    if (mismoTab && tab !== 'comunidad') return;
+
+    // Actualizar estado visual de los tabs
+    document.querySelectorAll('.feed-tab').forEach(b => b.classList.remove('active'));
+    if (el) el.classList.add('active');
+
+    const gridPeliculas = document.getElementById('peliculasGrid');
+        const paginacion = document.getElementById('paginacion-container');
+        const pills = document.getElementById('ordenarPills');
+        const filtros = document.getElementById('filtros-container');
+        const btnFiltrosAvanzados = document.querySelector('.feed-tab-filtro');
+        let comunidadContainer = document.getElementById('comunidad-container');
+
+        if (tab === 'peliculas') {
+            if (gridPeliculas) gridPeliculas.style.display = '';
+            if (paginacion) paginacion.style.display = '';
+            if (pills) pills.style.display = '';
+            if (filtros) filtros.style.display = '';
+            if (btnFiltrosAvanzados) btnFiltrosAvanzados.style.display = '';
+            if (comunidadContainer) comunidadContainer.style.display = 'none';
+
+        } else if (tab === 'comunidad') {
+            if (gridPeliculas) gridPeliculas.style.display = 'none';
+            if (paginacion) paginacion.style.display = 'none';
+            if (pills) pills.style.display = 'none';
+            if (filtros) filtros.style.display = 'none';
+            if (btnFiltrosAvanzados) btnFiltrosAvanzados.style.display = 'none';
+
+        // Crear contenedor si no existe
+        if (!comunidadContainer) {
+            comunidadContainer = document.createElement('div');
+            comunidadContainer.id = 'comunidad-container';
+            gridPeliculas.parentNode.insertBefore(comunidadContainer, gridPeliculas.nextSibling);
+        }
+        comunidadContainer.style.display = '';
+
+        // Cargar JS y CSS de comunidad si no están cargados aún
+        window.cargarModuloComunidad();
+    }
 };
 
-window.mostrarTooltipComunidad = function(event) {
-    event.stopPropagation();
-    const btn = document.getElementById('tabComunidad');
-    btn.setAttribute('title', '¡Próximamente!');
+window.cargarModuloComunidad = function() {
+    // CSS
+    if (!document.getElementById('css-comunidad')) {
+        const link = document.createElement('link');
+        link.id = 'css-comunidad';
+        link.rel = 'stylesheet';
+        link.href = `css/comunidad.css?v=${Date.now()}`;
+        document.head.appendChild(link);
+    }
 
-    // tooltip visual temporal
-    const tooltip = document.createElement('div');
-    tooltip.textContent = '¡Próximamente!';
-    tooltip.style.cssText = 'position:fixed;background:#333;color:white;padding:4px 10px;border-radius:6px;font-size:0.8rem;z-index:9999;pointer-events:none;';
-    tooltip.style.left = event.clientX + 'px';
-    tooltip.style.top = (event.clientY - 35) + 'px';
-    document.body.appendChild(tooltip);
-    setTimeout(() => tooltip.remove(), 1800);
+    // JS
+    if (!document.getElementById('js-comunidad')) {
+        const script = document.createElement('script');
+        script.id = 'js-comunidad';
+        script.src = `js/comunidad.js?v=${Date.now()}`;
+        script.onload = () => {
+            if (typeof window.initComunidad === 'function') {
+                window.initComunidad();
+            }
+        };
+        document.head.appendChild(script);
+    } else {
+        // Ya cargado, solo reinicializar
+        if (typeof window.initComunidad === 'function') {
+            window.initComunidad();
+        }
+    }
 };
 
 window.abrirFiltrosMobile = function() {
