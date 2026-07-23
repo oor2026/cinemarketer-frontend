@@ -380,6 +380,11 @@
 
     function validarEmailLogin(email) {
         if (!email) return { valido: false, error: 'El email es obligatorio' };
+
+        if (email.trim().toLowerCase() === 'info@cinemarketer.com.ar') {
+            return { valido: true };
+        }
+
         if (email.length > 254) return { valido: false, error: 'El email es demasiado largo (máximo 254 caracteres)' };
 
         const partes = email.split('@');
