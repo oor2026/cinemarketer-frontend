@@ -1341,18 +1341,25 @@
         };
 
                 window.ocultarComentarioPub = function(comentId, pubId) {
-            if (!confirm('¿Querés ocultar este comentario? Es irreversible.')) return;
-            const token = localStorage.getItem('token');
-            fetch(`${window._comunidadApiUrl}/publications/comments/${comentId}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            }).then(r => {
-                if (r.ok) {
-                    const el = document.getElementById(`pubComment-${comentId}`);
-                    if (el) el.remove();
-                } else alert('No se pudo ocultar.');
-            });
-        };
+                    if (!confirm('¿Querés ocultar este comentario? Es irreversible.')) return;
+                    const token = localStorage.getItem('token');
+                    fetch(`${window._comunidadApiUrl}/publications/comments/${comentId}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }).then(r => {
+                        if (r.ok) {
+                            const el = document.getElementById(`pubComment-${comentId}`);
+                            if (el) el.remove();
+
+                            // Actualizar contador en la card inmediatamente, sin esperar recarga
+                            const countEl = document.getElementById(`comentCount-${pubId}`);
+                            if (countEl) {
+                                const actual = parseInt(countEl.textContent) || 0;
+                                countEl.textContent = Math.max(actual - 1, 0);
+                            }
+                        } else alert('No se pudo ocultar.');
+                    });
+                };
 
         window.reportarComentarioPub = function(comentId) {
         const motivos = [
