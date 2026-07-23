@@ -43,13 +43,21 @@
     };
 
     window.cargarReaccionesModal = function(pubId) {
-        cargarMisReacciones(pubId);
-    };
+            cargarMisReacciones(pubId);
+        };
 
-    // ==============================================
-    // SHELL HTML
-    // ==============================================
-    function renderShell() {
+        // Exponer para que el modal de publicación desde notificaciones (novedades.js)
+        // también resuelva la ficha de película después de insertar el HTML —
+        // mismo motivo que _pubData: renderCard/renderPublicacionModal solo arma
+        // el placeholder, alguien tiene que llamar al fetch después de insertarlo.
+        window.resolverFichaPelicula = function(pubId, movieId) {
+            resolverFichaPelicula(pubId, movieId);
+        };
+
+        // ==============================================
+        // SHELL HTML
+        // ==============================================
+        function renderShell() {
         const container = document.getElementById('comunidad-container');
         if (!container) return;
 
@@ -315,6 +323,7 @@
                     feed.insertAdjacentHTML('beforeend', renderCard(pub));
                     const cardEl = feed.querySelector(`.com-card[data-id="${pub.id}"]`);
                     if (cardEl) cardEl._pubData = pub;
+                    if (pub.movieId && pub.movieFichaEnabled) resolverFichaPelicula(pub.id, pub.movieId);
                 });
 
                 // Cargar estado de reacciones propias
@@ -391,11 +400,23 @@
         const badgeTerritory = pub.territoryGroup
             ? `<span class="com-badge-territory">${formatTerritory(pub.territoryGroup)}</span>` : '';
 
-        const peliculaHtml = pub.movieId ? `
+        const peliculaHtml = pub.movieId && !pub.movieFichaEnabled ? `
             <div class="com-card-pelicula" onclick="window._abrirPeliculaDesdeModalPublicacion(${pub.movieId})">
                 <i class="fas fa-film"></i>
                 <span>Ver película vinculada</span>
                 <i class="fas fa-chevron-right" style="margin-left:auto;font-size:0.7rem;color:#ccc;"></i>
+            </div>` : '';
+
+        const fichaPeliculaHtml = pub.movieId && pub.movieFichaEnabled ? `
+            <div class="com-card-ficha-pelicula" id="fichaPelicula-${pub.id}" data-movie-id="${pub.movieId}"
+                 style="margin:0 1rem 10px;border:1px solid #eee;border-radius:10px;display:flex;overflow:hidden;min-height:90px;cursor:pointer;"
+                 onclick="window._abrirPeliculaDesdeModalPublicacion(${pub.movieId})">
+                <div style="width:70px;flex-shrink:0;aspect-ratio:2/3;background:#f5f5f5;display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-spinner fa-spin" style="color:#ccc;"></i>
+                </div>
+                <div style="flex:1;min-width:0;padding:10px 12px;display:flex;align-items:center;">
+                    <span style="font-size:0.8rem;color:#999;">Cargando ficha...</span>
+                </div>
             </div>` : '';
 
         const tituloHtml = pub.title
@@ -452,7 +473,7 @@
             ? `<span class="com-editado">· editado</span>` : '';
 
         return `
-            <div class="com-card" data-id="${pub.id}" data-created="${pub.createdAt || ''}" data-autor-id="${autor.id || ''}" data-autor-creator="${pub.authorWasCreator ? 'true' : 'false'}" data-video-uid="${pub.videoUid || ''}">
+            <div class="com-card" data-id="${pub.id}" data-created="${pub.createdAt || ''}" data-autor-id="${autor.id || ''}" data-autor-creator="${pub.authorWasCreator ? 'true' : 'false'}" data-video-uid="${pub.videoUid || ''}" data-movie-id="${pub.movieId || ''}" data-movie-ficha-enabled="${pub.movieFichaEnabled ? 'true' : 'false'}">
             <div class="com-card-header">
                 <div class="com-card-avatar" onclick="window.abrirPerfilUsuario(${autor.id})">${avatarHtml}</div>
                 <div class="com-card-meta">
@@ -465,9 +486,9 @@
                 </button>
             </div>
 
-            ${peliculaHtml}
-
             ${tituloHtml}
+            ${peliculaHtml}
+            ${fichaPeliculaHtml}
             ${imagenesHtml}
             ${videoHtml}
             ${contenidoHtml}
@@ -684,24 +705,27 @@
             .map(img => img.src);
 
         const videoUid = card.getAttribute('data-video-uid') || '';
+                const movieIdActual = card.getAttribute('data-movie-id') || null;
+       const movieFichaActual = card.getAttribute('data-movie-ficha-enabled') === 'true';
 
-        // Pre-cargar estado del workflow en modo edición
-        _wf = {
-            paso: 2,
-            movieId: null,
-            movieTitulo: null,
-            territory: 'PELICULAS_SERIES',
-            sub: null,
-            tone: 'OPINION',
-            title: tituloActual,
-            content: contenidoActual,
-            hashtags: hashtagsActuales,
-            spoiler: false,
-            imageUrls: imagenesActuales,
-            videoUrl: null,
-            _editandoId: pubId,
-            _tieneVideo: !!videoUid
-        };
+       // Pre-cargar estado del workflow en modo edición
+       _wf = {
+           paso: 2,
+           movieId: movieIdActual ? parseInt(movieIdActual) : null,
+           movieTitulo: null,
+           movieFichaEnabled: movieFichaActual,
+           territory: 'PELICULAS_SERIES',
+           sub: null,
+           tone: 'OPINION',
+           title: tituloActual,
+           content: contenidoActual,
+           hashtags: hashtagsActuales,
+           spoiler: false,
+           imageUrls: imagenesActuales,
+           videoUrl: null,
+           _editandoId: pubId,
+           _tieneVideo: !!videoUid
+       };
 
         renderWorkflow();
             document.body.classList.add('modal-open');
@@ -829,6 +853,55 @@
     };
 
     const LIMITE_VER_MAS = 500;
+
+    async function resolverFichaPelicula(pubId, movieId) {
+            const wrap = document.getElementById(`fichaPelicula-${pubId}`);
+            if (!wrap) return;
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${window._comunidadApiUrl}/movies/${movieId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('not found');
+                const m = await res.json();
+
+                const TMDB_GENEROS_FICHA = {
+                    28: 'Acción', 12: 'Aventura', 16: 'Animación', 35: 'Comedia',
+                    80: 'Crimen', 99: 'Documental', 18: 'Drama', 10751: 'Familia',
+                    14: 'Fantasía', 36: 'Historia', 27: 'Terror', 10402: 'Música',
+                    9648: 'Misterio', 10749: 'Romance', 878: 'Ciencia Ficción',
+                    10770: 'Película de TV', 53: 'Suspenso', 10752: 'Bélica', 37: 'Western'
+                };
+
+                const posterUrl = m.poster_path
+                    ? `https://image.tmdb.org/t/p/w500${m.poster_path}`
+                    : '';
+                const anio = m.release_date ? m.release_date.slice(0, 4) : '';
+                const generoIds = m.genre_ids || (m.genres?.map(g => g.id)) || [];
+                const genero = generoIds.length > 0 ? (TMDB_GENEROS_FICHA[generoIds[0]] || '') : '';
+
+                wrap.innerHTML = `
+                    <div style="width:70px;flex-shrink:0;aspect-ratio:2/3;background:#f5f5f5;">
+                        <img src="${posterUrl}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none';">
+                    </div>
+                    <div style="flex:1;min-width:0;padding:10px 12px;display:flex;flex-direction:column;gap:3px;">
+                        <span style="font-weight:600;font-size:0.85rem;color:#1a1a1a;">${escapeHtml(m.title || '')}</span>
+                        <span style="font-size:0.72rem;color:#999;">${[anio, genero].filter(Boolean).join(' · ')}</span>
+                        <span style="font-size:0.72rem;color:#999;"><i class="fas fa-star" style="color:#f5a623;"></i> ${m.vote_average ? m.vote_average.toFixed(1) : '—'}</span>
+                        <span style="font-size:0.72rem;color:#bbb;line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(m.overview || '')}</span>
+                    </div>`;
+            } catch (e) {
+                wrap.innerHTML = `
+                    <div style="width:70px;flex-shrink:0;aspect-ratio:2/3;background:#f5f5f5;display:flex;align-items:center;justify-content:center;">
+                        <i class="fas fa-film" style="color:#ccc;"></i>
+                    </div>
+                    <div style="flex:1;min-width:0;padding:10px 12px;display:flex;align-items:center;">
+                        <span style="font-size:0.8rem;color:#bbb;">Película no disponible</span>
+                    </div>`;
+                wrap.style.cursor = 'default';
+                wrap.onclick = null;
+            }
+        }
 
     function renderContenidoConVerMas(pubId, content) {
             const texto = content || '';
@@ -1487,6 +1560,7 @@
         paso: 0,
         movieId: null,
         movieTitulo: null,
+        movieFichaEnabled: false,
         territory: null,
         sub: null,
         tone: null,
@@ -1499,7 +1573,7 @@
     };
 
     window.abrirWorkflowPublicacion = function(movieId, movieTitulo) {
-        _wf = { paso: 1, movieId: movieId || null, movieTitulo: movieTitulo || null,
+        _wf = { paso: 1, movieId: movieId || null, movieTitulo: movieTitulo || null, movieFichaEnabled: false,
         territory: null, sub: null, tone: null, title: '', content: '', hashtags: '',
         spoiler: false, imageUrls: [], videoUrl: null };
 
@@ -1728,7 +1802,20 @@
     };
 
     // PASO 2 — Contenido
-    function renderPaso2() {
+    window.wfToggleFichaPelicula = function(checkbox) {
+            _wf.movieFichaEnabled = checkbox.checked;
+            // Si ya había imagen o video cargado antes de tildar, se descarta —
+            // así no queda forma de burlar el modo ficha subiendo el archivo primero
+            // y tildando el check después.
+            if (_wf.movieFichaEnabled) {
+                _wf.imageUrls = [];
+                _wf.videoUid = null;
+                _wf._videoFileName = null;
+            }
+            renderWorkflow();
+        };
+
+        function renderPaso2() {
         const isPremium = localStorage.getItem('userPremium') === 'true';
         const isCreator = localStorage.getItem('userCreator') === 'true';
         const puedeImagen = isPremium || isCreator;
@@ -1740,10 +1827,20 @@
                     <i class="fas fa-exclamation-triangle"></i> Tu publicación se marcará automáticamente como Spoiler.
                </div>` : '';
 
-        return `
-                    ${headerWf('Escribí tu publicación', _wf.movieId ? 3 : 2, 3)}
+        const fichaCheck = (_wf.movieId && isCreator) ? `
+                    <label style="display:flex;align-items:center;gap:8px;background:#f8f6ff;border:1px solid #e0d6ff;
+                                  border-radius:8px;padding:0.7rem 0.9rem;margin-bottom:0.75rem;font-size:0.82rem;
+                                  color:#5a3fa0;cursor:pointer;">
+                        <input type="checkbox" id="wfFichaPelicula" ${_wf.movieFichaEnabled ? 'checked' : ''}
+                               onchange="window.wfToggleFichaPelicula(this)" style="accent-color:#7c3aed;">
+                        <span><i class="fas fa-film"></i> Mostrar ficha completa de "${_wf.movieTitulo || 'la película'}" en la publicación (poster, año, rating y sinopsis)</span>
+                    </label>` : '';
 
-                    ${spoilerCheck}
+                return `
+                            ${headerWf('Escribí tu publicación', _wf.movieId ? 3 : 2, 3)}
+
+                            ${fichaCheck}
+                            ${spoilerCheck}
 
                     <input id="wfTitulo" type="text" placeholder="Título de tu publicación..." maxlength="150"
                            value="${(_wf.title || '').replace(/"/g, '&quot;')}"
@@ -1783,11 +1880,18 @@
                         // En cuanto saca lo que eligió (con la "×"), la otra opción reaparece sola.
                         const tieneImagenSeleccionada = (_wf.imageUrls || []).length > 0;
                         const tieneVideoSeleccionado = !!_wf.videoUid;
+                        const modoFicha = !!_wf.movieFichaEnabled;
 
                         let html = '';
 
                         if (!tieneVideoSeleccionado) {
-                            const botonImagen = puedeImagen
+                            const botonImagen = modoFicha
+                                ? `<span style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;
+                                                border:1px dashed #e0e0e0;border-radius:99px;font-size:0.8rem;color:#ccc;"
+                                         title="El modo Ficha técnica no se puede combinar con imagen o video, solo texto">
+                                        <i class="fas fa-image"></i> Imagen (no disponible en modo ficha)
+                                   </span>`
+                                : puedeImagen
                                 ? `<label style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;
                                                  border:1px solid #e0e0e0;border-radius:99px;cursor:pointer;font-size:0.8rem;color:#555;">
                                         <i class="fas fa-image"></i> Imagen (máx ${maxImagenes})
@@ -1803,7 +1907,13 @@
                         }
 
                         if (!tieneImagenSeleccionada) {
-                            const botonVideo = puedeVideo
+                            const botonVideo = modoFicha
+                                ? `<span style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;
+                                                border:1px dashed #e0e0e0;border-radius:99px;font-size:0.8rem;color:#ccc;"
+                                         title="El modo Ficha técnica no se puede combinar con imagen o video, solo texto">
+                                        <i class="fas fa-video"></i> Video (no disponible en modo ficha)
+                                   </span>`
+                                : puedeVideo
                                 ? `<label style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;
                                                  border:1px solid #e0e0e0;border-radius:99px;cursor:pointer;font-size:0.8rem;color:#555;">
                                         <i class="fas fa-video"></i> Video
@@ -2562,6 +2672,7 @@
                                     title: _wf.title.trim(),
                                     hashtags: hashtagsArray,
                                     movieId: _wf.movieId,
+                                    movieFichaEnabled: _wf.movieFichaEnabled,
                     territoryGroup: _wf.territory,
                     territorySub: _wf.sub,
                     tone: _wf.tone,
