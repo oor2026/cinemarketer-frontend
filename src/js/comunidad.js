@@ -830,36 +830,35 @@
     const LIMITE_VER_MAS = 500;
 
     function renderContenidoConVerMas(pubId, content) {
-        const texto = content || '';
-        if (texto.length <= LIMITE_VER_MAS) {
-            return `<div class="com-card-content">${escapeHtml(texto)}</div>`;
+            const texto = content || '';
+            if (texto.length <= LIMITE_VER_MAS) {
+                return `<div class="com-card-content">${escapeHtml(texto)}</div>`;
+            }
+            const truncado = texto.slice(0, LIMITE_VER_MAS);
+            return `<div id="pubContentWrap-${pubId}" data-full="false" data-full-text="${encodeURIComponent(texto)}">
+                <div class="com-card-content">${escapeHtml(truncado)}...</div>
+                <div class="com-ver-mas-wrap"><a href="javascript:void(0)" class="com-ver-mas" onclick="event.stopPropagation();window.toggleVerMasPub(${pubId})">Ver más</a></div>
+            </div>`;
         }
-        const truncado = texto.slice(0, LIMITE_VER_MAS);
-        return `<div id="pubContentWrap-${pubId}" data-full="false">
-            <div class="com-card-content">${escapeHtml(truncado)}...</div>
-            <div class="com-ver-mas-wrap"><a href="javascript:void(0)" class="com-ver-mas" onclick="event.stopPropagation();window.toggleVerMasPub(${pubId})">Ver más</a></div>
-        </div>`;
-    }
 
-    window.toggleVerMasPub = function(pubId) {
-        const wrap = document.getElementById(`pubContentWrap-${pubId}`);
-        if (!wrap) return;
-        const card = wrap.closest('.com-card');
-        const pub = card?._pubData;
-        if (!pub) return;
+        window.toggleVerMasPub = function(pubId) {
+            const wrap = document.getElementById(`pubContentWrap-${pubId}`);
+            if (!wrap) return;
+            const textoCompleto = decodeURIComponent(wrap.dataset.fullText || '');
+            if (!textoCompleto) return;
 
-        const esCompleto = wrap.dataset.full === 'true';
-        if (esCompleto) {
-            const truncado = pub.content.slice(0, LIMITE_VER_MAS);
-            wrap.innerHTML = `<div class="com-card-content">${escapeHtml(truncado)}...</div>
-                <div class="com-ver-mas-wrap"><a href="javascript:void(0)" class="com-ver-mas" onclick="event.stopPropagation();window.toggleVerMasPub(${pubId})">Ver más</a></div>`;
-            wrap.dataset.full = 'false';
-        } else {
-            wrap.innerHTML = `<div class="com-card-content">${escapeHtml(pub.content)}</div>
-                <div class="com-ver-mas-wrap"><a href="javascript:void(0)" class="com-ver-mas" onclick="event.stopPropagation();window.toggleVerMasPub(${pubId})">Ver menos</a></div>`;
-            wrap.dataset.full = 'true';
-        }
-    };
+            const esCompleto = wrap.dataset.full === 'true';
+            if (esCompleto) {
+                const truncado = textoCompleto.slice(0, LIMITE_VER_MAS);
+                wrap.innerHTML = `<div class="com-card-content">${escapeHtml(truncado)}...</div>
+                    <div class="com-ver-mas-wrap"><a href="javascript:void(0)" class="com-ver-mas" onclick="event.stopPropagation();window.toggleVerMasPub(${pubId})">Ver más</a></div>`;
+                wrap.dataset.full = 'false';
+            } else {
+                wrap.innerHTML = `<div class="com-card-content">${escapeHtml(textoCompleto)}</div>
+                    <div class="com-ver-mas-wrap"><a href="javascript:void(0)" class="com-ver-mas" onclick="event.stopPropagation();window.toggleVerMasPub(${pubId})">Ver menos</a></div>`;
+                wrap.dataset.full = 'true';
+            }
+        };
 
     // ==============================================
     // HELPERS
