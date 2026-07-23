@@ -729,6 +729,10 @@ window.abrirPublicacion = async function(pubId, abrirComentarios, comentarioId) 
                     ? window.renderPublicacionModal(pub)
                     : `<div style="text-align:center;padding:2rem;color:#ccc;">No se pudo mostrar la publicación.</div>`;
 
+                if (pub.movieId && pub.movieFichaEnabled && typeof window.resolverFichaPelicula === 'function') {
+                    window.resolverFichaPelicula(pub.id, pub.movieId);
+                }
+
         // Cargar reacciones
         const tokenR = localStorage.getItem('token');
         Promise.all([
