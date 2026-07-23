@@ -28,9 +28,8 @@
         <button class="feed-tab active" id="tabPeliculas" onclick="window.seleccionarTabFeed('peliculas', this)">
             🎬 Películas
         </button>
-        <button class="feed-tab disabled" id="tabComunidad"
-                onclick="window.mostrarTooltipComunidad(event)"
-                title="¡Próximamente!">
+        <button class="feed-tab" id="tabComunidad"
+                onclick="window.seleccionarTabFeed('comunidad', this)">
             💬 Comunidad
         </button>
         <button class="feed-tab-filtro" onclick="window.abrirFiltrosMobile()" title="Filtros">
@@ -74,6 +73,12 @@
                             title="Compartir"
                             style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
                         <i class="fas fa-share-alt" style="font-size:0.85rem;"></i>
+                    </button>
+                    <button id="btnPublicarModal"
+                            onclick="window.abrirWorkflowDesdeModal()"
+                            title="Publicar sobre esta película"
+                            style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+                        <i class="fas fa-pen" style="font-size:0.85rem;"></i>
                     </button>
                     <button class="btn-watchlist btn-watchlist-modal" id="btnWatchlistModal"
                             onclick="window.toggleWatchlist(window.peliculaActualId, event)"
@@ -345,6 +350,23 @@
                         style="flex:2; padding:0.7rem; background:#e50914; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer; font-size:0.9rem;">
                     Sí, ocultar
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL PUBLICACIÓN                              -->
+    <!-- ============================================== -->
+    <div id="modalPublicacion" style="display:none; position:fixed; inset:0; z-index:999999; align-items:center; justify-content:center; padding:1rem; background:rgba(0,0,0,0.6);">
+        <div class="modal-overlay" onclick="window.cerrarModalPublicacion()"></div>
+        <div class="modal-pub-contenido" style="position:relative;z-index:1;background:white;border-radius:16px;width:100%;max-width:680px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;">
+            <div class="modal-pub-header" style="display:flex;justify-content:flex-end;padding:0.5rem 0.75rem 0;flex-shrink:0;">
+                <button onclick="window.cerrarModalPublicacion()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#999;line-height:1;">×</button>
+            </div>
+            <div id="modalPublicacionContenido" style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch;">
+                <div style="text-align:center;padding:2rem;color:#ccc;">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
             </div>
         </div>
     </div>

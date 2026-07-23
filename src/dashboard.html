@@ -24,14 +24,14 @@
         <link rel="stylesheet" href="css/styles.css">
         <link rel="stylesheet" href="css/dashboard.css">
         <link rel="stylesheet" href="css/feed-films.css">
-        <link rel="stylesheet" href="css/mi-cuenta.css">
+        <link rel="stylesheet" href="css/mi-cuenta.css?v=3">
         <link rel="stylesheet" href="css/mis-puntos.css">
         <link rel="stylesheet" href="css/mis-premios.css">
         <link rel="stylesheet" href="css/mis-consultas.css">
         <link rel="stylesheet" href="css/contacto.css">
         <link rel="stylesheet" href="css/toast.css">
         <link rel="stylesheet" href="css/levelup.css">
-        <link rel="stylesheet" href="css/subscription.css">
+        <link rel="stylesheet" href="css/subscription.css?v=3">
 
         <!-- CSS PUBLICIDAD -->
         <link rel="stylesheet" href="css/ads.css">
@@ -363,6 +363,13 @@
     <script src="js/emoji-picker.js"></script>
     <script src="js/gif-picker.js"></script>
     <script src="js/novedades.js"></script>
+    <script>
+        window.cerrarModalPublicacion = function() {
+            const modal = document.getElementById('modalPublicacion');
+            if (modal) modal.style.display = 'none';
+            document.body.classList.remove('modal-open');
+        };
+    </script>
     <script src="js/watchlist.js"></script>
     <script src="js/main.js"></script>
     <script src="js/notificaciones.js"></script>

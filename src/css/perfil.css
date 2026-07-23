@@ -684,3 +684,8 @@
     letter-spacing: 0.5px;
     font-weight: 600;
 }
+
+/* ── Publicaciones en perfil (grilla de tiles) ─── */
+.perfil-pub-tile:hover .perfil-pub-overlay {
+    opacity: 1;
+}

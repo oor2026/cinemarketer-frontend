@@ -108,7 +108,7 @@ window.loadTransactions = async function(page = 1, filter = 'all') {
         }
 
         lista.innerHTML = transacciones.map(t => {
-            const esGanado  = t.type === 'EARNED';
+            const esGanado  = t.type === 'EARNED' && t.points > 0;
             const icono     = getIconForAction(t.action);
             const fecha     = new Date(t.createdAt).toLocaleDateString('es-ES', {
                 day: '2-digit', month: '2-digit', year: 'numeric',
@@ -128,7 +128,7 @@ window.loadTransactions = async function(page = 1, filter = 'all') {
                         <small>${t.referenceTitle || ''}</small>
                     </div>
                     <div class="transaction-amount ${esGanado ? 'earned' : 'spent'}">
-                        ${esGanado ? '+' : '-'}${t.points}
+                        ${esGanado ? '+' : '-'}${Math.abs(t.points)}
                         <i class="fas fa-coins"></i>
                     </div>
                 </div>`;
@@ -155,7 +155,10 @@ function getIconForAction(action) {
         REWARD_REDEMPTION:    'fa-ticket-alt',
         RECEIVE_MERECE_PUNTO: 'fa-star',
         REVERT_MERECE_PUNTO:  'fa-star',
-        ADMIN_GRANT:          'fa-gift'
+        ADMIN_GRANT:          'fa-gift',
+        PUBLISH_POST:         'fa-pen-alt',
+        RECEIVE_BANCO_POST:   'fa-fist-raised',
+        RECEIVE_MERECE_POST:  'fa-star'
     };
     return icons[action] || 'fa-coins';
 }
@@ -169,7 +172,11 @@ function getLabelForAction(action) {
         REWARD_REDEMPTION:    'Canje de premio',
         RECEIVE_MERECE_PUNTO: '¡Merecés un punto!',
         REVERT_MERECE_PUNTO:  'Reversión de punto',
-        ADMIN_GRANT:          'Regalo de puntos'
+        ADMIN_GRANT:          'Regalo de puntos',
+        PUBLISH_POST:         'Publicación en Comunidad',
+        RECEIVE_BANCO_POST:   'Te bancaron una publicación',
+        RECEIVE_MERECE_POST:  'Merecés un punto en publicación',
+        PUBLICATION_SANCTION: 'Sanción por moderación'
     };
     return labels[action] || action;
 }

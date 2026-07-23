@@ -115,17 +115,20 @@ const adminSupervision = {
         };
 
         try {
-            const response = await fetch(`${CONFIG.API_URL}/admin/supervision/${endpoints[pestana]}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (!response.ok) throw new Error(`Error ${response.status}`);
-            this.datosActuales = await response.json();
-            this.paginaActual  = 1;
-            this.aplicarFiltroFecha();
-        } catch (error) {
-                    tbody.innerHTML = `<tr><td colspan="7" class="loading-row" style="color:#e50914;">Error al cargar los datos</td></tr>`;
-                }
-            },
+                const response = await fetch(`${CONFIG.API_URL}/admin/supervision/${endpoints[pestana]}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error(`Error ${response.status}`);
+                const wrapped = await response.json();
+                // El backend ahora envuelve cada item como {sourceType, data} para poder
+                // mezclar comentarios de películas y de publicaciones sin acoplar sus DTOs
+                this.datosActuales = wrapped.map(w => ({ ...w.data, sourceType: w.sourceType }));
+                this.paginaActual  = 1;
+                this.aplicarFiltroFecha();
+            } catch (error) {
+                tbody.innerHTML = `<tr><td colspan="7" class="loading-row" style="color:#e50914;">Error al cargar los datos</td></tr>`;
+            }
+        },
 
             aplicarFiltroFecha() {
                 const desde = this.filtroDesde ? new Date(this.filtroDesde + 'T00:00:00') : null;
@@ -225,11 +228,16 @@ const adminSupervision = {
                 ? new Date(c.createdAt).toLocaleDateString('es-AR')
                 : '—';
 
+            const esPublicacion = c.sourceType === 'PUBLICATION';
+            const origenLabel = esPublicacion
+                ? `Publicación ID: ${c.publicationId}`
+                : `Película ID: ${c.movieId}`;
+
             return `
                 <tr>
                     <td>
                         <div style="font-size:0.85rem;color:#333;max-width:250px;">${contenidoCorto}${tipoLabel}</div>
-                        <small style="color:#999;">Película ID: ${c.movieId}</small>
+                        <small style="color:#999;">${origenLabel}</small>
                     </td>
                     <td>
                         <strong style="font-size:0.85rem;">${c.authorName || '—'}</strong><br>
@@ -258,18 +266,19 @@ const adminSupervision = {
         const esReply = c.isReply === true;
         const id = esReply ? c.replyId : c.commentId;
         const pestana = this.pestanaActual;
+        const origen = c.sourceType || 'MOVIE';
 
         let acciones = `
-            <button class="btn-accion btn-editar" onclick="adminSupervision.verDetalle(${c.commentId}, ${esReply})" title="Ver detalle">
-                <i class="fas fa-eye"></i>
-            </button>`;
+        <button class="btn-accion btn-editar" onclick="adminSupervision.verDetalle(${id}, ${esReply}, '${origen}')" title="Ver detalle">
+            <i class="fas fa-eye"></i>
+        </button>`;
 
         if (pestana === 'inreview') {
             acciones += `
-                <button class="btn-accion btn-eliminar" onclick="adminSupervision.abrirModalEliminar(${id}, ${esReply})" title="Eliminar">
+                <button class="btn-accion btn-eliminar" onclick="adminSupervision.abrirModalEliminar(${id}, ${esReply}, '${origen}')" title="Eliminar">
                     <i class="fas fa-trash"></i>
                 </button>
-                <button class="btn-accion btn-activar" onclick="adminSupervision.desestimar(${id}, ${esReply})" title="Desestimar reporte" style="background:#f0ad4e;">
+                <button class="btn-accion btn-activar" onclick="adminSupervision.desestimar(${id}, ${esReply}, '${origen}')" title="Desestimar reporte" style="background:#f0ad4e;">
                     <i class="fas fa-times"></i>
                 </button>`;
         }
@@ -327,9 +336,10 @@ const adminSupervision = {
     // ------------------------------------------
     // VER DETALLE
     // ------------------------------------------
-    verDetalle(commentId, esReply = false) {
+    verDetalle(commentId, esReply = false, sourceType = 'MOVIE') {
         const c = this.datosActuales.find(x =>
-                    x.isReply ? x.replyId === commentId : x.commentId === commentId);
+                    (x.sourceType || 'MOVIE') === sourceType &&
+                    (x.isReply ? x.replyId === commentId : x.commentId === commentId));
         if (!c) return;
 
         const contenido = document.getElementById('supDetalleContenido');
@@ -350,10 +360,15 @@ const adminSupervision = {
               </table>`
             : '<p style="color:#888;margin:0.5rem 0;">Sin reportes de usuarios</p>';
 
+        const esPublicacionDetalle = c.sourceType === 'PUBLICATION';
+        const origenLabelDetalle = esPublicacionDetalle
+            ? `<strong>Publicación ID:</strong> ${c.publicationId}<br>`
+            : `<strong>Película ID:</strong> ${c.movieId}<br>`;
+
         contenido.innerHTML = `
             <div style="margin-bottom:1rem;">
                 <strong>Autor:</strong> ${c.authorName} (${c.authorEmail})<br>
-                <strong>Película ID:</strong> ${c.movieId}<br>
+                ${origenLabelDetalle}
                 <strong>Fecha:</strong> ${c.createdAt ? new Date(c.createdAt).toLocaleDateString('es-AR') : '—'}<br>
                 ${c.toxicityScore != null ? `<strong>Score de toxicidad:</strong> ${(c.toxicityScore * 100).toFixed(1)}%<br>` : ''}
                 <strong>Estado:</strong> ${c.moderationStatus}
@@ -370,17 +385,19 @@ const adminSupervision = {
         // Guardar referencia para mark-reviewed al cerrar
         const esReplyActual = c.isReply === true;
         const idActual = esReplyActual ? c.replyId : c.commentId;
-        this._detalleCurrent = { id: idActual, esReply: esReplyActual };
+        this._detalleCurrent = { id: idActual, esReply: esReplyActual, sourceType: c.sourceType || 'MOVIE' };
 
         document.getElementById('modalSupervisionDetalle').style.display = 'flex';
     },
 
     cerrarDetalle() {
-        document.getElementById('modalSupervisionDetalle').style.display = 'none';
-        if (this.pestanaActual === 'pending' && this._detalleCurrent) {
-            const { id, esReply } = this._detalleCurrent;
-            const endpoint = `${CONFIG.API_URL}/admin/supervision/${id}/mark-reviewed?isReply=${esReply}`;
-            fetch(endpoint, {
+            document.getElementById('modalSupervisionDetalle').style.display = 'none';
+            if (this.pestanaActual === 'pending' && this._detalleCurrent) {
+                const { id, esReply, sourceType } = this._detalleCurrent;
+                const endpoint = sourceType === 'PUBLICATION'
+                    ? `${CONFIG.API_URL}/admin/supervision/publications/${id}/mark-reviewed`
+                    : `${CONFIG.API_URL}/admin/supervision/${id}/mark-reviewed?isReply=${esReply}`;
+                fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             }).then(() => {
@@ -405,12 +422,13 @@ const adminSupervision = {
     // ------------------------------------------
     // MODAL ELIMINAR
     // ------------------------------------------
-    abrirModalEliminar(id, esReply = false) {
-            document.getElementById('inputSupRazon').value = '';
-            document.getElementById('modalSupEliminar').style.display = 'flex';
-            document.getElementById('modalSupEliminar').dataset.commentId = id;
-            document.getElementById('modalSupEliminar').dataset.esReply = esReply;
-        },
+    abrirModalEliminar(id, esReply = false, sourceType = 'MOVIE') {
+        document.getElementById('inputSupRazon').value = '';
+        document.getElementById('modalSupEliminar').style.display = 'flex';
+        document.getElementById('modalSupEliminar').dataset.commentId = id;
+        document.getElementById('modalSupEliminar').dataset.esReply = esReply;
+        document.getElementById('modalSupEliminar').dataset.sourceType = sourceType;
+    },
 
     cerrarModalEliminar() {
         document.getElementById('modalSupEliminar').style.display = 'none';
@@ -431,11 +449,14 @@ const adminSupervision = {
         btn.textContent = 'Eliminando...';
 
         try {
-            const esReply = modal.dataset.esReply === 'true';
-                    const endpoint = esReply
+        const esReply = modal.dataset.esReply === 'true';
+                const sourceType = modal.dataset.sourceType || 'MOVIE';
+                const endpoint = sourceType === 'PUBLICATION'
+                    ? `${CONFIG.API_URL}/admin/supervision/publications/${commentId}/remove`
+                    : esReply
                         ? `${CONFIG.API_URL}/admin/supervision/replies/${commentId}/remove`
                         : `${CONFIG.API_URL}/admin/supervision/${commentId}/remove`;
-                    const response = await fetch(endpoint, {
+                const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -462,13 +483,15 @@ const adminSupervision = {
     // ------------------------------------------
     // RESTAURAR
     // ------------------------------------------
-    async restaurar(id, esReply = false) {
+    async restaurar(id, esReply = false, sourceType = 'MOVIE') {
             if (!confirm('¿Restaurar? Volverá a ser visible para los usuarios.')) return;
 
             try {
-                const endpoint = esReply
-                    ? `${CONFIG.API_URL}/admin/supervision/replies/${id}/restore`
-                    : `${CONFIG.API_URL}/admin/supervision/${id}/restore`;
+                const endpoint = sourceType === 'PUBLICATION'
+                    ? `${CONFIG.API_URL}/admin/supervision/publications/${id}/restore`
+                    : esReply
+                        ? `${CONFIG.API_URL}/admin/supervision/replies/${id}/restore`
+                        : `${CONFIG.API_URL}/admin/supervision/${id}/restore`;
                 const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -502,11 +525,13 @@ const adminSupervision = {
             }
         },
 
-        async desestimar(id, esReply = false) {
-            if (!confirm('¿Desestimar este reporte? El contenido seguirá visible.')) return;
-            try {
-                const response = await fetch(
-                    `${CONFIG.API_URL}/admin/supervision/${id}/dismiss?isReply=${esReply}`, {
+        async desestimar(id, esReply = false, sourceType = 'MOVIE') {
+                if (!confirm('¿Desestimar este reporte? El contenido seguirá visible.')) return;
+                try {
+                    const endpointDesestimar = sourceType === 'PUBLICATION'
+                        ? `${CONFIG.API_URL}/admin/supervision/publications/${id}/dismiss`
+                        : `${CONFIG.API_URL}/admin/supervision/${id}/dismiss?isReply=${esReply}`;
+                    const response = await fetch(endpointDesestimar, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });

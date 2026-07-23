@@ -189,6 +189,11 @@ async function loadModule(moduleName, element = null, updateHash = true) {
         return;
     }
 
+    // Limpieza de elementos "de fondo" inyectados dinámicamente por otros módulos
+    // (ej: el modal de película traído desde el perfil sin cargar el feed completo).
+    // Evita IDs duplicados cuando el módulo que los contiene de forma nativa se carga.
+    document.querySelectorAll(`[data-bg-asset="${moduleName}"]`).forEach(el => el.remove());
+
     const container = document.getElementById('module-container');
     if (!container) return;
 
@@ -304,6 +309,16 @@ async function cargarPerfilHeader() {
         const avatarEl = document.getElementById('headerAvatar');
         if (avatarEl && data.avatarUrl) {
             avatarEl.innerHTML = `<img src="${data.avatarUrl}" alt="Avatar" class="avatar-img">`;
+        }
+        // Guardar en localStorage para que otras partes del sitio (ej: la caja de
+        // "crear publicación" en Comunidad) puedan usar el avatar sin pedirlo de nuevo.
+        if (data.avatarUrl) {
+            localStorage.setItem('userAvatarUrl', data.avatarUrl);
+        } else {
+            localStorage.removeItem('userAvatarUrl');
+        }
+        if (data.name) {
+            localStorage.setItem('userName', data.name);
         }
 
         const levelEl = document.getElementById('headerLevel');

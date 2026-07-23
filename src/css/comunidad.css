@@ -1,0 +1,818 @@
+/* ==============================================
+   comunidad.css — Feed Comunidad
+   ============================================== */
+
+/* ── Caja nueva publicación ─────────────────── */
+.com-nueva-pub {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: white;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.com-nueva-pub:hover { border-color: #324C89; }
+
+.com-nueva-pub-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #324C89;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.com-nueva-pub-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.com-nueva-pub-avatar span {
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.com-nueva-pub-placeholder {
+    flex: 1;
+    font-size: 0.88rem;
+    color: #aaa;
+}
+
+.com-nueva-pub-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #e50914;
+    color: white;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* ── Filtros ────────────────────────────────── */
+.com-filtros-scroll {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    scrollbar-width: none;
+}
+
+.com-filtros-scroll::-webkit-scrollbar { display: none; }
+
+.com-filtro-chip {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border-radius: 99px;
+    border: 1.5px solid #e0e0e0;
+    background: white;
+    color: #555;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.com-filtro-chip:hover { border-color: #324C89; color: #324C89; }
+.com-filtro-chip.active {
+    background: #324C89;
+    border-color: #324C89;
+    color: white;
+}
+
+/* ── Card publicación ───────────────────────── */
+.com-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #f0f0f0;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+}
+
+.com-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+
+.com-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem 0.6rem;
+}
+
+.com-card-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #324C89;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.com-card-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.com-card-avatar span { color: white; font-size: 0.85rem; font-weight: 600; }
+
+.com-card-meta {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.com-card-autor {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    cursor: pointer;
+}
+
+.com-card-autor:hover { color: #324C89; }
+
+.com-card-badges {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.com-badge-territory {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 99px;
+    background: #eef1f8;
+    color: #324C89;
+    font-weight: 600;
+}
+
+.com-badge-tone {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 99px;
+    background: #f5f5f5;
+    color: #666;
+    font-weight: 500;
+}
+
+.com-card-tiempo {
+    font-size: 0.75rem;
+    color: #bbb;
+}
+
+.com-editado { font-size: 0.72rem; color: #ccc; }
+
+.com-card-menu-btn {
+    background: none;
+    border: none;
+    color: #ccc;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.com-card-menu-btn:hover { color: #888; background: #f5f5f5; }
+
+/* ── Película vinculada ─────────────────────── */
+.com-card-pelicula {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #f8f9ff;
+    border-top: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.8rem;
+    color: #324C89;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.com-card-pelicula:hover { background: #eef1f8; }
+
+/* ── Contenido ──────────────────────────────── */
+.com-card-content {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    color: #333;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.com-ver-mas-wrap {
+    text-align: center;
+    margin-top: 6px;
+}
+.com-ver-mas {
+    color: #324C89;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+.com-ver-mas:hover { text-decoration: underline; }
+
+/* ── Spoiler ────────────────────────────────── */
+.com-spoiler-mask {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.25rem 1rem;
+    background: #f5f5f5;
+    text-align: center;
+}
+
+.com-spoiler-mask i { font-size: 1.5rem; color: #e50914; }
+.com-spoiler-mask span { font-size: 0.85rem; color: #666; }
+.com-spoiler-mask button {
+    padding: 5px 14px;
+    border-radius: 99px;
+    border: 1.5px solid #e50914;
+    background: none;
+    color: #e50914;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+/* ── Imágenes ───────────────────────────────── */
+/* ===== CARRUSEL DE IMÁGENES ===== */
+.com-card-imagenes-wrap {
+    position: relative;
+    margin: 8px 0;
+}
+
+.com-card-imagenes {
+    position: relative;
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    border-radius: 10px;
+    aspect-ratio: 4 / 3;
+    background: #f0f0f0;
+}
+
+.com-card-imagenes::-webkit-scrollbar {
+    display: none;
+}
+
+.com-card-imagenes img {
+    flex: 0 0 100%;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    scroll-snap-align: start;
+    cursor: pointer;
+    display: block;
+}
+
+.com-card-imagenes-contador {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 99px;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.com-carrusel-flecha {
+    display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .com-carrusel-flecha {
+        display: flex;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.55);
+        color: white;
+        border: none;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 3;
+        font-size: 0.9rem;
+        transition: background 0.15s;
+    }
+
+    .com-carrusel-flecha:hover {
+        background: rgba(0, 0, 0, 0.8);
+    }
+
+    .com-carrusel-flecha.izq { left: 8px; }
+    .com-carrusel-flecha.der { right: 8px; }
+
+    .com-carrusel-flecha:disabled {
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+/* ── Acciones ───────────────────────────────── */
+.com-card-acciones {
+    display: flex;
+    gap: 0;
+    padding: 0 0.5rem 0.5rem;
+    border-top: 1px solid #f8f8f8;
+}
+
+.com-accion-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 0.82rem;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: color 0.2s, background 0.2s;
+}
+
+.com-accion-btn:hover { color: #324C89; background: #f0f3ff; }
+.com-accion-btn.com-accion-active { color: #324C89; }
+.com-accion-btn.com-accion-active.btn-punto { color: #e8a800; }
+
+/* ── Estados vacío y loading ────────────────── */
+.com-loading {
+    text-align: center;
+    padding: 2rem;
+    color: #ccc;
+    font-size: 1.5rem;
+}
+
+.com-vacio {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #ccc;
+}
+
+.com-vacio i { font-size: 2.5rem; margin-bottom: 0.75rem; display: block; }
+.com-vacio p { font-size: 0.9rem; line-height: 1.6; }
+
+/* ── Botón cargar más ───────────────────────── */
+.com-btn-mas {
+    padding: 0.6rem 1.5rem;
+    border-radius: 99px;
+    border: 1.5px solid #324C89;
+    background: none;
+    color: #324C89;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.com-btn-mas:hover { background: #eef1f8; }
+
+/* ── Comentarios en publicaciones ──────────────── */
+.pub-comentarios-panel {
+    border-top: 1px solid #f0f0f0;
+    padding: 1rem 1.25rem;
+    background: #fafafa;
+}
+
+.pub-comentarios-lista {
+    margin-bottom: 1rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.pub-comentario-item {
+    display: flex;
+    gap: 0.6rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid #f5f5f5;
+    align-items: flex-start;
+}
+
+.pub-comentario-item:last-child {
+    border-bottom: none;
+}
+
+.pub-comentarios-escribir {
+    border-top: 1px solid #f0f0f0;
+    padding-top: 0.75rem;
+}
+
+/* ── Ver más / Ver menos en comentarios (solo mobile) ─── */
+@media (max-width: 768px) {
+    .pub-coment-texto-clamp {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+        overflow: hidden;
+    }
+    .pub-coment-texto-clamp.pub-coment-expandido {
+        display: block;
+        -webkit-line-clamp: unset;
+        overflow: visible;
+    }
+}
+.pub-coment-ver-mas {
+    display: none;
+    color: #324C89;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 0.78rem;
+    margin-top: 2px;
+}
+
+/* ── Layout tres columnas desktop ──────────── */
+.com-layout {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr) 200px;
+    gap: 1rem;
+    align-items: start;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.com-col-left {
+    position: sticky;
+    top: 70px;
+    height: calc(100vh - 90px);
+    overflow-y: auto;
+    scrollbar-width: none;
+}
+.com-col-left::-webkit-scrollbar { display: none; }
+
+.com-col-left-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 0.5rem 0;
+}
+
+.com-categorias-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    padding: 0 0.75rem 0.75rem;
+}
+
+.com-cat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 0.9rem;
+    border-radius: 10px;
+    border: none;
+    background: none;
+    color: #444;
+    font-size: 0.95rem;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s, color 0.15s;
+    width: 100%;
+    line-height: 1.2;
+}
+
+.com-cat-item:hover { background: #f0f3ff; color: #324C89; }
+.com-cat-item.active { background: #eef1f8; color: #324C89; font-weight: 700; }
+
+.com-col-center {
+    min-width: 0;
+}
+
+.com-col-right {
+    position: sticky;
+    top: 70px;
+    height: calc(100vh - 90px);
+    overflow-y: auto;
+    scrollbar-width: none;
+}
+.com-col-right::-webkit-scrollbar { display: none; }
+
+.com-col-right-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+}
+
+.com-widget {
+    background: white;
+    border: 1px solid #f0f0f0;
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+}
+
+.com-widget-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.6rem;
+}
+
+.com-widget-empty {
+    font-size: 0.78rem;
+    color: #ccc;
+    text-align: center;
+    padding: 0.75rem 0;
+}
+
+.com-widget-banner {
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-style: dashed;
+    border-color: #e8e8e8;
+}
+
+.com-widget-banner-ph {
+    font-size: 0.75rem;
+    color: #ddd;
+}
+
+/* ── Mobile general ─────────────────────────── */
+@media (max-width: 768px) {
+    .com-card-content { font-size: 0.88rem; }
+    .com-card-imagenes img { max-height: 300px; }
+    .com-accion-btn { padding: 7px 10px; font-size: 0.8rem; }
+    .com-filtros-scroll { display: none; }
+    .com-layout {
+        grid-template-columns: 1fr;
+    }
+    .com-col-left,
+    .com-col-right {
+        display: none;
+        position: static;
+        height: auto;
+    }
+
+    /* .feed-container (definido en feed-films.css) le da padding:1rem a todo
+           lo que cuelga de él, incluido #comunidad-container por ser hermano de
+           #peliculasGrid. Acá cancelamos ESE padding puntual solo para el feed
+           de Comunidad — nunca tocamos #peliculasGrid ni .feed-container en sí,
+           así el feed de Películas queda 100% intacto. */
+    #comunidad-container {
+            margin-left: -1rem;
+            margin-right: -1rem;
+            width: calc(100% + 2rem);
+            padding-left: 0;
+            padding-right: 0;
+            box-sizing: border-box;
+        }
+
+        #comunidad-container .com-nueva-pub {
+                margin-left: 0.5rem;
+                margin-right: 0.5rem;
+            }
+}
+
+/* ── Desktop: ocultar chips horizontales ────── */
+@media (min-width: 769px) {
+    .com-filtros-scroll { display: none; }
+}
+
+/* ── Modal publicación desde notificaciones ─── */
+#modalPublicacion {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: transparent;
+}
+
+#modalPublicacion .modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 0;
+}
+
+#modalPublicacion .modal-pub-contenido {
+    position: relative;
+    z-index: 1;
+    background: white;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 680px;
+    max-height: 88vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    margin: 0 auto;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+
+#modalPublicacionContenido {
+    overflow-y: auto;
+    flex: 1;
+    -webkit-overflow-scrolling: touch;
+}
+
+#modalPublicacionContenido .com-card {
+    display: block;
+    flex: none;
+}
+
+/* Card dentro del modal — sin bordes propios */
+#modalPublicacionContenido .com-card {
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+}
+
+#modalPublicacionContenido .com-card:hover {
+    box-shadow: none !important;
+}
+
+/* Header del modal con botón cerrar */
+#modalPublicacion .modal-pub-header {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.6rem 0.75rem 0;
+    flex-shrink: 0;
+}
+
+#modalPublicacion .modal-pub-header button {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: #999;
+    line-height: 1;
+    padding: 0.25rem;
+}
+
+#modalPublicacion .modal-pub-header button:hover {
+    color: #333;
+}
+
+/* Imagen dentro del modal */
+#modalPublicacionContenido .com-card-imagenes {
+    padding: 0;
+    background: white;
+}
+
+#modalPublicacionContenido .com-card-imagenes img {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+}
+
+/* Acciones dentro del modal */
+#modalPublicacionContenido .com-card-acciones {
+    border-top: 1px solid #f0f0f0;
+    padding: 0.5rem;
+}
+
+/* Badges dentro del modal */
+#modalPublicacionContenido .com-badge-territory {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 99px;
+    background: #eef1f8;
+    color: #324C89;
+    font-weight: 600;
+}
+
+#modalPublicacionContenido .com-badge-tone {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 99px;
+    background: #f5f5f5;
+    color: #666;
+    font-weight: 500;
+}
+
+@media (min-width: 769px) {
+    #comFeedCreatorBannerSlot {
+        display: none;
+    }
+}
+
+/* ── Modal mobile ───────────────────────────── */
+@media (max-width: 768px) {
+    #modalPublicacion {
+        padding: 0.5rem 0;
+        align-items: center;
+    }
+
+    #modalPublicacion .modal-pub-contenido {
+        max-width: 100%;
+        max-height: 92vh;
+        border-radius: 16px;
+        width: 100%;
+    }
+}
+
+/* ── Footer fijo en modal publicación ── */
+#modalPublicacionContenido .pub-comentarios-panel {
+    display: flex;
+    flex-direction: column;
+    max-height: 350px;
+}
+
+#modalPublicacionContenido .pub-comentarios-lista {
+    flex: 1;
+    overflow-y: auto;
+    max-height: none;
+}
+
+#modalPublicacionContenido .pub-comentarios-escribir {
+    flex-shrink: 0;
+    background: white;
+    border-top: 1px solid #f0f0f0;
+    padding: 0.75rem 1rem;
+    position: sticky;
+    bottom: 0;
+}
+
+.wf-hashtag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #eef1f8;
+    color: #324C89;
+    font-weight: 600;
+    font-size: 0.8rem;
+    padding: 4px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+.wf-hashtag-chip button {
+    background: none;
+    border: none;
+    color: #324C89;
+    cursor: pointer;
+    font-size: 0.9rem;
+    line-height: 1;
+    padding: 0;
+    opacity: 0.6;
+}
+.wf-hashtag-chip button:hover { opacity: 1; }
+
+.wf-hashtag-sugerencias {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    z-index: 20;
+    max-height: 220px;
+    overflow-y: auto;
+}
+.wf-hashtag-sugerencia-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: #333;
+}
+.wf-hashtag-sugerencia-item:hover { background: #f4f6fb; }
+.wf-hashtag-sugerencia-nombre { font-weight: 600; color: #324C89; }
+.wf-hashtag-sugerencia-count { font-size: 0.75rem; color: #999; }

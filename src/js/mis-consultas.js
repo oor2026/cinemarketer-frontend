@@ -264,13 +264,16 @@ async function consultasEliminarTicket(ticketId) {
         });
 
         if (!response.ok) throw new Error(`Error ${response.status}`);
-        showToast('success', 'Consulta eliminada correctamente.');
-        consultasCargarLista();
+                showToast('success', 'Consulta eliminada correctamente.');
+                consultasCargarLista();
+                if (typeof window.actualizarBadgeNotificaciones === 'function') {
+                    window.actualizarBadgeNotificaciones();
+                }
 
-    } catch (error) {
-        showToast('error', 'Error al eliminar la consulta.');
-    }
-}
+            } catch (error) {
+                showToast('error', 'Error al eliminar la consulta.');
+            }
+        }
 
 // ── Modal nueva consulta ──────────────────────────────────────────────────────
 function consultasAbrirNueva() {

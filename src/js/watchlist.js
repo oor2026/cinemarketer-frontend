@@ -306,26 +306,11 @@ window.marcarWatchlistEnFeed = async function() {
     } catch (e) {}
 };
 
-window.abrirDetallePeliculaDesdeWatchlist = function(movieId) {
-    const modalExiste = !!document.getElementById('modalPelicula');
-
-    if (typeof window.abrirDetallePelicula === 'function' && modalExiste) {
-        window.abrirDetallePelicula(movieId);
-        return;
+window.abrirDetallePeliculaDesdeWatchlist = async function(movieId) {
+    if (typeof window._asegurarModalPeliculaEnDOM === 'function') {
+        await window._asegurarModalPeliculaEnDOM();
     }
-
-    // Navegar al feed y esperar que el modal esté en el DOM
-    if (typeof loadModule === 'function') {
-        loadModule('feed-films', null, true);
-        let intentos = 0;
-        const interval = setInterval(() => {
-            intentos++;
-            const modal = document.getElementById('modalPelicula');
-            if (typeof window.abrirDetallePelicula === 'function' && modal) {
-                clearInterval(interval);
-                setTimeout(() => window.abrirDetallePelicula(movieId), 300);
-            }
-            if (intentos > 100) clearInterval(interval);
-        }, 100);
+    if (typeof window.abrirDetallePelicula === 'function') {
+        window.abrirDetallePelicula(movieId);
     }
 };

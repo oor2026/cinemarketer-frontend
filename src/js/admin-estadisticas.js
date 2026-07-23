@@ -88,6 +88,7 @@ const adminEstadisticas = {
             this.renderizarVotos();
             this.renderizarComentarios();
             this.renderizarRecomendaciones();
+            this.renderizarPublicaciones();
             this.renderizarPremios();
             this.renderizarPuntos();
             this.renderizarSoporte();
@@ -379,6 +380,88 @@ const adminEstadisticas = {
                 </tr>
             `;
             document.getElementById('stats-recomendaciones-body').innerHTML = html;
+        },
+
+    renderizarPublicaciones: function() {
+            const p = this.datos.publications;
+            if (!p) return;
+
+            const topUsuarios = (p.topUsuarios || [])
+                .map((u, i) => `${i + 1}. ${u.nombre} (${u.total})`)
+                .join(' | ') || '—';
+
+            const topCategorias = (p.topCategorias || [])
+                .map((c, i) => `${i + 1}. ${this.formatearCategoria(c.categoria)} (${c.total})`)
+                .join(' | ') || '—';
+
+            const html = `
+                <tr>
+                    <td><strong>Total de publicaciones</strong></td>
+                    <td class="stat-valor">${this.formatearNumero(p.totalPublicaciones)}</td>
+                    <td class="${p.growth >= 0 ? 'positive' : 'negative'}">
+                        ${p.growth >= 0 ? '▲' : '▼'} ${Math.abs(p.growth).toFixed(1)}%
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Promedio por día</strong></td>
+                    <td class="stat-valor">${p.promedioPorDia}</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><strong>Publicaciones de texto</strong></td>
+                    <td class="stat-valor">${this.formatearNumero(p.publicacionesTexto)}</td>
+                    <td>${p.porcentajeTexto?.toFixed(1)}%</td>
+                </tr>
+                <tr>
+                    <td><strong>Publicaciones con imagen</strong></td>
+                    <td class="stat-valor">${this.formatearNumero(p.publicacionesImagen)}</td>
+                    <td>${p.porcentajeImagen?.toFixed(1)}%</td>
+                </tr>
+                <tr>
+                    <td><strong>Publicaciones con video</strong></td>
+                    <td class="stat-valor">${this.formatearNumero(p.publicacionesVideo)}</td>
+                    <td>${p.porcentajeVideo?.toFixed(1)}%</td>
+                </tr>
+                <tr>
+                    <td><strong>Tasa de aprobación automática</strong></td>
+                    <td class="stat-valor">${p.tasaAprobacionAutomatica?.toFixed(1)}%</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><strong>Publicaciones que pasaron por revisión</strong></td>
+                    <td class="stat-valor">${this.formatearNumero(p.publicacionesEnRevision)}</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><strong>Ocultas/sancionadas</strong></td>
+                    <td class="stat-valor">${this.formatearNumero(p.publicacionesOcultasSancionadas)}</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><strong>Total "Te banco"</strong></td>
+                    <td class="stat-valor">${this.formatearNumero(p.totalBanco)}</td>
+                    <td>Prom: ${p.promedioBancoPorPublicacion}</td>
+                </tr>
+                <tr>
+                    <td><strong>Total "Merecés un punto"</strong></td>
+                    <td class="stat-valor">${this.formatearNumero(p.totalPuntos)}</td>
+                    <td>Prom: ${p.promedioPuntosPorPublicacion}</td>
+                </tr>
+                <tr>
+                    <td><strong>Total comentarios</strong></td>
+                    <td class="stat-valor">${this.formatearNumero(p.totalComentarios)}</td>
+                    <td>Prom: ${p.promedioComentariosPorPublicacion}</td>
+                </tr>
+                <tr>
+                    <td><strong>Top 5 usuarios</strong></td>
+                    <td colspan="2" style="font-size:0.82rem;">${topUsuarios}</td>
+                </tr>
+                <tr>
+                    <td><strong>Top 5 categorías</strong></td>
+                    <td colspan="2" style="font-size:0.82rem;">${topCategorias}</td>
+                </tr>
+            `;
+            document.getElementById('stats-publicaciones-body').innerHTML = html;
         },
 
     // Renderizar tabla de premios y canjes
@@ -820,6 +903,20 @@ const adminEstadisticas = {
         if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
         return num?.toLocaleString() || '0';
     },
+
+    formatearCategoria: function(key) {
+            const map = {
+                PELICULAS_SERIES: 'Películas',
+                LO_QUE_VIENE: 'Estrenos',
+                GENTE_CINE: 'Gente de cine',
+                PREMIOS: 'Premios',
+                INDUSTRIA: 'Industria',
+                EXPERIENCIA: 'Experiencia',
+                ARTE_CULTURA: 'Arte y cultura',
+                EVENTOS: 'Eventos'
+            };
+            return map[key] || key;
+        },
 
     // Obtener icono de tendencia
     getTendenciaIcon: function(valor) {

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Publicación — Cinemarketer</title>
+
+  <!-- OG tags dinámicos — se actualizan por JS -->
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Cinemarketer">
+  <meta id="ogTitle" property="og:title" content="Publicación en Cinemarketer">
+  <meta id="ogDescription" property="og:description" content="La red social de cine de Argentina">
+  <meta id="ogImage" property="og:image" content="https://cinemarketer.com.ar/assets/images/og-default.png">
+  <meta id="ogUrl" property="og:url" content="https://cinemarketer.com.ar">
+
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/comunidad.css">
+  <link rel="stylesheet" href="css/publicacion-publica.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<!-- NAVBAR mínima -->
+<nav class="pub-navbar">
+  <a href="/" class="pub-navbar-logo">
+    <img src="assets/images/logo.png" alt="Cinemarketer">
+  </a>
+  <div class="pub-navbar-actions">
+    <a href="/login.html" class="pub-btn-login">Iniciar sesión</a>
+    <a href="/register.html" class="pub-btn-register">Registrarse gratis</a>
+  </div>
+</nav>
+
+<!-- CONTENIDO PRINCIPAL -->
+<main class="pub-main">
+
+  <!-- Loading -->
+  <div id="pubLoading" class="pub-loading">
+    <i class="fas fa-spinner fa-spin"></i>
+  </div>
+
+  <!-- Error -->
+  <div id="pubError" class="pub-error" style="display:none;">
+    <i class="fas fa-exclamation-circle"></i>
+    <p>No se encontró esta publicación.</p>
+    <a href="/">Volver al inicio</a>
+  </div>
+
+  <!-- Publicación -->
+  <div id="pubContenido" style="display:none;">
+
+    <!-- Card publicación -->
+    <div class="pub-card">
+
+      <div class="pub-card-header">
+        <div class="pub-avatar" id="pubAvatar"></div>
+        <div class="pub-card-meta">
+          <span class="pub-autor" id="pubAutor"></span>
+          <div id="pubBadges" class="pub-badges"></div>
+          <span class="pub-tiempo" id="pubTiempo"></span>
+        </div>
+      </div>
+
+      <div id="pubPeliculaVinculada" style="display:none;" class="pub-pelicula-vinculada">
+        <i class="fas fa-film"></i>
+        <span id="pubPeliculaNombre"></span>
+      </div>
+
+      <div id="pubContenidoTexto" class="pub-contenido-texto"></div>
+
+      <div id="pubImagenes" class="pub-imagenes"></div>
+
+    </div>
+
+    <!-- CTA registro -->
+    <div class="pub-cta">
+      <div class="pub-cta-inner">
+        <div class="pub-cta-logo">🎬</div>
+        <h2>¿Querés opinar sobre esta publicación?</h2>
+        <p>Unite a Cinemarketer, la red social de cine de Argentina. Comentá, reaccioná y compartí tu pasión por el cine.</p>
+        <div class="pub-cta-btns">
+          <a href="/register.html" class="pub-cta-btn-primary">Registrarse gratis</a>
+          <a href="/login.html" class="pub-cta-btn-secondary">Ya tengo cuenta</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+  const API_URL = window.location.hostname === 'localhost'
+    ? 'http://localhost:8080/api'
+    : 'https://cinemarketer-backend-production.up.railway.app/api';
+
+  async function cargarPublicacion() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      if (!id) { mostrarError(); return; }
+
+      try {
+          const res = await fetch(`${API_URL}/publications/public/${id}`);
+          if (!res.ok) throw new Error();
+          const pub = await res.json();
+          renderPublicacion(pub);
+      } catch(e) {
+          mostrarError();
+      }
+  }
+
+  function renderPublicacion(pub) {
+      const autor = pub.user || {};
+      const inicial = (autor.name || 'U').charAt(0).toUpperCase();
+
+      // Avatar
+      const avatarEl = document.getElementById('pubAvatar');
+      avatarEl.innerHTML = autor.avatarUrl
+          ? `<img src="${autor.avatarUrl}" alt="${autor.name}">`
+          : `<span>${inicial}</span>`;
+
+      document.getElementById('pubAutor').textContent = autor.name || 'Usuario';
+      document.getElementById('pubTiempo').textContent = tiempoRelativo(pub.createdAt);
+
+      // Badges
+      const badges = document.getElementById('pubBadges');
+      badges.innerHTML = `
+          ${pub.territoryGroup ? `<span class="pub-badge-territory">${formatTerritory(pub.territoryGroup)}</span>` : ''}
+          ${pub.tone ? `<span class="pub-badge-tone">${pub.tone}</span>` : ''}`;
+
+      // Película vinculada
+      if (pub.movieId) {
+          document.getElementById('pubPeliculaVinculada').style.display = 'flex';
+          document.getElementById('pubPeliculaNombre').textContent = 'Ver película vinculada';
+          document.getElementById('pubPeliculaVinculada').onclick = () => {
+              window.location.href = `/pelicula?id=${pub.movieId}`;
+          };
+      }
+
+      // Contenido
+      const contenidoEl = document.getElementById('pubContenidoTexto');
+      if (pub.spoiler) {
+          contenidoEl.innerHTML = `
+              <div class="pub-spoiler-mask">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  <span>Esta publicación contiene spoilers</span>
+                  <button onclick="this.parentElement.innerHTML = \`<p>${escapeHtml(pub.content)}</p>\`">Ver bajo tu propio riesgo</button>
+              </div>`;
+      } else {
+          contenidoEl.textContent = pub.content || '';
+      }
+
+      // Imágenes
+      if (pub.imageUrls && pub.imageUrls.length > 0) {
+          document.getElementById('pubImagenes').innerHTML =
+              pub.imageUrls.map(url => `<img src="${url}" alt="imagen">`).join('');
+      }
+
+      // OG tags
+      document.title = `${autor.name} en Cinemarketer`;
+      document.getElementById('ogTitle').content = `${autor.name} en Cinemarketer`;
+      document.getElementById('ogDescription').content =
+          pub.spoiler ? 'Publicación con spoilers en Cinemarketer' :
+          (pub.content || '').substring(0, 150);
+      document.getElementById('ogUrl').content = window.location.href;
+
+      // Mostrar
+      document.getElementById('pubLoading').style.display = 'none';
+      document.getElementById('pubContenido').style.display = 'block';
+  }
+
+  function mostrarError() {
+      document.getElementById('pubLoading').style.display = 'none';
+      document.getElementById('pubError').style.display = 'flex';
+  }
+
+  function escapeHtml(str) {
+      return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function tiempoRelativo(fechaStr) {
+      if (!fechaStr) return '';
+      const diff = Math.floor((Date.now() - new Date(fechaStr).getTime()) / 1000);
+      if (diff < 60) return 'hace un momento';
+      if (diff < 3600) return `hace ${Math.floor(diff/60)} min`;
+      if (diff < 86400) return `hace ${Math.floor(diff/3600)}h`;
+      return new Date(fechaStr).toLocaleDateString('es-AR', {day:'numeric',month:'short',year:'numeric'});
+  }
+
+  function formatTerritory(key) {
+      const map = {
+          PELICULAS_SERIES:'🎬 Películas', LO_QUE_VIENE:'📅 Estrenos',
+          GENTE_CINE:'🎭 Gente de cine', PREMIOS:'🏆 Premios',
+          INDUSTRIA:'💰 Industria', EXPERIENCIA:'🍿 Experiencia',
+          ARTE_CULTURA:'🎓 Arte y cultura', EVENTOS:'🎪 Eventos'
+      };
+      return map[key] || key;
+  }
+
+  cargarPublicacion();
+</script>
+</body>
+</html>

@@ -1305,9 +1305,9 @@ body {
 /* ========== CUADRO COMPARATIVO FREE VS PREMIUM ========== */
 .planes-comparativo {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 16px;
-    max-width: 1000px;
+    max-width: 1300px;
     margin: 0 auto;
 }
 
@@ -1320,6 +1320,25 @@ body {
 
 .plan-card-premium {
     border: 2px solid #e50914;
+}
+
+.plan-card-creator {
+    border: 2px solid #7c3aed;
+}
+
+.plan-badge-creator {
+    background: #7c3aed;
+}
+
+.plan-highlight-creator { color: #7c3aed; }
+
+.plan-btn-creator {
+    background: #7c3aed;
+    color: #fff;
+}
+
+.plan-btn-creator:hover {
+    background: #6025d9;
 }
 
 .plan-head {

@@ -452,8 +452,231 @@ body.menu-open {
     overflow: hidden;
 }
 
-@media (max-width: 768px) {
-    .navbar.navbar-hidden {
-        transform: none !important;
-    }
+/* ── Modal publicación ─────────────────────── */
+#modalPublicacionContenido .com-card {
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+}
+
+#modalPublicacionContenido .com-card:hover {
+    box-shadow: none !important;
+}
+
+#modalPublicacionContenido .com-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem 0.6rem;
+}
+
+#modalPublicacionContenido .com-card-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #324C89;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+#modalPublicacionContenido .com-card-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+#modalPublicacionContenido .com-card-meta {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+#modalPublicacionContenido .com-card-autor {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+#modalPublicacionContenido .com-card-badges {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+#modalPublicacionContenido .com-badge-territory {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 99px;
+    background: #eef1f8;
+    color: #324C89;
+    font-weight: 600;
+}
+
+#modalPublicacionContenido .com-badge-tone {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 99px;
+    background: #f5f5f5;
+    color: #666;
+    font-weight: 500;
+}
+
+#modalPublicacionContenido .com-card-tiempo {
+    font-size: 0.75rem;
+    color: #bbb;
+}
+
+#modalPublicacionContenido .com-card-pelicula {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #f8f9ff;
+    border-top: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.8rem;
+    color: #324C89;
+    cursor: pointer;
+}
+
+#modalPublicacionContenido .com-card-imagenes {
+    display: flex;
+    padding: 0;
+    background: white;
+}
+
+#modalPublicacionContenido .com-card-imagenes img {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+}
+
+#modalPublicacionContenido .com-card-content {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    color: #333;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+#modalPublicacionContenido .com-card-acciones {
+    display: flex;
+    gap: 0;
+    padding: 0 0.5rem 0.5rem;
+    border-top: 1px solid #f0f0f0;
+}
+
+#modalPublicacionContenido .com-accion-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 0.82rem;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: color 0.2s, background 0.2s;
+}
+
+#modalPublicacionContenido .com-accion-btn:hover { color: #324C89; background: #f0f3ff; }
+#modalPublicacionContenido .com-accion-btn.com-accion-active { color: #324C89; }
+
+#modalPublicacionContenido .pub-comentarios-panel {
+    border-top: 1px solid #f0f0f0;
+    padding: 1rem 1.25rem;
+    background: #fafafa;
+}
+
+#modalPublicacionContenido .pub-comentarios-lista {
+    margin-bottom: 1rem;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+#modalPublicacionContenido .pub-comentarios-escribir {
+    border-top: 1px solid #f0f0f0;
+    padding-top: 0.75rem;
+    background: white;
+}
+
+#modalPublicacion .modal-pub-header {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.5rem 0.75rem 0;
+    flex-shrink: 0;
+}
+
+#modalPublicacion .modal-pub-header button {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: #999;
+    line-height: 1;
+    padding: 0.25rem;
+}
+
+/* ── Botón flotante "Volver arriba" ─────────────────────── */
+#btnVolverArriba {
+    position: fixed;
+    bottom: 1.25rem;
+    right: 1.25rem;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: #324C89;
+    color: white;
+    border: none;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    cursor: pointer;
+    z-index: 900;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+}
+
+#btnVolverArriba.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* ── Botón flotante "Nueva publicación" (apilado sobre el de Volver arriba) ── */
+#btnNuevaPubFlotante {
+    position: fixed;
+    bottom: 5.25rem;
+    right: 1.25rem;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: #e50914;
+    color: white;
+    border: none;
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    cursor: pointer;
+    z-index: 900;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+}
+
+#btnNuevaPubFlotante.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
 }

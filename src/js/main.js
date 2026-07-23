@@ -106,3 +106,61 @@ if (dashToggle && dashMenu) {
         }
     }, { passive: true });
 })();
+
+// ── Botones flotantes "Volver arriba" + "Nueva publicación" (solo mobile) ──
+(function() {
+    let btnArriba = null;
+    let btnNuevaPub = null;
+
+    function crearBotonArriba() {
+        if (btnArriba) return btnArriba;
+        btnArriba = document.createElement('button');
+        btnArriba.id = 'btnVolverArriba';
+        btnArriba.setAttribute('aria-label', 'Volver arriba');
+        btnArriba.innerHTML = '<i class="fas fa-arrow-up"></i>';
+        btnArriba.onclick = function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+        document.body.appendChild(btnArriba);
+        return btnArriba;
+    }
+
+    function crearBotonNuevaPub() {
+        if (btnNuevaPub) return btnNuevaPub;
+        btnNuevaPub = document.createElement('button');
+        btnNuevaPub.id = 'btnNuevaPubFlotante';
+        btnNuevaPub.setAttribute('aria-label', 'Crear publicación');
+        btnNuevaPub.innerHTML = '<i class="fas fa-plus"></i>';
+        btnNuevaPub.onclick = function() {
+            if (typeof window.abrirWorkflowPublicacion === 'function') {
+                window.abrirWorkflowPublicacion();
+            }
+        };
+        document.body.appendChild(btnNuevaPub);
+        return btnNuevaPub;
+    }
+
+    window.addEventListener('scroll', function() {
+        if (window.innerWidth > 768) {
+            if (btnArriba) btnArriba.classList.remove('visible');
+            if (btnNuevaPub) btnNuevaPub.classList.remove('visible');
+            return;
+        }
+
+        const hash = window.location.hash.replace('#', '') || 'feed-films';
+        if (hash !== 'feed-films') {
+            if (btnArriba) btnArriba.classList.remove('visible');
+            if (btnNuevaPub) btnNuevaPub.classList.remove('visible');
+            return;
+        }
+
+        const enComunidad = window._tabActivo === 'comunidad';
+        const scrolleado = window.scrollY > 400;
+
+        const a = crearBotonArriba();
+        if (scrolleado) { a.classList.add('visible'); } else { a.classList.remove('visible'); }
+
+        const p = crearBotonNuevaPub();
+        if (scrolleado && enComunidad) { p.classList.add('visible'); } else { p.classList.remove('visible'); }
+    }, { passive: true });
+})();
