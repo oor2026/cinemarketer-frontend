@@ -72,9 +72,9 @@
                             ${unidades.map(u => `<option value="${u.key}" ${wf.votacionDuracionUnidad === u.key ? 'selected' : ''}>${u.label}</option>`).join('')}
                         </select>
                     </div>
-                    ${excedeTope ? `<p style="font-size:0.75rem;color:#e50914;margin:0.5rem 0 0;">Superaste el máximo permitido de 3 meses.</p>` : ''}
-                </div>`;
-            }
+                    <p id="wfVotacionExcedeTope" style="font-size:0.75rem;color:#e50914;margin:0.5rem 0 0;display:${excedeTope ? 'block' : 'none'};">Superaste el máximo permitido de 3 meses.</p>
+                            </div>`;
+                        }
 
             window.wfVotacionRecalcularMinutos = function() {
                 const wf = window.getWfState();
@@ -84,11 +84,15 @@
             };
 
             window.wfVotacionCambiarDuracionValor = function(valor) {
-                const wf = window.getWfState();
-                wf.votacionDuracionValor = valor;
-                window.wfVotacionRecalcularMinutos();
-                window.wfRerenderWorkflow();
-            };
+                    const wf = window.getWfState();
+                    wf.votacionDuracionValor = valor;
+                    window.wfVotacionRecalcularMinutos();
+                    // Sin re-render completo acá — recrear todo el panel en cada tecla
+                    // tipeada era lo que disparaba el salto de scroll (mismo motivo por
+                    // el que título/texto/opciones tampoco re-renderizan al tipear).
+                    const aviso = document.getElementById('wfVotacionExcedeTope');
+                    if (aviso) aviso.style.display = (wf.votacionDuracionMinutos > MAX_DURACION_MINUTOS) ? 'block' : 'none';
+                };
 
             window.wfVotacionCambiarDuracionUnidad = function(unidad) {
                 const wf = window.getWfState();
