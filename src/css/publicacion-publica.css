@@ -17,7 +17,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     z-index: 100;
 }
 
-.pub-navbar-logo img { height: 32px; }
+.pub-navbar-logo img {
+    height: 32px;
+    background: rgba(255, 255, 255, 0.92);
+    padding: 4px 8px;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
 
 .pub-navbar-actions { display: flex; gap: 0.75rem; align-items: center; }
 
@@ -151,33 +157,17 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
 .pub-imagenes {
     display: flex;
+    flex-direction: column;
     gap: 4px;
-    padding: 0 1.25rem 1rem;
-    overflow-x: auto;
+    padding: 0 0 1rem;
 }
 
 .pub-imagenes img {
-    height: 200px;
-    border-radius: 8px;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
     object-fit: cover;
-    flex-shrink: 0;
-}
-
-@media (min-width: 1400px) {
-    /* Mismo criterio que .com-card-imagenes en el feed real: una imagen
-       a todo el ancho de la card con aspect-ratio 4/3, no una galería
-       de miniaturas achicadas. */
-    .pub-imagenes {
-        overflow-x: visible;
-        padding: 0 0 1rem;
-    }
-    .pub-imagenes img {
-        width: 100%;
-        height: auto;
-        aspect-ratio: 4 / 3;
-        border-radius: 0;
-        margin: 0 0 4px;
-    }
+    display: block;
 }
 
 .pub-spoiler-mask {
@@ -297,6 +287,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     display: block;
 }
 
-@media (min-width: 1600px) {
+@media (min-width: 1400px) {
     .pub-poster-rail { display: flex; }
 }
