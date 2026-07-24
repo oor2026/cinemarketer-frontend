@@ -163,6 +163,23 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     flex-shrink: 0;
 }
 
+@media (min-width: 1400px) {
+    /* Mismo criterio que .com-card-imagenes en el feed real: una imagen
+       a todo el ancho de la card con aspect-ratio 4/3, no una galería
+       de miniaturas achicadas. */
+    .pub-imagenes {
+        overflow-x: visible;
+        padding: 0 0 1rem;
+    }
+    .pub-imagenes img {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 4 / 3;
+        border-radius: 0;
+        margin: 0 0 4px;
+    }
+}
+
 .pub-spoiler-mask {
     display: flex;
     flex-direction: column;
@@ -243,17 +260,24 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     position: fixed;
     top: 90px;
     bottom: 0;
-    width: 150px;
+    width: 274px;
     overflow: hidden;
-    flex-direction: column;
+    flex-direction: row;
     gap: 14px;
     padding: 0.5rem 0;
     -webkit-mask-image: linear-gradient(to bottom, transparent, black 40px, black calc(100% - 60px), transparent);
     mask-image: linear-gradient(to bottom, transparent, black 40px, black calc(100% - 60px), transparent);
 }
 
-.pub-poster-rail-left { left: 32px; }
-.pub-poster-rail-right { right: 32px; }
+.pub-poster-rail-left { left: 24px; }
+.pub-poster-rail-right { right: 24px; }
+
+.pub-poster-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex: 1;
+}
 
 .pub-poster-rail-item {
     display: block;
@@ -273,6 +297,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     display: block;
 }
 
-@media (min-width: 1400px) {
+@media (min-width: 1600px) {
     .pub-poster-rail { display: flex; }
 }
