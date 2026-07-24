@@ -1992,7 +1992,8 @@
                             const botonImagen = modoFicha
                                 ? `<span style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;
                                                 border:1px dashed #e0e0e0;border-radius:99px;font-size:0.8rem;color:#ccc;"
-                                         title="${nombreHerramientaBloqueante} no se puede combinar con imagen o video, solo texto">
+                                         title="${nombreHerramientaBloqueante} no se puede combinar con imagen o video, solo texto"
+                                         onclick="window.mostrarToast && window.mostrarToast('${nombreHerramientaBloqueante} no se puede combinar con imagen o video, solo texto', 'info')">
                                         <i class="fas fa-image"></i> Imagen (no disponible)
                                    </span>`
                                 : puedeImagen
@@ -2004,7 +2005,8 @@
                                    </label>`
                                 : `<span style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;
                                                 border:1px dashed #e0e0e0;border-radius:99px;font-size:0.8rem;color:#ccc;"
-                                         title="Disponible para usuarios Premium y Creator">
+                                         title="Disponible para usuarios Premium y Creator"
+                                         onclick="window.mostrarToast && window.mostrarToast('Disponible para usuarios Premium y Creator', 'info')">
                                         <i class="fas fa-image"></i> Imagen (Premium)
                                    </span>`;
                             html += `<span id="wfSlotImagen">${botonImagen}</span>`;
@@ -2014,7 +2016,8 @@
                             const botonVideo = modoFicha
                                     ? `<span style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;
                                                     border:1px dashed #e0e0e0;border-radius:99px;font-size:0.8rem;color:#ccc;"
-                                             title="${nombreHerramientaBloqueante} no se puede combinar con imagen o video, solo texto">
+                                             title="${nombreHerramientaBloqueante} no se puede combinar con imagen o video, solo texto"
+                                             onclick="window.mostrarToast && window.mostrarToast('${nombreHerramientaBloqueante} no se puede combinar con imagen o video, solo texto', 'info')">
                                             <i class="fas fa-video"></i> Video (no disponible)
                                        </span>`
                                     : puedeVideo
@@ -2026,7 +2029,8 @@
                                    </label>`
                                 : `<span style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;
                                                 border:1px dashed #e0e0e0;border-radius:99px;font-size:0.8rem;color:#ccc;"
-                                         title="Disponible exclusivamente para usuarios Creator">
+                                         title="Disponible exclusivamente para usuarios Creator"
+                                         onclick="window.mostrarToast && window.mostrarToast('Disponible exclusivamente para usuarios Creator', 'info')">
                                         <i class="fas fa-video"></i> Video (Creator)
                                    </span>`;
                             html += `<span id="wfSlotVideo">${botonVideo}</span>`;
