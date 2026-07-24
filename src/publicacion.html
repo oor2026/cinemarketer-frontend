@@ -22,28 +22,27 @@
 <body>
 
 <!-- NAVBAR mínima -->
-<nav class="pub-navbar">
-  <a href="/" class="pub-navbar-logo">
+<header class="pub-header">
+  <a href="/" class="pub-logo">
     <img src="assets/images/isologotipo.webp" alt="Cinemarketer">
   </a>
-  <div class="pub-navbar-actions">
-    <a href="/login.html" class="pub-btn-login">Iniciar sesión</a>
-    <a href="/register.html" class="pub-btn-register">Registrarse gratis</a>
+  <div class="pub-header-btns">
+    <a href="/login.html" class="btn-login">Iniciar sesión</a>
+    <a href="/register.html" class="btn-registro">Registrarme gratis</a>
   </div>
-</nav>
+</header>
 
-<!-- Rieles de posters — decorativos, solo desktop ancho (ver media query en CSS) -->
-<div class="pub-poster-rail pub-poster-rail-left">
-  <div class="pub-poster-col" id="pubPosterColLeftOuter"></div>
-  <div class="pub-poster-col" id="pubPosterColLeftInner"></div>
-</div>
-<div class="pub-poster-rail pub-poster-rail-right">
-  <div class="pub-poster-col" id="pubPosterColRightInner"></div>
-  <div class="pub-poster-col" id="pubPosterColRightOuter"></div>
-</div>
+<!-- Rieles + contenido en el mismo contenedor flex, así el hueco entre
+     poster y card queda fijo sin importar el ancho de pantalla -->
+<div class="pub-layout">
 
-<!-- CONTENIDO PRINCIPAL -->
-<main class="pub-main">
+  <div class="pub-poster-rail pub-poster-rail-left">
+    <div class="pub-poster-col" id="pubPosterColLeftOuter"></div>
+    <div class="pub-poster-col" id="pubPosterColLeftInner"></div>
+  </div>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="pub-main">
 
   <!-- Loading -->
   <div id="pubLoading" class="pub-loading">
@@ -100,7 +99,14 @@
 
   </div>
 
-</main>
+  </main>
+
+  <div class="pub-poster-rail pub-poster-rail-right">
+    <div class="pub-poster-col" id="pubPosterColRightInner"></div>
+    <div class="pub-poster-col" id="pubPosterColRightOuter"></div>
+  </div>
+
+</div><!-- /.pub-layout -->
 
 <script>
   const API_URL = window.location.hostname === 'localhost'
