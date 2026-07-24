@@ -5,51 +5,78 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1a1a1a; }
 
-/* ── Navbar ─────────────────────────────────── */
-.pub-navbar {
+/* ── Header — clonado de pelicula.html para que ambas páginas públicas
+   sean visualmente consistentes ──────────────────────────────────── */
+.pub-header {
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 0.75rem 1.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.75rem 1.5rem;
-    background: #e50914;
     position: sticky;
     top: 0;
     z-index: 100;
 }
 
-.pub-navbar-logo img {
-    height: 32px;
-    background: rgba(255, 255, 255, 0.92);
-    padding: 4px 8px;
+.pub-logo img {
+    height: 48px;
+    width: auto;
+    display: block;
+}
+
+.pub-header-btns {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.btn-login {
+    padding: 0.5rem 1.1rem;
+    border: 2px solid #1a3a6b;
+    background: transparent;
+    color: #1a3a6b;
     border-radius: 8px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
 }
+.btn-login:hover { background: #1a3a6b; color: white; }
 
-.pub-navbar-actions { display: flex; gap: 0.75rem; align-items: center; }
-
-.pub-btn-login {
+.btn-registro {
+    padding: 0.5rem 1.1rem;
+    background: #e50914;
     color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
     text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 500;
-    opacity: 0.9;
+    transition: background 0.2s;
 }
+.btn-registro:hover { background: #b2070f; }
 
-.pub-btn-register {
-    background: white;
-    color: #e50914;
-    padding: 0.4rem 1rem;
-    border-radius: 99px;
-    text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 700;
-}
-
-/* ── Main ───────────────────────────────────── */
-.pub-main {
-    max-width: 600px;
+/* ── Layout: rieles + contenido en un mismo contenedor flex, para que
+   el hueco entre poster y card sea un gap fijo, no crezca con la
+   pantalla ────────────────────────────────────────────────────────── */
+.pub-layout {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 24px;
+    max-width: 1200px;
     margin: 2rem auto;
     padding: 0 1rem;
+}
+
+.pub-main {
+    max-width: 600px;
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 /* ── Loading / Error ────────────────────────── */
@@ -247,10 +274,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 /* ── Rieles de posters laterales — decorativos, solo desktop ancho ─── */
 .pub-poster-rail {
     display: none;
-    position: fixed;
+    position: sticky;
     top: 90px;
-    bottom: 0;
+    height: calc(100vh - 110px);
     width: 274px;
+    flex-shrink: 0;
     overflow: hidden;
     flex-direction: row;
     gap: 14px;
@@ -258,9 +286,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     -webkit-mask-image: linear-gradient(to bottom, transparent, black 40px, black calc(100% - 60px), transparent);
     mask-image: linear-gradient(to bottom, transparent, black 40px, black calc(100% - 60px), transparent);
 }
-
-.pub-poster-rail-left { left: 24px; }
-.pub-poster-rail-right { right: 24px; }
 
 .pub-poster-col {
     display: flex;
