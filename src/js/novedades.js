@@ -726,8 +726,17 @@ window.abrirPublicacion = async function(pubId, abrirComentarios, comentarioId) 
                 // mantener una plantilla propia que se desincroniza cada vez que se
                 // agrega algo nuevo a la tarjeta (título, hashtags, menú de 3 puntos, etc.)
                 contenido.innerHTML = (typeof window.renderPublicacionModal === 'function')
-                    ? window.renderPublicacionModal(pub)
-                    : `<div style="text-align:center;padding:2rem;color:#ccc;">No se pudo mostrar la publicación.</div>`;
+                                    ? window.renderPublicacionModal(pub)
+                                    : `<div style="text-align:center;padding:2rem;color:#ccc;">No se pudo mostrar la publicación.</div>`;
+
+                                // Resolver la herramienta activa (Ficha técnica, Countdown, Votación,
+                                // o la que sea) — sin esto, renderPublicacionModal solo pinta el
+                                // placeholder ("Cargando...") y nadie lo termina de resolver, porque
+                                // acá no pasa por el loop del feed de comunidad.js.
+                                const herramientaActivaModal = (window.CreatorTools || []).find(t => typeof t.activoPara === 'function' && t.activoPara(pub));
+                                if (herramientaActivaModal && typeof herramientaActivaModal.resolverEnCard === 'function') {
+                                    herramientaActivaModal.resolverEnCard(pub);
+                                }
 
                 if (pub.movieId && pub.movieFichaEnabled && typeof window.resolverFichaPelicula === 'function') {
                     window.resolverFichaPelicula(pub.id, pub.movieId);

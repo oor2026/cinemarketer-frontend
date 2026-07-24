@@ -1143,10 +1143,45 @@ async function cargarPublicacionesPerfil(userId) {
                 </div>`;
         }
 
-            const estilo = estiloTerritorioPerfil(pub.territoryGroup);
-            const textoTile = pub.spoiler
-                ? 'Contiene spoilers'
-                : (pub.title || pub.content || '').substring(0, 70) + ((pub.title || pub.content || '').length > 70 ? '...' : '');
+            const herramientaActivaTile = (window.CreatorTools || []).find(t => typeof t.activoPara === 'function' && t.activoPara(pub));
+                        if (herramientaActivaTile) {
+                            return `
+                                <div class="perfil-pub-tile" data-perfil-pub-id="${pub.id}" onclick="window.abrirPublicacionDesdePerfi(${pub.id})"
+                                     style="aspect-ratio:1;border-radius:8px;overflow:hidden;position:relative;cursor:pointer;
+                                            background:#f8f6ff;display:flex;flex-direction:column;">
+                                    <div style="padding:8px 10px 4px;text-align:center;">
+                                        <span style="font-size:0.66rem;font-weight:800;color:#5a3fa0;text-transform:uppercase;
+                                                     letter-spacing:0.3px;">
+                                            ${herramientaActivaTile.label}
+                                        </span>
+                                    </div>
+                                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:0 10px;">
+                                            <span style="font-size:2.2rem;line-height:1;">${herramientaActivaTile.emoji}</span>
+                                            ${pub.title ? `<p style="font-size:0.72rem;font-weight:600;color:#5a3fa0;margin:0;line-height:1.3;text-align:center;
+                                                                       display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+                                                ${escapeHtmlPerfil(pub.title)}
+                                            </p>` : ''}
+                                        </div>
+                                        <div class="perfil-pub-overlay"
+                                         style="position:absolute;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;
+                                                justify-content:center;gap:14px;opacity:0;transition:opacity .15s;">
+                                        <span style="color:white;font-size:0.8rem;font-weight:600;">
+                                            <i class="fas fa-thumbs-up"></i> <span id="perfilPubBanco-${pub.id}">0</span>
+                                        </span>
+                                        <span style="color:white;font-size:0.8rem;font-weight:600;">
+                                            <i class="fas fa-star"></i> <span id="perfilPubPunto-${pub.id}">0</span>
+                                        </span>
+                                        <span style="color:white;font-size:0.8rem;font-weight:600;">
+                                            <i class="fas fa-comment"></i> <span id="perfilPubComent-${pub.id}">0</span>
+                                        </span>
+                                    </div>
+                                </div>`;
+                        }
+
+                        const estilo = estiloTerritorioPerfil(pub.territoryGroup);
+                        const textoTile = pub.spoiler
+                            ? 'Contiene spoilers'
+                            : (pub.title || pub.content || '').substring(0, 70) + ((pub.title || pub.content || '').length > 70 ? '...' : '');
 
             return `
                 <div class="perfil-pub-tile" data-perfil-pub-id="${pub.id}" onclick="window.abrirPublicacionDesdePerfi(${pub.id})"
