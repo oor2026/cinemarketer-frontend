@@ -33,8 +33,14 @@
 </nav>
 
 <!-- Rieles de posters — decorativos, solo desktop ancho (ver media query en CSS) -->
-<div class="pub-poster-rail pub-poster-rail-left" id="pubPosterRailLeft"></div>
-<div class="pub-poster-rail pub-poster-rail-right" id="pubPosterRailRight"></div>
+<div class="pub-poster-rail pub-poster-rail-left">
+  <div class="pub-poster-col" id="pubPosterColLeftOuter"></div>
+  <div class="pub-poster-col" id="pubPosterColLeftInner"></div>
+</div>
+<div class="pub-poster-rail pub-poster-rail-right">
+  <div class="pub-poster-col" id="pubPosterColRightInner"></div>
+  <div class="pub-poster-col" id="pubPosterColRightOuter"></div>
+</div>
 
 <!-- CONTENIDO PRINCIPAL -->
 <main class="pub-main">
@@ -218,44 +224,62 @@
   // (token TMDb, now_playing con fallback a popular, region AR), pero con
   // poster_path (vertical) en vez de backdrop_path, repartidos en dos columnas.
   async function cargarPostersLaterales() {
-      const railLeft  = document.getElementById('pubPosterRailLeft');
-      const railRight = document.getElementById('pubPosterRailRight');
-      if (!railLeft || !railRight) return;
+      const cols = {
+          leftOuter:  document.getElementById('pubPosterColLeftOuter'),
+          leftInner:  document.getElementById('pubPosterColLeftInner'),
+          rightInner: document.getElementById('pubPosterColRightInner'),
+          rightOuter: document.getElementById('pubPosterColRightOuter')
+      };
+      if (!cols.leftOuter) return;
 
       const TMDB_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzZjFjNjgyZDZkNTMzNWIzMjQyNzc3MzQ2OWUxNmE1MSIsIm5iZiI6MTc3MTE3NzkxNy44ODEsInN1YiI6IjY5OTIwN2JkOTRjZDE0N2M5ZjFhZWY2OSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.8GieGBESmuWLnoD_IyFrBbXBCX40qUKE8vY6VBMj_DM';
       const BASE_IMG = 'https://image.tmdb.org/t/p/w300';
+      const NECESARIAS = 24; // 4 columnas x 6 posters, todas distintas
 
-      try {
-          const res = await fetch(
-              'https://api.themoviedb.org/3/movie/now_playing?language=es-AR&region=AR&page=1',
-              { headers: { 'Authorization': `Bearer ${TMDB_TOKEN}`, 'accept': 'application/json' } }
-          );
-          const data = await res.json();
-          let peliculas = (data.results || []).filter(m => m.poster_path);
-
-          if (peliculas.length < 6) {
-              const res2 = await fetch(
-                  'https://api.themoviedb.org/3/movie/popular?language=es-AR&region=AR&page=1',
+      const fetchTmdb = async (endpoint, page) => {
+          try {
+              const res = await fetch(
+                  `https://api.themoviedb.org/3/movie/${endpoint}?language=es-AR&region=AR&page=${page}`,
                   { headers: { 'Authorization': `Bearer ${TMDB_TOKEN}`, 'accept': 'application/json' } }
               );
-              const data2 = await res2.json();
-              const extra = (data2.results || [])
-                  .filter(m => m.poster_path && !peliculas.find(p => p.id === m.id));
-              peliculas = [...peliculas, ...extra];
+              const data = await res.json();
+              return data.results || [];
+          } catch (e) {
+              return [];
           }
+      };
 
-          if (peliculas.length === 0) return;
+      try {
+          let pool = [];
+          const agregar = (lista) => {
+              lista.filter(m => m.poster_path && !pool.find(p => p.id === m.id))
+                   .forEach(m => pool.push(m));
+          };
 
-          const izquierda = peliculas.filter((_, i) => i % 2 === 0).slice(0, 6);
-          const derecha   = peliculas.filter((_, i) => i % 2 === 1).slice(0, 6);
+          agregar(await fetchTmdb('now_playing', 1));
+          if (pool.length < NECESARIAS) agregar(await fetchTmdb('popular', 1));
+          if (pool.length < NECESARIAS) agregar(await fetchTmdb('now_playing', 2));
+          if (pool.length < NECESARIAS) agregar(await fetchTmdb('popular', 2));
+
+          if (pool.length === 0) return;
 
           const armarPoster = (m) => `
               <a href="/pelicula?id=${m.id}" class="pub-poster-rail-item" title="${(m.title || '').replace(/"/g,'')}">
                   <img src="${BASE_IMG}${m.poster_path}" alt="${m.title || ''}" loading="lazy">
               </a>`;
 
-          railLeft.innerHTML  = izquierda.map(armarPoster).join('');
-          railRight.innerHTML = derecha.map(armarPoster).join('');
+          // Cada columna recibe una tanda distinta del mismo pool sin superposición
+          const tandas = [
+              pool.slice(0, 6),
+              pool.slice(6, 12),
+              pool.slice(12, 18),
+              pool.slice(18, 24)
+          ];
+
+          if (cols.leftOuter)  cols.leftOuter.innerHTML  = tandas[0].map(armarPoster).join('');
+          if (cols.leftInner)  cols.leftInner.innerHTML  = tandas[1].map(armarPoster).join('');
+          if (cols.rightInner) cols.rightInner.innerHTML = tandas[2].map(armarPoster).join('');
+          if (cols.rightOuter) cols.rightOuter.innerHTML = tandas[3].map(armarPoster).join('');
       } catch (e) {
           // Silencioso — es puramente decorativo, no debe romper la carga de la publicación
       }
