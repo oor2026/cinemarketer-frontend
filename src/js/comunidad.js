@@ -46,13 +46,10 @@
             cargarMisReacciones(pubId);
         };
 
-        // Exponer para que el modal de publicación desde notificaciones (novedades.js)
-        // también resuelva la ficha de película después de insertar el HTML —
-        // mismo motivo que _pubData: renderCard/renderPublicacionModal solo arma
-        // el placeholder, alguien tiene que llamar al fetch después de insertarlo.
-        window.resolverFichaPelicula = function(pubId, movieId) {
-            resolverFichaPelicula(pubId, movieId);
-        };
+        // NOTA: window.resolverFichaPelicula ahora se define directamente en
+        // js/creator-tools/ficha-pelicula.js, no acá — esa herramienta vive
+        // completa en su propio archivo. novedades.js sigue llamándola igual,
+        // sin cambios de su lado.
 
         // ==============================================
         // SHELL HTML
@@ -323,7 +320,8 @@
                     feed.insertAdjacentHTML('beforeend', renderCard(pub));
                     const cardEl = feed.querySelector(`.com-card[data-id="${pub.id}"]`);
                     if (cardEl) cardEl._pubData = pub;
-                    if (pub.movieId && pub.movieFichaEnabled) resolverFichaPelicula(pub.id, pub.movieId);
+                    const herramientaActivaFeed = (window.CreatorTools || []).find(t => typeof t.activoPara === 'function' && t.activoPara(pub));
+                    if (herramientaActivaFeed && typeof herramientaActivaFeed.resolverEnCard === 'function') herramientaActivaFeed.resolverEnCard(pub);
                 });
 
                 // Cargar estado de reacciones propias
@@ -400,24 +398,20 @@
         const badgeTerritory = pub.territoryGroup
             ? `<span class="com-badge-territory">${formatTerritory(pub.territoryGroup)}</span>` : '';
 
-        const peliculaHtml = pub.movieId && !pub.movieFichaEnabled ? `
-            <div class="com-card-pelicula" onclick="window._abrirPeliculaDesdeModalPublicacion(${pub.movieId})">
-                <i class="fas fa-film"></i>
-                <span>Ver película vinculada</span>
-                <i class="fas fa-chevron-right" style="margin-left:auto;font-size:0.7rem;color:#ccc;"></i>
-            </div>` : '';
+        // Genérico: busca en el registro de Creator Tools cuál herramienta
+                // (si alguna) está activa para esta publicación, y le delega el render.
+                const herramientaActivaPub = (window.CreatorTools || []).find(t => typeof t.activoPara === 'function' && t.activoPara(pub));
 
-        const fichaPeliculaHtml = pub.movieId && pub.movieFichaEnabled ? `
-            <div class="com-card-ficha-pelicula" id="fichaPelicula-${pub.id}" data-movie-id="${pub.movieId}"
-                 style="margin:0 1rem 10px;border:1px solid #eee;border-radius:10px;display:flex;overflow:hidden;min-height:90px;cursor:pointer;"
-                 onclick="window._abrirPeliculaDesdeModalPublicacion(${pub.movieId})">
-                <div style="width:70px;flex-shrink:0;aspect-ratio:2/3;background:#f5f5f5;display:flex;align-items:center;justify-content:center;">
-                    <i class="fas fa-spinner fa-spin" style="color:#ccc;"></i>
-                </div>
-                <div style="flex:1;min-width:0;padding:10px 12px;display:flex;align-items:center;">
-                    <span style="font-size:0.8rem;color:#999;">Cargando ficha...</span>
-                </div>
-            </div>` : '';
+                const peliculaHtml = pub.movieId && !herramientaActivaPub ? `
+                    <div class="com-card-pelicula" onclick="window._abrirPeliculaDesdeModalPublicacion(${pub.movieId})">
+                        <i class="fas fa-film"></i>
+                        <span>Ver película vinculada</span>
+                        <i class="fas fa-chevron-right" style="margin-left:auto;font-size:0.7rem;color:#ccc;"></i>
+                    </div>` : '';
+
+                const fichaPeliculaHtml = herramientaActivaPub && typeof herramientaActivaPub.renderEnCard === 'function'
+                    ? herramientaActivaPub.renderEnCard(pub)
+                    : '';
 
         const tituloHtml = pub.title
             ? `<div class="com-card-titulo" style="font-weight:700;font-size:1.15rem;color:#1a1a1a;margin:10px 0 12px;padding:0 1rem;word-break:break-word;overflow-wrap:break-word;">${escapeHtml(pub.title)}</div>`
@@ -709,11 +703,12 @@
        const movieFichaActual = card.getAttribute('data-movie-ficha-enabled') === 'true';
 
        // Pre-cargar estado del workflow en modo edición
-       _wf = {
-           paso: 2,
-           movieId: movieIdActual ? parseInt(movieIdActual) : null,
-           movieTitulo: null,
-           movieFichaEnabled: movieFichaActual,
+      _wf = {
+          paso: 5,
+          movieId: movieIdActual ? parseInt(movieIdActual) : null,
+          movieTitulo: null,
+          movieFichaEnabled: movieFichaActual,
+          creatorTool: movieFichaActual ? 'FICHA' : null,
            territory: 'PELICULAS_SERIES',
            sub: null,
            tone: 'OPINION',
@@ -854,56 +849,9 @@
 
     const LIMITE_VER_MAS = 500;
 
-    async function resolverFichaPelicula(pubId, movieId) {
-            const wrap = document.getElementById(`fichaPelicula-${pubId}`);
-            if (!wrap) return;
-            try {
-                const token = localStorage.getItem('token');
-                const res = await fetch(`${window._comunidadApiUrl}/movies/${movieId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (!res.ok) throw new Error('not found');
-                const m = await res.json();
+        // resolverFichaPelicula ahora vive en js/creator-tools/ficha-pelicula.js
 
-                const TMDB_GENEROS_FICHA = {
-                    28: 'Acción', 12: 'Aventura', 16: 'Animación', 35: 'Comedia',
-                    80: 'Crimen', 99: 'Documental', 18: 'Drama', 10751: 'Familia',
-                    14: 'Fantasía', 36: 'Historia', 27: 'Terror', 10402: 'Música',
-                    9648: 'Misterio', 10749: 'Romance', 878: 'Ciencia Ficción',
-                    10770: 'Película de TV', 53: 'Suspenso', 10752: 'Bélica', 37: 'Western'
-                };
-
-                const posterUrl = m.poster_path
-                    ? `https://image.tmdb.org/t/p/w500${m.poster_path}`
-                    : '';
-                const anio = m.release_date ? m.release_date.slice(0, 4) : '';
-                const generoIds = m.genre_ids || (m.genres?.map(g => g.id)) || [];
-                const genero = generoIds.length > 0 ? (TMDB_GENEROS_FICHA[generoIds[0]] || '') : '';
-
-                wrap.innerHTML = `
-                    <div style="width:70px;flex-shrink:0;aspect-ratio:2/3;background:#f5f5f5;">
-                        <img src="${posterUrl}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none';">
-                    </div>
-                    <div style="flex:1;min-width:0;padding:10px 12px;display:flex;flex-direction:column;gap:3px;">
-                        <span style="font-weight:600;font-size:0.85rem;color:#1a1a1a;">${escapeHtml(m.title || '')}</span>
-                        <span style="font-size:0.72rem;color:#999;">${[anio, genero].filter(Boolean).join(' · ')}</span>
-                        <span style="font-size:0.72rem;color:#999;"><i class="fas fa-star" style="color:#f5a623;"></i> ${m.vote_average ? m.vote_average.toFixed(1) : '—'}</span>
-                        <span style="font-size:0.72rem;color:#bbb;line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(m.overview || '')}</span>
-                    </div>`;
-            } catch (e) {
-                wrap.innerHTML = `
-                    <div style="width:70px;flex-shrink:0;aspect-ratio:2/3;background:#f5f5f5;display:flex;align-items:center;justify-content:center;">
-                        <i class="fas fa-film" style="color:#ccc;"></i>
-                    </div>
-                    <div style="flex:1;min-width:0;padding:10px 12px;display:flex;align-items:center;">
-                        <span style="font-size:0.8rem;color:#bbb;">Película no disponible</span>
-                    </div>`;
-                wrap.style.cursor = 'default';
-                wrap.onclick = null;
-            }
-        }
-
-    function renderContenidoConVerMas(pubId, content) {
+        function renderContenidoConVerMas(pubId, content) {
             const texto = content || '';
             if (texto.length <= LIMITE_VER_MAS) {
                 return `<div class="com-card-content">${escapeHtml(texto)}</div>`;
@@ -1557,36 +1505,55 @@
     ];
 
     let _wf = {
-        paso: 0,
-        movieId: null,
-        movieTitulo: null,
-        movieFichaEnabled: false,
-        territory: null,
-        sub: null,
-        tone: null,
-        title: '',
-        content: '',
-        hashtags: '',
-        spoiler: false,
-        imageUrls: [],
-        videoUrl: null
-    };
+            paso: 1,
+            movieId: null,
+            movieTitulo: null,
+            movieFichaEnabled: false,
+            creatorTool: null, // null | 'FICHA' | 'COUNTDOWN' (a futuro) — selección única
+            territory: null,
+            sub: null,
+            tone: null,
+            title: '',
+            content: '',
+            hashtags: '',
+            spoiler: false,
+            imageUrls: [],
+            videoUrl: null
+        };
 
-    window.abrirWorkflowPublicacion = function(movieId, movieTitulo) {
-        _wf = { paso: 1, movieId: movieId || null, movieTitulo: movieTitulo || null, movieFichaEnabled: false,
-        territory: null, sub: null, tone: null, title: '', content: '', hashtags: '',
-        spoiler: false, imageUrls: [], videoUrl: null };
-
-        // Si viene desde una película, saltear paso 0
-        if (_wf.movieId) {
-            _wf.paso = 1;
-        } else {
-            _wf.paso = 0;
+        // Camino según estado, para header ("Paso X de Y") y navegación:
+        //   Libre:                 1 → 2 → 5
+        //   Vinculada, no Creator:  1 → 2 → 3 → 5
+        //   Vinculada, Creator:     1 → 2 → 3 → 4 → 5
+        function wfEsCreator() {
+            return localStorage.getItem('userCreator') === 'true';
+        }
+        function wfTotalPasos() {
+            if (!_wf.movieId) return 3;
+            return wfEsCreator() ? 5 : 4;
+        }
+        function wfPasoVisible() {
+            if (_wf.paso <= 3) return _wf.paso;
+            if (_wf.paso === 4) return 4;
+            if (_wf.paso === 5) {
+                if (!_wf.movieId) return 3;
+                return wfEsCreator() ? 5 : 4;
+            }
+            return _wf.paso;
+        }
+        function wfPasoAnterior() {
+            if (!_wf.movieId) return 2;
+            return wfEsCreator() ? 4 : 3;
         }
 
-        renderWorkflow();
-        document.body.style.overflow = 'hidden';
-    };
+        window.abrirWorkflowPublicacion = function(movieId, movieTitulo) {
+            _wf = { paso: 1, movieId: movieId || null, movieTitulo: movieTitulo || null, movieFichaEnabled: false, creatorTool: null,
+            territory: null, sub: null, tone: null, title: '', content: '', hashtags: '',
+            spoiler: false, imageUrls: [], videoUrl: null };
+
+            renderWorkflow();
+            document.body.style.overflow = 'hidden';
+        };
 
     function renderWorkflow() {
         let overlay = document.getElementById('wfOverlay');
@@ -1597,6 +1564,7 @@
             // Recrear todo (remove + append) es lo que disparaba el scroll-behavior:
             // smooth global de styles.css en cada click de badge.
             panel.innerHTML = renderPaso();
+            resolverExtraHerramientaSiCorresponde();
             return;
         }
 
@@ -1609,19 +1577,29 @@
         panel.style.cssText = 'background:white;border-radius:16px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;padding:1.5rem 1.5rem 2rem;';
 
         panel.innerHTML = renderPaso();
-        overlay.appendChild(panel);
-        document.body.appendChild(overlay);
-    }
+            overlay.appendChild(panel);
+            document.body.appendChild(overlay);
+            resolverExtraHerramientaSiCorresponde();
+        }
+
+        function resolverExtraHerramientaSiCorresponde() {
+            if (_wf.paso !== 4 || !_wf.creatorTool) return;
+            const tool = (window.CreatorTools || []).find(t => t.key === _wf.creatorTool);
+            if (tool && typeof tool.resolverExtra === 'function') {
+                tool.resolverExtra(_wf.movieId, _wf.countdownCountryCode);
+            }
+        }
 
     function renderPaso() {
-        switch(_wf.paso) {
-            case 0: return renderPaso0();
-            case 1: return renderPaso1();
-            case 2: return renderPaso2();
-            case 3: return renderPaso3();
-            default: return '';
+            switch(_wf.paso) {
+                case 1: return renderPaso1();
+                case 2: return renderPaso2();
+                case 3: return renderPaso3();
+                case 4: return renderPaso4();
+                case 5: return renderPaso5();
+                default: return '';
+            }
         }
-    }
 
     function headerWf(titulo, paso, total) {
         return `
@@ -1634,19 +1612,18 @@
             </div>`;
     }
 
-    // PASO 0 — Buscar película (solo desde feed)
-    function renderPaso0() {
-        return `
-            ${headerWf('¿Sobre qué película?', 1, 3)}
-            <input id="wfBuscador" type="text" placeholder="Escribí el título de la película..."
-                   oninput="window.buscarPeliculaWf(this.value)"
-                   style="width:100%;box-sizing:border-box;padding:10px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:0.9rem;margin-bottom:0.75rem;font-family:inherit;">
-            <div id="wfResultados" style="max-height:300px;overflow-y:auto;"></div>
-            <p style="font-size:0.78rem;color:#bbb;text-align:center;margin-top:0.75rem;">
-                También podés publicar sin vincular una película —
-                <span onclick="window.saltearPelicula()" style="color:#324C89;cursor:pointer;font-weight:600;">Continuar sin película</span>
-            </p>`;
-    }
+    // PASO 3 — Buscar película (solo se llega acá si eligió "Vincular con una película" en el Paso 2)
+        function renderPaso3() {
+            return `
+                ${headerWf('¿Sobre qué película?', 3, wfTotalPasos())}
+                <input id="wfBuscador" type="text" placeholder="Escribí el título de la película..."
+                       oninput="window.buscarPeliculaWf(this.value)"
+                       style="width:100%;box-sizing:border-box;padding:10px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:0.9rem;margin-bottom:0.75rem;font-family:inherit;">
+                <div id="wfResultados" style="max-height:300px;overflow-y:auto;"></div>
+                <div style="margin-top:1rem;">
+                    <button onclick="window.wfPaso(2)" style="width:100%;padding:0.7rem;border:1.5px solid #ddd;background:none;border-radius:10px;color:#666;cursor:pointer;font-size:0.9rem;">← Atrás</button>
+                </div>`;
+        }
 
     window.buscarPeliculaWf = async function(query) {
         const res = document.getElementById('wfResultados');
@@ -1688,22 +1665,15 @@
     };
 
     window.seleccionarPeliculaWf = function(id, titulo, event) {
-        if (event) event.stopPropagation();
-        _wf.movieId = id;
-        _wf.movieTitulo = titulo;
-        _wf.paso = 1;
-        renderWorkflow();
-    };
+            if (event) event.stopPropagation();
+            _wf.movieId = id;
+            _wf.movieTitulo = titulo;
+            _wf.paso = wfEsCreator() ? 4 : 5;
+            renderWorkflow();
+        };
 
-    window.saltearPelicula = function() {
-        _wf.movieId = null;
-        _wf.movieTitulo = null;
-        _wf.paso = 1;
-        renderWorkflow();
-    };
-
-    // PASO 1 — Territorio + sub + tono
-    function renderPaso1() {
+        // PASO 1 — Territorio + sub + tono (siempre el primer paso)
+        function renderPaso1() {
         const totalPasos = _wf.movieId ? 3 : 3;
         const peliculaTag = _wf.movieTitulo
             ? `<div style="display:inline-flex;align-items:center;gap:6px;background:#f4f6fb;border:1px solid #c8d4f0;border-radius:99px;padding:4px 12px;font-size:0.78rem;color:#324C89;font-weight:600;margin-bottom:1rem;">
@@ -1757,90 +1727,220 @@
         const puedeAvanzar = _wf.territory && _wf.tone;
 
         return `
-            ${headerWf('¿De qué va tu publicación?', _wf.movieId ? 2 : 1, totalPasos)}
-            ${peliculaTag}
-            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
-                ${gridTerr}
-            </div>
-            ${subsHtml}
-            ${tonosHtml}
-            <div style="margin-top:1.25rem;display:flex;gap:0.75rem;">
-                ${!_wf.movieId ? `<button onclick="window.wfPaso(0)" style="flex:1;padding:0.7rem;border:1.5px solid #ddd;background:none;border-radius:10px;color:#666;cursor:pointer;font-size:0.9rem;">← Atrás</button>` : ''}
-                <button onclick="window.wfPaso(2)"
-                        ${!puedeAvanzar ? 'disabled' : ''}
-                        style="flex:2;padding:0.7rem;border:none;border-radius:10px;
-                               background:${puedeAvanzar ? '#324C89' : '#e0e0e0'};
-                               color:${puedeAvanzar ? 'white' : '#aaa'};
-                               cursor:${puedeAvanzar ? 'pointer' : 'not-allowed'};font-size:0.9rem;font-weight:600;">
-                    Continuar →
-                </button>
-            </div>`;
-    }
-
-    window.selTerritory = function(key) {
-        _wf.territory = key;
-        _wf.sub = null;
-        _wf.tone = null;
-        renderWorkflow();
-    };
-
-    window.selSub = function(sub) {
-        _wf.sub = sub;
-        renderWorkflow();
-    };
-
-    window.selTone = function(key) {
-        _wf.tone = key;
-        renderWorkflow();
-    };
-
-    window.cambiarPelicula = function() {
-        _wf.movieId = null;
-        _wf.movieTitulo = null;
-        _wf.paso = 0;
-        renderWorkflow();
-    };
-
-    // PASO 2 — Contenido
-    window.wfToggleFichaPelicula = function(checkbox) {
-            _wf.movieFichaEnabled = checkbox.checked;
-            // Si ya había imagen o video cargado antes de tildar, se descarta —
-            // así no queda forma de burlar el modo ficha subiendo el archivo primero
-            // y tildando el check después.
-            if (_wf.movieFichaEnabled) {
-                _wf.imageUrls = [];
-                _wf.videoUid = null;
-                _wf._videoFileName = null;
+                    ${headerWf('¿De qué va tu publicación?', 1, totalPasos)}
+                    ${peliculaTag}
+                    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
+                        ${gridTerr}
+                    </div>
+                    ${subsHtml}
+                    ${tonosHtml}
+                    <div style="margin-top:1.25rem;">
+                        <button onclick="window.wfPaso1Continuar()"
+                                ${!puedeAvanzar ? 'disabled' : ''}
+                                style="width:100%;padding:0.7rem;border:none;border-radius:10px;
+                                       background:${puedeAvanzar ? '#324C89' : '#e0e0e0'};
+                                       color:${puedeAvanzar ? 'white' : '#aaa'};
+                                       cursor:${puedeAvanzar ? 'pointer' : 'not-allowed'};font-size:0.9rem;font-weight:600;">
+                            Continuar →
+                        </button>
+                    </div>`;
             }
-            renderWorkflow();
-        };
 
-        function renderPaso2() {
-        const isPremium = localStorage.getItem('userPremium') === 'true';
-        const isCreator = localStorage.getItem('userCreator') === 'true';
-        const puedeImagen = isPremium || isCreator;
-        const puedeVideo = isCreator;
-        const maxImagenes = isCreator ? 10 : isPremium ? 1 : 0;
+            window.wfPaso1Continuar = function() {
+                if (_wf.movieId) {
+                    _wf.paso = wfEsCreator() ? 4 : 5;
+                } else {
+                    _wf.paso = 2;
+                }
+                renderWorkflow();
+            };
 
-        const spoilerCheck = _wf.tone === 'SPOILER'
-            ? `<div style="background:#fff0f0;border-radius:8px;padding:0.75rem;margin-bottom:0.75rem;font-size:0.82rem;color:#e50914;">
-                    <i class="fas fa-exclamation-triangle"></i> Tu publicación se marcará automáticamente como Spoiler.
-               </div>` : '';
+            window.selTerritory = function(key) {
+                _wf.territory = key;
+                _wf.sub = null;
+                _wf.tone = null;
+                renderWorkflow();
+            };
 
-        const fichaCheck = (_wf.movieId && isCreator) ? `
-                    <label style="display:flex;align-items:center;gap:8px;background:#f8f6ff;border:1px solid #e0d6ff;
-                                  border-radius:8px;padding:0.7rem 0.9rem;margin-bottom:0.75rem;font-size:0.82rem;
-                                  color:#5a3fa0;cursor:pointer;">
-                        <input type="checkbox" id="wfFichaPelicula" ${_wf.movieFichaEnabled ? 'checked' : ''}
-                               onchange="window.wfToggleFichaPelicula(this)" style="accent-color:#7c3aed;">
-                        <span><i class="fas fa-film"></i> Mostrar ficha completa de "${_wf.movieTitulo || 'la película'}" en la publicación (poster, año, rating y sinopsis)</span>
-                    </label>` : '';
+            window.selSub = function(sub) {
+                _wf.sub = sub;
+                renderWorkflow();
+            };
+
+            window.selTone = function(key) {
+                _wf.tone = key;
+                renderWorkflow();
+            };
+
+            window.cambiarPelicula = function() {
+                _wf.movieId = null;
+                _wf.movieTitulo = null;
+                _wf.creatorTool = null;
+                _wf.movieFichaEnabled = false;
+                _wf.paso = 2;
+                renderWorkflow();
+            };
+
+            // PASO 2 — ¿Cómo armás la publicación?
+            function renderPaso2() {
+                const opcionLibre = `
+                    <div onclick="window.wfElegirLibre()" style="border:1px solid #e0e0e0;border-radius:12px;padding:1.1rem;
+                                 cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:0.9rem;margin-bottom:0.65rem;">
+                        <span style="font-size:1.6rem;">✍️</span>
+                        <div>
+                            <p style="margin:0;font-size:0.92rem;font-weight:700;color:#1a1a1a;">Publicación libre</p>
+                            <p style="margin:2px 0 0;font-size:0.78rem;color:#999;">Texto, imagen o video — sin vincular ninguna película</p>
+                        </div>
+                    </div>`;
+
+                const opcionVincular = `
+                    <div onclick="window.wfElegirVincular()" style="border:1px solid #e0e0e0;border-radius:12px;padding:1.1rem;
+                                 cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:0.9rem;">
+                        <span style="font-size:1.6rem;">🎬</span>
+                        <div>
+                            <p style="margin:0;font-size:0.92rem;font-weight:700;color:#1a1a1a;">Vincular con una película</p>
+                            <p style="margin:2px 0 0;font-size:0.78rem;color:#999;">Elegí una película y, si sos Creator, enriquecé la publicación</p>
+                        </div>
+                    </div>`;
 
                 return `
-                            ${headerWf('Escribí tu publicación', _wf.movieId ? 3 : 2, 3)}
+                    ${headerWf('¿Cómo armás tu publicación?', 2, wfTotalPasos())}
+                    ${opcionLibre}
+                    ${opcionVincular}
+                    <div style="margin-top:1.25rem;">
+                        <button onclick="window.wfPaso(1)" style="width:100%;padding:0.7rem;border:1.5px solid #ddd;background:none;border-radius:10px;color:#666;cursor:pointer;font-size:0.9rem;">← Atrás</button>
+                    </div>`;
+            }
 
-                            ${fichaCheck}
-                            ${spoilerCheck}
+            window.wfElegirLibre = function() {
+                _wf.paso = 5;
+                renderWorkflow();
+            };
+
+            window.wfElegirVincular = function() {
+                _wf.paso = 3;
+                renderWorkflow();
+            };
+
+            // PASO 4 — Menú visual de Creator Tools (solo si hay película vinculada y es Creator)
+            function renderPaso4() {
+                const peliculaTag = `
+                    <div style="display:inline-flex;align-items:center;gap:6px;background:#f4f6fb;border:1px solid #c8d4f0;border-radius:99px;padding:4px 12px;font-size:0.78rem;color:#324C89;font-weight:600;margin-bottom:1rem;">
+                        <i class="fas fa-film"></i> ${_wf.movieTitulo || ''}
+                        <span onclick="window.cambiarPelicula()" style="margin-left:4px;cursor:pointer;color:#aaa;font-size:0.85rem;">×</span>
+                    </div>`;
+
+                const leyenda = `
+                    <p style="font-size:0.82rem;color:#666;margin:0 0 0.85rem;line-height:1.4;">
+                        Elegí una herramienta para enriquecer tu publicación con esta película<br>
+                        <span style="color:#aaa;">(opcional — si más adelante querés cambiarla, podés volver a este paso)</span>.
+                    </p>`;
+
+                const herramientas = window.CreatorTools || [];
+
+                const gridHerramientas = herramientas.map(h => {
+                    if (!h.disponible) {
+                        return `<div style="border:1px dashed #e0e0e0;border-radius:12px;padding:1rem;opacity:0.5;">
+                                    <p style="margin:0 0 4px;font-size:1.4rem;">${h.emoji}</p>
+                                    <p style="margin:0;font-size:0.85rem;font-weight:700;color:#999;">${h.label}</p>
+                                    <p style="margin:2px 0 0;font-size:0.72rem;color:#bbb;">${h.desc}</p>
+                                </div>`;
+                    }
+                    const sel = _wf.creatorTool === h.key;
+                    return `<div onclick="window.wfSeleccionarHerramienta('${h.key}')"
+                                 style="position:relative;border:${sel ? '1.5px solid #7c3aed' : '1px solid #e0e0e0'};
+                                        background:${sel ? '#f8f6ff' : 'white'};
+                                        border-radius:12px;padding:1rem;cursor:pointer;transition:all 0.15s;">
+                                ${sel ? `<span style="position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;
+                                                background:#7c3aed;color:white;display:flex;align-items:center;justify-content:center;
+                                                font-size:0.7rem;">✓</span>` : ''}
+                                <p style="margin:0 0 4px;font-size:1.4rem;">${h.emoji}</p>
+                                <p style="margin:0;font-size:0.85rem;font-weight:700;color:#1a1a1a;">${h.label}</p>
+                                <p style="margin:2px 0 0;font-size:0.72rem;color:#999;">${h.desc}</p>
+                            </div>`;
+                }).join('');
+
+                const toolSeleccionado = herramientas.find(h => h.key === _wf.creatorTool);
+                const extraHerramienta = (toolSeleccionado && typeof toolSeleccionado.renderExtra === 'function') ? toolSeleccionado.renderExtra() : '';
+                const puedeContinuarHerramienta = !toolSeleccionado || typeof toolSeleccionado.puedeAvanzar !== 'function' || toolSeleccionado.puedeAvanzar(_wf);
+
+                return `
+                    ${headerWf('Enriquecé tu publicación', 4, wfTotalPasos())}
+                    ${peliculaTag}
+                    ${leyenda}
+                    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
+                        ${gridHerramientas}
+                    </div>
+                    ${extraHerramienta}
+                    <div style="margin-top:1.25rem;display:flex;gap:0.75rem;">
+                        <button onclick="window.wfPaso(3)" style="flex:1;padding:0.7rem;border:1.5px solid #ddd;background:none;border-radius:10px;color:#666;cursor:pointer;font-size:0.9rem;">← Atrás</button>
+                        <button onclick="window.wfPaso(5)"
+                                ${!puedeContinuarHerramienta ? 'disabled' : ''}
+                                style="flex:2;padding:0.7rem;border:none;border-radius:10px;
+                                       background:${puedeContinuarHerramienta ? '#324C89' : '#e0e0e0'};
+                                       color:${puedeContinuarHerramienta ? 'white' : '#aaa'};
+                                       cursor:${puedeContinuarHerramienta ? 'pointer' : 'not-allowed'};font-size:0.9rem;font-weight:600;">
+                            Continuar →
+                        </button>
+                    </div>`;
+            }
+
+            window.wfSetCreatorToolField = function(field, value) {
+                _wf[field] = value;
+                renderWorkflow();
+            };
+
+            window.wfSeleccionarHerramienta = function(key) {
+                // Toggle: tocar la que ya estaba elegida la deselecciona
+                // (vuelve a "ninguna"), en vez de necesitar un botón aparte.
+                const nuevaKey = (_wf.creatorTool === key) ? null : key;
+                _wf.creatorTool = nuevaKey;
+                (window.CreatorTools || []).forEach(tool => {
+                    if (typeof tool.onSeleccionar === 'function') {
+                        tool.onSeleccionar(_wf, tool.key === nuevaKey);
+                    }
+                });
+                const activo = (window.CreatorTools || []).find(t => t.key === nuevaKey);
+                if (activo && activo.bloqueaImagenVideo) {
+                    _wf.imageUrls = [];
+                    _wf.videoUid = null;
+                    _wf._videoFileName = null;
+                }
+                renderWorkflow();
+            };
+
+            // PASO 5 — Contenido
+            function renderPaso5() {
+        const isPremium = localStorage.getItem('userPremium') === 'true';
+                const isCreator = localStorage.getItem('userCreator') === 'true';
+                const puedeImagen = isPremium || isCreator;
+                const puedeVideo = isCreator;
+                const maxImagenes = isCreator ? 10 : isPremium ? 1 : 0;
+
+                const spoilerCheck = _wf.tone === 'SPOILER'
+                    ? `<div style="background:#fff0f0;border-radius:8px;padding:0.75rem;margin-bottom:0.75rem;font-size:0.82rem;color:#e50914;">
+                            <i class="fas fa-exclamation-triangle"></i> Tu publicación se marcará automáticamente como Spoiler.
+                       </div>` : '';
+
+                const herramientaSeleccionada = (window.CreatorTools || []).find(t => t.key === _wf.creatorTool);
+                    const herramientaChip = herramientaSeleccionada ? `
+                                <div style="display:flex;align-items:center;justify-content:${_wf._editandoId ? 'flex-start' : 'space-between'};background:#f8f6ff;border:1px solid #e0d6ff;
+                                            border-radius:8px;padding:0.6rem 0.9rem;margin-bottom:0.75rem;font-size:0.8rem;color:#5a3fa0;">
+                                    <span>${herramientaSeleccionada.emoji} ${herramientaSeleccionada.label} activada</span>
+                                    ${!_wf._editandoId ? `<span onclick="window.wfPaso(4)" style="cursor:pointer;color:#7c3aed;font-weight:600;">Cambiar</span>` : ''}
+                                </div>` : '';
+
+                const upsellCreator = (_wf.movieId && !isCreator) ? `
+                        <div style="background:#fff9e6;border:1px solid #f5dd8a;border-radius:8px;padding:0.65rem 0.9rem;margin-bottom:0.75rem;font-size:0.78rem;color:#8a6d00;">
+                            ☝️ Con <b>Creator</b> podés enriquecer tus publicaciones vinculadas con: ficha técnica, cuenta regresiva de estreno, votaciones, sliders de expectativa, rankings, trivias y muchas más herramientas— y tus comentarios/respuestas quedan destacados con la insignia de autor.
+                        </div>` : '';
+
+                        return `
+                                    ${headerWf('Escribí tu publicación', wfPasoVisible(), wfTotalPasos())}
+
+                                    ${herramientaChip}
+                                    ${upsellCreator}
+                                    ${spoilerCheck}
 
                     <input id="wfTitulo" type="text" placeholder="Título de tu publicación..." maxlength="150"
                            value="${(_wf.title || '').replace(/"/g, '&quot;')}"
@@ -1880,7 +1980,11 @@
                         // En cuanto saca lo que eligió (con la "×"), la otra opción reaparece sola.
                         const tieneImagenSeleccionada = (_wf.imageUrls || []).length > 0;
                         const tieneVideoSeleccionado = !!_wf.videoUid;
-                        const modoFicha = !!_wf.movieFichaEnabled;
+                        const herramientaBloqueante = _wf.creatorTool
+                            ? (window.CreatorTools || []).find(t => t.key === _wf.creatorTool && t.bloqueaImagenVideo)
+                            : null;
+                        const modoFicha = !!herramientaBloqueante;
+                        const nombreHerramientaBloqueante = herramientaBloqueante ? herramientaBloqueante.label : 'Esta herramienta';
 
                         let html = '';
 
@@ -1888,8 +1992,8 @@
                             const botonImagen = modoFicha
                                 ? `<span style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;
                                                 border:1px dashed #e0e0e0;border-radius:99px;font-size:0.8rem;color:#ccc;"
-                                         title="El modo Ficha técnica no se puede combinar con imagen o video, solo texto">
-                                        <i class="fas fa-image"></i> Imagen (no disponible en modo ficha)
+                                         title="${nombreHerramientaBloqueante} no se puede combinar con imagen o video, solo texto">
+                                        <i class="fas fa-image"></i> Imagen (no disponible)
                                    </span>`
                                 : puedeImagen
                                 ? `<label style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;
@@ -1908,12 +2012,12 @@
 
                         if (!tieneImagenSeleccionada) {
                             const botonVideo = modoFicha
-                                ? `<span style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;
-                                                border:1px dashed #e0e0e0;border-radius:99px;font-size:0.8rem;color:#ccc;"
-                                         title="El modo Ficha técnica no se puede combinar con imagen o video, solo texto">
-                                        <i class="fas fa-video"></i> Video (no disponible en modo ficha)
-                                   </span>`
-                                : puedeVideo
+                                    ? `<span style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;
+                                                    border:1px dashed #e0e0e0;border-radius:99px;font-size:0.8rem;color:#ccc;"
+                                             title="${nombreHerramientaBloqueante} no se puede combinar con imagen o video, solo texto">
+                                            <i class="fas fa-video"></i> Video (no disponible)
+                                       </span>`
+                                    : puedeVideo
                                 ? `<label style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;
                                                  border:1px solid #e0e0e0;border-radius:99px;cursor:pointer;font-size:0.8rem;color:#555;">
                                         <i class="fas fa-video"></i> Video
@@ -1960,9 +2064,9 @@
             </div>
 
             <div style="margin-top:1.25rem;display:flex;gap:0.75rem;">
-                <button onclick="window.wfPaso(1)" style="flex:1;padding:0.7rem;border:1.5px solid #ddd;background:none;border-radius:10px;color:#666;cursor:pointer;font-size:0.9rem;">← Atrás</button>
-                <button onclick="window.wfPublicar()"
-                        id="wfBtnPublicar"
+                            ${!_wf._editandoId ? `<button onclick="window.wfPaso(wfPasoAnterior())" style="flex:1;padding:0.7rem;border:1.5px solid #ddd;background:none;border-radius:10px;color:#666;cursor:pointer;font-size:0.9rem;">← Atrás</button>` : ''}
+                            <button onclick="window.wfPublicar()"
+                                    id="wfBtnPublicar"
                         style="flex:2;padding:0.7rem;background:#e50914;border:none;border-radius:10px;color:white;font-weight:600;cursor:pointer;font-size:0.9rem;">
                     ${_wf._editandoId ? 'Guardar cambios' : 'Publicar'}
                 </button>
@@ -2619,35 +2723,81 @@
                         })
                     });
                     const data = await res.json();
-                    if (data.id) {
-                        window.cerrarWorkflow();
-                        // Actualizar contenido en la card
-                        const card = document.querySelector(`.com-card[data-id="${_wf._editandoId}"]`);
-                        if (card) {
-                            const contenidoEl = card.querySelector('.com-card-content');
-                            if (contenidoEl) contenidoEl.textContent = data.content;
+                            if (data.id) {
+                                window.cerrarWorkflow();
+                                const card = document.querySelector(`.com-card[data-id="${_wf._editandoId}"]`);
 
-                            // Actualizar imágenes si cambiaron
-                            const imagenesEl = card.querySelector('.com-card-imagenes');
-                            if (data.imageUrls && data.imageUrls.length > 0) {
-                                const newImgHtml = `<div class="com-card-imagenes">${data.imageUrls.map(url =>
-                                    `<img src="${url}" alt="imagen" onclick="window.abrirImagenFullscreen('${url}')">`
-                                ).join('')}</div>`;
-                                if (imagenesEl) {
-                                    imagenesEl.outerHTML = newImgHtml;
-                                } else {
-                                    contenidoEl.insertAdjacentHTML('beforebegin', newImgHtml);
+                                // Si la edición hizo que la publicación vuelva a caer en
+                                // revisión (mismo control de cuenta nueva/riesgo que aplica
+                                // al crear), NO corresponde mostrar el cambio en pantalla —
+                                // el admin todavía tiene que aprobarla. Mismo criterio que
+                                // ya usás al crear: ahí ni se parchea el DOM, directamente
+                                // se recarga el feed y el backend la excluye solo por filtrar
+                                // moderationStatus = APPROVED.
+                                if (data.moderationStatus === 'PENDING_REVIEW') {
+                                    if (card) card.remove();
+                                    window.mostrarToast('🕓 Tu edición quedó en revisión. Mientras tanto, la publicación no se muestra en Comunidad.', 'info');
+                                    return;
                                 }
-                            } else if (imagenesEl) {
-                                imagenesEl.remove();
-                            }
 
-                            const tiempoEl = card.querySelector('.com-card-tiempo');
-                            if (tiempoEl && !tiempoEl.querySelector('.com-editado')) {
-                                tiempoEl.insertAdjacentHTML('beforeend', ' <span class="com-editado">· editado</span>');
+                                if (card) {
+                                    const contenidoEl = card.querySelector('.com-card-content');
+                                if (contenidoEl) contenidoEl.textContent = data.content;
+
+                                // Título — se leía al abrir el editor pero nunca se
+                                // volvía a pintar al guardar; por eso quedaba visible
+                                // el viejo hasta recargar la página.
+                                const _escHtmlEdit = (s) => (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                                const tituloEl = card.querySelector('.com-card-titulo');
+                                if (data.title) {
+                                    if (tituloEl) {
+                                        tituloEl.textContent = data.title;
+                                    } else {
+                                        card.insertAdjacentHTML('afterbegin',
+                                            `<div class="com-card-titulo" style="font-weight:700;font-size:1.15rem;color:#1a1a1a;margin:10px 0 12px;padding:0 1rem;word-break:break-word;overflow-wrap:break-word;">${_escHtmlEdit(data.title)}</div>`);
+                                    }
+                                } else if (tituloEl) {
+                                    tituloEl.remove();
+                                }
+
+                                // Hashtags — mismo caso: se leían al abrir el editor
+                                // pero nunca se repintaban al guardar.
+                                const hashtagsEl = card.querySelector('.com-card-hashtags');
+                                if (data.hashtags && data.hashtags.length > 0) {
+                                    const newHashtagsHtml = `<div class="com-card-hashtags" style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px;padding:0 1rem;">
+                                        ${data.hashtags.map(h => `<a href="javascript:void(0)" onclick="event.stopPropagation();window.filtrarPorHashtag('${h.replace(/'/g, "\\'")}')"
+                                            style="color:#e50914;font-size:0.85rem;font-weight:600;text-decoration:none;">#${_escHtmlEdit(h)}</a>`).join('')}
+                                       </div>`;
+                                    if (hashtagsEl) {
+                                        hashtagsEl.outerHTML = newHashtagsHtml;
+                                    } else {
+                                        card.querySelector('.com-card-acciones')?.insertAdjacentHTML('beforebegin', newHashtagsHtml);
+                                    }
+                                } else if (hashtagsEl) {
+                                    hashtagsEl.remove();
+                                }
+
+                                // Actualizar imágenes si cambiaron
+                                const imagenesEl = card.querySelector('.com-card-imagenes');
+                                if (data.imageUrls && data.imageUrls.length > 0) {
+                                    const newImgHtml = `<div class="com-card-imagenes">${data.imageUrls.map(url =>
+                                        `<img src="${url}" alt="imagen" onclick="window.abrirImagenFullscreen('${url}')">`
+                                    ).join('')}</div>`;
+                                    if (imagenesEl) {
+                                        imagenesEl.outerHTML = newImgHtml;
+                                    } else {
+                                        contenidoEl.insertAdjacentHTML('beforebegin', newImgHtml);
+                                    }
+                                } else if (imagenesEl) {
+                                    imagenesEl.remove();
+                                }
+
+                                const tiempoEl = card.querySelector('.com-card-tiempo');
+                                if (tiempoEl && !tiempoEl.querySelector('.com-editado')) {
+                                    tiempoEl.insertAdjacentHTML('beforeend', ' <span class="com-editado">· editado</span>');
+                                }
                             }
-                        }
-                        window.mostrarToast('Publicación editada correctamente.', 'success');
+                            window.mostrarToast('Publicación editada correctamente.', 'success');
                         } else {
                             mostrarModalErrorPublicar(data.error || data.message || 'No se pudo editar la publicación.');
                         }
@@ -2673,6 +2823,8 @@
                                     hashtags: hashtagsArray,
                                     movieId: _wf.movieId,
                                     movieFichaEnabled: _wf.movieFichaEnabled,
+                                    countdownEnabled: _wf.countdownEnabled,
+                                    countdownCountryCode: _wf.countdownCountryCode,
                     territoryGroup: _wf.territory,
                     territorySub: _wf.sub,
                     tone: _wf.tone,

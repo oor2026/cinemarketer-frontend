@@ -266,8 +266,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 }
 
 @media (max-width: 480px) {
-    .pub-main { margin: 1rem auto; }
-    .pub-navbar { padding: 0.65rem 1rem; }
+    .pub-layout { margin: 1rem auto; }
+    .pub-header { padding: 0.65rem 1rem; }
+    .pub-header-btns .btn-login { display: none; }
     .pub-cta-btns { flex-direction: column; align-items: center; }
 }
 
