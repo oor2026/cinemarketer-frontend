@@ -46,6 +46,20 @@
             cargarMisReacciones(pubId);
         };
 
+        // Puentes genéricos para que las herramientas de Creator Tools (archivos
+        // aparte en js/creator-tools/) puedan leer y mutar el estado del workflow
+        // sin acceso directo a la variable privada _wf, y disparar un re-render
+        // después de cambiarlo. Countdown resuelve con parámetros explícitos
+        // porque su estado es simple (un código de país); Votación necesita algo
+        // más flexible (una lista de opciones que se agregan/quitan/editan), así
+        // que usa este puente en vez de un setter puntual.
+        window.getWfState = function() {
+            return _wf;
+        };
+        window.wfRerenderWorkflow = function() {
+            renderWorkflow();
+        };
+
         // NOTA: window.resolverFichaPelicula ahora se define directamente en
         // js/creator-tools/ficha-pelicula.js, no acá — esa herramienta vive
         // completa en su propio archivo. novedades.js sigue llamándola igual,
@@ -467,7 +481,7 @@
             ? `<span class="com-editado">· editado</span>` : '';
 
         return `
-            <div class="com-card" data-id="${pub.id}" data-created="${pub.createdAt || ''}" data-autor-id="${autor.id || ''}" data-autor-creator="${pub.authorWasCreator ? 'true' : 'false'}" data-video-uid="${pub.videoUid || ''}" data-movie-id="${pub.movieId || ''}" data-movie-ficha-enabled="${pub.movieFichaEnabled ? 'true' : 'false'}">
+            <div class="com-card" data-id="${pub.id}" data-created="${pub.createdAt || ''}" data-autor-id="${autor.id || ''}" data-autor-creator="${pub.authorWasCreator ? 'true' : 'false'}" data-video-uid="${pub.videoUid || ''}" data-movie-id="${pub.movieId || ''}" data-movie-ficha-enabled="${pub.movieFichaEnabled ? 'true' : 'false'}" data-creator-tool="${herramientaActivaPub ? herramientaActivaPub.key : ''}">
             <div class="com-card-header">
                 <div class="com-card-avatar" onclick="window.abrirPerfilUsuario(${autor.id})">${avatarHtml}</div>
                 <div class="com-card-meta">
@@ -701,6 +715,7 @@
         const videoUid = card.getAttribute('data-video-uid') || '';
                 const movieIdActual = card.getAttribute('data-movie-id') || null;
        const movieFichaActual = card.getAttribute('data-movie-ficha-enabled') === 'true';
+       const creatorToolActual = card.getAttribute('data-creator-tool') || null;
 
        // Pre-cargar estado del workflow en modo edición
       _wf = {
@@ -708,7 +723,7 @@
           movieId: movieIdActual ? parseInt(movieIdActual) : null,
           movieTitulo: null,
           movieFichaEnabled: movieFichaActual,
-          creatorTool: movieFichaActual ? 'FICHA' : null,
+           creatorTool: creatorToolActual,
            territory: 'PELICULAS_SERIES',
            sub: null,
            tone: 'OPINION',
@@ -2829,6 +2844,9 @@
                                     movieFichaEnabled: _wf.movieFichaEnabled,
                                     countdownEnabled: _wf.countdownEnabled,
                                     countdownCountryCode: _wf.countdownCountryCode,
+                                    votacionEnabled: _wf.votacionEnabled,
+                                    opciones: (_wf.votacionOpciones || []).map(o => ({ texto: o.texto, movieId: o.movieId })),
+                                    votacionDuracionMinutos: _wf.votacionDuracionMinutos,
                     territoryGroup: _wf.territory,
                     territorySub: _wf.sub,
                     tone: _wf.tone,
