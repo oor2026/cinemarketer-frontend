@@ -236,3 +236,43 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     .pub-navbar { padding: 0.65rem 1rem; }
     .pub-cta-btns { flex-direction: column; align-items: center; }
 }
+
+/* ── Rieles de posters laterales — decorativos, solo desktop ancho ─── */
+.pub-poster-rail {
+    display: none;
+    position: fixed;
+    top: 90px;
+    bottom: 0;
+    width: 150px;
+    overflow: hidden;
+    flex-direction: column;
+    gap: 14px;
+    padding: 0.5rem 0;
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 40px, black calc(100% - 60px), transparent);
+    mask-image: linear-gradient(to bottom, transparent, black 40px, black calc(100% - 60px), transparent);
+}
+
+.pub-poster-rail-left { left: 32px; }
+.pub-poster-rail-right { right: 32px; }
+
+.pub-poster-rail-item {
+    display: block;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    opacity: 0.85;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.pub-poster-rail-item:hover { opacity: 1; transform: scale(1.03); }
+
+.pub-poster-rail-item img {
+    width: 100%;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    display: block;
+}
+
+@media (min-width: 1400px) {
+    .pub-poster-rail { display: flex; }
+}
