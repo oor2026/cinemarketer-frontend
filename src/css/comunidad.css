@@ -362,7 +362,9 @@
     transition: color 0.2s, background 0.2s;
 }
 
-.com-accion-btn:hover { color: #324C89; background: #f0f3ff; }
+@media (hover: hover) {
+    .com-accion-btn:hover { color: #324C89; background: #f0f3ff; }
+}
 .com-accion-btn.com-accion-active { color: #324C89; }
 .com-accion-btn.com-accion-active.btn-punto { color: #e8a800; }
 
