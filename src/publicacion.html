@@ -24,13 +24,17 @@
 <!-- NAVBAR mínima -->
 <nav class="pub-navbar">
   <a href="/" class="pub-navbar-logo">
-    <img src="assets/images/logo.png" alt="Cinemarketer">
+    <img src="assets/images/isologotipo.webp" alt="Cinemarketer">
   </a>
   <div class="pub-navbar-actions">
     <a href="/login.html" class="pub-btn-login">Iniciar sesión</a>
     <a href="/register.html" class="pub-btn-register">Registrarse gratis</a>
   </div>
 </nav>
+
+<!-- Rieles de posters — decorativos, solo desktop ancho (ver media query en CSS) -->
+<div class="pub-poster-rail pub-poster-rail-left" id="pubPosterRailLeft"></div>
+<div class="pub-poster-rail pub-poster-rail-right" id="pubPosterRailRight"></div>
 
 <!-- CONTENIDO PRINCIPAL -->
 <main class="pub-main">
@@ -67,9 +71,11 @@
         <span id="pubPeliculaNombre"></span>
       </div>
 
-      <div id="pubContenidoTexto" class="pub-contenido-texto"></div>
+      <h2 id="pubTitulo" class="pub-titulo" style="display:none;"></h2>
 
       <div id="pubImagenes" class="pub-imagenes"></div>
+
+      <div id="pubContenidoTexto" class="pub-contenido-texto"></div>
 
     </div>
 
@@ -122,6 +128,13 @@
 
       document.getElementById('pubAutor').textContent = autor.name || 'Usuario';
       document.getElementById('pubTiempo').textContent = tiempoRelativo(pub.createdAt);
+
+      // Título
+      if (pub.title) {
+          const tituloEl = document.getElementById('pubTitulo');
+          tituloEl.textContent = pub.title;
+          tituloEl.style.display = 'block';
+      }
 
       // Badges
       const badges = document.getElementById('pubBadges');
@@ -199,6 +212,54 @@
   }
 
   cargarPublicacion();
+  cargarPostersLaterales();
+
+  // Rieles decorativos de posters — mismo mecanismo que hero-carrusel.js
+  // (token TMDb, now_playing con fallback a popular, region AR), pero con
+  // poster_path (vertical) en vez de backdrop_path, repartidos en dos columnas.
+  async function cargarPostersLaterales() {
+      const railLeft  = document.getElementById('pubPosterRailLeft');
+      const railRight = document.getElementById('pubPosterRailRight');
+      if (!railLeft || !railRight) return;
+
+      const TMDB_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzZjFjNjgyZDZkNTMzNWIzMjQyNzc3MzQ2OWUxNmE1MSIsIm5iZiI6MTc3MTE3NzkxNy44ODEsInN1YiI6IjY5OTIwN2JkOTRjZDE0N2M5ZjFhZWY2OSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.8GieGBESmuWLnoD_IyFrBbXBCX40qUKE8vY6VBMj_DM';
+      const BASE_IMG = 'https://image.tmdb.org/t/p/w300';
+
+      try {
+          const res = await fetch(
+              'https://api.themoviedb.org/3/movie/now_playing?language=es-AR&region=AR&page=1',
+              { headers: { 'Authorization': `Bearer ${TMDB_TOKEN}`, 'accept': 'application/json' } }
+          );
+          const data = await res.json();
+          let peliculas = (data.results || []).filter(m => m.poster_path);
+
+          if (peliculas.length < 6) {
+              const res2 = await fetch(
+                  'https://api.themoviedb.org/3/movie/popular?language=es-AR&region=AR&page=1',
+                  { headers: { 'Authorization': `Bearer ${TMDB_TOKEN}`, 'accept': 'application/json' } }
+              );
+              const data2 = await res2.json();
+              const extra = (data2.results || [])
+                  .filter(m => m.poster_path && !peliculas.find(p => p.id === m.id));
+              peliculas = [...peliculas, ...extra];
+          }
+
+          if (peliculas.length === 0) return;
+
+          const izquierda = peliculas.filter((_, i) => i % 2 === 0).slice(0, 6);
+          const derecha   = peliculas.filter((_, i) => i % 2 === 1).slice(0, 6);
+
+          const armarPoster = (m) => `
+              <a href="/pelicula?id=${m.id}" class="pub-poster-rail-item" title="${(m.title || '').replace(/"/g,'')}">
+                  <img src="${BASE_IMG}${m.poster_path}" alt="${m.title || ''}" loading="lazy">
+              </a>`;
+
+          railLeft.innerHTML  = izquierda.map(armarPoster).join('');
+          railRight.innerHTML = derecha.map(armarPoster).join('');
+      } catch (e) {
+          // Silencioso — es puramente decorativo, no debe romper la carga de la publicación
+      }
+  }
 </script>
 </body>
 </html>
