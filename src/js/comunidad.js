@@ -603,7 +603,7 @@
         }
 
     window.compartirPublicacion = function(pubId) {
-        const url = `${window.location.origin}/publicacion/${pubId}`;
+            const url = `${window.location.origin}/publicacion?id=${pubId}`;
         if (navigator.share) {
             navigator.share({ url });
         } else {
