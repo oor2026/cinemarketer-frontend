@@ -57,8 +57,24 @@
             return _wf;
         };
         window.wfRerenderWorkflow = function() {
-            renderWorkflow();
-        };
+                renderWorkflow();
+            };
+
+            // Recalcula si el botón "Continuar" del Paso 4 debe estar habilitado,
+            // sin re-renderizar el panel entero — para usarlo dentro de listeners
+            // de tecleo (ej. el textarea de opinión de Ranking Segmentada) sin
+            // perder el foco del campo en cada letra.
+            window.wfActualizarBotonContinuar = function() {
+                if (_wf.paso !== 4) return;
+                const btn = document.getElementById('wfBtnContinuarPaso4');
+                if (!btn) return;
+                const tool = (window.CreatorTools || []).find(t => t.key === _wf.creatorTool);
+                const puede = !tool || typeof tool.puedeAvanzar !== 'function' || tool.puedeAvanzar(_wf);
+                btn.disabled = !puede;
+                btn.style.background = puede ? '#324C89' : '#e0e0e0';
+                btn.style.color = puede ? 'white' : '#aaa';
+                btn.style.cursor = puede ? 'pointer' : 'not-allowed';
+            };
 
         // NOTA: window.resolverFichaPelicula ahora se define directamente en
         // js/creator-tools/ficha-pelicula.js, no acá — esa herramienta vive
@@ -1889,7 +1905,7 @@
                     ${extraHerramienta}
                     <div style="margin-top:1.25rem;display:flex;gap:0.75rem;">
                         <button onclick="window.wfPaso(3)" style="flex:1;padding:0.7rem;border:1.5px solid #ddd;background:none;border-radius:10px;color:#666;cursor:pointer;font-size:0.9rem;">← Atrás</button>
-                        <button onclick="window.wfPaso(5)"
+                        <button id="wfBtnContinuarPaso4" onclick="window.wfPaso(5)"
                                 ${!puedeContinuarHerramienta ? 'disabled' : ''}
                                 style="flex:2;padding:0.7rem;border:none;border-radius:10px;
                                        background:${puedeContinuarHerramienta ? '#324C89' : '#e0e0e0'};
@@ -1966,15 +1982,22 @@
                         ${(_wf.title || '').length} / 150
                     </div>
 
-                    <textarea id="wfContent" placeholder="Compartí tu opinión, análisis, pregunta..." maxlength="2000"
-                              oninput="window.wfContentChange(this)"
-                              style="width:100%;box-sizing:border-box;min-height:140px;padding:12px 14px;
-                                     border:1.5px solid #e0e0e0;border-radius:10px;font-size:0.9rem;
-                                     font-family:inherit;resize:none;line-height:1.6;"
-                    >${_wf.content}</textarea>
-                    <div style="text-align:right;font-size:0.75rem;color:#bbb;margin-top:4px;" id="wfCharCount">
-                        ${_wf.content.length} / 2000
-                    </div>
+                    ${(() => {
+                            const toolActivoContenido = (window.CreatorTools || []).find(t => t.key === _wf.creatorTool);
+                            const ocultarContenido = toolActivoContenido && typeof toolActivoContenido.ocultaContenidoGeneral === 'function'
+                                && toolActivoContenido.ocultaContenidoGeneral(_wf);
+                            if (ocultarContenido) return '';
+                            return `
+                        <textarea id="wfContent" placeholder="Compartí tu opinión, análisis, pregunta..." maxlength="2000"
+                                  oninput="window.wfContentChange(this)"
+                                  style="width:100%;box-sizing:border-box;min-height:140px;padding:12px 14px;
+                                         border:1.5px solid #e0e0e0;border-radius:10px;font-size:0.9rem;
+                                         font-family:inherit;resize:none;line-height:1.6;"
+                        >${_wf.content}</textarea>
+                        <div style="text-align:right;font-size:0.75rem;color:#bbb;margin-top:4px;" id="wfCharCount">
+                            ${_wf.content.length} / 2000
+                        </div>`;
+                        })()}
 
                     <div id="wfHashtagsWrap" style="position:relative;margin-top:0.75rem;">
                                             <div id="wfHashtagsChips" style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;
@@ -2672,7 +2695,10 @@
                 alert('Escribí un título antes de publicar.');
                 return;
             }
-            if (!_wf.content || _wf.content.trim().length < 3) {
+            const toolActivoPublicar = (window.CreatorTools || []).find(t => t.key === _wf.creatorTool);
+            const ocultaContenidoPublicar = toolActivoPublicar && typeof toolActivoPublicar.ocultaContenidoGeneral === 'function'
+                && toolActivoPublicar.ocultaContenidoGeneral(_wf);
+            if (!ocultaContenidoPublicar && (!_wf.content || _wf.content.trim().length < 3)) {
                 alert('Escribí algo antes de publicar.');
                 return;
             }
@@ -2847,6 +2873,10 @@
                                     votacionEnabled: _wf.votacionEnabled,
                                     opciones: (_wf.votacionOpciones || []).map(o => ({ texto: o.texto, movieId: o.movieId })),
                                     votacionDuracionMinutos: _wf.votacionDuracionMinutos,
+                                    rankingEnabled: _wf.rankingEnabled,
+                                    rankingFormato: _wf.rankingFormato,
+                                    rankingModoTexto: _wf.rankingModoTexto,
+                                    rankingItems: (_wf.rankingItems || []).map(i => ({ movieId: i.movieId, texto: i.texto })),
                     territoryGroup: _wf.territory,
                     territorySub: _wf.sub,
                     tone: _wf.tone,
