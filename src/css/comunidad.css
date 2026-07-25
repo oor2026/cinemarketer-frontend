@@ -365,6 +365,96 @@
 @media (hover: hover) {
     .com-accion-btn:hover { color: #324C89; background: #f0f3ff; }
 }
+
+/* "Puesto N°X" del Ranking — versión completa solo en desktop. */
+.ranking-puesto-label {
+    display: none;
+}
+@media (min-width: 768px) {
+    .ranking-puesto-label {
+        display: inline;
+    }
+}
+
+/* Versión compacta (🏆 N°X) solo para mobile, solo en Ranking Lista
+   Estándar — Segmentada tiene su propio tratamiento aparte en mobile. */
+.ranking-puesto-label-mobile {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+@media (min-width: 768px) {
+    .ranking-puesto-label-mobile {
+        display: none;
+    }
+}
+
+/* 🏆 N°X pegado al título — solo Lista Segmentada en mobile (en desktop
+   ya alcanza con .ranking-puesto-label, no hace falta repetirlo acá). */
+.ranking-puesto-label-mobile-titulo {
+    display: inline;
+}
+@media (min-width: 768px) {
+    .ranking-puesto-label-mobile-titulo {
+        display: none;
+    }
+}
+
+/* Poster de Ranking Segmentada — chico en desktop, bien grande en mobile
+   (ocupa el cuadrado completo de su fila). */
+.ranking-poster-segmentada {
+    width: 46px;
+    height: 68px;
+}
+@media (max-width: 767px) {
+    .ranking-poster-segmentada {
+        width: 78px;
+        height: 112px;
+    }
+}
+
+/* Flechas de navegación del carrusel de Ranking — se ocultan en mobile,
+   donde ya funciona el swipe táctil y son redundantes. */
+@media (max-width: 767px) {
+    .ranking-carrusel-flecha {
+        display: none;
+    }
+    .ranking-carrusel-nav {
+        justify-content: center !important;
+    }
+    .ranking-carrusel-poster {
+        max-width: 230px !important;
+    }
+}
+
+/* Backdrop del carrusel de Ranking — oculto por default (mobile queda con
+   el poster solo, centrado, como ya estaba). En desktop reemplaza al
+   poster directamente, ocupando todo el ancho de la card. */
+.ranking-carrusel-backdrop {
+    display: none;
+    background: #f5f5f5;
+}
+@media (min-width: 768px) {
+    .ranking-carrusel-poster {
+        display: none !important;
+    }
+    .ranking-carrusel-backdrop {
+            display: flex;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+        }
+        .ranking-carrusel-backdrop img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+}
+
 .com-accion-btn.com-accion-active { color: #324C89; }
 .com-accion-btn.com-accion-active.btn-punto { color: #e8a800; }
 
