@@ -1973,14 +1973,21 @@
                                     ${upsellCreator}
                                     ${spoilerCheck}
 
-                    <input id="wfTitulo" type="text" placeholder="Título de tu publicación..." maxlength="150"
-                           value="${(_wf.title || '').replace(/"/g, '&quot;')}"
-                           oninput="window.wfTituloChange(this)"
-                           style="width:100%;box-sizing:border-box;padding:10px 14px;border:1.5px solid #e0e0e0;
-                                  border-radius:10px;font-size:0.92rem;font-family:inherit;margin-bottom:0.4rem;font-weight:600;">
-                    <div style="text-align:right;font-size:0.72rem;color:#bbb;margin-bottom:0.75rem;" id="wfTituloCount">
-                        ${(_wf.title || '').length} / 150
-                    </div>
+                        ${(() => {
+                                const toolActivoTitulo = (window.CreatorTools || []).find(t => t.key === _wf.creatorTool);
+                                const ocultarTitulo = toolActivoTitulo && typeof toolActivoTitulo.ocultaTituloGeneral === 'function'
+                                    && toolActivoTitulo.ocultaTituloGeneral(_wf);
+                                if (ocultarTitulo) return '';
+                                return `
+                        <input id="wfTitulo" type="text" placeholder="Título de tu publicación..." maxlength="150"
+                               value="${(_wf.title || '').replace(/"/g, '&quot;')}"
+                               oninput="window.wfTituloChange(this)"
+                               style="width:100%;box-sizing:border-box;padding:10px 14px;border:1.5px solid #e0e0e0;
+                                      border-radius:10px;font-size:0.92rem;font-family:inherit;margin-bottom:0.4rem;font-weight:600;">
+                        <div style="text-align:right;font-size:0.72rem;color:#bbb;margin-bottom:0.75rem;" id="wfTituloCount">
+                            ${(_wf.title || '').length} / 150
+                        </div>`;
+                            })()}
 
                     ${(() => {
                             const toolActivoContenido = (window.CreatorTools || []).find(t => t.key === _wf.creatorTool);
@@ -2877,6 +2884,12 @@
                                     rankingFormato: _wf.rankingFormato,
                                     rankingModoTexto: _wf.rankingModoTexto,
                                     rankingItems: (_wf.rankingItems || []).map(i => ({ movieId: i.movieId, texto: i.texto })),
+                                    triviaEnabled: _wf.triviaEnabled,
+                                    triviaTipo: _wf.triviaTipo,
+                                    triviaReferenciaTipo: _wf.triviaReferenciaTipo,
+                                    triviaReferenciaId: _wf.triviaReferenciaId,
+                                    triviaOpciones: (_wf.triviaOpciones || []).map(o => ({ texto: o.texto, esCorrecta: o.esCorrecta })),
+                                    triviaDuracionMinutos: _wf.triviaDuracionMinutos,
                     territoryGroup: _wf.territory,
                     territorySub: _wf.sub,
                     tone: _wf.tone,
