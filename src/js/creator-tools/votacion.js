@@ -384,9 +384,11 @@
                     const duracionOk = _wf.votacionDuracionMinutos > 0 && _wf.votacionDuracionMinutos <= MAX_DURACION_MINUTOS;
                     return opcionesOk && duracionOk;
                 },
+
         renderEnCard: renderEnCard,
         resolverEnCard: (pub) => resolverEnCard(pub),
         renderExtra: renderExtra,
-        resolverExtra: resolverExtra
+        resolverExtra: resolverExtra,
+        muestraPeliculaVinculada: true
     });
 })();

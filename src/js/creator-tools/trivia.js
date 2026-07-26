@@ -40,16 +40,30 @@
                                    font-weight:${sel ? '700' : '400'};">${t.label}</button>`;
             }).join('');
 
-            const referenciaSeleccionada = wf.triviaReferenciaId ? `
-                <div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding:6px 10px;background:#f8f6ff;border-radius:8px;">
-                    ${wf.triviaReferenciaImagen ? `<img src="${wf.triviaReferenciaImagen}" style="width:28px;height:${wf.triviaReferenciaTipo === 'PELICULA' ? '40' : '28'}px;object-fit:cover;border-radius:${wf.triviaReferenciaTipo === 'PELICULA' ? '4' : '50'}px;">` : ''}
-                    <span style="flex:1;font-size:0.82rem;color:#333;">${escapeHtml(wf.triviaReferenciaLabel || '')}</span>
-                    <span onclick="window.wfTriviaQuitarReferencia()" style="cursor:pointer;color:#ccc;">×</span>
-                </div>` : (wf.triviaReferenciaTipo ? `
-                <input type="text" placeholder="Buscar ${wf.triviaReferenciaTipo === 'PERSONA' ? 'actor, actriz o director...' : 'película...'}"
-                       oninput="window.wfTriviaBuscarReferencia(this.value)"
-                       style="width:100%;box-sizing:border-box;margin-top:8px;padding:8px 10px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:0.85rem;font-family:inherit;">
-                <div id="wfTriviaResultadosReferencia" style="margin-top:4px;"></div>` : '');
+                let referenciaSeleccionada = '';
+                if (wf.triviaReferenciaTipo === 'PELICULA') {
+                    // La referencia-película nunca se busca aparte — es siempre la
+                    // misma película ya vinculada en el Paso 3, sin opción de
+                    // cambiarla ni quitarla, para que la publicación no termine
+                    // mostrando una película vinculada y otra distinta en la trivia.
+                    referenciaSeleccionada = `
+                        <div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding:6px 10px;background:#f8f6ff;border-radius:8px;">
+                            ${wf.triviaReferenciaImagen ? `<img src="${wf.triviaReferenciaImagen}" style="width:28px;height:40px;object-fit:cover;border-radius:4px;">` : ''}
+                            <span style="flex:1;font-size:0.82rem;color:#333;">${escapeHtml(wf.triviaReferenciaLabel || '')}</span>
+                            <span style="font-size:0.7rem;color:#aaa;white-space:nowrap;">Película vinculada</span>
+                        </div>`;
+                } else if (wf.triviaReferenciaTipo === 'PERSONA') {
+                    referenciaSeleccionada = wf.triviaReferenciaId ? `
+                        <div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding:6px 10px;background:#f8f6ff;border-radius:8px;">
+                            ${wf.triviaReferenciaImagen ? `<img src="${wf.triviaReferenciaImagen}" style="width:28px;height:28px;object-fit:cover;border-radius:50%;">` : ''}
+                            <span style="flex:1;font-size:0.82rem;color:#333;">${escapeHtml(wf.triviaReferenciaLabel || '')}</span>
+                            <span onclick="window.wfTriviaQuitarReferencia()" style="cursor:pointer;color:#ccc;">×</span>
+                        </div>` : `
+                        <input type="text" placeholder="Buscar actor, actriz o director..."
+                               oninput="window.wfTriviaBuscarReferencia(this.value)"
+                               style="width:100%;box-sizing:border-box;margin-top:8px;padding:8px 10px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:0.85rem;font-family:inherit;">
+                        <div id="wfTriviaResultadosReferencia" style="margin-top:4px;"></div>`;
+                }
 
             referenciaHtml = `
                 <p style="font-size:0.75rem;color:#888;margin:1rem 0 0.5rem;text-transform:uppercase;letter-spacing:0.5px;">¿Sobre qué es la referencia?</p>
@@ -144,14 +158,38 @@
         window.wfRerenderWorkflow();
     };
 
-    window.wfTriviaSetReferenciaTipo = function(tipo) {
-        const wf = window.getWfState();
-        wf.triviaReferenciaTipo = tipo;
-        wf.triviaReferenciaId = null;
-        wf.triviaReferenciaLabel = null;
-        wf.triviaReferenciaImagen = null;
-        window.wfRerenderWorkflow();
-    };
+        window.wfTriviaSetReferenciaTipo = function(tipo) {
+            const wf = window.getWfState();
+            wf.triviaReferenciaTipo = tipo;
+            if (tipo === 'PELICULA') {
+                // Se fija a la película ya vinculada — nada para buscar ni elegir.
+                wf.triviaReferenciaId = wf.movieId;
+                wf.triviaReferenciaLabel = wf.movieTitulo;
+                wf.triviaReferenciaImagen = null;
+                window.wfRerenderWorkflow();
+                resolverPosterReferenciaVinculada(wf);
+            } else {
+                wf.triviaReferenciaId = null;
+                wf.triviaReferenciaLabel = null;
+                wf.triviaReferenciaImagen = null;
+                window.wfRerenderWorkflow();
+            }
+        };
+
+        async function resolverPosterReferenciaVinculada(wf) {
+            if (!wf.movieId) return;
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${window._comunidadApiUrl}/movies/${wf.movieId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) return;
+                const m = await res.json();
+                if (wf.triviaReferenciaTipo !== 'PELICULA' || wf.triviaReferenciaId !== wf.movieId) return; // el usuario cambió de tipo mientras cargaba
+                wf.triviaReferenciaImagen = m.poster_path ? `https://image.tmdb.org/t/p/w92${m.poster_path}` : null;
+                window.wfRerenderWorkflow();
+            } catch (e) { /* sin poster, no rompe nada */ }
+        }
 
     window.wfTriviaQuitarReferencia = function() {
         const wf = window.getWfState();
@@ -420,6 +458,7 @@
         renderEnCard: renderEnCard,
         resolverEnCard: (pub) => resolverEnCard(pub),
         renderExtra: renderExtra,
-        ocultaTituloGeneral: () => true
+        ocultaTituloGeneral: () => true,
+        muestraPeliculaVinculada: (pub) => pub.triviaReferenciaTipo === 'PELICULA'
     });
 })();
