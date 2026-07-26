@@ -61,7 +61,10 @@ const adminSuscripciones = {
         const lower = texto.toLowerCase();
         this.paginaActual = 1;
         this.datosActuales = this.suscripciones.filter(s =>
-            (s.planName || '').toLowerCase().includes(lower)
+            (s.planName || '').toLowerCase().includes(lower) ||
+            (s.userEmail || '').toLowerCase().includes(lower) ||
+            (s.userName || '').toLowerCase().includes(lower) ||
+            String(s.userId ?? '').includes(lower)
         );
         this.renderTabla();
     },
@@ -107,9 +110,14 @@ const adminSuscripciones = {
                 : '—';
 
             return `
-                <tr>
-                    <td><strong>${s.planName || 'Premium'}</strong><br><small style="color:#888;">${s.planType || 'Mensual'}</small></td>
-                    <td>${estadoBadge}</td>
+                    <tr>
+                        <td>
+                            <strong>${s.userName || '(sin nombre)'}</strong><br>
+                            <small style="color:#888;">${s.userEmail || '—'}</small><br>
+                            <small style="color:#aaa;">ID: ${s.userId ?? '—'}</small>
+                        </td>
+                        <td><strong>${s.planName || 'Premium'}</strong><br><small style="color:#888;">${s.planType || 'Mensual'}</small></td>
+                        <td>${estadoBadge}</td>
                     <td>${s.startDate ? new Date(s.startDate).toLocaleDateString('es-AR') : '—'}</td>
                     <td>${vencimiento}</td>
                     <td>${renovacion}</td>
