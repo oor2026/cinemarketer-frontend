@@ -422,6 +422,37 @@ const adminEstadisticas = {
                     <td class="stat-valor">${this.formatearNumero(p.publicacionesVideo)}</td>
                     <td>${p.porcentajeVideo?.toFixed(1)}%</td>
                 </tr>
+
+                <tr>
+                    <td><strong>Publicaciones con ficha técnica</strong></td>
+                    <td class="stat-valor">${this.formatearNumero(p.publicacionesFichaTecnica)}</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><strong>Publicaciones con countdown</strong></td>
+                    <td class="stat-valor">${this.formatearNumero(p.publicacionesCountdown)}</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><strong>Publicaciones con votación</strong></td>
+                    <td class="stat-valor">${this.formatearNumero(p.publicacionesVotacion)}</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><strong>Publicaciones con ranking</strong></td>
+                    <td class="stat-valor">${this.formatearNumero(p.publicacionesRanking)}</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><strong>Publicaciones con trivia</strong></td>
+                    <td class="stat-valor">${this.formatearNumero(p.publicacionesTrivia)}</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><strong>Publicaciones con tráiler</strong></td>
+                    <td class="stat-valor">${this.formatearNumero(p.publicacionesTrailer)}</td>
+                    <td></td>
+                </tr>
                 <tr>
                     <td><strong>Tasa de aprobación automática</strong></td>
                     <td class="stat-valor">${p.tasaAprobacionAutomatica?.toFixed(1)}%</td>
