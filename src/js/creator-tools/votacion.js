@@ -34,13 +34,14 @@
 
     function renderExtra() {
             const wf = window.getWfState();
-            if (!wf.votacionOpciones || wf.votacionOpciones.length === 0) {
-                    wf.votacionOpciones = wf.movieId
-                        ? [{ texto: wf.movieTitulo || '', movieId: wf.movieId, posterUrl: null, bloqueada: false },
-                           { texto: '', movieId: null, posterUrl: null, bloqueada: false }]
-                        : [{ texto: '', movieId: null, posterUrl: null, bloqueada: false },
-                           { texto: '', movieId: null, posterUrl: null, bloqueada: false }];
-                }
+
+                if (!wf.votacionOpciones || wf.votacionOpciones.length === 0) {
+                        wf.votacionOpciones = wf.movieId
+                            ? [{ texto: wf.movieTitulo || '', movieId: wf.movieId, posterUrl: null, bloqueada: true },
+                               { texto: '', movieId: null, posterUrl: null, bloqueada: false }]
+                            : [{ texto: '', movieId: null, posterUrl: null, bloqueada: false },
+                               { texto: '', movieId: null, posterUrl: null, bloqueada: false }];
+                    }
                 if (!wf.votacionDuracionValor) wf.votacionDuracionValor = 3;
                 if (!wf.votacionDuracionUnidad) wf.votacionDuracionUnidad = 'DIAS';
                 window.wfVotacionRecalcularMinutos();
@@ -360,11 +361,12 @@
             _wf.votacionEnabled = activo;
             if (activo) {
                 if (!_wf.votacionOpciones || _wf.votacionOpciones.length === 0) {
-                        _wf.votacionOpciones = _wf.movieId
-                            ? [{ texto: _wf.movieTitulo || '', movieId: _wf.movieId, posterUrl: null, bloqueada: false },
-                               { texto: '', movieId: null, posterUrl: null, bloqueada: false }]
-                            : [{ texto: '', movieId: null, posterUrl: null, bloqueada: false },
-                               { texto: '', movieId: null, posterUrl: null, bloqueada: false }];
+
+                    _wf.votacionOpciones = _wf.movieId
+                        ? [{ texto: _wf.movieTitulo || '', movieId: _wf.movieId, posterUrl: null, bloqueada: true },
+                           { texto: '', movieId: null, posterUrl: null, bloqueada: false }]
+                        : [{ texto: '', movieId: null, posterUrl: null, bloqueada: false },
+                           { texto: '', movieId: null, posterUrl: null, bloqueada: false }];
                     }
                 if (!_wf.votacionDuracionValor) _wf.votacionDuracionValor = 3;
                         if (!_wf.votacionDuracionUnidad) _wf.votacionDuracionUnidad = 'DIAS';
