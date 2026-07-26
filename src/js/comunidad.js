@@ -432,7 +432,12 @@
                 // (si alguna) está activa para esta publicación, y le delega el render.
                 const herramientaActivaPub = (window.CreatorTools || []).find(t => typeof t.activoPara === 'function' && t.activoPara(pub));
 
-                const peliculaHtml = pub.movieId && !herramientaActivaPub ? `
+                const muestraPeliculaVinculada = !herramientaActivaPub || (
+                    typeof herramientaActivaPub.muestraPeliculaVinculada === 'function'
+                        ? herramientaActivaPub.muestraPeliculaVinculada(pub)
+                        : !!herramientaActivaPub.muestraPeliculaVinculada
+                );
+                const peliculaHtml = pub.movieId && muestraPeliculaVinculada ? `
                     <div class="com-card-pelicula" onclick="window._abrirPeliculaDesdeModalPublicacion(${pub.movieId})">
                         <i class="fas fa-film"></i>
                         <span>Ver película vinculada</span>
@@ -1695,13 +1700,36 @@
         }
     };
 
-    window.seleccionarPeliculaWf = function(id, titulo, event) {
-            if (event) event.stopPropagation();
-            _wf.movieId = id;
-            _wf.movieTitulo = titulo;
-            _wf.paso = wfEsCreator() ? 4 : 5;
-            renderWorkflow();
-        };
+        window.seleccionarPeliculaWf = function(id, titulo, event) {
+                if (event) event.stopPropagation();
+                const cambioDePelicula = _wf.movieId && _wf.movieId !== id;
+                _wf.movieId = id;
+                _wf.movieTitulo = titulo;
+                if (cambioDePelicula) {
+                    // La película vinculada cambió — el estado de la herramienta que
+                    // ya estaba armada (tráiler buscado, opciones de votación con
+                    // póster de la película vieja, etc.) queda inválido. Se limpia
+                    // TODO lo específico de tool, dejando solo el tool elegido, así
+                    // el Paso 4 se re-renderiza desde cero para la película nueva.
+                    _wf.trailerYoutubeKey = null;
+                    _wf.trailerVideoNombre = null;
+                    _wf.trailerOpciones = null;
+                    _wf.trailerBuscando = false;
+                    _wf.trailerNoEncontrado = false;
+                    _wf.movieFichaEnabled = false;
+                    _wf.countdownEnabled = false;
+                    _wf.countdownCountryCode = null;
+                    _wf.votacionOpciones = null;
+                    _wf.votacionDuracionValor = null;
+                    _wf.votacionDuracionUnidad = null;
+                    _wf.votacionDuracionMinutos = null;
+                    _wf.rankingItems = null;
+                    _wf.triviaReferenciaId = null;
+                    _wf.triviaReferenciaLabel = null;
+                }
+                _wf.paso = wfEsCreator() ? 4 : 5;
+                renderWorkflow();
+            };
 
         // PASO 1 — Territorio + sub + tono (siempre el primer paso)
         function renderPaso1() {
@@ -2890,7 +2918,9 @@
                                     triviaReferenciaId: _wf.triviaReferenciaId,
                                     triviaOpciones: (_wf.triviaOpciones || []).map(o => ({ texto: o.texto, esCorrecta: o.esCorrecta })),
                                     triviaDuracionMinutos: _wf.triviaDuracionMinutos,
-                    territoryGroup: _wf.territory,
+                                    trailerEnabled: _wf.trailerEnabled,
+                                    trailerYoutubeKey: _wf.trailerYoutubeKey,
+                                    territoryGroup: _wf.territory,
                     territorySub: _wf.sub,
                     tone: _wf.tone,
                     content: _wf.content.trim(),
