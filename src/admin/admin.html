@@ -715,12 +715,24 @@
                     <button class="btn-nuevo" onclick="adminFeed.agregarPeliculaAlCarrusel()">
                         <i class="fas fa-film"></i> Agregar Película destacada
                     </button>
+                    <button class="btn-nuevo" style="background:#6b1a3a;" onclick="adminFeed.abrirSelectorPelicula()">
+                        <i class="fas fa-clapperboard"></i> Agregar otra película
+                    </button>
                     <button class="btn-nuevo" style="background:#1a3a6b;" onclick="adminFeed.abrirSelectorPremio('COMUN')">
                         <i class="fas fa-gift"></i> Agregar premio común
                     </button>
                     <button class="btn-nuevo" style="background:#8a6d1a;" onclick="adminFeed.abrirSelectorPremio('ESPECIAL')">
                         <i class="fas fa-star"></i> Agregar premio especial
                     </button>
+                </div>
+
+                <div id="carruselSelectorPelicula" style="display:none;margin-top:1rem;position:relative;max-width:420px;overflow:visible;">
+                    <input type="text" id="carruselBuscarPelicula" class="search-input"
+                           placeholder="Buscar película por título..."
+                           oninput="adminFeed.buscarPeliculaCarrusel(this.value)"
+                           style="width:100%;">
+                    <div id="carruselResultadosPelicula"
+                         style="position:absolute;top:calc(100% + 6px);left:0;right:0;background:white;border:1px solid #ddd;border-radius:10px;max-height:400px;overflow-y:auto;z-index:1000;display:none;box-shadow:0 8px 24px rgba(0,0,0,0.18);"></div>
                 </div>
 
                 <div id="carruselSelectorPremio" style="display:none;margin-top:1rem;position:relative;max-width:420px;overflow:visible;">

@@ -304,9 +304,9 @@ window.cargarPeliculaDestacada = async function() {
 
         // Resolvemos cada ítem en paralelo (película o premio según tipo)
         const resueltos = await Promise.all(items.map(async (item) => {
-            try {
-                if (item.tipo === 'PELICULA_DESTACADA') {
-                    const res = await fetch(`${CONFIG.API_URL}/movies/${item.movieId}`, {
+                    try {
+                        if (item.tipo === 'PELICULA_DESTACADA' || item.tipo === 'PELICULA_CARRUSEL') {
+                            const res = await fetch(`${CONFIG.API_URL}/movies/${item.movieId}`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     if (!res.ok) return null;
