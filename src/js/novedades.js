@@ -274,9 +274,56 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
                 return;
             }
 
-            if (type === 'REPLY') {
-            // Si el modal no está en el DOM, hay que cargar el feed primero
-            if (!document.getElementById('movieModal')) {
+            if (type === 'BANCO' || type === 'MERECE_PUNTO') {
+                    // Si el modal no está en el DOM, hay que cargar el feed primero
+                    if (!document.getElementById('movieModal')) {
+                        await new Promise(resolve => {
+                            loadModule('feed-films', null, true);
+                            setTimeout(resolve, 1200);
+                        });
+                    }
+                    if (typeof window.abrirDetallePelicula === 'function' && movieId) {
+
+                        // Consultar si el comentario es spoiler antes de abrir
+                        let esSpoiler = false;
+                        if (commentId) {
+                            try {
+                                const res = await fetch(`${CONFIG.API_URL}/comments/${commentId}`, {
+                                    headers: { 'Authorization': `Bearer ${token}` }
+                                });
+                                if (res.ok) {
+                                    const data = await res.json();
+                                    if (data.spoiler) esSpoiler = true;
+                                }
+                            } catch(e) {}
+                        }
+
+                        window.abrirDetallePelicula(movieId);
+
+                        if (commentId) {
+                            setTimeout(async () => {
+                                if (esSpoiler && typeof window.activarModoSpoiler === 'function') {
+                                    window.activarModoSpoiler(true);
+                                }
+                                // Esperar a que cargarComentariosPelicula termine de renderizar
+                                await new Promise(resolve => setTimeout(resolve, 600));
+
+                                const comentEl = document.getElementById(`comment-${commentId}`);
+                                if (comentEl) {
+                                    comentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    comentEl.style.transition = 'background 0.3s';
+                                    comentEl.style.background = '#fff3cd';
+                                    setTimeout(() => { comentEl.style.background = ''; }, 3000);
+                                }
+                            }, 800);
+                        }
+                    }
+                    return;
+                }
+
+                if (type === 'REPLY') {
+                // Si el modal no está en el DOM, hay que cargar el feed primero
+                if (!document.getElementById('movieModal')) {
                 await new Promise(resolve => {
                     loadModule('feed-films', null, true);
                     setTimeout(resolve, 1200);
