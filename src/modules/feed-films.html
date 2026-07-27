@@ -37,6 +37,13 @@
         </button>
     </div>
 
+    <!-- CARRUSEL DESTACADO (película + premios, configurado por el admin) -->
+    <div id="destacadaContainer" style="display:none;">
+        <div class="destacada-label" id="destacadaLabel">⭐ Destacado</div>
+        <div class="destacada-card" id="destacadaCard"></div>
+        <div class="destacada-dots" id="destacadaDots" style="display:none;"></div>
+    </div>
+
     <!-- PILLS DE ORDENAMIENTO -->
     <div class="ordenar-pills" id="ordenarPills">
         <button class="pill-orden active" data-criterio="fecha" onclick="window.seleccionarOrden('fecha', this)">🔥 Más populares</button>
@@ -507,6 +514,208 @@
         .btn-recomendar:hover {
             background: #1a3a6b;
             color: white;
+        }
+    </style>
+
+    <style>
+        .destacada-label {
+            padding: 12px 12px 6px;
+            font-size: 11px;
+            font-weight: 800;
+            color: #e50914;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .destacada-card {
+            margin: 0 12px 12px;
+            border-radius: 18px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+        .destacada-img-real {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            max-height: 480px;
+            object-fit: cover;
+            display: block;
+            background: linear-gradient(135deg, #1a0a0a 0%, #3d0000 40%, #1a1a2e 100%);
+        }
+        .destacada-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.3) 55%, transparent 100%);
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+        .destacada-badge {
+            position: absolute;
+            top: 12px; left: 12px;
+            background: #e50914;
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 99px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .destacada-titulo {
+            color: white;
+            font-size: 22px;
+            font-weight: 900;
+            margin-bottom: 3px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+        .destacada-meta {
+            color: rgba(255,255,255,0.65);
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+        .destacada-acciones {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-dest-votar {
+            background: #e50914;
+            color: white;
+            border: none;
+            padding: 9px 20px;
+            border-radius: 99px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .btn-dest-comentar {
+            background: rgba(255,255,255,0.12);
+            color: white;
+            border: 1.5px solid rgba(255,255,255,0.25);
+            padding: 9px 16px;
+            border-radius: 99px;
+            font-size: 13px;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+        }
+        .destacada-score {
+            margin-left: auto;
+            color: #4caf50;
+            font-size: 18px;
+            font-weight: 900;
+        }
+        .destacada-dots {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin: 8px 0 12px;
+        }
+        .destacada-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.18);
+            cursor: pointer;
+            transition: background 0.2s, width 0.2s, border-radius 0.2s;
+        }
+        .destacada-dot.activo {
+            background: #e50914;
+            width: 18px;
+            border-radius: 4px;
+        }
+        .destacada-premio-badge {
+            position: absolute;
+            top: 12px; left: 12px;
+            background: #1a3a6b;
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 99px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .destacada-premio-badge.especial {
+            background: #8a6d1a;
+        }
+        .btn-dest-ver {
+            background: #e50914;
+            color: white;
+            border: none;
+            padding: 9px 20px;
+            border-radius: 99px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .destacada-puntos {
+            margin-left: auto;
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+            color: #ffd54f;
+        }
+        .destacada-puntos-numero {
+            font-size: 20px;
+            font-weight: 900;
+        }
+        .destacada-puntos-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        @media (min-width: 769px) {
+            .destacada-card {
+                max-width: 2000px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            .destacada-badge,
+            .destacada-premio-badge {
+                top: 28px; left: 28px;
+                font-size: 16px;
+                padding: 10px 22px;
+                border-radius: 99px;
+            }
+            .destacada-overlay {
+                padding: 40px 48px;
+            }
+            .destacada-titulo {
+                font-size: 35px;
+                margin-bottom: 12px;
+            }
+            .destacada-meta {
+                font-size: 19px;
+                margin-bottom: 28px;
+            }
+            .destacada-acciones {
+                gap: 20px;
+            }
+            .btn-dest-votar,
+            .btn-dest-ver {
+                padding: 10px 36px;
+                font-size: 20px;
+                border-radius: 99px;
+            }
+            .btn-dest-comentar {
+                padding: 10px 36px;
+                font-size: 20px;
+            }
+            .destacada-score {
+                font-size: 36px;
+            }
+            .destacada-puntos-numero {
+                font-size: 35px;
+            }
+            .destacada-puntos-label {
+                font-size: 18px;
+            }
         }
     </style>
 

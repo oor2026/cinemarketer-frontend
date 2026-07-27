@@ -156,7 +156,13 @@ window.cargarPeliculasPopulares = async function(pagina = 1) {
     if (!grid) return;
     if (window.estadoPaginacion.cargando) return;
 
-    window.estadoPaginacion.cargando = true;
+    // Se recarga cada vez que se entra al módulo (el HTML del feed se
+        // reinyecta de cero al navegar entre secciones, así que el carrusel
+        // también tiene que reconstruirse — no alcanza con cargarlo una sola
+        // vez por sesión).
+        window.cargarPeliculaDestacada();
+
+        window.estadoPaginacion.cargando = true;
     grid.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando películas...</div>';
 
     try {
@@ -260,6 +266,203 @@ window.cargarPeliculasPopulares = async function(pagina = 1) {
         window.estadoPaginacion.cargando = false;
     }
 };
+
+// ==============================================
+// CARRUSEL DESTACADO (película + premios, configurado por el admin
+// desde Gestión Feed). Funciona igual en mobile y desktop.
+// ==============================================
+window._carruselDestacado = { items: [], actual: 0, timer: null };
+
+window.cargarPeliculaDestacada = async function() {
+    const contenedor = document.getElementById('destacadaContainer');
+    if (!contenedor) return;
+
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${CONFIG.API_URL}/feed/carrusel`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error();
+
+        const items = await response.json();
+        if (!items || items.length === 0) {
+            contenedor.style.display = 'none';
+            return;
+        }
+
+        // Resolvemos cada ítem en paralelo (película o premio según tipo)
+        const resueltos = await Promise.all(items.map(async (item) => {
+            try {
+                if (item.tipo === 'PELICULA_DESTACADA') {
+                    const res = await fetch(`${CONFIG.API_URL}/movies/${item.movieId}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) return null;
+                    return { tipo: 'PELICULA', data: await res.json() };
+                } else {
+                    const urlBase = item.tipo === 'PREMIO_COMUN' ? '/rewards/' : '/premium/rewards/';
+                    const res = await fetch(`${CONFIG.API_URL}${urlBase}${item.rewardId}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) return null;
+                    return { tipo: item.tipo, data: await res.json() };
+                }
+            } catch {
+                return null;
+            }
+        }));
+
+        const validos = resueltos.filter(Boolean);
+        if (validos.length === 0) {
+            contenedor.style.display = 'none';
+            return;
+        }
+
+        window._carruselDestacado.items = validos;
+        window._carruselDestacado.actual = 0;
+        contenedor.style.display = 'block';
+
+        renderSlideDestacado(0);
+        iniciarRotacionDestacado();
+    } catch (error) {
+        contenedor.style.display = 'none';
+    }
+};
+
+function iniciarRotacionDestacado() {
+    const state = window._carruselDestacado;
+    if (state.timer) clearInterval(state.timer);
+
+    const dotsEl = document.getElementById('destacadaDots');
+    if (state.items.length < 2) {
+        dotsEl.style.display = 'none';
+        return;
+    }
+
+    dotsEl.style.display = 'flex';
+    dotsEl.innerHTML = state.items.map((_, i) =>
+        `<span class="destacada-dot${i === 0 ? ' activo' : ''}" onclick="irASlideDestacado(${i})"></span>`
+    ).join('');
+
+    state.timer = setInterval(() => {
+        const siguiente = (state.actual + 1) % state.items.length;
+        renderSlideDestacado(siguiente);
+    }, 6000);
+}
+
+window.irASlideDestacado = function(idx) {
+    renderSlideDestacado(idx);
+    iniciarRotacionDestacado(); // reinicia el conteo de 6s al navegar a mano
+};
+
+function renderSlideDestacado(idx) {
+    const state = window._carruselDestacado;
+    const card = document.getElementById('destacadaCard');
+    const label = document.getElementById('destacadaLabel');
+
+    // El módulo se pudo haber desmontado (navegaste a otra sección) sin que
+    // el setInterval de rotación llegara a limpiarse — si el DOM ya no está,
+    // cortamos el timer acá en vez de romper contra elementos null.
+    if (!card || !label) {
+        if (state.timer) clearInterval(state.timer);
+        return;
+    }
+
+    state.actual = idx;
+    const item = state.items[idx];
+
+    document.querySelectorAll('.destacada-dot').forEach((d, i) => d.classList.toggle('activo', i === idx));
+
+    if (item.tipo === 'PELICULA') {
+        const p = item.data;
+        window._destacadaMovieId = p.id;
+        label.textContent = '⭐ Película destacada';
+
+        const backdrop = p.backdrop_path
+            ? `https://image.tmdb.org/t/p/original${p.backdrop_path}`
+            : (p.poster_path ? `https://image.tmdb.org/t/p/w500${p.poster_path}` : '');
+        const anio = p.release_date ? new Date(p.release_date).getFullYear() : '—';
+        const generos = (p.genres || []).map(g => g.name).slice(0, 2).join(', ');
+        const duracion = p.runtime ? `${p.runtime} min` : '';
+        const meta = [anio, generos, duracion].filter(Boolean).join(' · ');
+        const score = p.vote_average ? `${Math.round(p.vote_average * 10)}%` : '—';
+
+        card.onclick = () => window.abrirDetallePelicula(p.id);
+        card.innerHTML = `
+            <img class="destacada-img-real" src="${backdrop}" alt="${p.title || ''}">
+            <div class="destacada-badge">🔥 Tendencia</div>
+            <div class="destacada-overlay">
+                <div class="destacada-titulo">${p.title || ''}</div>
+                <div class="destacada-meta">${meta}</div>
+                <div class="destacada-acciones">
+                    <button class="btn-dest-votar" onclick="event.stopPropagation(); window.votarPelicula(${p.id}, 'like')">👍 Votar</button>
+                    <button class="btn-dest-comentar" onclick="event.stopPropagation(); window.abrirDetallePelicula(${p.id})">💬 Comentar</button>
+                    <span class="destacada-score">${score}</span>
+                </div>
+            </div>`;
+    } else {
+        const esEspecial = item.tipo === 'PREMIO_ESPECIAL';
+        const r = item.data;
+        label.textContent = esEspecial ? '⭐ Premio especial' : '🎁 Premio';
+
+        const imagen = r.imageUrl
+            ? `https://images.weserv.nl/?url=${encodeURIComponent(r.imageUrl.replace(/^https?:\/\//, ''))}` // fallback simple si la imagen no es absoluta ya servible
+            : '';
+        const img = r.imageUrl || ''; // usamos la url directa, ya viene absoluta desde el backend
+
+        const puntosHtml = r.pointsRequired
+            ? `<span class="destacada-puntos"><span class="destacada-puntos-numero">${r.pointsRequired}</span><span class="destacada-puntos-label">Puntos</span></span>`
+            : '';
+
+        // Común siempre es canje directo. Especial puede ser sorteo (inscripción)
+        // o canje directo — mismo criterio que ya usa el modal de mis-premios.js.
+        const textoBoton = !esEspecial
+            ? 'Canjearlo'
+            : (r.type === 'SORTEO' ? 'Inscribirme' : 'Canjearlo');
+
+        card.onclick = () => abrirPremioDesdeCarrusel(r.id, item.tipo);
+        card.innerHTML = `
+            <img class="destacada-img-real" src="${img}" alt="${r.name || ''}" style="object-fit:contain;background:#111;">
+            <div class="destacada-premio-badge${esEspecial ? ' especial' : ''}">${esEspecial ? '⭐ Exclusivo Premium' : '🎁 Premio'}</div>
+            <div class="destacada-overlay">
+                <div class="destacada-titulo">${r.name || ''}</div>
+                <div class="destacada-acciones">
+                    <button class="btn-dest-ver" onclick="event.stopPropagation(); abrirPremioDesdeCarrusel(${r.id}, '${item.tipo}')">${textoBoton}</button>
+                    ${puntosHtml}
+                </div>
+            </div>`;
+    }
+}
+
+// Navega a Mis Premios y abre el modal del premio puntual apenas el
+// módulo termina de cargar (polling corto, sin tocar el router).
+function abrirPremioDesdeCarrusel(rewardId, tipo) {
+    window.location.hash = 'mis-premios';
+
+    let intentos = 0;
+    const esperar = setInterval(() => {
+        intentos++;
+        const listo = tipo === 'PREMIO_COMUN'
+            ? (typeof window.abrirModalPremio === 'function' && Array.isArray(premiosState?.premiosOriginalCache) && premiosState.premiosOriginalCache.length > 0)
+            : (typeof window.abrirModalEspecial === 'function' && Array.isArray(premiosState?.especialesCache) && premiosState.especialesCache.length > 0);
+
+        if (listo) {
+            clearInterval(esperar);
+            if (tipo === 'PREMIO_COMUN') {
+                const p = premiosState.premiosOriginalCache.find(x => x.id === rewardId);
+                if (p) window.abrirModalPremio(p);
+            } else {
+                const p = premiosState.especialesCache.find(x => x.id === rewardId);
+                if (p) {
+                    const isPremium = document.getElementById('especialesBannerNoPremium')?.style.display === 'none';
+                    window.abrirModalEspecial(p, isPremium);
+                }
+            }
+        } else if (intentos > 25) { // ~5s de margen, después desistimos en silencio
+            clearInterval(esperar);
+        }
+    }, 200);
+}
 
 // ==============================================
 // FUNCIONES DE PAGINACIÓN
@@ -2580,20 +2783,26 @@ window.seleccionarTabFeed = function(tab, el) {
         const btnFiltrosAvanzados = document.querySelector('.feed-tab-filtro');
         let comunidadContainer = document.getElementById('comunidad-container');
 
-        if (tab === 'peliculas') {
-            if (gridPeliculas) gridPeliculas.style.display = '';
-            if (paginacion) paginacion.style.display = '';
-            if (pills) pills.style.display = '';
-            if (filtros) filtros.style.display = '';
-            if (btnFiltrosAvanzados) btnFiltrosAvanzados.style.display = '';
-            if (comunidadContainer) comunidadContainer.style.display = 'none';
+        const destacada = document.getElementById('destacadaContainer');
 
-        } else if (tab === 'comunidad') {
-            if (gridPeliculas) gridPeliculas.style.display = 'none';
-            if (paginacion) paginacion.style.display = 'none';
-            if (pills) pills.style.display = 'none';
-            if (filtros) filtros.style.display = 'none';
-            if (btnFiltrosAvanzados) btnFiltrosAvanzados.style.display = 'none';
+                if (tab === 'peliculas') {
+                    if (gridPeliculas) gridPeliculas.style.display = '';
+                    if (paginacion) paginacion.style.display = '';
+                    if (pills) pills.style.display = '';
+                    if (filtros) filtros.style.display = '';
+                    if (btnFiltrosAvanzados) btnFiltrosAvanzados.style.display = '';
+                    if (comunidadContainer) comunidadContainer.style.display = 'none';
+                    // Solo la mostramos de nuevo si efectivamente hay una destacada
+                    // cargada — si nunca hubo (204) o falló, seguimos ocultándola.
+                    if (destacada && window._destacadaMovieId) destacada.style.display = 'block';
+
+                } else if (tab === 'comunidad') {
+                    if (gridPeliculas) gridPeliculas.style.display = 'none';
+                    if (paginacion) paginacion.style.display = 'none';
+                    if (pills) pills.style.display = 'none';
+                    if (filtros) filtros.style.display = 'none';
+                    if (btnFiltrosAvanzados) btnFiltrosAvanzados.style.display = 'none';
+                    if (destacada) destacada.style.display = 'none';
 
         // Crear contenedor si no existe
         if (!comunidadContainer) {
