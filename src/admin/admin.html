@@ -106,6 +106,10 @@
                 <i class="fas fa-bullhorn"></i>
                 <span>Comercial</span>
             </li>
+            <li class="sidebar-item" onclick="adminUI.switchSection('feed', this); window.adminFeed && adminFeed.init();">
+                <i class="fas fa-thumbtack"></i>
+                <span>Gestión Feed</span>
+            </li>
         </ul>
     </aside>
 
@@ -658,6 +662,74 @@
                     <button class="btn-paginacion" onclick="adminAvatares.cambiarPagina('siguiente')" id="btnAvataresSiguiente" disabled>
                         Siguiente <i class="fas fa-chevron-right"></i>
                     </button>
+                </div>
+            </div>
+        </section>
+        <section id="section-feed" class="admin-section">
+            <div class="section-header">
+                <div>
+                    <h1>Gestión Feed</h1>
+                    <p>Configurá qué película aparece destacada en el feed principal de Películas</p>
+                </div>
+            </div>
+
+            <div class="admin-card">
+                <h3>Película destacada actual</h3>
+                <div id="feedDestacadaActual" style="display:flex;gap:1rem;align-items:center;padding:1rem 0;">
+                    <p style="color:#888;">Cargando...</p>
+                </div>
+            </div>
+
+            <div class="admin-card" style="overflow:visible;">
+                <h3>Elegir nueva película destacada</h3>
+                <div style="position:relative;max-width:420px;overflow:visible;">
+                    <input type="text" id="feedBuscarPelicula" class="search-input"
+                           placeholder="Buscar película por título..."
+                           oninput="adminFeed.buscar(this.value)"
+                           style="width:100%;">
+                    <div id="feedResultadosBusqueda"
+                         style="position:absolute;top:calc(100% + 6px);left:0;right:0;background:white;border:1px solid #ddd;border-radius:10px;max-height:400px;overflow-y:auto;z-index:1000;display:none;box-shadow:0 8px 24px rgba(0,0,0,0.18);"></div>
+                </div>
+
+                <div id="feedSeleccionPreview" style="display:none;margin-top:1rem;padding:1rem;background:#f8f8f8;border-radius:8px;align-items:center;gap:1rem;">
+                </div>
+
+                <div style="margin-top:1rem;display:flex;gap:0.75rem;">
+                    <button class="btn-nuevo" id="feedBtnGuardar" onclick="adminFeed.guardar()" disabled>
+                        <i class="fas fa-check"></i> Guardar como destacada
+                    </button>
+                </div>
+            </div>
+
+            <div class="admin-card" style="overflow:visible;">
+                <h3>Carrusel del feed (solo mobile) <small style="color:#888;font-weight:400;">— hasta 5 elementos</small></h3>
+                <p style="color:#888;font-size:0.85rem;margin-bottom:1rem;">
+                    Con 0 o 1 elementos se muestra fijo (como hoy). Con 2 o más, rota automáticamente.
+                </p>
+
+                <div id="carruselListaActual" style="margin-bottom:1.5rem;">
+                    <p style="color:#888;">Cargando...</p>
+                </div>
+
+                <div id="carruselAgregarBotones" style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+                    <button class="btn-nuevo" onclick="adminFeed.agregarPeliculaAlCarrusel()">
+                        <i class="fas fa-film"></i> Agregar Película destacada
+                    </button>
+                    <button class="btn-nuevo" style="background:#1a3a6b;" onclick="adminFeed.abrirSelectorPremio('COMUN')">
+                        <i class="fas fa-gift"></i> Agregar premio común
+                    </button>
+                    <button class="btn-nuevo" style="background:#8a6d1a;" onclick="adminFeed.abrirSelectorPremio('ESPECIAL')">
+                        <i class="fas fa-star"></i> Agregar premio especial
+                    </button>
+                </div>
+
+                <div id="carruselSelectorPremio" style="display:none;margin-top:1rem;position:relative;max-width:420px;overflow:visible;">
+                    <input type="text" id="carruselBuscarPremio" class="search-input"
+                           placeholder="Buscar premio por nombre..."
+                           oninput="adminFeed.buscarPremio(this.value)"
+                           style="width:100%;">
+                    <div id="carruselResultadosPremio"
+                         style="position:absolute;top:calc(100% + 6px);left:0;right:0;background:white;border:1px solid #ddd;border-radius:10px;max-height:400px;overflow-y:auto;z-index:1000;display:none;box-shadow:0 8px 24px rgba(0,0,0,0.18);"></div>
                 </div>
             </div>
         </section>
@@ -2110,6 +2182,7 @@
 <script src="../js/admin-estadisticas.js"></script>
 <script src="../js/admin-premios-premium.js"></script>
 <script src="../js/admin-suscripciones.js"></script>
+<script src="../js/admin-feed.js"></script>
 <!-- ── NUEVO ── -->
 <script src="../js/admin-comercial.js"></script>
 

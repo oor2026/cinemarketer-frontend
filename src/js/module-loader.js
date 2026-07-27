@@ -203,22 +203,26 @@ async function loadModule(moduleName, element = null, updateHash = true) {
     if (element) element.classList.add('active');
 
     // Actualiza la clase del body según el módulo — controla visibilidad del banner
-    actualizarClaseModulo(moduleName);
+        actualizarClaseModulo(moduleName);
 
-    // Carga los banners correspondientes al módulo desde la API
-    // Se ejecuta después del timeout para asegurar que el HTML del módulo ya está en el DOM
-    setTimeout(() => cargarBanners(moduleName), 300);
+        // Splash mobile — solo una vez por sesión por módulo
+            mostrarSplashMobile(moduleName);
 
-    // Splash mobile — solo una vez por sesión por módulo
-        mostrarSplashMobile(moduleName);
+        try {
+            // HTML
+            const htmlResponse = await fetch(`${MODULE_PATH}${moduleName}.html`);
+            if (!htmlResponse.ok) throw new Error(`Error HTTP: ${htmlResponse.status}`);
 
-    try {
-        // HTML
-        const htmlResponse = await fetch(`${MODULE_PATH}${moduleName}.html`);
-        if (!htmlResponse.ok) throw new Error(`Error HTTP: ${htmlResponse.status}`);
+            container.innerHTML = await htmlResponse.text();
+            window.scrollTo(0, 0);
 
-        container.innerHTML = await htmlResponse.text();
-        window.scrollTo(0, 0);
+            // Carga los banners correspondientes al módulo desde la API.
+            // Se dispara acá adentro, recién ahora que el HTML del módulo ya
+            // está insertado en el DOM — antes se llamaba con un setTimeout de
+            // 300ms a ciegas, que era una condición de carrera: si el fetch del
+            // HTML tardaba más que eso, cargarBanners no encontraba los
+            // elementos todavía y el banner quedaba vacío para esa visita.
+            cargarBanners(moduleName);
 
         // CSS
         const cssId = `css-${moduleName}`;
