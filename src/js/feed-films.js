@@ -284,10 +284,22 @@ window.cargarPeliculaDestacada = async function() {
         });
         if (!response.ok) throw new Error();
 
-        const items = await response.json();
+        let items = await response.json();
+
+        // Si el carrusel está vacío, caemos al fallback: la Película
+        // destacada fija (si el admin configuró una desde el módulo
+        // superior), igual que se comportaba antes de que existiera el
+        // carrusel. Solo si tampoco hay destacada fija, se oculta todo.
         if (!items || items.length === 0) {
-            contenedor.style.display = 'none';
-            return;
+            const resDestacada = await fetch(`${CONFIG.API_URL}/feed/destacada`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (resDestacada.status === 204 || !resDestacada.ok) {
+                contenedor.style.display = 'none';
+                return;
+            }
+            const { movieId } = await resDestacada.json();
+            items = [{ tipo: 'PELICULA_DESTACADA', movieId }];
         }
 
         // Resolvemos cada ítem en paralelo (película o premio según tipo)
