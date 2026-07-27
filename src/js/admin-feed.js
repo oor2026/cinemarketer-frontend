@@ -231,9 +231,20 @@ const adminFeed = {
             let icono = '';
 
             if (item.tipo === 'PELICULA_DESTACADA') {
-                icono = '<i class="fas fa-film"></i>';
-                etiqueta = 'Película destacada';
-            } else {
+                    icono = '<i class="fas fa-film"></i>';
+                    etiqueta = 'Película destacada';
+                } else if (item.tipo === 'PELICULA_CARRUSEL') {
+                    icono = '<i class="fas fa-clapperboard"></i>';
+                    try {
+                        const res = await fetch(`${CONFIG.API_URL}/movies/${item.movieId}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        const p = res.ok ? await res.json() : null;
+                        etiqueta = p ? `${p.title} <small style="color:#888;">(película)</small>` : `Película #${item.movieId} (no encontrada)`;
+                    } catch {
+                        etiqueta = `Película #${item.movieId}`;
+                    }
+                } else {
                 icono = item.tipo === 'PREMIO_COMUN' ? '<i class="fas fa-gift"></i>' : '<i class="fas fa-star"></i>';
                 const urlBase = item.tipo === 'PREMIO_COMUN' ? '/rewards/' : '/premium/rewards/';
                 try {
@@ -362,9 +373,83 @@ const adminFeed = {
                     if (!response.ok) throw new Error();
                     await this.cargarCarrusel();
                 } catch {
-                    alert('Error al mover el elemento');
+                            alert('Error al mover el elemento');
+                        }
+                    },
+
+                debounceCarruselPeliculaTimer: null,
+
+            abrirSelectorPelicula() {
+                document.getElementById('carruselSelectorPelicula').style.display = 'block';
+                document.getElementById('carruselBuscarPelicula').value = '';
+                document.getElementById('carruselBuscarPelicula').focus();
+                document.getElementById('carruselResultadosPelicula').style.display = 'none';
+            },
+
+            buscarPeliculaCarrusel(texto) {
+                clearTimeout(this.debounceCarruselPeliculaTimer);
+                const query = texto.trim();
+                const cont = document.getElementById('carruselResultadosPelicula');
+
+                if (query.length < 2) {
+                    cont.style.display = 'none';
+                    return;
                 }
-            }
+
+                this.debounceCarruselPeliculaTimer = setTimeout(async () => {
+                    try {
+                        const response = await fetch(`${CONFIG.API_URL}/movies/search?query=${encodeURIComponent(query)}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (!response.ok) throw new Error();
+                        const data = await response.json();
+                        const peliculas = data.results || [];
+
+                        if (peliculas.length === 0) {
+                            cont.innerHTML = `<div style="padding:0.75rem;color:#888;">Sin resultados</div>`;
+                            cont.style.display = 'block';
+                            return;
+                        }
+
+                        cont.innerHTML = peliculas.slice(0, 8).map(p => {
+                            const poster = p.poster_path
+                                ? `https://image.tmdb.org/t/p/w92${p.poster_path}`
+                                : 'assets/images/isologotipo.webp';
+                            const anio = p.release_date ? p.release_date.substring(0, 4) : '—';
+                            return `
+                                <div onclick="adminFeed.seleccionarPeliculaCarrusel(${p.id})"
+                                     style="display:flex;gap:0.75rem;align-items:center;padding:0.5rem 0.75rem;cursor:pointer;border-bottom:1px solid #f0f0f0;"
+                                     onmouseover="this.style.background='#f8f8f8'" onmouseout="this.style.background='white'">
+                                    <img src="${poster}" style="width:32px;height:48px;object-fit:cover;border-radius:4px;">
+                                    <span>${p.title} <small style="color:#888;">(${anio})</small></span>
+                                </div>`;
+                        }).join('');
+                        cont.style.display = 'block';
+                    } catch {
+                        cont.innerHTML = `<div style="padding:0.75rem;color:#e50914;">Error al buscar</div>`;
+                        cont.style.display = 'block';
+                    }
+                }, 350);
+            },
+
+            async seleccionarPeliculaCarrusel(movieId) {
+                try {
+                    const response = await fetch(`${CONFIG.API_URL}/admin/feed/carrusel/pelicula-nueva`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ movieId })
+                    });
+                    if (!response.ok) {
+                        const err = await response.json().catch(() => ({}));
+                        throw new Error(err.error || 'Error al agregar la película');
+                    }
+                    document.getElementById('carruselSelectorPelicula').style.display = 'none';
+                    document.getElementById('carruselResultadosPelicula').style.display = 'none';
+                    await this.cargarCarrusel();
+                } catch (error) {
+                    alert(error.message);
+                }
+            },
         };
 
         window.adminFeed = adminFeed;
