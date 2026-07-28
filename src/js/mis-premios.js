@@ -1,7 +1,49 @@
 // ==============================================
 // mis-premios.js - Módulo de premios
 // ==============================================
+// ==============================================
+// ABRIR PREMIO PUNTUAL DESDE LINK COMPARTIDO (?id=X en la URL)
+// Se resuelve directo contra el backend por id, sin depender de que
+// las listas de "Disponibles" o "Especiales" ya estén cargadas.
+// ==============================================
+window._premioDesdeUrlRevisado = false;
 
+window.revisarPremioCompartidoEnUrl = async function() {
+    if (window._premioDesdeUrlRevisado) return;
+    window._premioDesdeUrlRevisado = true;
+
+    const params = new URLSearchParams(window.location.search);
+    const rewardId = params.get('id');
+    if (!rewardId) return;
+
+    const token = localStorage.getItem('token');
+
+    try {
+        const resComun = await fetch(`${CONFIG.API_URL}/rewards/${rewardId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (resComun.ok) {
+            const premio = await resComun.json();
+            window.abrirModalPremio(premio);
+            return;
+        }
+    } catch (e) {}
+
+    try {
+        const resEspecial = await fetch(`${CONFIG.API_URL}/premium/rewards/${rewardId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (resEspecial.ok) {
+            const premio = await resEspecial.json();
+            const isPremium = document.getElementById('especialesBannerNoPremium')?.style.display === 'none';
+            window.abrirModalEspecial(premio, isPremium);
+            return;
+        }
+    } catch (e) {}
+
+    // Si no se encontró en ninguno de los dos catálogos, no hacemos nada —
+    // el usuario simplemente ve la sección de Mis Premios normal.
+};
 // ==============================================
 // ESTADO DEL MÓDULO
 // ==============================================
@@ -290,12 +332,14 @@ window.cargarDisponibles = async function(pagina = 1) {
         }
 
         renderDisponiblesPagina(pagina);
-        actualizarContadorDisponibles();
+                actualizarContadorDisponibles();
 
-    } catch (error) {
-        grid.innerHTML = '<div style="text-align:center;padding:3rem;color:#e50914;">Error al cargar los premios</div>';
-    }
-};
+                window.revisarPremioCompartidoEnUrl();
+
+            } catch (error) {
+                grid.innerHTML = '<div style="text-align:center;padding:3rem;color:#e50914;">Error al cargar los premios</div>';
+            }
+        };
 
 // ==============================================
 // RENDER DE PÁGINA DE DISPONIBLES
@@ -344,6 +388,11 @@ function renderDisponiblesPagina(pagina) {
                 <div class="premio-imagen">
                     ${imagen}
                     ${badgeTipo}
+                    <button onclick="event.stopPropagation(); window.compartirPremio(${p.id}, '${p.name.replace(/'/g, "\\'")}')"
+                            title="Compartir"
+                            style="position:absolute;top:8px;left:8px;background:#e50914;border:none;color:white;width:34px;height:34px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.25);">
+                        <i class="fas fa-share-alt" style="font-size:0.8rem;"></i>
+                    </button>
                 </div>
                 <div class="premio-info">
                     <h4 class="premio-titulo">${p.name}</h4>
@@ -612,6 +661,11 @@ function renderCardEspecial(p, isPremium) {
             <div class="premio-imagen">
                 ${imagen}
                 ${badge}
+                <button onclick="event.stopPropagation(); window.compartirPremio(${p.id}, '${p.name.replace(/'/g, "\\'")}')"
+                        title="Compartir"
+                        style="position:absolute;top:8px;left:8px;background:#e50914;border:none;color:white;width:34px;height:34px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.25);">
+                    <i class="fas fa-share-alt" style="font-size:0.8rem;"></i>
+                </button>
             </div>
             <div class="premio-info">
                 <h4 class="premio-titulo">${p.name}</h4>
@@ -1264,6 +1318,29 @@ window.abrirModalPremio = function(premio) {
         modal.style.display = 'flex';
         document.body.classList.add('modal-open');
         setTimeout(() => modal.classList.add('open'), 10);
+    };
+
+    window.compartirPremio = async function(rewardId, nombre) {
+        const urlOg = `https://cinemarketer-backend-production.up.railway.app/api/rewards/og/${rewardId}`;
+        const urlFront = `https://cinemarketer.com.ar/mis-premios?id=${rewardId}`;
+        const texto = `Mirá este premio en Cinemarketer: "${nombre}" 🎁`;
+
+        if (navigator.share) {
+            try {
+                await navigator.share({ title: nombre, text: texto, url: urlOg });
+            } catch (e) {
+                // usuario canceló, no hacer nada
+            }
+        } else {
+            try {
+                await navigator.clipboard.writeText(urlFront);
+                if (typeof showToast === 'function') {
+                    showToast('success', '¡Link copiado al portapapeles!');
+                }
+            } catch (e) {
+                prompt('Copiá este link:', urlFront);
+            }
+        }
     };
 
     window.cerrarModalPremio = function() {

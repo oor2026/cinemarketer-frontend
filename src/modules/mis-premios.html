@@ -164,6 +164,11 @@
             <h2 id="modalPremioTitulo">Nombre del premio</h2>
             <div class="modal-premio-header-right">
                 <span class="modal-premio-badge" id="modalPremioBadge">🎁 Merchandising</span>
+                <button onclick="window.compartirPremio(premioActual && premioActual.id, premioActual && premioActual.name)"
+                        title="Compartir"
+                        style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+                    <i class="fas fa-share-alt" style="font-size:0.85rem;"></i>
+                </button>
                 <button class="modal-premio-cerrar" onclick="window.cerrarModalPremio()">×</button>
             </div>
         </div>
@@ -267,6 +272,11 @@
             <h2 id="modalEspecialTitulo">Nombre del premio</h2>
             <div class="modal-premio-header-right">
                 <span class="modal-premio-badge" id="modalEspecialBadge">⭐ Exclusivo</span>
+                <button onclick="window.compartirPremio(especialActual && especialActual.id, especialActual && especialActual.name)"
+                        title="Compartir"
+                        style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+                    <i class="fas fa-share-alt" style="font-size:0.85rem;"></i>
+                </button>
                 <button class="modal-premio-cerrar" onclick="window.cerrarModalEspecial()">×</button>
             </div>
         </div>
