@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Premio — Cinemarketer</title>
+<style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background:#f5f5f1;
+        min-height:100vh;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:1.5rem;
+    }
+    .card {
+        background:white;
+        border-radius:18px;
+        max-width:420px;
+        width:100%;
+        overflow:hidden;
+        box-shadow:0 8px 30px rgba(0,0,0,0.12);
+    }
+    .card-header {
+        background:#324C89;
+        padding:1.25rem 1.5rem;
+        display:flex;
+        align-items:center;
+        gap:0.6rem;
+    }
+    .card-header img { height:28px; }
+    .card-header span { color:white; font-weight:800; font-size:1.05rem; }
+    .imagen-wrap {
+        width:100%;
+        aspect-ratio:4/3;
+        background:#f0f0f0;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        overflow:hidden;
+    }
+    .imagen-wrap img { width:100%; height:100%; object-fit:contain; padding:0.5rem; }
+    .imagen-wrap i { font-size:3.5rem; color:#324C89; }
+    .contenido { padding:1.5rem; }
+    .badge {
+        display:inline-block;
+        background:#fdece9;
+        color:#e50914;
+        font-size:0.75rem;
+        font-weight:700;
+        padding:0.3rem 0.7rem;
+        border-radius:99px;
+        margin-bottom:0.75rem;
+    }
+    h1 { font-size:1.3rem; margin-bottom:0.5rem; color:#222; }
+    p.desc { color:#666; font-size:0.9rem; line-height:1.5; margin-bottom:1.25rem; }
+    .puntos-box {
+        background:#fff8e6;
+        border:1px solid #ffe4a3;
+        border-radius:10px;
+        padding:0.9rem 1rem;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        margin-bottom:1.5rem;
+    }
+    .puntos-box span:first-child { color:#555; font-size:0.9rem; }
+    .puntos-box strong { color:#b8860b; font-size:1.3rem; }
+    .btn-login {
+        display:block;
+        width:100%;
+        background:#e50914;
+        color:white;
+        text-align:center;
+        text-decoration:none;
+        padding:0.9rem;
+        border-radius:99px;
+        font-weight:700;
+        font-size:0.95rem;
+        border:none;
+        cursor:pointer;
+    }
+    .estado {
+        text-align:center;
+        color:#888;
+        padding:3rem 1.5rem;
+    }
+    .estado i { font-size:2rem; margin-bottom:1rem; display:block; }
+</style>
+</head>
+<body>
+    <div class="card">
+        <div class="card-header">
+            <span>🎬 Cinemarketer</span>
+        </div>
+        <div id="contenido">
+            <div class="estado">
+                <i class="fas fa-spinner fa-spin">⏳</i>
+                Cargando premio...
+            </div>
+        </div>
+    </div>
+
+<script>
+(async function() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    const tipo = params.get('tipo') === 'especial' ? 'especial' : 'comun';
+    const contenido = document.getElementById('contenido');
+
+    // Ajustá esta base si tu backend corre en otro dominio/puerto
+    const API_URL = 'https://cinemarketer-backend-production.up.railway.app/api';
+
+    if (!id) {
+        contenido.innerHTML = '<div class="estado">Premio no especificado</div>';
+        return;
+    }
+
+    const endpoint = tipo === 'especial'
+        ? `${API_URL}/premium/rewards/public/${id}`
+        : `${API_URL}/rewards/public/${id}`;
+
+    try {
+        const res = await fetch(endpoint);
+        if (!res.ok) throw new Error();
+        const p = await res.json();
+
+        const imagenHtml = p.imageUrl
+            ? `<img src="${p.imageUrl}" alt="${p.name}">`
+            : `<i>🎁</i>`;
+
+        contenido.innerHTML = `
+            <div class="imagen-wrap">${imagenHtml}</div>
+            <div class="contenido">
+                <span class="badge">${tipo === 'especial' ? '⭐ Premio exclusivo' : '🎁 Premio'}</span>
+                <h1>${p.name}</h1>
+                <p class="desc">${p.description || ''}</p>
+                <div class="puntos-box">
+                    <span>Puntos requeridos</span>
+                    <strong>${p.pointsRequired ?? '—'} pts</strong>
+                </div>
+                <a class="btn-login" href="https://cinemarketer.com.ar/login">Iniciar sesión para canjear</a>
+            </div>`;
+    } catch (e) {
+        contenido.innerHTML = '<div class="estado">Este premio ya no está disponible</div>';
+    }
+})();
+</script>
+</body>
+</html>

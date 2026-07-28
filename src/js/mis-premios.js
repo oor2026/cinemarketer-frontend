@@ -1320,9 +1320,11 @@ window.abrirModalPremio = function(premio) {
         setTimeout(() => modal.classList.add('open'), 10);
     };
 
-    window.compartirPremio = async function(rewardId, nombre) {
-        const urlOg = `https://cinemarketer-backend-production.up.railway.app/api/rewards/og/${rewardId}`;
-        const urlFront = `https://cinemarketer.com.ar/mis-premios?id=${rewardId}`;
+    window.compartirPremio = async function(rewardId, nombre, tipo = 'comun') {
+        const urlOg = tipo === 'especial'
+            ? `https://cinemarketer-backend-production.up.railway.app/api/premium/rewards/og/${rewardId}`
+            : `https://cinemarketer-backend-production.up.railway.app/api/rewards/og/${rewardId}`;
+        const urlFront = `https://cinemarketer.com.ar/premio-publico.html?id=${rewardId}&tipo=${tipo}`;
         const texto = `Mirá este premio en Cinemarketer: "${nombre}" 🎁`;
 
         if (navigator.share) {
