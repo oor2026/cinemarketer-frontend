@@ -1324,7 +1324,7 @@ window.abrirModalPremio = function(premio) {
         const urlOg = tipo === 'especial'
             ? `https://cinemarketer-backend-production.up.railway.app/api/premium/rewards/og/${rewardId}`
             : `https://cinemarketer-backend-production.up.railway.app/api/rewards/og/${rewardId}`;
-        const urlFront = `https://cinemarketer.com.ar/premio-publico.html?id=${rewardId}&tipo=${tipo}`;
+        const urlFront = `https://cinemarketer.com.ar/premio-publico?id=${rewardId}&tipo=${tipo}`;
         const texto = `Mirá este premio en Cinemarketer: "${nombre}" 🎁`;
 
         if (navigator.share) {
