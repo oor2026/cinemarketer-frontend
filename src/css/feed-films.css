@@ -1850,66 +1850,100 @@
         grid-column: unset !important;
     }
 
-    /* Carrusel — altura fija para ambos slides */
-    #modalPelicula .modal-carrusel {
-        display: flex !important;
-        overflow-x: auto !important;
-        overflow-y: hidden !important;
-        scroll-snap-type: x mandatory !important;
-        -webkit-overflow-scrolling: touch !important;
-        scroll-behavior: smooth !important;
-        width: 100% !important;
-        gap: 0 !important;
-        scrollbar-width: none !important;
-        height: 420px !important;
-    }
+    /* Carrusel — la altura se calcula sola a partir de la proporción real
+           de un poster de película (2:3), no un valor fijo arbitrario. Así la
+           caja siempre tiene la misma forma que la imagen que va adentro. */
+        #modalPelicula .modal-carrusel {
+                display: flex !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                scroll-snap-type: x mandatory !important;
+                -webkit-overflow-scrolling: touch !important;
+                scroll-behavior: smooth !important;
+                width: calc(100% + 2rem) !important;
+                margin-left: -1rem !important;
+                margin-right: -1rem !important;
+                margin-top: -1rem !important;
+                gap: 0 !important;
+                scrollbar-width: none !important;
+                aspect-ratio: 2 / 3 !important;
+                height: auto !important;
+            }
 
-    #modalPelicula .modal-carrusel::-webkit-scrollbar {
-        display: none;
-    }
+        #modalPelicula .modal-carrusel::-webkit-scrollbar {
+            display: none;
+        }
 
-    /* Ambos slides exactamente igual de altos */
-    #modalPelicula .carrusel-slide {
-        flex: 0 0 100% !important;
-        scroll-snap-align: start !important;
-        width: 100% !important;
-        height: 420px !important;
-        min-height: 420px !important;
-        box-sizing: border-box !important;
-        padding: 0.5rem !important;
-        overflow: hidden !important;
-        display: block !important;
-    }
+        /* Ambos slides ocupan el 100% de esa altura dinámica */
+        #modalPelicula .carrusel-slide {
+            flex: 0 0 100% !important;
+            scroll-snap-align: start !important;
+            width: 100% !important;
+            height: 100% !important;
+            box-sizing: border-box !important;
+            padding: 0.5rem !important;
+            overflow: hidden !important;
+            display: block !important;
+        }
 
-    /* Slide 1: sin padding para que imagen ocupe todo el ancho */
-    #modalPelicula .carrusel-slide:first-child {
-        padding: 0 !important;
-    }
+        /* Slide 1: sin padding para que la imagen llegue a los bordes reales */
+        #modalPelicula .carrusel-slide:first-child {
+            padding: 0 !important;
+        }
 
-    /* Slide 1: imagen llena todo */
-    #modalPelicula .carrusel-slide:first-child .modal-poster {
-        min-width: 130% !important;
-        height: 100% !important;
-        border-radius: 10px !important;
-        overflow: hidden !important;
-        margin: 0 !important;
-    }
+        /* Slide 1: el poster ocupa toda la caja, ya con su misma proporción —
+               no hace falta estirar ni dejar relleno vacío a los costados.
+               max-width: none es necesario para pisar una regla más vieja
+               (línea ~1219, #modalPelicula .modal-poster { max-width: 200px })
+               que quedó de un layout anterior sin carrusel — al ser una propiedad
+               distinta a width, seguía aplicando encima aunque esta regla sea
+               más específica. */
+            #modalPelicula .carrusel-slide:first-child .modal-poster {
+                width: 100% !important;
+                max-width: none !important;
+                height: 100% !important;
+                border-radius: 10px !important;
+                overflow: hidden !important;
+                margin: 0 !important;
+            }
 
-    #modalPelicula .carrusel-slide:first-child .modal-poster img {
-        width: 75% !important;
-        height: 100% !important;
-        object-fit: fill !important;
-        display: block !important;
-        border-radius: 10px;
-    }
+        #modalPelicula .carrusel-slide:first-child .modal-poster img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            display: block !important;
+            border-radius: 10px;
+        }
 
     /* Slide 2: datos con scroll interno */
-    #modalPelicula .carrusel-slide:last-child .modal-columna-derecha {
-        width: 100% !important;
-        height: 100% !important;
-        overflow-y: auto !important;
-        padding: 0.5rem !important;
-    }
+        #modalPelicula .carrusel-slide:last-child .modal-columna-derecha {
+            width: 100% !important;
+            height: 100% !important;
+            overflow-y: auto !important;
+            padding: 0.5rem !important;
+        }
+
+        /* Si la sinopsis es corta, el contenido se reparte con "aire" en vez
+           de quedar amontonado arriba con espacio vacío abajo. Si es larga,
+           no hay espacio sobrante para repartir y se comporta como una lista
+           normal con scroll — se adapta solo a los dos casos. */
+        #modalPelicula .carrusel-slide:last-child .modal-info {
+            min-height: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-evenly !important;
+            gap: 0.75rem !important;
+        }
+
+        /* La caja de sinopsis crece para ocupar el espacio extra que le toque,
+           y su contenido (título + texto) queda centrado dentro de esa caja
+           más alta en vez de pegado arriba con nada debajo. */
+        #modalPelicula .carrusel-slide:last-child .modal-sinopsis {
+            flex: 1 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+        }
 
     /* Miga de pan */
     .carrusel-dots {
