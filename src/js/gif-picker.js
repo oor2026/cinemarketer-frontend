@@ -14,26 +14,21 @@
     let triggerBtnRef = null;
 
     function getPosicionRelativa(triggerBtn) {
-        const modalBody = document.querySelector('#modalPelicula .modal-body');
-        if (!modalBody) return { top: 0, left: 0 };
+            const triggerRect = triggerBtn.getBoundingClientRect();
+            const pickerH = 340;
+            const pickerW = 320;
 
-        const modalRect   = modalBody.getBoundingClientRect();
-        const triggerRect = triggerBtn.getBoundingClientRect();
-        const scrollTop   = modalBody.scrollTop;
+            const spaceBelow = window.innerHeight - triggerRect.bottom;
+            let top = spaceBelow < pickerH + 10
+                ? triggerRect.top - pickerH - 6
+                : triggerRect.bottom + 6;
 
-        const pickerH    = 340;
-        const spaceBelow = modalRect.bottom - triggerRect.bottom;
+            let left = triggerRect.left;
+            if (left + pickerW > window.innerWidth) left = window.innerWidth - pickerW - 4;
+            if (left < 0) left = 4;
 
-        let top = spaceBelow < pickerH + 10
-            ? (triggerRect.top - modalRect.top + scrollTop) - pickerH - 6
-            : (triggerRect.bottom - modalRect.top + scrollTop) + 6;
-
-        let left = triggerRect.left - modalRect.left;
-        if (left + 324 > modalRect.width) left = modalRect.width - 328;
-        if (left < 0) left = 4;
-
-        return { top, left };
-    }
+            return { top, left };
+        }
 
     function crearPicker() {
         if (pickerEl) return;
@@ -41,8 +36,8 @@
         pickerEl = document.createElement('div');
         pickerEl.id = 'cine-gif-picker';
         pickerEl.style.cssText = `
-            position: absolute;
-            z-index: 9999;
+            position: fixed;
+            z-index: 1000001;
             width: 320px;
             background: white;
             border-radius: 12px;
@@ -82,9 +77,7 @@
             </div>
         `;
 
-        const modalBody = document.querySelector('#modalPelicula .modal-body') || document.body;
-        modalBody.style.position = 'relative';
-        modalBody.appendChild(pickerEl);
+        document.body.appendChild(pickerEl);
 
         document.addEventListener('click', (e) => {
             if (pickerEl &&

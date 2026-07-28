@@ -958,6 +958,136 @@
     margin-bottom: 1rem !important;
 }
 
+@media (max-width: 768px) {
+    #modalPelicula .modal-fila-comentarios:not(.comentarios-sheet-fixed) {
+        width: calc(100% + 2rem) !important;
+        margin-left: -1rem !important;
+        margin-right: -1rem !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        box-sizing: border-box !important;
+    }
+}
+
+/* Preview: solo se ven ~2 comentarios, con degradé al final para insinuar que hay más */
+#modalPelicula .modal-fila-comentarios .comentarios-lista {
+    max-height: 190px !important;
+    -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%) !important;
+    mask-image: linear-gradient(to bottom, black 75%, transparent 100%) !important;
+}
+
+#modalPelicula .ver-mas-comentarios {
+    text-align: center !important;
+    color: #e50914 !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    padding: 0.5rem 0 !important;
+    cursor: pointer !important;
+}
+
+/* Barra teaser "Escribí un comentario..." — reemplaza al botón rojo grande */
+#modalPelicula .comentario-teaser {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.6rem !important;
+    background: #f8f9fa !important;
+    border: 1.5px solid #e0e0e0 !important;
+    border-radius: 99px !important;
+    padding: 0.7rem 1rem !important;
+    color: #888 !important;
+    font-size: 0.9rem !important;
+    cursor: pointer !important;
+    margin: 1rem 0 !important;
+}
+
+#modalPelicula .comentario-teaser i {
+    color: #e50914 !important;
+}
+
+/* Header de la hoja — oculto por default, solo aparece cuando está abierta */
+#modalPelicula .comentarios-sheet-header {
+    display: none;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid #eee;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #333;
+}
+
+#modalPelicula .comentarios-sheet-header button {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    color: #333;
+    cursor: pointer;
+    padding: 0.25rem;
+}
+
+/* ===== Técnica de dos clases para la transición a pantalla completa ===== */
+
+/* Paso 1: se vuelve fixed, arrancando ya trasladada fuera de pantalla
+   (invisible, sin animación todavía — esto pasa instantáneo) */
+#modalPelicula .modal-fila-comentarios.comentarios-sheet-fixed {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 999999 !important;
+    background: white !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    transform: translateY(100%);
+    transition: transform 0.3s ease-out;
+}
+
+/* Paso 2: recién acá se anima el translateY, un instante después */
+#modalPelicula .modal-fila-comentarios.comentarios-sheet-fixed.comentarios-sheet-open {
+    transform: translateY(0);
+}
+
+/* Dentro de la hoja abierta: reordenar y expandir todo */
+#modalPelicula .comentarios-sheet-fixed .comentarios-sheet-header {
+    display: flex;
+    order: -1;
+}
+
+#modalPelicula .comentarios-sheet-fixed .comentarios-seccion-titulo,
+#modalPelicula .comentarios-sheet-fixed .ver-mas-comentarios {
+    display: none !important;
+}
+
+#modalPelicula .comentarios-sheet-fixed .spoiler-switch-row {
+    position: absolute !important;
+    top: 0 !important;
+    right: 1rem !important;
+    height: 100%;
+    max-height: 3.2rem;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    z-index: 2;
+}
+
+#modalPelicula .comentarios-sheet-fixed .comentarios-lista {
+    flex: 1 !important;
+    max-height: none !important;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+    overflow-y: auto !important;
+    padding: 0.5rem 1rem !important;
+}
+
+#modalPelicula .comentarios-sheet-fixed .comentario-escritura {
+    margin: 0 !important;
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+}
+
 /* Scrollbar */
 #modalPelicula .comentarios-lista::-webkit-scrollbar {
     width: 4px !important;

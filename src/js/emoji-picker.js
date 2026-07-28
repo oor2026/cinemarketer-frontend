@@ -110,26 +110,21 @@
     }
 
     function getPosicionRelativa(triggerBtn) {
-        const modalBody = document.querySelector('#modalPelicula .modal-body');
-        if (!modalBody) return { top: 0, left: 0 };
+            const triggerRect = triggerBtn.getBoundingClientRect();
+            const pickerH = 320;
+            const pickerW = 300;
 
-        const modalRect   = modalBody.getBoundingClientRect();
-        const triggerRect = triggerBtn.getBoundingClientRect();
-        const scrollTop   = modalBody.scrollTop;
+            const spaceBelow = window.innerHeight - triggerRect.bottom;
+            let top = spaceBelow < pickerH + 10
+                ? triggerRect.top - pickerH - 6
+                : triggerRect.bottom + 6;
 
-        const pickerH    = 320;
-        const spaceBelow = modalRect.bottom - triggerRect.bottom;
+            let left = triggerRect.left;
+            if (left + pickerW > window.innerWidth) left = window.innerWidth - pickerW - 4;
+            if (left < 0) left = 4;
 
-        let top = spaceBelow < pickerH + 10
-        ? (triggerRect.bottom - modalRect.top + scrollTop) - pickerH - 6
-        : (triggerRect.bottom - modalRect.top + scrollTop) + 6;
-
-        let left = triggerRect.left - modalRect.left;
-        if (left + 300 > modalRect.width) left = modalRect.width - 304;
-        if (left < 0) left = 4;
-
-        return { top, left };
-    }
+            return { top, left };
+        }
 
     function crearPicker() {
         if (pickerEl) return;
@@ -137,7 +132,7 @@
         pickerEl = document.createElement('div');
         pickerEl.id = 'cine-emoji-picker';
         pickerEl.className = 'cine-emoji-picker';
-        pickerEl.style.cssText = 'display:none; position:absolute; z-index:9999;';
+        pickerEl.style.cssText = 'display:none; position:fixed; z-index:1000001;';
 
         const tabsDiv = document.createElement('div');
         tabsDiv.className = 'cep-tabs';
@@ -161,10 +156,10 @@
         grid.id = 'cep-grid';
         pickerEl.appendChild(grid);
 
-        // Insertar dentro del modal-body para que respete su scroll
-        const modalBody = document.querySelector('#modalPelicula .modal-body') || document.body;
-        modalBody.style.position = 'relative';
-        modalBody.appendChild(pickerEl);
+        // position:fixed calcula respecto al viewport, así que lo insertamos
+                // directo en <body> — funciona igual esté la hoja de comentarios
+                // abierta (pantalla completa) o cerrada (dentro del modal normal)
+                document.body.appendChild(pickerEl);
 
         document.addEventListener('click', (e) => {
             if (pickerEl && !pickerEl.contains(e.target) && !e.target.classList.contains('cep-trigger')) {

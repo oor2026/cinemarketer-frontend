@@ -1233,7 +1233,7 @@ window.cargarDatosPelicula = async function(id) {
 
         document.getElementById('modalTitulo').textContent = pelicula.title || 'Título no disponible';
         const tituloComentarios = document.getElementById('comentariosTitulo');
-        if (tituloComentarios) tituloComentarios.textContent = `💬 Comentarios de ${pelicula.title || 'esta película'}`;
+                if (tituloComentarios) tituloComentarios.textContent = `💬 Comentarios`;
         const posterEl = document.getElementById('modalPoster');
         const posterSrc = pelicula.poster_path
             ? `https://image.tmdb.org/t/p/w500${pelicula.poster_path}`
@@ -1477,10 +1477,19 @@ window.cargarComentariosPelicula = async function(id) {
         const comentarios = await response.json();
 
         const modalComentariosCount = document.getElementById('modalComentariosCount');
-        if (modalComentariosCount) modalComentariosCount.innerHTML = `💬 <span class="modal-rating-num">${comentarios.length}</span><span class="modal-rating-label"> comentarios</span>`;
+                if (modalComentariosCount) modalComentariosCount.innerHTML = `💬 <span class="modal-rating-num">${comentarios.length}</span><span class="modal-rating-label"> comentarios</span>`;
 
-        const btnComentarios = document.getElementById('modalComentariosBtn');
-        if (btnComentarios) btnComentarios.textContent = comentarios.length;
+                const btnComentarios = document.getElementById('modalComentariosBtn');
+                if (btnComentarios) btnComentarios.textContent = comentarios.length;
+
+                const verMasCount = document.getElementById('verMasCount');
+                if (verMasCount) verMasCount.textContent = comentarios.length;
+
+                const sheetCount = document.getElementById('comentariosSheetCount');
+                if (sheetCount) sheetCount.textContent = comentarios.length;
+
+                const verMas = document.getElementById('verMasComentarios');
+                if (verMas) verMas.style.display = comentarios.length === 0 ? 'none' : 'block';
 
         lista.innerHTML = '';
         if (comentarios.length === 0) {
@@ -1541,8 +1550,8 @@ window.cargarComentariosPelicula = async function(id) {
                                 ${btnOcultar}
                             </div>
                         </div>
-                        <div class="comentario-texto" style="font-size:0.9rem;color:#444;margin:0.25rem 0;word-break:break-word;">${c.content}</div>
-                        ${c.hasGif && c.gifUrl ? `<img src="${c.gifUrl}" alt="GIF" style="max-width:100%;max-height:200px;border-radius:8px;margin-top:0.4rem;display:block;">` : ''}
+                        <div class="comentario-texto" id="comentario-texto-${c.id}" style="font-size:0.9rem;color:#444;margin:0.25rem 0;word-break:break-word;">${c.content}</div>
+                        ${c.hasGif && c.gifUrl ? `<img id="comentario-gif-${c.id}" src="${c.gifUrl}" alt="GIF" style="max-width:100%;max-height:200px;border-radius:8px;margin-top:0.4rem;display:block;">` : ''}
                         ${c.ownComment ? `
                         <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.4rem;flex-wrap:wrap;gap:0.4rem;">
                             <div style="display:flex;align-items:center;gap:0.75rem;">
@@ -2038,29 +2047,37 @@ window.cargarRespuestas = async function(commentId, offset) {
                                     </button>`}
                                 </div>
                             </div>
-                            <div style="font-size:0.85rem;color:#444;margin:0.2rem 0;word-break:break-word;">${r.content}</div>
-                            ${r.hasGif && r.gifUrl ? `<img src="${r.gifUrl}" alt="GIF" style="max-width:100%;max-height:160px;border-radius:8px;margin-top:0.3rem;display:block;">` : ''}
-                            <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.3rem;">
-                                <button onclick="window.toggleReplyBanco(${r.id}, this)"
-                                    data-active="${r.bancadoByMe}"
-                                    style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;
-                                           font-size:0.75rem;color:${r.bancadoByMe ? '#1a3a6b' : '#999'};padding:0;">
-                                    <i class="fas fa-thumbs-up"></i>
-                                    <span class="reply-banco-count-${r.id}">${r.bancoCount || 0}</span>
-                                    <span>Te banco</span>
-                                </button>
-                                <button onclick="window.abrirFormRespuesta(${commentId}, this, ${r.id})"
-                                    style="background:none;border:none;cursor:pointer;font-size:0.75rem;color:#999;padding:0;">
-                                    <i class="fas fa-reply"></i> Responder
-                                </button>
-                            </div>
-                            <div style="font-size:0.7rem;color:#bbb;margin-top:5px;">${new Date(r.createdAt).toLocaleString('es-ES', {
-                                                                                 day: '2-digit', month: '2-digit', year: 'numeric',
-                                                                                 hour: '2-digit', minute: '2-digit',
-                                                                                 timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-                                                                             })}</div>
-                        </div>
-                    `;
+                            <div class="respuesta-texto" id="respuesta-texto-${r.id}" style="font-size:0.85rem;color:#444;margin:0.2rem 0;word-break:break-word;">${r.content}</div>
+                                    ${r.hasGif && r.gifUrl ? `<img id="respuesta-gif-${r.id}" src="${r.gifUrl}" alt="GIF" style="max-width:100%;max-height:160px;border-radius:8px;margin-top:0.3rem;display:block;">` : ''}
+                                    <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.3rem;">
+                                        <button onclick="window.toggleReplyBanco(${r.id}, this)"
+                                            data-active="${r.bancadoByMe}"
+                                            style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;
+                                                   font-size:0.75rem;color:${r.bancadoByMe ? '#1a3a6b' : '#999'};padding:0;">
+                                            <i class="fas fa-thumbs-up"></i>
+                                            <span class="reply-banco-count-${r.id}">${r.bancoCount || 0}</span>
+                                            <span>Te banco</span>
+                                        </button>
+                                        <button onclick="window.abrirFormRespuesta(${commentId}, this, ${r.id})"
+                                            style="background:none;border:none;cursor:pointer;font-size:0.75rem;color:#999;padding:0;">
+                                            <i class="fas fa-reply"></i> Responder
+                                        </button>
+                                    </div>
+                                    <div style="display:flex;align-items:center;gap:0.5rem;margin-top:5px;">
+                                        <div class="respuesta-fecha" id="respuesta-fecha-${r.id}" style="font-size:0.7rem;color:#bbb;">${new Date(r.createdAt).toLocaleString('es-ES', {
+                                                                                         day: '2-digit', month: '2-digit', year: 'numeric',
+                                                                                         hour: '2-digit', minute: '2-digit',
+                                                                                         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                                                                                     })}${r.editedAt ? ' <span class="editado-label" style="color:#bbb;">(editado)</span>' : ''}</div>
+                                        ${r.canEdit ? `
+                                        <button onclick="window.editarRespuesta(${r.id}, this)"
+                                            style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.3rem;font-size:0.7rem;color:#aaa;padding:0;">
+                                            <i class="fas fa-pencil-alt"></i>
+                                            <span>Editar</span>
+                                        </button>` : ''}
+                                    </div>
+                                </div>
+                            `;
                     container.appendChild(div);
                 });
 
@@ -2330,6 +2347,29 @@ window.mostrarAreaComentario = function() {
             }
         }
     }
+};
+
+window.abrirComentariosSheet = function(enfocarEscritura) {
+    const fila = document.querySelector('#modalPelicula .modal-fila-comentarios');
+    if (!fila) return;
+
+    fila.classList.add('comentarios-sheet-fixed');
+    fila.offsetHeight;
+    fila.classList.add('comentarios-sheet-open');
+
+    if (enfocarEscritura) {
+        window.mostrarAreaComentario();
+    }
+};
+
+window.cerrarComentariosSheet = function() {
+    const fila = document.querySelector('#modalPelicula .modal-fila-comentarios');
+    if (!fila) return;
+
+    fila.classList.remove('comentarios-sheet-open');
+    setTimeout(() => {
+        fila.classList.remove('comentarios-sheet-fixed');
+    }, 300);
 };
 
 window.cancelarComentario = function() {
@@ -2898,11 +2938,14 @@ function mostrarMensajeLimiteDiario() {
 
 // ── Editar comentario ──────────────────────────────────────────
 window.editarComentario = function(commentId, btn) {
-    const contenedorTexto = btn.closest('[style*="justify-content:space-between"]')
-                               .previousElementSibling;
+    const contenedorTexto = document.getElementById(`comentario-texto-${commentId}`);
     if (!contenedorTexto) return;
 
     const textoActual = contenedorTexto.textContent.trim();
+    contenedorTexto.dataset.textoOriginal = textoActual;
+
+    const gifImg = document.getElementById(`comentario-gif-${commentId}`);
+    window[`_quitarGifComentario_${commentId}`] = false;
 
     // Reemplazar texto por textarea inline
     contenedorTexto.innerHTML = `
@@ -2910,8 +2953,16 @@ window.editarComentario = function(commentId, btn) {
             <textarea id="editTextarea-${commentId}"
                 style="width:100%;box-sizing:border-box;padding:0.5rem;border:1.5px solid #324C89;border-radius:8px;font-size:0.88rem;font-family:inherit;resize:none;min-height:60px;"
                 maxlength="2000">${textoActual}</textarea>
+            ${gifImg ? `
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+                <span style="font-size:0.78rem;color:#888;">GIF adjunto —</span>
+                <button onclick="window.marcarQuitarGifComentario(${commentId}, this)"
+                    style="background:none;border:1px solid #ddd;border-radius:6px;padding:0.15rem 0.5rem;font-size:0.75rem;cursor:pointer;color:#c0392b;">
+                    Quitar GIF
+                </button>
+            </div>` : ''}
             <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
-                <button onclick="window.cancelarEdicionComentario(${commentId}, '${textoActual.replace(/'/g, "\\'")}')"
+                <button onclick="window.cancelarEdicionComentario(${commentId})"
                     style="padding:0.3rem 0.75rem;border:1px solid #ddd;background:none;border-radius:6px;font-size:0.78rem;cursor:pointer;color:#666;">
                     Cancelar
                 </button>
@@ -2923,6 +2974,15 @@ window.editarComentario = function(commentId, btn) {
         </div>
     `;
     document.getElementById(`editTextarea-${commentId}`)?.focus();
+};
+
+window.marcarQuitarGifComentario = function(commentId, btn) {
+    window[`_quitarGifComentario_${commentId}`] = true;
+    const gifImg = document.getElementById(`comentario-gif-${commentId}`);
+    if (gifImg) gifImg.style.display = 'none';
+    btn.textContent = 'Se va a quitar al guardar';
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
 };
 
 window.cancelarEdicionComentario = function(commentId, textoOriginal) {
@@ -2938,6 +2998,8 @@ window.guardarEdicionComentario = async function(commentId) {
     const nuevoContenido = textarea.value.trim();
     if (!nuevoContenido) return;
 
+    const quitarGif = window[`_quitarGifComentario_${commentId}`] === true;
+
     const token = localStorage.getItem('token');
     try {
         const res = await fetch(`${CONFIG.API_URL}/comments/${commentId}/edit`, {
@@ -2946,7 +3008,7 @@ window.guardarEdicionComentario = async function(commentId) {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ content: nuevoContenido })
+            body: JSON.stringify({ content: nuevoContenido, removeGif: quitarGif ? 'true' : 'false' })
         });
 
         const data = await res.json();
@@ -2957,26 +3019,130 @@ window.guardarEdicionComentario = async function(commentId) {
         }
 
         // Actualizar el texto en el DOM
-        const contenedor = textarea.closest('[style*="flex-direction:column"]').parentElement;
-        contenedor.innerHTML = `<span>${data.content}</span>`;
+        const contenedorTexto = document.getElementById(`comentario-texto-${commentId}`);
+        if (contenedorTexto) contenedorTexto.textContent = data.content;
+
+        // Si se pidió quitar el GIF, sacarlo definitivamente del DOM
+        if (quitarGif) {
+            const gifImg = document.getElementById(`comentario-gif-${commentId}`);
+            if (gifImg) gifImg.remove();
+        }
 
         // Mostrar etiqueta editado en la fecha
-        const fechaEl = contenedor.closest('.comentario-item, [data-id]')
-                                  ?.querySelector('.comentario-fecha');
+        const fechaEl = contenedorTexto?.closest('.comentario-item')?.querySelector('.comentario-fecha');
         if (fechaEl && !fechaEl.querySelector('.editado-label')) {
             fechaEl.insertAdjacentHTML('beforeend',
                 ' <span class="editado-label" style="font-size:0.7rem;color:#bbb;">(editado)</span>');
         }
 
-        // Ocultar botón editar (ya fue editado o venció el tiempo)
-        const btnEditar = contenedor.closest('[data-id], .comentario-item')
-                                    ?.querySelector('button[title="Editar comentario"]');
+        // Ocultar botón editar (ya fue editado)
+        const btnEditar = contenedorTexto?.closest('.comentario-item')?.querySelector('button[title="Editar comentario"]');
         if (btnEditar) btnEditar.remove();
 
     } catch (e) {
         alert('Error al guardar la edición');
     }
 };
+
+window.editarRespuesta = function(replyId, btn) {
+    const contenedorTexto = document.getElementById(`respuesta-texto-${replyId}`);
+    if (!contenedorTexto) return;
+
+    const textoActual = contenedorTexto.textContent.trim();
+    contenedorTexto.dataset.textoOriginal = textoActual;
+
+    const gifImg = document.getElementById(`respuesta-gif-${replyId}`);
+    window[`_quitarGifRespuesta_${replyId}`] = false;
+
+    contenedorTexto.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:0.4rem;width:100%;">
+            <textarea id="editReplyTextarea-${replyId}"
+                style="width:100%;box-sizing:border-box;padding:0.5rem;border:1.5px solid #324C89;border-radius:8px;font-size:0.85rem;font-family:inherit;resize:none;min-height:50px;"
+                maxlength="2000">${textoActual}</textarea>
+            ${gifImg ? `
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+                <span style="font-size:0.75rem;color:#888;">GIF adjunto —</span>
+                <button onclick="window.marcarQuitarGifRespuesta(${replyId}, this)"
+                    style="background:none;border:1px solid #ddd;border-radius:6px;padding:0.15rem 0.5rem;font-size:0.72rem;cursor:pointer;color:#c0392b;">
+                    Quitar GIF
+                </button>
+            </div>` : ''}
+            <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+                <button onclick="window.cancelarEdicionRespuesta(${replyId})"
+                    style="padding:0.25rem 0.65rem;border:1px solid #ddd;background:none;border-radius:6px;font-size:0.72rem;cursor:pointer;color:#666;">
+                    Cancelar
+                </button>
+                <button onclick="window.guardarEdicionRespuesta(${replyId})"
+                    style="padding:0.25rem 0.65rem;background:#324C89;border:none;border-radius:6px;font-size:0.72rem;cursor:pointer;color:white;font-weight:600;">
+                    Guardar
+                </button>
+            </div>
+        </div>
+    `;
+    document.getElementById(`editReplyTextarea-${replyId}`)?.focus();
+};
+
+window.marcarQuitarGifRespuesta = function(replyId, btn) {
+    window[`_quitarGifRespuesta_${replyId}`] = true;
+    const gifImg = document.getElementById(`respuesta-gif-${replyId}`);
+    if (gifImg) gifImg.style.display = 'none';
+    btn.textContent = 'Se va a quitar al guardar';
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+};
+
+window.cancelarEdicionRespuesta = function(replyId) {
+    const contenedorTexto = document.getElementById(`respuesta-texto-${replyId}`);
+    if (!contenedorTexto) return;
+    contenedorTexto.textContent = contenedorTexto.dataset.textoOriginal || '';
+};
+
+window.guardarEdicionRespuesta = async function(replyId) {
+    const textarea = document.getElementById(`editReplyTextarea-${replyId}`);
+    if (!textarea) return;
+    const nuevoContenido = textarea.value.trim();
+    if (!nuevoContenido) return;
+
+    const quitarGif = window[`_quitarGifRespuesta_${replyId}`] === true;
+
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/comments/replies/${replyId}/edit`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ content: nuevoContenido, removeGif: quitarGif ? 'true' : 'false' })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            alert(data.error || 'No se pudo guardar la edición');
+            return;
+        }
+
+        const contenedorTexto = document.getElementById(`respuesta-texto-${replyId}`);
+                        if (contenedorTexto) contenedorTexto.textContent = data.content;
+
+                        if (quitarGif) {
+                            const gifImg = document.getElementById(`respuesta-gif-${replyId}`);
+                            if (gifImg) gifImg.remove();
+                        }
+
+                        const fechaEl = document.getElementById(`respuesta-fecha-${replyId}`);
+                if (fechaEl && !fechaEl.querySelector('.editado-label')) {
+                    fechaEl.insertAdjacentHTML('beforeend',
+                        ' <span class="editado-label" style="color:#bbb;">(editado)</span>');
+                }
+
+                const btnEditar = document.querySelector(`[onclick="window.editarRespuesta(${replyId}, this)"]`);
+                if (btnEditar) btnEditar.remove();
+            } catch (e) {
+                alert('Error de conexión al guardar la edición');
+            }
+        };
 
 window.compartirPelicula = async function(movieId, titulo) {
     const urlOg  = `https://cinemarketer-backend-production.up.railway.app/api/movies/og/${movieId}`;
