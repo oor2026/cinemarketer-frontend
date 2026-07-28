@@ -204,7 +204,15 @@
                 <!-- FILA INFERIOR: caja de comentarios (ancho completo) -->
                 <div class="modal-fila-comentarios">
 
-                    <!-- Título comentarios -->
+                    <!-- Header de la hoja (solo visible cuando está abierta a pantalla completa) -->
+                    <div class="comentarios-sheet-header" id="comentariosSheetHeader">
+                        <button onclick="window.cerrarComentariosSheet()" aria-label="Volver">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <span>Comentarios (<span id="comentariosSheetCount">0</span>)</span>
+                    </div>
+
+                    <!-- Título comentarios (solo visible en el preview, no dentro de la hoja) -->
                     <h4 class="comentarios-seccion-titulo" id="comentariosTitulo">💬 Comentarios</h4>
 
                     <!-- Switch modo spoiler -->
@@ -217,7 +225,12 @@
 
                     <!-- Lista de comentarios -->
                     <div class="comentarios-lista" id="comentariosLista">
-                        <div class="sin-comentarios">Expande para ver comentarios</div>
+                        <div class="sin-comentarios">Cargando comentarios...</div>
+                    </div>
+
+                    <!-- Link "ver más" — solo visible en el preview -->
+                    <div class="ver-mas-comentarios" id="verMasComentarios" onclick="window.abrirComentariosSheet(false)">
+                        Ver los <span id="verMasCount">0</span> comentarios
                     </div>
 
                     <!-- Área de escritura (oculta hasta presionar Comentar) -->
@@ -258,11 +271,12 @@
 
                 </div><!-- /modal-fila-comentarios -->
 
-                <!-- BOTÓN COMENTAR (ancho completo, siempre visible) -->
+                <!-- BARRA "ESCRIBÍ UN COMENTARIO" (ancho completo, siempre visible) -->
                 <div class="modal-fila-boton">
-                    <button class="btn-comentar" onclick="window.mostrarAreaComentario()">
-                        <i class="fas fa-pen"></i> Comentar
-                    </button>
+                    <div class="comentario-teaser" id="comentarioTeaser" onclick="window.abrirComentariosSheet(true)">
+                        <i class="fas fa-pen"></i>
+                        <span>Escribí un comentario...</span>
+                    </div>
                 </div>
 
             </div><!-- /modal-body -->
