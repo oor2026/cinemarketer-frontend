@@ -388,7 +388,7 @@ function renderDisponiblesPagina(pagina) {
                 <div class="premio-imagen">
                     ${imagen}
                     ${badgeTipo}
-                    <button onclick="event.stopPropagation(); window.compartirPremio(${p.id}, '${p.name.replace(/'/g, "\\'")}')"
+                    <button onclick="event.stopPropagation(); window.compartirPremio(${p.id}, '${p.name.replace(/'/g, "\\'")}', 'comun')"
                             title="Compartir"
                             style="position:absolute;top:8px;left:8px;background:#e50914;border:none;color:white;width:34px;height:34px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.25);">
                         <i class="fas fa-share-alt" style="font-size:0.8rem;"></i>
@@ -661,7 +661,7 @@ function renderCardEspecial(p, isPremium) {
             <div class="premio-imagen">
                 ${imagen}
                 ${badge}
-                <button onclick="event.stopPropagation(); window.compartirPremio(${p.id}, '${p.name.replace(/'/g, "\\'")}')"
+                <button onclick="event.stopPropagation(); window.compartirPremio(${p.id}, '${p.name.replace(/'/g, "\\'")}', 'especial')"
                         title="Compartir"
                         style="position:absolute;top:8px;left:8px;background:#e50914;border:none;color:white;width:34px;height:34px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.25);">
                     <i class="fas fa-share-alt" style="font-size:0.8rem;"></i>
