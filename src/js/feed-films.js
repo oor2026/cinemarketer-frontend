@@ -1489,7 +1489,13 @@ window.cargarComentariosPelicula = async function(id) {
                 if (sheetCount) sheetCount.textContent = comentarios.length;
 
                 const verMas = document.getElementById('verMasComentarios');
-                if (verMas) verMas.style.display = comentarios.length === 0 ? 'none' : 'block';
+                                if (verMas) {
+                                    if (comentarios.length === 0) {
+                                        verMas.style.setProperty('display', 'none', 'important');
+                                    } else {
+                                        verMas.style.removeProperty('display');
+                                    }
+                                }
 
         lista.innerHTML = '';
         if (comentarios.length === 0) {
@@ -2167,15 +2173,26 @@ window.abrirFormRespuesta = function(commentId, btn, replyId = null) {
     // Cerrar área de comentario principal si está abierta
     window.cancelarComentario();
 
+    // Cerrar cualquier edición abierta (de comentario o de respuesta)
+    document.querySelectorAll('#modalPelicula [data-texto-original]').forEach(el => {
+        el.textContent = el.dataset.textoOriginal;
+        delete el.dataset.textoOriginal;
+    });
+
     const container = document.querySelector(`.replies-container-${commentId}`);
     if (!container) return;
 
-    // Si ya hay un form abierto, lo quitamos
+    // Si ya hay un form abierto EN ESTE MISMO comentario, actúa como
+    // toggle: lo cerramos y listo (no se vuelve a abrir).
     const existing = container.querySelector('.reply-form');
     if (existing) {
         existing.remove();
         return;
     }
+
+    // Si había un form de respuesta abierto en OTRO comentario distinto,
+    // lo cerramos — solo puede haber uno abierto a la vez en todo el modal.
+    document.querySelectorAll('#modalPelicula .reply-form').forEach(f => f.remove());
 
     const form = document.createElement('div');
     form.className = 'reply-form';
@@ -2285,7 +2302,7 @@ window.activarModoSpoiler = function activarModoSpoiler(activar) {
     const label    = document.getElementById('spoilerSwitchLabel');
     const textarea = document.getElementById('nuevoComentario');
     const aviso    = document.getElementById('spoilerAviso');
-    const btnCom   = document.querySelector('.btn-comentar');
+    const btnCom   = document.querySelector('.comentario-teaser');
     const header   = document.querySelector('#modalPelicula .modal-header');
 
     toggle?.classList.toggle('activo', modoSpoilerActivo);
@@ -2325,9 +2342,20 @@ window.mostrarAreaComentario = function() {
     // Cerrar cualquier form de respuesta abierto
     document.querySelectorAll('.reply-form').forEach(f => f.remove());
 
-    const area = document.getElementById('areaEscritura');
-    if (area) {
-        area.style.display = 'block';
+    // Cerrar cualquier edición abierta (de comentario o de respuesta —
+    // ambas usan el mismo atributo data-texto-original), restaurando el
+    // texto original sin guardar nada.
+    document.querySelectorAll('#modalPelicula [data-texto-original]').forEach(el => {
+        el.textContent = el.dataset.textoOriginal;
+        delete el.dataset.textoOriginal;
+    });
+
+    const teaser = document.getElementById('comentarioTeaser');
+        if (teaser) teaser.style.setProperty('display', 'none', 'important');
+
+        const area = document.getElementById('areaEscritura');
+        if (area) {
+            area.style.display = 'block';
         const textarea = document.getElementById('nuevoComentario');
         if (textarea) {
             textarea.focus();
@@ -2373,8 +2401,11 @@ window.cerrarComentariosSheet = function() {
 };
 
 window.cancelarComentario = function() {
-    const area = document.getElementById('areaEscritura');
-    if (area) area.style.display = 'none';
+    const teaser = document.getElementById('comentarioTeaser');
+        if (teaser) teaser.style.removeProperty('display');
+
+        const area = document.getElementById('areaEscritura');
+        if (area) area.style.display = 'none';
 
     const input = document.getElementById('nuevoComentario');
     if (input) input.value = '';
@@ -2941,6 +2972,23 @@ window.editarComentario = function(commentId, btn) {
     const contenedorTexto = document.getElementById(`comentario-texto-${commentId}`);
     if (!contenedorTexto) return;
 
+    // Cerrar la caja de "escribir comentario nuevo" si estaba abierta
+    const area = document.getElementById('areaEscritura');
+    if (area && area.style.display !== 'none' && typeof window.cancelarComentario === 'function') {
+        window.cancelarComentario();
+    }
+
+    // Cerrar cualquier form de respuesta abierto
+    document.querySelectorAll('.reply-form').forEach(f => f.remove());
+
+    // Cerrar cualquier OTRA edición abierta (solo una a la vez)
+    document.querySelectorAll('#modalPelicula [data-texto-original]').forEach(el => {
+        if (el !== contenedorTexto) {
+            el.textContent = el.dataset.textoOriginal;
+            delete el.dataset.textoOriginal;
+        }
+    });
+
     const textoActual = contenedorTexto.textContent.trim();
     contenedorTexto.dataset.textoOriginal = textoActual;
 
@@ -3047,6 +3095,23 @@ window.guardarEdicionComentario = async function(commentId) {
 window.editarRespuesta = function(replyId, btn) {
     const contenedorTexto = document.getElementById(`respuesta-texto-${replyId}`);
     if (!contenedorTexto) return;
+
+    // Cerrar la caja de "escribir comentario nuevo" si estaba abierta
+    const area = document.getElementById('areaEscritura');
+    if (area && area.style.display !== 'none' && typeof window.cancelarComentario === 'function') {
+        window.cancelarComentario();
+    }
+
+    // Cerrar cualquier form de respuesta abierto
+    document.querySelectorAll('.reply-form').forEach(f => f.remove());
+
+    // Cerrar cualquier OTRA edición abierta (solo una a la vez)
+    document.querySelectorAll('#modalPelicula [data-texto-original]').forEach(el => {
+        if (el !== contenedorTexto) {
+            el.textContent = el.dataset.textoOriginal;
+            delete el.dataset.textoOriginal;
+        }
+    });
 
     const textoActual = contenedorTexto.textContent.trim();
     contenedorTexto.dataset.textoOriginal = textoActual;
