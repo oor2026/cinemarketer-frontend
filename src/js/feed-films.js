@@ -452,6 +452,11 @@ function renderSlideDestacado(idx) {
     // ==============================================
     window._votoRelampago = { movieId: null, chainFromId: null, streak: 0, vistas: [] };
 
+    function vrStorageKey() {
+        const token = localStorage.getItem('token') || '';
+        return 'vrEstado_' + token;
+    }
+
     window.cargarVotoRelampago = async function() {
         const contenedor = document.getElementById('votoRelampagoContainer');
         if (!contenedor) return;
@@ -460,7 +465,7 @@ function renderSlideDestacado(idx) {
         if (!token) { contenedor.style.display = 'none'; return; }
 
         try {
-            const guardado = JSON.parse(localStorage.getItem('vrEstado') || 'null');
+            const guardado = JSON.parse(localStorage.getItem(vrStorageKey()) || 'null');
             if (guardado && guardado.movieId) {
                 window._votoRelampago = guardado;
                 const res = await fetch(`${CONFIG.API_URL}/movies/${guardado.movieId}`, {
@@ -523,7 +528,7 @@ function renderSlideDestacado(idx) {
 
                 state.movieId = pelicula.id;
                 state.vistas = [...state.vistas.slice(-19), pelicula.id];
-                localStorage.setItem('vrEstado', JSON.stringify(state));
+                localStorage.setItem(vrStorageKey(), JSON.stringify(state));
 
                 contenedor.style.display = 'block';
                 renderVotoRelampago(pelicula);
