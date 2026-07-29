@@ -3050,25 +3050,29 @@ window.seleccionarTabFeed = function(tab, el) {
         let comunidadContainer = document.getElementById('comunidad-container');
 
         const destacada = document.getElementById('destacadaContainer');
+                const votoRelampago = document.getElementById('votoRelampagoContainer');
 
-                if (tab === 'peliculas') {
-                    if (gridPeliculas) gridPeliculas.style.display = '';
-                    if (paginacion) paginacion.style.display = '';
-                    if (pills) pills.style.display = '';
-                    if (filtros) filtros.style.display = '';
-                    if (btnFiltrosAvanzados) btnFiltrosAvanzados.style.display = '';
-                    if (comunidadContainer) comunidadContainer.style.display = 'none';
-                    // Solo la mostramos de nuevo si efectivamente hay una destacada
-                    // cargada — si nunca hubo (204) o falló, seguimos ocultándola.
-                    if (destacada && window._destacadaMovieId) destacada.style.display = 'block';
+                        if (tab === 'peliculas') {
+                            if (gridPeliculas) gridPeliculas.style.display = '';
+                            if (paginacion) paginacion.style.display = '';
+                            if (pills) pills.style.display = '';
+                            if (filtros) filtros.style.display = '';
+                            if (btnFiltrosAvanzados) btnFiltrosAvanzados.style.display = '';
+                            if (comunidadContainer) comunidadContainer.style.display = 'none';
+                            // Solo la mostramos de nuevo si efectivamente hay una destacada
+                            // cargada — si nunca hubo (204) o falló, seguimos ocultándola.
+                            if (destacada && window._destacadaMovieId) destacada.style.display = 'block';
+                            // Mismo criterio para Voto Relámpago: solo si hay película cargada.
+                            if (votoRelampago && window._votoRelampago && window._votoRelampago.movieId) votoRelampago.style.display = 'block';
 
-                } else if (tab === 'comunidad') {
-                    if (gridPeliculas) gridPeliculas.style.display = 'none';
-                    if (paginacion) paginacion.style.display = 'none';
-                    if (pills) pills.style.display = 'none';
-                    if (filtros) filtros.style.display = 'none';
-                    if (btnFiltrosAvanzados) btnFiltrosAvanzados.style.display = 'none';
-                    if (destacada) destacada.style.display = 'none';
+                        } else if (tab === 'comunidad') {
+                            if (gridPeliculas) gridPeliculas.style.display = 'none';
+                            if (paginacion) paginacion.style.display = 'none';
+                            if (pills) pills.style.display = 'none';
+                            if (filtros) filtros.style.display = 'none';
+                            if (btnFiltrosAvanzados) btnFiltrosAvanzados.style.display = 'none';
+                            if (destacada) destacada.style.display = 'none';
+                            if (votoRelampago) votoRelampago.style.display = 'none';
 
         // Crear contenedor si no existe
         if (!comunidadContainer) {
