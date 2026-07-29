@@ -78,6 +78,20 @@ if (dashToggle && dashMenu) {
     let lastScrollY = 0;
     let ticking = false;
 
+    // Si el navbar quedó oculto por scroll dentro del feed y el usuario
+    // navega a otro módulo (por ejemplo, un perfil público) sin volver a
+    // scrollear en el feed antes, la clase navbar-hidden se quedaba pegada
+    // para siempre — porque la única lógica que la saca vive adentro del
+    // scroll handler, que corta apenas el hash deja de ser feed-films.
+    // Por eso hay que restaurarlo explícitamente al cambiar de módulo.
+    window.addEventListener('hashchange', function() {
+        const hash = window.location.hash.replace('#', '') || 'feed-films';
+        if (hash !== 'feed-films') {
+            const navbar = document.querySelector('.navbar');
+            if (navbar) navbar.classList.remove('navbar-hidden');
+        }
+    });
+
     window.addEventListener('scroll', function() {
         if (window.innerWidth > 768) return;
 
