@@ -357,9 +357,9 @@ function iniciarRotacionDestacado() {
     ).join('');
 
     state.timer = setInterval(() => {
-        const siguiente = (state.actual + 1) % state.items.length;
-        renderSlideDestacado(siguiente);
-    }, 6000);
+            const siguiente = (state.actual + 1) % state.items.length;
+            renderSlideDestacado(siguiente);
+        }, 3000);
 }
 
 window.irASlideDestacado = function(idx) {
