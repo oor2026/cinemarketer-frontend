@@ -44,6 +44,29 @@
         <div class="destacada-dots" id="destacadaDots" style="display:none;"></div>
     </div>
 
+    <!-- VOTO RELÁMPAGO (like/dislike rápido, encadenado por similitud) -->
+    <div id="votoRelampagoContainer" style="display:none;">
+        <div class="vr-label">⚡ Voto Relámpago</div>
+        <div class="vr-leyenda">Tu voto, en un toque</div>
+        <div class="vr-wrap">
+            <div class="vr-card" id="vrCard"></div>
+            <div class="vr-flash" id="vrFlash"></div>
+            <i class="fas fa-bolt vr-bolt" id="vrBolt"></i>
+            <div class="vr-acciones">
+                <button class="vr-btn vr-btn-like" onclick="window.votoRelampagoVotar('like')">
+                    <i class="fas fa-thumbs-up"></i> Me gustó
+                </button>
+                <button class="vr-btn vr-btn-dislike" onclick="window.votoRelampagoVotar('dislike')">
+                    <i class="fas fa-thumbs-down"></i> No me gustó
+                </button>
+                <button class="vr-btn vr-btn-skip" onclick="window.votoRelampagoVotar('skip')">
+                    <i class="fas fa-eye-slash"></i> No la vi
+                </button>
+            </div>
+        </div>
+        <p class="vr-hint">Tocá la imagen para ver la ficha completa</p>
+    </div>
+
     <!-- PILLS DE ORDENAMIENTO -->
     <div class="ordenar-pills" id="ordenarPills">
         <button class="pill-orden active" data-criterio="fecha" onclick="window.seleccionarOrden('fecha', this)">🔥 Más populares</button>
@@ -690,6 +713,10 @@
                 margin-left: auto;
                 margin-right: auto;
             }
+            .destacada-label {
+                font-size: 16px;
+                padding: 20px 12px 6px;
+            }
             .destacada-badge,
             .destacada-premio-badge {
                 top: 28px; left: 28px;
@@ -729,6 +756,57 @@
             }
             .destacada-puntos-label {
                 font-size: 18px;
+            }
+            .vr-label {
+                font-size: 16px;
+                padding: 20px 12px 2px;
+            }
+            .vr-leyenda {
+                font-size: 14px;
+                padding: 0 12px 12px;
+            }
+            .vr-wrap {
+                max-width: 2000px;
+                margin-left: auto;
+                margin-right: auto;
+                padding: 16px;
+                border-radius: 26px;
+            }
+            .vr-card {
+                border-radius: 18px;
+            }
+            .vr-overlay {
+                padding: 28px 32px;
+            }
+            .vr-score {
+                font-size: 20px;
+                padding: 5px 16px;
+            }
+            .vr-titulo {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .vr-meta {
+                font-size: 16px;
+            }
+            .vr-acciones {
+                gap: 14px;
+                margin-top: 16px;
+            }
+            .vr-btn {
+                padding: 16px 8px;
+                font-size: 15px;
+                border-radius: 14px;
+            }
+            .vr-btn i {
+                font-size: 26px;
+            }
+            .vr-hint {
+                font-size: 13px;
+                margin: 8px 0 24px;
+            }
+            .vr-bolt {
+                font-size: 80px;
             }
         }
         @media (max-width: 768px) {

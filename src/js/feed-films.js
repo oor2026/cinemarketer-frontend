@@ -161,8 +161,9 @@ window.cargarPeliculasPopulares = async function(pagina = 1) {
         // también tiene que reconstruirse — no alcanza con cargarlo una sola
         // vez por sesión).
         window.cargarPeliculaDestacada();
+                window.cargarVotoRelampago();
 
-        window.estadoPaginacion.cargando = true;
+                window.estadoPaginacion.cargando = true;
     grid.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando películas...</div>';
 
     try {
@@ -445,6 +446,166 @@ function renderSlideDestacado(idx) {
             </div>`;
     }
 }
+
+    // ==============================================
+    // VOTO RELÁMPAGO (like/dislike rápido encadenado por similitud)
+    // ==============================================
+    window._votoRelampago = { movieId: null, chainFromId: null, streak: 0, vistas: [] };
+
+    window.cargarVotoRelampago = async function() {
+        const contenedor = document.getElementById('votoRelampagoContainer');
+        if (!contenedor) return;
+
+        const token = localStorage.getItem('token');
+        if (!token) { contenedor.style.display = 'none'; return; }
+
+        try {
+            const guardado = JSON.parse(localStorage.getItem('vrEstado') || 'null');
+            if (guardado && guardado.movieId) {
+                window._votoRelampago = guardado;
+                const res = await fetch(`${CONFIG.API_URL}/movies/${guardado.movieId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    contenedor.style.display = 'block';
+                    renderVotoRelampago(await res.json());
+                    return;
+                }
+            }
+        } catch (e) {}
+
+        await window.vrCargarSiguiente();
+    };
+
+    window.vrCargarSiguiente = async function() {
+        const contenedor = document.getElementById('votoRelampagoContainer');
+        if (!contenedor) return;
+        const token = localStorage.getItem('token');
+        if (!token) { contenedor.style.display = 'none'; return; }
+
+        const state = window._votoRelampago;
+        const romperCadena = !state.chainFromId || state.streak >= 4 || Math.random() < 0.25;
+
+        try {
+            let candidatos = [];
+            if (!romperCadena && state.chainFromId) {
+                const res = await fetch(`${CONFIG.API_URL}/movies/${state.chainFromId}/similar`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) candidatos = await res.json();
+            }
+            if (!candidatos || !candidatos.length) {
+                state.chainFromId = null;
+                state.streak = 0;
+                const pagina = Math.floor(Math.random() * 10) + 1;
+                const res = await fetch(`${CONFIG.API_URL}/movies/popular?page=${pagina}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) candidatos = await res.json();
+            }
+
+            candidatos = (candidatos.results || candidatos || []).filter(p =>
+                p.poster_path && p.overview && !state.vistas.includes(p.id)
+            );
+
+            for (const candidato of candidatos) {
+                const statsRes = await fetch(`${CONFIG.API_URL}/reviews/movies/${candidato.id}/stats`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const stats = statsRes.ok ? await statsRes.json() : null;
+                if (stats && stats.userVoteType) continue; // ya la votó, probamos con la siguiente
+
+                const detalleRes = await fetch(`${CONFIG.API_URL}/movies/${candidato.id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!detalleRes.ok) continue;
+                const pelicula = await detalleRes.json();
+
+                state.movieId = pelicula.id;
+                state.vistas = [...state.vistas.slice(-19), pelicula.id];
+                localStorage.setItem('vrEstado', JSON.stringify(state));
+
+                contenedor.style.display = 'block';
+                renderVotoRelampago(pelicula);
+                return;
+            }
+
+            contenedor.style.display = 'none'; // no encontramos candidatos sin votar por ahora
+        } catch (e) {
+            contenedor.style.display = 'none';
+        }
+    };
+
+    function renderVotoRelampago(p) {
+        const card = document.getElementById('vrCard');
+        if (!card) return;
+
+        const backdrop = p.backdrop_path
+            ? `https://image.tmdb.org/t/p/original${p.backdrop_path}`
+            : (p.poster_path ? `https://image.tmdb.org/t/p/w500${p.poster_path}` : '');
+        const anio = p.release_date ? new Date(p.release_date).getFullYear() : '—';
+        const generos = (p.genres || []).map(g => g.name).slice(0, 2).join(', ');
+        const duracion = p.runtime ? `${p.runtime} min` : '';
+        const meta = [anio, generos, duracion].filter(Boolean).join(' · ');
+        const score = p.vote_average ? `${Math.round(p.vote_average * 10)}%` : '—';
+
+        card.onclick = () => window.abrirDetallePelicula(p.id);
+        card.innerHTML = `
+            <img class="vr-img-real" src="${backdrop}" alt="${p.title || ''}">
+            <div class="vr-overlay">
+                <div class="vr-score">${score}</div>
+                <div class="vr-titulo">${p.title || ''}</div>
+                <div class="vr-meta">${meta}</div>
+            </div>`;
+    }
+
+    window.votoRelampagoVotar = async function(tipo) {
+        const state = window._votoRelampago;
+        const movieId = state.movieId;
+        if (!movieId) return;
+
+        vrDispararRayo();
+
+        if (tipo === 'like' || tipo === 'dislike') {
+            const token = localStorage.getItem('token');
+            try {
+                await fetch(`${CONFIG.API_URL}/reviews/movies/${movieId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ voteType: tipo.toUpperCase() })
+                });
+            } catch (e) {}
+
+            if (tipo === 'like') {
+                state.chainFromId = movieId;
+                state.streak = (state.streak || 0) + 1;
+            } else {
+                state.chainFromId = null;
+                state.streak = 0;
+            }
+        }
+        // "skip" (no la vi) no toca la cadena ni registra voto
+
+        setTimeout(() => { window.vrCargarSiguiente(); }, 320);
+    };
+
+    function vrDispararRayo() {
+        const flash = document.getElementById('vrFlash');
+        const bolt = document.getElementById('vrBolt');
+        if (!flash || !bolt) return;
+        flash.style.transition = 'none';
+        bolt.style.transition = 'none';
+        flash.style.opacity = '0.55';
+        bolt.style.opacity = '1';
+        bolt.style.transform = 'translate(-50%,-50%) scale(1.1) rotate(0deg)';
+        requestAnimationFrame(() => {
+            flash.style.transition = 'opacity .5s ease';
+            bolt.style.transition = 'opacity .5s ease, transform .5s ease';
+            flash.style.opacity = '0';
+            bolt.style.opacity = '0';
+            bolt.style.transform = 'translate(-50%,-50%) scale(1.6) rotate(6deg)';
+        });
+    }
 
 // Navega a Mis Premios y abre el modal del premio puntual apenas el
 // módulo termina de cargar (polling corto, sin tocar el router).
@@ -1192,11 +1353,33 @@ window.cerrarModal = function() {
             }
         }
 
-        window.peliculaActualId = null;
-        window.modalActualId = null;
-        window.cancelarComentario();
-    }
-};
+        // Sincronización con Voto Relámpago: si el usuario votó desde el
+                // modal (en vez de los botones del segmento), avanzamos solo,
+                // sin volver a pedirle el voto que ya emitió.
+                if (window._votoRelampago && window._votoRelampago.movieId == movieId) {
+                    fetch(`${CONFIG.API_URL}/reviews/movies/${movieId}/stats`, {
+                        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                    })
+                    .then(r => r.ok ? r.json() : null)
+                    .then(stats => {
+                        if (!stats || !stats.userVoteType) return; // no votó, no tocamos nada
+                        if (stats.userVoteType === 'LIKE') {
+                            window._votoRelampago.chainFromId = movieId;
+                            window._votoRelampago.streak = (window._votoRelampago.streak || 0) + 1;
+                        } else {
+                            window._votoRelampago.chainFromId = null;
+                            window._votoRelampago.streak = 0;
+                        }
+                        setTimeout(() => window.vrCargarSiguiente(), 200);
+                    })
+                    .catch(() => {});
+                }
+
+                window.peliculaActualId = null;
+                window.modalActualId = null;
+                window.cancelarComentario();
+            }
+        };
 
 window.abrirWorkflowDesdeModal = function() {
     const movieId = window.peliculaActualId;

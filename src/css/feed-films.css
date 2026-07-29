@@ -857,6 +857,123 @@
     }
 }
 
+.vr-label {
+            padding: 12px 12px 0;
+            font-size: 11px;
+            font-weight: 800;
+            color: #e08e00;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .vr-leyenda {
+            padding: 2px 12px 8px;
+            font-size: 11px;
+            color: #888;
+        }
+        .vr-wrap {
+            position: relative;
+            margin: 0 12px 6px;
+            padding: 10px;
+            border: 2px solid #ffb300;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .vr-card {
+            border-radius: 14px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+        .vr-img-real {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            max-height: 420px;
+            object-fit: cover;
+            display: block;
+            background: linear-gradient(135deg, #1a0a0a 0%, #3d0000 40%, #1a1a2e 100%);
+        }
+        .vr-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.25) 55%, transparent 100%);
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+        .vr-score {
+            align-self: flex-end;
+            background: #4caf50;
+            color: white;
+            font-size: 13px;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 99px;
+            margin-bottom: auto;
+        }
+        .vr-titulo {
+            color: white;
+            font-size: 18px;
+            font-weight: 900;
+            margin-bottom: 2px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+        .vr-meta {
+            color: rgba(255,255,255,0.7);
+            font-size: 12px;
+        }
+        .vr-acciones {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .vr-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 10px 4px;
+            border-radius: 12px;
+            border: 1.5px solid #eee;
+            background: white;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .vr-btn-like { color: #2e7d32; border-color: #c8e6c9; background: #f1f8f2; }
+        .vr-btn-like i { font-size: 18px; }
+        .vr-btn-dislike { color: #c62828; border-color: #ffcdd2; background: #fdf1f1; }
+        .vr-btn-dislike i { font-size: 18px; }
+        .vr-btn-skip { color: #888; }
+        .vr-btn-skip i { font-size: 18px; }
+        .vr-hint {
+            text-align: center;
+            font-size: 11px;
+            color: #999;
+            margin: 4px 0 14px;
+        }
+        .vr-flash {
+            position: absolute;
+            inset: 0;
+            background: #ffb300;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .vr-bolt {
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            font-size: 52px;
+            color: #ffb300;
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.4) rotate(-8deg);
+            pointer-events: none;
+            z-index: 6;
+            text-shadow: 0 4px 14px rgba(0,0,0,0.35);
+        }
+
 #modalPelicula .modal-sinopsis h4 {
     color: #333 !important;
     font-size: 1.2rem !important;
