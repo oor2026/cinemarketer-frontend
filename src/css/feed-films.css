@@ -871,13 +871,14 @@
             color: #888;
         }
         .vr-wrap {
-            position: relative;
-            margin: 0 12px 6px;
-            padding: 10px;
-            border: 2px solid #ffb300;
-            border-radius: 20px;
-            overflow: hidden;
-        }
+                    position: relative;
+                    margin: 0 12px 6px;
+                    padding: 10px;
+                    border: 4px solid #ffe999;
+                    border-radius: 20px;
+                    background: #ffe999; 
+                    overflow: hidden;
+                }
         .vr-card {
             border-radius: 14px;
             overflow: hidden;
