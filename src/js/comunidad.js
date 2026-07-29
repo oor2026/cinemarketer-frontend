@@ -1991,7 +1991,7 @@
 
                 const upsellCreator = (_wf.movieId && !isCreator) ? `
                         <div style="background:#fff9e6;border:1px solid #f5dd8a;border-radius:8px;padding:0.65rem 0.9rem;margin-bottom:0.75rem;font-size:0.78rem;color:#8a6d00;">
-                            ☝️ Con <b>Creator</b> podés enriquecer tus publicaciones vinculadas con: ficha técnica, cuenta regresiva de estreno, votaciones, sliders de expectativa, rankings, trivias y muchas más herramientas— y tus comentarios/respuestas quedan destacados con la insignia de autor.
+                            ☝️ Con <a href="javascript:void(0)" onclick="window.iniciarSuscripcionCreator()" style="color:#324C89;font-weight:700;text-decoration:underline;cursor:pointer;">Creator</a> podés enriquecer tus publicaciones vinculadas con: ficha técnica, cuenta regresiva de estreno, votaciones, sliders de expectativa, rankings, trivias y muchas más herramientas— y tus comentarios/respuestas quedan destacados con la insignia de autor.
                         </div>` : '';
 
                         return `
