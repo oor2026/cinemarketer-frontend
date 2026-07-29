@@ -1933,40 +1933,50 @@ function _renderProgresoBody(nivel, p) {
     }
 
     if (nivel === 'COLABORADOR') {
-            titulo = 'Crítico'; emoji = '🟣';
-            const peliculasOk     = (p.reviewsCount || 0) >= 200;
-            const comentOk        = (p.commentsCount || 0) >= 100;
-            const publicacionesOk = (p.publicationsCount || 0) >= 50;
-            const puntosOk        = (p.totalRedeemedPoints || 0) >= 4000;
-            items = _item(peliculasOk,     '200 películas únicas votadas') +
-                    _item(comentOk,        '100 comentarios en películas distintas') +
-                    _item(publicacionesOk, '50 publicaciones en Comunidad') +
-                    _item(false,           '25 usuarios seguidos') +
-                    _item(false,           '60 días activos en la plataforma') +
-                    _item(false,           '30 recomendaciones enviadas') +
-                    _item(false,           '20 "Te banco" de usuarios distintos') +
-                    _item(puntosOk,        '4.000 puntos canjeados');
-        }
+                titulo = 'Crítico'; emoji = '🟣';
+                const peliculasOk     = (p.reviewsCount || 0) >= 200;
+                const comentOk        = (p.commentsUniqueMoviesCount || 0) >= 100;
+                const publicacionesOk = (p.publicationsCount || 0) >= 50;
+                const seguidosOk      = (p.usuariosSeguidosCount || 0) >= 25;
+                const diasOk          = (p.diasActivos || 0) >= 60;
+                const recomendOk      = (p.recommendationsCount || 0) >= 30;
+                const teBancoOk       = (p.teBancoRecibidosCount || 0) >= 20;
+                const puntosOk        = (p.totalRedeemedPoints || 0) >= 4000;
+                items = _item(peliculasOk,     '200 películas únicas votadas') +
+                        _item(comentOk,        '100 comentarios en películas distintas') +
+                        _item(publicacionesOk, '50 publicaciones en Comunidad') +
+                        _item(seguidosOk,      '25 usuarios seguidos') +
+                        _item(diasOk,          '60 días activos en la plataforma') +
+                        _item(recomendOk,      '30 recomendaciones enviadas') +
+                        _item(teBancoOk,       '20 "Te banco" de usuarios distintos') +
+                        _item(puntosOk,        '4.000 puntos canjeados');
+            }
 
-        if (nivel === 'CRITICO') {
-            titulo = 'Jurado Experto'; emoji = '🏆';
-            const premiumOk       = !!p.isPremium;
-            const peliculasOk     = (p.reviewsCount || 0) >= 500;
-            const comentOk        = (p.commentsCount || 0) >= 300;
-            const publicacionesOk = (p.publicationsCount || 0) >= 200;
-            const puntosOk        = (p.totalRedeemedPoints || 0) >= 20000;
-            items = _item(premiumOk,       'Suscripción Premium activa') +
-                    _item(peliculasOk,     '500 películas únicas votadas') +
-                    _item(comentOk,        '300 comentarios en películas distintas') +
-                    _item(publicacionesOk, '200 publicaciones en Comunidad') +
-                    _item(false,           '100 usuarios seguidos') +
-                    _item(false,           '120 días activos en la plataforma') +
-                    _item(false,           '200 recomendaciones enviadas') +
-                    _item(false,           '100 "Te banco" de usuarios distintos') +
-                    _item(false,           '100 "Merecés un punto" recibidos') +
-                    _item(false,           '100 seguidores ganados') +
-                    _item(puntosOk,        '20.000 puntos canjeados');
-        }
+            if (nivel === 'CRITICO') {
+                titulo = 'Jurado Experto'; emoji = '🏆';
+                const premiumOk       = !!p.isPremium;
+                const peliculasOk     = (p.reviewsCount || 0) >= 500;
+                const comentOk        = (p.commentsUniqueMoviesCount || 0) >= 300;
+                const publicacionesOk = (p.publicationsCount || 0) >= 200;
+                const seguidosOk      = (p.usuariosSeguidosCount || 0) >= 100;
+                const diasOk          = (p.diasActivos || 0) >= 120;
+                const recomendOk      = (p.recommendationsCount || 0) >= 200;
+                const teBancoOk       = (p.teBancoRecibidosCount || 0) >= 100;
+                const merecePuntoOk   = (p.merecePuntosCount || 0) >= 100;
+                const seguidoresOk    = (p.seguidoresGanadosCount || 0) >= 100;
+                const puntosOk        = (p.totalRedeemedPoints || 0) >= 20000;
+                items = _item(premiumOk,       'Suscripción Premium activa') +
+                        _item(peliculasOk,     '500 películas únicas votadas') +
+                        _item(comentOk,        '300 comentarios en películas distintas') +
+                        _item(publicacionesOk, '200 publicaciones en Comunidad') +
+                        _item(seguidosOk,      '100 usuarios seguidos') +
+                        _item(diasOk,          '120 días activos en la plataforma') +
+                        _item(recomendOk,      '200 recomendaciones enviadas') +
+                        _item(teBancoOk,       '100 "Te banco" de usuarios distintos') +
+                        _item(merecePuntoOk,   '100 "Merecés un punto" recibidos') +
+                        _item(seguidoresOk,    '100 seguidores ganados') +
+                        _item(puntosOk,        '20.000 puntos canjeados');
+            }
 
     return `
         <div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Próximo objetivo</div>
