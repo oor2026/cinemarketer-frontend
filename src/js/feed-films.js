@@ -578,36 +578,42 @@ function renderSlideDestacado(idx) {
     }
 
     window.votoRelampagoVotar = async function(tipo) {
-        const state = window._votoRelampago;
-        const movieId = state.movieId;
-        if (!movieId) return;
+            if (window._votoRelampagoProcesando) return; // ignora clicks mientras hay un voto en curso
+            window._votoRelampagoProcesando = true;
 
-        vrDispararRayo();
+            const state = window._votoRelampago;
+            const movieId = state.movieId;
+            if (!movieId) { window._votoRelampagoProcesando = false; return; }
 
-        if (tipo === 'like' || tipo === 'dislike') {
-            const token = localStorage.getItem('token');
-            try {
-                await fetch(`${CONFIG.API_URL}/reviews/movies/${movieId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ voteType: tipo.toUpperCase() })
-                });
-            } catch (e) {}
+            vrDispararRayo();
 
-            if (window._votoRelampagoVotadas) window._votoRelampagoVotadas.add(movieId);
+            if (tipo === 'like' || tipo === 'dislike') {
+                const token = localStorage.getItem('token');
+                try {
+                    await fetch(`${CONFIG.API_URL}/reviews/movies/${movieId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ voteType: tipo.toUpperCase() })
+                    });
+                } catch (e) {}
 
-                    if (tipo === 'like') {
-                        state.chainFromId = movieId;
-                        state.streak = (state.streak || 0) + 1;
-                    } else {
-                        state.chainFromId = null;
-                        state.streak = 0;
+                if (window._votoRelampagoVotadas) window._votoRelampagoVotadas.add(movieId);
+
+                        if (tipo === 'like') {
+                            state.chainFromId = movieId;
+                            state.streak = (state.streak || 0) + 1;
+                        } else {
+                            state.chainFromId = null;
+                            state.streak = 0;
+                        }
                     }
-                }
-        // "skip" (no la vi) no toca la cadena ni registra voto
+            // "skip" (no la vi) no toca la cadena ni registra voto
 
-        setTimeout(() => { window.vrCargarSiguiente(); }, 320);
-    };
+            setTimeout(async () => {
+                await window.vrCargarSiguiente();
+                window._votoRelampagoProcesando = false;
+            }, 320);
+        };
 
     function vrDispararRayo() {
         const flash = document.getElementById('vrFlash');
