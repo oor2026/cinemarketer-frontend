@@ -850,6 +850,30 @@
                 padding-right: 1rem;
             }
         }
+        .puntos-flotantes {
+            position: fixed;
+            left: 50%;
+            bottom: 110px;
+            background: #2e7d32;
+            color: #fff;
+            font-weight: 800;
+            font-size: 14px;
+            padding: 9px 20px;
+            border-radius: 99px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+            z-index: 9999;
+            pointer-events: none;
+            animation: puntosFlotar 1.6s ease forwards;
+        }
+        .puntos-flotantes-neg {
+            background: #c62828;
+        }
+        @keyframes puntosFlotar {
+            0%   { opacity: 0; transform: translate(-50%, 0) scale(0.85); }
+            15%  { opacity: 1; transform: translate(-50%, -12px) scale(1); }
+            75%  { opacity: 1; transform: translate(-50%, -95px) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -125px) scale(1); }
+        }
     </style>
 
     <!-- ============================================== -->
