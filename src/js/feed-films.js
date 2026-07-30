@@ -578,26 +578,30 @@ function renderSlideDestacado(idx) {
     }
 
     window.votoRelampagoVotar = async function(tipo) {
-            if (window._votoRelampagoProcesando) return; // ignora clicks mientras hay un voto en curso
-            window._votoRelampagoProcesando = true;
+                if (window._votoRelampagoProcesando) return; // ignora clicks mientras hay un voto en curso
+                window._votoRelampagoProcesando = true;
 
-            const state = window._votoRelampago;
-            const movieId = state.movieId;
-            if (!movieId) { window._votoRelampagoProcesando = false; return; }
+                const state = window._votoRelampago;
+                const movieId = state.movieId;
+                if (!movieId) { window._votoRelampagoProcesando = false; return; }
 
-            vrDispararRayo();
+                vrDispararRayo();
 
-            if (tipo === 'like' || tipo === 'dislike') {
-                const token = localStorage.getItem('token');
-                try {
-                    await fetch(`${CONFIG.API_URL}/reviews/movies/${movieId}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                        body: JSON.stringify({ voteType: tipo.toUpperCase() })
-                    });
-                } catch (e) {}
+                if (tipo === 'like' || tipo === 'dislike') {
+                    const token = localStorage.getItem('token');
+                    try {
+                        const res = await fetch(`${CONFIG.API_URL}/reviews/movies/${movieId}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({ voteType: tipo.toUpperCase() })
+                        });
+                        if (res.ok) {
+                            const stats = await res.json();
+                            mostrarPuntosGanados(stats.pointsAwarded);
+                        }
+                    } catch (e) {}
 
-                if (window._votoRelampagoVotadas) window._votoRelampagoVotadas.add(movieId);
+                    if (window._votoRelampagoVotadas) window._votoRelampagoVotadas.add(movieId);
 
                         if (tipo === 'like') {
                             state.chainFromId = movieId;
@@ -614,6 +618,17 @@ function renderSlideDestacado(idx) {
                 window._votoRelampagoProcesando = false;
             }, 320);
         };
+
+    function mostrarPuntosGanados(puntos) {
+        if (!puntos) return; // null, 0 o undefined: no corresponde animar
+
+        const el = document.createElement('div');
+        el.className = 'puntos-flotantes' + (puntos < 0 ? ' puntos-flotantes-neg' : '');
+        el.textContent = (puntos > 0 ? 'Sumaste +' : 'Perdiste ') + Math.abs(puntos) + ' puntos';
+        document.body.appendChild(el);
+
+        setTimeout(() => el.remove(), 1700);
+    }
 
     function vrDispararRayo() {
         const flash = document.getElementById('vrFlash');
@@ -1028,10 +1043,11 @@ window.votarPelicula = async function(movieId, tipo, event) {
         }
 
         const stats = await response.json();
+                mostrarPuntosGanados(stats.pointsAwarded);
 
-        if (typeof window.loadHeaderUserInfo === 'function') {
-            window.loadHeaderUserInfo();
-        }
+                if (typeof window.loadHeaderUserInfo === 'function') {
+                    window.loadHeaderUserInfo();
+                }
 
         const totalVotos = (stats.likes || 0) + (stats.dislikes || 0);
         const porcentaje = totalVotos > 0 ? Math.round((stats.likes / totalVotos) * 100) : 0;
@@ -2697,10 +2713,12 @@ window.enviarComentario = async function() {
         }
 
         const data = await response.json();
+                const comentarioCreado = data.comment || data;
+                mostrarPuntosGanados(comentarioCreado.pointsAwarded);
 
-        input.value = '';
-        window._gifSeleccionado = null;
-        window.cancelarComentario();
+                input.value = '';
+                window._gifSeleccionado = null;
+                window.cancelarComentario();
 
         const contadorCard = document.getElementById(`comentarios-card-${movieId}`);
         if (contadorCard) {

@@ -334,10 +334,12 @@ window.enviarRecomendacion = async function() {
             );
 
             const exitosas  = responses.filter(r => r.ok);
-            const duplicadas = responses.filter(r => !r.ok && r.data?.error?.includes('Ya le recomendaste'));
-            const sinPuntos  = exitosas.some(r => r.data?.sinPuntos === true);
+                        const duplicadas = responses.filter(r => !r.ok && r.data?.error?.includes('Ya le recomendaste'));
+                        const sinPuntos  = exitosas.some(r => r.data?.sinPuntos === true);
+                        const puntosTotal = exitosas.reduce((acc, r) => acc + (r.data?.pointsAwarded || 0), 0);
+                        mostrarPuntosGanados(puntosTotal);
 
-            window.cerrarPanelRecomendar();
+                        window.cerrarPanelRecomendar();
 
             if (duplicadas.length > 0 && exitosas.length === 0) {
                 // Todas duplicadas

@@ -2951,12 +2951,13 @@
                 }
 
                 if (_wf.videoUid) {
-                    mostrarToastProcesandoVideo();
-                } else {
-                    // Si ya confirmó de antemano que no sumaría puntos, no
-                    // repetimos la misma info en un segundo toast — solo éxito.
-                    mostrarToastPublicacion(_wf._confirmoSinPuntos ? -1 : pubCreada.pointsAwarded, pubCreada.moderationStatus);
-                }
+                                    mostrarToastProcesandoVideo();
+                                } else {
+                                    // Si ya confirmó de antemano que no sumaría puntos, no
+                                    // repetimos la misma info en un segundo toast — solo éxito.
+                                    mostrarToastPublicacion(_wf._confirmoSinPuntos ? -1 : pubCreada.pointsAwarded, pubCreada.moderationStatus);
+                                    mostrarPuntosGanados(pubCreada.pointsAwarded);
+                                }
 
             } catch(e) {
                 mostrarModalErrorPublicar(e.message || 'Ocurrió un error al publicar. Intentá de nuevo.');
