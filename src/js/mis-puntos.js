@@ -158,7 +158,8 @@ function getIconForAction(action) {
         ADMIN_GRANT:          'fa-gift',
         PUBLISH_POST:         'fa-pen-alt',
         RECEIVE_BANCO_POST:   'fa-fist-raised',
-        RECEIVE_MERECE_POST:  'fa-star'
+        RECEIVE_MERECE_POST:  'fa-star',
+        TRIVIA_ANSWER:        'fa-question-circle'
     };
     return icons[action] || 'fa-coins';
 }
@@ -176,7 +177,8 @@ function getLabelForAction(action) {
         PUBLISH_POST:         'Publicación en Comunidad',
         RECEIVE_BANCO_POST:   'Te bancaron una publicación',
         RECEIVE_MERECE_POST:  'Merecés un punto en publicación',
-        PUBLICATION_SANCTION: 'Sanción por moderación'
+        PUBLICATION_SANCTION: 'Sanción por moderación',
+        TRIVIA_ANSWER:        'Trivia diaria'
     };
     return labels[action] || action;
 }

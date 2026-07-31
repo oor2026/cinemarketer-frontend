@@ -4,6 +4,13 @@
 
 window._triviaTimerInterval = null;
 
+function triviaFechaHoy() {
+    return new Date().toISOString().slice(0, 10);
+}
+function triviaYaAdvertido() {
+    return localStorage.getItem('triviaAdvertenciaFecha') === triviaFechaHoy();
+}
+
 function triviaGuestToken() {
     let token = localStorage.getItem('triviaGuestToken');
     if (!token) {
@@ -64,10 +71,41 @@ window.abrirTrivia = async function() {
             headers: triviaAuthHeaders()
         });
         const estado = await res.json();
-        renderTriviaEstado(estado);
+
+        // Advertencia solo antes de la primera pregunta del día, una vez por día
+        const esPrimeraPregunta = estado.estado === 'EN_CURSO' && estado.preguntaActual === 1;
+        if (esPrimeraPregunta && !triviaYaAdvertido()) {
+            renderTriviaAdvertencia(estado);
+        } else {
+            renderTriviaEstado(estado);
+        }
     } catch (e) {
         document.getElementById('triviaModalContenido').innerHTML =
             '<div class="trivia-resultado"><p>No pudimos cargar la trivia. Probá de nuevo.</p></div>';
+    }
+};
+
+function renderTriviaAdvertencia(estado) {
+    document.getElementById('triviaModalContenido').innerHTML = `
+        <div class="trivia-advertencia">
+            <i class="fas fa-question-circle"></i>
+            <h3>Adivina Adivinador</h3>
+            <p>Son 10 preguntas, un tiro por pregunta — 10 segundos cada una.</p>
+            <p>Tenés <strong>un solo intento por día</strong>. Si te equivocás en cualquier pregunta, el juego termina ahí y volvés a poder jugar recién mañana.</p>
+            <div class="trivia-advertencia-botones">
+                <button class="trivia-btn-primario" onclick="window.triviaConfirmarInicio()">Estoy listo, ¡a jugar!</button>
+                <button class="trivia-btn-secundario" onclick="window.cerrarTrivia()">Ahora no</button>
+            </div>
+        </div>
+    `;
+    window._triviaEstadoPendiente = estado;
+}
+
+window.triviaConfirmarInicio = function() {
+    localStorage.setItem('triviaAdvertenciaFecha', triviaFechaHoy());
+    if (window._triviaEstadoPendiente) {
+        renderTriviaEstado(window._triviaEstadoPendiente);
+        window._triviaEstadoPendiente = null;
     }
 };
 
