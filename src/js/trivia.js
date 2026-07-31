@@ -310,17 +310,23 @@ function renderRankingTrivia(ranking) {
     };
 
     cont.innerHTML = `
-        <h3 class="ranking-titulo">🏆 Ranking de cinéfilos</h3>
-        <p class="ranking-sub">Por cantidad de aciertos en Adivina Adivinador</p>
-        <div>
-            ${ranking.map(r => `
-                <div class="ranking-fila${r.esUsuarioActual ? ' yo' : ''}">
-                    <span class="ranking-pos${r.posicion <= 3 ? ' top3' : ''}">#${r.posicion}</span>
-                    <span>${r.nombre}${r.esUsuarioActual ? ' (vos)' : ''}</span>
-                    <span class="ranking-aciertos">${r.aciertos}</span>
-                    <span class="ranking-tiempo">${formatTiempo(r.tiempoTotalSegundos)}</span>
+            <h3 class="ranking-titulo">🏆 Ranking de cinéfilos</h3>
+            <p class="ranking-sub">Por cantidad de aciertos en Adivina Adivinador</p>
+            <div class="ranking-tabla">
+                <div class="ranking-fila ranking-header">
+                    <span>Puesto</span>
+                    <span>Usuario</span>
+                    <span class="ranking-aciertos">Aciertos</span>
+                    <span class="ranking-tiempo">Tiempo</span>
                 </div>
-            `).join('')}
-        </div>
-    `;
+                ${ranking.map(r => `
+                    <div class="ranking-fila${r.esUsuarioActual ? ' yo' : ''}">
+                        <span class="ranking-pos${r.posicion <= 3 ? ' top3' : ''}">#${r.posicion}</span>
+                        <span>${r.nombre}${r.esUsuarioActual ? ' (vos)' : ''}</span>
+                        <span class="ranking-aciertos">${r.aciertos}</span>
+                        <span class="ranking-tiempo">${formatTiempo(r.tiempoTotalSegundos)}</span>
+                    </div>
+                `).join('')}
+            </div>
+        `;
 }

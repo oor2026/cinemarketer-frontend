@@ -1090,6 +1090,27 @@
                     background: none; color: #888; font-size: 13px; cursor: pointer;
                 }
 
+                .ranking-titulo { text-align: center; margin: 0 0 4px; font-size: 18px; }
+                        .ranking-sub { text-align: center; color: #888; font-size: 13px; margin: 0 0 16px; }
+                        .ranking-tabla { border: 1px solid #eee; border-radius: 10px; overflow: hidden; }
+                        .ranking-fila {
+                            display: grid; grid-template-columns: 50px 1fr 70px 60px;
+                            align-items: center; gap: 10px; padding: 10px 12px;
+                            border-bottom: 1px solid #f0f0f0; font-size: 13px;
+                        }
+                        .ranking-fila:last-child { border-bottom: none; }
+                        .ranking-header {
+                            background: #f7f5ff; font-size: 11px; font-weight: 800;
+                            text-transform: uppercase; letter-spacing: 0.5px; color: #6d28d9;
+                        }
+                        .ranking-fila.yo { background: #f7f5ff; font-weight: 700; }
+                        .ranking-pos { color: #888; font-weight: 700; }
+                        .ranking-pos.top3 { color: #f5a623; }
+                        .ranking-aciertos { color: #2e7d32; font-weight: 700; text-align: right; }
+                        .ranking-tiempo { color: #999; text-align: right; font-size: 12px; }
+                        .ranking-header .ranking-aciertos,
+                        .ranking-header .ranking-tiempo { color: inherit; font-weight: inherit; }
+
 #modalPelicula .modal-sinopsis h4 {
     color: #333 !important;
     font-size: 1.2rem !important;
