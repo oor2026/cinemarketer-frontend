@@ -44,6 +44,25 @@
         <div class="destacada-dots" id="destacadaDots" style="display:none;"></div>
     </div>
 
+    <!-- ADIVINA ADIVINADOR (trivia diaria) -->
+    <div id="triviaBadgeContainer" style="display:none;" onclick="window.abrirTrivia()">
+        <div class="trivia-badge">
+            <div class="trivia-badge-icon"><i class="fas fa-question-circle"></i></div>
+            <div class="trivia-badge-texto">
+                <p class="trivia-badge-titulo">Adivina adivinador</p>
+                <p class="trivia-badge-sub" id="triviaBadgeSub">Cargando...</p>
+            </div>
+            <i class="fas fa-chevron-right trivia-badge-chevron"></i>
+        </div>
+    </div>
+
+    <div id="triviaModal" class="trivia-modal-overlay" style="display:none;">
+        <div class="trivia-modal">
+            <button class="trivia-cerrar" onclick="window.cerrarTrivia()"><i class="fas fa-times"></i></button>
+            <div id="triviaModalContenido"></div>
+        </div>
+    </div>
+
     <!-- VOTO RELÁMPAGO (like/dislike rápido, encadenado por similitud) -->
     <div id="votoRelampagoContainer" style="display:none;">
         <div class="vr-label">⚡ Voto Relámpago</div>

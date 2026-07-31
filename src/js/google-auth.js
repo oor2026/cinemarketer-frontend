@@ -151,13 +151,18 @@ window.googleAuth = {
     },
 
     _guardarSesionYRedirigir: function(data) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('userEmail', data.email);
-        localStorage.setItem('userRole', data.role);
-        localStorage.setItem('userPoints', data.totalPoints);
-        localStorage.setItem('userLevel', data.level || 'AMATEUR');
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('userEmail', data.email);
+            localStorage.setItem('userRole', data.role);
+            localStorage.setItem('userPoints', data.totalPoints);
+            localStorage.setItem('userLevel', data.level || 'AMATEUR');
 
-        showToast('success', '¡Bienvenido a Cinemarketer!');
+            // Si jugó Trivia como invitado hoy, le atribuye ese intento
+            if (typeof window.triviaIntentarReclamar === 'function') {
+                window.triviaIntentarReclamar();
+            }
+
+            showToast('success', '¡Bienvenido a Cinemarketer!');
 
         setTimeout(() => {
             if (data.role === 'ADMIN') {

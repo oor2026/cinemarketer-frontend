@@ -466,6 +466,11 @@
                 localStorage.setItem('userPoints', data.totalPoints);
                 localStorage.setItem('userLevel', data.level || 'AMATEUR');
 
+                // Si jugó Trivia como invitado hoy, le atribuye ese intento
+                if (typeof window.triviaIntentarReclamar === 'function') {
+                    window.triviaIntentarReclamar();
+                }
+
                 showToast('success', '¡Bienvenido de nuevo!');
 
                 // Redirigir según rol
