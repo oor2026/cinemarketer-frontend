@@ -1049,9 +1049,23 @@
         .trivia-opcion.correcta { background: #f1f8f2; border-color: #c8e6c9; color: #2e7d32; }
         .trivia-opcion.incorrecta { background: #fdf1f1; border-color: #ffcdd2; color: #c62828; }
         .trivia-resultado { text-align: center; padding: 30px 10px 10px; }
-        .trivia-resultado i { font-size: 44px; margin-bottom: 14px; display: block; }
-        .trivia-resultado h3 { font-size: 18px; margin: 0 0 8px; }
-        .trivia-resultado p { font-size: 14px; color: #666; margin: 0; }
+                .trivia-resultado i { font-size: 44px; margin-bottom: 14px; display: block; }
+                .trivia-resultado h3 { font-size: 18px; margin: 0 0 8px; }
+                .trivia-resultado p { font-size: 14px; color: #666; margin: 0; }
+
+                .trivia-advertencia { text-align: center; padding: 10px; }
+                .trivia-advertencia i { font-size: 40px; color: #7c3aed; margin-bottom: 14px; display: block; }
+                .trivia-advertencia h3 { font-size: 17px; margin: 0 0 10px; }
+                .trivia-advertencia p { font-size: 14px; color: #555; line-height: 1.5; margin: 0 0 8px; text-align: left; }
+                .trivia-advertencia-botones { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; }
+                .trivia-btn-primario {
+                    padding: 13px; border-radius: 12px; border: none;
+                    background: #7c3aed; color: white; font-size: 14px; font-weight: 700; cursor: pointer;
+                }
+                .trivia-btn-secundario {
+                    padding: 10px; border-radius: 12px; border: none;
+                    background: none; color: #888; font-size: 13px; cursor: pointer;
+                }
 
 #modalPelicula .modal-sinopsis h4 {
     color: #333 !important;
