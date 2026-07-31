@@ -231,9 +231,12 @@ const adminFeed = {
             let icono = '';
 
             if (item.tipo === 'PELICULA_DESTACADA') {
-                    icono = '<i class="fas fa-film"></i>';
-                    etiqueta = 'Película destacada';
-                } else if (item.tipo === 'PELICULA_CARRUSEL') {
+                                icono = '<i class="fas fa-film"></i>';
+                                etiqueta = 'Película destacada';
+                            } else if (item.tipo === 'RANKING_TRIVIA') {
+                                icono = '<i class="fas fa-trophy"></i>';
+                                etiqueta = 'Ranking Trivia (Adivina Adivinador)';
+                            } else if (item.tipo === 'PELICULA_CARRUSEL') {
                     icono = '<i class="fas fa-clapperboard"></i>';
                     try {
                         const res = await fetch(`${CONFIG.API_URL}/movies/${item.movieId}`, {
@@ -283,6 +286,22 @@ const adminFeed = {
                 alert(error.message);
             }
         },
+
+        async agregarRankingAlCarrusel() {
+                    try {
+                        const response = await fetch(`${CONFIG.API_URL}/admin/feed/carrusel/ranking-trivia`, {
+                            method: 'POST',
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (!response.ok) {
+                            const err = await response.json().catch(() => ({}));
+                            throw new Error(err.error || 'Error al agregar');
+                        }
+                        await this.cargarCarrusel();
+                    } catch (error) {
+                        alert(error.message);
+                    }
+                },
 
         abrirSelectorPremio(tipo) {
             this.tipoPremioSeleccionando = tipo;

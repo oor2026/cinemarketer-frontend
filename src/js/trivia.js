@@ -137,21 +137,22 @@ function renderTriviaPregunta(pregunta, numero, total) {
     const etiqueta = pregunta.tipo === 'QUIEN_ES' ? '¿Quién es?' : 'Adivina la película';
 
     cont.innerHTML = `
-        <div class="trivia-header">
-            <span class="trivia-progreso">Pregunta ${numero} de ${total}</span>
-            <div class="trivia-timer"><i class="fas fa-clock"></i> <span id="triviaTimerNum">10s</span></div>
-        </div>
-        <div class="trivia-barra-tiempo"><div class="trivia-barra-tiempo-fill" id="triviaBarraFill" style="width:100%;"></div></div>
-        <p class="trivia-tipo-label">${etiqueta}</p>
-        ${mediaHtml}
-        <div class="trivia-opciones" id="triviaOpciones">
-            ${pregunta.opciones.map((op, i) =>
-                `<button class="trivia-opcion" onclick="window.triviaResponder(${i})">${op}</button>`
-            ).join('')}
-        </div>
-    `;
+            <div class="trivia-header">
+                <span class="trivia-progreso">Pregunta ${numero} de ${total}</span>
+                <div class="trivia-timer"><i class="fas fa-clock"></i> <span id="triviaTimerNum">10s</span></div>
+            </div>
+            <div class="trivia-barra-tiempo"><div class="trivia-barra-tiempo-fill" id="triviaBarraFill" style="width:100%;"></div></div>
+            <p class="trivia-tipo-label">${etiqueta}</p>
+            ${mediaHtml}
+            <div class="trivia-opciones" id="triviaOpciones">
+                ${pregunta.opciones.map((op, i) =>
+                    `<button class="trivia-opcion" onclick="window.triviaResponder(${i})">${op}</button>`
+                ).join('')}
+            </div>
+        `;
 
-    iniciarTimer();
+        window._triviaInicioPregunta = Date.now();
+        iniciarTimer();
 }
 
 function iniciarTimer() {
@@ -181,11 +182,15 @@ window.triviaResponder = async function(opcionElegida) {
 
     document.querySelectorAll('#triviaOpciones .trivia-opcion').forEach(b => b.style.pointerEvents = 'none');
 
+    const tiempoSegundos = window._triviaInicioPregunta
+        ? Math.min(10, Math.round((Date.now() - window._triviaInicioPregunta) / 1000))
+        : 10;
+
     try {
         const res = await fetch(`${CONFIG.API_URL}/trivia/responder${triviaQueryParam()}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...triviaAuthHeaders() },
-            body: JSON.stringify({ opcionElegida })
+            body: JSON.stringify({ opcionElegida, tiempoSegundos })
         });
 
         if (res.status === 409) {
@@ -269,3 +274,53 @@ window.triviaIntentarReclamar = async function() {
         }
     } catch (e) {}
 };
+
+window.abrirRankingTrivia = async function() {
+    const modal = document.getElementById('rankingTriviaModal');
+    modal.style.display = 'flex';
+    document.getElementById('rankingTriviaContenido').innerHTML =
+        '<div class="trivia-resultado"><i class="fas fa-spinner fa-spin"></i></div>';
+
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/trivia/ranking`, { headers: triviaAuthHeaders() });
+        const ranking = await res.json();
+        renderRankingTrivia(ranking);
+    } catch (e) {
+        document.getElementById('rankingTriviaContenido').innerHTML =
+            '<div class="trivia-resultado"><p>No pudimos cargar el ranking.</p></div>';
+    }
+};
+
+window.cerrarRankingTrivia = function() {
+    document.getElementById('rankingTriviaModal').style.display = 'none';
+};
+
+function renderRankingTrivia(ranking) {
+    const cont = document.getElementById('rankingTriviaContenido');
+
+    if (!ranking || ranking.length === 0) {
+        cont.innerHTML = '<div class="trivia-resultado"><p>Todavía no hay suficientes aciertos para armar el ranking.</p></div>';
+        return;
+    }
+
+    const formatTiempo = (seg) => {
+        const m = Math.floor(seg / 60);
+        const s = seg % 60;
+        return m > 0 ? `${m}m ${s}s` : `${s}s`;
+    };
+
+    cont.innerHTML = `
+        <h3 class="ranking-titulo">🏆 Ranking de cinéfilos</h3>
+        <p class="ranking-sub">Por cantidad de aciertos en Adivina Adivinador</p>
+        <div>
+            ${ranking.map(r => `
+                <div class="ranking-fila${r.esUsuarioActual ? ' yo' : ''}">
+                    <span class="ranking-pos${r.posicion <= 3 ? ' top3' : ''}">#${r.posicion}</span>
+                    <span>${r.nombre}${r.esUsuarioActual ? ' (vos)' : ''}</span>
+                    <span class="ranking-aciertos">${r.aciertos}</span>
+                    <span class="ranking-tiempo">${formatTiempo(r.tiempoTotalSegundos)}</span>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}

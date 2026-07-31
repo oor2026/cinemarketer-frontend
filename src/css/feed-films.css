@@ -976,16 +976,39 @@
         }
 
         .trivia-badge {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin: 0 6px 6px;
-            padding: 30px 30px;
-            background: white;
-            border: 1.5px solid #ded8fb;
-            border-radius: 16px;
-            cursor: pointer;
-            }
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    margin: 0 6px 6px;
+                    padding: 12px 22px;
+                    background: white;
+                    border: 1.5px solid #ded8fb;
+                    border-radius: 16px;
+                    cursor: pointer;
+                    position: relative;
+                    overflow: hidden;
+                }
+                .trivia-bg-icon {
+                    position: absolute;
+                    color: #7c3aed;
+                    opacity: 0.18;
+                    pointer-events: none;
+                    z-index: 0;
+                }
+                .trivia-badge-icon,
+                .trivia-badge-texto,
+                .trivia-badge-chevron {
+                    position: relative;
+                    z-index: 1;
+                }
+
+         .ranking-bg-icon {
+                     position: absolute;
+                     color: white;
+                     opacity: 0.16;
+                     pointer-events: none;
+                     z-index: 0;
+                 }
         .trivia-badge-icon {
             width: 52px; height: 52px;
             border-radius: 12px;
