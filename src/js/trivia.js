@@ -136,6 +136,9 @@ function iniciarTimer() {
 }
 
 window.triviaResponder = async function(opcionElegida) {
+    if (window._triviaEnviando) return; // ya hay una respuesta en curso — ignorar
+    window._triviaEnviando = true;
+
     if (window._triviaTimerInterval) clearInterval(window._triviaTimerInterval);
 
     document.querySelectorAll('#triviaOpciones .trivia-opcion').forEach(b => b.style.pointerEvents = 'none');
@@ -146,6 +149,15 @@ window.triviaResponder = async function(opcionElegida) {
             headers: { 'Content-Type': 'application/json', ...triviaAuthHeaders() },
             body: JSON.stringify({ opcionElegida })
         });
+
+        if (res.status === 409) {
+            // Se detectó una doble respuesta — no confiamos en este resultado,
+            // volvemos a pedir el estado real desde el servidor.
+            window._triviaEnviando = false;
+            window.abrirTrivia();
+            return;
+        }
+
         const data = await res.json();
 
         const botones = document.querySelectorAll('#triviaOpciones .trivia-opcion');
@@ -159,21 +171,23 @@ window.triviaResponder = async function(opcionElegida) {
         }
 
         setTimeout(() => {
-            if (data.estado === 'EN_CURSO') {
-                renderTriviaPregunta(data.siguientePregunta, data.preguntaActual, undefined);
-            } else if (data.estado === 'GANADA') {
-                renderTriviaGanada();
-            } else {
-                renderTriviaPerdida();
-            }
-            window.cargarTriviaBadge(); // refresca el badge del feed con el nuevo estado
-        }, 1200);
+                    if (data.estado === 'EN_CURSO') {
+                        renderTriviaPregunta(data.siguientePregunta, data.preguntaActual, undefined);
+                    } else if (data.estado === 'GANADA') {
+                        renderTriviaGanada();
+                    } else {
+                        renderTriviaPerdida();
+                    }
+                    window.cargarTriviaBadge(); // refresca el badge del feed con el nuevo estado
+                    window._triviaEnviando = false;
+                }, 1200);
 
-    } catch (e) {
-        document.getElementById('triviaModalContenido').innerHTML =
-            '<div class="trivia-resultado"><p>Hubo un error al responder. Cerrá e intentá de nuevo.</p></div>';
-    }
-};
+            } catch (e) {
+                window._triviaEnviando = false;
+                document.getElementById('triviaModalContenido').innerHTML =
+                    '<div class="trivia-resultado"><p>Hubo un error al responder. Cerrá e intentá de nuevo.</p></div>';
+            }
+        };
 
 function renderTriviaGanada() {
     document.getElementById('triviaModalContenido').innerHTML = `
