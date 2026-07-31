@@ -56,7 +56,7 @@ function actualizarBadgeSub(estado) {
     if (estado.estado === 'GANADA') {
         sub.textContent = '¡Ganaste hoy! Volvé mañana';
     } else if (estado.estado === 'PERDIDA') {
-        sub.textContent = 'Volvé mañana a las 00hs';
+        sub.textContent = 'Volvé a intentarlo mañana';
     } else {
         sub.textContent = `Pregunta ${estado.preguntaActual} de ${estado.totalPreguntas}`;
     }
@@ -247,7 +247,7 @@ function renderTriviaPerdida() {
         <div class="trivia-resultado">
             <i class="fas fa-hourglass-half" style="color:#999;"></i>
             <h3>¡Casi!</h3>
-            <p>Volvé mañana a las 00hs para tu próxima trivia.</p>
+            <p>Volvé mañana. A partir de las 00hs reestableceremos tu intento diario.</p>
         </div>
     `;
 }
