@@ -162,6 +162,7 @@ window.cargarPeliculasPopulares = async function(pagina = 1) {
         // vez por sesión).
         window.cargarPeliculaDestacada();
                 window.cargarVotoRelampago();
+                window.cargarTriviaBadge();
 
                 window.estadoPaginacion.cargando = true;
     grid.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando películas...</div>';
@@ -3095,6 +3096,7 @@ window.seleccionarTabFeed = function(tab, el) {
 
         const destacada = document.getElementById('destacadaContainer');
                 const votoRelampago = document.getElementById('votoRelampagoContainer');
+                const triviaBadge = document.getElementById('triviaBadgeContainer');
 
                         if (tab === 'peliculas') {
                             if (gridPeliculas) gridPeliculas.style.display = '';
@@ -3108,8 +3110,9 @@ window.seleccionarTabFeed = function(tab, el) {
                             if (destacada && window._destacadaMovieId) destacada.style.display = 'block';
                             // Mismo criterio para Voto Relámpago: solo si hay película cargada.
                             if (votoRelampago && window._votoRelampago && window._votoRelampago.movieId) votoRelampago.style.display = 'block';
+                                                if (triviaBadge && window._triviaEstadoCargado) triviaBadge.style.display = 'block';
 
-                        } else if (tab === 'comunidad') {
+                                            } else if (tab === 'comunidad') {
                             if (gridPeliculas) gridPeliculas.style.display = 'none';
                             if (paginacion) paginacion.style.display = 'none';
                             if (pills) pills.style.display = 'none';
@@ -3117,6 +3120,7 @@ window.seleccionarTabFeed = function(tab, el) {
                             if (btnFiltrosAvanzados) btnFiltrosAvanzados.style.display = 'none';
                             if (destacada) destacada.style.display = 'none';
                             if (votoRelampago) votoRelampago.style.display = 'none';
+                            if (triviaBadge) triviaBadge.style.display = 'none';
 
         // Crear contenedor si no existe
         if (!comunidadContainer) {
