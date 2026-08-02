@@ -242,7 +242,7 @@ function ctaInvitadoHtml(puntos) {
         <div class="trivia-cta-invitado">
             <p>Jugaste como invitado — sumaste <strong>${puntos} puntos</strong> hoy. Iniciá sesión o creá tu cuenta para que no se pierdan y quedar en el ranking de cinéfilos.</p>
             <div class="trivia-advertencia-botones">
-                <button class="trivia-btn-primario" onclick="window.location.href='login.html'">Iniciar sesión / crear cuenta</button>
+                <button class="trivia-btn-cta-invitado" onclick="window.location.href='login.html'">Iniciar sesión / crear cuenta</button>
             </div>
         </div>`;
 }
