@@ -440,6 +440,12 @@ function activarSwipeManual(track) {
             startScrollLeft = track.scrollLeft;
             ancho = track.clientWidth;
             track.dataset.dragging = '1';
+            track._scrollToken = (track._scrollToken || 0) + 1;
+
+            if (track._guinoTimeouts) {
+                track._guinoTimeouts.forEach(id => clearTimeout(id));
+                track._guinoTimeouts = [];
+            }
         }, { passive: true });
 
     track.addEventListener('touchmove', (e) => {
@@ -618,10 +624,13 @@ function detenerGuinoIntermitente(fila) {
 }
 
 function animarScrollTrack(track, destino, duracion) {
+    track._scrollToken = (track._scrollToken || 0) + 1;
+    const miToken = track._scrollToken;
     const inicio = track.scrollLeft;
     const delta = destino - inicio;
     const t0 = performance.now();
     function paso(t) {
+        if (track._scrollToken !== miToken) return; // se canceló — arrancó un drag real
         const p = Math.min((t - t0) / duracion, 1);
         const ease = 1 - Math.pow(1 - p, 3);
         track.scrollLeft = inicio + delta * ease;
@@ -631,7 +640,7 @@ function animarScrollTrack(track, destino, duracion) {
 }
 
 function dispararGuino(track) {
-    if (track.dataset.dragging === '1') return; // no interrumpir un drag real del usuario
+    if (track.dataset.dragging === '1') return;
     if (track.scrollWidth <= track.clientWidth + 2) return;
 
     const base = track.scrollLeft;
@@ -639,10 +648,17 @@ function dispararGuino(track) {
     track.style.scrollSnapType = 'none';
 
     animarScrollTrack(track, base + distancia, 500);
-    setTimeout(() => {
+
+    const t1 = setTimeout(() => {
         animarScrollTrack(track, base, 500);
-        setTimeout(() => { track.style.scrollSnapType = 'x mandatory'; }, 550);
-    }, 1100); // se queda afuera 900ms antes de volver — bien perceptible
+        const t2 = setTimeout(() => {
+            if (track.dataset.dragging !== '1') track.style.scrollSnapType = 'x mandatory';
+        }, 550);
+        track._guinoTimeouts.push(t2);
+    }, 1100);
+
+    track._guinoTimeouts = track._guinoTimeouts || [];
+    track._guinoTimeouts.push(t1);
 }
 
 function renderDotsFila(fila) {
