@@ -248,7 +248,7 @@ function ctaInvitadoHtml(puntos) {
 }
 
 function urlTriviaPublica() {
-    return `${window.location.origin}/trivia`;
+    return `${window.location.origin}/trivia-publica`;
 }
 
 window.compartirTrivia = async function() {
