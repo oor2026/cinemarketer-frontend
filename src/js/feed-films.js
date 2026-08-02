@@ -275,6 +275,502 @@ window.cargarPeliculasPopulares = async function(pagina = 1) {
 // ==============================================
 window._carruselDestacado = { items: [], actual: 0, timer: null };
 
+// ==============================================
+// FILAS POR GÉNERO (mobile) — un carrusel por pill/género
+// ==============================================
+window._filasGenero = [];
+window._filasGeneroCargadas = false;
+
+function esMobileFilas() {
+    return window.innerWidth <= 768;
+}
+
+window.cargarFilasGenero = async function() {
+    window.cargarPeliculaDestacada();
+    window.cargarVotoRelampago();
+    window.cargarTriviaBadge();
+
+    const grid = document.getElementById('peliculasGrid');
+    const filasCont = document.getElementById('filasGeneroContainer');
+    if (grid) grid.style.display = 'none';
+    if (filasCont) filasCont.style.display = 'block';
+
+    if (window._filasGeneroCargadas) {
+        renderFilasGenero();
+        return;
+    }
+
+    const fijas = [
+        { key: 'fecha', label: '🔥 Más populares', tipo: 'fijo' },
+        { key: 'proximamente', label: '🎬 Lo que se viene', tipo: 'fijo' },
+        { key: 'votos', label: '👍 Más votadas', tipo: 'fijo' }
+    ];
+
+    let generos = [];
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${CONFIG.API_URL}/movies/genres`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            const iconosPorGenero = {
+                            'Acción': '💥', 'Aventura': '🗺️', 'Animación': '🎨', 'Comedia': '😂',
+                            'Crimen': '🔪', 'Documental': '🎥', 'Drama': '🎭', 'Familia': '👨‍👩‍👧',
+                            'Fantasía': '🧙', 'Historia': '📜', 'Terror': '👻', 'Música': '🎵',
+                            'Misterio': '🔎', 'Romance': '💕', 'Ciencia ficción': '🚀',
+                            'Película de TV': '📺', 'Suspense': '😰', 'Bélica': '⚔️', 'Western': '🤠'
+                        };
+
+                        generos = (data.genres || [])
+                            .slice()
+                            .sort((a, b) => a.name.localeCompare(b.name, 'es'))
+                            .map(g => ({
+                                key: `genero-${g.id}`,
+                                label: `${iconosPorGenero[g.name] || '🎞️'} ${g.name}`,
+                                tipo: 'genero',
+                                generoId: g.id
+                            }));
+        }
+    } catch (e) {}
+
+    window._filasGenero = [...fijas, ...generos].map(f => ({ ...f, peliculas: [], cargado: false, pagina: 1, finDelCatalogo: false, cargandoMas: false }));
+    window._filasGeneroCargadas = true;
+
+    renderPillsFilas();
+    renderFilasGenero();
+};
+
+function renderPillsFilas() {
+    const pillsCont = document.getElementById('ordenarPills');
+    if (!pillsCont) return;
+    pillsCont.innerHTML = window._filasGenero.map((f, i) =>
+        `<button class="pill-orden${i === 0 ? ' active' : ''}" data-key="${f.key}" onclick="window.priorizarFilaGenero('${f.key}', this)">${f.label}</button>`
+    ).join('');
+}
+
+window.priorizarFilaGenero = function(key, btn) {
+    document.querySelectorAll('#ordenarPills .pill-orden').forEach(p => p.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+
+    const idx = window._filasGenero.findIndex(f => f.key === key);
+    if (idx > 0) {
+        const [fila] = window._filasGenero.splice(idx, 1);
+        window._filasGenero.unshift(fila);
+    }
+    renderFilasGenero();
+
+    const cont = document.getElementById('filasGeneroContainer');
+        if (cont) {
+            const header = document.querySelector('header');
+            const offset = (header ? header.offsetHeight : 70) + 16; // altura del header + un respiro
+            const top = cont.getBoundingClientRect().top + window.scrollY - offset;
+            window.scrollTo({ top, behavior: 'auto' });
+        }
+};
+
+function renderFilasGenero() {
+    const cont = document.getElementById('filasGeneroContainer');
+    if (!cont) return;
+
+    // Solo crea el HTML la primera vez que aparece cada fila — si ya
+    // existía, reutiliza el nodo (con sus películas ya cargadas) y
+    // simplemente lo reordena en el DOM.
+    window._filasGenero.forEach(f => {
+        let el = document.getElementById(`fila-${f.key}`);
+        if (!el) {
+                    el = document.createElement('div');
+                    el.className = 'fila-genero';
+                    el.id = `fila-${f.key}`;
+                    el.dataset.key = f.key;
+                    el.innerHTML = `
+                                    <p class="fila-genero-titulo">${f.label}</p>
+                                    <div class="fila-genero-viewport">
+                                        <button class="fila-genero-nav fila-genero-nav-prev" onclick="window.moverFilaGenero('${f.key}', -1)" aria-label="Anterior"><i class="fas fa-chevron-left"></i></button>
+                                        <div class="fila-genero-track" id="filaTrack-${f.key}">
+                                            <div class="fila-genero-loading"><i class="fas fa-spinner fa-spin"></i></div>
+                                        </div>
+                                        <button class="fila-genero-nav fila-genero-nav-next" onclick="window.moverFilaGenero('${f.key}', 1)" aria-label="Siguiente"><i class="fas fa-chevron-right"></i></button>
+                                    </div>`;
+                    const trackNuevo = el.querySelector('.fila-genero-track');
+                                activarSwipeManual(trackNuevo);
+                                configurarScrollFila(f, trackNuevo);
+                            }
+        cont.appendChild(el); // appendChild sobre un nodo existente lo MUEVE, no lo duplica
+    });
+
+    configurarLazyLoadFilas();
+
+    if (window._filasGenero[0] && !window._filasGenero[0].cargado) {
+        cargarPeliculasFila(window._filasGenero[0]);
+    }
+}
+
+let _observerFilas = null;
+function configurarLazyLoadFilas() {
+    if (_observerFilas) _observerFilas.disconnect();
+    _observerFilas = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const fila = window._filasGenero.find(f => f.key === entry.target.dataset.key);
+                if (!fila) return;
+
+                if (entry.isIntersecting) {
+                    if (!fila.cargado) cargarPeliculasFila(fila);
+                    const track = document.getElementById(`filaTrack-${fila.key}`);
+                    if (track) iniciarGuinoIntermitente(fila, track);
+                } else {
+                    detenerGuinoIntermitente(fila);
+                }
+            });
+        }, { rootMargin: '200px' });
+
+    document.querySelectorAll('.fila-genero').forEach(el => _observerFilas.observe(el));
+}
+
+function activarSwipeManual(track) {
+    let startX = 0, startScrollLeft = 0, dragging = false, moved = false, comprometido = false, ancho = 0;
+    const UMBRAL_INICIO = 6; // px — evita que un toque simple/temblor cuente como drag
+    const UMBRAL_COMPROMISO = 0.30; // 30% del ancho — cruzado esto, cambia sin esperar a soltar
+
+    track.addEventListener('touchstart', (e) => {
+            dragging = true;
+            moved = false;
+            comprometido = false;
+            startX = e.touches[0].clientX;
+            startScrollLeft = track.scrollLeft;
+            ancho = track.clientWidth;
+            track.dataset.dragging = '1';
+        }, { passive: true });
+
+    track.addEventListener('touchmove', (e) => {
+            if (!dragging) return;
+
+            if (comprometido) {
+                // Ya decidimos a qué película vamos — igual seguimos bloqueando
+                // el gesto hasta que sueltes el dedo, así el navegador nunca
+                // recupera el control y no puede sumar su propio scroll encima.
+                e.preventDefault();
+                return;
+            }
+
+            const dx = e.touches[0].clientX - startX;
+
+            if (!moved) {
+                if (Math.abs(dx) < UMBRAL_INICIO) return;
+                moved = true;
+                track.style.scrollSnapType = 'none';
+            }
+
+            e.preventDefault();
+            track.scrollLeft = startScrollLeft - dx;
+
+            if (Math.abs(dx) >= ancho * UMBRAL_COMPROMISO) {
+                comprometido = true;
+                const indiceInicial = Math.round(startScrollLeft / ancho);
+                let nuevoIndice = dx < 0 ? indiceInicial + 1 : indiceInicial - 1;
+                nuevoIndice = Math.max(0, Math.min(nuevoIndice, track.children.length - 1));
+                track.scrollTo({ left: nuevoIndice * ancho, behavior: 'smooth' });
+            }
+        }, { passive: false });
+
+    track.addEventListener('touchend', () => {
+            if (!dragging) return;
+            dragging = false;
+            track.dataset.dragging = '0';
+            if (!moved) return;
+
+        if (!comprometido) {
+            const indiceInicial = Math.round(startScrollLeft / ancho);
+            track.scrollTo({ left: indiceInicial * ancho, behavior: 'smooth' });
+        }
+
+        setTimeout(() => { track.style.scrollSnapType = 'x mandatory'; }, 350);
+    });
+}
+
+window.moverFilaGenero = function(key, direccion) {
+    const track = document.getElementById(`filaTrack-${key}`);
+    if (!track) return;
+    track.scrollBy({ left: direccion * track.clientWidth * 0.9, behavior: 'smooth' });
+};
+
+async function cargarPeliculasFila(fila) {
+    fila.cargado = true;
+    const token = localStorage.getItem('token');
+    const anioActual = new Date().getFullYear();
+    const soloLatinos = /^[a-zA-ZÀ-ÿ0-9\s\-:,.!?'"()\u00C0-\u024F\u1E00-\u1EFF]+$/;
+
+    const esValida = (p, esProximamente) => {
+        if (!p.poster_path || !p.overview || p.overview.trim() === '') return false;
+        if (!p.title || !soloLatinos.test(p.title.trim())) return false;
+        const anio = p.release_date ? new Date(p.release_date).getFullYear() : null;
+        return esProximamente ? anio > anioActual : (!anio || anio <= anioActual);
+    };
+
+    try {
+        let resultados = [];
+
+        if (fila.key === 'fecha') {
+            const res = await fetch(`${CONFIG.API_URL}/movies/popular?page=1&sortBy=primary_release_date.desc`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            resultados = (data.results || []).filter(p => esValida(p, false));
+
+        } else if (fila.key === 'proximamente') {
+            const res = await fetch(`${CONFIG.API_URL}/movies/popular?page=1&sortBy=primary_release_date.asc&releaseDateGte=${anioActual + 1}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            resultados = (data.results || []).filter(p => esValida(p, true));
+
+        } else if (fila.key === 'votos') {
+            const res = await fetch(`${CONFIG.API_URL}/movies/popular?page=1`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            const pool = (data.results || []).filter(p => esValida(p, false)).slice(0, 15);
+
+            const conVotos = await Promise.all(pool.map(async p => {
+                try {
+                    const r = await fetch(`${CONFIG.API_URL}/reviews/movies/${p.id}/stats`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const stats = r.ok ? await r.json() : { likes: 0, dislikes: 0 };
+                    return { ...p, _totalVotos: (stats.likes || 0) + (stats.dislikes || 0) };
+                } catch (e) {
+                    return { ...p, _totalVotos: 0 };
+                }
+            }));
+            resultados = conVotos.sort((a, b) => b._totalVotos - a._totalVotos);
+
+        } else if (fila.tipo === 'genero') {
+            const res = await fetch(`${CONFIG.API_URL}/movies/search?withGenres=${fila.generoId}&page=1`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            resultados = (data.results || []).filter(p => esValida(p, false));
+        }
+
+        fila.peliculas = resultados.slice(0, 15);
+        await renderCardsFila(fila);
+
+    } catch (e) {
+        const track = document.getElementById(`filaTrack-${fila.key}`);
+        if (track) track.innerHTML = '<div class="fila-genero-vacia">No pudimos cargar esta sección.</div>';
+    }
+}
+
+async function renderCardsFila(fila) {
+    const track = document.getElementById(`filaTrack-${fila.key}`);
+    if (!track) return;
+
+    if (fila.peliculas.length === 0) {
+        track.innerHTML = '<div class="fila-genero-vacia">No encontramos películas acá todavía.</div>';
+        return;
+    }
+
+    // generarTarjetasHTML vuelve a filtrar internamente según
+    // window._criterioOrden (variable del sistema viejo de desktop) — se la
+    // seteamos acá para que ese segundo filtro coincida con lo que esta
+    // fila ya filtró, en vez de descartarle las películas futuras.
+    const criterioPrevio = window._criterioOrden;
+    window._criterioOrden = fila.key === 'proximamente' ? 'proximamente' : 'fecha';
+    const html = await window.generarTarjetasHTML(fila.peliculas);
+    window._criterioOrden = criterioPrevio;
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+
+    track.innerHTML = '';
+        temp.querySelectorAll('.pelicula-card').forEach(card => {
+            const slide = document.createElement('div');
+            slide.className = 'fila-genero-slide';
+            slide.appendChild(card);
+
+            track.appendChild(slide);
+        });
+
+                renderDotsFila(fila);
+
+                    if (typeof window.cargarEstadisticasVotacion === 'function') {
+                        window.cargarEstadisticasVotacion();
+                    }
+}
+
+function reiniciarGuinoTimer(fila, track) {
+    if (fila.guinoTimeout) clearTimeout(fila.guinoTimeout);
+    fila.guinoTimeout = setTimeout(() => {
+        dispararGuino(track);
+        reiniciarGuinoTimer(fila, track); // sigue repitiendo cada 4s mientras te quedes en esta misma película
+    }, 4000);
+}
+
+function iniciarGuinoIntermitente(fila, track) {
+    if (fila.guinoTimeout) return; // ya está corriendo, no duplicar
+    reiniciarGuinoTimer(fila, track);
+}
+
+function detenerGuinoIntermitente(fila) {
+    if (fila.guinoTimeout) {
+        clearTimeout(fila.guinoTimeout);
+        fila.guinoTimeout = null;
+    }
+}
+
+function animarScrollTrack(track, destino, duracion) {
+    const inicio = track.scrollLeft;
+    const delta = destino - inicio;
+    const t0 = performance.now();
+    function paso(t) {
+        const p = Math.min((t - t0) / duracion, 1);
+        const ease = 1 - Math.pow(1 - p, 3);
+        track.scrollLeft = inicio + delta * ease;
+        if (p < 1) requestAnimationFrame(paso);
+    }
+    requestAnimationFrame(paso);
+}
+
+function dispararGuino(track) {
+    if (track.dataset.dragging === '1') return; // no interrumpir un drag real del usuario
+    if (track.scrollWidth <= track.clientWidth + 2) return;
+
+    const base = track.scrollLeft;
+    const distancia = 46;
+    track.style.scrollSnapType = 'none';
+
+    animarScrollTrack(track, base + distancia, 500);
+    setTimeout(() => {
+        animarScrollTrack(track, base, 500);
+        setTimeout(() => { track.style.scrollSnapType = 'x mandatory'; }, 550);
+    }, 900); // se queda afuera 900ms antes de volver — bien perceptible
+}
+
+function renderDotsFila(fila) {
+    const el = document.getElementById(`fila-${fila.key}`);
+    if (!el) return;
+    let dotsEl = el.querySelector('.fila-genero-dots');
+    if (!dotsEl) {
+        dotsEl = document.createElement('div');
+        dotsEl.className = 'fila-genero-dots';
+        el.appendChild(dotsEl);
+    }
+    const total = Math.min(fila.peliculas.length, 8); // tope visual, no tiene sentido pintar 15 puntitos
+    dotsEl.innerHTML = Array.from({ length: total }, (_, i) =>
+        `<span class="fila-genero-dot${i === 0 ? ' activo' : ''}"></span>`
+    ).join('');
+}
+
+function configurarScrollFila(fila, track) {
+    let ultimoIndice = -1;
+    track.addEventListener('scroll', () => {
+        const ancho = track.clientWidth || 1;
+        const indice = Math.round(track.scrollLeft / ancho);
+        if (indice === ultimoIndice) return;
+        ultimoIndice = indice;
+
+        if (fila.guinoTimeout) reiniciarGuinoTimer(fila, track);
+        actualizarDotActivo(fila, indice);
+
+        if (!fila.cargandoMas && !fila.finDelCatalogo && indice >= track.children.length - 3) {
+            cargarMasPeliculasFila(fila, track);
+        }
+    });
+}
+
+function actualizarDotActivo(fila, indice) {
+    const el = document.getElementById(`fila-${fila.key}`);
+    if (!el) return;
+    const dots = el.querySelectorAll('.fila-genero-dot');
+    if (dots.length === 0) return;
+    const tope = dots.length - 1;
+    const activo = Math.min(indice, tope);
+    dots.forEach((d, i) => d.classList.toggle('activo', i === activo));
+}
+
+async function cargarMasPeliculasFila(fila, track) {
+    fila.cargandoMas = true;
+    fila.pagina = (fila.pagina || 1) + 1;
+    const token = localStorage.getItem('token');
+    const anioActual = new Date().getFullYear();
+    const soloLatinos = /^[a-zA-ZÀ-ÿ0-9\s\-:,.!?'"()\u00C0-\u024F\u1E00-\u1EFF]+$/;
+    const esValida = (p, esProximamente) => {
+        if (!p.poster_path || !p.overview || p.overview.trim() === '') return false;
+        if (!p.title || !soloLatinos.test(p.title.trim())) return false;
+        const anio = p.release_date ? new Date(p.release_date).getFullYear() : null;
+        return esProximamente ? anio > anioActual : (!anio || anio <= anioActual);
+    };
+
+    try {
+        let nuevos = [];
+        let totalPaginas = 1;
+
+        if (fila.key === 'fecha') {
+            const res = await fetch(`${CONFIG.API_URL}/movies/popular?page=${fila.pagina}&sortBy=primary_release_date.desc`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+            nuevos = (data.results || []).filter(p => esValida(p, false));
+            totalPaginas = data.total_pages || 1;
+
+        } else if (fila.key === 'proximamente') {
+            const res = await fetch(`${CONFIG.API_URL}/movies/popular?page=${fila.pagina}&sortBy=primary_release_date.asc&releaseDateGte=${anioActual + 1}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+            nuevos = (data.results || []).filter(p => esValida(p, true));
+            totalPaginas = data.total_pages || 1;
+
+        } else if (fila.key === 'votos') {
+            const res = await fetch(`${CONFIG.API_URL}/movies/popular?page=${fila.pagina}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+            const pool = (data.results || []).filter(p => esValida(p, false));
+            nuevos = await Promise.all(pool.map(async p => {
+                try {
+                    const r = await fetch(`${CONFIG.API_URL}/reviews/movies/${p.id}/stats`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    const stats = r.ok ? await r.json() : { likes: 0, dislikes: 0 };
+                    return { ...p, _totalVotos: (stats.likes || 0) + (stats.dislikes || 0) };
+                } catch (e) { return { ...p, _totalVotos: 0 }; }
+            }));
+            totalPaginas = data.total_pages || 1;
+
+        } else if (fila.tipo === 'genero') {
+            const res = await fetch(`${CONFIG.API_URL}/movies/search?withGenres=${fila.generoId}&page=${fila.pagina}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+            nuevos = (data.results || []).filter(p => esValida(p, false));
+            totalPaginas = data.total_pages || 1;
+        }
+
+        if (fila.pagina >= totalPaginas) fila.finDelCatalogo = true;
+
+        const idsExistentes = new Set(fila.peliculas.map(p => p.id));
+        nuevos = nuevos.filter(p => !idsExistentes.has(p.id));
+
+        if (nuevos.length > 0) {
+            fila.peliculas = [...fila.peliculas, ...nuevos];
+            await agregarCardsAFila(fila, track, nuevos);
+        }
+    } catch (e) {
+    } finally {
+        fila.cargandoMas = false;
+    }
+}
+
+async function agregarCardsAFila(fila, track, nuevasPeliculas) {
+    const criterioPrevio = window._criterioOrden;
+    window._criterioOrden = fila.key === 'proximamente' ? 'proximamente' : 'fecha';
+    const html = await window.generarTarjetasHTML(nuevasPeliculas);
+    window._criterioOrden = criterioPrevio;
+
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+    temp.querySelectorAll('.pelicula-card').forEach(card => {
+            const slide = document.createElement('div');
+            slide.className = 'fila-genero-slide';
+            slide.appendChild(card);
+            track.appendChild(slide);
+        });
+
+        if (typeof window.cargarEstadisticasVotacion === 'function') {
+            window.cargarEstadisticasVotacion();
+        }
+    }
+
 window.cargarPeliculaDestacada = async function() {
     const contenedor = document.getElementById('destacadaContainer');
     if (!contenedor) return;
@@ -2938,10 +3434,8 @@ window['init_feed-films'] = async function() {
             }
         }, 200);
 
-    window.cargarPeliculasPopulares(1).then(() => {
-            window.ordenarPeliculas();
-        });
-        inicializarContadorCaracteres();
+    window.cargarFilasGenero();
+            inicializarContadorCaracteres();
         window.addEventListener('resize', window.actualizarBotonesPaginacion);
     };
 
