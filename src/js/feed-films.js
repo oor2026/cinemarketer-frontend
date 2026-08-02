@@ -1708,6 +1708,8 @@ window.cargarTrailerPelicula = async function(movieId) {
 // CARGAR COMENTARIOS — con botón reportar
 // ==============================================
 window.cargarComentariosPelicula = async function(id) {
+    window.cargarSpoilerCount(id);
+
     let lista = document.getElementById('comentariosLista');
     let intentos = 0;
 
@@ -1909,6 +1911,22 @@ window.cargarComentariosPelicula = async function(id) {
             }
         } catch (error) {
             if (lista) lista.innerHTML = '<div class="sin-comentarios">Error al cargar comentarios</div>';
+        }
+    };
+
+    window.cargarSpoilerCount = async function(id) {
+        const badge = document.getElementById('spoilerCountBadge');
+        if (!badge) return;
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${CONFIG.API_URL}/comments/movies/${id}/spoiler-count`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) { badge.textContent = ''; return; }
+            const data = await res.json();
+            badge.textContent = data.count > 0 ? `(${data.count}) ` : '';
+        } catch (e) {
+            badge.textContent = '';
         }
     };
 
