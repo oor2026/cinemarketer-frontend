@@ -602,7 +602,7 @@ function reiniciarGuinoTimer(fila, track) {
     fila.guinoTimeout = setTimeout(() => {
         dispararGuino(track);
         reiniciarGuinoTimer(fila, track); // sigue repitiendo cada 4s mientras te quedes en esta misma película
-    }, 4000);
+    }, 5000);
 }
 
 function iniciarGuinoIntermitente(fila, track) {
@@ -642,7 +642,7 @@ function dispararGuino(track) {
     setTimeout(() => {
         animarScrollTrack(track, base, 500);
         setTimeout(() => { track.style.scrollSnapType = 'x mandatory'; }, 550);
-    }, 900); // se queda afuera 900ms antes de volver — bien perceptible
+    }, 1100); // se queda afuera 900ms antes de volver — bien perceptible
 }
 
 function renderDotsFila(fila) {
