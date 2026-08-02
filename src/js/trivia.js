@@ -116,9 +116,9 @@ window.cerrarTrivia = function() {
 
 function renderTriviaEstado(estado) {
     if (estado.estado === 'GANADA') {
-        renderTriviaGanada();
+        renderTriviaGanada(estado.puntosGanados);
     } else if (estado.estado === 'PERDIDA') {
-        renderTriviaPerdida();
+        renderTriviaPerdida(estado.puntosGanados);
     } else {
         renderTriviaPregunta(estado.pregunta, estado.preguntaActual, estado.totalPreguntas);
     }
@@ -214,13 +214,13 @@ window.triviaResponder = async function(opcionElegida) {
         }
 
         setTimeout(() => {
-                    if (data.estado === 'EN_CURSO') {
-                        renderTriviaPregunta(data.siguientePregunta, data.preguntaActual, undefined);
-                    } else if (data.estado === 'GANADA') {
-                        renderTriviaGanada();
-                    } else {
-                        renderTriviaPerdida();
-                    }
+                            if (data.estado === 'EN_CURSO') {
+                                renderTriviaPregunta(data.siguientePregunta, data.preguntaActual, undefined);
+                            } else if (data.estado === 'GANADA') {
+                                renderTriviaGanada(data.puntosGanadosTotal);
+                            } else {
+                                renderTriviaPerdida(data.puntosGanadosTotal);
+                            }
                     window.cargarTriviaBadge(); // refresca el badge del feed con el nuevo estado
                     window._triviaEnviando = false;
                 }, 1200);
@@ -232,23 +232,69 @@ window.triviaResponder = async function(opcionElegida) {
             }
         };
 
-function renderTriviaGanada() {
+function esInvitado() {
+    return !localStorage.getItem('token');
+}
+
+function ctaInvitadoHtml(puntos) {
+    if (!esInvitado() || !puntos) return '';
+    return `
+        <div class="trivia-cta-invitado">
+            <p>Jugaste como invitado — sumaste <strong>${puntos} puntos</strong> hoy. Iniciá sesión o creá tu cuenta para que no se pierdan y quedar en el ranking de cinéfilos.</p>
+            <div class="trivia-advertencia-botones">
+                <button class="trivia-btn-primario" onclick="window.location.href='login.html'">Iniciar sesión / crear cuenta</button>
+            </div>
+        </div>`;
+}
+
+function urlTriviaPublica() {
+    return `${window.location.origin}/trivia`;
+}
+
+window.compartirTrivia = async function() {
+    const url = urlTriviaPublica();
+    const texto = '🎬 Te desafío a la trivia de hoy en Cinemarketer — ¿cuántas preguntas acertás?';
+
+    if (navigator.share) {
+        try {
+            await navigator.share({ title: 'Adivina Adivinador', text: texto, url });
+        } catch (e) {} // usuario canceló el share nativo, no hacemos nada
+    } else {
+        try {
+            await navigator.clipboard.writeText(url);
+            if (typeof showToast === 'function') showToast('success', 'Link copiado');
+        } catch (e) {}
+    }
+};
+
+function botonCompartirHtml() {
+    return `
+        <button class="trivia-btn-compartir" onclick="window.compartirTrivia()">
+            <i class="fas fa-bolt"></i> Desafiá a tus amigos
+        </button>`;
+}
+
+function renderTriviaGanada(puntos) {
     document.getElementById('triviaModalContenido').innerHTML = `
         <div class="trivia-resultado">
             <i class="fas fa-trophy" style="color:#f5a623;"></i>
             <h3>¡Sos un cinéfilo de primera!</h3>
             <p>Acertaste las 10 preguntas de hoy. Volvé mañana para mantener tu racha en el ranking de cinéfilos.</p>
+            ${botonCompartirHtml()}
         </div>
+        ${ctaInvitadoHtml(puntos)}
     `;
 }
 
-function renderTriviaPerdida() {
+function renderTriviaPerdida(puntos) {
     document.getElementById('triviaModalContenido').innerHTML = `
         <div class="trivia-resultado">
             <i class="fas fa-hourglass-half" style="color:#999;"></i>
             <h3>¡Casi!</h3>
             <p>Volvé mañana. A partir de las 00hs reestableceremos tu intento diario.</p>
+            ${botonCompartirHtml()}
         </div>
+        ${ctaInvitadoHtml(puntos)}
     `;
 }
 

@@ -1075,6 +1075,8 @@
                 .trivia-resultado i { font-size: 44px; margin-bottom: 14px; display: block; }
                 .trivia-resultado h3 { font-size: 18px; margin: 0 0 8px; }
                 .trivia-resultado p { font-size: 14px; color: #666; margin: 0; }
+                .trivia-cta-invitado { margin-top: 20px; padding-top: 16px; border-top: 1px solid #eee; }
+                .trivia-cta-invitado p { font-size: 13px; color: #555; margin: 0 0 12px; }
 
                 .trivia-advertencia { text-align: center; padding: 10px; }
                 .trivia-advertencia i { font-size: 40px; color: #7c3aed; margin-bottom: 14px; display: block; }
@@ -1110,6 +1112,15 @@
                         .ranking-tiempo { color: #999; text-align: right; font-size: 12px; }
                         .ranking-header .ranking-aciertos,
                         .ranking-header .ranking-tiempo { color: inherit; font-weight: inherit; }
+
+.trivia-btn-compartir {
+            margin-top: 16px; padding: 12px 20px;
+            border: none; border-radius: 12px;
+            background: linear-gradient(135deg,#7c3aed,#4c1d95);
+            color: white; font-size: 14px; font-weight: 700; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+
 
 #modalPelicula .modal-sinopsis h4 {
     color: #333 !important;
