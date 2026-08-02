@@ -78,12 +78,24 @@
             </div>`;
     };
 
-    async function iniciarTriviaPublica() {
-        try {
-            const res = await fetch(`${CONFIG.API_URL}/trivia/estado${triviaQueryParam()}`, {
-                headers: triviaAuthHeaders()
-            });
-            const estado = await res.json();
+   async function iniciarTriviaPublica() {
+      try {
+          let res = await fetch(`${CONFIG.API_URL}/trivia/estado${triviaQueryParam()}`, {
+              headers: triviaAuthHeaders()
+          });
+
+          if (res.status === 401) {
+              // Token viejo/inválido en localStorage — esta página no debe
+              // exigir sesión, así que lo descartamos y probamos de nuevo
+              // como invitado en vez de romper.
+              localStorage.removeItem('token');
+              res = await fetch(`${CONFIG.API_URL}/trivia/estado${triviaQueryParam()}`, {
+                  headers: triviaAuthHeaders()
+              });
+          }
+
+          if (!res.ok) throw new Error('estado no ok');
+          const estado = await res.json();
 
             const esPrimeraPregunta = estado.estado === 'EN_CURSO' && estado.preguntaActual === 1;
             if (esPrimeraPregunta && !triviaYaAdvertido()) {
