@@ -1669,7 +1669,135 @@ window.toggleFiltros = function() {
     }
 };
 
-window.aplicarFiltros = async function(pagina = 1) {
+function construirTextoCriterio() {
+    const partes = [];
+    const busqueda = document.getElementById('busquedaInput')?.value.trim();
+    if (busqueda) partes.push(`"${busqueda}"`);
+
+    const generoSel = document.getElementById('filtroGenero');
+    if (generoSel && generoSel.value !== 'todos') partes.push(generoSel.options[generoSel.selectedIndex].text);
+
+    const anioSel = document.getElementById('filtroAnio');
+    if (anioSel && anioSel.value !== 'todos') partes.push(anioSel.value);
+
+    const idiomaSel = document.getElementById('filtroIdioma');
+    if (idiomaSel && idiomaSel.value !== 'todos') partes.push(idiomaSel.options[idiomaSel.selectedIndex].text);
+
+    const popularidadSel = document.getElementById('filtroPopularidad');
+    if (popularidadSel && popularidadSel.value !== 'todas') partes.push(popularidadSel.options[popularidadSel.selectedIndex].text);
+
+    const duracionSel = document.getElementById('filtroDuracion');
+    if (duracionSel && duracionSel.value !== 'todos') partes.push(duracionSel.options[duracionSel.selectedIndex].text);
+
+    const directorNombre = document.getElementById('busquedaDirector')?.value.trim();
+    if (directorNombre) partes.push(directorNombre);
+
+    return partes.length > 0 ? partes.join(' · ') : 'Resultados de búsqueda';
+}
+
+window.mostrarVistaResultados = function() {
+    const filaBusqueda = document.getElementById('fila-busqueda');
+    const resultadosHeader = document.getElementById('resultadosHeader');
+    const criterioTexto = document.getElementById('criterioBusquedaTexto');
+
+    const filasCont = document.getElementById('filasGeneroContainer');
+    const ordenarPills = document.getElementById('ordenarPills');
+    const destacada = document.getElementById('destacadaContainer');
+    const votoRelampago = document.getElementById('votoRelampagoContainer');
+    const triviaBadge = document.getElementById('triviaBadgeContainer');
+    const grid = document.getElementById('peliculasGrid');
+    const paginacion = document.getElementById('paginacion-container');
+
+    if (filasCont) filasCont.style.display = 'none';
+    if (ordenarPills) ordenarPills.style.display = 'none';
+    if (destacada) destacada.style.display = 'none';
+    if (votoRelampago) votoRelampago.style.display = 'none';
+    if (triviaBadge) triviaBadge.style.display = 'none';
+    if (grid) grid.style.display = 'none';
+    if (paginacion) paginacion.style.display = 'none';
+
+    if (filaBusqueda) filaBusqueda.style.display = 'block';
+    if (resultadosHeader) resultadosHeader.style.display = 'flex';
+    if (criterioTexto) criterioTexto.textContent = construirTextoCriterio();
+
+    inicializarFilaBusqueda();
+};
+
+window.ocultarVistaResultados = function() {
+    const filaBusqueda = document.getElementById('fila-busqueda');
+    const resultadosHeader = document.getElementById('resultadosHeader');
+
+    const filasCont = document.getElementById('filasGeneroContainer');
+    const ordenarPills = document.getElementById('ordenarPills');
+    const destacada = document.getElementById('destacadaContainer');
+    const votoRelampago = document.getElementById('votoRelampagoContainer');
+    const triviaBadge = document.getElementById('triviaBadgeContainer');
+
+    if (filaBusqueda) filaBusqueda.style.display = 'none';
+    if (resultadosHeader) resultadosHeader.style.display = 'none';
+
+    if (filasCont) filasCont.style.display = 'block';
+    if (ordenarPills) ordenarPills.style.display = '';
+    if (destacada && window._destacadaMovieId) destacada.style.display = 'block';
+    if (votoRelampago && window._votoRelampago && window._votoRelampago.movieId) votoRelampago.style.display = 'block';
+    if (triviaBadge && window._triviaEstadoCargado) triviaBadge.style.display = 'block';
+
+    if (window._filasGeneroCargadas) renderPillsFilas();
+};
+
+window._filaBusqueda = { key: 'busqueda', peliculas: [] };
+window._filaBusquedaInit = false;
+
+function inicializarFilaBusqueda() {
+    if (window._filaBusquedaInit) return;
+    window._filaBusquedaInit = true;
+
+    const track = document.getElementById('filaTrack-busqueda');
+    if (!track) return;
+
+    activarSwipeManual(track);
+    configurarScrollFila(window._filaBusqueda, track);
+    track.addEventListener('click', () => fijarPosicionActual(track), true);
+
+    // Scroll infinito: al acercarse al final del carrusel, si hay más
+    // páginas de resultados, las va pidiendo solas — así el carrusel
+    // se comporta igual que cualquier otro, sin botón de "cargar más".
+    track.addEventListener('scroll', () => {
+        if (window.estadoPaginacion.cargando) return;
+        const hayMas = window.estadoPaginacion.paginaActual < window.estadoPaginacion.totalPaginas;
+        if (!hayMas) return;
+        const restante = track.scrollWidth - (track.scrollLeft + track.clientWidth);
+        if (restante < track.clientWidth * 2) {
+            window.aplicarFiltros(window.estadoPaginacion.paginaActual + 1, true);
+        }
+    });
+}
+
+async function appendCardsFila(fila, nuevasPeliculas) {
+    const track = document.getElementById(`filaTrack-${fila.key}`);
+    if (!track || nuevasPeliculas.length === 0) return;
+
+    const criterioPrevio = window._criterioOrden;
+    window._criterioOrden = 'fecha';
+    const html = await window.generarTarjetasHTML(nuevasPeliculas);
+    window._criterioOrden = criterioPrevio;
+
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+    temp.querySelectorAll('.pelicula-card').forEach(card => {
+        const slide = document.createElement('div');
+        slide.className = 'fila-genero-slide';
+        slide.appendChild(card);
+        track.appendChild(slide);
+    });
+
+    renderDotsFila(fila);
+    if (typeof window.cargarEstadisticasVotacion === 'function') {
+        window.cargarEstadisticasVotacion();
+    }
+}
+
+window.aplicarFiltros = async function(pagina = 1, append = false) {
     const busqueda    = document.getElementById('busquedaInput')?.value.trim() || '';
     const genero      = document.getElementById('filtroGenero')?.value || 'todos';
     const anio        = document.getElementById('filtroAnio')?.value || 'todos';
@@ -1687,17 +1815,21 @@ window.aplicarFiltros = async function(pagina = 1) {
         return;
     }
 
-    const grid = document.getElementById('peliculasGrid');
-    if (!grid) return;
     if (window.estadoPaginacion.cargando) return;
-
     window.estadoPaginacion.cargando = true;
-    grid.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Buscando películas...</div>';
+
+    if (!append) {
+        window.mostrarVistaResultados();
+        window._filaBusqueda.peliculas = [];
+        const track = document.getElementById('filaTrack-busqueda');
+        if (track) track.innerHTML = '<div class="fila-genero-loading"><i class="fas fa-spinner fa-spin"></i></div>';
+    }
 
     try {
         const token = localStorage.getItem('token');
         if (!token) {
-            grid.innerHTML = '<div class="error">Error de autenticación</div>';
+            const track = document.getElementById('filaTrack-busqueda');
+            if (track) track.innerHTML = '<div class="fila-genero-vacia">Error de autenticación</div>';
             return;
         }
 
@@ -1726,37 +1858,39 @@ window.aplicarFiltros = async function(pagina = 1) {
         const data = await response.json();
 
         window.estadoPaginacion.paginaActual = pagina;
-        window.estadoPaginacion._ultimaPaginaTmdb = pagina; // cursor real de TMDB
         window.estadoPaginacion.totalPaginas = data.total_pages;
         window.estadoPaginacion.totalResultados = data.total_results;
 
-if (!data.results || data.results.length === 0) {
-    grid.innerHTML = '<div class="sin-resultados"><i class="fas fa-film"></i><p>No se encontraron películas con esos filtros.</p></div>';
-    const countEl = document.getElementById('resultadosCount');
-    if (countEl) countEl.textContent = 0;
-} else {
-    grid.innerHTML = await window.generarTarjetasHTML(data.results);
+        const countEl = document.getElementById('resultadosCount');
+        if (countEl) countEl.textContent = data.total_results || 0;
 
-    const peliculasMostradas = grid.querySelectorAll('.pelicula-card').length;
-    const countEl = document.getElementById('resultadosCount');
-    if (countEl) countEl.textContent = peliculasMostradas;
+        if (!data.results || data.results.length === 0) {
+            if (!append) {
+                const track = document.getElementById('filaTrack-busqueda');
+                if (track) track.innerHTML = '<div class="fila-genero-vacia">No se encontraron películas con esos filtros.</div>';
+            }
+        } else {
+            window._filaBusqueda.peliculas = append
+                ? window._filaBusqueda.peliculas.concat(data.results)
+                : data.results;
 
-    // Si la página quedó vacía tras el filtro y hay más páginas, saltar automáticamente
-    if (peliculasMostradas === 0 && data.page < data.total_pages) {
-        window.estadoPaginacion.cargando = false;
-        await window.aplicarFiltros(data.page + 1);
-        return;
-    }
+            if (append) {
+                await appendCardsFila(window._filaBusqueda, data.results);
+            } else {
+                await renderCardsFila(window._filaBusqueda);
+            }
 
-    limpiarModalesDuplicados();
-    if (typeof window.cargarEstadisticasVotacion === 'function') {
-        window.cargarEstadisticasVotacion();
-    }
-}
-window.actualizarBotonesPaginacion();
+            limpiarModalesDuplicados();
+            if (typeof window.cargarEstadisticasVotacion === 'function') {
+                window.cargarEstadisticasVotacion();
+            }
+        }
 
     } catch (error) {
-        grid.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+        if (!append) {
+            const track = document.getElementById('filaTrack-busqueda');
+            if (track) track.innerHTML = `<div class="fila-genero-vacia">Error: ${error.message}</div>`;
+        }
     } finally {
         window.estadoPaginacion.cargando = false;
     }
@@ -1779,8 +1913,8 @@ window.limpiarFiltros = function() {
     });
 
     window._directorSeleccionadoId = '';
-    window.cargarPeliculasPopulares(1);
-};
+        window.ocultarVistaResultados();
+    };
 
 // ==============================================
 // FUNCIONES DEL MODAL
@@ -3677,7 +3811,11 @@ window.seleccionarTabFeed = function(tab, el) {
                                                         if (filasGenero && window._filasGeneroCargadas) filasGenero.style.display = 'block';
 
                                                     } else if (tab === 'comunidad') {
-                                    if (gridPeliculas) gridPeliculas.style.display = 'none';
+                                                        // Si había una búsqueda con filtros activa, se descarta al salir de Películas
+                                                        if (document.getElementById('resultadosHeader')?.style.display === 'flex') {
+                                                            window.limpiarFiltros();
+                                                        }
+                                                        if (gridPeliculas) gridPeliculas.style.display = 'none';
                                     if (paginacion) paginacion.style.display = 'none';
                                     if (pills) pills.style.display = 'none';
                                     if (filtros) filtros.style.display = 'none';
