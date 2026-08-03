@@ -65,6 +65,7 @@ function actualizarBadgeSub(estado) {
 window.abrirTrivia = async function() {
     const modal = document.getElementById('triviaModal');
     modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
 
     try {
         const res = await fetch(`${CONFIG.API_URL}/trivia/estado${triviaQueryParam()}`, {
@@ -111,6 +112,7 @@ window.triviaConfirmarInicio = function() {
 
 window.cerrarTrivia = function() {
     document.getElementById('triviaModal').style.display = 'none';
+    document.body.style.overflow = '';
     if (window._triviaTimerInterval) clearInterval(window._triviaTimerInterval);
 };
 
@@ -324,6 +326,7 @@ window.triviaIntentarReclamar = async function() {
 window.abrirRankingTrivia = async function() {
     const modal = document.getElementById('rankingTriviaModal');
     modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
     document.getElementById('rankingTriviaContenido').innerHTML =
         '<div class="trivia-resultado"><i class="fas fa-spinner fa-spin"></i></div>';
 
@@ -339,6 +342,7 @@ window.abrirRankingTrivia = async function() {
 
 window.cerrarRankingTrivia = function() {
     document.getElementById('rankingTriviaModal').style.display = 'none';
+    document.body.style.overflow = '';
 };
 
 function renderRankingTrivia(ranking) {
