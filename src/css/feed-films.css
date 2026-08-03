@@ -3489,7 +3489,16 @@ window.abrirElencoCard = async function(movieId, event) {
 };
 
 .fila-genero { margin-bottom: 30px; }
-        .fila-genero-titulo { font-size: 15px; font-weight: 700; margin: 0 0 8px 12px; }
+        .fila-genero-titulo {
+            display: inline-block;
+            font-size: 15px;
+            font-weight: 800;
+            margin: 0 0 10px 12px;
+            background: #fdeceb;
+            color: #c0392b;
+            padding: 6px 14px;
+            border-radius: 20px;
+        }
         .fila-genero-viewport { width: 100%; overflow: hidden; position: relative; }
                 .fila-genero-track {
                                     display: flex;
