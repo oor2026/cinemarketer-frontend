@@ -2015,11 +2015,11 @@ window.cargarDatosPelicula = async function(id) {
         };
 
         if (generos) {
-            const ids = pelicula.genre_ids || (pelicula.genres?.map(g => g.id)) || [];
-            generos.textContent = ids.length > 0
-                ? ids.map(id => TMDB_GENEROS[id] || id).join(', ')
-                : 'No especificado';
-        }
+                    const ids = pelicula.genre_ids || (pelicula.genres?.map(g => g.id)) || [];
+                    generos.innerHTML = ids.length > 0
+                        ? ids.map(id => `<span class="genero-chip">${TMDB_GENEROS[id] || id}</span>`).join('')
+                        : '<span class="genero-chip">No especificado</span>';
+                }
 
         // Verificar estado watchlist
                 window.verificarEstadoWatchlist(id);

@@ -3555,3 +3555,160 @@ window.abrirElencoCard = async function(movieId, event) {
                             width: 25px;
                             border-radius: 4px;
                         }
+
+        /* ===== FICHA DE DATOS DE LA PELÍCULA — base (todas las resoluciones) ===== */
+        #modalPelicula .modal-stat-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        #modalPelicula .modal-stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        #modalPelicula .modal-stat-divider {
+            width: 1px;
+            height: 1rem;
+            background: #ddd;
+        }
+
+        #modalPelicula .modal-chips-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        #modalPelicula .modal-chip {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        #modalPelicula .modal-chip-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        #modalPelicula .modal-chip-texto {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #modalPelicula .modal-chip-label {
+            font-size: 0.75rem;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        #modalPelicula .modal-chip-valor {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        #modalPelicula .modal-generos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        #modalPelicula .genero-chip:not(:last-child)::after {
+            content: ', ';
+            color: #555;
+        }
+
+        #modalPelicula .modal-sinopsis-titulo {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+
+        /* ===== FICHA DE DATOS — versión color, solo mobile por ahora ===== */
+        @media (max-width: 768px) {
+            #modalPelicula .modal-stat-bar {
+                background: #fdf0ef !important;
+                border-radius: 12px !important;
+                padding: 0.6rem 0.9rem !important;
+            }
+
+            #modalPelicula .modal-stat-item,
+            #modalPelicula .modal-stat-item i {
+                color: #c0392b !important;
+                font-weight: 600 !important;
+            }
+
+            #modalPelicula .modal-stat-divider {
+                background: #f0d3d0 !important;
+            }
+
+            #modalPelicula .modal-chips-grid {
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.6rem !important;
+            }
+
+            #modalPelicula .modal-chip {
+                border-radius: 12px !important;
+                padding: 0.6rem 0.75rem !important;
+            }
+
+            #modalPelicula .modal-chip-full {
+                grid-column: 1 / -1 !important;
+            }
+
+            #modalPelicula .modal-chip-red { background: #fdf0ef !important; }
+            #modalPelicula .modal-chip-red .modal-chip-icon { background: #fbdcda !important; color: #c0392b !important; }
+            #modalPelicula .modal-chip-red .modal-chip-label { color: #c0392b !important; }
+
+            #modalPelicula .modal-chip-blue { background: #eaf0fa !important; }
+            #modalPelicula .modal-chip-blue .modal-chip-icon { background: #d3e0f4 !important; color: #1a3a6b !important; }
+            #modalPelicula .modal-chip-blue .modal-chip-label { color: #1a3a6b !important; }
+
+            #modalPelicula .modal-chip-icon {
+                width: 30px !important;
+                height: 30px !important;
+                border-radius: 50% !important;
+                font-size: 0.85rem !important;
+            }
+
+            #modalPelicula .genero-chip {
+                    font-size: 0.75rem !important;
+                    font-weight: 600 !important;
+                    padding: 0.3rem 0.7rem !important;
+                    border-radius: 20px !important;
+                    display: inline-block !important;
+                }
+                #modalPelicula .genero-chip::after {
+                    content: none !important;
+                }
+
+                #modalPelicula .genero-chip:nth-child(4n+1) { background: #f1eefb !important; color: #5a4fd1 !important; }
+                #modalPelicula .genero-chip:nth-child(4n+2) { background: #eaf7f0 !important; color: #1f7a4c !important; }
+                #modalPelicula .genero-chip:nth-child(4n+3) { background: #fff4e0 !important; color: #a66a0c !important; }
+                #modalPelicula .genero-chip:nth-child(4n)   { background: #fdeaf2 !important; color: #b23368 !important; }
+
+            #modalPelicula .modal-sinopsis {
+                border: none !important;
+                border-left: 4px solid #e50914 !important;
+                border-radius: 0 12px 12px 0 !important;
+                background: #fafafa !important;
+            }
+
+            #modalPelicula .modal-sinopsis-titulo {
+                color: #e50914 !important;
+                text-transform: uppercase !important;
+                font-size: 0.75rem !important;
+                letter-spacing: 0.4px !important;
+            }
+        }
