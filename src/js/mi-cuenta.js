@@ -1791,70 +1791,40 @@ window.confirmarBloquear = async function() {
     }
 };
 
-// ── Premium benefits carrusel mobile ──────────
+// ── Premium benefits: ya no se pagina (el banner colapsable dejó
+// innecesarios los dots internos) — se muestran siempre los 4 completos.
 function inicializarPremiumCarrusel() {
-    if (window.innerWidth > 480) return;
-
-    const list   = document.getElementById('premiumBenefitsList');
-    const dots   = document.getElementById('premiumBenefitsDots');
-    if (!list || !dots) return;
-
-    // Limpiar dots previos
-    dots.innerHTML = '';
-
-    const items       = Array.from(list.querySelectorAll('li'));
-    const perPage     = 3;
-    const totalPages  = Math.ceil(items.length / perPage);
-    let current       = 0;
-
-    // Crear dots
-    for (let i = 0; i < totalPages; i++) {
-        const d = document.createElement('span');
-        d.className = 'premium-benefit-dot' + (i === 0 ? ' active' : '');
-        d.onclick = () => goTo(i);
-        dots.appendChild(d);
-    }
-
-    function goTo(page) {
-        current = page;
-        items.forEach((li, idx) => {
-            li.style.display = (idx >= page * perPage && idx < (page + 1) * perPage) ? '' : 'none';
-        });
-        dots.querySelectorAll('.premium-benefit-dot').forEach((d, i) => {
-            d.classList.toggle('active', i === page);
-        });
-    }
-
-    goTo(0);
-
-    // Swipe support
-    let startX = 0;
-    list.addEventListener('touchstart', e => startX = e.touches[0].clientX);
-    list.addEventListener('touchend', e => {
-        const diff = startX - e.changedTouches[0].clientX;
-        if (Math.abs(diff) > 40) {
-            if (diff > 0 && current < totalPages - 1) goTo(current + 1);
-            if (diff < 0 && current > 0) goTo(current - 1);
-        }
-    });
+    const list = document.getElementById('premiumBenefitsList');
+    const dots = document.getElementById('premiumBenefitsDots');
+    if (dots) dots.innerHTML = '';
+    if (list) list.querySelectorAll('li').forEach(li => { li.style.display = ''; });
 }
 
-window.togglePremiumBanner = function() {
-    const colapsable = document.getElementById('premiumBannerColapsable');
-    const chevron    = document.getElementById('premiumBannerChevron');
-    const label      = document.querySelector('#premiumBanner .premium-banner-toggle-label');
+// Premium y Creator son slides del mismo carrusel — colapsar/desplegar uno
+// tiene que reflejarse en el otro, para que al deslizar entre ambos el
+// estado (ocupa espacio / no ocupa espacio) sea consistente.
+const BANNERS_COLAPSABLES = [
+    { colapsable: 'premiumBannerColapsable', chevron: 'premiumBannerChevron', banner: 'premiumBanner' },
+    { colapsable: 'creatorBannerColapsable', chevron: 'creatorBannerChevron', banner: 'creatorBanner' }
+];
 
-    const estaColapsado = colapsable.classList.contains('collapsed');
+function aplicarEstadoColapsoBanners(colapsado) {
+    BANNERS_COLAPSABLES.forEach(({ colapsable, chevron, banner }) => {
+        const colapsableEl = document.getElementById(colapsable);
+        const chevronEl    = document.getElementById(chevron);
+        const labelEl      = document.querySelector(`#${banner} .premium-banner-toggle-label`);
+        if (!colapsableEl || !chevronEl) return;
 
-    if (estaColapsado) {
-        colapsable.classList.remove('collapsed');
-        chevron.className = 'fas fa-chevron-up';
-        if (label) label.style.display = 'none';
-    } else {
-        colapsable.classList.add('collapsed');
-        chevron.className = 'fas fa-chevron-down';
-        if (label) label.style.display = 'inline';
-    }
+        if (colapsado) {
+            colapsableEl.classList.add('collapsed');
+            chevronEl.className = 'fas fa-chevron-down';
+            if (labelEl) labelEl.style.display = 'inline';
+        } else {
+            colapsableEl.classList.remove('collapsed');
+            chevronEl.className = 'fas fa-chevron-up';
+            if (labelEl) labelEl.style.display = 'none';
+        }
+    });
 
     // La transición de max-height tarda 0.35s (ver .premium-banner-colapsable
     // en mi-cuenta.css) — medimos recién cuando termina, para no capturar
@@ -1862,6 +1832,18 @@ window.togglePremiumBanner = function() {
     setTimeout(() => {
         if (typeof window.ajustarAlturaCarrusel === 'function') window.ajustarAlturaCarrusel();
     }, 360);
+}
+
+window.togglePremiumBanner = function() {
+    const colapsable = document.getElementById('premiumBannerColapsable');
+    const estaColapsado = colapsable.classList.contains('collapsed');
+    aplicarEstadoColapsoBanners(!estaColapsado);
+};
+
+window.toggleCreatorBanner = function() {
+    const colapsable = document.getElementById('creatorBannerColapsable');
+    const estaColapsado = colapsable.classList.contains('collapsed');
+    aplicarEstadoColapsoBanners(!estaColapsado);
 };
 
 // ── Modal progreso de insignia ──────────────────────────────────
