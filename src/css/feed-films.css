@@ -3712,3 +3712,80 @@ window.abrirElencoCard = async function(movieId, event) {
                 letter-spacing: 0.4px !important;
             }
         }
+
+
+/* ===== FICHA DE DATOS — versión color, desktop ===== */
+@media (min-width: 769px) {
+    #modalPelicula .modal-stat-bar {
+        background: #fdf0ef !important;
+        border-radius: 12px !important;
+        padding: 0.75rem 1.25rem !important;
+        justify-content: flex-start !important;
+    }
+
+    #modalPelicula .modal-stat-item,
+    #modalPelicula .modal-stat-item i {
+        color: #c0392b !important;
+        font-weight: 600 !important;
+    }
+
+    #modalPelicula .modal-stat-divider {
+        background: #f0d3d0 !important;
+    }
+
+    #modalPelicula .modal-chips-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 0.75rem !important;
+    }
+
+    #modalPelicula .modal-chip {
+        border-radius: 12px !important;
+        padding: 0.75rem 1rem !important;
+    }
+
+    #modalPelicula .modal-chip-red { background: #fdf0ef !important; }
+    #modalPelicula .modal-chip-red .modal-chip-icon { background: #fbdcda !important; color: #c0392b !important; }
+    #modalPelicula .modal-chip-red .modal-chip-label { color: #c0392b !important; }
+
+    #modalPelicula .modal-chip-blue { background: #eaf0fa !important; }
+    #modalPelicula .modal-chip-blue .modal-chip-icon { background: #d3e0f4 !important; color: #1a3a6b !important; }
+    #modalPelicula .modal-chip-blue .modal-chip-label { color: #1a3a6b !important; }
+
+    #modalPelicula .modal-chip-icon {
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 50% !important;
+        font-size: 0.9rem !important;
+    }
+
+    #modalPelicula .genero-chip {
+        font-size: 0.8rem !important;
+        font-weight: 600 !important;
+        padding: 0.35rem 0.8rem !important;
+        border-radius: 20px !important;
+        display: inline-block !important;
+    }
+    #modalPelicula .genero-chip::after {
+        content: none !important;
+    }
+
+    #modalPelicula .genero-chip:nth-child(4n+1) { background: #f1eefb !important; color: #5a4fd1 !important; }
+    #modalPelicula .genero-chip:nth-child(4n+2) { background: #eaf7f0 !important; color: #1f7a4c !important; }
+    #modalPelicula .genero-chip:nth-child(4n+3) { background: #fff4e0 !important; color: #a66a0c !important; }
+    #modalPelicula .genero-chip:nth-child(4n)   { background: #fdeaf2 !important; color: #b23368 !important; }
+
+    #modalPelicula .modal-sinopsis {
+        border: none !important;
+        border-left: 4px solid #e50914 !important;
+        border-radius: 0 12px 12px 0 !important;
+        background: #fafafa !important;
+    }
+
+    #modalPelicula .modal-sinopsis-titulo {
+        color: #e50914 !important;
+        text-transform: uppercase !important;
+        font-size: 0.8rem !important;
+        letter-spacing: 0.4px !important;
+    }
+}
