@@ -191,6 +191,15 @@ async function loadModule(moduleName, element = null, updateHash = true) {
         return;
     }
 
+    // Si había una búsqueda con filtros activa en Películas, navegar a
+    // cualquier otro módulo (o incluso volver a cargar Películas) equivale
+    // a quitar el filtro — evita que el usuario vuelva y se encuentre
+    // resultados de una búsqueda vieja en vez del feed normal.
+    if (document.getElementById('resultadosHeader')?.style.display === 'flex'
+        && typeof window.limpiarFiltros === 'function') {
+        window.limpiarFiltros();
+    }
+
     // Limpieza de elementos "de fondo" inyectados dinámicamente por otros módulos
     // (ej: el modal de película traído desde el perfil sin cargar el feed completo).
     // Evita IDs duplicados cuando el módulo que los contiene de forma nativa se carga.

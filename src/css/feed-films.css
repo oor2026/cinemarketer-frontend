@@ -189,6 +189,32 @@
     margin-left: 0.5rem;
 }
 
+.criterio-busqueda-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #fdeceb;
+    color: #c0392b;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.4rem 0.5rem 0.4rem 0.9rem;
+    border-radius: 20px;
+}
+
+.criterio-busqueda-pill button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #f5cfcb;
+    color: #c0392b;
+    border: none;
+    cursor: pointer;
+    font-size: 0.7rem;
+}
+
 .ordenar-select {
     padding: 0.5rem 1rem;
     border: 2px solid #e0e0e0;
