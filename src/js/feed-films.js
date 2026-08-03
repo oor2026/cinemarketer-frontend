@@ -429,9 +429,7 @@ function configurarLazyLoadFilas() {
 }
 
 function activarSwipeManual(track) {
-    if (track._indiceActual === undefined) track._indiceActual = 0;
-
-    let startX = 0, dragging = false, moved = false, comprometido = false, ancho = 0;
+    let startX = 0, startScrollLeft = 0, dragging = false, moved = false, comprometido = false, ancho = 0;
     const UMBRAL_INICIO = 12;
     const UMBRAL_COMPROMISO = 0.20;
 
@@ -442,13 +440,14 @@ function activarSwipeManual(track) {
             startX = e.touches[0].clientX;
             ancho = track.clientWidth;
             track.dataset.dragging = '1';
-            track._scrollToken = (track._scrollToken || 0) + 1;
+            track._scrollToken = (track._scrollToken || 0) + 1; // congela cualquier animación anterior en su posición real, sin moverla
 
-            // Fuerza la posición visual a coincidir con el índice lógico
-            // confirmado — corta en seco cualquier animación de un swipe
-            // anterior que todavía no haya terminado de asentarse, así el
-            // nuevo drag siempre arranca desde un punto de partida real.
-            track.scrollLeft = track._indiceActual * ancho;
+            // Resincroniza el índice lógico con lo que REALMENTE se ve ahora
+            // mismo — así, aunque un swipe anterior se haya interrumpido a
+            // mitad de camino, el próximo cálculo parte de la verdad visual,
+            // nunca de un destino "prometido" que todavía no se alcanzó.
+            track._indiceActual = Math.round(track.scrollLeft / ancho);
+            startScrollLeft = track.scrollLeft;
 
             if (track._guinoTimeouts) {
                 track._guinoTimeouts.forEach(id => clearTimeout(id));
@@ -473,13 +472,13 @@ function activarSwipeManual(track) {
             }
 
             e.preventDefault();
-            track.scrollLeft = (track._indiceActual * ancho) - dx;
+            track.scrollLeft = startScrollLeft - dx; // sigue el dedo desde donde REALMENTE estaba, sin saltos
 
             if (Math.abs(dx) >= ancho * UMBRAL_COMPROMISO) {
                 comprometido = true;
                 let nuevoIndice = dx < 0 ? track._indiceActual + 1 : track._indiceActual - 1;
                 nuevoIndice = Math.max(0, Math.min(nuevoIndice, track.children.length - 1));
-                track._indiceActual = nuevoIndice; // se confirma YA, no al terminar la animación
+                track._indiceActual = nuevoIndice;
                 animarScrollTrack(track, nuevoIndice * ancho, 300);
             }
         }, { passive: false });
