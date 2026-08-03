@@ -395,6 +395,7 @@ function renderFilasGenero() {
                     const trackNuevo = el.querySelector('.fila-genero-track');
                                 activarSwipeManual(trackNuevo);
                                 configurarScrollFila(f, trackNuevo);
+                                trackNuevo.addEventListener('click', () => fijarPosicionActual(trackNuevo), true); // true = fase de captura, no la frena el stopPropagation del botón
                             }
         cont.appendChild(el); // appendChild sobre un nodo existente lo MUEVE, no lo duplica
     });
@@ -429,8 +430,8 @@ function configurarLazyLoadFilas() {
 
 function activarSwipeManual(track) {
     let startX = 0, startScrollLeft = 0, dragging = false, moved = false, comprometido = false, ancho = 0;
-    const UMBRAL_INICIO = 6; // px — evita que un toque simple/temblor cuente como drag
-    const UMBRAL_COMPROMISO = 0.30; // 30% del ancho — cruzado esto, cambia sin esperar a soltar
+    const UMBRAL_INICIO = 12; // px — evita que un toque simple/temblor cuente como drag
+    const UMBRAL_COMPROMISO = 0.20; // antes 30% — ahora hace falta menos recorrido para pasar a la siguiente
 
     track.addEventListener('touchstart', (e) => {
             dragging = true;
@@ -659,6 +660,18 @@ function dispararGuino(track) {
 
     track._guinoTimeouts = track._guinoTimeouts || [];
     track._guinoTimeouts.push(t1);
+}
+
+function fijarPosicionActual(track) {
+    track._scrollToken = (track._scrollToken || 0) + 1; // corta cualquier animación de guiño en curso
+    if (track._guinoTimeouts) {
+        track._guinoTimeouts.forEach(id => clearTimeout(id));
+        track._guinoTimeouts = [];
+    }
+    const ancho = track.clientWidth || 1;
+    const indiceCercano = Math.round(track.scrollLeft / ancho);
+    track.style.scrollSnapType = 'x mandatory';
+    track.scrollLeft = indiceCercano * ancho; // corte abrupto, sin animación — vuelve a la que estabas viendo
 }
 
 function renderDotsFila(fila) {
