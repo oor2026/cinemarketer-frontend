@@ -3336,13 +3336,25 @@
 /* ===== Comentarios mobile (movido al final a propósito — ver nota arriba) ===== */
 @media (max-width: 768px) {
     #modalPelicula .modal-fila-comentarios:not(.comentarios-sheet-fixed) {
-        width: calc(100% + 2rem) !important;
-        margin-left: -1rem !important;
-        margin-right: -1rem !important;
+        width: calc(100% + 1.5rem) !important;
+        margin-left: -0.75rem !important;
+        margin-right: -0.75rem !important;
         padding-left: 1rem !important;
         padding-right: 1rem !important;
         box-sizing: border-box !important;
     }
+
+    #modalPelicula .modal-fila-boton {
+            width: calc(100% + 1.5rem) !important;
+            margin-left: -0.75rem !important;
+            margin-right: -0.75rem !important;
+            margin-top: -0.25rem !important;
+            margin-bottom: -0.75rem !important;
+            padding-left: 1.5rem !important;
+            padding-right: 1.5rem !important;
+            padding-bottom: 1.75rem !important;
+            box-sizing: border-box !important;
+        }
 }
 
 @media (max-width: 768px) {
@@ -3417,7 +3429,6 @@
         position: fixed !important;
         inset: 0 !important;
         z-index: 999999 !important;
-        background: white !important;
         display: flex !important;
         flex-direction: column !important;
         padding: 0 !important;
