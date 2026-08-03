@@ -429,8 +429,8 @@ function configurarLazyLoadFilas() {
 
 function activarSwipeManual(track) {
     let startX = 0, startScrollLeft = 0, dragging = false, moved = false, comprometido = false, ancho = 0;
-    const UMBRAL_INICIO = 6; // px — evita que un toque simple/temblor cuente como drag
-    const UMBRAL_COMPROMISO = 0.30; // 30% del ancho — cruzado esto, cambia sin esperar a soltar
+    const UMBRAL_INICIO = 8; // px — evita que un toque simple/temblor cuente como drag
+    const UMBRAL_COMPROMISO = 0.20; // antes 30% — ahora hace falta menos recorrido para pasar a la siguiente
 
     track.addEventListener('touchstart', (e) => {
             dragging = true;
