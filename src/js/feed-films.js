@@ -429,85 +429,24 @@ function configurarLazyLoadFilas() {
 }
 
 function activarSwipeManual(track) {
-    let startX = 0, startY = 0, startScrollLeft = 0, dragging = false, moved = false, comprometido = false, ancho = 0;
-    let direccionDecidida = false, esHorizontal = false;
-    const UMBRAL_INICIO = 12;
-    const UMBRAL_COMPROMISO = 0.20;
-
-    track.addEventListener('touchstart', (e) => {
-            dragging = true;
-            moved = false;
-            comprometido = false;
-            direccionDecidida = false;
-            esHorizontal = false;
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
-            startScrollLeft = track.scrollLeft;
-            ancho = track.clientWidth;
-            track.dataset.dragging = '1';
-            track._scrollToken = (track._scrollToken || 0) + 1;
-
-            if (track._guinoTimeouts) {
-                track._guinoTimeouts.forEach(id => clearTimeout(id));
-                track._guinoTimeouts = [];
-            }
-        }, { passive: true });
-
-    track.addEventListener('touchmove', (e) => {
-            if (!dragging) return;
-
-            const dx = e.touches[0].clientX - startX;
-            const dy = e.touches[0].clientY - startY;
-
-            if (!direccionDecidida) {
-                if (Math.abs(dx) < UMBRAL_INICIO && Math.abs(dy) < UMBRAL_INICIO) return; // todavía muy chico para saber
-
-                direccionDecidida = true;
-                esHorizontal = Math.abs(dx) > Math.abs(dy);
-
-                if (esHorizontal) {
-                    moved = true;
-                    track.style.scrollSnapType = 'none';
-                } else {
-                    // Es un scroll vertical de la página — soltamos el
-                    // gesto por completo, sin tocar preventDefault ni nada,
-                    // para que el navegador lo maneje 100% a su manera.
-                    dragging = false;
-                    track.dataset.dragging = '0';
-                    return;
-                }
-            }
-
-            if (!esHorizontal) return;
-
-            e.preventDefault();
-
-            if (comprometido) return;
-
-            track.scrollLeft = startScrollLeft - dx;
-
-            if (Math.abs(dx) >= ancho * UMBRAL_COMPROMISO) {
-                comprometido = true;
-                const indiceInicial = Math.round(startScrollLeft / ancho);
-                let nuevoIndice = dx < 0 ? indiceInicial + 1 : indiceInicial - 1;
-                nuevoIndice = Math.max(0, Math.min(nuevoIndice, track.children.length - 1));
-                track.scrollTo({ left: nuevoIndice * ancho, behavior: 'smooth' });
-            }
-        }, { passive: false });
+    // El navegador maneja el gesto entero de forma nativa:
+    // - scroll-snap-stop:always impide saltear más de una card por gesto,
+    //   sin importar qué tan fuerte sea el drag.
+    // - touch-action:pan-y le deja el scroll vertical a la página, así que
+    //   nunca hace falta calcular a mano si el gesto es horizontal o no.
+    // Acá solo cancelamos el guiño si el usuario toca de verdad.
+    track.addEventListener('touchstart', () => {
+        track.dataset.dragging = '1';
+        track._scrollToken = (track._scrollToken || 0) + 1;
+        if (track._guinoTimeouts) {
+            track._guinoTimeouts.forEach(id => clearTimeout(id));
+            track._guinoTimeouts = [];
+        }
+    }, { passive: true });
 
     track.addEventListener('touchend', () => {
-            if (!dragging) { track.dataset.dragging = '0'; return; }
-            dragging = false;
-            track.dataset.dragging = '0';
-            if (!moved) return;
-
-        if (!comprometido) {
-            const indiceInicial = Math.round(startScrollLeft / ancho);
-            track.scrollTo({ left: indiceInicial * ancho, behavior: 'smooth' });
-        }
-
-        setTimeout(() => { track.style.scrollSnapType = 'x mandatory'; }, 350);
-    });
+        track.dataset.dragging = '0';
+    }, { passive: true });
 }
 
 window.moverFilaGenero = function(key, direccion) {

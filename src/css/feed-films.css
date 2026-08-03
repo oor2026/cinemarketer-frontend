@@ -3485,11 +3485,13 @@ window.abrirElencoCard = async function(movieId, event) {
                     gap: 1.5rem;
                     overflow-x: auto;
                     scroll-snap-type: x proximity;
+                    touch-action: pan-y;
                 }
                 .fila-genero-track::-webkit-scrollbar { display: none; }
                 .fila-genero-slide {
                     flex: 0 0 400px;
                     scroll-snap-align: start;
+                    scroll-snap-stop: always;
                     position: relative;
                 }
                 .fila-genero-flecha { display: none; }
