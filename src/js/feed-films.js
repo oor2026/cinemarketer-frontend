@@ -429,7 +429,8 @@ function configurarLazyLoadFilas() {
 }
 
 function activarSwipeManual(track) {
-    let startX = 0, startScrollLeft = 0, dragging = false, moved = false, comprometido = false, ancho = 0;
+    let startX = 0, startY = 0, startScrollLeft = 0, dragging = false, moved = false, comprometido = false, ancho = 0;
+    let direccionDecidida = false, esHorizontal = false;
     const UMBRAL_INICIO = 12;
     const UMBRAL_COMPROMISO = 0.20;
 
@@ -437,7 +438,10 @@ function activarSwipeManual(track) {
             dragging = true;
             moved = false;
             comprometido = false;
+            direccionDecidida = false;
+            esHorizontal = false;
             startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
             startScrollLeft = track.scrollLeft;
             ancho = track.clientWidth;
             track.dataset.dragging = '1';
@@ -450,20 +454,37 @@ function activarSwipeManual(track) {
         }, { passive: true });
 
     track.addEventListener('touchmove', (e) => {
-                if (!dragging) return;
-                e.preventDefault(); // bloquea el scroll nativo desde el primer movimiento, aunque todavía sea chico
+            if (!dragging) return;
 
-                if (comprometido) return;
+            const dx = e.touches[0].clientX - startX;
+            const dy = e.touches[0].clientY - startY;
 
-                const dx = e.touches[0].clientX - startX;
+            if (!direccionDecidida) {
+                if (Math.abs(dx) < UMBRAL_INICIO && Math.abs(dy) < UMBRAL_INICIO) return; // todavía muy chico para saber
 
-                if (!moved) {
-                    if (Math.abs(dx) < UMBRAL_INICIO) return;
+                direccionDecidida = true;
+                esHorizontal = Math.abs(dx) > Math.abs(dy);
+
+                if (esHorizontal) {
                     moved = true;
                     track.style.scrollSnapType = 'none';
+                } else {
+                    // Es un scroll vertical de la página — soltamos el
+                    // gesto por completo, sin tocar preventDefault ni nada,
+                    // para que el navegador lo maneje 100% a su manera.
+                    dragging = false;
+                    track.dataset.dragging = '0';
+                    return;
                 }
+            }
 
-                track.scrollLeft = startScrollLeft - dx;
+            if (!esHorizontal) return;
+
+            e.preventDefault();
+
+            if (comprometido) return;
+
+            track.scrollLeft = startScrollLeft - dx;
 
             if (Math.abs(dx) >= ancho * UMBRAL_COMPROMISO) {
                 comprometido = true;
@@ -475,7 +496,7 @@ function activarSwipeManual(track) {
         }, { passive: false });
 
     track.addEventListener('touchend', () => {
-            if (!dragging) return;
+            if (!dragging) { track.dataset.dragging = '0'; return; }
             dragging = false;
             track.dataset.dragging = '0';
             if (!moved) return;
