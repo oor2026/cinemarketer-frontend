@@ -2569,18 +2569,37 @@ window.mostrarToast = function(mensaje, tipo = 'success') {
 // ==============================================
 window.toggleBanco = async function(commentId, btn) {
     const token = localStorage.getItem('token');
+    const counter = document.querySelector(`.banco-count-${commentId}`);
+
+    // Estado previo (para revertir si el request falla)
+    const estabaActivo = btn.dataset.active === 'true';
+    const countPrevio = counter ? (parseInt(counter.textContent, 10) || 0) : 0;
+
+    // --- Actualización optimista: se ve al instante del clic ---
+    const nuevoActivo = !estabaActivo;
+    btn.dataset.active = nuevoActivo;
+    btn.style.color = nuevoActivo ? '#1a3a6b' : '#999';
+    if (counter) counter.textContent = countPrevio + (nuevoActivo ? 1 : -1);
+
     try {
         const res = await fetch(`${CONFIG.API_URL}/comments/${commentId}/banco`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (!res.ok) return;
+        if (!res.ok) throw new Error('Respuesta no OK');
         const data = await res.json();
+
+        // Confirmar con el valor real del servidor
         btn.dataset.active = data.active;
         btn.style.color = data.active ? '#1a3a6b' : '#999';
-        const counter = document.querySelector(`.banco-count-${commentId}`);
         if (counter) counter.textContent = data.count;
-    } catch (e) { console.error(e); }
+    } catch (e) {
+        // Revertir el cambio optimista si falló
+        btn.dataset.active = estabaActivo;
+        btn.style.color = estabaActivo ? '#1a3a6b' : '#999';
+        if (counter) counter.textContent = countPrevio;
+        console.error(e);
+    }
 };
 
 // ==============================================
@@ -2895,18 +2914,34 @@ window.enviarRespuesta = async function(commentId) {
 
 window.toggleReplyBanco = async function(replyId, btn) {
     const token = localStorage.getItem('token');
+    const counter = document.querySelector(`.reply-banco-count-${replyId}`);
+
+    const estabaActivo = btn.dataset.active === 'true';
+    const countPrevio = counter ? (parseInt(counter.textContent, 10) || 0) : 0;
+
+    // --- Actualización optimista ---
+    const nuevoActivo = !estabaActivo;
+    btn.dataset.active = nuevoActivo;
+    btn.style.color = nuevoActivo ? '#1a3a6b' : '#999';
+    if (counter) counter.textContent = countPrevio + (nuevoActivo ? 1 : -1);
+
     try {
         const res = await fetch(`${CONFIG.API_URL}/comments/replies/${replyId}/banco`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (!res.ok) return;
+        if (!res.ok) throw new Error('Respuesta no OK');
         const data = await res.json();
+
         btn.dataset.active = data.active;
         btn.style.color = data.active ? '#1a3a6b' : '#999';
-        const counter = document.querySelector(`.reply-banco-count-${replyId}`);
         if (counter) counter.textContent = data.count;
-    } catch (e) { console.error(e); }
+    } catch (e) {
+        btn.dataset.active = estabaActivo;
+        btn.style.color = estabaActivo ? '#1a3a6b' : '#999';
+        if (counter) counter.textContent = countPrevio;
+        console.error(e);
+    }
 };
 
 window.abrirModalReporteReply = function(replyId) {
