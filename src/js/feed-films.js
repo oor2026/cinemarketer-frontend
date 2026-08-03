@@ -450,23 +450,20 @@ function activarSwipeManual(track) {
         }, { passive: true });
 
     track.addEventListener('touchmove', (e) => {
-            if (!dragging) return;
+                if (!dragging) return;
+                e.preventDefault(); // bloquea el scroll nativo desde el primer movimiento, aunque todavía sea chico
 
-            if (comprometido) {
-                e.preventDefault();
-                return;
-            }
+                if (comprometido) return;
 
-            const dx = e.touches[0].clientX - startX;
+                const dx = e.touches[0].clientX - startX;
 
-            if (!moved) {
-                if (Math.abs(dx) < UMBRAL_INICIO) return;
-                moved = true;
-                track.style.scrollSnapType = 'none';
-            }
+                if (!moved) {
+                    if (Math.abs(dx) < UMBRAL_INICIO) return;
+                    moved = true;
+                    track.style.scrollSnapType = 'none';
+                }
 
-            e.preventDefault();
-            track.scrollLeft = startScrollLeft - dx;
+                track.scrollLeft = startScrollLeft - dx;
 
             if (Math.abs(dx) >= ancho * UMBRAL_COMPROMISO) {
                 comprometido = true;
