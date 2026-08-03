@@ -36,6 +36,7 @@ window._splashTimer = null;
 window.cerrarSplashAd = function() {
     const overlay = document.getElementById('splashAdOverlay');
     if (overlay) overlay.style.display = 'none';
+    document.body.style.overflow = '';
     if (window._splashTimer) { clearInterval(window._splashTimer); window._splashTimer = null; }
 };
 
@@ -71,7 +72,8 @@ async function mostrarSplashMobile(moduleName) {
                 else link.style.pointerEvents = '';
 
         overlay.style.display = 'flex';
-        sessionStorage.setItem(splashKey(moduleName), '1');
+                document.body.style.overflow = 'hidden';
+                sessionStorage.setItem(splashKey(moduleName), '1');
 
         // Countdown de 5 segundos
         let segundos = 5;
