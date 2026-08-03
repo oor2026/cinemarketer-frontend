@@ -3481,12 +3481,11 @@ window.abrirElencoCard = async function(movieId, event) {
         .fila-genero-titulo { font-size: 15px; font-weight: 700; margin: 0 0 8px 12px; }
         .fila-genero-viewport { width: 100%; overflow: hidden; position: relative; }
                 .fila-genero-track {
-                    display: flex;
-                    gap: 1.5rem;
-                    overflow-x: auto;
-                    scroll-snap-type: x proximity;
-                    touch-action: pan-y;
-                }
+                                    display: flex;
+                                    gap: 1.5rem;
+                                    overflow-x: auto;
+                                    scroll-snap-type: x proximity;
+                                }
                 .fila-genero-track::-webkit-scrollbar { display: none; }
                 .fila-genero-slide {
                     flex: 0 0 400px;
