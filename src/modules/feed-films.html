@@ -175,14 +175,47 @@
                         <div class="carrusel-slide">
                             <div class="modal-columna-derecha">
                                 <div class="modal-info" id="modalInfo">
-                                    <p><strong>Fecha de estreno:</strong> <span id="modalFecha">-</span></p>
-                                    <p><strong>Duración:</strong> <span id="modalDuracion">-</span> min</p>
-                                    <p><strong>Idioma:</strong> <span id="modalIdioma">-</span></p>
-                                    <p><strong>Popularidad:</strong> <span id="modalPopularidad">-</span></p>
-                                    <p><strong>Votos TMDB:</strong> <span id="modalVotos">-</span></p>
-                                    <p><strong>Géneros:</strong> <span id="modalGeneros">-</span></p>
+
+                                    <div class="modal-stat-bar">
+                                        <div class="modal-stat-item">
+                                            <i class="fas fa-star"></i>
+                                            <span><span id="modalVotos">-</span> votos TMDB</span>
+                                        </div>
+                                        <div class="modal-stat-divider"></div>
+                                        <div class="modal-stat-item">
+                                            <i class="fas fa-fire"></i>
+                                            <span><span id="modalPopularidad">-</span> popularidad</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-chips-grid">
+                                        <div class="modal-chip modal-chip-red">
+                                            <div class="modal-chip-icon"><i class="fas fa-calendar-alt"></i></div>
+                                            <div class="modal-chip-texto">
+                                                <span class="modal-chip-label">Estreno</span>
+                                                <span class="modal-chip-valor" id="modalFecha">-</span>
+                                            </div>
+                                        </div>
+                                        <div class="modal-chip modal-chip-red">
+                                            <div class="modal-chip-icon"><i class="fas fa-clock"></i></div>
+                                            <div class="modal-chip-texto">
+                                                <span class="modal-chip-label">Duración</span>
+                                                <span class="modal-chip-valor"><span id="modalDuracion">-</span> min</span>
+                                            </div>
+                                        </div>
+                                        <div class="modal-chip modal-chip-red modal-chip-full">
+                                            <div class="modal-chip-icon"><i class="fas fa-globe"></i></div>
+                                            <div class="modal-chip-texto">
+                                                <span class="modal-chip-label">Idioma</span>
+                                                <span class="modal-chip-valor" id="modalIdioma">-</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-generos" id="modalGeneros"></div>
+
                                     <div class="modal-sinopsis">
-                                        <strong>Sinopsis</strong>
+                                        <div class="modal-sinopsis-titulo"><i class="fas fa-align-left"></i> Sinopsis</div>
                                         <p id="modalSinopsis">Cargando...</p>
                                     </div>
                                 </div>
