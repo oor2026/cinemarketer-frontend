@@ -438,16 +438,10 @@ function activarSwipeManual(track) {
             moved = false;
             comprometido = false;
             startX = e.touches[0].clientX;
+            startScrollLeft = track.scrollLeft;
             ancho = track.clientWidth;
             track.dataset.dragging = '1';
-            track._scrollToken = (track._scrollToken || 0) + 1; // congela cualquier animación anterior en su posición real, sin moverla
-
-            // Resincroniza el índice lógico con lo que REALMENTE se ve ahora
-            // mismo — así, aunque un swipe anterior se haya interrumpido a
-            // mitad de camino, el próximo cálculo parte de la verdad visual,
-            // nunca de un destino "prometido" que todavía no se alcanzó.
-            track._indiceActual = Math.round(track.scrollLeft / ancho);
-            startScrollLeft = track.scrollLeft;
+            track._scrollToken = (track._scrollToken || 0) + 1;
 
             if (track._guinoTimeouts) {
                 track._guinoTimeouts.forEach(id => clearTimeout(id));
@@ -472,14 +466,14 @@ function activarSwipeManual(track) {
             }
 
             e.preventDefault();
-            track.scrollLeft = startScrollLeft - dx; // sigue el dedo desde donde REALMENTE estaba, sin saltos
+            track.scrollLeft = startScrollLeft - dx;
 
             if (Math.abs(dx) >= ancho * UMBRAL_COMPROMISO) {
                 comprometido = true;
-                let nuevoIndice = dx < 0 ? track._indiceActual + 1 : track._indiceActual - 1;
+                const indiceInicial = Math.round(startScrollLeft / ancho);
+                let nuevoIndice = dx < 0 ? indiceInicial + 1 : indiceInicial - 1;
                 nuevoIndice = Math.max(0, Math.min(nuevoIndice, track.children.length - 1));
-                track._indiceActual = nuevoIndice;
-                animarScrollTrack(track, nuevoIndice * ancho, 300);
+                track.scrollTo({ left: nuevoIndice * ancho, behavior: 'smooth' });
             }
         }, { passive: false });
 
@@ -490,7 +484,8 @@ function activarSwipeManual(track) {
             if (!moved) return;
 
         if (!comprometido) {
-            animarScrollTrack(track, track._indiceActual * ancho, 300);
+            const indiceInicial = Math.round(startScrollLeft / ancho);
+            track.scrollTo({ left: indiceInicial * ancho, behavior: 'smooth' });
         }
 
         setTimeout(() => { track.style.scrollSnapType = 'x mandatory'; }, 350);
