@@ -429,19 +429,26 @@ function configurarLazyLoadFilas() {
 }
 
 function activarSwipeManual(track) {
-    let startX = 0, startScrollLeft = 0, dragging = false, moved = false, comprometido = false, ancho = 0;
-    const UMBRAL_INICIO = 12; // px — evita que un toque simple/temblor cuente como drag
-    const UMBRAL_COMPROMISO = 0.20; // antes 30% — ahora hace falta menos recorrido para pasar a la siguiente
+    if (track._indiceActual === undefined) track._indiceActual = 0;
+
+    let startX = 0, dragging = false, moved = false, comprometido = false, ancho = 0;
+    const UMBRAL_INICIO = 12;
+    const UMBRAL_COMPROMISO = 0.20;
 
     track.addEventListener('touchstart', (e) => {
             dragging = true;
             moved = false;
             comprometido = false;
             startX = e.touches[0].clientX;
-            startScrollLeft = track.scrollLeft;
             ancho = track.clientWidth;
             track.dataset.dragging = '1';
             track._scrollToken = (track._scrollToken || 0) + 1;
+
+            // Fuerza la posición visual a coincidir con el índice lógico
+            // confirmado — corta en seco cualquier animación de un swipe
+            // anterior que todavía no haya terminado de asentarse, así el
+            // nuevo drag siempre arranca desde un punto de partida real.
+            track.scrollLeft = track._indiceActual * ancho;
 
             if (track._guinoTimeouts) {
                 track._guinoTimeouts.forEach(id => clearTimeout(id));
@@ -453,9 +460,6 @@ function activarSwipeManual(track) {
             if (!dragging) return;
 
             if (comprometido) {
-                // Ya decidimos a qué película vamos — igual seguimos bloqueando
-                // el gesto hasta que sueltes el dedo, así el navegador nunca
-                // recupera el control y no puede sumar su propio scroll encima.
                 e.preventDefault();
                 return;
             }
@@ -469,14 +473,14 @@ function activarSwipeManual(track) {
             }
 
             e.preventDefault();
-            track.scrollLeft = startScrollLeft - dx;
+            track.scrollLeft = (track._indiceActual * ancho) - dx;
 
             if (Math.abs(dx) >= ancho * UMBRAL_COMPROMISO) {
                 comprometido = true;
-                const indiceInicial = Math.round(startScrollLeft / ancho);
-                let nuevoIndice = dx < 0 ? indiceInicial + 1 : indiceInicial - 1;
+                let nuevoIndice = dx < 0 ? track._indiceActual + 1 : track._indiceActual - 1;
                 nuevoIndice = Math.max(0, Math.min(nuevoIndice, track.children.length - 1));
-                track.scrollTo({ left: nuevoIndice * ancho, behavior: 'smooth' });
+                track._indiceActual = nuevoIndice; // se confirma YA, no al terminar la animación
+                animarScrollTrack(track, nuevoIndice * ancho, 300);
             }
         }, { passive: false });
 
@@ -487,8 +491,7 @@ function activarSwipeManual(track) {
             if (!moved) return;
 
         if (!comprometido) {
-            const indiceInicial = Math.round(startScrollLeft / ancho);
-            track.scrollTo({ left: indiceInicial * ancho, behavior: 'smooth' });
+            animarScrollTrack(track, track._indiceActual * ancho, 300);
         }
 
         setTimeout(() => { track.style.scrollSnapType = 'x mandatory'; }, 350);
@@ -696,6 +699,7 @@ function configurarScrollFila(fila, track) {
         const indice = Math.round(track.scrollLeft / ancho);
         if (indice === ultimoIndice) return;
         ultimoIndice = indice;
+        track._indiceActual = indice;
 
         if (fila.guinoTimeout) reiniciarGuinoTimer(fila, track);
         actualizarDotActivo(fila, indice);
