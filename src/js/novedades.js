@@ -154,7 +154,7 @@ window.cargarNovedades = async function() {
     }
 };
 
-window.clickNovedad = async function(notificationId, movieId, commentId, replyId, type, yaLeida, actorId, publicationId) {
+window.clickNovedad = async function(notificationId, movieId, commentId, replyId, type, yaLeida, actorId, publicationId, rewardId) {
      console.log('clickNovedad ejecutado, type:', type);
      console.log('movieId:', movieId, 'abrirDetallePelicula:', typeof window.abrirDetallePelicula);
     const token = localStorage.getItem('token');
@@ -194,19 +194,14 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
 
     // Abrir película al clickear recomendación nueva
         if (type === 'NEW_RECOMMENDATION') {
-            if (movieId) {
-                if (typeof window.abrirDetallePelicula !== 'function') {
-                    await new Promise(resolve => {
-                        loadModule('feed-films', null, true);
-                        setTimeout(resolve, 1500);
-                    });
+                    if (movieId) {
+                        await _asegurarModalPeliculaEnDOM();
+                        if (typeof window.abrirDetallePelicula === 'function') {
+                            window.abrirDetallePelicula(movieId);
+                        }
+                    }
+                    return;
                 }
-                if (typeof window.abrirDetallePelicula === 'function') {
-                    window.abrirDetallePelicula(movieId);
-                }
-            }
-            return;
-        }
 
         // Navegar a suscripción al clickear notif de vencimiento premium
         if (type === 'PREMIUM_EXPIRING_SOON' || type === 'PREMIUM_EXPIRING_TOMORROW') {
@@ -237,14 +232,14 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
             }
 
             if (type === 'NEW_REWARD') {
-                if (typeof loadModule === 'function') loadModule('mis-premios');
-                return;
-            }
+                            await _abrirModalPremioDesdeNotificacion(rewardId, false);
+                            return;
+                        }
 
-            if (type === 'NEW_PREMIUM_REWARD') {
-                if (typeof loadModule === 'function') loadModule('mis-premios');
-                return;
-            }
+                        if (type === 'NEW_PREMIUM_REWARD') {
+                            await _abrirModalPremioDesdeNotificacion(rewardId, true);
+                            return;
+                        }
 
             // Notificaciones de publicaciones en Comunidad
             if (type === 'PUB_BANCO') {
@@ -376,6 +371,34 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
         }
     }
 };
+
+async function _abrirModalPremioDesdeNotificacion(rewardId, esPremiumReward) {
+    loadModule('mis-premios');
+    if (!rewardId) return; // notificación vieja, de antes de guardar el id — solo navega
+    let intentos = 0;
+    const esperar = setInterval(() => {
+        intentos++;
+        const listo = esPremiumReward
+            ? (typeof window.abrirModalEspecial === 'function' && Array.isArray(window.premiosState?.especialesCache) && window.premiosState.especialesCache.length > 0)
+            : (typeof window.abrirModalPremio === 'function' && Array.isArray(window.premiosState?.premiosOriginalCache) && window.premiosState.premiosOriginalCache.length > 0);
+        if (listo) {
+            clearInterval(esperar);
+            if (esPremiumReward) {
+                const p = window.premiosState.especialesCache.find(x => x.id === rewardId);
+                if (p) {
+                    const isPremium = document.getElementById('especialesBannerNoPremium')?.style.display === 'none';
+                    window.abrirModalEspecial(p, isPremium);
+                }
+            } else {
+                const p = window.premiosState.premiosOriginalCache.find(x => x.id === rewardId);
+                if (p) window.abrirModalPremio(p);
+            }
+        } else if (intentos > 25) {
+            clearInterval(esperar);
+        }
+    }, 200);
+}
+
 
 window.marcarTodasLeidas = async function() {
     const token = localStorage.getItem('token');
