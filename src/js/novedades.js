@@ -275,14 +275,10 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
             }
 
             if (type === 'BANCO' || type === 'MERECE_PUNTO') {
-                    // Si el modal no está en el DOM, hay que cargar el feed primero
-                    if (!document.getElementById('movieModal')) {
-                        await new Promise(resolve => {
-                            loadModule('feed-films', null, true);
-                            setTimeout(resolve, 1200);
-                        });
-                    }
-                    if (typeof window.abrirDetallePelicula === 'function' && movieId) {
+                                // Inyecta solo el modal de película si todavía no está en el DOM,
+                                // sin tocar #module-container — no recarga los carruseles del feed.
+                                await _asegurarModalPeliculaEnDOM();
+                                if (typeof window.abrirDetallePelicula === 'function' && movieId) {
 
                         // Consultar si el comentario es spoiler antes de abrir
                         let esSpoiler = false;
@@ -322,14 +318,10 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
                 }
 
                 if (type === 'REPLY') {
-                // Si el modal no está en el DOM, hay que cargar el feed primero
-                if (!document.getElementById('movieModal')) {
-                await new Promise(resolve => {
-                    loadModule('feed-films', null, true);
-                    setTimeout(resolve, 1200);
-                });
-            }
-            if (typeof window.abrirDetallePelicula === 'function') {
+                                // Inyecta solo el modal de película si todavía no está en el DOM,
+                                // sin tocar #module-container — no recarga los carruseles del feed.
+                                await _asegurarModalPeliculaEnDOM();
+                            if (typeof window.abrirDetallePelicula === 'function') {
 
             // Consultar si el comentario padre es spoiler antes de abrir
             if (commentId) {
