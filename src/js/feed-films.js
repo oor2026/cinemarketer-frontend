@@ -436,13 +436,18 @@ function activarSwipeManual(track) {
     //   nunca hace falta calcular a mano si el gesto es horizontal o no.
     // Acá solo cancelamos el guiño si el usuario toca de verdad.
     track.addEventListener('touchstart', () => {
-        track.dataset.dragging = '1';
-        track._scrollToken = (track._scrollToken || 0) + 1;
-        if (track._guinoTimeouts) {
-            track._guinoTimeouts.forEach(id => clearTimeout(id));
-            track._guinoTimeouts = [];
-        }
-    }, { passive: true });
+            track.dataset.dragging = '1';
+            track._scrollToken = (track._scrollToken || 0) + 1;
+            if (track._guinoTimeouts) {
+                track._guinoTimeouts.forEach(id => clearTimeout(id));
+                track._guinoTimeouts = [];
+            }
+            // El guiño puede haber dejado esto en 'none' para poder animar
+            // libremente — si el usuario empieza a draguear justo en ese
+            // instante, el timeout que lo iba a restaurar queda cancelado
+            // arriba, así que lo restauramos acá mismo, al toque.
+            track.style.scrollSnapType = 'x mandatory';
+        }, { passive: true });
 
     track.addEventListener('touchend', () => {
         track.dataset.dragging = '0';
