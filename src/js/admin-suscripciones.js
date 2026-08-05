@@ -5,10 +5,11 @@
 const adminSuscripciones = {
 
     suscripciones: [],
-    datosActuales: [],
-    filtroActual: 'todas',
-    paginaActual: 1,
-    porPagina: 10,
+        datosActuales: [],
+        filtroActual: 'todas',
+        planFiltro: 'todos',
+        paginaActual: 1,
+        porPagina: 10,
 
     // ------------------------------------------
     // INIT
@@ -44,30 +45,40 @@ const adminSuscripciones = {
     // FILTRO
     // ------------------------------------------
     aplicarFiltro(subs) {
-        if (this.filtroActual === 'activas')    return subs.filter(s => s.status === 'ACTIVE');
-        if (this.filtroActual === 'canceladas') return subs.filter(s => s.status === 'CANCELLED');
-        if (this.filtroActual === 'expiradas')  return subs.filter(s => s.status === 'EXPIRED');
-        return subs;
-    },
+            let resultado = this.planFiltro === 'todos'
+                ? subs
+                : subs.filter(s => s.planName === this.planFiltro);
 
-    filtrar(valor) {
-        this.filtroActual = valor;
-        this.paginaActual = 1;
-        this.datosActuales = this.aplicarFiltro(this.suscripciones);
-        this.renderTabla();
-    },
+            if (this.filtroActual === 'activas')    return resultado.filter(s => s.status === 'ACTIVE');
+            if (this.filtroActual === 'canceladas') return resultado.filter(s => s.status === 'CANCELLED');
+            if (this.filtroActual === 'expiradas')  return resultado.filter(s => s.status === 'EXPIRED');
+            return resultado;
+        },
+
+    filtrarPlan(valor, btn) {
+            this.planFiltro = valor;
+            this.paginaActual = 1;
+            this.datosActuales = this.aplicarFiltro(this.suscripciones);
+            this.renderTabla();
+            this.actualizarStats();
+            document.querySelectorAll('#section-suscripciones .tab-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+        },
 
     buscar(texto) {
-        const lower = texto.toLowerCase();
-        this.paginaActual = 1;
-        this.datosActuales = this.suscripciones.filter(s =>
-            (s.planName || '').toLowerCase().includes(lower) ||
-            (s.userEmail || '').toLowerCase().includes(lower) ||
-            (s.userName || '').toLowerCase().includes(lower) ||
-            String(s.userId ?? '').includes(lower)
-        );
-        this.renderTabla();
-    },
+            const lower = texto.toLowerCase();
+            this.paginaActual = 1;
+            const base = this.planFiltro === 'todos'
+                ? this.suscripciones
+                : this.suscripciones.filter(s => s.planName === this.planFiltro);
+            this.datosActuales = base.filter(s =>
+                (s.planName || '').toLowerCase().includes(lower) ||
+                (s.userEmail || '').toLowerCase().includes(lower) ||
+                (s.userName || '').toLowerCase().includes(lower) ||
+                String(s.userId ?? '').includes(lower)
+            );
+            this.renderTabla();
+        },
 
     // ------------------------------------------
     // RENDER TABLA
@@ -189,10 +200,13 @@ const adminSuscripciones = {
     // STATS
     // ------------------------------------------
     actualizarStats() {
-        const total      = this.suscripciones.length;
-        const activas    = this.suscripciones.filter(s => s.status === 'ACTIVE').length;
-        const canceladas = this.suscripciones.filter(s => s.status === 'CANCELLED').length;
-        const expiradas  = this.suscripciones.filter(s => s.status === 'EXPIRED').length;
+            const base = this.planFiltro === 'todos'
+                ? this.suscripciones
+                : this.suscripciones.filter(s => s.planName === this.planFiltro);
+            const total      = base.length;
+            const activas    = base.filter(s => s.status === 'ACTIVE').length;
+            const canceladas = base.filter(s => s.status === 'CANCELLED').length;
+            const expiradas  = base.filter(s => s.status === 'EXPIRED').length;
         document.getElementById('statSubsTotal')      && (document.getElementById('statSubsTotal').textContent = total);
         document.getElementById('statSubsActivas')    && (document.getElementById('statSubsActivas').textContent = activas);
         document.getElementById('statSubsCanceladas') && (document.getElementById('statSubsCanceladas').textContent = canceladas);

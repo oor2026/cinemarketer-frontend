@@ -237,14 +237,17 @@
         <section id="section-suscripciones" class="admin-section">
             <div class="section-header">
                 <div>
-                    <h1>Suscripciones Premium</h1>
+                    <h1>Suscripciones Premium y Creator</h1>
                     <p>Gestioná las suscripciones activas y el historial de pagos</p>
                 </div>
                 <button class="btn-nuevo" onclick="adminSuscripciones.abrirAltaManual()">
                     <i class="fas fa-plus"></i> Alta manual
                 </button>
-            </div>
-            <div class="admin-stats">
+                <div style="display:flex;gap:0.5rem;margin-bottom:1rem;">
+                    <button class="tab-btn active" onclick="adminSuscripciones.filtrarPlan('todos', this)">Todos</button>
+                    <button class="tab-btn" onclick="adminSuscripciones.filtrarPlan('Premium', this)">Premium</button>
+                    <button class="tab-btn" onclick="adminSuscripciones.filtrarPlan('Creator', this)">Creator</button>
+                </div>
                 <div class="admin-stat-box">
                     <span class="stat-num" id="statSubsTotal">0</span>
                     <span class="stat-label">Total</span>
