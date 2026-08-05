@@ -1599,3 +1599,24 @@
     .modal-premio-acciones-desktop { display: none; }
     .modal-premio-acciones-mobile { display: block; }
 }
+
+.estado-tabs {
+    display: flex;
+    gap: 6px;
+    margin: 0.5rem 0 0.75rem;
+}
+.estado-tab-btn {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid #ddd;
+    background: #fff;
+    color: #666;
+    cursor: pointer;
+}
+.estado-tab-btn.active {
+    background: #1a3a6b;
+    color: #fff;
+    border-color: #1a3a6b;
+}
