@@ -222,9 +222,20 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
 
         // Abrir modal premium al clickear notif de puntos liberados con techo superado
             if (type === 'POINTS_RELEASED') {
-                if (typeof abrirDetallePlan === 'function') abrirDetallePlan();
-                return;
-            }
+                        const token = localStorage.getItem('token');
+                        try {
+                            const res = await fetch(`${CONFIG.API_URL}/subscriptions/me`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            const data = await res.json();
+                            if (!data.active && typeof abrirDetallePlan === 'function') {
+                                abrirDetallePlan();
+                            }
+                        } catch (e) {
+                            // si falla la consulta, no mostramos el modal comercial por las dudas
+                        }
+                        return;
+                    }
 
             if (type === 'ADMIN_GRANT_POINTS') {
                 if (typeof loadModule === 'function') loadModule('mis-puntos');
