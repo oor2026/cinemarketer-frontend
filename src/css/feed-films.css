@@ -3824,3 +3824,11 @@ window.abrirElencoCard = async function(movieId, event) {
         letter-spacing: 0.4px !important;
     }
 }
+
+/* Modal advertencia spoiler — caja rosada un poco más ancha, solo mobile */
+@media (max-width: 768px) {
+    .spoiler-aviso-caja {
+        margin-left: -0.5rem !important;
+        margin-right: -0.5rem !important;
+    }
+}
