@@ -525,9 +525,14 @@ window.cargarEspeciales = async function() {
 // ==============================================
 // RENDER DE PÁGINA DE ESPECIALES
 // ==============================================
+function estaResueltoEspecial(p) {
+    if (p.type === 'SORTEO') return p.drawExecuted === true;
+    return p.stock != null && p.stock <= 0;
+}
+
 function especialesVisibles() {
     return premiosState.especialesCache.filter(p =>
-        premiosState.especialesEstadoFiltro === 'abiertos' ? !estaResuelto(p) : estaResuelto(p)
+        premiosState.especialesEstadoFiltro === 'abiertos' ? !estaResueltoEspecial(p) : estaResueltoEspecial(p)
     );
 }
 
