@@ -56,7 +56,7 @@ function actualizarBadgeSub(estado) {
     if (estado.estado === 'GANADA') {
         sub.textContent = '¡Ganaste hoy! Volvé mañana';
     } else if (estado.estado === 'PERDIDA') {
-        sub.textContent = 'Volvé a intentarlo mañana';
+        sub.textContent = `Hoy: ${estado.aciertos} de ${estado.totalPreguntas} — Volvé mañana`;
     } else {
         sub.textContent = `Pregunta ${estado.preguntaActual} de ${estado.totalPreguntas}`;
     }
@@ -92,7 +92,7 @@ function renderTriviaAdvertencia(estado) {
             <i class="fas fa-question-circle"></i>
             <h3>Adivina Adivinador</h3>
             <p>Son 10 preguntas, un tiro por pregunta — 10 segundos cada una.</p>
-            <p>Tenés <strong>un solo intento por día</strong>. Si te equivocás en cualquier pregunta, el juego termina ahí y volvés a poder jugar recién mañana.</p>
+            <p>Tenés <strong>un solo intento por día</strong>. Respondé las 10 preguntas — te equivoques o no, seguís hasta el final, y ahí vemos cuántas acertaste.</p>
             <div class="trivia-advertencia-botones">
                 <button class="trivia-btn-primario" onclick="window.triviaConfirmarInicio()">Estoy listo, ¡a jugar!</button>
                 <button class="trivia-btn-secundario" onclick="window.cerrarTrivia()">Ahora no</button>
@@ -120,13 +120,14 @@ function renderTriviaEstado(estado) {
     if (estado.estado === 'GANADA') {
         renderTriviaGanada(estado.puntosGanados);
     } else if (estado.estado === 'PERDIDA') {
-        renderTriviaPerdida(estado.puntosGanados);
+        renderTriviaPerdida(estado.puntosGanados, estado.aciertos, estado.totalPreguntas);
     } else {
         renderTriviaPregunta(estado.pregunta, estado.preguntaActual, estado.totalPreguntas);
     }
 }
 
 function renderTriviaPregunta(pregunta, numero, total) {
+    window._triviaTotalPreguntas = total; // se guarda para reusarlo al avanzar de pregunta
     const cont = document.getElementById('triviaModalContenido');
 
     let mediaHtml;
@@ -217,12 +218,12 @@ window.triviaResponder = async function(opcionElegida) {
 
         setTimeout(() => {
                             if (data.estado === 'EN_CURSO') {
-                                renderTriviaPregunta(data.siguientePregunta, data.preguntaActual, undefined);
-                            } else if (data.estado === 'GANADA') {
+                                                            renderTriviaPregunta(data.siguientePregunta, data.preguntaActual, window._triviaTotalPreguntas);
+                                                        } else if (data.estado === 'GANADA') {
                                 renderTriviaGanada(data.puntosGanadosTotal);
                             } else {
-                                renderTriviaPerdida(data.puntosGanadosTotal);
-                            }
+                                        renderTriviaPerdida(data.puntosGanadosTotal, data.aciertos, window._triviaTotalPreguntas);
+                                    }
                     window.cargarTriviaBadge(); // refresca el badge del feed con el nuevo estado
                     window._triviaEnviando = false;
                 }, 1200);
@@ -288,12 +289,12 @@ function renderTriviaGanada(puntos) {
     `;
 }
 
-function renderTriviaPerdida(puntos) {
+function renderTriviaPerdida(puntos, aciertos, total) {
     document.getElementById('triviaModalContenido').innerHTML = `
         <div class="trivia-resultado">
             <i class="fas fa-hourglass-half" style="color:#999;"></i>
-            <h3>¡Casi!</h3>
-            <p>Volvé mañana. A partir de las 00hs reestableceremos tu intento diario.</p>
+            <h3>¡Completaste la trivia de hoy!</h3>
+            <p>Acertaste <strong>${aciertos} de ${total}</strong> preguntas y sumaste <strong>${puntos} puntos</strong>. Volvé mañana para tu próximo intento.</p>
             ${botonCompartirHtml()}
         </div>
         ${ctaInvitadoHtml(puntos)}
