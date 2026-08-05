@@ -2473,6 +2473,177 @@
                 overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
             }
 
+    // ==============================================
+    // ENCUADRE DE IMAGEN — recorte/relleno antes de subir (estilo Instagram)
+    // Proporción fija 4:3, la misma que usa .com-card-imagenes en el feed real,
+    // para que lo que el creator ve acá sea EXACTAMENTE lo que va a salir publicado.
+    // ==============================================
+    function abrirEncuadreImagen(file) {
+        return new Promise((resolve, reject) => {
+            const FRAME_W = 320, FRAME_H = 240; // 4:3, tamaño de trabajo en pantalla
+            const OUT_W = 1200, OUT_H = 900;    // 4:3, tamaño final que se sube
+
+            const img = new Image();
+            const reader = new FileReader();
+            reader.onload = e => { img.src = e.target.result; };
+            reader.readAsDataURL(file);
+
+            img.onload = () => {
+                const estado = { modo: 'cover', scale: 1, offsetX: 0, offsetY: 0 };
+                const coverScale   = Math.max(FRAME_W / img.width, FRAME_H / img.height);
+                const containScale = Math.min(FRAME_W / img.width, FRAME_H / img.height);
+                const escalaBase = () => estado.modo === 'cover' ? coverScale : containScale;
+
+                const overlay = document.createElement('div');
+                overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:1rem;';
+                overlay.innerHTML = `
+                    <div style="color:white;font-size:0.9rem;font-weight:600;">Encuadrá tu imagen</div>
+                    <div id="encuadreCanvasWrap" style="width:${FRAME_W}px;height:${FRAME_H}px;background:#000;border-radius:10px;overflow:hidden;position:relative;touch-action:none;cursor:grab;">
+                        <canvas id="encuadreCanvas" width="${FRAME_W}" height="${FRAME_H}" style="display:block;"></canvas>
+                    </div>
+                    <input type="range" id="encuadreZoom" min="1" max="3" step="0.01" value="1" style="width:${FRAME_W}px;">
+                    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;">
+                        <button id="encuadreModoCover" style="padding:6px 14px;border-radius:20px;border:1px solid #fff;background:#fff;color:#111;font-size:0.8rem;cursor:pointer;">Llenar el marco</button>
+                        <button id="encuadreModoContain" style="padding:6px 14px;border-radius:20px;border:1px solid #fff;background:transparent;color:#fff;font-size:0.8rem;cursor:pointer;">Mostrar completa</button>
+                        <button id="encuadreModoBlur" style="padding:6px 14px;border-radius:20px;border:1px solid #fff;background:transparent;color:#fff;font-size:0.8rem;cursor:pointer;">Fondo difuminado</button>
+                        <button id="encuadreModoStretch" style="padding:6px 14px;border-radius:20px;border:1px solid #fff;background:transparent;color:#fff;font-size:0.8rem;cursor:pointer;">Estirar sin espacios</button>
+                    </div>
+                    <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
+                        <button id="encuadreCancelar" style="padding:8px 20px;border-radius:20px;border:1px solid #999;background:transparent;color:#ccc;cursor:pointer;">Cancelar</button>
+                        <button id="encuadreListo" style="padding:8px 24px;border-radius:20px;border:none;background:#e50914;color:white;font-weight:600;cursor:pointer;">Listo</button>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+
+                const canvas = overlay.querySelector('#encuadreCanvas');
+                const ctx = canvas.getContext('2d');
+                const wrap = overlay.querySelector('#encuadreCanvasWrap');
+                const zoomInput = overlay.querySelector('#encuadreZoom');
+                const btnCover = overlay.querySelector('#encuadreModoCover');
+                const btnContain = overlay.querySelector('#encuadreModoContain');
+                const btnStretch = overlay.querySelector('#encuadreModoStretch');
+                const btnBlur = overlay.querySelector('#encuadreModoBlur');
+
+                function limitesOffset() {
+                    const s = escalaBase() * estado.scale;
+                    const w = img.width * s, h = img.height * s;
+                    return { maxX: Math.max(0, (w - FRAME_W) / 2), maxY: Math.max(0, (h - FRAME_H) / 2) };
+                }
+                function clampOffset() {
+                    const { maxX, maxY } = limitesOffset();
+                    estado.offsetX = Math.max(-maxX, Math.min(maxX, estado.offsetX));
+                    estado.offsetY = Math.max(-maxY, Math.min(maxY, estado.offsetY));
+                }
+                function render() {
+                    ctx.clearRect(0, 0, FRAME_W, FRAME_H);
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(0, 0, FRAME_W, FRAME_H);
+                    if (estado.modo === 'stretch') {
+                        ctx.drawImage(img, 0, 0, FRAME_W, FRAME_H);
+                        return;
+                    }
+                    if (estado.modo === 'blur') {
+                        // Fondo: la misma imagen agrandada y difuminada, cubre todo el marco
+                        ctx.save();
+                        ctx.filter = 'blur(14px)';
+                        const bs = coverScale * 1.15; // de más, para que el blur no deje ver un borde nítido en el límite
+                        const bw = img.width * bs, bh = img.height * bs;
+                        ctx.drawImage(img, (FRAME_W - bw) / 2, (FRAME_H - bh) / 2, bw, bh);
+                        ctx.restore();
+                        ctx.fillStyle = 'rgba(0,0,0,0.15)';
+                        ctx.fillRect(0, 0, FRAME_W, FRAME_H);
+                    }
+                    const s = escalaBase() * estado.scale;
+                    const w = img.width * s, h = img.height * s;
+                    const x = (FRAME_W - w) / 2 + estado.offsetX;
+                    const y = (FRAME_H - h) / 2 + estado.offsetY;
+                    ctx.drawImage(img, x, y, w, h);
+                }
+                function setModo(modo) {
+                    estado.modo = modo; estado.scale = 1; estado.offsetX = 0; estado.offsetY = 0;
+                    zoomInput.value = 1;
+                    zoomInput.disabled = (modo === 'stretch');
+                    zoomInput.style.opacity = (modo === 'stretch') ? '0.3' : '1';
+                    wrap.style.cursor = (modo === 'stretch') ? 'default' : 'grab';
+                    btnCover.style.background = modo === 'cover' ? '#fff' : 'transparent';
+                    btnCover.style.color = modo === 'cover' ? '#111' : '#fff';
+                    btnContain.style.background = modo === 'contain' ? '#fff' : 'transparent';
+                    btnContain.style.color = modo === 'contain' ? '#111' : '#fff';
+                    btnStretch.style.background = modo === 'stretch' ? '#fff' : 'transparent';
+                    btnStretch.style.color = modo === 'stretch' ? '#111' : '#fff';
+                    btnBlur.style.background = modo === 'blur' ? '#fff' : 'transparent';
+                    btnBlur.style.color = modo === 'blur' ? '#111' : '#fff';
+                    render();
+                }
+
+                btnCover.onclick = () => setModo('cover');
+                btnContain.onclick = () => setModo('contain');
+                btnStretch.onclick = () => setModo('stretch');
+                btnBlur.onclick = () => setModo('blur');
+                zoomInput.oninput = () => { estado.scale = parseFloat(zoomInput.value); clampOffset(); render(); };
+
+                let arrastrando = false, inicioX = 0, inicioY = 0, offInicioX = 0, offInicioY = 0;
+               wrap.addEventListener('pointerdown', e => {
+                   if (estado.modo === 'stretch') return;
+                   arrastrando = true; wrap.style.cursor = 'grabbing';
+                   inicioX = e.clientX; inicioY = e.clientY;
+                   offInicioX = estado.offsetX; offInicioY = estado.offsetY;
+                   wrap.setPointerCapture(e.pointerId);
+               });
+               wrap.addEventListener('pointermove', e => {
+                   if (!arrastrando || estado.modo === 'stretch') return;
+                   estado.offsetX = offInicioX + (e.clientX - inicioX);
+                   estado.offsetY = offInicioY + (e.clientY - inicioY);
+                   clampOffset(); render();
+               });
+                wrap.addEventListener('pointerup', () => { arrastrando = false; wrap.style.cursor = 'grab'; });
+                wrap.addEventListener('pointercancel', () => { arrastrando = false; wrap.style.cursor = 'grab'; });
+
+                overlay.querySelector('#encuadreCancelar').onclick = () => {
+                    document.body.removeChild(overlay);
+                    reject(new Error('cancelado'));
+                };
+
+                overlay.querySelector('#encuadreListo').onclick = () => {
+                    const outCanvas = document.createElement('canvas');
+                    outCanvas.width = OUT_W; outCanvas.height = OUT_H;
+                    const outCtx = outCanvas.getContext('2d');
+                    outCtx.fillStyle = '#000';
+                    outCtx.fillRect(0, 0, OUT_W, OUT_H);
+                    const factor = OUT_W / FRAME_W;
+                    if (estado.modo === 'stretch') {
+                        outCtx.drawImage(img, 0, 0, OUT_W, OUT_H);
+                    } else {
+                        if (estado.modo === 'blur') {
+                            outCtx.save();
+                            outCtx.filter = `blur(${14 * factor}px)`;
+                            const bs = coverScale * 1.15 * factor;
+                            const bw = img.width * bs, bh = img.height * bs;
+                            outCtx.drawImage(img, (OUT_W - bw) / 2, (OUT_H - bh) / 2, bw, bh);
+                            outCtx.restore();
+                            outCtx.fillStyle = 'rgba(0,0,0,0.15)';
+                            outCtx.fillRect(0, 0, OUT_W, OUT_H);
+                        }
+                        const s = escalaBase() * estado.scale * factor;
+                        const w = img.width * s, h = img.height * s;
+                        const x = (OUT_W - w) / 2 + estado.offsetX * factor;
+                        const y = (OUT_H - h) / 2 + estado.offsetY * factor;
+                        outCtx.drawImage(img, x, y, w, h);
+                    }
+                    outCanvas.toBlob(blob => {
+                        document.body.removeChild(overlay);
+                        resolve(blob);
+                    }, 'image/jpeg', 0.9);
+                };
+
+                setModo('cover');
+            };
+
+            img.onerror = () => reject(new Error('No se pudo cargar la imagen'));
+        });
+    }
+    window.abrirEncuadreImagen = abrirEncuadreImagen;
+
             window.wfAdjuntarImagenes = async function(input, maxImagenes) {
                     const yaCargadas = (_wf.imageUrls || []).length;
                     const espacioDisponible = Math.max(0, maxImagenes - yaCargadas);
@@ -2506,50 +2677,58 @@
             const token = localStorage.getItem('token');
 
             for (const file of validas) {
-                const tileId = 'wfImgTile-' + Math.random().toString(36).slice(2, 9);
-                const tile = document.createElement('div');
-                tile.id = tileId;
-                tile.style.cssText = 'position:relative;width:80px;height:80px;border-radius:6px;overflow:hidden;background:#f0f0f0;flex-shrink:0;';
+                            let blobEncuadrado;
+                            try {
+                                blobEncuadrado = await abrirEncuadreImagen(file);
+                            } catch (e) {
+                                continue; // el usuario canceló el encuadre de esta imagen puntual — se salta, no sube nada
+                            }
+                            const fileEncuadrado = new File([blobEncuadrado], file.name, { type: 'image/jpeg' });
 
-                const previewSrc = await new Promise(resolve => {
-                    const reader = new FileReader();
-                    reader.onload = e => resolve(e.target.result);
-                    reader.readAsDataURL(file);
-                });
+                            const tileId = 'wfImgTile-' + Math.random().toString(36).slice(2, 9);
+                            const tile = document.createElement('div');
+                            tile.id = tileId;
+                            tile.style.cssText = 'position:relative;width:80px;height:80px;border-radius:6px;overflow:hidden;background:#f0f0f0;flex-shrink:0;';
 
-                tile.innerHTML = `
-                    <img src="${previewSrc}" style="width:100%;height:100%;object-fit:cover;display:block;">
-                    <div class="wf-img-overlay" style="position:absolute;inset:0;background:rgba(0,0,0,0.45);
-                         display:flex;align-items:center;justify-content:center;">
-                        <i class="fas fa-spinner fa-spin" style="color:white;font-size:1.1rem;"></i>
-                    </div>`;
-                // Se agrega al lado de lo que ya había — todavía no se borra nada
-                preview.appendChild(tile);
-                tilesNuevos.push(tile);
+                            const previewSrc = await new Promise(resolve => {
+                                const reader = new FileReader();
+                                reader.onload = e => resolve(e.target.result);
+                                reader.readAsDataURL(blobEncuadrado);
+                            });
 
-                try {
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    const uploadRes = await fetch(`${window._comunidadApiUrl}/publications/upload-image`, {
-                        method: 'POST',
-                        headers: { 'Authorization': `Bearer ${token}` },
-                        body: formData
-                    });
+                            tile.innerHTML = `
+                                <img src="${previewSrc}" style="width:100%;height:100%;object-fit:cover;display:block;">
+                                <div class="wf-img-overlay" style="position:absolute;inset:0;background:rgba(0,0,0,0.45);
+                                     display:flex;align-items:center;justify-content:center;">
+                                    <i class="fas fa-spinner fa-spin" style="color:white;font-size:1.1rem;"></i>
+                                </div>`;
+                            // Se agrega al lado de lo que ya había — todavía no se borra nada
+                            preview.appendChild(tile);
+                            tilesNuevos.push(tile);
 
-                    if (!uploadRes.ok) {
-                        const errData = await uploadRes.json().catch(() => ({}));
-                        marcarTileImagenError(tileId, errData.error || 'Error al subir la imagen.');
-                        continue;
-                    }
+                            try {
+                                const formData = new FormData();
+                                formData.append('file', fileEncuadrado);
+                                const uploadRes = await fetch(`${window._comunidadApiUrl}/publications/upload-image`, {
+                                    method: 'POST',
+                                    headers: { 'Authorization': `Bearer ${token}` },
+                                    body: formData
+                                });
 
-                    const uploadData = await uploadRes.json();
-                    nuevasUrls.push(uploadData.url);
-                    tile.classList.add('wf-img-tile');
+                                if (!uploadRes.ok) {
+                                    const errData = await uploadRes.json().catch(() => ({}));
+                                    marcarTileImagenError(tileId, errData.error || 'Error al subir la imagen.');
+                                    continue;
+                                }
 
-                } catch (e) {
-                    marcarTileImagenError(tileId, 'Error de conexión al subir la imagen.');
-                }
-            }
+                                const uploadData = await uploadRes.json();
+                                nuevasUrls.push(uploadData.url);
+                                tile.classList.add('wf-img-tile');
+
+                            } catch (e) {
+                                marcarTileImagenError(tileId, 'Error de conexión al subir la imagen.');
+                            }
+                        }
 
             if (nuevasUrls.length > 0) {
                             // Al menos una subió bien — se agregan a las que ya
