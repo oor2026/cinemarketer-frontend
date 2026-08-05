@@ -271,19 +271,20 @@ const adminSuscripciones = {
     },
 
     async confirmarAltaManual() {
-        const userId = document.getElementById('inputAltaManualUserId').value.trim();
-        if (!userId) { alert('Ingresá el ID del usuario'); return; }
-        try {
-            const response = await fetch(`${CONFIG.API_URL}/admin/subscriptions/${userId}/activate`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({})
-            });
-            if (!response.ok) throw new Error();
-            this.cerrarAltaManual();
-            await this.cargarSuscripciones();
-        } catch {
-            alert('Error al activar la suscripción manualmente');
+            const userId = document.getElementById('inputAltaManualUserId').value.trim();
+            if (!userId) { alert('Ingresá el ID del usuario'); return; }
+            const planName = document.getElementById('selectAltaManualPlan')?.value || 'Premium';
+            try {
+                const response = await fetch(`${CONFIG.API_URL}/admin/subscriptions/${userId}/activate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ planName })
+                });
+                if (!response.ok) throw new Error();
+                this.cerrarAltaManual();
+                await this.cargarSuscripciones();
+            } catch {
+                alert('Error al activar la suscripción manualmente');
+            }
         }
-    }
 };
