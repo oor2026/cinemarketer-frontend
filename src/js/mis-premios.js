@@ -966,6 +966,17 @@ function inicializarEspecialesBannerCarrusel() {
     }
 }
 
+window.toggleEspecialesBanner = function() {
+    const colapsable = document.getElementById('especialesBannerColapsable');
+    const chevron = document.getElementById('especialesBannerChevron');
+    const label = document.querySelector('#especialesBanner .premium-banner-toggle-label');
+    if (!colapsable) return;
+    const estaColapsadoAhora = colapsable.classList.toggle('colapsado');
+    if (chevron) chevron.classList.toggle('fa-chevron-up', !estaColapsadoAhora);
+    if (chevron) chevron.classList.toggle('fa-chevron-down', estaColapsadoAhora);
+    if (label) label.style.display = estaColapsadoAhora ? 'inline' : 'none';
+};
+
 // ==============================================
 // INICIALIZACIÓN
 // ==============================================
