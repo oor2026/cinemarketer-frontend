@@ -51,6 +51,7 @@ const premiosState = {
     puntosActuales: 0,
     filtroActual: 'todos',
     ordenActual: 'puntos-menor',
+    estadoFiltro: 'activos',
     premiosCache: [],
     premiosOriginalCache: [],
     canjeadosCache: [],
@@ -60,9 +61,14 @@ const premiosState = {
     disponiblesPorPagina: 9,
     especialesCache: [],
     especialesFiltro: 'todos',
+    especialesEstadoFiltro: 'abiertos',
     especialesPagina: 1,
     especialesPorPagina: 9
 };
+
+function estaResuelto(p) {
+    return p.isExpired || !p.hasStock || p.drawExecuted === true;
+}
 
 // ==============================================
 // SWITCH DE TABS
@@ -519,11 +525,26 @@ window.cargarEspeciales = async function() {
 // ==============================================
 // RENDER DE PÁGINA DE ESPECIALES
 // ==============================================
+function especialesVisibles() {
+    return premiosState.especialesCache.filter(p =>
+        premiosState.especialesEstadoFiltro === 'abiertos' ? !estaResuelto(p) : estaResuelto(p)
+    );
+}
+
+window.filtrarEspecialesEstado = function(estado, btn) {
+    premiosState.especialesEstadoFiltro = estado;
+    premiosState.especialesPagina = 1;
+    const isPremium = document.getElementById('especialesBannerNoPremium')?.style.display === 'none';
+    renderEspecialesPagina(1, isPremium);
+    document.querySelectorAll('#especialesEstadoTabs .estado-tab-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+};
+
 function renderEspecialesPagina(pagina, isPremium) {
     const grid = document.getElementById('especialesGrid');
     if (!grid) return;
 
-    const premios      = premiosState.especialesCache;
+    const premios      = especialesVisibles();
     const porPagina    = premiosState.especialesPorPagina;
     const totalPaginas = Math.ceil(premios.length / porPagina);
     pagina = Math.max(1, Math.min(pagina, totalPaginas));
@@ -551,7 +572,7 @@ function renderEspecialesPaginacion() {
         seccion.appendChild(paginacion);
     }
 
-    const total        = premiosState.especialesCache.length;
+    const total        = especialesVisibles().length;
     const porPagina    = premiosState.especialesPorPagina;
     const totalPaginas = Math.ceil(total / porPagina);
     const pagina       = premiosState.especialesPagina;
@@ -734,7 +755,9 @@ window.canjearEspecial = async function(rewardId, rewardName, pointsRequired) {
 // FILTROS Y ORDEN
 // ==============================================
 function aplicarFiltroYOrden(premios) {
-    let resultado = [...premios];
+    let resultado = premios.filter(p =>
+        premiosState.estadoFiltro === 'activos' ? !estaResuelto(p) : estaResuelto(p)
+    );
 
     if (premiosState.filtroActual === 'entradas') {
         resultado = resultado.filter(p => p.rewardType === 'TICKET');
@@ -762,6 +785,15 @@ window.filtrarPremios = function(filtro) {
     premiosState.disponiblesPagina = 1;
     premiosState.premiosCache = aplicarFiltroYOrden(premiosState.premiosOriginalCache);
     renderDisponiblesPagina(1);
+};
+
+window.filtrarPremiosEstado = function(estado, btn) {
+    premiosState.estadoFiltro = estado;
+    premiosState.disponiblesPagina = 1;
+    premiosState.premiosCache = aplicarFiltroYOrden(premiosState.premiosOriginalCache);
+    renderDisponiblesPagina(1);
+    document.querySelectorAll('#disponiblesEstadoTabs .estado-tab-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
 };
 
 window.ordenarPremios = function(orden) {

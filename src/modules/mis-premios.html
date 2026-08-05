@@ -16,10 +16,10 @@
 
     <!-- Tabs de navegación -->
     <div class="premios-tabs">
-        <button class="tab-btn active" onclick="window.switchTab('canjeados', this)">Premios Canjeados</button>
-        <button class="tab-btn" onclick="window.switchTab('disponibles', this)">Premios Disponibles</button>
+        <button class="tab-btn active" onclick="window.switchTab('canjeados', this)">Canjeados</button>
+        <button class="tab-btn" onclick="window.switchTab('disponibles', this)">Free</button>
         <button class="tab-btn tab-btn-premium" onclick="window.switchTab('especiales', this)">
-            ★ Premios Especiales
+            ★ Premium
         </button>
     </div>
 
@@ -48,7 +48,11 @@
     <!-- SECCIÓN: PREMIOS DISPONIBLES -->
     <div id="disponibles-section" class="tab-content">
         <div class="disponibles-header">
-            <h3>Premios para canjear <span id="tituloCountDisponibles" style="font-weight:normal;opacity:0.7;font-size:0.9em;"></span></h3>
+            <h3>Premios Free <span id="tituloCountDisponibles" style="font-weight:normal;opacity:0.7;font-size:0.9em;"></span></h3>
+            <div class="estado-tabs" id="disponiblesEstadoTabs">
+                <button class="estado-tab-btn active" onclick="window.filtrarPremiosEstado('activos', this)">Activos</button>
+                <button class="estado-tab-btn" onclick="window.filtrarPremiosEstado('agotados', this)">Agotados</button>
+            </div>
             <div class="filtros-premios">
                 <select class="filtro-select" onchange="window.filtrarPremios(this.value)">
                     <option value="todos">Todos</option>
@@ -140,7 +144,11 @@
         <!-- Contenido para premium activo -->
         <div id="especialesContenido">
             <div class="disponibles-header">
-                <h3>Premios y sorteos exclusivos <span id="tituloCountEspeciales" style="font-weight:normal;opacity:0.7;font-size:0.9em;"></span></h3>
+                <h3>Premios Premium <span id="tituloCountEspeciales" style="font-weight:normal;opacity:0.7;font-size:0.9em;"></span></h3>
+                <div class="estado-tabs" id="especialesEstadoTabs">
+                    <button class="estado-tab-btn active" onclick="window.filtrarEspecialesEstado('abiertos', this)">Abiertos</button>
+                    <button class="estado-tab-btn" onclick="window.filtrarEspecialesEstado('resueltos', this)">Resueltos</button>
+                </div>
                 <div class="filtros-premios">
                     <select class="filtro-select" onchange="window.filtrarEspeciales(this.value)">
                         <option value="todos">Todos</option>
