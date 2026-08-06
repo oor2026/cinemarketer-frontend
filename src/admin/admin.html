@@ -106,9 +106,14 @@
                 <i class="fas fa-bullhorn"></i>
                 <span>Comercial</span>
             </li>
+            <li class="sidebar-item" onclick="adminUI.switchSection('notificaciones', this); typeof adminNotificaciones !== 'undefined' && adminNotificaciones.init();">
+                <i class="fas fa-paper-plane"></i>
+                <span>Notificaciones</span>
+            </li>
             <li class="sidebar-item" onclick="adminUI.switchSection('feed', this); window.adminFeed && adminFeed.init();">
                 <i class="fas fa-thumbtack"></i>
                 <span>Gestión Feed</span>
+            </li>
             </li>
         </ul>
     </aside>
@@ -1199,6 +1204,108 @@
                 </div>
             </div>
         </section>
+        <section id="section-notificaciones" class="admin-section">
+            <div class="section-header">
+                <div>
+                    <h1>Notificaciones</h1>
+                    <p>Enviá avisos internos + push a tus usuarios, por segmento o de forma puntual</p>
+                </div>
+            </div>
+
+            <div class="admin-card" style="margin-bottom:1.5rem;">
+                <div class="card-header"><h3>Nueva notificación</h3></div>
+                <div style="padding:1.25rem;display:flex;flex-direction:column;gap:1rem;">
+
+                    <div>
+                        <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:0.35rem;">Título</label>
+                        <input type="text" id="notifTitulo" maxlength="150" placeholder="Ej: 🎁 Nuevo premio disponible"
+                               style="width:100%;padding:0.6rem 0.8rem;border:1px solid #ddd;border-radius:6px;">
+                    </div>
+
+                    <div>
+                        <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:0.35rem;">Mensaje</label>
+                        <textarea id="notifMensaje" rows="3" placeholder="Escribí el mensaje que van a ver..."
+                                  style="width:100%;padding:0.6rem 0.8rem;border:1px solid #ddd;border-radius:6px;resize:vertical;"></textarea>
+                    </div>
+
+                    <div>
+                        <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:0.5rem;">Destinatarios</label>
+                        <div style="display:flex;gap:1.5rem;margin-bottom:0.75rem;">
+                            <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;">
+                                <input type="radio" name="notifTargetType" value="SEGMENTS" checked onchange="adminNotificaciones.cambiarTargetType('SEGMENTS')">
+                                Suscriptores
+                            </label>
+                            <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;">
+                                <input type="radio" name="notifTargetType" value="USERS" onchange="adminNotificaciones.cambiarTargetType('USERS')">
+                                Usuarios específicos
+                            </label>
+                        </div>
+
+                        <div id="notifSegmentos" style="display:flex;gap:1.5rem;">
+                            <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;">
+                                <input type="checkbox" value="FREE" class="notif-segmento-check"> Free
+                            </label>
+                            <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;">
+                                <input type="checkbox" value="PREMIUM" class="notif-segmento-check"> Premium
+                            </label>
+                            <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;">
+                                <input type="checkbox" value="CREATOR" class="notif-segmento-check"> Creator
+                            </label>
+                        </div>
+
+                        <div id="notifUsuarios" style="display:none;">
+                            <input type="text" id="notifBuscarUsuario" placeholder="Buscar por nombre, email o ID..."
+                                   oninput="adminNotificaciones.buscarUsuarios(this.value)"
+                                   style="width:100%;padding:0.6rem 0.8rem;border:1px solid #ddd;border-radius:6px;">
+                            <div id="notifResultadosBusqueda" style="position:relative;">
+                                <div id="notifResultadosLista" style="display:none;position:absolute;top:2px;left:0;right:0;background:white;border:1px solid #ddd;border-radius:6px;max-height:200px;overflow-y:auto;z-index:10;box-shadow:0 4px 10px rgba(0,0,0,0.1);"></div>
+                            </div>
+                            <div id="notifUsuariosSeleccionados" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.75rem;"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:0.5rem;">Envío</label>
+                        <div style="display:flex;gap:1.5rem;align-items:center;margin-bottom:0.5rem;">
+                            <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;">
+                                <input type="radio" name="notifEnvio" value="inmediato" checked onchange="adminNotificaciones.cambiarEnvio('inmediato')">
+                                Inmediato
+                            </label>
+                            <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;">
+                                <input type="radio" name="notifEnvio" value="programado" onchange="adminNotificaciones.cambiarEnvio('programado')">
+                                Programado
+                            </label>
+                        </div>
+                        <input type="datetime-local" id="notifFechaProgramada" style="display:none;padding:0.5rem 0.8rem;border:1px solid #ddd;border-radius:6px;">
+                    </div>
+
+                    <button class="btn-nuevo" style="align-self:flex-start;" onclick="adminNotificaciones.enviar()">
+                        <i class="fas fa-paper-plane"></i> <span id="notifBtnLabel">Enviar ahora</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="admin-card">
+                <div class="card-header"><h3>Historial</h3></div>
+                <div class="tabla-wrapper">
+                    <table class="admin-table" id="tablaNotificaciones">
+                        <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>Destino</th>
+                            <th>Estado</th>
+                            <th>Programada / Enviada</th>
+                            <th>Destinatarios</th>
+                            <th>Creada por</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tablaNotificacionesBody">
+                        <tr><td colspan="6" class="loading-row"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
 
     </main>
 </div>
@@ -2208,8 +2315,8 @@
 <script src="../js/admin-premios-premium.js"></script>
 <script src="../js/admin-suscripciones.js"></script>
 <script src="../js/admin-feed.js"></script>
-<!-- ── NUEVO ── -->
 <script src="../js/admin-comercial.js"></script>
+<script src="../js/admin-notificaciones.js"></script>
 
 <!-- MODAL DESBLOQUEAR USUARIO -->
 <div id="modalDesbloquearOverlay" style="display:none;position:fixed;inset:0;
