@@ -651,8 +651,12 @@ function renderDotsFila(fila) {
 function configurarScrollFila(fila, track) {
     let ultimoIndice = -1;
     track.addEventListener('scroll', () => {
-        const ancho = track.clientWidth || 1;
-        const indice = Math.round(track.scrollLeft / ancho);
+        // El ancho de UNA card, no el de toda la ventana visible — en mobile
+        // coinciden (una card = una pantalla), pero en desktop se ven varias
+        // cards a la vez, así que había que medir la card real para saber
+        // cuántas se recorrieron, no cuántas "pantallas" se scrollearon.
+        const anchoCard = track.children[0]?.offsetWidth || track.clientWidth || 1;
+        const indice = Math.round(track.scrollLeft / anchoCard);
         if (indice === ultimoIndice) return;
         ultimoIndice = indice;
         track._indiceActual = indice;
