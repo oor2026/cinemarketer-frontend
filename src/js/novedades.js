@@ -138,16 +138,19 @@ window.cargarNovedades = async function() {
                     onmouseover="this.style.background='#f8f8f8'"
                     onmouseout="this.style.background='${n.read ? 'white' : '#f0f4ff'}'">
                     <div style="display:flex;align-items:flex-start;gap:0.5rem;">
-                        <span style="font-size:1rem;flex-shrink:0;">${getNotifIcono(n.type, n.referenceType)}</span>
-                        <div style="flex:1;min-width:0;">
-                            <div style="font-size:0.83rem;color:#333;line-height:1.4;">${n.message}</div>
-                            <div style="font-size:0.75rem;color:#999;margin-top:0.2rem;">${new Date(n.createdAt).toLocaleDateString('es-ES')} ${new Date(n.createdAt).toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'})}</div>
-                            ${botonesFollow}
+                            <span style="font-size:1rem;flex-shrink:0;">${getNotifIcono(n.type, n.referenceType)}</span>
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-size:0.83rem;color:#333;line-height:1.4;">${n.message}</div>
+                                <div style="font-size:0.75rem;color:#999;margin-top:0.2rem;">${new Date(n.createdAt).toLocaleDateString('es-ES')} ${new Date(n.createdAt).toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'})}</div>
+                                ${botonesFollow}
+                            </div>
+                            ${!n.read ? '<span style="width:8px;height:8px;background:#e50914;border-radius:50%;flex-shrink:0;margin-top:4px;"></span>' : ''}
+                            <i class="fas fa-trash-alt" onclick="event.stopPropagation(); window.confirmarEliminarNovedad(${n.id})"
+                               style="font-size:0.8rem;color:#bbb;flex-shrink:0;margin-top:3px;cursor:pointer;padding:2px;"
+                               onmouseover="this.style.color='#e50914'" onmouseout="this.style.color='#bbb'"></i>
                         </div>
-                        ${!n.read ? '<span style="width:8px;height:8px;background:#e50914;border-radius:50%;flex-shrink:0;margin-top:4px;"></span>' : ''}
-                    </div>
-                </div>`;
-        }).join('');
+                    </div>`;
+            }).join('');
 
     } catch(e) {
         lista.innerHTML = '<div style="padding:1rem;text-align:center;color:#999;font-size:0.85rem;">Error al cargar novedades</div>';
@@ -482,6 +485,8 @@ window.cargarNovedadesMobile = async function() {
                                     ${botonesFollow}
                                 </div>
                                 ${!n.read ? '<span style="width:8px;height:8px;background:#e50914;border-radius:50%;flex-shrink:0;margin-top:4px;"></span>' : ''}
+                                <i class="fas fa-trash-alt" onclick="event.stopPropagation(); window.confirmarEliminarNovedad(${n.id})"
+                                   style="font-size:0.8rem;color:#bbb;flex-shrink:0;margin-top:3px;cursor:pointer;padding:2px;"></i>
                             </div>
                         </div>`;
                 }).join('');
@@ -743,6 +748,47 @@ async function _asegurarComunidadJsCargado() {
 
     return true;
 }
+
+window.confirmarEliminarNovedad = function(id) {
+        let overlay = document.getElementById('modalEliminarNovedadOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'modalEliminarNovedadOverlay';
+            overlay.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999999;align-items:center;justify-content:center;padding:1rem;';
+            overlay.innerHTML = `
+                <div style="background:white;border-radius:12px;padding:1.5rem;max-width:320px;width:100%;text-align:center;">
+                    <p style="font-size:0.95rem;color:#333;margin-bottom:1.25rem;">¿Eliminar esta notificación?</p>
+                    <div style="display:flex;gap:0.75rem;justify-content:center;">
+                        <button id="btnCancelarEliminarNovedad" style="padding:0.5rem 1.2rem;border-radius:8px;border:1px solid #ddd;background:white;color:#555;cursor:pointer;">Cancelar</button>
+                        <button id="btnConfirmarEliminarNovedad" style="padding:0.5rem 1.2rem;border-radius:8px;border:none;background:#e50914;color:white;font-weight:600;cursor:pointer;">Eliminar</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(overlay);
+            overlay.addEventListener('click', e => { if (e.target === overlay) overlay.style.display = 'none'; });
+            overlay.querySelector('#btnCancelarEliminarNovedad').onclick = () => { overlay.style.display = 'none'; };
+        }
+        overlay.querySelector('#btnConfirmarEliminarNovedad').onclick = async () => {
+            overlay.style.display = 'none';
+            await window.eliminarNovedad(id);
+        };
+        overlay.style.display = 'flex';
+    };
+
+    window.eliminarNovedad = async function(id) {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${CONFIG.API_URL}/notifications/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error();
+            document.querySelectorAll(`[data-notif-id="${id}"], [data-notif-id-mobile="${id}"]`).forEach(el => el.remove());
+            if (typeof window.cargarNovedades === 'function') window.cargarNovedades();
+            if (typeof window.cargarNovedadesMobile === 'function') window.cargarNovedadesMobile();
+        } catch (e) {
+            alert('No se pudo eliminar la notificación. Probá de nuevo.');
+        }
+    };
 
 window.abrirPublicacion = async function(pubId, abrirComentarios, comentarioId) {
     await _asegurarComunidadJsCargado();
