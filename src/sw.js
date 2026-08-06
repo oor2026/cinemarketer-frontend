@@ -77,7 +77,7 @@ self.addEventListener('push', (event) => {
     const options = {
         body: data.body,
         icon: data.icon || '/assets/images/icon-192.png',
-        badge: '/assets/images/icon-192.png',
+        badge: '/assets/images/badge-icon.png',
         vibrate: [200, 100, 200],
         data: { url: data.url || '/dashboard.html' },
         actions: [
