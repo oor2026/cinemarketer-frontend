@@ -3808,7 +3808,7 @@ window.seleccionarTabFeed = function(tab, el) {
                                     if (paginacion) paginacion.style.display = '';
                                     if (pills) pills.style.display = '';
                                     if (filtros) filtros.style.display = '';
-                                    if (btnFiltrosAvanzados) btnFiltrosAvanzados.style.display = '';
+                                    if (btnFiltrosAvanzados) btnFiltrosAvanzados.style.visibility = 'visible';
                                     if (comunidadContainer) comunidadContainer.style.display = 'none';
                                     // Solo la mostramos de nuevo si efectivamente hay una destacada
                                     // cargada — si nunca hubo (204) o falló, seguimos ocultándola.
@@ -3828,7 +3828,7 @@ window.seleccionarTabFeed = function(tab, el) {
                                     if (paginacion) paginacion.style.display = 'none';
                                     if (pills) pills.style.display = 'none';
                                     if (filtros) filtros.style.display = 'none';
-                                    if (btnFiltrosAvanzados) btnFiltrosAvanzados.style.display = 'none';
+                                    if (btnFiltrosAvanzados) btnFiltrosAvanzados.style.visibility = 'hidden';
                                     if (destacada) destacada.style.display = 'none';
                                     if (votoRelampago) votoRelampago.style.display = 'none';
                                     if (triviaBadge) triviaBadge.style.display = 'none';
@@ -4608,4 +4608,12 @@ window.abrirFotoActor = function(src, nombre) {
         </div>`;
 
     document.body.appendChild(overlay);
+};
+
+window.mostrarSeriesProximamente = function() {
+    if (typeof showToast === 'function') {
+        showToast('info', '¡Series está en camino! Próximamente 📺');
+    } else {
+        alert('Próximamente');
+    }
 };

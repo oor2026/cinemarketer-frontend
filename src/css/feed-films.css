@@ -1498,6 +1498,22 @@
         border-radius: 0 !important;
     }
 
+    #feedBannerHorizontal {
+        position: relative;
+    }
+
+    .feed-banner-label {
+        position: absolute;
+        bottom: 8px;
+        right: 10px;
+        background: rgba(0,0,0,0.55);
+        color: #fff;
+        font-size: 0.65rem;
+        padding: 2px 8px;
+        border-radius: 4px;
+        pointer-events: none;
+    }
+
     .filtros-grid {
         grid-template-columns: 1fr;
     }
@@ -2882,34 +2898,53 @@
 /* ========== TABS FEED ========== */
 .feed-tabs {
     display: flex;
+    align-items: center;
     gap: 0;
-    padding: 0.5rem 1rem 0;
-    border-bottom: 2px solid #eee;
+    padding: 0.5rem 1rem;
+    background: #ffffff;
+    border: 1px solid #eeeeee;
+    border-radius: 12px;
+    border-bottom: 1px solid #eeeeee;
     margin-bottom: 0.75rem;
 }
 
 .feed-tab {
     padding: 0.5rem 1.25rem;
-    border-radius: 0;
+    border-radius: 10px;
     border: none;
-    border-bottom: 3px solid transparent;
-    margin-bottom: -2px;
+    margin-bottom: 0;
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
     background: transparent;
-    color: #999;
+    color: #666666;
 }
 
 .feed-tab.active {
-    color: #1a3a6b;
-    border-bottom-color: #1a3a6b;
+    background: #fdeceb;
+    color: #e50914;
+}
+
+#tabSeries {
+    color: #cccccc !important;
+    cursor: default;
+}
+
+@media (max-width: 768px) {
+    .feed-tabs {
+        box-sizing: border-box !important;
+        margin-left: -1rem !important;
+        margin-right: -1rem !important;
+        width: calc(100% + 2rem) !important;
+        border-radius: 0 !important;
+    }
 }
 
 .feed-tab.disabled {
-    color: #ccc;
+    color: #cccccc;
     cursor: not-allowed;
+    -webkit-text-stroke: 0;
 }
 
 .feed-tab-filtro {
@@ -2917,21 +2952,22 @@
     background: none;
     border: none;
     cursor: pointer;
-    color: #666;
+    color: #000000;
     font-size: 1.1rem;
     padding: 0.5rem 0.75rem;
     border-bottom: 3px solid transparent;
-    margin-bottom: -2px;
+    margin-bottom: 0;
     transition: color 0.2s;
 }
 
 .feed-tab-filtro:hover {
-    color: #1a3a6b;
+    color: #e50914;
 }
 
 .feed-tab-filtro-label {
     font-size: 0.85rem;
     font-weight: 600;
+    color: #000000;
 }
 
 @media (max-width: 768px) {
@@ -3830,5 +3866,12 @@ window.abrirElencoCard = async function(movieId, event) {
     .spoiler-aviso-caja {
         margin-left: -0.5rem !important;
         margin-right: -0.5rem !important;
+    }
+}
+
+@media (max-width: 768px) {
+    #filtros-container > .filtros-desktop,
+    #filtros-container > .filtros-mobile {
+        display: none !important;
     }
 }
