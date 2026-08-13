@@ -521,6 +521,10 @@
     #modalSerie .modal-contenido {
         width: 95% !important;
     }
+
+    .serie-poster {
+        aspect-ratio: 0.79;
+    }
 }
 
 /* ========== FILAS INFERIORES DEL MODAL (comentarios y botón) ========== */
