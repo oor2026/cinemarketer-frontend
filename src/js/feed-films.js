@@ -833,15 +833,57 @@ window.cargarPeliculaDestacada = async function() {
         }
 
         window._carruselDestacado.items = validos;
-        window._carruselDestacado.actual = 0;
-        contenedor.style.display = 'block';
+                window._carruselDestacado.actual = 0;
+                contenedor.style.display = 'block';
 
-        renderSlideDestacado(0);
-        iniciarRotacionDestacado();
-    } catch (error) {
-        contenedor.style.display = 'none';
-    }
-};
+                renderSlideDestacado(0);
+                iniciarRotacionDestacado();
+                iniciarSwipeDestacado();
+            } catch (error) {
+                contenedor.style.display = 'none';
+            }
+        };
+
+        // Swipe táctil sobre la card destacada — mobile únicamente (los eventos
+        // touch* simplemente no disparan en desktop con mouse). No reemplaza la
+        // rotación automática, conviven: swipear reinicia el timer de 3s vía
+        // irASlideDestacado, igual que ya hace el click en los dots.
+        function iniciarSwipeDestacado() {
+            const card = document.getElementById('destacadaCard');
+            if (!card || card._swipeInit) return;
+            card._swipeInit = true;
+
+            let startX = 0;
+            let startY = 0;
+            let dragueando = false;
+
+            card.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                dragueando = true;
+            }, { passive: true });
+
+            card.addEventListener('touchend', (e) => {
+                if (!dragueando) return;
+                dragueando = false;
+
+                const diffX = startX - e.changedTouches[0].clientX;
+                const diffY = Math.abs(startY - e.changedTouches[0].clientY);
+
+                // Solo swipe horizontal — si el movimiento vertical predomina,
+                // era scroll de página, no un swipe del carrusel.
+                if (Math.abs(diffX) < 40 || diffY > Math.abs(diffX)) return;
+
+                const state = window._carruselDestacado;
+                if (!state.items || state.items.length < 2) return;
+
+                const siguiente = diffX > 0
+                    ? (state.actual + 1) % state.items.length
+                    : (state.actual - 1 + state.items.length) % state.items.length;
+
+                window.irASlideDestacado(siguiente);
+            }, { passive: true });
+        }
 
 function iniciarRotacionDestacado() {
     const state = window._carruselDestacado;
