@@ -228,10 +228,11 @@ const adminSupervision = {
                 ? new Date(c.createdAt).toLocaleDateString('es-AR')
                 : '—';
 
-            const esPublicacion = c.sourceType === 'PUBLICATION';
-            const origenLabel = esPublicacion
-                ? `Publicación ID: ${c.publicationId}`
-                : `Película ID: ${c.movieId}`;
+            const origenLabel = c.sourceType === 'PUBLICATION'
+                            ? `Publicación ID: ${c.publicationId}`
+                            : c.sourceType === 'SERIES'
+                                ? `Serie ID: ${c.seriesId}`
+                                : `Película ID: ${c.movieId}`;
 
             return `
                 <tr>
@@ -360,10 +361,11 @@ const adminSupervision = {
               </table>`
             : '<p style="color:#888;margin:0.5rem 0;">Sin reportes de usuarios</p>';
 
-        const esPublicacionDetalle = c.sourceType === 'PUBLICATION';
-        const origenLabelDetalle = esPublicacionDetalle
-            ? `<strong>Publicación ID:</strong> ${c.publicationId}<br>`
-            : `<strong>Película ID:</strong> ${c.movieId}<br>`;
+        const origenLabelDetalle = c.sourceType === 'PUBLICATION'
+                    ? `<strong>Publicación ID:</strong> ${c.publicationId}<br>`
+                    : c.sourceType === 'SERIES'
+                        ? `<strong>Serie ID:</strong> ${c.seriesId}<br>`
+                        : `<strong>Película ID:</strong> ${c.movieId}<br>`;
 
         contenido.innerHTML = `
             <div style="margin-bottom:1rem;">
@@ -394,9 +396,11 @@ const adminSupervision = {
             document.getElementById('modalSupervisionDetalle').style.display = 'none';
             if (this.pestanaActual === 'pending' && this._detalleCurrent) {
                 const { id, esReply, sourceType } = this._detalleCurrent;
-                const endpoint = sourceType === 'PUBLICATION'
-                    ? `${CONFIG.API_URL}/admin/supervision/publications/${id}/mark-reviewed`
-                    : `${CONFIG.API_URL}/admin/supervision/${id}/mark-reviewed?isReply=${esReply}`;
+                                const endpoint = sourceType === 'PUBLICATION'
+                                    ? `${CONFIG.API_URL}/admin/supervision/publications/${id}/mark-reviewed`
+                                    : sourceType === 'SERIES'
+                                        ? `${CONFIG.API_URL}/admin/supervision/series/${id}/mark-reviewed?isReply=${esReply}`
+                                        : `${CONFIG.API_URL}/admin/supervision/${id}/mark-reviewed?isReply=${esReply}`;
                 fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -450,12 +454,16 @@ const adminSupervision = {
 
         try {
         const esReply = modal.dataset.esReply === 'true';
-                const sourceType = modal.dataset.sourceType || 'MOVIE';
-                const endpoint = sourceType === 'PUBLICATION'
-                    ? `${CONFIG.API_URL}/admin/supervision/publications/${commentId}/remove`
-                    : esReply
-                        ? `${CONFIG.API_URL}/admin/supervision/replies/${commentId}/remove`
-                        : `${CONFIG.API_URL}/admin/supervision/${commentId}/remove`;
+                        const sourceType = modal.dataset.sourceType || 'MOVIE';
+                        const endpoint = sourceType === 'PUBLICATION'
+                            ? `${CONFIG.API_URL}/admin/supervision/publications/${commentId}/remove`
+                            : sourceType === 'SERIES'
+                                ? (esReply
+                                    ? `${CONFIG.API_URL}/admin/supervision/series/replies/${commentId}/remove`
+                                    : `${CONFIG.API_URL}/admin/supervision/series/${commentId}/remove`)
+                                : esReply
+                                    ? `${CONFIG.API_URL}/admin/supervision/replies/${commentId}/remove`
+                                    : `${CONFIG.API_URL}/admin/supervision/${commentId}/remove`;
                 const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
@@ -489,9 +497,13 @@ const adminSupervision = {
             try {
                 const endpoint = sourceType === 'PUBLICATION'
                     ? `${CONFIG.API_URL}/admin/supervision/publications/${id}/restore`
-                    : esReply
-                        ? `${CONFIG.API_URL}/admin/supervision/replies/${id}/restore`
-                        : `${CONFIG.API_URL}/admin/supervision/${id}/restore`;
+                    : sourceType === 'SERIES'
+                        ? (esReply
+                            ? `${CONFIG.API_URL}/admin/supervision/series/replies/${id}/restore`
+                            : `${CONFIG.API_URL}/admin/supervision/series/${id}/restore`)
+                        : esReply
+                            ? `${CONFIG.API_URL}/admin/supervision/replies/${id}/restore`
+                            : `${CONFIG.API_URL}/admin/supervision/${id}/restore`;
                 const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -530,7 +542,9 @@ const adminSupervision = {
                 try {
                     const endpointDesestimar = sourceType === 'PUBLICATION'
                         ? `${CONFIG.API_URL}/admin/supervision/publications/${id}/dismiss`
-                        : `${CONFIG.API_URL}/admin/supervision/${id}/dismiss?isReply=${esReply}`;
+                        : sourceType === 'SERIES'
+                            ? `${CONFIG.API_URL}/admin/supervision/series/${id}/dismiss?isReply=${esReply}`
+                            : `${CONFIG.API_URL}/admin/supervision/${id}/dismiss?isReply=${esReply}`;
                     const response = await fetch(endpointDesestimar, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }

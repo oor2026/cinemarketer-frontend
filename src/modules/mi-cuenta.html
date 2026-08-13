@@ -344,7 +344,19 @@
 
     <!-- MIS PREFERENCIAS -->
     <div class="cuenta-seccion">
-        <h3 class="cuenta-seccion-titulo"><i class="fas fa-heart"></i> Mis preferencias</h3>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
+            <h3 class="cuenta-seccion-titulo"><i class="fas fa-heart"></i> Mis preferencias</h3>
+            <div style="display:flex;gap:6px;">
+                <button class="mi-lista-switch-btn active" id="btnPrefPeliculas" onclick="window.switchPreferenciasTipo('peliculas')"
+                        style="font-size:0.8rem;font-weight:600;padding:5px 14px;border-radius:20px;border:1px solid #1a3a6b;background:#1a3a6b;color:#fff;cursor:pointer;">
+                    🎬 Películas
+                </button>
+                <button class="mi-lista-switch-btn" id="btnPrefSeries" onclick="window.switchPreferenciasTipo('series')"
+                        style="font-size:0.8rem;font-weight:600;padding:5px 14px;border-radius:20px;border:1px solid #ddd;background:#fff;color:#666;cursor:pointer;">
+                    📺 Series
+                </button>
+            </div>
+        </div>
         <div class="mi-red-seccion">
             <div class="mi-red-tabs">
                 <button class="mi-red-tab active" id="tabMiLista" onclick="window.switchListaTab('mi-lista')">

@@ -76,13 +76,18 @@ async function cargarPerfil(userId) {
         const perfil = await response.json();
 
         renderIdentidad(perfil);
-        renderStats(perfil);
-        renderVotaciones(perfil.ultimasVotaciones);
-        window._perfilTotalComentarios = perfil.totalComentarios || 0;
-        renderComentarios(perfil.ultimosComentarios);
+                renderStats(perfil);
+                renderVotaciones(perfil.ultimasVotaciones);
+                if (typeof window.renderVotacionesSeries === 'function') {
+                    window.renderVotacionesSeries(perfil.ultimasVotacionesSeries);
+                }
+                window._perfilTotalComentarios = perfil.totalComentarios || 0;
+                                window._perfilComentariosCache = perfil.ultimosComentarios || [];
+                                window._perfilComentariosSerieCache = perfil.ultimosComentariosSeries || [];
+                                renderComentarios(perfil.ultimosComentarios);
 
-        _comentariosTotal = perfil.totalComentarios || 0;
-        _actualizarNavComentarios();
+                        _comentariosTotal = perfil.totalComentarios || 0;
+                        _actualizarNavComentarios();
 
         cargarPublicacionesPerfil(userId);
 
@@ -1375,3 +1380,279 @@ function formatTeritorioPerfil(key) {
     };
     return map[key] || key;
 }
+
+// ==============================================
+// ÚLTIMOS COMENTARIOS DE SERIES — toggle en el mismo header
+// ==============================================
+window._perfilComentariosTipo = 'pelicula';
+let _comentariosSeriePage  = 0;
+let _comentariosSerieTotal = 0;
+
+window.toggleComentariosPerfilTipo = function() {
+    const titulo = document.getElementById('perfilComentariosTitulo');
+    const toggle = document.getElementById('perfilComentariosToggle');
+    if (!titulo || !toggle) return;
+
+    if (window._perfilComentariosTipo === 'pelicula') {
+        window._perfilComentariosTipo = 'serie';
+        titulo.innerHTML = '<i class="fas fa-tv"></i> Últimas series comentadas';
+        titulo.style.background = '#e50914';
+        toggle.innerHTML = '<i class="fas fa-film"></i> Películas';
+        toggle.title = 'Ver últimas películas comentadas';
+
+        _comentariosSeriePage = 0;
+        renderComentariosSerie(window._perfilComentariosSerieCache || []);
+    } else {
+        window._perfilComentariosTipo = 'pelicula';
+        titulo.innerHTML = '<i class="fas fa-comment"></i> Últimas películas comentadas';
+        titulo.style.background = '';
+        toggle.innerHTML = '<i class="fas fa-tv"></i> Series';
+        toggle.title = 'Ver últimas series comentadas';
+
+        renderComentarios(window._perfilComentariosCache || []);
+    }
+};
+
+function renderComentariosSerie(comentarios) {
+    _comentariosSeriePage  = 0;
+    _comentariosSerieTotal = window._perfilTotalComentariosSeries || comentarios?.length || 0;
+
+    const seccion = document.getElementById('perfilComentariosList');
+    if (!comentarios || comentarios.length === 0) {
+        seccion.innerHTML = '<div class="perfil-vacio">Sin comentarios de series aún</div>';
+        return;
+    }
+
+    const esMobile = window.innerWidth <= 600;
+
+    if (esMobile) {
+        seccion.innerHTML = `
+            <div class="perfil-comentarios-swipe" id="perfilComentariosSwipe"></div>
+            <div class="perfil-comentarios-dots" id="perfilComentariosDots"></div>
+        `;
+        _renderSwipeComentariosSerie(comentarios);
+    } else {
+        seccion.innerHTML = `
+            <div id="perfilComentariosItems"></div>
+            <div class="perfil-comentarios-nav" id="perfilComentariosNav">
+                <button class="perfil-carrusel-arrow left" onclick="window.cambiarPaginaComentariosSerie(-1)">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <span id="perfilComentariosInfo" style="font-size:0.8rem;color:#999;"></span>
+                <button class="perfil-carrusel-arrow right" onclick="window.cambiarPaginaComentariosSerie(1)">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        `;
+        _renderItemsComentariosSerie(comentarios);
+        _actualizarNavComentariosSerie();
+    }
+}
+
+function _comentarioItemHTMLSerie(c) {
+    const textoClass = c.spoiler ? 'perfil-comentario-texto spoiler' : 'perfil-comentario-texto';
+    const spoilerTag = c.spoiler ? '<span class="perfil-tag-spoiler">spoiler</span>' : '';
+    const poster = c.posterPath
+        ? `<img src="https://image.tmdb.org/t/p/w92${c.posterPath}" alt="${c.seriesTitle || ''}" style="width:100%;height:100%;object-fit:cover;">`
+        : `<i class="fas fa-tv"></i>`;
+    const banco      = c.bancoCount       || 0;
+    const merece     = c.merecePuntoCount || 0;
+    const respuestas = c.replyCount       || 0;
+    const uid        = `cmnt-serie-${c.commentId}`;
+
+    const CHARS_LIMIT = window.innerWidth <= 600 ? 150 : 300;
+    const contenido   = c.contenido || '';
+    const esMuyLargo = contenido.length > CHARS_LIMIT;
+    const textoCorto = esMuyLargo ? contenido.substring(0, CHARS_LIMIT) + '...' : contenido;
+
+    if (esMuyLargo) {
+        window[`_verMas_${uid}`] = function(btn) {
+            const el = document.getElementById(`txt-${uid}`);
+            if (btn.dataset.expanded === '1') {
+                el.textContent = textoCorto;
+                btn.textContent = 'Ver más';
+                btn.dataset.expanded = '0';
+            } else {
+                el.textContent = contenido;
+                btn.textContent = 'Ver menos';
+                btn.dataset.expanded = '1';
+            }
+        };
+    }
+
+    const textoHTML = esMuyLargo ? `
+        <p class="${textoClass}" id="txt-${uid}">${textoCorto}</p>
+        <span class="perfil-ver-mas" onclick="window['_verMas_${uid}'](this)" data-expanded="0">Ver más</span>
+    ` : `<p class="${textoClass}">${contenido}</p>`;
+
+    return `
+        <div class="perfil-comentario-item"
+             onclick="window._abrirSerieDesdeComentario(${c.seriesId}, ${c.commentId}, ${c.spoiler || false})"
+             style="cursor:pointer;">
+            <div class="perfil-comentario-poster">${poster}</div>
+            <div class="perfil-comentario-body">
+                <p class="perfil-comentario-pelicula">${c.seriesTitle || 'Serie no disponible'}</p>
+                ${textoHTML}
+                <div class="perfil-comentario-meta">
+                    <span>${c.fechaRelativa || ''}</span>
+                    ${spoilerTag}
+                </div>
+                <div class="perfil-comentario-reacciones">
+                    <span title="Te banco"><i class="fas fa-thumbs-up"></i> ${banco}</span>
+                    <span title="Merecés un punto"><i class="fas fa-star"></i> ${merece}</span>
+                    <span title="Respuestas"><i class="fas fa-reply"></i> ${respuestas}</span>
+                </div>
+            </div>
+        </div>`;
+}
+
+function _buildSlideHTMLSerie(grupo) {
+    return `<div class="perfil-swipe-slide">${grupo.map(c => _comentarioItemHTMLSerie(c)).join('')}</div>`;
+}
+
+async function _renderSwipeComentariosSerie(comentarios) {
+    const swipe = document.getElementById('perfilComentariosSwipe');
+    const dots  = document.getElementById('perfilComentariosDots');
+    if (!swipe) return;
+
+    let todos = [...comentarios];
+    const totalPags = Math.ceil(_comentariosSerieTotal / _comentariosSize);
+    const token = localStorage.getItem('token');
+
+    for (let p = 1; p < totalPags; p++) {
+        try {
+            const res = await fetch(
+                `${CONFIG.API_URL}/users/${perfilUsuarioId}/comentarios-series?page=${p}&size=${_comentariosSize}`,
+                { headers: { 'Authorization': `Bearer ${token}` } }
+            );
+            if (!res.ok) break;
+            const data = await res.json();
+            todos = [...todos, ...data.comentarios];
+        } catch(e) { break; }
+    }
+
+    const grupos = [];
+    for (let i = 0; i < todos.length; i += _comentariosSize) {
+        grupos.push(todos.slice(i, i + _comentariosSize));
+    }
+
+    swipe.innerHTML = grupos.map(g => _buildSlideHTMLSerie(g)).join('');
+
+    const totalGrupos = grupos.length;
+
+    const _actualizarDots = (idx) => {
+        if (!dots) return;
+        if (totalGrupos <= 1) { dots.innerHTML = ''; return; }
+
+        const maxDots = totalGrupos === 2 ? 2 : 3;
+        let activoDot;
+        if (idx === 0) activoDot = 0;
+        else if (idx >= totalGrupos - 1) activoDot = maxDots - 1;
+        else activoDot = maxDots === 2 ? 1 : 1;
+
+        dots.innerHTML = Array.from({length: maxDots}, (_, i) =>
+            `<span class="perfil-dot${i === activoDot ? ' active' : ''}"></span>`
+        ).join('');
+    };
+    _actualizarDots(0);
+
+    swipe.addEventListener('scroll', () => {
+        const idx = Math.round(swipe.scrollLeft / swipe.offsetWidth);
+        _actualizarDots(idx);
+    }, { passive: true });
+}
+
+function _renderItemsComentariosSerie(comentarios) {
+    const lista = document.getElementById('perfilComentariosItems');
+    if (!lista) return;
+    lista.innerHTML = comentarios.map(c => _comentarioItemHTMLSerie(c)).join('');
+}
+
+window.cambiarPaginaComentariosSerie = async function(dir) {
+    const nuevaPagina = _comentariosSeriePage + dir;
+    const totalPaginas = Math.ceil(_comentariosSerieTotal / _comentariosSize);
+    if (nuevaPagina < 0 || nuevaPagina >= totalPaginas) return;
+
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(
+            `${CONFIG.API_URL}/users/${perfilUsuarioId}/comentarios-series?page=${nuevaPagina}&size=${_comentariosSize}`,
+            { headers: { 'Authorization': `Bearer ${token}` } }
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+
+        _comentariosSeriePage  = nuevaPagina;
+        _comentariosSerieTotal = data.total;
+
+        _renderItemsComentariosSerie(data.comentarios);
+        _actualizarNavComentariosSerie();
+
+    } catch(e) {}
+};
+
+function _actualizarNavComentariosSerie() {
+    const esMobile = window.innerWidth <= 600;
+    if (esMobile) return;
+
+    const totalPaginas = Math.ceil(_comentariosSerieTotal / _comentariosSize);
+    const info = document.getElementById('perfilComentariosInfo');
+    if (info) info.textContent = `${_comentariosSeriePage + 1} / ${totalPaginas}`;
+
+    const nav = document.getElementById('perfilComentariosNav');
+    if (!nav) return;
+    const btns = nav.querySelectorAll('.perfil-carrusel-arrow');
+    btns[0].disabled = _comentariosSeriePage <= 0;
+    btns[1].disabled = _comentariosSeriePage >= totalPaginas - 1;
+}
+
+window._abrirSerieDesdeComentario = async function(seriesId, commentId, esSpoiler) {
+    if (!seriesId) return;
+
+    if (typeof window._asegurarModalPeliculaEnDOM === 'function') {
+        await window._asegurarModalPeliculaEnDOM();
+    }
+
+    if (typeof window.abrirDetalleSerie !== 'function') return;
+
+    window.abrirDetalleSerie(seriesId);
+
+    if (commentId) {
+        setTimeout(async () => {
+            if (esSpoiler && typeof window.activarModoSpoilerSerie === 'function') {
+                window.activarModoSpoilerSerie(true);
+            }
+            await new Promise(r => setTimeout(r, 600));
+
+            let intentos = 0;
+            const buscarYResaltar = () => {
+                const comentarioEl = document.getElementById(`comment-serie-${commentId}`);
+                if (comentarioEl) {
+                    const scrollContainer = document.querySelector('#modalSerie .modal-body')
+                                        || document.querySelector('#modalSerie .modal-contenido');
+                    if (scrollContainer) {
+                        const containerRect = scrollContainer.getBoundingClientRect();
+                        const elRect = comentarioEl.getBoundingClientRect();
+                        const offset = elRect.top - containerRect.top + scrollContainer.scrollTop - (scrollContainer.clientHeight / 2) + (elRect.height / 2);
+                        scrollContainer.scrollTo({ top: offset, behavior: 'smooth' });
+                    } else {
+                        comentarioEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    comentarioEl.style.transition = 'none';
+                    comentarioEl.style.background = '#ffe066';
+                    comentarioEl.style.borderRadius = '8px';
+                    comentarioEl.style.outline = '2px solid #e50914';
+                    setTimeout(() => {
+                        comentarioEl.style.transition = 'background 0.8s, outline 0.8s';
+                        comentarioEl.style.background = '';
+                        comentarioEl.style.outline = '';
+                    }, 1500);
+                } else if (intentos < 10) {
+                    intentos++;
+                    setTimeout(buscarYResaltar, 300);
+                }
+            };
+            buscarYResaltar();
+        }, 800);
+    }
+};

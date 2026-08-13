@@ -363,43 +363,33 @@
     align-items: center;
 }
 
-/* ========== BOTONES DE VOTACIÓN UNIFICADOS ========== */
+/* ========== BOTONES DE VOTACIÓN — solo íconos, sin píldora ========== */
 .btn-like, .btn-dislike, .btn-comentarios-card {
     flex: 1;
     padding: 8px 6px;
     border: none;
+    background: transparent;
     border-radius: 99px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 5px;
     font-size: 0.82rem;
-}
-
-.btn-like {
-    background: #e8f5e8;
-    color: #2e7d32;
-}
-
-.btn-dislike {
-    background: #ffebee;
-    color: #c62828;
+    color: #999;
 }
 
 .btn-comentarios-card {
-    background: #e3f2fd;
-    color: #1565c0;
+    flex: 0.6;
 }
 
 .btn-recomendar {
     margin-left: auto;
-    padding: 8px 14px;
-    border-radius: 99px;
-    border: 1.5px solid #E8A800;
-    background: #fff8e1;
+    padding: 8px 10px;
+    border: none;
+    background: transparent;
     color: #E8A800;
     font-size: 0.82rem;
     font-weight: 600;
@@ -413,43 +403,62 @@
 }
 
 .btn-recomendar:hover {
-    background: #E8A800;
-    color: white;
+    opacity: 0.8;
 }
 
 .btn-like:hover:not(:disabled) {
-    background: #4caf50;
-    color: white;
+    color: #2e7d32;
 }
 
 .btn-dislike:hover:not(:disabled) {
-    background: #f44336;
-    color: white;
+    color: #c62828;
+}
+
+.btn-comentarios-card:hover,
+.btn-recomendar:hover {
+    color: #555;
 }
 
 .btn-like.votado {
-    background: #4caf50;
-    border-color: #2e7d32;
-    color: white;
+    color: #2e7d32;
 }
 
 .btn-dislike.votado {
-    background: #f44336;
-    border-color: #c62828;
-    color: white;
+    color: #c62828;
 }
 
 .btn-like.votado:hover,
 .btn-dislike.votado:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    opacity: 0.8;
 }
 
 .btn-like:disabled,
 .btn-dislike:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.btn-like i, .btn-dislike i, .btn-comentarios-card i, .btn-recomendar i {
+    font-size: 1.15rem;
+}
+
+.btn-like, .btn-dislike, .btn-comentarios-card {
+    border-radius: 0;
+    border-bottom: 2px solid transparent;
+    padding-bottom: 6px;
+}
+
+.btn-like.votado {
+    border-bottom-color: #4caf50;
+}
+
+.btn-dislike.votado {
+    border-bottom-color: #f44336;
+}
+
+.btn-comentarios-card.tiene-comentarios {
+    color: #1565c0;
+    border-bottom-color: #1565c0;
 }
 
 /* Comentarios en tarjetas */
@@ -1200,11 +1209,15 @@
 #modalPelicula .btn-like,
 #modalPelicula .btn-dislike {
     padding: 10px 20px !important;
+    padding-bottom: 8px !important;
     border: none !important;
-    border-radius: 99px !important;
+    border-bottom: 2px solid transparent !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #999 !important;
     font-weight: 600 !important;
     cursor: pointer !important;
-    transition: all 0.3s !important;
+    transition: all 0.2s !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -1212,34 +1225,22 @@
     font-size: 0.95rem !important;
 }
 
-#modalPelicula .btn-like {
-    background: #e8f5e8 !important;
+#modalPelicula .btn-like:hover {
     color: #2e7d32 !important;
 }
 
-#modalPelicula .btn-like:hover {
-    background: #4caf50 !important;
-    color: white !important;
-}
-
 #modalPelicula .btn-like.votado {
-    background: #4caf50 !important;
-    color: white !important;
-}
-
-#modalPelicula .btn-dislike {
-    background: #ffebee !important;
-    color: #c62828 !important;
+    color: #2e7d32 !important;
+    border-bottom-color: #4caf50 !important;
 }
 
 #modalPelicula .btn-dislike:hover {
-    background: #f44336 !important;
-    color: white !important;
+    color: #c62828 !important;
 }
 
 #modalPelicula .btn-dislike.votado {
-    background: #f44336 !important;
-    color: white !important;
+    color: #c62828 !important;
+    border-bottom-color: #f44336 !important;
 }
 
 /* ========== SECCIÓN DE COMENTARIOS ========== */
@@ -2871,9 +2872,9 @@
 #modalPelicula .modal-acciones .btn-recomendar {
     flex: 1 !important;
     padding: 10px 20px !important;
-    border-radius: 99px !important;
-    border: 1.5px solid #E8A800 !important;
-    background: #fff8e1 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
     color: #E8A800 !important;
     font-size: 0.95rem !important;
     font-weight: 600 !important;
@@ -2881,12 +2882,12 @@
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    gap: 0.5rem !important;
     transition: all 0.2s !important;
 }
 
 #modalPelicula .modal-acciones .btn-recomendar:hover {
-    background: #E8A800 !important;
-    color: white !important;
+    opacity: 0.8 !important;
 }
 
 @media (max-width: 768px) {
@@ -2924,11 +2925,6 @@
 .feed-tab.active {
     background: #fdeceb;
     color: #e50914;
-}
-
-#tabSeries {
-    color: #cccccc !important;
-    cursor: default;
 }
 
 @media (max-width: 768px) {

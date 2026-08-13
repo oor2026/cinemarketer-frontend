@@ -47,6 +47,13 @@ async function cargarComponente(url, contenedorId) {
 // ==============================================
 // FUNCIÓN PARA GENERAR TARJETAS
 // ==============================================
+
+window._pintarContadorComentarios = function(el, count) {
+    if (!el) return;
+    el.textContent = count;
+    el.closest('.btn-comentarios-card')?.classList.toggle('tiene-comentarios', count > 0);
+};
+
 window.generarTarjetasHTML = async function(peliculas) {
     try {
          const soloLatinos = /^[a-zA-ZÀ-ÿ0-9\s\-:,.!?'"()\u00C0-\u024F\u1E00-\u1EFF]+$/;
@@ -1515,7 +1522,7 @@ window.ordenarPeliculas = async function() {
             }
 
             const comentariosEl = card.querySelector(`#comentarios-card-${movieId}`);
-                        if (comentariosEl) comentariosEl.textContent = stats.comentarios;
+                      window._pintarContadorComentarios(comentariosEl, stats.comentarios);
                     }
                 });
 
@@ -1650,10 +1657,10 @@ window.cargarEstadisticasVotacion = async function() {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (commResponse.ok) {
-                    const comentarios = await commResponse.json();
-                    const contadorEl = card.querySelector(`#comentarios-card-${movieId}`);
-                    if (contadorEl) contadorEl.textContent = comentarios.length;
-                }
+                                    const comentarios = await commResponse.json();
+                                    const contadorEl = card.querySelector(`#comentarios-card-${movieId}`);
+                                    window._pintarContadorComentarios(contadorEl, comentarios.length);
+                                }
             } catch (ce) {}
         } catch (e) {
         }
@@ -3428,9 +3435,9 @@ window.enviarComentario = async function() {
                 window.cancelarComentario();
 
         const contadorCard = document.getElementById(`comentarios-card-${movieId}`);
-        if (contadorCard) {
-            contadorCard.textContent = parseInt(contadorCard.textContent || '0') + 1;
-        }
+                if (contadorCard) {
+                    window._pintarContadorComentarios(contadorCard, parseInt(contadorCard.textContent || '0') + 1);
+                }
 
         await window.cargarComentariosPelicula(movieId);
 
@@ -3570,10 +3577,11 @@ function poblarFiltroAnio() {
 window['init_feed-films'] = async function() {
     limpiarModalesDuplicados();
 
-    // El módulo siempre arranca mostrando Películas por defecto — sincronizamos
-    // el estado global para que los botones flotantes (crear publicación, etc.)
-    // no sigan pensando que estamos en Comunidad de una carga anterior.
-    window._tabActivo = 'peliculas';
+    // El módulo siempre arranca renderizando Películas por defecto (grid,
+        // filtros, etc. se cargan igual más abajo) — pero si el usuario tenía
+        // otra tab elegida antes del refresh, la restauramos al final de este
+        // init (ver el bloque de restauración cerca del cierre de esta función).
+        window._tabActivo = 'peliculas';
 
     await cargarComponente('modules/feed-filtros.html', 'filtros-container');
     await cargarComponente('modules/feed-paginacion.html', 'paginacion-container');
@@ -3597,9 +3605,22 @@ window['init_feed-films'] = async function() {
         }, 200);
 
     window.cargarFilasGenero();
-            inicializarContadorCaracteres();
-        window.addEventListener('resize', window.actualizarBotonesPaginacion);
-    };
+                inicializarContadorCaracteres();
+            window.addEventListener('resize', window.actualizarBotonesPaginacion);
+
+            // Restaurar la tab que el usuario tenía elegida antes del refresh.
+            // Se hace al final, después de que el grid de Películas por defecto
+            // ya terminó de montarse, así que hay un flash breve de Películas
+            // antes de pasar a Series/Comunidad si esa era la tab guardada.
+            const tabGuardada = localStorage.getItem('feedTabActivo');
+            if (tabGuardada && tabGuardada !== 'peliculas') {
+                const idsPorTab = { series: 'tabSeries', comunidad: 'tabComunidad' };
+                const btnGuardado = document.getElementById(idsPorTab[tabGuardada]);
+                if (btnGuardado) {
+                    window.seleccionarTabFeed(tabGuardada, btnGuardado);
+                }
+            }
+        };
 
 // ==============================================
 // MODAL OCULTAR RESPUESTA PROPIA
@@ -3783,6 +3804,7 @@ window._tabActivo = 'peliculas';
 window.seleccionarTabFeed = function(tab, el) {
     const mismoTab = window._tabActivo === tab;
     window._tabActivo = tab;
+    localStorage.setItem('feedTabActivo', tab);
 
     // Si es comunidad y ya estaba activo, reinicializar igual
     if (mismoTab && tab !== 'comunidad') return;
@@ -3802,6 +3824,7 @@ window.seleccionarTabFeed = function(tab, el) {
                         const votoRelampago = document.getElementById('votoRelampagoContainer');
                         const triviaBadge = document.getElementById('triviaBadgeContainer');
                         const filasGenero = document.getElementById('filasGeneroContainer');
+                        const filasSeries = document.getElementById('filasSeriesContainer');
 
                                 if (tab === 'peliculas') {
                                     if (gridPeliculas) gridPeliculas.style.display = '';
@@ -3810,6 +3833,7 @@ window.seleccionarTabFeed = function(tab, el) {
                                     if (filtros) filtros.style.display = '';
                                     if (btnFiltrosAvanzados) btnFiltrosAvanzados.style.visibility = 'visible';
                                     if (comunidadContainer) comunidadContainer.style.display = 'none';
+                                    if (filasSeries) filasSeries.style.display = 'none';
                                     // Solo la mostramos de nuevo si efectivamente hay una destacada
                                     // cargada — si nunca hubo (204) o falló, seguimos ocultándola.
                                     if (destacada && window._destacadaMovieId) destacada.style.display = 'block';
@@ -3833,6 +3857,7 @@ window.seleccionarTabFeed = function(tab, el) {
                                     if (votoRelampago) votoRelampago.style.display = 'none';
                                     if (triviaBadge) triviaBadge.style.display = 'none';
                                     if (filasGenero) filasGenero.style.display = 'none';
+                                    if (filasSeries) filasSeries.style.display = 'none';
 
         // Crear contenedor si no existe
         if (!comunidadContainer) {
@@ -3844,8 +3869,30 @@ window.seleccionarTabFeed = function(tab, el) {
 
         // Cargar JS y CSS de comunidad si no están cargados aún
         window.cargarModuloComunidad();
-    }
-};
+
+    } else if (tab === 'series') {
+        if (document.getElementById('resultadosHeader')?.style.display === 'flex') {
+            window.limpiarFiltros();
+        }
+        if (gridPeliculas) gridPeliculas.style.display = 'none';
+                if (paginacion) paginacion.style.display = 'none';
+                if (pills) pills.style.display = 'none';
+                if (filtros) filtros.style.display = 'none';
+                if (btnFiltrosAvanzados) btnFiltrosAvanzados.style.visibility = 'hidden';
+                // El carrusel destacado (Película destacada + premios + ranking) es
+                // cross-contenido — se muestra en Series igual que en Películas.
+                if (destacada && window._destacadaMovieId) destacada.style.display = 'block';
+                if (votoRelampago) votoRelampago.style.display = 'none';
+                if (triviaBadge) triviaBadge.style.display = 'none';
+                if (filasGenero) filasGenero.style.display = 'none';
+                if (comunidadContainer) comunidadContainer.style.display = 'none';
+
+                if (filasSeries) filasSeries.style.display = 'block';
+                if (typeof window.cargarFilasSeries === 'function') {
+                    window.cargarFilasSeries();
+                }
+            }
+        };
 
 window.cargarModuloComunidad = function() {
     // CSS
