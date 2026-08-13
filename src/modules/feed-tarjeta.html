@@ -1,7 +1,7 @@
 <!-- Plantilla de tarjeta de película con votación propia  -->
 <div class="pelicula-card" data-id="{id}" onclick="window.abrirDetallePelicula({id})" style="cursor: pointer;">
     <div class="pelicula-poster">
-        <img src="{posterUrl}" alt="{title}"
+        <img src="{posterUrl}" alt="{title}" loading="lazy"
              onerror="this.src='https://via.placeholder.com/300x450?text=Error+imagen'">
         <div class="pelicula-overlay">
             <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;">

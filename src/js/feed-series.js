@@ -212,7 +212,7 @@ function generarTarjetaSerieHTML(serie) {
     return `
         <div class="serie-card" data-id="${serie.id}" onclick="window.abrirDetalleSerie(${serie.id})" style="cursor:pointer;">
             <div class="serie-poster">
-                <img src="${posterUrl}" alt="${serie.name || ''}" onerror="this.src='https://via.placeholder.com/300x450?text=Error+imagen'">
+                <img src="${posterUrl}" alt="${serie.name || ''}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450?text=Error+imagen'">
                 <div class="serie-overlay">
                     <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;">
                         <span class="total-votos" id="totalVotosSerie-${serie.id}">0%</span>
