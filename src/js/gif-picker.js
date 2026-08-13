@@ -150,19 +150,24 @@
     }
 
     window._gifSeleccionar = function(url) {
-        if (currentMode === 'main') {
-            window._gifSeleccionado = url;
-            const preview = document.getElementById('gifPreviewMain');
-            const img     = document.getElementById('gifPreviewImgMain');
-            if (preview && img) { img.src = url; preview.style.display = 'block'; }
-        } else if (currentMode === 'reply') {
-            window._gifSeleccionadoReply = url;
-            const preview = document.getElementById(`gifPreviewReply-${window._gifReplyCommentId}`);
-            const img     = document.getElementById(`gifPreviewImgReply-${window._gifReplyCommentId}`);
-            if (preview && img) { img.src = url; preview.style.display = 'block'; }
-        }
-        cerrarPicker();
-    };
+            if (currentMode === 'main') {
+                window._gifSeleccionado = url;
+                const preview = document.getElementById('gifPreviewMain');
+                const img     = document.getElementById('gifPreviewImgMain');
+                if (preview && img) { img.src = url; preview.style.display = 'block'; }
+            } else if (currentMode === 'main-serie') {
+                window._gifSeleccionadoSerie = url;
+                const preview = document.getElementById('gifPreviewMainSerie');
+                const img     = document.getElementById('gifPreviewImgMainSerie');
+                if (preview && img) { img.src = url; preview.style.display = 'block'; }
+            } else if (currentMode === 'reply') {
+                window._gifSeleccionadoReply = url;
+                const preview = document.getElementById(`gifPreviewReply-${window._gifReplyCommentId}`);
+                const img     = document.getElementById(`gifPreviewImgReply-${window._gifReplyCommentId}`);
+                if (preview && img) { img.src = url; preview.style.display = 'block'; }
+            }
+            cerrarPicker();
+        };
 
     window.quitarGifMain = function() {
         window._gifSeleccionado = null;
@@ -212,9 +217,14 @@
     };
 
     window.initGifPickerMain = function() {
-        const btn = document.getElementById('gifTriggerMain');
-        if (btn) window.initGifPicker(btn, 'main', null);
-    };
+            const btn = document.getElementById('gifTriggerMain');
+            if (btn) window.initGifPicker(btn, 'main', null);
+        };
+
+        window.initGifPickerMainSerie = function() {
+            const btn = document.getElementById('gifTriggerMainSerie');
+            if (btn) window.initGifPicker(btn, 'main-serie', null);
+        };
 
     window.cerrarGifPicker = cerrarPicker;
 

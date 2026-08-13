@@ -150,8 +150,11 @@ function getIconForAction(action) {
     const icons = {
         VOTE_MOVIE:           'fa-thumbs-up',
         VOTE_CINEMA:          'fa-building',
+        VOTE_SERIES:          'fa-thumbs-up',
         COMMENT_MOVIE:        'fa-comment',
+        COMMENT_SERIES:       'fa-comment',
         RECOMMEND_MOVIE:      'fa-share',
+        RECOMMEND_SERIES:     'fa-share',
         REWARD_REDEMPTION:    'fa-ticket-alt',
         RECEIVE_MERECE_PUNTO: 'fa-star',
         REVERT_MERECE_PUNTO:  'fa-star',
@@ -168,8 +171,11 @@ function getLabelForAction(action) {
     const labels = {
         VOTE_MOVIE:           'Voto en película',
         VOTE_CINEMA:          'Voto en cine',
+        VOTE_SERIES:          'Voto en serie',
         COMMENT_MOVIE:        'Comentario en película',
+        COMMENT_SERIES:       'Comentario en serie',
         RECOMMEND_MOVIE:      'Recomendación de película',
+        RECOMMEND_SERIES:     'Recomendación de serie',
         REWARD_REDEMPTION:    'Canje de premio',
         RECEIVE_MERECE_PUNTO: '¡Merecés un punto!',
         REVERT_MERECE_PUNTO:  'Reversión de punto',

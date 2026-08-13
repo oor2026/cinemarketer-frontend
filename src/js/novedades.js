@@ -131,7 +131,7 @@ window.cargarNovedades = async function() {
 
             return `
                 <div data-notif-id="${n.id}"
-                    onclick="window.clickNovedad(${n.id}, ${n.movieId}, ${n.commentId}, ${n.replyId || 'null'}, '${n.type}', ${n.read}, ${n.actorId || 'null'}, ${n.publicationId || 'null'})"
+                    onclick="window.clickNovedad(${n.id}, ${n.movieId}, ${n.commentId}, ${n.replyId || 'null'}, '${n.type}', ${n.read}, ${n.actorId || 'null'}, ${n.publicationId || 'null'}, ${n.rewardId || 'null'}, ${n.seriesId || 'null'})"
                     style="padding:0.75rem 1rem;border-bottom:1px solid #f5f5f5;cursor:pointer;
                            background:${n.read ? 'white' : '#f0f4ff'};
                            transition:background 0.2s;"
@@ -157,7 +157,7 @@ window.cargarNovedades = async function() {
     }
 };
 
-window.clickNovedad = async function(notificationId, movieId, commentId, replyId, type, yaLeida, actorId, publicationId, rewardId) {
+window.clickNovedad = async function(notificationId, movieId, commentId, replyId, type, yaLeida, actorId, publicationId, rewardId, seriesId) {
      console.log('clickNovedad ejecutado, type:', type);
      console.log('movieId:', movieId, 'abrirDetallePelicula:', typeof window.abrirDetallePelicula);
     const token = localStorage.getItem('token');
@@ -205,6 +205,17 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
                     }
                     return;
                 }
+    // Abrir serie al clickear recomendación nueva de serie, o al clickear
+        // el aviso de "calificaron tu recomendación" cuando es de una serie
+        // (RECOMMENDATION_RATED lo comparten película y serie — se distingue
+        // por cuál de los dos ids viene poblado).
+            if (type === 'NEW_RECOMMENDATION_SERIES' || (type === 'RECOMMENDATION_RATED' && seriesId)) {
+                if (seriesId && typeof window.abrirDetalleSerie === 'function') {
+                    window.abrirDetalleSerie(seriesId);
+                }
+                return;
+            }
+
 
         // Navegar a suscripción al clickear notif de vencimiento premium
         if (type === 'PREMIUM_EXPIRING_SOON' || type === 'PREMIUM_EXPIRING_TOMORROW') {
@@ -284,107 +295,202 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
             }
 
             if (type === 'BANCO' || type === 'MERECE_PUNTO') {
-                                // Inyecta solo el modal de película si todavía no está en el DOM,
-                                // sin tocar #module-container — no recarga los carruseles del feed.
-                                await _asegurarModalPeliculaEnDOM();
-                                if (typeof window.abrirDetallePelicula === 'function' && movieId) {
+                                    // Inyecta el modal correspondiente si todavía no está en el DOM,
+                                    // sin tocar #module-container — no recarga los carruseles del feed.
+                                    await _asegurarModalPeliculaEnDOM();
 
-                        // Consultar si el comentario es spoiler antes de abrir
-                        let esSpoiler = false;
-                        if (commentId) {
-                            try {
-                                const res = await fetch(`${CONFIG.API_URL}/comments/${commentId}`, {
-                                    headers: { 'Authorization': `Bearer ${token}` }
-                                });
-                                if (res.ok) {
-                                    const data = await res.json();
-                                    if (data.spoiler) esSpoiler = true;
-                                }
-                            } catch(e) {}
+                                    if (seriesId && typeof window.abrirDetalleSerie === 'function') {
+
+                            // Consultar si el comentario es spoiler antes de abrir
+                            let esSpoilerSerie = false;
+                            if (commentId) {
+                                try {
+                                    const res = await fetch(`${CONFIG.API_URL}/series-comments/${commentId}`, {
+                                        headers: { 'Authorization': `Bearer ${token}` }
+                                    });
+                                    if (res.ok) {
+                                        const data = await res.json();
+                                        if (data.spoiler) esSpoilerSerie = true;
+                                    }
+                                } catch(e) {}
+                            }
+
+                            window.abrirDetalleSerie(seriesId);
+
+                            if (commentId) {
+                                setTimeout(async () => {
+                                    if (esSpoilerSerie && typeof window.activarModoSpoilerSerie === 'function') {
+                                        window.activarModoSpoilerSerie(true);
+                                    }
+                                    // Esperar a que cargarComentariosSerie termine de renderizar
+                                    await new Promise(resolve => setTimeout(resolve, 600));
+
+                                    const comentEl = document.getElementById(`comment-serie-${commentId}`);
+                                    if (comentEl) {
+                                        comentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                        comentEl.style.transition = 'background 0.3s';
+                                        comentEl.style.background = '#fff3cd';
+                                        setTimeout(() => { comentEl.style.background = ''; }, 3000);
+                                    }
+                                }, 800);
+                            }
+                            return;
                         }
 
-                        window.abrirDetallePelicula(movieId);
+                                    if (typeof window.abrirDetallePelicula === 'function' && movieId) {
 
-                        if (commentId) {
-                            setTimeout(async () => {
-                                if (esSpoiler && typeof window.activarModoSpoiler === 'function') {
-                                    window.activarModoSpoiler(true);
-                                }
-                                // Esperar a que cargarComentariosPelicula termine de renderizar
-                                await new Promise(resolve => setTimeout(resolve, 600));
+                            // Consultar si el comentario es spoiler antes de abrir
+                            let esSpoiler = false;
+                            if (commentId) {
+                                try {
+                                    const res = await fetch(`${CONFIG.API_URL}/comments/${commentId}`, {
+                                        headers: { 'Authorization': `Bearer ${token}` }
+                                    });
+                                    if (res.ok) {
+                                        const data = await res.json();
+                                        if (data.spoiler) esSpoiler = true;
+                                    }
+                                } catch(e) {}
+                            }
 
-                                const comentEl = document.getElementById(`comment-${commentId}`);
-                                if (comentEl) {
-                                    comentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                    comentEl.style.transition = 'background 0.3s';
-                                    comentEl.style.background = '#fff3cd';
-                                    setTimeout(() => { comentEl.style.background = ''; }, 3000);
-                                }
-                            }, 800);
+                            window.abrirDetallePelicula(movieId);
+
+                            if (commentId) {
+                                setTimeout(async () => {
+                                    if (esSpoiler && typeof window.activarModoSpoiler === 'function') {
+                                        window.activarModoSpoiler(true);
+                                    }
+                                    // Esperar a que cargarComentariosPelicula termine de renderizar
+                                    await new Promise(resolve => setTimeout(resolve, 600));
+
+                                    const comentEl = document.getElementById(`comment-${commentId}`);
+                                    if (comentEl) {
+                                        comentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                        comentEl.style.transition = 'background 0.3s';
+                                        comentEl.style.background = '#fff3cd';
+                                        setTimeout(() => { comentEl.style.background = ''; }, 3000);
+                                    }
+                                }, 800);
+                            }
                         }
+                        return;
+                    }
+
+                if (type === 'REPLY') {
+                                        // Inyecta el modal correspondiente si todavía no está en el DOM,
+                                        // sin tocar #module-container — no recarga los carruseles del feed.
+                                        await _asegurarModalPeliculaEnDOM();
+
+                                    if (seriesId && typeof window.abrirDetalleSerie === 'function') {
+
+                    // Consultar si el comentario padre es spoiler antes de abrir
+                    let modoSpoilerActivoSerieNotif = false;
+                    if (commentId) {
+                        try {
+                            const token2 = localStorage.getItem('token');
+                            const res = await fetch(`${CONFIG.API_URL}/series-comments/${commentId}`, {
+                                headers: { 'Authorization': `Bearer ${token2}` }
+                            });
+                            if (res.ok) {
+                                const data = await res.json();
+                                if (data.spoiler) {
+                                    modoSpoilerActivoSerieNotif = true;
+                                }
+                            }
+                        } catch(e) {}
+                    }
+
+                    window.abrirDetalleSerie(seriesId);
+
+                    if (replyId && commentId) {
+                        setTimeout(async () => {
+                            if (modoSpoilerActivoSerieNotif && typeof window.activarModoSpoilerSerie === 'function') {
+                                window.activarModoSpoilerSerie(true);
+                            }
+                            // Esperar a que cargarComentariosSerie termine de renderizar
+                            await new Promise(resolve => setTimeout(resolve, 600));
+
+                            const container = document.querySelector(`.replies-container-serie-${commentId}`);
+                            if (container) {
+                                container.style.display = 'block';
+                                await window.cargarRespuestasSerie(commentId, 0);
+                            }
+
+                            setTimeout(() => {
+                                const containerFinal = document.querySelector(`.replies-container-serie-${commentId}`);
+                                const bancoBtns = containerFinal
+                                    ? containerFinal.querySelectorAll(`button[onclick*="toggleReplyBancoSerie(${replyId}"]`)
+                                    : [];
+                                const targetEl = bancoBtns.length > 0
+                                    ? bancoBtns[0].closest('div[style*="display:flex"]')
+                                    : null;
+                                if (targetEl) {
+                                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    targetEl.style.transition = 'background 0.3s';
+                                    targetEl.style.background = '#fff3cd';
+                                    setTimeout(() => { targetEl.style.background = ''; }, 3000);
+                                }
+                            }, 600);
+                        }, 800);
                     }
                     return;
                 }
 
-                if (type === 'REPLY') {
-                                // Inyecta solo el modal de película si todavía no está en el DOM,
-                                // sin tocar #module-container — no recarga los carruseles del feed.
-                                await _asegurarModalPeliculaEnDOM();
-                            if (typeof window.abrirDetallePelicula === 'function') {
+                                    if (typeof window.abrirDetallePelicula === 'function') {
 
-            // Consultar si el comentario padre es spoiler antes de abrir
-            if (commentId) {
-                try {
-                    const token2 = localStorage.getItem('token');
-                    const res = await fetch(`${CONFIG.API_URL}/comments/${commentId}`, {
-                        headers: { 'Authorization': `Bearer ${token2}` }
-                    });
-                    if (res.ok) {
-                        const data = await res.json();
-                        if (data.spoiler) {
-                            modoSpoilerActivo = true;
-                        }
+                    // Consultar si el comentario padre es spoiler antes de abrir
+                    if (commentId) {
+                        try {
+                            const token2 = localStorage.getItem('token');
+                            const res = await fetch(`${CONFIG.API_URL}/comments/${commentId}`, {
+                                headers: { 'Authorization': `Bearer ${token2}` }
+                            });
+                            if (res.ok) {
+                                const data = await res.json();
+                                if (data.spoiler) {
+                                    modoSpoilerActivo = true;
+                                }
+                            }
+                        } catch(e) {}
                     }
-                } catch(e) {}
+
+                    window.abrirDetallePelicula(movieId);
+
+                    if (replyId && commentId) {
+                        setTimeout(async () => {
+                            // Aplicar modo spoiler visual ahora que el modal ya está abierto
+                            if (modoSpoilerActivo && typeof window.activarModoSpoiler === 'function') {
+                                window.activarModoSpoiler(true);
+                            }
+                            // Esperar a que cargarComentariosPelicula termine de renderizar
+                            await new Promise(resolve => setTimeout(resolve, 600));
+
+                            const container = document.querySelector(`.replies-container-${commentId}`);
+                            if (container) {
+                                container.style.display = 'block';
+                                await window.cargarRespuestas(commentId, 0);
+                            }
+
+                            setTimeout(() => {
+                                const containerFinal = document.querySelector(`.replies-container-${commentId}`);
+                                const bancoBtns = containerFinal
+                                    ? containerFinal.querySelectorAll(`button[onclick*="toggleReplyBanco(${replyId}"]`)
+                                    : [];
+                                const targetEl = bancoBtns.length > 0
+                                    ? bancoBtns[0].closest('div[style*="display:flex"]')
+                                    : null;
+                                if (targetEl) {
+                                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    targetEl.style.transition = 'background 0.3s';
+                                    targetEl.style.background = '#fff3cd';
+                                    setTimeout(() => { targetEl.style.background = ''; }, 3000);
+                                }
+                            }, 600);
+                        }, 800);
+                    }
+                }
             }
-
-            window.abrirDetallePelicula(movieId);
-
-            if (replyId && commentId) {
-                setTimeout(async () => {
-                    // Aplicar modo spoiler visual ahora que el modal ya está abierto
-                    if (modoSpoilerActivo && typeof window.activarModoSpoiler === 'function') {
-                        window.activarModoSpoiler(true);
-                    }
-                    // Esperar a que cargarComentariosPelicula termine de renderizar
-                    await new Promise(resolve => setTimeout(resolve, 600));
-
-                    const container = document.querySelector(`.replies-container-${commentId}`);
-                    if (container) {
-                        container.style.display = 'block';
-                        await window.cargarRespuestas(commentId, 0);
-                    }
-
-                    setTimeout(() => {
-                        const containerFinal = document.querySelector(`.replies-container-${commentId}`);
-                        const bancoBtns = containerFinal
-                            ? containerFinal.querySelectorAll(`button[onclick*="toggleReplyBanco(${replyId}"]`)
-                            : [];
-                        const targetEl = bancoBtns.length > 0
-                            ? bancoBtns[0].closest('div[style*="display:flex"]')
-                            : null;
-                        if (targetEl) {
-                            targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            targetEl.style.transition = 'background 0.3s';
-                            targetEl.style.background = '#fff3cd';
-                            setTimeout(() => { targetEl.style.background = ''; }, 3000);
-                        }
-                    }, 600);
-                }, 800);
-            }
-        }
-    }
-};
+        };
 
 async function _abrirModalPremioDesdeNotificacion(rewardId, esPremiumReward) {
     loadModule('mis-premios');
@@ -474,7 +580,7 @@ window.cargarNovedadesMobile = async function() {
 
                     return `
                         <div data-notif-id-mobile="${n.id}"
-                            onclick="window.clickNovedad(${n.id}, ${n.movieId}, ${n.commentId}, ${n.replyId || 'null'}, '${n.type}', ${n.read}, ${n.actorId || 'null'}, ${n.publicationId || 'null'})"
+                            onclick="window.clickNovedad(${n.id}, ${n.movieId}, ${n.commentId}, ${n.replyId || 'null'}, '${n.type}', ${n.read}, ${n.actorId || 'null'}, ${n.publicationId || 'null'}, ${n.rewardId || 'null'}, ${n.seriesId || 'null'})"
                             style="padding:0.75rem 1rem;border-bottom:1px solid #eee;cursor:pointer;
                                    background:${n.read ? 'white' : '#f0f4ff'};">
                             <div style="display:flex;align-items:flex-start;gap:0.5rem;">
@@ -610,10 +716,10 @@ async function _asegurarModalPeliculaEnDOM() {
 
         // Todo lo que el modal de película necesita para funcionar, no solo el propio modal
         const idsNecesarios = [
-            'modalPelicula', 'modalReportarComentario', 'modalMerecePunto',
-            'modalOcultarComentario', 'panelRecomendar', 'modalSpoilerWarning',
-            'dondeVerlaOverlay', 'dondeVerlaPanel', 'actorOverlay', 'actorPanel'
-        ];
+                    'modalPelicula', 'modalSerie', 'modalReportarComentario', 'modalMerecePunto',
+                    'modalOcultarComentario', 'panelRecomendar', 'modalSpoilerWarning',
+                    'dondeVerlaOverlay', 'dondeVerlaPanel', 'actorOverlay', 'actorPanel'
+                ];
 
         let encontroPrincipal = false;
         idsNecesarios.forEach(id => {
@@ -646,18 +752,40 @@ async function _asegurarModalPeliculaEnDOM() {
             document.head.appendChild(link);
         }
         if (!document.getElementById('js-feed-films')) {
-            await new Promise(resolve => {
-                const script = document.createElement('script');
-                script.id = 'js-feed-films';
-                script.src = `js/feed-films.js?v=${Date.now()}`;
-                script.onload = resolve;
-                script.onerror = resolve;
-                document.head.appendChild(script);
-            });
-        }
-        // Margen para que el script recién cargado registre sus funciones globales
-        await new Promise(r => setTimeout(r, 300));
-        return true;
+                    await new Promise(resolve => {
+                        const script = document.createElement('script');
+                        script.id = 'js-feed-films';
+                        script.src = `js/feed-films.js?v=${Date.now()}`;
+                        script.onload = resolve;
+                        script.onerror = resolve;
+                        document.head.appendChild(script);
+                    });
+                }
+
+                // feed-series.css / feed-series.js — el modal de Serie también
+                // vino en el mismo fetch de arriba (modalSerie vive en
+                // feed-films.html), pero su CSS y su lógica están en archivos aparte.
+                if (!document.getElementById('css-feed-series')) {
+                    const linkSerie = document.createElement('link');
+                    linkSerie.id = 'css-feed-series';
+                    linkSerie.rel = 'stylesheet';
+                    linkSerie.href = `css/feed-series.css?v=${Date.now()}`;
+                    document.head.appendChild(linkSerie);
+                }
+                if (!document.getElementById('js-feed-series')) {
+                    await new Promise(resolve => {
+                        const script = document.createElement('script');
+                        script.id = 'js-feed-series';
+                        script.src = `js/feed-series.js?v=${Date.now()}`;
+                        script.onload = resolve;
+                        script.onerror = resolve;
+                        document.head.appendChild(script);
+                    });
+                }
+
+                // Margen para que los scripts recién cargados registren sus funciones globales
+                await new Promise(r => setTimeout(r, 300));
+                return true;
     } catch(e) {
         return false;
     }

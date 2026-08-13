@@ -78,11 +78,28 @@
         </div>
     </div>
 
-    <!-- ÚLTIMOS COMENTARIOS -->
+    <!-- ÚLTIMAS VOTACIONES DE SERIES -->
     <div class="perfil-seccion">
         <h3 class="perfil-seccion-titulo">
-            <i class="fas fa-comment"></i> Últimas películas comentadas
+            <i class="fas fa-tv"></i> Últimas series votadas
         </h3>
+        <div id="perfilVotacionesSeriesWrapper">
+            <div class="perfil-loading"><i class="fas fa-spinner fa-spin"></i></div>
+        </div>
+    </div>
+
+    <!-- ÚLTIMOS COMENTARIOS -->
+    <div class="perfil-seccion">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
+            <h3 class="perfil-seccion-titulo" id="perfilComentariosTitulo" style="margin:0;">
+                <i class="fas fa-comment"></i> Últimas películas comentadas
+            </h3>
+            <button id="perfilComentariosToggle" onclick="window.toggleComentariosPerfilTipo()"
+                    title="Ver últimas series comentadas"
+                    style="background:none; border:1.5px solid #ddd; border-radius:20px; padding:0.3rem 0.7rem; cursor:pointer; color:#888; font-size:0.8rem; display:flex; align-items:center; gap:0.4rem; transition:all 0.2s; flex-shrink:0;">
+                <i class="fas fa-tv"></i> Series
+            </button>
+        </div>
         <div class="perfil-comentarios" id="perfilComentariosList">
             <div class="perfil-loading"><i class="fas fa-spinner fa-spin"></i></div>
         </div>

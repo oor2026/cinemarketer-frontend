@@ -94,7 +94,7 @@ function _actualizarBtnWatchlist(btn, saved) {
 }
 
 // ── Cargar Mi lista ────────────────────────────────────────────
-window.cargarMiLista = async function() {
+window.cargarMiLista = async function(pedidoId) {
     const token = localStorage.getItem('token');
     const lista = document.getElementById('panelMiLista');
     if (!lista) return;
@@ -103,12 +103,15 @@ window.cargarMiLista = async function() {
         const res = await fetch(`${CONFIG.API_URL}/watchlist`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
+        if (pedidoId && pedidoId !== window._prefRequestId) return;
         _watchlistCache = res.ok ? await res.json() : [];
         const countEl = document.getElementById('countMiLista');
         if (countEl) countEl.textContent = _watchlistCache.length;
         renderMiLista();
     } catch (e) {
-        lista.innerHTML = '<div class="mi-red-vacio">Error al cargar tu lista</div>';
+        if (!pedidoId || pedidoId === window._prefRequestId) {
+            lista.innerHTML = '<div class="mi-red-vacio">Error al cargar tu lista</div>';
+        }
     }
 };
 
@@ -189,39 +192,10 @@ function renderMiLista() {
 
 // ── Ya la vi ───────────────────────────────────────────────────
 window.abrirModalYaLaViWatchlist = function(wlId) {
-    _watchlistModalId = wlId;
-    // Reusar el mismo modal que recomendaciones
+    window._recModalId = wlId;
+    window._yaLaViModo = 'pelicula-watchlist';
     const modal = document.getElementById('modalYaLaVi');
-    if (modal) {
-        // Override confirmar para watchlist
-        window._yaLaViModo = 'watchlist';
-        modal.style.display = 'flex';
-    }
-};
-
-// Override de confirmarYaLaVi para manejar ambos modos
-const _confirmarYaLaViOriginal = window.confirmarYaLaVi;
-window.confirmarYaLaVi = async function() {
-    if (window._yaLaViModo === 'watchlist') {
-        const wlId = _watchlistModalId;
-        if (!wlId) return;
-        window.cerrarModalYaLaVi?.();
-        window._yaLaViModo = null;
-        const token = localStorage.getItem('token');
-        try {
-            const res = await fetch(`${CONFIG.API_URL}/watchlist/${wlId}/seen`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const w = _watchlistCache.find(x => x.id === wlId);
-                if (w) w.seenAt = new Date().toISOString();
-                renderMiLista();
-            }
-        } catch (e) {}
-    } else {
-        if (_confirmarYaLaViOriginal) _confirmarYaLaViOriginal();
-    }
+    if (modal) modal.style.display = 'flex';
 };
 
 // ── Calificar ──────────────────────────────────────────────────
@@ -313,4 +287,52 @@ window.abrirDetallePeliculaDesdeWatchlist = async function(movieId) {
     if (typeof window.abrirDetallePelicula === 'function') {
         window.abrirDetallePelicula(movieId);
     }
+};
+
+// ==============================================
+// WATCHLIST (series) — reusa _actualizarBtnWatchlist y
+// _mostrarToastWatchlist (genéricas, ya definidas en watchlist.js)
+// ==============================================
+window.toggleWatchlistSerie = async function(seriesId, event) {
+    if (event) event.stopPropagation();
+
+    const btns = document.querySelectorAll(`.btn-watchlist-serie[data-serie-id="${seriesId}"]`);
+    const yaGuardado = btns[0]?.classList.contains('guardado');
+    btns.forEach(btn => _actualizarBtnWatchlist(btn, !yaGuardado));
+
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/series-watchlist/${seriesId}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const saved = data.saved;
+
+        document.querySelectorAll(`.btn-watchlist-serie[data-serie-id="${seriesId}"]`).forEach(btn => {
+            _actualizarBtnWatchlist(btn, saved);
+        });
+
+        _mostrarToastWatchlist(saved ? 'Guardada en tu lista' : 'Quitada de tu lista');
+
+    } catch (e) {
+        btns.forEach(btn => _actualizarBtnWatchlist(btn, yaGuardado));
+    }
+};
+
+window.marcarWatchlistSerieEnFeed = async function() {
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/series-watchlist/ids`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const savedIds = await res.json();
+
+        document.querySelectorAll('.btn-watchlist-serie[data-serie-id]').forEach(btn => {
+            const seriesId = parseInt(btn.dataset.serieId);
+            _actualizarBtnWatchlist(btn, savedIds.includes(seriesId));
+        });
+    } catch (e) {}
 };

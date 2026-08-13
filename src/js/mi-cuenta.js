@@ -1192,13 +1192,44 @@ window.switchRedTab = function(tab) {
     renderRedTab(tab);
 };
 
+window._prefTipo = 'peliculas';
+window._tabPrefActual = 'mi-lista';
+
 window.switchListaTab = function(tab) {
+    window._tabPrefActual = tab;
     document.getElementById('tabMiLista').classList.toggle('active', tab === 'mi-lista');
     document.getElementById('tabRecomendaciones').classList.toggle('active', tab === 'recomendaciones');
     document.getElementById('panelMiLista').style.display = tab === 'mi-lista' ? 'block' : 'none';
     document.getElementById('panelRecomendaciones').style.display = tab === 'recomendaciones' ? 'block' : 'none';
-    if (tab === 'recomendaciones') cargarMeRecomendaron();
-    if (tab === 'mi-lista') window.cargarMiLista();
+    window._recargarPreferenciaActual();
+};
+
+window.switchPreferenciasTipo = function(tipo) {
+    window._prefTipo = tipo;
+    document.getElementById('btnPrefPeliculas').style.background = tipo === 'peliculas' ? '#1a3a6b' : '#fff';
+    document.getElementById('btnPrefPeliculas').style.color = tipo === 'peliculas' ? '#fff' : '#666';
+    document.getElementById('btnPrefSeries').style.background = tipo === 'series' ? '#1a3a6b' : '#fff';
+    document.getElementById('btnPrefSeries').style.color = tipo === 'series' ? '#fff' : '#666';
+    window._recargarPreferenciaActual();
+};
+
+window._prefRequestId = 0;
+
+window._recargarPreferenciaActual = function() {
+    window._prefRequestId++;
+    const miPedido = window._prefRequestId;
+    const esSeries = window._prefTipo === 'series';
+
+    // Se piden las dos listas del tipo actual, no solo la que se está
+    // viendo — así el contador de la pestaña oculta también queda al
+    // día, sin esperar a que la abras para recién ahí actualizarse.
+    if (esSeries) {
+        window.cargarMiListaSeries(miPedido);
+        window.cargarMeRecomendaronSeries(miPedido);
+    } else {
+        window.cargarMiLista(miPedido);
+        cargarMeRecomendaron(miPedido);
+    }
 };
 
 function renderRedTab(tab) {
@@ -1330,7 +1361,7 @@ async function cargarConteoRecomendaciones() {
     } catch (e) {}
 }
 
-async function cargarMeRecomendaron() {
+async function cargarMeRecomendaron(pedidoId) {
     const token = localStorage.getItem('token');
     const lista = document.getElementById('meRecomendaronLista');
     if (!lista) return;
@@ -1339,12 +1370,15 @@ async function cargarMeRecomendaron() {
         const res = await fetch(`${CONFIG.API_URL}/recommendations/received`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
+        if (pedidoId && pedidoId !== window._prefRequestId) return; // quedó vieja, se descarta
         _recomendacionesCache = res.ok ? await res.json() : [];
         const countEl = document.getElementById('countRecomendaciones');
                 if (countEl) countEl.textContent = _recomendacionesCache.length;
         renderMeRecomendaron();
     } catch (e) {
-        lista.innerHTML = '<div class="mi-red-vacio">Error al cargar recomendaciones</div>';
+        if (!pedidoId || pedidoId === window._prefRequestId) {
+            lista.innerHTML = '<div class="mi-red-vacio">Error al cargar recomendaciones</div>';
+        }
     }
 }
 
@@ -1427,31 +1461,44 @@ function renderMeRecomendaron() {
 }
 
 window.abrirModalYaLaVi = function(recId) {
-    _recModalId = recId;
+    window._recModalId = recId;
+    window._yaLaViModo = 'pelicula-rec';
     const modal = document.getElementById('modalYaLaVi');
     if (modal) modal.style.display = 'flex';
 };
 
 window.cerrarModalYaLaVi = function() {
-    _recModalId = null;
+    window._recModalId = null;
     const modal = document.getElementById('modalYaLaVi');
     if (modal) modal.style.display = 'none';
 };
 
+// Despachador único — reemplaza la cadena de overrides que veníamos
+// apilando (mi-cuenta.js → watchlist.js → feed-series.js). Cada endpoint
+// y caché según window._yaLaViModo, seteado por quien abre el modal.
 window.confirmarYaLaVi = async function() {
     const recId = window._recModalId;
     if (!recId) return;
     window.cerrarModalYaLaVi();
     const token = localStorage.getItem('token');
+
+    const config = {
+        'pelicula-rec':      { url: `${CONFIG.API_URL}/recommendations/${recId}/seen`,      cache: () => _recomendacionesCache,      render: () => renderMeRecomendaron() },
+        'pelicula-watchlist':{ url: `${CONFIG.API_URL}/watchlist/${recId}/seen`,              cache: () => _watchlistCache,             render: () => renderMiLista() },
+        'serie-rec':         { url: `${CONFIG.API_URL}/series-recommendations/${recId}/seen`, cache: () => window._recomendacionesSeriesCache, render: () => window.renderMeRecomendadoSeries() },
+        'serie-watchlist':   { url: `${CONFIG.API_URL}/series-watchlist/${recId}/seen`,       cache: () => window._watchlistSeriesCache, render: () => window.renderMiListaSeries() }
+    }[window._yaLaViModo];
+    if (!config) return;
+
     try {
-        const res = await fetch(`${CONFIG.API_URL}/recommendations/${recId}/seen`, {
+        const res = await fetch(config.url, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
-            const rec = _recomendacionesCache.find(r => r.id === recId);
-            if (rec) rec.seenAt = new Date().toISOString();
-            renderMeRecomendaron();
+            const item = config.cache().find(r => r.id === recId);
+            if (item) item.seenAt = new Date().toISOString();
+            config.render();
         }
     } catch (e) {}
 };
@@ -1481,32 +1528,44 @@ window.seleccionarEstrellaRec = async function(recId, rating) {
 let _eliminarRecId = null;
 
 window.abrirModalEliminarRec = function(recId) {
-    _eliminarRecId = recId;
+    window._eliminarRecId = recId;
+    window._eliminarModo = 'pelicula-rec';
     const modal = document.getElementById('modalEliminarRec');
     if (modal) modal.style.display = 'flex';
 };
 
 window.cerrarModalEliminarRec = function() {
-    _eliminarRecId = null;
+    window._eliminarRecId = null;
     const modal = document.getElementById('modalEliminarRec');
     if (modal) modal.style.display = 'none';
 };
 
 window.confirmarEliminarRec = async function() {
-    const recId = _eliminarRecId;
+    const recId = window._eliminarRecId;
     if (!recId) return;
     window.cerrarModalEliminarRec();
     const token = localStorage.getItem('token');
+
+    const config = {
+        'pelicula-rec':      { url: `${CONFIG.API_URL}/recommendations/${recId}`,      filtrar: () => { _recomendacionesCache = _recomendacionesCache.filter(r => r.id !== recId); }, contador: 'countRecomendaciones', total: () => _recomendacionesCache.length, render: () => renderMeRecomendaron() },
+        'pelicula-watchlist':{ url: `${CONFIG.API_URL}/watchlist/${recId}`,              filtrar: () => { _watchlistCache = _watchlistCache.filter(r => r.id !== recId); },             contador: 'countMiLista',        total: () => _watchlistCache.length,        render: () => renderMiLista() },
+        'serie-rec':         { url: `${CONFIG.API_URL}/series-recommendations/${recId}`, filtrar: () => { window._recomendacionesSeriesCache = window._recomendacionesSeriesCache.filter(r => r.id !== recId); }, contador: 'countRecomendaciones', total: () => window._recomendacionesSeriesCache.length, render: () => window.renderMeRecomendadoSeries() },
+        'serie-watchlist':   { url: `${CONFIG.API_URL}/series-watchlist/${recId}`,       filtrar: () => { window._watchlistSeriesCache = window._watchlistSeriesCache.filter(r => r.id !== recId); }, contador: 'countMiLista',        total: () => window._watchlistSeriesCache.length,        render: () => window.renderMiListaSeries() }
+    }[window._eliminarModo];
+    if (!config) return;
+
     try {
-        const res = await fetch(`${CONFIG.API_URL}/recommendations/${recId}`, {
+        const res = await fetch(config.url, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
-            _recomendacionesCache = _recomendacionesCache.filter(r => r.id !== recId);
-            const countEl = document.getElementById('countRecomendaciones');
-            if (countEl) countEl.textContent = _recomendacionesCache.length;
-            renderMeRecomendaron();
+            config.filtrar();
+            if (config.contador) {
+                const countEl = document.getElementById(config.contador);
+                if (countEl) countEl.textContent = config.total();
+            }
+            config.render();
         }
     } catch (e) {}
 };

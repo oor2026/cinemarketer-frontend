@@ -33,7 +33,7 @@
         <button class="feed-tab active" id="tabPeliculas" onclick="window.seleccionarTabFeed('peliculas', this)">
             🎬 Películas
         </button>
-        <button class="feed-tab" id="tabSeries" onclick="window.mostrarSeriesProximamente()">
+        <button class="feed-tab" id="tabSeries" onclick="window.seleccionarTabFeed('series', this)">
             📺 Series
         </button>
         <button class="feed-tab" id="tabComunidad"
@@ -131,6 +131,9 @@
 
     <!-- FILAS POR GÉNERO (mobile) -->
     <div class="filas-genero-container" id="filasGeneroContainer" style="display:none;"></div>
+
+    <!-- FILAS DE SERIES -->
+    <div id="filasSeriesContainer" class="filas-genero-container" style="display:none;"></div>
 
     <!-- PAGINACIÓN (cargada dinámicamente) -->
     <div id="paginacion-container"></div>
@@ -394,6 +397,277 @@
     </div>
 
     <!-- ============================================== -->
+    <!-- MODAL DE DETALLE — SERIES                      -->
+    <!-- ============================================== -->
+    <div id="modalSerie" class="modal" style="display: none;">
+        <div class="modal-overlay" onclick="window.cerrarModalSerie()"></div>
+        <div class="modal-contenido">
+
+            <!-- HEADER: título + rating + cerrar -->
+            <div class="modal-header">
+                <h2 id="modalTituloSerie">Título de la serie</h2>
+                <div class="modal-header-right">
+                    <div class="modal-rating" id="modalRatingSerie">⭐ <span class="modal-rating-num">0</span><span class="modal-rating-label"> votos</span></div>
+                    <div class="modal-rating modal-badge-comentarios" id="modalComentariosCountSerie">💬 <span class="modal-rating-num">0</span><span class="modal-rating-label"> comentarios</span></div>
+                    <button id="btnDondeVerlaModalSerie"
+                            onclick="window.abrirDondeVerlaSerie(window.serieActualId, event)"
+                            title="Dónde verla"
+                            style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+                        <i class="fas fa-tv" style="font-size:0.85rem;"></i>
+                    </button>
+                    <button id="btnCompartirModalSerie"
+                            onclick="window.compartirSerie(window.serieActualId, document.getElementById('modalTituloSerie').textContent)"
+                            title="Compartir"
+                            style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+                        <i class="fas fa-share-alt" style="font-size:0.85rem;"></i>
+                    </button>
+                    <button class="btn-watchlist-serie" id="btnWatchlistModalSerie"
+                            onclick="window.toggleWatchlistSerie(window.serieActualId, event)"
+                            title="Guardar en mi lista"
+                            style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+                        <i class="fas fa-bookmark" style="font-size:0.85rem;"></i>
+                    </button>
+                    <button class="modal-cerrar" onclick="window.cerrarModalSerie()">×</button>
+                </div>
+            </div>
+
+            <!-- BODY SCROLLABLE -->
+            <div class="modal-body">
+
+                <!-- FILA SUPERIOR: carrusel en móvil, lado a lado en desktop -->
+                <div class="modal-fila-superior">
+
+                    <div class="modal-carrusel" id="modalCarruselSerie">
+
+                        <!-- Slide 1: Poster -->
+                        <div class="carrusel-slide">
+                            <div class="modal-poster">
+                                <img id="modalPosterSerie" src="" alt="Poster">
+                            </div>
+                        </div>
+
+                        <!-- Slide 2: Datos -->
+                        <div class="carrusel-slide">
+                            <div class="modal-columna-derecha">
+                                <div class="modal-info" id="modalInfoSerie">
+
+                                    <div class="modal-stat-bar">
+                                        <div class="modal-stat-item">
+                                            <i class="fas fa-star"></i>
+                                            <span><span id="modalVotosSerie">-</span> votos TMDB</span>
+                                        </div>
+                                        <div class="modal-stat-divider"></div>
+                                        <div class="modal-stat-item">
+                                            <i class="fas fa-fire"></i>
+                                            <span><span id="modalPopularidadSerie">-</span> popularidad</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-chips-grid">
+                                        <div class="modal-chip modal-chip-red">
+                                            <div class="modal-chip-icon"><i class="fas fa-calendar-alt"></i></div>
+                                            <div class="modal-chip-texto">
+                                                <span class="modal-chip-label">Estreno</span>
+                                                <span class="modal-chip-valor" id="modalFechaSerie">-</span>
+                                            </div>
+                                        </div>
+                                        <div class="modal-chip modal-chip-red">
+                                            <div class="modal-chip-icon"><i class="fas fa-layer-group"></i></div>
+                                            <div class="modal-chip-texto">
+                                                <span class="modal-chip-label">Temporadas</span>
+                                                <span class="modal-chip-valor" id="modalTemporadasSerie">-</span>
+                                            </div>
+                                        </div>
+                                        <div class="modal-chip modal-chip-red modal-chip-full">
+                                            <div class="modal-chip-icon"><i class="fas fa-globe"></i></div>
+                                            <div class="modal-chip-texto">
+                                                <span class="modal-chip-label">Idioma</span>
+                                                <span class="modal-chip-valor" id="modalIdiomaSerie">-</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-generos" id="modalGenerosSerie"></div>
+
+                                    <div class="modal-sinopsis">
+                                        <div class="modal-sinopsis-titulo"><i class="fas fa-align-left"></i> Sinopsis</div>
+                                        <p id="modalSinopsisSerie">Cargando...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div><!-- /slide 2 -->
+
+                    </div><!-- /modal-carrusel -->
+
+                    <div class="carrusel-dots" id="carruselDotsSerie">
+                        <span class="carrusel-dot-serie active" onclick="window.irASlideSerie(0)"></span>
+                        <span class="carrusel-dot-serie" onclick="window.irASlideSerie(1)"></span>
+                    </div>
+
+                </div><!-- /modal-fila-superior -->
+
+                <!-- TEMPORADAS -->
+                <div class="temporadas-seccion" id="temporadasSeccionSerie" style="display:none;">
+                    <div class="temporadas-header">
+                        <span class="temporadas-titulo-seccion"><i class="fas fa-layer-group"></i> Temporadas</span>
+                        <span class="temporadas-resumen" id="temporadasResumenSerie"></span>
+                    </div>
+                    <div class="temporadas-track" id="temporadasTrackSerie"></div>
+                </div>
+
+                <!-- ELENCO & DIRECCIÓN -->
+                <div class="elenco-seccion" id="elencoSeccionSerie" style="display:none;">
+                    <div class="elenco-header">
+                        <span class="elenco-titulo-seccion">👥 Elenco y dirección</span>
+                        <div class="elenco-tabs">
+                            <button class="elenco-tab active" id="tabElencoSerie" onclick="window.switchElencoTabSerie('cast')">Elenco</button>
+                            <button class="elenco-tab" id="tabDireccionSerie" onclick="window.switchElencoTabSerie('crew')">Dirección</button>
+                        </div>
+                    </div>
+                    <div class="elenco-carrusel-outer">
+                        <button class="elenco-arrow" onclick="window.scrollElencoSerie(-1)"><i class="fas fa-chevron-left"></i></button>
+                        <div class="elenco-track" id="elencoTrackSerie"></div>
+                        <button class="elenco-arrow" onclick="window.scrollElencoSerie(1)"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+
+                <div class="trailer-propio-container" id="trailerPropioContainerSerie">
+                    <div class="trailer-propio-wrapper">
+                        <div class="modal-trailer-container" id="modalTrailerContainerSerie">
+                            <div class="trailer-placeholder">
+                                <i class="fas fa-film"></i>
+                                <span>Cargando tráiler...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="modalLeyendaPorcentajeSerie" style="text-align:center;font-size:0.95rem;font-weight:600;color:#333;margin:0rem 0 0.25rem;white-space:nowrap;grid-column:1/-1;width:100%;display:block;"></div>
+
+                <!-- BOTONES VOTAR -->
+                <div class="modal-acciones">
+                    <button class="btn-like" onclick="window.votarSerie(window.serieActualId, 'like', event)" title="Me gusta">
+                        <i class="fas fa-thumbs-up"></i> <span class="btn-label-modal">Te banco</span> <span id="modalLikesSerie">0</span>
+                    </button>
+                    <button class="btn-dislike" onclick="window.votarSerie(window.serieActualId, 'dislike', event)" title="No me gusta">
+                        <i class="fas fa-thumbs-down"></i> <span class="btn-label-modal">No te banco</span> <span id="modalDislikesSerie">0</span>
+                    </button>
+                    <button class="btn-recomendar" onclick="window.abrirPanelRecomendarSerie(window.serieActualId, event)" title="Recomendar">
+                        <i class="fas fa-envelope"></i> <span class="btn-label-modal">Recomendar</span>
+                    </button>
+                </div>
+
+                <!-- SERIES SIMILARES -->
+                <div class="similares-seccion similares-seccion-inline" style="display:none;">
+                    <h4 class="similares-titulo-seccion">📺 Series similares</h4>
+                    <div class="similares-carrusel-outer">
+                        <button class="similares-arrow" onclick="window.scrollSimilaresSerie(-1)">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div id="similares-container-serie" class="similares-container"></div>
+                        <button class="similares-arrow" onclick="window.scrollSimilaresSerie(1)">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- FILA INFERIOR: caja de comentarios (ancho completo) -->
+                <div class="modal-fila-comentarios">
+
+                    <div class="comentarios-sheet-header" id="comentariosSheetHeaderSerie">
+                        <button onclick="window.cerrarComentariosSheetSerie()" aria-label="Volver">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <span>Comentarios (<span id="comentariosSheetCountSerie">0</span>)</span>
+                    </div>
+
+                    <h4 class="comentarios-seccion-titulo" id="comentariosTituloSerie">💬 Comentarios</h4>
+
+                    <div class="spoiler-switch-row" id="spoilerSwitchRowSerie">
+                        <label class="spoiler-switch-label" id="spoilerSwitchLabelSerie"><span id="spoilerCountBadgeSerie"></span>Modo spoiler</label>
+                        <div class="spoiler-toggle" id="spoilerToggleSerie" onclick="window.toggleModoSpoilerSerie()">
+                            <div class="spoiler-toggle-dot"></div>
+                        </div>
+                    </div>
+
+                    <div class="comentarios-lista" id="comentariosListaSerie">
+                        <div class="sin-comentarios">Cargando comentarios...</div>
+                    </div>
+
+                    <div class="ver-mas-comentarios" id="verMasComentariosSerie" onclick="window.abrirComentariosSheetSerie(false)">
+                        Ver los <span id="verMasCountSerie">0</span> comentarios
+                    </div>
+
+                    <div class="comentario-escritura" id="areaEscrituraSerie" style="display: none;">
+                        <div class="textarea-wrapper">
+                            <div class="textarea-emoji-col">
+                                <button id="emojiTriggerMainSerie" type="button"
+                                        class="cep-trigger-btn" title="Insertar emoji">😊</button>
+                                <button id="gifTriggerMainSerie" type="button"
+                                        class="cep-trigger-btn" title="Insertar GIF"
+                                        style="font-size:0.7rem;font-weight:700;color:#888;letter-spacing:-0.5px;">GIF</button>
+                            </div>
+                            <div class="textarea-input-col">
+                                <textarea id="nuevoComentarioSerie" placeholder="Escribe tu comentario... (máx 2000 caracteres)" maxlength="2000"></textarea>
+                                <div class="spoiler-aviso" id="spoilerAvisoSerie" style="display:none;">
+                                    <i class="fas fa-exclamation-triangle"></i> Estás escribiendo un comentario con spoiler
+                                </div>
+                                <div id="gifPreviewMainSerie" style="display:none;padding:0.4rem 0.5rem 0.2rem;position:relative;">
+                                    <img id="gifPreviewImgMainSerie" src="" alt="GIF seleccionado"
+                                         style="max-height:120px;border-radius:6px;display:block;">
+                                    <button onclick="window.quitarGifMainSerie()"
+                                            style="position:absolute;top:0.2rem;right:0.7rem;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.75rem;cursor:pointer;line-height:1;padding:0;">✕</button>
+                                </div>
+                                <span class="caracteres-restantes" id="caracteresRestantesSerie">0/2000</span>
+                            </div>
+                        </div>
+                        <div class="comentario-acciones">
+                            <div class="comentario-botones">
+                                <button class="btn-cancelar" onclick="window.cancelarComentarioSerie()">
+                                    <i class="fas fa-times"></i> Cancelar
+                                </button>
+                                <button class="btn-enviar" onclick="window.enviarComentarioSerie()">
+                                    <i class="fas fa-paper-plane"></i> Enviar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- /modal-fila-comentarios -->
+
+                <div class="modal-fila-boton">
+                    <div class="comentario-teaser" id="comentarioTeaserSerie" onclick="window.abrirComentariosSheetSerie(true)">
+                        <i class="fas fa-pen"></i>
+                        <span>Escribí un comentario...</span>
+                    </div>
+                </div>
+
+                <!-- MODAL HIJO — DETALLE DE TEMPORADA -->
+                <div id="modalTemporada" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:1000000; align-items:center; justify-content:center; padding:1rem;">
+                    <div class="modal-temporada-contenido" onclick="event.stopPropagation()">
+                        <div class="modal-temporada-header">
+                            <button class="modal-temporada-volver" onclick="window.cerrarModalTemporada()" aria-label="Volver a la serie">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                            <div class="modal-temporada-titulos">
+                                <span class="modal-temporada-serie-nombre" id="modalTemporadaSerieNombre"></span>
+                                <span class="modal-temporada-numero" id="modalTemporadaNumero">Temporada</span>
+                            </div>
+                            <button class="modal-temporada-cerrar" onclick="window.cerrarModalTemporadaDelTodo()" aria-label="Cerrar">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="modal-temporada-body" id="modalTemporadaBody">
+                            <div class="modal-temporada-loading">Cargando temporada...</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /modal-body -->
+        </div><!-- /modal-contenido -->
+    </div>
+
+    <!-- ============================================== -->
     <!-- MODAL REPORTAR COMENTARIO                      -->
     <!-- ============================================== -->
     <div id="modalReportarComentario" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
@@ -444,13 +718,13 @@
     <!-- ============================================== -->
     <div id="modalMerecePunto" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
         <div style="background:white; border-radius:16px; padding:2rem; max-width:420px; width:100%; position:relative;" onclick="event.stopPropagation()">
-            <button onclick="window.cerrarModalMerecePunto()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#666;">×</button>
+            <button onclick="window.cerrarModalMerecePuntoGenerico()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#666;">×</button>
             <h3 style="margin:0 0 0.5rem; color:#e8a800;"><i class="fas fa-star"></i> ¡Merecés un punto!</h3>
             <p style="color:#666; font-size:0.9rem; margin-bottom:1.5rem;">
                 ¿Creés que <strong><span id="merecePuntoAutorNombre"></span></strong> se merece un punto por su comentario? <u>Esta acción es irreversible</u>.
             </p>
             <div style="display:flex; gap:0.75rem;">
-                <button onclick="window.cerrarModalMerecePunto()"
+                <button onclick="window.cerrarModalMerecePuntoGenerico()"
                         style="flex:1; padding:0.7rem; border:1.5px solid #ddd; background:none; border-radius:8px; color:#666; cursor:pointer; font-size:0.9rem;">
                     Cancelar
                 </button>
@@ -561,8 +835,7 @@
                         style="padding:0.65rem 1.25rem;border:1.5px solid #ddd;background:none;border-radius:8px;color:#666;cursor:pointer;font-size:0.9rem;">
                     Cancelar
                 </button>
-                <button id="btnEnviarRecomendacion" onclick="window.enviarRecomendacion()"
-                        style="padding:0.65rem 1.25rem;background:#e50914;border:none;border-radius:8px;color:white;font-weight:600;cursor:pointer;font-size:0.9rem;opacity:0.5;cursor:not-allowed;">
+                <button id="btnEnviarRecomendacion" onclick="window.enviarRecomendacionActual()" style="padding:0.65rem 1.25rem;background:#e50914;border:none;border-radius:8px;color:white;font-weight:600;cursor:pointer;font-size:0.9rem;opacity:0.5;cursor:not-allowed;">
                     <i class="fas fa-envelope"></i> Recomendar
                 </button>
             </div>
@@ -623,21 +896,6 @@
             border-color: #1a3a6b;
             background: #e8eef7;
             color: #1a3a6b;
-        }
-        .btn-recomendar {
-            background: none;
-            border: 1.5px solid #1a3a6b;
-            color: #1a3a6b;
-            border-radius: 8px;
-            padding: 0.5rem 1rem;
-            font-size: 0.85rem;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background 0.15s;
-        }
-        .btn-recomendar:hover {
-            background: #1a3a6b;
-            color: white;
         }
     </style>
 
@@ -984,11 +1242,11 @@
                 No volver a advertirme para esta película
             </label>
             <div style="display:flex; gap:0.75rem;">
-                <button onclick="window.cancelarSpoilerWarning()"
+                <button id="btnCancelarSpoilerWarning" onclick="window.cancelarSpoilerWarning()"
                         style="flex:1; padding:0.7rem; border:1.5px solid #ddd; background:none; border-radius:8px; color:#666; cursor:pointer; font-size:0.9rem;">
                     Cancelar
                 </button>
-                <button onclick="window.confirmarSpoilerWarning()"
+                <button id="btnConfirmarSpoilerWarning" onclick="window.confirmarSpoilerWarning()"
                         style="flex:2; padding:0.7rem; background:#e50914; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer; font-size:0.9rem;">
                     ¡Entrar al modo spoiler!
                 </button>

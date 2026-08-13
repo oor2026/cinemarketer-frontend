@@ -19,6 +19,7 @@ window.abrirPanelRecomendar = async function(movieId, event) {
     if (event) event.stopPropagation();
 
     window._recMovieId = movieId;
+    window._recSeriesId = null;
     window._recSeleccionados = new Set();
     window._recContextoSeleccionado = null;
     _recPaginaActual = 0;
@@ -66,6 +67,7 @@ window.cerrarPanelRecomendar = function() {
         document.body.classList.remove('modal-open');
     }
     window._recMovieId = null;
+    window._recSeriesId = null;
     window._recTodosUsuarios = [];
     window._recSeleccionados = new Set();
     window._recContextoSeleccionado = null;
@@ -362,6 +364,22 @@ window.enviarRecomendacion = async function() {
                 btn.innerHTML = '<i class="fas fa-envelope"></i> Recomendar';
                 _actualizarBotonEnviar();
             }
+};
+
+// -----------------------------------------------
+// DESPACHADOR ÚNICO — decide si el envío es de película o
+// de serie según cuál de los dos ids esté seteado en este momento.
+// El botón del panel (#btnEnviarRecomendacion) siempre llama a esta
+// función; nunca hay que pisarle el onclick a mano desde otro archivo.
+// -----------------------------------------------
+window.enviarRecomendacionActual = function() {
+    if (window._recSeriesId) {
+        if (typeof window.enviarRecomendacionSerie === 'function') {
+            window.enviarRecomendacionSerie();
+        }
+    } else {
+        window.enviarRecomendacion();
+    }
 };
 
 // -----------------------------------------------
