@@ -188,8 +188,23 @@ async function cargarSeriesFila(fila) {
             resultados = (data.results || []).filter(s => esValidaSerie(s, false, anioActual));
         }
 
-        fila.series = resultados.slice(0, 15);
-        await renderCardsFilaSerie(fila);
+        // Evitar que el primer poster de esta fila ya haya sido "primero"
+                // en otra fila — sensación de contenido siempre nuevo, sobre todo
+                // en mobile donde solo se ve una card a la vez por fila.
+                window._primerosSeriesUsados = window._primerosSeriesUsados || new Set();
+                if (resultados.length > 1 && window._primerosSeriesUsados.has(resultados[0].id)) {
+                    const idxAlternativo = resultados.findIndex(s => !window._primerosSeriesUsados.has(s.id));
+                    if (idxAlternativo > 0) {
+                        const [elegida] = resultados.splice(idxAlternativo, 1);
+                        resultados.unshift(elegida);
+                    }
+                }
+                if (resultados.length > 0) {
+                    window._primerosSeriesUsados.add(resultados[0].id);
+                }
+
+                fila.series = resultados.slice(0, 15);
+                await renderCardsFilaSerie(fila);
 
     } catch (e) {
         const track = document.getElementById(`filaSerieTrack-${fila.key}`);

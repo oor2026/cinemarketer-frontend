@@ -525,8 +525,23 @@ async function cargarPeliculasFila(fila) {
             resultados = (data.results || []).filter(p => esValida(p, false));
         }
 
-        fila.peliculas = resultados.slice(0, 15);
-        await renderCardsFila(fila);
+        // Evitar que el primer poster de esta fila ya haya sido "primero"
+                // en otra fila — sensación de contenido siempre nuevo, sobre todo
+                // en mobile donde solo se ve una card a la vez por fila.
+                window._primerosPeliculasUsados = window._primerosPeliculasUsados || new Set();
+                if (resultados.length > 1 && window._primerosPeliculasUsados.has(resultados[0].id)) {
+                    const idxAlternativo = resultados.findIndex(p => !window._primerosPeliculasUsados.has(p.id));
+                    if (idxAlternativo > 0) {
+                        const [elegido] = resultados.splice(idxAlternativo, 1);
+                        resultados.unshift(elegido);
+                    }
+                }
+                if (resultados.length > 0) {
+                    window._primerosPeliculasUsados.add(resultados[0].id);
+                }
+
+                fila.peliculas = resultados.slice(0, 15);
+                await renderCardsFila(fila);
 
     } catch (e) {
         const track = document.getElementById(`filaTrack-${fila.key}`);
