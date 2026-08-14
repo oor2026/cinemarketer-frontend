@@ -1080,22 +1080,38 @@ function renderSlideDestacado(idx) {
     // VOTO RELÁMPAGO (like/dislike rápido encadenado por similitud)
     // ==============================================
     window._votoRelampago = { movieId: null, chainFromId: null, streak: 0, vistas: [] };
-    window._votoRelampagoVotadas = null; // Set<Long> en memoria, se recarga por sesión de módulo (no se persiste)
+        window._votoRelampagoVotadas = null; // Set<Long> en memoria, se recarga por sesión de módulo (no se persiste)
+        window._votoRelampagoOmitidas = null; // Set<Long> — películas "No la vi" todavía en cooldown de 20 días
 
     async function vrObtenerVotadas() {
-        if (window._votoRelampagoVotadas) return window._votoRelampagoVotadas;
-        const token = localStorage.getItem('token');
-        try {
-            const res = await fetch(`${CONFIG.API_URL}/reviews/movies/voted-ids`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const ids = res.ok ? await res.json() : [];
-            window._votoRelampagoVotadas = new Set(ids);
-        } catch (e) {
-            window._votoRelampagoVotadas = new Set();
+            if (window._votoRelampagoVotadas) return window._votoRelampagoVotadas;
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${CONFIG.API_URL}/reviews/movies/voted-ids`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const ids = res.ok ? await res.json() : [];
+                window._votoRelampagoVotadas = new Set(ids);
+            } catch (e) {
+                window._votoRelampagoVotadas = new Set();
+            }
+            return window._votoRelampagoVotadas;
         }
-        return window._votoRelampagoVotadas;
-    }
+
+        async function vrObtenerOmitidas() {
+            if (window._votoRelampagoOmitidas) return window._votoRelampagoOmitidas;
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${CONFIG.API_URL}/reviews/movies/omitidas-activas`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const ids = res.ok ? await res.json() : [];
+                window._votoRelampagoOmitidas = new Set(ids);
+            } catch (e) {
+                window._votoRelampagoOmitidas = new Set();
+            }
+            return window._votoRelampagoOmitidas;
+        }
 
     function vrStorageKey() {
         const token = localStorage.getItem('token') || '';
@@ -1155,10 +1171,11 @@ function renderSlideDestacado(idx) {
             }
 
             const votadas = await vrObtenerVotadas();
+                        const omitidas = await vrObtenerOmitidas();
 
-                    candidatos = (candidatos.results || candidatos || []).filter(p =>
-                        p.poster_path && p.overview && !state.vistas.includes(p.id) && !votadas.has(p.id)
-                    );
+                                candidatos = (candidatos.results || candidatos || []).filter(p =>
+                                    p.poster_path && p.overview && !state.vistas.includes(p.id) && !votadas.has(p.id) && !omitidas.has(p.id)
+                                );
 
                     if (!candidatos.length) {
                         contenedor.style.display = 'none'; // no encontramos candidatos sin votar por ahora
@@ -1232,21 +1249,31 @@ function renderSlideDestacado(idx) {
 
                     if (window._votoRelampagoVotadas) window._votoRelampagoVotadas.add(movieId);
 
-                        if (tipo === 'like') {
-                            state.chainFromId = movieId;
-                            state.streak = (state.streak || 0) + 1;
-                        } else {
-                            state.chainFromId = null;
-                            state.streak = 0;
-                        }
-                    }
-            // "skip" (no la vi) no toca la cadena ni registra voto
+                                    if (tipo === 'like') {
+                                        state.chainFromId = movieId;
+                                        state.streak = (state.streak || 0) + 1;
+                                    } else {
+                                        state.chainFromId = null;
+                                        state.streak = 0;
+                                    }
+                                } else if (tipo === 'skip') {
+                                    // "No la vi" — no toca la cadena, pero sí queda
+                                    // registrado en el backend (cooldown de 20 días).
+                                    const token = localStorage.getItem('token');
+                                    try {
+                                        await fetch(`${CONFIG.API_URL}/reviews/movies/${movieId}/omitir`, {
+                                            method: 'POST',
+                                            headers: { 'Authorization': `Bearer ${token}` }
+                                        });
+                                    } catch (e) {}
+                                    if (window._votoRelampagoOmitidas) window._votoRelampagoOmitidas.add(movieId);
+                                }
 
-            setTimeout(async () => {
-                await window.vrCargarSiguiente();
-                window._votoRelampagoProcesando = false;
-            }, 320);
-        };
+                        setTimeout(async () => {
+                            await window.vrCargarSiguiente();
+                            window._votoRelampagoProcesando = false;
+                        }, 320);
+                    };
 
     function mostrarPuntosGanados(puntos) {
         if (!puntos) return; // null, 0 o undefined: no corresponde animar
