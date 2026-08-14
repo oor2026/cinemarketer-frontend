@@ -84,6 +84,24 @@
 
     </div>
 
+    <!-- Métricas -->
+    <div class="pub-metricas" id="pubMetricas">
+      <span class="pub-metrica banco"><i class="fas fa-thumbs-up"></i> <span id="pubMetricaBanco">0</span> Te banco</span>
+      <span class="pub-metrica punto"><i class="fas fa-star"></i> <span id="pubMetricaPunto">0</span> Merecés un punto</span>
+      <span class="pub-metrica comentarios"><i class="fas fa-comment"></i> <span id="pubMetricaComentarios">0</span> comentarios</span>
+    </div>
+
+    <!-- Comentarios -->
+    <div class="pub-comentarios-seccion">
+      <div class="pub-seccion-titulo">
+        <i class="fas fa-comments"></i>
+        Comentarios de la comunidad
+      </div>
+      <div id="pubComentariosList">
+        <div class="pub-sin-comentarios">Cargando comentarios...</div>
+      </div>
+    </div>
+
     <!-- CTA registro -->
     <div class="pub-cta">
       <div class="pub-cta-inner">
@@ -123,8 +141,66 @@
           if (!res.ok) throw new Error();
           const pub = await res.json();
           renderPublicacion(pub);
+          cargarMetricas(id);
+          cargarComentariosPublicos(id);
       } catch(e) {
           mostrarError();
+      }
+  }
+
+  async function cargarMetricas(id) {
+      try {
+          const [reaccionesRes, comentariosCountRes] = await Promise.allSettled([
+              fetch(`${API_URL}/publications/${id}/reactions/count`),
+              fetch(`${API_URL}/publications/${id}/comments/count`)
+          ]);
+          if (reaccionesRes.status === 'fulfilled' && reaccionesRes.value.ok) {
+              const r = await reaccionesRes.value.json();
+              document.getElementById('pubMetricaBanco').textContent = r.banco || 0;
+              document.getElementById('pubMetricaPunto').textContent = r.punto || 0;
+          }
+          if (comentariosCountRes.status === 'fulfilled' && comentariosCountRes.value.ok) {
+              const c = await comentariosCountRes.value.json();
+              document.getElementById('pubMetricaComentarios').textContent = c.count || 0;
+          }
+      } catch(e) {}
+  }
+
+  async function cargarComentariosPublicos(id) {
+      const lista = document.getElementById('pubComentariosList');
+      try {
+          const res = await fetch(`${API_URL}/publications/${id}/comments?page=0&size=20`);
+          if (!res.ok) throw new Error();
+          const data = await res.json();
+          const comentarios = data.content || [];
+
+          if (comentarios.length === 0) {
+              lista.innerHTML = `<div class="pub-sin-comentarios">
+                  <i class="fas fa-comment-slash" style="font-size:1.5rem;color:#ccc;display:block;margin-bottom:0.5rem;"></i>
+                  Todavía no hay comentarios en esta publicación.
+              </div>`;
+              return;
+          }
+
+          lista.innerHTML = comentarios.map(c => {
+              const autor = c.user || {};
+              const inicial = (autor.name || 'U').charAt(0).toUpperCase();
+              const avatarHtml = autor.avatarUrl
+                  ? `<img src="${autor.avatarUrl}" alt="${inicial}">`
+                  : inicial;
+
+              return `
+              <div class="pub-comentario-item">
+                  <div class="pub-comentario-header">
+                      <div class="pub-comentario-avatar">${avatarHtml}</div>
+                      <span class="pub-comentario-autor">${autor.name || 'Usuario'}</span>
+                      <span class="pub-comentario-fecha">${tiempoRelativo(c.createdAt)}</span>
+                  </div>
+                  <div class="pub-comentario-texto">${escapeHtml(c.content || '')}</div>
+              </div>`;
+          }).join('');
+      } catch(e) {
+          lista.innerHTML = `<div class="pub-sin-comentarios">Error al cargar comentarios.</div>`;
       }
   }
 
