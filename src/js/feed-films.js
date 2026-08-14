@@ -3966,6 +3966,8 @@ window.seleccionarTabFeed = function(tab, el) {
                                     if (comunidadContainer) comunidadContainer.style.display = 'none';
                                     if (filasSeries) filasSeries.style.display = 'none';
                                     if (pillsSerie) pillsSerie.style.display = 'none';
+                                    const destacadaSerieOculta = document.getElementById('destacadaContainerSerie');
+                                    if (destacadaSerieOculta) destacadaSerieOculta.style.display = 'none';
                                     // Solo la mostramos de nuevo si efectivamente hay una destacada
                                     // cargada — si nunca hubo (204) o falló, seguimos ocultándola.
                                     if (destacada && window._destacadaMovieId) destacada.style.display = 'block';
@@ -4012,9 +4014,12 @@ window.seleccionarTabFeed = function(tab, el) {
                 if (pills) pills.style.display = 'none';
                 if (filtros) filtros.style.display = 'none';
                 if (btnFiltrosAvanzados) btnFiltrosAvanzados.style.visibility = 'hidden';
-                // El carrusel destacado (Película destacada + premios + ranking) es
-                // cross-contenido — se muestra en Series igual que en Películas.
-                if (destacada && window._destacadaMovieId) destacada.style.display = 'block';
+                if (destacada) destacada.style.display = 'none';
+                        const destacadaSerie = document.getElementById('destacadaContainerSerie');
+                        if (destacadaSerie) destacadaSerie.style.display = 'block';
+                        if (typeof window.cargarSerieDestacada === 'function') {
+                            window.cargarSerieDestacada();
+                        }
                 if (votoRelampago) votoRelampago.style.display = 'none';
                 if (triviaBadge) triviaBadge.style.display = 'none';
                 if (filasGenero) filasGenero.style.display = 'none';
