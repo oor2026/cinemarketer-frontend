@@ -376,9 +376,11 @@ const adminSupervision = {
                 <strong>Estado:</strong> ${c.moderationStatus}
             </div>
             <div style="background:#f9f9f9;border-radius:8px;padding:1rem;margin-bottom:1rem;border-left:3px solid #e50914;">
-                <strong>${c.isReply ? 'Respuesta:' : 'Comentario:'}</strong>
-                <p style="margin:0.5rem 0 0;color:#444;">${c.content}</p>
-            </div>
+                            <strong>${c.isReply ? 'Respuesta:' : 'Comentario:'}</strong>
+                            ${c.content ? `<p style="margin:0.5rem 0 0;color:#444;">${c.content}</p>` : ''}
+                            ${c.hasGif && c.gifUrl ? `<img src="${c.gifUrl}" alt="GIF" style="max-width:100%;max-height:220px;border-radius:6px;margin-top:0.5rem;display:block;">` : ''}
+                            ${!c.content && !c.hasGif ? '<p style="margin:0.5rem 0 0;color:#aaa;font-style:italic;">Sin contenido</p>' : ''}
+                        </div>
             <div>
                 <strong>Reportes recibidos (${c.reportCount || 0}):</strong>
                 ${reportesHTML}
