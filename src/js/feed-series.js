@@ -285,26 +285,26 @@ function generarTarjetaSerieHTML(serie) {
                             <i class="fas fa-bookmark" style="font-size:0.85rem;"></i>
                         </button>
                         <button onclick="event.stopPropagation(); window.compartirSerie(${serie.id}, '${tituloEscapado}')" title="Compartir" style="background:rgba(0,0,0,0.5);border:none;color:white;width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);">
-                            <i class="fas fa-share-alt" style="font-size:0.85rem;"></i>
-                        </button>
+                                <i class="fas fa-share-alt" style="font-size:0.85rem;"></i>
+                            </button>
+                            <button onclick="event.stopPropagation(); window.abrirPanelRecomendarSerie(${serie.id}, event)" title="Recomendar" style="background:rgba(0,0,0,0.5);border:none;color:white;width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);">
+                                                        <i class="fas fa-envelope" style="font-size:0.85rem;"></i>
+                                                    </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="serie-info">
-                <h3 class="serie-titulo">${serie.name || ''}</h3>
-                <p class="serie-descripcion">${overview} <span class="ver-mas" onclick="event.stopPropagation(); window.abrirDetalleSerie(${serie.id})">Ver más</span></p>
-                <div class="votacion-container" id="votacion-serie-${serie.id}">
-                    <div class="votacion-buttons">
-                        <button class="btn-like" onclick="event.stopPropagation(); window.votarSerie(${serie.id}, 'like', event)"><i class="fas fa-thumbs-up"></i> 0</button>
-                        <button class="btn-dislike" onclick="event.stopPropagation(); window.votarSerie(${serie.id}, 'dislike', event)"><i class="fas fa-thumbs-down"></i> 0</button>
-                        <button class="btn-comentarios-card" onclick="event.stopPropagation(); window.abrirDetalleSerie(${serie.id})" title="Comentarios">
-                            <i class="fas fa-comment"></i> <span id="comentarios-card-serie-${serie.id}" class="comentarios-count">0</span>
-                        </button>
-                        <button class="btn-recomendar" onclick="event.stopPropagation(); window.abrirPanelRecomendarSerie(${serie.id}, event)" title="Recomendar">
-                            <i class="fas fa-envelope"></i>
-                        </button>
+                <div class="serie-info">
+                    <h3 class="serie-titulo">${serie.name || ''}</h3>
+                    <p class="serie-descripcion">${overview} <span class="ver-mas" onclick="event.stopPropagation(); window.abrirDetalleSerie(${serie.id})">Ver más</span></p>
+                    <div class="votacion-container" id="votacion-serie-${serie.id}">
+                        <div class="votacion-buttons">
+                            <button class="btn-like" onclick="event.stopPropagation(); window.votarSerie(${serie.id}, 'like', event)"><i class="fas fa-thumbs-up"></i> 0</button>
+                            <button class="btn-dislike" onclick="event.stopPropagation(); window.votarSerie(${serie.id}, 'dislike', event)"><i class="fas fa-thumbs-down"></i> 0</button>
+                            <button class="btn-comentarios-card" onclick="event.stopPropagation(); window.abrirDetalleSerie(${serie.id})" title="Comentarios">
+                                <i class="fas fa-comment"></i> <span id="comentarios-card-serie-${serie.id}" class="comentarios-count">0</span>
+                            </button>
+                        </div>
                     </div>
-                </div>
             </div>
         </div>`;
 }
