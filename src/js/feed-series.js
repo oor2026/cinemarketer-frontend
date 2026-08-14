@@ -670,7 +670,7 @@ window.cargarComentariosSerie = async function(id) {
         const comentarios = await response.json();
 
         const modalComentariosCount = document.getElementById('modalComentariosCountSerie');
-        if (modalComentariosCount) modalComentariosCount.innerHTML = `💬 <span class="modal-rating-num">${comentarios.length}</span><span class="modal-rating-label"> comentarios</span>`;
+        if (modalComentariosCount) modalComentariosCount.innerHTML = `💬 <span class="modal-rating-num">${comentarios.length}</span><span class="modal-rating-label"></span>`;
 
         const verMasCount = document.getElementById('verMasCountSerie');
         if (verMasCount) verMasCount.textContent = comentarios.length;
@@ -2334,12 +2334,11 @@ window.cargarDatosSerie = async function(id) {
 
         if (statsResponse.ok) {
             const stats = await statsResponse.json();
-            document.getElementById('modalRatingSerie').innerHTML = `⭐ <span class="modal-rating-num">${stats.totalVotes}</span><span class="modal-rating-label"> votos</span>`;
-            document.getElementById('modalLikesSerie').textContent = stats.likes || 0;
-            document.getElementById('modalDislikesSerie').textContent = stats.dislikes || 0;
-
             const totalVotosModal = (stats.likes || 0) + (stats.dislikes || 0);
             const porcentajeModal = totalVotosModal > 0 ? Math.round((stats.likes / totalVotosModal) * 100) : 0;
+            document.getElementById('modalRatingSerie').innerHTML = `⭐ <span class="modal-rating-num">${porcentajeModal}%</span><span class="modal-rating-label"></span>`;
+            document.getElementById('modalLikesSerie').textContent = stats.likes || 0;
+            document.getElementById('modalDislikesSerie').textContent = stats.dislikes || 0;
             const leyendaEl = document.getElementById('modalLeyendaPorcentajeSerie');
             if (leyendaEl) {
                 leyendaEl.textContent = porcentajeModal > 0

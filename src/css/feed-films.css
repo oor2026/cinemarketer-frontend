@@ -802,16 +802,36 @@
 #modalPelicula .modal-header {
     background: linear-gradient(135deg, #e50914, #b2070f) !important;
     color: white !important;
-    padding: 1.5rem 2rem !important;
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    flex-shrink: 0 !important;
-}
+        padding: 1.5rem 2rem !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        flex-shrink: 0 !important;
+    }
 
-#modalPelicula .modal-header h2 {
-    font-size: 1.8rem !important;
-    margin: 0 !important;
+    @media (min-width: 769px) {
+        #modalPelicula .modal-header,
+        #modalSerie .modal-header {
+            flex-wrap: wrap !important;
+            row-gap: 0.5rem !important;
+        }
+
+        #modalPelicula .modal-header h2,
+        #modalSerie .modal-header h2 {
+            flex: 1 1 auto !important;
+            min-width: 200px !important;
+        }
+
+        #modalPelicula .modal-header-right,
+        #modalSerie .modal-header-right {
+            flex-wrap: wrap !important;
+            justify-content: flex-end !important;
+        }
+    }
+
+    #modalPelicula .modal-header h2 {
+        font-size: 1.8rem !important;
+        margin: 0 !important;
     color: white !important;
 }
 
