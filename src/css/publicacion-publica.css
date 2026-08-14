@@ -316,3 +316,93 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 @media (min-width: 1400px) {
     .pub-poster-rail { display: flex; }
 }
+
+/* ── Métricas de la publicación (Te banco / Merecés un punto / Comentarios) ── */
+.pub-metricas {
+    display: flex;
+    gap: 1.5rem;
+    padding: 0.9rem 1.25rem;
+    border-top: 1px solid #f0f0f0;
+    background: white;
+    border-radius: 0 0 16px 16px;
+    margin-top: -1.25rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+}
+
+.pub-metrica {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.pub-metrica i { font-size: 0.9rem; color: #999; }
+.pub-metrica.banco i { color: #4caf50; }
+.pub-metrica.punto i { color: #E8A800; }
+.pub-metrica.comentarios i { color: #324C89; }
+
+/* ── Sección de comentarios ─────────────────── */
+.pub-comentarios-seccion { margin-bottom: 1.25rem; }
+
+.pub-seccion-titulo {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.pub-seccion-titulo i { color: #e50914; }
+
+.pub-comentario-item {
+    background: white;
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.pub-comentario-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+}
+
+.pub-comentario-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #324C89;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+.pub-comentario-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.pub-comentario-autor { font-size: 0.85rem; font-weight: 600; color: #1a1a1a; }
+.pub-comentario-fecha { font-size: 0.75rem; color: #aaa; margin-left: auto; }
+
+.pub-comentario-texto {
+    font-size: 0.88rem;
+    color: #444;
+    line-height: 1.6;
+    word-break: break-word;
+}
+
+.pub-sin-comentarios {
+    text-align: center;
+    color: #aaa;
+    padding: 2rem;
+    font-size: 0.9rem;
+    background: white;
+    border-radius: 10px;
+}
