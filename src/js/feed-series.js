@@ -72,6 +72,7 @@ window.cargarFilasSeries = async function() {
                 `<button class="pill-orden${i === 0 ? ' active' : ''}" data-key="${f.key}" onclick="window.priorizarFilaGeneroSerie('${f.key}', this)">${f.label}</button>`
             ).join('');
             pillsCont.style.display = '';
+            if (typeof activarDragScrollPills === 'function') activarDragScrollPills(pillsCont);
         }
 
     window.priorizarFilaGeneroSerie = function(key, btn) {

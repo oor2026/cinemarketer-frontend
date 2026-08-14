@@ -354,6 +354,51 @@ function renderPillsFilas() {
     pillsCont.innerHTML = window._filasGenero.map((f, i) =>
         `<button class="pill-orden${i === 0 ? ' active' : ''}" data-key="${f.key}" onclick="window.priorizarFilaGenero('${f.key}', this)">${f.label}</button>`
     ).join('');
+    activarDragScrollPills(pillsCont);
+}
+
+// Drag horizontal con mouse — solo aplica en desktop (mousedown/mousemove
+// nunca compiten con el swipe táctil de mobile, que usa eventos touch*
+// aparte). Reutilizable para cualquier fila de pills.
+function activarDragScrollPills(cont) {
+    if (!cont || cont._dragInit) return;
+    cont._dragInit = true;
+
+    let arrastrando = false;
+    let startX = 0;
+    let scrollInicial = 0;
+    let huboDrag = false;
+
+    cont.addEventListener('mousedown', (e) => {
+        arrastrando = true;
+        huboDrag = false;
+        cont.classList.add('arrastrando');
+        startX = e.pageX;
+        scrollInicial = cont.scrollLeft;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (!arrastrando) return;
+        const delta = e.pageX - startX;
+        if (Math.abs(delta) > 4) huboDrag = true;
+        cont.scrollLeft = scrollInicial - delta;
+    });
+
+    window.addEventListener('mouseup', () => {
+        if (!arrastrando) return;
+        arrastrando = false;
+        cont.classList.remove('arrastrando');
+    });
+
+    // Si hubo drag real, cancelamos el click del botón que quedó debajo
+    // del mouse al soltar — si no, un simple click dispararía también
+    // priorizarFilaGenero sin que el usuario lo haya elegido a propósito.
+    cont.addEventListener('click', (e) => {
+        if (huboDrag) {
+            e.stopPropagation();
+            e.preventDefault();
+        }
+    }, true);
 }
 
 window.priorizarFilaGenero = function(key, btn) {
