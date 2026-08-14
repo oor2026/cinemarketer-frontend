@@ -1704,7 +1704,9 @@ window.votarPelicula = async function(movieId, tipo, event) {
             const modalRating   = document.getElementById('modalRating');
             if (modalLikes)    modalLikes.textContent    = stats.likes;
             if (modalDislikes) modalDislikes.textContent = stats.dislikes;
-            if (modalRating)   modalRating.innerHTML   = `⭐ <span class="modal-rating-num">${stats.totalVotes}</span><span class="modal-rating-label"> votos</span>`;
+          const totalVotosModal = (stats.likes || 0) + (stats.dislikes || 0);
+          const porcentajeModal = totalVotosModal === 0 ? 0 : Math.round((stats.likes / totalVotosModal) * 100);
+          if (modalRating)   modalRating.innerHTML   = `👍 <span class="modal-rating-num">${porcentajeModal}%</span><span class="modal-rating-label"></span>`;
 
             const btnLike    = document.querySelector('#modalPelicula .btn-like');
             const btnDislike = document.querySelector('#modalPelicula .btn-dislike');
@@ -2282,12 +2284,11 @@ window.cargarDatosPelicula = async function(id) {
 
         if (statsResponse.ok) {
             const stats = await statsResponse.json();
-            document.getElementById('modalRating').innerHTML    = `⭐ <span class="modal-rating-num">${stats.totalVotes}</span><span class="modal-rating-label"> votos</span>`;
-            document.getElementById('modalLikes').textContent    = stats.likes || 0;
-            document.getElementById('modalDislikes').textContent = stats.dislikes || 0;
-
             const totalVotosModal = (stats.likes || 0) + (stats.dislikes || 0);
             const porcentajeModal = totalVotosModal > 0 ? Math.round((stats.likes / totalVotosModal) * 100) : 0;
+            document.getElementById('modalRating').innerHTML    = `👍 <span class="modal-rating-num">${porcentajeModal}%</span><span class="modal-rating-label"></span>`;
+            document.getElementById('modalLikes').textContent    = stats.likes || 0;
+            document.getElementById('modalDislikes').textContent = stats.dislikes || 0;
             const leyendaEl = document.getElementById('modalLeyendaPorcentaje');
             if (leyendaEl) {
                 leyendaEl.textContent = porcentajeModal > 0
@@ -2467,7 +2468,7 @@ window.cargarComentariosPelicula = async function(id) {
         const comentarios = await response.json();
 
         const modalComentariosCount = document.getElementById('modalComentariosCount');
-                if (modalComentariosCount) modalComentariosCount.innerHTML = `💬 <span class="modal-rating-num">${comentarios.length}</span><span class="modal-rating-label"> comentarios</span>`;
+                if (modalComentariosCount) modalComentariosCount.innerHTML = `💬 <span class="modal-rating-num">${comentarios.length}</span><span class="modal-rating-label"></span>`;
 
                 const btnComentarios = document.getElementById('modalComentariosBtn');
                 if (btnComentarios) btnComentarios.textContent = comentarios.length;
