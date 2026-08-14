@@ -1509,3 +1509,54 @@
     font-size: 0.72rem;
     color: #999;
 }
+
+/* ========== AJUSTES MOBILE — calcados de #modalPelicula ========== */
+@media (max-width: 480px) {
+
+    #modalSerie #modalRatingSerie,
+    #modalSerie #modalComentariosCountSerie {
+        display: none !important;
+    }
+
+    #modalSerie #btnRecomendarModalHeaderSerie {
+        display: flex !important;
+    }
+
+    #modalSerie #btnDondeVerlaModalSerie      { order: 1; }
+    #modalSerie #btnCompartirModalSerie       { order: 2; }
+    #modalSerie #btnRecomendarModalHeaderSerie { order: 3; }
+    #modalSerie #btnWatchlistModalSerie       { order: 4; }
+
+    #modalSerie .modal-cerrar {
+        position: absolute !important;
+        top: 0.6rem !important;
+        right: 0.6rem !important;
+        background: white !important;
+        border: none !important;
+        border-radius: 50% !important;
+        width: 26px !important;
+        height: 26px !important;
+        font-size: 1rem !important;
+        color: #e50914 !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        transition: background 0.2s !important;
+        line-height: 1 !important;
+    }
+
+    #modalSerie .modal-cerrar:hover {
+        background: #f0f0f0 !important;
+        color: #e50914 !important;
+    }
+
+    #modalSerie .modal-acciones .btn-recomendar {
+        display: none !important;
+    }
+
+    #modalSerie .modal-acciones .btn-like .btn-label-modal,
+    #modalSerie .modal-acciones .btn-dislike .btn-label-modal {
+        display: inline !important;
+    }
+}
