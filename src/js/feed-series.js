@@ -2388,8 +2388,8 @@ window.cargarSeriesSimilares = async function(seriesId) {
         const soloLatinos = /^[a-zA-ZÀ-ÿ0-9\s\-:,.!?'"()\u00C0-\u024F\u1E00-\u1EFF]+$/;
 
         const series = (data.results || [])
-            .filter(s => s.poster_path && s.name && soloLatinos.test(s.name.trim()))
-            .slice(0, 10);
+                    .filter(s => s.poster_path && s.name && soloLatinos.test(s.name.trim()))
+                    .slice(0, 30);
 
         if (series.length === 0) {
             contenedor.closest('.similares-seccion').style.display = 'none';
@@ -3455,3 +3455,233 @@ window.cerrarModalTemporadaDelTodo = function() {
     window.cerrarModalTemporada();
     if (typeof window.cerrarModalSerie === 'function') window.cerrarModalSerie();
 };
+
+// ==============================================
+// CARRUSEL DESTACADO — SERIE (serie destacada + premios + ranking)
+// Calcado 1:1 del de Película, con su propio contenedor y estado.
+// ==============================================
+window._carruselDestacadoSerie = { items: [], actual: 0, timer: null };
+
+window.cargarSerieDestacada = async function() {
+    const contenedor = document.getElementById('destacadaContainerSerie');
+    if (!contenedor) return;
+
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${CONFIG.API_URL}/series-feed/carrusel`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error();
+
+        let items = await response.json();
+
+        if (!items || items.length === 0) {
+            const resDestacada = await fetch(`${CONFIG.API_URL}/series-feed/destacada`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (resDestacada.status === 204 || !resDestacada.ok) {
+                contenedor.style.display = 'none';
+                return;
+            }
+            const { seriesId } = await resDestacada.json();
+            items = [{ tipo: 'SERIE_DESTACADA', seriesId }];
+        }
+
+        const resueltos = await Promise.all(items.map(async (item) => {
+            try {
+                if (item.tipo === 'SERIE_DESTACADA' || item.tipo === 'SERIE_CARRUSEL') {
+                    const res = await fetch(`${CONFIG.API_URL}/series/${item.seriesId}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) return null;
+                    return { tipo: 'SERIE', data: await res.json() };
+                } else if (item.tipo === 'RANKING_TRIVIA') {
+                    return { tipo: 'RANKING_TRIVIA', data: null };
+                } else {
+                    const urlBase = item.tipo === 'PREMIO_COMUN' ? '/rewards/' : '/premium/rewards/';
+                    const res = await fetch(`${CONFIG.API_URL}${urlBase}${item.rewardId}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) return null;
+                    return { tipo: item.tipo, data: await res.json() };
+                }
+            } catch {
+                return null;
+            }
+        }));
+
+        const validos = resueltos.filter(Boolean);
+        if (validos.length === 0) {
+            contenedor.style.display = 'none';
+            return;
+        }
+
+        window._carruselDestacadoSerie.items = validos;
+        window._carruselDestacadoSerie.actual = 0;
+        contenedor.style.display = 'block';
+
+        renderSlideDestacadoSerie(0);
+        iniciarRotacionDestacadoSerie();
+        iniciarSwipeDestacadoSerie();
+    } catch (error) {
+        contenedor.style.display = 'none';
+    }
+};
+
+function iniciarSwipeDestacadoSerie() {
+    const card = document.getElementById('destacadaCardSerie');
+    if (!card || card._swipeInit) return;
+    card._swipeInit = true;
+
+    let startX = 0;
+    let startY = 0;
+    let dragueando = false;
+
+    card.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        dragueando = true;
+    }, { passive: true });
+
+    card.addEventListener('touchend', (e) => {
+        if (!dragueando) return;
+        dragueando = false;
+
+        const diffX = startX - e.changedTouches[0].clientX;
+        const diffY = Math.abs(startY - e.changedTouches[0].clientY);
+
+        if (Math.abs(diffX) < 40 || diffY > Math.abs(diffX)) return;
+
+        const state = window._carruselDestacadoSerie;
+        if (!state.items || state.items.length < 2) return;
+
+        const siguiente = diffX > 0
+            ? (state.actual + 1) % state.items.length
+            : (state.actual - 1 + state.items.length) % state.items.length;
+
+        window.irASlideDestacadoSerie(siguiente);
+    }, { passive: true });
+}
+
+function iniciarRotacionDestacadoSerie() {
+    const state = window._carruselDestacadoSerie;
+    if (state.timer) clearInterval(state.timer);
+
+    const dotsEl = document.getElementById('destacadaDotsSerie');
+    if (state.items.length < 2) {
+        dotsEl.style.display = 'none';
+        return;
+    }
+
+    dotsEl.style.display = 'flex';
+    dotsEl.innerHTML = state.items.map((_, i) =>
+        `<span class="destacada-dot${i === 0 ? ' activo' : ''}" onclick="irASlideDestacadoSerie(${i})"></span>`
+    ).join('');
+
+    state.timer = setInterval(() => {
+        const siguiente = (state.actual + 1) % state.items.length;
+        renderSlideDestacadoSerie(siguiente);
+    }, 3000);
+}
+
+window.irASlideDestacadoSerie = function(idx) {
+    renderSlideDestacadoSerie(idx);
+    iniciarRotacionDestacadoSerie();
+};
+
+function renderSlideDestacadoSerie(idx) {
+    const state = window._carruselDestacadoSerie;
+    const card = document.getElementById('destacadaCardSerie');
+    const label = document.getElementById('destacadaLabelSerie');
+
+    if (!card || !label) {
+        if (state.timer) clearInterval(state.timer);
+        return;
+    }
+
+    state.actual = idx;
+    const item = state.items[idx];
+
+    document.querySelectorAll('#destacadaDotsSerie .destacada-dot').forEach((d, i) => d.classList.toggle('activo', i === idx));
+
+    if (item.tipo === 'RANKING_TRIVIA') {
+        label.textContent = '🏆 Ranking de cinéfilos';
+        card.onclick = () => window.abrirRankingTrivia();
+        card.innerHTML = `
+            <div class="destacada-img-real" style="position:relative; overflow:hidden; display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#4c1d95,#7c3aed);">
+                            <i class="fas fa-clapperboard ranking-bg-icon" style="top:8%; left:6%; font-size:44px; transform:rotate(-18deg);"></i>
+                            <i class="fas fa-film ranking-bg-icon" style="bottom:10%; left:14%; font-size:34px; transform:rotate(14deg);"></i>
+                            <i class="fas fa-star ranking-bg-icon" style="top:14%; right:20%; font-size:24px; transform:rotate(-10deg);"></i>
+                            <i class="fas fa-video ranking-bg-icon" style="bottom:12%; right:8%; font-size:38px; transform:rotate(16deg);"></i>
+                            <i class="fas fa-ticket-alt ranking-bg-icon" style="top:36%; right:6%; font-size:26px; transform:rotate(-12deg);"></i>
+                            <i class="fas fa-star ranking-bg-icon" style="bottom:34%; left:8%; font-size:20px; transform:rotate(8deg);"></i>
+                            <i class="fas fa-popcorn ranking-bg-icon" style="top:44%; left:42%; font-size:30px; transform:rotate(-6deg);"></i>
+                            <i class="fas fa-film ranking-bg-icon" style="top:4%; right:38%; font-size:22px; transform:rotate(20deg);"></i>
+                            <i class="fas fa-clapperboard ranking-bg-icon" style="bottom:6%; right:32%; font-size:26px; transform:rotate(10deg);"></i>
+                            <i class="fas fa-star ranking-bg-icon" style="top:60%; left:22%; font-size:16px; transform:rotate(-15deg);"></i>
+                            <i class="fas fa-video ranking-bg-icon" style="top:64%; right:16%; font-size:20px; transform:rotate(8deg);"></i>
+                            <i class="fas fa-ticket-alt ranking-bg-icon" style="bottom:38%; left:36%; font-size:18px; transform:rotate(-20deg);"></i>
+                            <i class="fas fa-trophy" style="font-size:56px;color:#f5a623;position:relative;z-index:1;"></i>
+                        </div>
+            <div class="destacada-overlay">
+                <div class="destacada-titulo">Los que más aciertan</div>
+                <div class="destacada-meta">Tocá para ver el ranking completo</div>
+            </div>`;
+        return;
+    }
+
+    if (item.tipo === 'SERIE') {
+        const s = item.data;
+        window._destacadaSeriesId = s.id;
+        label.textContent = '⭐ Serie destacada';
+
+        const backdrop = s.backdrop_path
+            ? `https://image.tmdb.org/t/p/original${s.backdrop_path}`
+            : (s.poster_path ? `https://image.tmdb.org/t/p/w500${s.poster_path}` : '');
+        const anio = s.first_air_date ? new Date(s.first_air_date).getFullYear() : '—';
+        const generos = (s.genres || []).map(g => g.name).slice(0, 2).join(', ');
+        const temporadas = s.number_of_seasons ? `${s.number_of_seasons} temp.` : '';
+        const meta = [anio, generos, temporadas].filter(Boolean).join(' · ');
+        const score = s.vote_average ? `${Math.round(s.vote_average * 10)}%` : '—';
+
+        card.onclick = () => window.abrirDetalleSerie(s.id);
+        card.innerHTML = `
+            <img class="destacada-img-real" src="${backdrop}" alt="${s.name || ''}">
+            <div class="destacada-badge">🔥 Tendencia</div>
+            <div class="destacada-overlay">
+                <div class="destacada-titulo">${s.name || ''}</div>
+                <div class="destacada-meta">${meta}</div>
+                <div class="destacada-acciones">
+                    <button class="btn-dest-votar" onclick="event.stopPropagation(); window.votarSerie(${s.id}, 'like')">👍 Votar</button>
+                    <button class="btn-dest-comentar" onclick="event.stopPropagation(); window.abrirDetalleSerie(${s.id})">💬 Comentar</button>
+                    <span class="destacada-score">${score}</span>
+                </div>
+            </div>`;
+    } else {
+        const esEspecial = item.tipo === 'PREMIO_ESPECIAL';
+        const r = item.data;
+        label.textContent = esEspecial ? '⭐ Premio especial' : '🎁 Premio';
+
+        const img = r.imageUrl || '';
+
+        const puntosHtml = r.pointsRequired
+            ? `<span class="destacada-puntos"><span class="destacada-puntos-numero">${r.pointsRequired}</span><span class="destacada-puntos-label">Puntos</span></span>`
+            : '';
+
+        const textoBoton = !esEspecial
+            ? 'Canjearlo'
+            : (r.type === 'SORTEO' ? 'Inscribirme' : 'Canjearlo');
+
+        card.onclick = () => abrirPremioDesdeCarrusel(r.id, item.tipo);
+        card.innerHTML = `
+            <img class="destacada-img-real" src="${img}" alt="${r.name || ''}" style="object-fit:contain;background:#111;">
+            <div class="destacada-premio-badge${esEspecial ? ' especial' : ''}">${esEspecial ? '⭐ Exclusivo Premium' : '🎁 Premio'}</div>
+            <div class="destacada-overlay">
+                <div class="destacada-titulo">${r.name || ''}</div>
+                <div class="destacada-acciones">
+                    <button class="btn-dest-ver" onclick="event.stopPropagation(); abrirPremioDesdeCarrusel(${r.id}, '${item.tipo}')">${textoBoton}</button>
+                    ${puntosHtml}
+                </div>
+            </div>`;
+    }
+}
