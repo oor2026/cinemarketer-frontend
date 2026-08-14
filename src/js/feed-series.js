@@ -11,6 +11,7 @@ window.cargarFilasSeries = async function() {
     if (!cont) return;
 
     if (window._filasSeriesCargadas) {
+        renderPillsFilasSerie();
         renderFilasSeries();
         return;
     }
@@ -30,29 +31,68 @@ window.cargarFilasSeries = async function() {
         if (res.ok) {
             const data = await res.json();
             const iconosPorGenero = {
-                'Acción y Aventura': '💥', 'Animación': '🎨', 'Comedia': '😂',
-                'Crimen': '🔪', 'Documental': '🎥', 'Drama': '🎭', 'Familia': '👨‍👩‍👧',
-                'Kids': '🧒', 'Misterio': '🔎', 'Noticias': '📰', 'Reality': '🎪',
-                'Ciencia ficción y Fantasía': '🚀', 'Soap': '💔', 'Talk': '🎤',
-                'Guerra y Política': '⚔️', 'Western': '🤠'
-            };
-            generos = (data.genres || [])
-                .slice()
-                .sort((a, b) => a.name.localeCompare(b.name, 'es'))
-                .map(g => ({
-                    key: `genero-${g.id}`,
-                    label: `${iconosPorGenero[g.name] || '🎞️'} ${g.name}`,
-                    tipo: 'genero',
-                    generoId: g.id
-                }));
+                            'Acción y Aventura': '💥', 'Animación': '🎨', 'Comedia': '😂',
+                            'Crimen': '🔪', 'Documental': '🎥', 'Drama': '🎭', 'Familia': '👨‍👩‍👧',
+                            'Kids': '🧒', 'Misterio': '🔎', 'Noticias': '📰', 'Reality': '🎪',
+                            'Ciencia ficción y Fantasía': '🚀', 'Soap': '💔', 'Talk': '🎤',
+                            'Guerra y Política': '⚔️', 'Western': '🤠',
+                            'Action & Adventure': '💥', 'Sci-Fi & Fantasy': '🚀', 'War & Politics': '⚔️'
+                        };
+                        const traduccionesGeneroSerie = {
+                            'Kids': 'Infantil',
+                            'Action & Adventure': 'Acción y Aventura',
+                            'Sci-Fi & Fantasy': 'Ciencia Ficción',
+                            'Soap': 'Telenovela',
+                            'Talk': 'Programas',
+                            'War & Politics': 'Bélico'
+                        };
+                        generos = (data.genres || [])
+                            .slice()
+                            .sort((a, b) => a.name.localeCompare(b.name, 'es'))
+                            .map(g => ({
+                                key: `genero-${g.id}`,
+                                label: `${iconosPorGenero[g.name] || '🎞️'} ${traduccionesGeneroSerie[g.name] || g.name}`,
+                                tipo: 'genero',
+                                generoId: g.id
+                            }));
         }
     } catch (e) {}
 
     window._filasSeries = [...fijas, ...generos].map(f => ({ ...f, series: [], cargado: false, pagina: 1, finDelCatalogo: false, cargandoMas: false }));
-    window._filasSeriesCargadas = true;
+        window._filasSeriesCargadas = true;
 
-    renderFilasSeries();
-};
+        renderPillsFilasSerie();
+        renderFilasSeries();
+    };
+
+    function renderPillsFilasSerie() {
+            const pillsCont = document.getElementById('ordenarPillsSerie');
+            if (!pillsCont) return;
+            pillsCont.innerHTML = window._filasSeries.map((f, i) =>
+                `<button class="pill-orden${i === 0 ? ' active' : ''}" data-key="${f.key}" onclick="window.priorizarFilaGeneroSerie('${f.key}', this)">${f.label}</button>`
+            ).join('');
+            pillsCont.style.display = '';
+        }
+
+    window.priorizarFilaGeneroSerie = function(key, btn) {
+        document.querySelectorAll('#ordenarPillsSerie .pill-orden').forEach(p => p.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+
+        const idx = window._filasSeries.findIndex(f => f.key === key);
+        if (idx > 0) {
+            const [fila] = window._filasSeries.splice(idx, 1);
+            window._filasSeries.unshift(fila);
+        }
+        renderFilasSeries();
+
+        const cont = document.getElementById('filasSeriesContainer');
+        if (cont) {
+            const header = document.querySelector('header');
+            const offset = (header ? header.offsetHeight : 70) + 16;
+            const top = cont.getBoundingClientRect().top + window.scrollY - offset;
+            window.scrollTo({ top, behavior: 'auto' });
+        }
+    };
 
 function renderFilasSeries() {
     const cont = document.getElementById('filasSeriesContainer');

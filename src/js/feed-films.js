@@ -3878,10 +3878,11 @@ window.seleccionarTabFeed = function(tab, el) {
         let comunidadContainer = document.getElementById('comunidad-container');
 
         const destacada = document.getElementById('destacadaContainer');
-                        const votoRelampago = document.getElementById('votoRelampagoContainer');
-                        const triviaBadge = document.getElementById('triviaBadgeContainer');
-                        const filasGenero = document.getElementById('filasGeneroContainer');
-                        const filasSeries = document.getElementById('filasSeriesContainer');
+                                const votoRelampago = document.getElementById('votoRelampagoContainer');
+                                const triviaBadge = document.getElementById('triviaBadgeContainer');
+                                const filasGenero = document.getElementById('filasGeneroContainer');
+                                const filasSeries = document.getElementById('filasSeriesContainer');
+                                const pillsSerie = document.getElementById('ordenarPillsSerie');
 
                                 if (tab === 'peliculas') {
                                     if (gridPeliculas) gridPeliculas.style.display = '';
@@ -3891,6 +3892,7 @@ window.seleccionarTabFeed = function(tab, el) {
                                     if (btnFiltrosAvanzados) btnFiltrosAvanzados.style.visibility = 'visible';
                                     if (comunidadContainer) comunidadContainer.style.display = 'none';
                                     if (filasSeries) filasSeries.style.display = 'none';
+                                    if (pillsSerie) pillsSerie.style.display = 'none';
                                     // Solo la mostramos de nuevo si efectivamente hay una destacada
                                     // cargada — si nunca hubo (204) o falló, seguimos ocultándola.
                                     if (destacada && window._destacadaMovieId) destacada.style.display = 'block';
@@ -3915,8 +3917,9 @@ window.seleccionarTabFeed = function(tab, el) {
                                     if (triviaBadge) triviaBadge.style.display = 'none';
                                     if (filasGenero) filasGenero.style.display = 'none';
                                     if (filasSeries) filasSeries.style.display = 'none';
+                                    if (pillsSerie) pillsSerie.style.display = 'none';
 
-        // Crear contenedor si no existe
+                                            // Crear contenedor si no existe
         if (!comunidadContainer) {
             comunidadContainer = document.createElement('div');
             comunidadContainer.id = 'comunidad-container';
@@ -3945,6 +3948,7 @@ window.seleccionarTabFeed = function(tab, el) {
                 if (comunidadContainer) comunidadContainer.style.display = 'none';
 
                 if (filasSeries) filasSeries.style.display = 'block';
+                if (pillsSerie && window._filasSeriesCargadas) pillsSerie.style.display = '';
                 if (typeof window.cargarFilasSeries === 'function') {
                     window.cargarFilasSeries();
                 }
