@@ -2666,10 +2666,19 @@
 /* PILLS DE ORDENAMIENTO */
 .ordenar-pills {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
     gap: 0.5rem;
     margin-bottom: 1.25rem;
-    padding: 0 0.25rem;
+    padding: 0 0.25rem 0.25rem;
+    scrollbar-width: thin;
+    cursor: grab;
+    user-select: none;
+}
+
+.ordenar-pills.arrastrando {
+    cursor: grabbing;
+    scroll-behavior: auto;
 }
 
 .pill-orden {
