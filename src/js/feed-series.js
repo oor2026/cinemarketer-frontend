@@ -3516,13 +3516,19 @@ window.cargarSerieDestacada = async function() {
             return;
         }
 
-        window._carruselDestacadoSerie.items = validos;
-        window._carruselDestacadoSerie.actual = 0;
-        contenedor.style.display = 'block';
+        // Mismo chequeo que Película, a la inversa — si para cuando este
+                // fetch termina el usuario ya volvió a Películas, no lo mostramos.
+                if (window._tabActivo !== 'series') {
+                    return;
+                }
 
-        renderSlideDestacadoSerie(0);
-        iniciarRotacionDestacadoSerie();
-        iniciarSwipeDestacadoSerie();
+                window._carruselDestacadoSerie.items = validos;
+                window._carruselDestacadoSerie.actual = 0;
+                contenedor.style.display = 'block';
+
+                renderSlideDestacadoSerie(0);
+                iniciarRotacionDestacadoSerie();
+                iniciarSwipeDestacadoSerie();
     } catch (error) {
         contenedor.style.display = 'none';
     }
