@@ -835,6 +835,24 @@ window.cargarPeliculaDestacada = async function() {
     const contenedor = document.getElementById('destacadaContainer');
     if (!contenedor) return;
 
+    // Pintar instantáneo desde caché de sesión (si hay), mientras se
+    // revalida contra el servidor en paralelo más abajo — evita la
+    // demora visible al volver de otro módulo del dashboard.
+    try {
+        const cache = sessionStorage.getItem('cm_destacada_cache');
+        if (cache && window._tabActivo === 'peliculas') {
+            const items = JSON.parse(cache);
+            if (items && items.length > 0) {
+                window._carruselDestacado.items = items;
+                window._carruselDestacado.actual = 0;
+                contenedor.style.display = 'block';
+                renderSlideDestacado(0);
+                iniciarRotacionDestacado();
+                iniciarSwipeDestacado();
+            }
+        }
+    } catch (e) {}
+
     try {
         const token = localStorage.getItem('token');
         const response = await fetch(`${CONFIG.API_URL}/feed/carrusel`, {
@@ -892,7 +910,11 @@ window.cargarPeliculaDestacada = async function() {
             return;
         }
 
-        // Si para cuando este fetch (async) termina el usuario ya cambió
+        // Guardar en caché de sesión para que la próxima vez (incluso
+                // volviendo de otro módulo del dashboard) pinte instantáneo.
+                try { sessionStorage.setItem('cm_destacada_cache', JSON.stringify(validos)); } catch (e) {}
+
+                // Si para cuando este fetch (async) termina el usuario ya cambió
                 // a otra tab, no mostramos nada — evita que el carrusel de
                 // Película "aparezca de la nada" encima de Series por una
                 // respuesta tardía de red.

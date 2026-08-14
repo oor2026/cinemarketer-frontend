@@ -3467,6 +3467,21 @@ window.cargarSerieDestacada = async function() {
     if (!contenedor) return;
 
     try {
+        const cache = sessionStorage.getItem('cm_destacada_serie_cache');
+        if (cache && window._tabActivo === 'series') {
+            const items = JSON.parse(cache);
+            if (items && items.length > 0) {
+                window._carruselDestacadoSerie.items = items;
+                window._carruselDestacadoSerie.actual = 0;
+                contenedor.style.display = 'block';
+                renderSlideDestacadoSerie(0);
+                iniciarRotacionDestacadoSerie();
+                iniciarSwipeDestacadoSerie();
+            }
+        }
+    } catch (e) {}
+
+    try {
         const token = localStorage.getItem('token');
         const response = await fetch(`${CONFIG.API_URL}/series-feed/carrusel`, {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -3516,7 +3531,9 @@ window.cargarSerieDestacada = async function() {
             return;
         }
 
-        // Mismo chequeo que Película, a la inversa — si para cuando este
+        try { sessionStorage.setItem('cm_destacada_serie_cache', JSON.stringify(validos)); } catch (e) {}
+
+                // Mismo chequeo que Película, a la inversa — si para cuando este
                 // fetch termina el usuario ya volvió a Películas, no lo mostramos.
                 if (window._tabActivo !== 'series') {
                     return;
