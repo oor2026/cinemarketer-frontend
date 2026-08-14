@@ -2363,8 +2363,8 @@ window.cargarDatosPelicula = async function(id) {
                 const soloLatinos = /^[a-zA-ZÀ-ÿ0-9\s\-:,.!?'"()\u00C0-\u024F\u1E00-\u1EFF]+$/;
 
                 const peliculas = (data.results || [])
-                    .filter(p => p.poster_path && p.title && soloLatinos.test(p.title.trim()))
-                    .slice(0, 10);
+                        .filter(p => p.poster_path && p.title && soloLatinos.test(p.title.trim()))
+                        .slice(0, 30);
 
                 if (peliculas.length === 0) {
                     contenedor.closest('.similares-seccion').style.display = 'none';
