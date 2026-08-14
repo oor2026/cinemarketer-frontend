@@ -892,7 +892,15 @@ window.cargarPeliculaDestacada = async function() {
             return;
         }
 
-        window._carruselDestacado.items = validos;
+        // Si para cuando este fetch (async) termina el usuario ya cambió
+                // a otra tab, no mostramos nada — evita que el carrusel de
+                // Película "aparezca de la nada" encima de Series por una
+                // respuesta tardía de red.
+                if (window._tabActivo !== 'peliculas') {
+                    return;
+                }
+
+                window._carruselDestacado.items = validos;
                 window._carruselDestacado.actual = 0;
                 contenedor.style.display = 'block';
 
@@ -3968,9 +3976,15 @@ window.seleccionarTabFeed = function(tab, el) {
                                     if (pillsSerie) pillsSerie.style.display = 'none';
                                     const destacadaSerieOculta = document.getElementById('destacadaContainerSerie');
                                     if (destacadaSerieOculta) destacadaSerieOculta.style.display = 'none';
-                                    // Solo la mostramos de nuevo si efectivamente hay una destacada
-                                    // cargada — si nunca hubo (204) o falló, seguimos ocultándola.
-                                    if (destacada && window._destacadaMovieId) destacada.style.display = 'block';
+                                    // Si ya se cargó antes, mostrarla directo. Si todavía no (por
+                                    // ejemplo, el primer intento se frenó porque en ese momento la
+                                    // tab activa era otra), reintentar ahora en vez de quedar roto
+                                    // hasta el próximo refresh completo.
+                                    if (window._destacadaMovieId) {
+                                        if (destacada) destacada.style.display = 'block';
+                                    } else if (typeof window.cargarPeliculaDestacada === 'function') {
+                                        window.cargarPeliculaDestacada();
+                                    }
                                     // Mismo criterio para Voto Relámpago: solo si hay película cargada.
                                     if (votoRelampago && window._votoRelampago && window._votoRelampago.movieId) votoRelampago.style.display = 'block';
                                                         if (triviaBadge && window._triviaEstadoCargado) triviaBadge.style.display = 'block';
