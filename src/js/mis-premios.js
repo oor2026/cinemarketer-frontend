@@ -63,8 +63,14 @@ const premiosState = {
     especialesFiltro: 'todos',
     especialesEstadoFiltro: 'abiertos',
     especialesPagina: 1,
-    especialesPorPagina: 9
-};
+        especialesPorPagina: 9
+    };
+
+    // novedades.js necesita leer este estado desde otro módulo para poder
+    // abrir el modal del premio específico al hacer click en una notificación
+    // (NEW_REWARD/NEW_PREMIUM_REWARD) — sin esto, premiosState queda atrapado
+    // como variable local de este archivo y nunca es visible desde afuera.
+    window.premiosState = premiosState;
 
 function estaResuelto(p) {
     return p.isExpired || !p.hasStock || p.drawExecuted === true;
