@@ -76,6 +76,8 @@
         <span id="pubPeliculaNombre"></span>
       </div>
 
+      <div id="pubCountdown" style="display:none;"></div>
+
       <h2 id="pubTitulo" class="pub-titulo" style="display:none;"></h2>
 
       <div id="pubImagenes" class="pub-imagenes"></div>
@@ -239,6 +241,11 @@
           };
       }
 
+      // Countdown de estreno (Creator Tool)
+      if (pub.movieId && pub.countdownEnabled && pub.countdownCountryCode) {
+          renderCountdownPublico(pub);
+      }
+
       // Contenido
       const contenidoEl = document.getElementById('pubContenidoTexto');
       if (pub.spoiler) {
@@ -269,6 +276,102 @@
       // Mostrar
       document.getElementById('pubLoading').style.display = 'none';
       document.getElementById('pubContenido').style.display = 'block';
+  }
+
+  function nombrePaisCountdown(code) {
+      try {
+          return new Intl.DisplayNames(['es'], { type: 'region' }).of(code);
+      } catch (e) {
+          return code;
+      }
+  }
+
+  function formatearFechaCountdown(fechaStr) {
+      return new Date(fechaStr + 'T00:00:00').toLocaleDateString('es-AR', { day: 'numeric', month: 'long' });
+  }
+
+  function iniciarTickerPublico(pubId, targetDate) {
+      const el = document.getElementById(`pubCountdown-${pubId}-timer`);
+      if (!el) return;
+      if (el._tickerInterval) clearInterval(el._tickerInterval);
+
+      function tick() {
+          const diff = targetDate.getTime() - Date.now();
+          if (diff <= 0) {
+              el.innerHTML = `<div style="padding:12px;text-align:center;">
+                  <p style="font-size:0.85rem;font-weight:600;margin:0;color:#1a1a1a;">
+                      <i class="fas fa-clapperboard"></i> Ya está en cines
+                  </p>
+              </div>`;
+              clearInterval(el._tickerInterval);
+              return;
+          }
+          const dias = Math.floor(diff / 86400000);
+          const horas = Math.floor((diff % 86400000) / 3600000);
+          const min = Math.floor((diff % 3600000) / 60000);
+          const seg = Math.floor((diff % 60000) / 1000);
+          const celda = (num, label) => `
+              <div style="flex:1;text-align:center;padding:12px 4px;background:#fff5f5;">
+                  <p style="font-size:1.5rem;font-weight:700;margin:0;color:#e50914;line-height:1;">${String(num).padStart(2, '0')}</p>
+                  <p style="font-size:0.68rem;color:#999;margin:4px 0 0;text-transform:uppercase;letter-spacing:0.5px;">${label}</p>
+              </div>`;
+          el.innerHTML = `<div style="display:flex;gap:2px;padding:2px;background:#eee;">
+              ${celda(dias, 'días')}${celda(horas, 'horas')}${celda(min, 'min')}${celda(seg, 'seg')}
+          </div>`;
+      }
+      tick();
+      el._tickerInterval = setInterval(tick, 1000);
+  }
+
+  async function renderCountdownPublico(pub) {
+      const wrap = document.getElementById('pubCountdown');
+      if (!wrap) return;
+      wrap.id = `pubCountdown-${pub.id}`;
+      wrap.style.cssText = 'display:block;border:1px solid #eee;border-radius:10px;overflow:hidden;margin-bottom:1rem;cursor:pointer;';
+      wrap.onclick = () => { window.location.href = `/pelicula?id=${pub.movieId}`; };
+      wrap.innerHTML = `<div style="aspect-ratio:16/9;background:#f5f5f5;display:flex;align-items:center;justify-content:center;">
+          <i class="fas fa-spinner fa-spin" style="color:#ccc;"></i>
+      </div>`;
+
+      try {
+          const [movieRes, datesRes] = await Promise.all([
+              fetch(`${API_URL}/public/movies/${pub.movieId}`),
+              fetch(`https://api.themoviedb.org/3/movie/${pub.movieId}/release_dates`, {
+                  headers: { 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzZjFjNjgyZDZkNTMzNWIzMjQyNzc3MzQ2OWUxNmE1MSIsIm5iZiI6MTc3MTE3NzkxNy44ODEsInN1YiI6IjY5OTIwN2JkOTRjZDE0N2M5ZjFhZWY2OSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.8GieGBESmuWLnoD_IyFrBbXBCX40qUKE8vY6VBMj_DM', 'accept': 'application/json' }
+              })
+          ]);
+          if (!movieRes.ok) throw new Error('not found');
+          const m = await movieRes.json();
+          const datesData = await datesRes.json();
+
+          const resultado = (datesData.results || []).find(r => r.iso_3166_1 === pub.countdownCountryCode);
+          const fechaStr = resultado?.release_dates?.[0]?.release_date?.slice(0, 10);
+          if (!fechaStr) throw new Error('no date');
+
+          const backdropPath = m.backdropPath || m.backdrop_path;
+          const backdropUrl = backdropPath ? `https://image.tmdb.org/t/p/w780${backdropPath}` : '';
+          const paisLabel = nombrePaisCountdown(pub.countdownCountryCode);
+          const fechaLabel = formatearFechaCountdown(fechaStr);
+          const tituloMovie = m.title || m.titulo || '';
+
+          wrap.innerHTML = `
+              <div style="aspect-ratio:16/9;background:#f5f5f5;">
+                  <img src="${backdropUrl}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none';">
+              </div>
+              <div style="padding:16px 14px;border-bottom:0.5px solid #eee;text-align:center;">
+                  <p style="font-size:1.4rem;font-weight:700;color:#1a1a1a;margin:0 0 5px;">${escapeHtml(tituloMovie)}</p>
+                  <p style="font-size:1.05rem;color:#e50914;font-weight:600;margin:0;">Estreno en ${escapeHtml(paisLabel)} · ${fechaLabel}</p>
+              </div>
+              <div id="pubCountdown-${pub.id}-timer"></div>`;
+
+          iniciarTickerPublico(pub.id, new Date(fechaStr + 'T00:00:00'));
+      } catch (e) {
+          wrap.innerHTML = `<div style="padding:12px;text-align:center;">
+              <span style="font-size:0.8rem;color:#bbb;">Fecha de estreno no disponible</span>
+          </div>`;
+          wrap.style.cursor = 'default';
+          wrap.onclick = null;
+      }
   }
 
   function mostrarError() {
