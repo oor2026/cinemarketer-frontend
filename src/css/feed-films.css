@@ -1914,26 +1914,27 @@
 }
 
 #modalPelicula .modal-cerrar {
-    position: static !important;
-    background: rgba(255,255,255,0.2) !important;
+    position: absolute !important;
+    top: 0.6rem !important;
+    right: 0.6rem !important;
+    background: white !important;
     border: none !important;
     border-radius: 50% !important;
-    width: 36px !important;
-    height: 36px !important;
-    font-size: 1.4rem !important;
-    color: white !important;
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 1rem !important;
+    color: #e50914 !important;
     cursor: pointer !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    flex-shrink: 0 !important;
     transition: background 0.2s !important;
     line-height: 1 !important;
 }
 
 #modalPelicula .modal-cerrar:hover {
-    background: rgba(255,255,255,0.35) !important;
-    color: white !important;
+    background: #f0f0f0 !important;
+    color: #e50914 !important;
 }
 
 #modalPelicula .modal-header-right {
@@ -2471,6 +2472,23 @@
    ============================================== */
 @media (max-width: 480px) {
 
+    #modalPelicula #modalRating,
+        #modalPelicula #modalComentariosCount {
+            display: none !important;
+        }
+
+        #modalPelicula #btnRecomendarModalHeader {
+            display: flex !important;
+        }
+
+        #modalPelicula #btnDondeVerlaModal   { order: 1; }
+        #modalPelicula #btnCompartirModal    { order: 2; }
+        #modalPelicula #btnRecomendarModalHeader { order: 3; }
+        #modalPelicula #btnWatchlistModal    { order: 4; }
+        #modalPelicula #btnPublicarModal     { order: 5; }
+        #modalPelicula .modal-cerrar         { order: 6; }
+
+
     .pelicula-poster {
             aspect-ratio: 0.79;
         }
@@ -2897,6 +2915,17 @@
 
 #modalPelicula .modal-acciones .btn-recomendar:hover {
     opacity: 0.8 !important;
+}
+
+@media (max-width: 480px) {
+    #modalPelicula .modal-acciones .btn-recomendar {
+        display: none !important;
+    }
+
+    #modalPelicula .modal-acciones .btn-like .btn-label-modal,
+    #modalPelicula .modal-acciones .btn-dislike .btn-label-modal {
+        display: inline !important;
+    }
 }
 
 @media (max-width: 768px) {
