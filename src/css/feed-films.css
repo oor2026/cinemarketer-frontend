@@ -139,6 +139,37 @@
     justify-content: flex-end;
 }
 
+.filtro-switch-tipo {
+    display: flex;
+    gap: 0.5rem;
+    background: #f5f5f5;
+    padding: 0.3rem;
+    border-radius: 10px;
+    width: fit-content;
+}
+
+.filtro-switch-btn {
+    padding: 0.5rem 1.2rem;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #888;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filtro-switch-btn:hover {
+    color: #555;
+}
+
+.filtro-switch-btn.activo {
+    background: white;
+    color: #e50914;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
 .btn-aplicar {
     padding: 0.8rem 2rem;
     background: #e50914;
