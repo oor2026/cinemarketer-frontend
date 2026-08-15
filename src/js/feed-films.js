@@ -1851,17 +1851,8 @@ function construirTextoCriterio() {
     const busqueda = document.getElementById('busquedaInput')?.value.trim();
     if (busqueda) partes.push(`"${busqueda}"`);
 
-    const generoSel = document.getElementById('filtroGenero');
-    if (generoSel && generoSel.value !== 'todos') partes.push(generoSel.options[generoSel.selectedIndex].text);
-
     const anioSel = document.getElementById('filtroAnio');
     if (anioSel && anioSel.value !== 'todos') partes.push(anioSel.value);
-
-    const idiomaSel = document.getElementById('filtroIdioma');
-    if (idiomaSel && idiomaSel.value !== 'todos') partes.push(idiomaSel.options[idiomaSel.selectedIndex].text);
-
-    const popularidadSel = document.getElementById('filtroPopularidad');
-    if (popularidadSel && popularidadSel.value !== 'todas') partes.push(popularidadSel.options[popularidadSel.selectedIndex].text);
 
     const duracionSel = document.getElementById('filtroDuracion');
     if (duracionSel && duracionSel.value !== 'todos') partes.push(duracionSel.options[duracionSel.selectedIndex].text);
@@ -1893,6 +1884,13 @@ window.mostrarVistaResultados = function() {
     if (grid) grid.style.display = 'none';
     if (paginacion) paginacion.style.display = 'none';
 
+    // Excluyente con la vista de resultados de Serie — si estaba
+    // mostrándose, se apaga para que no queden las dos apiladas.
+    const filaBusquedaSerie = document.getElementById('fila-busqueda-serie');
+    const resultadosHeaderSerie = document.getElementById('resultadosHeaderSerie');
+    if (filaBusquedaSerie) filaBusquedaSerie.style.display = 'none';
+    if (resultadosHeaderSerie) resultadosHeaderSerie.style.display = 'none';
+
     if (filaBusqueda) filaBusqueda.style.display = 'block';
     if (resultadosHeader) resultadosHeader.style.display = 'flex';
     if (criterioTexto) criterioTexto.textContent = construirTextoCriterio();
@@ -1922,8 +1920,113 @@ window.ocultarVistaResultados = function() {
     if (window._filasGeneroCargadas) renderPillsFilas();
 };
 
+window.mostrarVistaResultadosSerie = function() {
+    const filaBusquedaSerie = document.getElementById('fila-busqueda-serie');
+    const resultadosHeaderSerie = document.getElementById('resultadosHeaderSerie');
+    const criterioTexto = document.getElementById('criterioBusquedaTextoSerie');
+
+    const filasCont = document.getElementById('filasSeriesContainer');
+    const ordenarPills = document.getElementById('ordenarPillsSerie');
+    const destacadaSerie = document.getElementById('destacadaContainerSerie');
+
+    if (filasCont) filasCont.style.display = 'none';
+    if (ordenarPills) ordenarPills.style.display = 'none';
+    if (destacadaSerie) destacadaSerie.style.display = 'none';
+
+    // Excluyente con la vista de resultados de Película — mismo criterio
+    // a la inversa.
+    const filaBusqueda = document.getElementById('fila-busqueda');
+    const resultadosHeader = document.getElementById('resultadosHeader');
+    if (filaBusqueda) filaBusqueda.style.display = 'none';
+    if (resultadosHeader) resultadosHeader.style.display = 'none';
+
+    if (filaBusquedaSerie) filaBusquedaSerie.style.display = 'block';
+    if (resultadosHeaderSerie) resultadosHeaderSerie.style.display = 'flex';
+    if (criterioTexto) criterioTexto.textContent = construirTextoCriterioSerie();
+
+    inicializarFilaBusquedaSerie();
+};
+
+window.ocultarVistaResultadosSerie = function() {
+    const filaBusquedaSerie = document.getElementById('fila-busqueda-serie');
+    const resultadosHeaderSerie = document.getElementById('resultadosHeaderSerie');
+
+    const filasCont = document.getElementById('filasSeriesContainer');
+    const ordenarPills = document.getElementById('ordenarPillsSerie');
+    const destacadaSerie = document.getElementById('destacadaContainerSerie');
+
+    if (filaBusquedaSerie) filaBusquedaSerie.style.display = 'none';
+    if (resultadosHeaderSerie) resultadosHeaderSerie.style.display = 'none';
+
+    if (filasCont) filasCont.style.display = 'block';
+    if (ordenarPills && window._filasSeriesCargadas) ordenarPills.style.display = '';
+    // Mismo criterio que Película: solo mostrar si efectivamente hay una
+    // serie destacada cargada — si nunca hubo (204) o falló, seguir oculto.
+    if (destacadaSerie && window._destacadaSeriesId) destacadaSerie.style.display = 'block';
+};
+
+function construirTextoCriterioSerie() {
+    const partes = [];
+    const busqueda = document.getElementById('busquedaInput')?.value.trim();
+    if (busqueda) partes.push(`"${busqueda}"`);
+
+    const anioSel = document.getElementById('filtroAnio');
+    if (anioSel && anioSel.value !== 'todos') partes.push(anioSel.value);
+
+    const temporadasSel = document.getElementById('filtroTemporadas');
+    if (temporadasSel && temporadasSel.value !== 'todos') partes.push(temporadasSel.options[temporadasSel.selectedIndex].text);
+
+    const directorNombre = document.getElementById('busquedaDirector')?.value.trim();
+    if (directorNombre) partes.push(directorNombre);
+
+    return partes.length > 0 ? partes.join(' · ') : 'Resultados de búsqueda';
+}
+
 window._filaBusqueda = { key: 'busqueda', peliculas: [] };
 window._filaBusquedaInit = false;
+
+window._filaBusquedaSerie = { key: 'busqueda-serie', series: [] };
+window._filaBusquedaSerieInit = false;
+window.estadoPaginacionSerie = { cargando: false, paginaActual: 1, totalPaginas: 1, totalResultados: 0 };
+
+function inicializarFilaBusquedaSerie() {
+    if (window._filaBusquedaSerieInit) return;
+    window._filaBusquedaSerieInit = true;
+
+    const track = document.getElementById('filaSerieTrack-busqueda-serie');
+    if (!track) return;
+
+    activarSwipeManualSerie(track);
+    configurarScrollFilaSerie(window._filaBusquedaSerie, track);
+    track.addEventListener('click', () => fijarPosicionActualSerie(track), true);
+
+    track.addEventListener('scroll', () => {
+        if (window.estadoPaginacionSerie.cargando) return;
+        const hayMas = window.estadoPaginacionSerie.paginaActual < window.estadoPaginacionSerie.totalPaginas;
+        if (!hayMas) return;
+        const restante = track.scrollWidth - (track.scrollLeft + track.clientWidth);
+        if (restante < track.clientWidth * 2) {
+            window.aplicarFiltros(window.estadoPaginacionSerie.paginaActual + 1, true);
+        }
+    });
+}
+
+async function appendCardsFilaSerie(fila, nuevasSeries) {
+    const track = document.getElementById(`filaSerieTrack-${fila.key}`);
+    if (!track || nuevasSeries.length === 0) return;
+
+    nuevasSeries.forEach(serie => {
+        const slide = document.createElement('div');
+        slide.className = 'fila-genero-slide';
+        slide.innerHTML = generarTarjetaSerieHTML(serie);
+        track.appendChild(slide);
+    });
+
+    renderDotsFilaSerie(fila);
+    if (typeof window.cargarEstadisticasVotacionSeries === 'function') {
+        window.cargarEstadisticasVotacionSeries();
+    }
+}
 
 function inicializarFilaBusqueda() {
     if (window._filaBusquedaInit) return;
@@ -1975,24 +2078,35 @@ async function appendCardsFila(fila, nuevasPeliculas) {
 }
 
 window.aplicarFiltros = async function(pagina = 1, append = false) {
-    const busqueda    = document.getElementById('busquedaInput')?.value.trim() || '';
-    const genero      = document.getElementById('filtroGenero')?.value || 'todos';
-    const anio        = document.getElementById('filtroAnio')?.value || 'todos';
-    const idioma      = document.getElementById('filtroIdioma')?.value || 'todos';
-    const popularidad = document.getElementById('filtroPopularidad')?.value || 'todas';
-    const duracion    = document.getElementById('filtroDuracion')?.value || 'todos';
-    const director    = window._directorSeleccionadoId || '';
-
-    const hayFiltros = busqueda || genero !== 'todos' || anio !== 'todos' ||
-                       idioma !== 'todos' || popularidad !== 'todas' ||
-                       duracion !== 'todos' || director;
-
-    if (!hayFiltros) {
-        alert('Por favor completá al menos un criterio de búsqueda antes de aplicar filtros.');
-        return;
+    if (window._filtroTipoActivo === 'serie') {
+        return window.aplicarFiltrosSerie(pagina, append);
     }
 
-    if (window.estadoPaginacion.cargando) return;
+    // Leer los campos ANTES de tocar la tab — mismo motivo que en
+    // aplicarFiltrosSerie: cambiar de tab puede disparar
+    // window.limpiarFiltros() como efecto secundario.
+    const busqueda    = document.getElementById('busquedaInput')?.value.trim() || '';
+        const anio        = document.getElementById('filtroAnio')?.value || 'todos';
+        const duracion    = document.getElementById('filtroDuracion')?.value || 'todos';
+        const director    = window._directorSeleccionadoId || '';
+
+        // Si el filtro se aplica en modo Película pero la tab activa es otra
+        // (por ejemplo, estabas en Series), nos movemos a Películas primero —
+        // como si hubieras hecho click en esa tab vos mismo. Mismo cierre
+        // defensivo del modal que en aplicarFiltrosSerie.
+        if (!append && window._tabActivo !== 'peliculas') {
+            if (typeof cerrarFiltrosModal === 'function') cerrarFiltrosModal();
+            window.seleccionarTabFeed('peliculas', document.getElementById('tabPeliculas'));
+        }
+
+    const hayFiltros = busqueda || anio !== 'todos' || duracion !== 'todos' || director;
+
+        if (!hayFiltros) {
+            alert('Por favor completá al menos un criterio de búsqueda antes de aplicar filtros.');
+            return;
+        }
+
+        if (window.estadoPaginacion.cargando) return;
     window.estadoPaginacion.cargando = true;
 
     if (!append) {
@@ -2014,16 +2128,10 @@ window.aplicarFiltros = async function(pagina = 1, append = false) {
         params.append('page', pagina);
 
         if (busqueda)           params.append('query', busqueda);
-        if (genero !== 'todos') params.append('withGenres', genero);
-        if (anio !== 'todos')   params.append('year', anio);
-        if (idioma !== 'todos') params.append('language', idioma);
-        if (director)           params.append('withCrew', director);
+                if (anio !== 'todos')   params.append('year', anio);
+                if (director)           params.append('withCrew', director);
 
-        if (popularidad === 'alta')  { params.append('voteAverageGte', '7.5'); }
-        if (popularidad === 'media') { params.append('voteAverageGte', '5'); params.append('voteAverageLte', '7.4'); }
-        if (popularidad === 'baja')  { params.append('voteAverageLte', '4.9'); }
-
-        if (duracion === 'corta')  params.append('withRuntimeLte', '89');
+                if (duracion === 'corta')  params.append('withRuntimeLte', '89');
         if (duracion === 'media')  { params.append('withRuntimeGte', '90'); params.append('withRuntimeLte', '120'); }
         if (duracion === 'larga')  params.append('withRuntimeGte', '121');
 
@@ -2069,28 +2177,132 @@ window.aplicarFiltros = async function(pagina = 1, append = false) {
             if (track) track.innerHTML = `<div class="fila-genero-vacia">Error: ${error.message}</div>`;
         }
     } finally {
-        window.estadoPaginacion.cargando = false;
-    }
-};
+            window.estadoPaginacion.cargando = false;
+        }
+    };
 
-window.limpiarFiltros = function() {
-    ['busquedaInput', 'busquedaDirector'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-    });
+    window.aplicarFiltrosSerie = async function(pagina = 1, append = false) {
+        // Leer los campos ANTES de tocar la tab — cambiar de tab puede
+        // disparar window.limpiarFiltros() como efecto secundario (si el
+        // header de resultados de Película seguía visible), y eso borraría
+        // estos valores si los leyéramos después.
+        const busqueda    = document.getElementById('busquedaInput')?.value.trim() || '';
+            const anio        = document.getElementById('filtroAnio')?.value || 'todos';
+            const temporadas  = document.getElementById('filtroTemporadas')?.value || 'todos';
+            const director    = window._directorSeleccionadoId || '';
 
-    ['filtroGenero', 'filtroAnio', 'filtroIdioma', 'filtroPopularidad', 'filtroDuracion'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.selectedIndex = 0;
-    });
+            // Mismo criterio a la inversa
+            // pero la tab activa es Películas, nos movemos a Series primero.
+            // Cerramos el modal de filtros ANTES, de forma defensiva — si quedó
+            // abierto (con sus clases active/force-show pegadas) justo cuando
+            // #filtros-container se oculta por el cambio de tab, se queda
+            // atrapado invisible con el scroll del body bloqueado para siempre.
+            if (!append && window._tabActivo !== 'series') {
+                if (typeof cerrarFiltrosModal === 'function') cerrarFiltrosModal();
+                window.seleccionarTabFeed('series', document.getElementById('tabSeries'));
+            }
 
-    ['busquedaResultados', 'directorResultados'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
-    });
+        const hayFiltros = busqueda || anio !== 'todos' || temporadas !== 'todos' || director;
 
-    window._directorSeleccionadoId = '';
-        window.ocultarVistaResultados();
+            if (!hayFiltros) {
+                alert('Por favor completá al menos un criterio de búsqueda antes de aplicar filtros.');
+                return;
+            }
+
+            if (window.estadoPaginacionSerie.cargando) return;
+        window.estadoPaginacionSerie.cargando = true;
+
+        if (!append) {
+            window.mostrarVistaResultadosSerie();
+            window._filaBusquedaSerie.series = [];
+            const track = document.getElementById('filaSerieTrack-busqueda-serie');
+            if (track) track.innerHTML = '<div class="fila-genero-loading"><i class="fas fa-spinner fa-spin"></i></div>';
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                const track = document.getElementById('filaSerieTrack-busqueda-serie');
+                if (track) track.innerHTML = '<div class="fila-genero-vacia">Error de autenticación</div>';
+                return;
+            }
+
+            const params = new URLSearchParams();
+            params.append('page', pagina);
+
+            if (busqueda)           params.append('query', busqueda);
+                    if (anio !== 'todos')   params.append('year', anio);
+                    if (director)           params.append('withCrew', director);
+                    if (temporadas !== 'todos') params.append('temporadas', temporadas);
+
+                    const response = await fetch(`${CONFIG.API_URL}/series/search?${params.toString()}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!response.ok) throw new Error(`Error ${response.status}`);
+            const data = await response.json();
+
+            window.estadoPaginacionSerie.paginaActual = pagina;
+            window.estadoPaginacionSerie.totalPaginas = data.total_pages;
+            window.estadoPaginacionSerie.totalResultados = data.total_results;
+
+            const countEl = document.getElementById('resultadosCountSerie');
+            if (countEl) countEl.textContent = data.total_results || 0;
+
+            if (!data.results || data.results.length === 0) {
+                if (!append) {
+                    const track = document.getElementById('filaSerieTrack-busqueda-serie');
+                    if (track) track.innerHTML = '<div class="fila-genero-vacia">No se encontraron series con esos filtros.</div>';
+                }
+            } else {
+                window._filaBusquedaSerie.series = append
+                    ? window._filaBusquedaSerie.series.concat(data.results)
+                    : data.results;
+
+                if (append) {
+                    await appendCardsFilaSerie(window._filaBusquedaSerie, data.results);
+                } else {
+                    await renderCardsFilaSerie(window._filaBusquedaSerie);
+                }
+
+                if (typeof window.cargarEstadisticasVotacionSeries === 'function') {
+                    window.cargarEstadisticasVotacionSeries();
+                }
+            }
+
+        } catch (error) {
+            if (!append) {
+                const track = document.getElementById('filaSerieTrack-busqueda-serie');
+                if (track) track.innerHTML = `<div class="fila-genero-vacia">Error: ${error.message}</div>`;
+            }
+        } finally {
+            window.estadoPaginacionSerie.cargando = false;
+        }
+    };
+
+    window.limpiarFiltros = function() {
+        ['busquedaInput', 'busquedaDirector'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+
+        ['filtroAnio', 'filtroDuracion', 'filtroTemporadas'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.selectedIndex = 0;
+            });
+
+        ['busquedaResultados', 'directorResultados'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+
+        window._directorSeleccionadoId = '';
+
+        if (window._filtroTipoActivo === 'serie') {
+            window.ocultarVistaResultadosSerie();
+        } else {
+            window.ocultarVistaResultados();
+        }
     };
 
 // ==============================================
@@ -3642,7 +3854,52 @@ function inicializarContadorCaracteres() {
 }
 
 // ==============================================
-// AUTOCOMPLETADO DE DIRECTOR
+// SWITCH TIPO DE CONTENIDO (Película / Serie) — Filtros avanzados
+// ==============================================
+window._filtroTipoActivo = 'pelicula';
+
+window.toggleFiltroTipo = function(tipo) {
+    window._filtroTipoActivo = tipo;
+    const esSerie = tipo === 'serie';
+
+    ['filtroSwitchPelicula', 'filtroSwitchPeliculaMobile'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.classList.toggle('activo', !esSerie);
+    });
+    ['filtroSwitchSerie', 'filtroSwitchSerieMobile'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.classList.toggle('activo', esSerie);
+    });
+
+    const mostrarOcultar = (id, mostrar) => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = mostrar ? '' : 'none';
+    };
+
+    mostrarOcultar('filtroDuracionPeliculaGrupo', !esSerie);
+    mostrarOcultar('filtroDuracionPeliculaGrupoMobile', !esSerie);
+    mostrarOcultar('filtroTemporadasSerieGrupo', esSerie);
+    mostrarOcultar('filtroTemporadasSerieGrupoMobile', esSerie);
+
+    ['filtroBusquedaLabel', 'filtroBusquedaLabelMobile'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = esSerie ? 'Buscar serie' : 'Buscar película';
+    });
+
+    // Limpiar los campos específicos del tipo que se deja de usar, para
+        // que no queden filtros "fantasma" aplicándose sin que el usuario
+        // los vea.
+        if (esSerie) {
+            ['filtroDuracion', 'filtroDuracionMobile'].forEach(id => { const el = document.getElementById(id); if (el) el.selectedIndex = 0; });
+        } else {
+            ['filtroTemporadas', 'filtroTemporadasMobile'].forEach(id => { const el = document.getElementById(id); if (el) el.selectedIndex = 0; });
+        }
+    };
+
+// ==============================================
+// AUTOCOMPLETADO DE PERSONALIDAD (director/actor/creador)
+// Compartido entre Película y Serie — el endpoint que consulta depende
+// de window._filtroTipoActivo en el momento exacto de la búsqueda.
 // ==============================================
 window._directorSeleccionadoId = '';
 
@@ -3675,8 +3932,9 @@ function configurarAutocompletado(input, resultados) {
         timeoutDirector = setTimeout(async () => {
             try {
                 const token = localStorage.getItem('token');
+                const base = window._filtroTipoActivo === 'serie' ? 'series' : 'movies';
                 const response = await fetch(
-                    `${CONFIG.API_URL}/movies/people/search?query=${encodeURIComponent(query)}`,
+                    `${CONFIG.API_URL}/${base}/people/search?query=${encodeURIComponent(query)}`,
                     { headers: { 'Authorization': `Bearer ${token}` } }
                 );
                 if (!response.ok) return;
@@ -3873,6 +4131,13 @@ function abrirFiltrosModal() {
         anioMobile.innerHTML = anioDesktop.innerHTML;
     }
 
+    // El switch del panel se sincroniza con la tab en la que estás parado
+    // al momento de abrirlo — si estás en Series, arranca en Series.
+    const tipoSegunTab = window._tabActivo === 'series' ? 'serie' : 'pelicula';
+    if (window._filtroTipoActivo !== tipoSegunTab && typeof window.toggleFiltroTipo === 'function') {
+        window.toggleFiltroTipo(tipoSegunTab);
+    }
+
     const overlay = document.getElementById('filtrosModalOverlay');
     const sheet = document.getElementById('filtrosModalSheet');
     if (overlay) {
@@ -3898,11 +4163,12 @@ function cerrarFiltrosModal() {
 
 function aplicarFiltrosMobile() {
     document.getElementById('busquedaInput').value     = document.getElementById('busquedaInputMobile').value;
-    document.getElementById('filtroGenero').value      = document.getElementById('filtroGeneroMobile').value;
     document.getElementById('filtroAnio').value        = document.getElementById('filtroAnioMobile').value;
-    document.getElementById('filtroIdioma').value      = document.getElementById('filtroIdiomaMobile').value;
-    document.getElementById('filtroPopularidad').value = document.getElementById('filtroPopularidadMobile').value;
     document.getElementById('filtroDuracion').value    = document.getElementById('filtroDuracionMobile').value;
+
+    const temporadasMobile = document.getElementById('filtroTemporadasMobile');
+    const temporadasDesktop = document.getElementById('filtroTemporadas');
+    if (temporadasMobile && temporadasDesktop) temporadasDesktop.value = temporadasMobile.value;
 
     // Sincronizar director mobile → desktop
     const directorMobile = document.getElementById('busquedaDirectorMobile');
@@ -3917,11 +4183,10 @@ function aplicarFiltrosMobile() {
 
 function limpiarFiltrosMobile() {
     document.getElementById('busquedaInputMobile').value      = '';
-    document.getElementById('filtroGeneroMobile').value       = 'todos';
     document.getElementById('filtroAnioMobile').value         = 'todos';
-    document.getElementById('filtroIdiomaMobile').value       = 'todos';
-    document.getElementById('filtroPopularidadMobile').value  = 'todas';
     document.getElementById('filtroDuracionMobile').value     = 'todos';
+    const temporadasMobile = document.getElementById('filtroTemporadasMobile');
+    if (temporadasMobile) temporadasMobile.selectedIndex = 0;
     const dirMobile = document.getElementById('busquedaDirectorMobile');
     if (dirMobile) dirMobile.value = '';
     window._directorSeleccionadoId = '';
@@ -3965,6 +4230,18 @@ window.seleccionarTabFeed = function(tab, el) {
     const mismoTab = window._tabActivo === tab;
     window._tabActivo = tab;
     localStorage.setItem('feedTabActivo', tab);
+
+    // Cualquier búsqueda activa (Película o Serie) se descarta apenas te
+    // movés a otra tab — sin importar a cuál vayas, incluida la misma
+    // categoría de contenido. Chequeamos los dos headers, no solo el de
+    // Película como antes.
+    if (!mismoTab) {
+        const resultadosHeaderActivo = document.getElementById('resultadosHeader')?.style.display === 'flex';
+        const resultadosHeaderSerieActivo = document.getElementById('resultadosHeaderSerie')?.style.display === 'flex';
+        if (resultadosHeaderActivo || resultadosHeaderSerieActivo) {
+            window.limpiarFiltros();
+        }
+    }
 
     // Si es comunidad y ya estaba activo, reinicializar igual
     if (mismoTab && tab !== 'comunidad') return;
@@ -4042,14 +4319,15 @@ window.seleccionarTabFeed = function(tab, el) {
         window.cargarModuloComunidad();
 
     } else if (tab === 'series') {
-        if (document.getElementById('resultadosHeader')?.style.display === 'flex') {
-            window.limpiarFiltros();
-        }
-        if (gridPeliculas) gridPeliculas.style.display = 'none';
-                if (paginacion) paginacion.style.display = 'none';
-                if (pills) pills.style.display = 'none';
-                if (filtros) filtros.style.display = 'none';
-                if (btnFiltrosAvanzados) btnFiltrosAvanzados.style.visibility = 'hidden';
+            if (document.getElementById('resultadosHeader')?.style.display === 'flex') {
+                window.limpiarFiltros();
+            }
+            if (gridPeliculas) gridPeliculas.style.display = 'none';
+                    if (paginacion) paginacion.style.display = 'none';
+                    if (pills) pills.style.display = 'none';
+                    // El panel de filtros ahora es compartido (switch Película/Serie
+                    // adentro), no exclusivo de Película — ya no se oculta acá.
+                    if (btnFiltrosAvanzados) btnFiltrosAvanzados.style.visibility = 'visible';
                 if (destacada) destacada.style.display = 'none';
                         const destacadaSerie = document.getElementById('destacadaContainerSerie');
                         if (destacadaSerie) destacadaSerie.style.display = 'block';
