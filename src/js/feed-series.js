@@ -11,10 +11,11 @@ window.cargarFilasSeries = async function() {
     if (!cont) return;
 
     if (window._filasSeriesCargadas) {
-        renderPillsFilasSerie();
-        renderFilasSeries();
-        return;
-    }
+            renderPillsFilasSerie();
+            renderFilasSeries();
+            window.cargarTriviaSeriesBadge();
+            return;
+        }
 
     const fijas = [
         { key: 'fecha', label: '🔥 Más populares', tipo: 'fijo' },
@@ -59,11 +60,12 @@ window.cargarFilasSeries = async function() {
     } catch (e) {}
 
     window._filasSeries = [...fijas, ...generos].map(f => ({ ...f, series: [], cargado: false, pagina: 1, finDelCatalogo: false, cargandoMas: false }));
-        window._filasSeriesCargadas = true;
+            window._filasSeriesCargadas = true;
 
-        renderPillsFilasSerie();
-        renderFilasSeries();
-    };
+            renderPillsFilasSerie();
+            renderFilasSeries();
+            window.cargarTriviaSeriesBadge();
+        };
 
     function renderPillsFilasSerie() {
             const pillsCont = document.getElementById('ordenarPillsSerie');

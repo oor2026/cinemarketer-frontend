@@ -4258,11 +4258,12 @@ window.seleccionarTabFeed = function(tab, el) {
         let comunidadContainer = document.getElementById('comunidad-container');
 
         const destacada = document.getElementById('destacadaContainer');
-                                const votoRelampago = document.getElementById('votoRelampagoContainer');
-                                const triviaBadge = document.getElementById('triviaBadgeContainer');
-                                const filasGenero = document.getElementById('filasGeneroContainer');
-                                const filasSeries = document.getElementById('filasSeriesContainer');
-                                const pillsSerie = document.getElementById('ordenarPillsSerie');
+                                        const votoRelampago = document.getElementById('votoRelampagoContainer');
+                                        const triviaBadge = document.getElementById('triviaBadgeContainer');
+                                        const triviaSeriesBadge = document.getElementById('triviaSeriesBadgeContainer');
+                                        const filasGenero = document.getElementById('filasGeneroContainer');
+                                        const filasSeries = document.getElementById('filasSeriesContainer');
+                                        const pillsSerie = document.getElementById('ordenarPillsSerie');
 
                                 if (tab === 'peliculas') {
                                     if (gridPeliculas) gridPeliculas.style.display = '';
@@ -4273,6 +4274,7 @@ window.seleccionarTabFeed = function(tab, el) {
                                     if (comunidadContainer) comunidadContainer.style.display = 'none';
                                     if (filasSeries) filasSeries.style.display = 'none';
                                     if (pillsSerie) pillsSerie.style.display = 'none';
+                                    if (triviaSeriesBadge) triviaSeriesBadge.style.display = 'none';
                                     const destacadaSerieOculta = document.getElementById('destacadaContainerSerie');
                                     if (destacadaSerieOculta) destacadaSerieOculta.style.display = 'none';
                                     // Si ya se cargó antes, mostrarla directo. Si todavía no (por
@@ -4303,6 +4305,7 @@ window.seleccionarTabFeed = function(tab, el) {
                                     if (destacada) destacada.style.display = 'none';
                                     if (votoRelampago) votoRelampago.style.display = 'none';
                                     if (triviaBadge) triviaBadge.style.display = 'none';
+                                    if (triviaSeriesBadge) triviaSeriesBadge.style.display = 'none';
                                     if (filasGenero) filasGenero.style.display = 'none';
                                     if (filasSeries) filasSeries.style.display = 'none';
                                     if (pillsSerie) pillsSerie.style.display = 'none';
@@ -4336,6 +4339,12 @@ window.seleccionarTabFeed = function(tab, el) {
                         }
                 if (votoRelampago) votoRelampago.style.display = 'none';
                 if (triviaBadge) triviaBadge.style.display = 'none';
+                // Se dispara acá directamente (no solo confiando en la cadena
+                // interna de cargarFilasSeries) — así cada entrada al tab
+                // Series siempre reintenta cargar el badge, sin depender de
+                // en qué estado de caché haya quedado feed-series.js.
+                if (triviaSeriesBadge && window._triviaSeriesEstadoCargado) triviaSeriesBadge.style.display = 'block';
+                if (typeof window.cargarTriviaSeriesBadge === 'function') window.cargarTriviaSeriesBadge();
                 if (filasGenero) filasGenero.style.display = 'none';
                 if (comunidadContainer) comunidadContainer.style.display = 'none';
 

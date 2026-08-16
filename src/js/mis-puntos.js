@@ -162,7 +162,8 @@ function getIconForAction(action) {
         PUBLISH_POST:         'fa-pen-alt',
         RECEIVE_BANCO_POST:   'fa-fist-raised',
         RECEIVE_MERECE_POST:  'fa-star',
-        TRIVIA_ANSWER:        'fa-question-circle'
+        TRIVIA_ANSWER:        'fa-question-circle',
+        TRIVIA_SERIES_ANSWER: 'fa-question-circle'
     };
     return icons[action] || 'fa-coins';
 }
@@ -184,7 +185,8 @@ function getLabelForAction(action) {
         RECEIVE_BANCO_POST:   'Te bancaron una publicación',
         RECEIVE_MERECE_POST:  'Merecés un punto en publicación',
         PUBLICATION_SANCTION: 'Sanción por moderación',
-        TRIVIA_ANSWER:        'Trivia diaria'
+        TRIVIA_ANSWER:        'Trivia diaria de películas',
+        TRIVIA_SERIES_ANSWER: 'Trivia diaria de series'
     };
     return labels[action] || action;
 }
