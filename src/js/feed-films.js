@@ -1023,7 +1023,7 @@ function renderSlideDestacado(idx) {
             label.textContent = '🏆 Ranking de cinéfilos';
             card.onclick = () => window.abrirRankingTrivia();
             card.innerHTML = `
-                <div class="destacada-img-real" style="position:relative; overflow:hidden; display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#4c1d95,#7c3aed);">
+                            <div class="destacada-img-real" style="position:relative; overflow:hidden; display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#a4070f,#e50914);">
                                 <i class="fas fa-clapperboard ranking-bg-icon" style="top:8%; left:6%; font-size:44px; transform:rotate(-18deg);"></i>
                                 <i class="fas fa-film ranking-bg-icon" style="bottom:10%; left:14%; font-size:34px; transform:rotate(14deg);"></i>
                                 <i class="fas fa-star ranking-bg-icon" style="top:14%; right:20%; font-size:24px; transform:rotate(-10deg);"></i>

@@ -3630,30 +3630,30 @@ function renderSlideDestacadoSerie(idx) {
     document.querySelectorAll('#destacadaDotsSerie .destacada-dot').forEach((d, i) => d.classList.toggle('activo', i === idx));
 
     if (item.tipo === 'RANKING_TRIVIA') {
-        label.textContent = '🏆 Ranking de cinéfilos';
-        card.onclick = () => window.abrirRankingTrivia();
-        card.innerHTML = `
-            <div class="destacada-img-real" style="position:relative; overflow:hidden; display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#4c1d95,#7c3aed);">
-                            <i class="fas fa-clapperboard ranking-bg-icon" style="top:8%; left:6%; font-size:44px; transform:rotate(-18deg);"></i>
-                            <i class="fas fa-film ranking-bg-icon" style="bottom:10%; left:14%; font-size:34px; transform:rotate(14deg);"></i>
-                            <i class="fas fa-star ranking-bg-icon" style="top:14%; right:20%; font-size:24px; transform:rotate(-10deg);"></i>
-                            <i class="fas fa-video ranking-bg-icon" style="bottom:12%; right:8%; font-size:38px; transform:rotate(16deg);"></i>
-                            <i class="fas fa-ticket-alt ranking-bg-icon" style="top:36%; right:6%; font-size:26px; transform:rotate(-12deg);"></i>
-                            <i class="fas fa-star ranking-bg-icon" style="bottom:34%; left:8%; font-size:20px; transform:rotate(8deg);"></i>
-                            <i class="fas fa-popcorn ranking-bg-icon" style="top:44%; left:42%; font-size:30px; transform:rotate(-6deg);"></i>
-                            <i class="fas fa-film ranking-bg-icon" style="top:4%; right:38%; font-size:22px; transform:rotate(20deg);"></i>
-                            <i class="fas fa-clapperboard ranking-bg-icon" style="bottom:6%; right:32%; font-size:26px; transform:rotate(10deg);"></i>
-                            <i class="fas fa-star ranking-bg-icon" style="top:60%; left:22%; font-size:16px; transform:rotate(-15deg);"></i>
-                            <i class="fas fa-video ranking-bg-icon" style="top:64%; right:16%; font-size:20px; transform:rotate(8deg);"></i>
-                            <i class="fas fa-ticket-alt ranking-bg-icon" style="bottom:38%; left:36%; font-size:18px; transform:rotate(-20deg);"></i>
-                            <i class="fas fa-trophy" style="font-size:56px;color:#f5a623;position:relative;z-index:1;"></i>
-                        </div>
-            <div class="destacada-overlay">
-                <div class="destacada-titulo">Los que más aciertan</div>
-                <div class="destacada-meta">Tocá para ver el ranking completo</div>
-            </div>`;
-        return;
-    }
+            label.textContent = '🏆 Ranking de series';
+            card.onclick = () => window.abrirRankingTriviaSeries();
+            card.innerHTML = `
+                <div class="destacada-img-real" style="position:relative; overflow:hidden; display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1f2f57,#324c89);">
+                                <i class="fas fa-tv ranking-bg-icon" style="top:8%; left:6%; font-size:44px; transform:rotate(-18deg);"></i>
+                                <i class="fas fa-satellite-dish ranking-bg-icon" style="bottom:10%; left:14%; font-size:34px; transform:rotate(14deg);"></i>
+                                <i class="fas fa-star ranking-bg-icon" style="top:14%; right:20%; font-size:24px; transform:rotate(-10deg);"></i>
+                                <i class="fas fa-couch ranking-bg-icon" style="bottom:12%; right:8%; font-size:38px; transform:rotate(16deg);"></i>
+                                <i class="fas fa-tablet-alt ranking-bg-icon" style="top:36%; right:6%; font-size:26px; transform:rotate(-12deg);"></i>
+                                <i class="fas fa-star ranking-bg-icon" style="bottom:34%; left:8%; font-size:20px; transform:rotate(8deg);"></i>
+                                <i class="fas fa-play-circle ranking-bg-icon" style="top:44%; left:42%; font-size:30px; transform:rotate(-6deg);"></i>
+                                <i class="fas fa-tv ranking-bg-icon" style="top:4%; right:38%; font-size:22px; transform:rotate(20deg);"></i>
+                                <i class="fas fa-headphones ranking-bg-icon" style="bottom:6%; right:32%; font-size:26px; transform:rotate(10deg);"></i>
+                                <i class="fas fa-star ranking-bg-icon" style="top:60%; left:22%; font-size:16px; transform:rotate(-15deg);"></i>
+                                <i class="fas fa-satellite-dish ranking-bg-icon" style="top:64%; right:16%; font-size:20px; transform:rotate(8deg);"></i>
+                                <i class="fas fa-couch ranking-bg-icon" style="bottom:38%; left:36%; font-size:18px; transform:rotate(-20deg);"></i>
+                                <i class="fas fa-trophy" style="font-size:56px;color:#f5a623;position:relative;z-index:1;"></i>
+                            </div>
+                <div class="destacada-overlay">
+                    <div class="destacada-titulo">Los que más aciertan series</div>
+                    <div class="destacada-meta">Tocá para ver el ranking completo</div>
+                </div>`;
+            return;
+        }
 
     if (item.tipo === 'SERIE') {
         const s = item.data;
