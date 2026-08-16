@@ -709,9 +709,9 @@ const adminFeed = {
                             icono = '<i class="fas fa-tv"></i>';
                             etiqueta = 'Serie destacada';
                         } else if (item.tipo === 'RANKING_TRIVIA') {
-                            icono = '<i class="fas fa-trophy"></i>';
-                            etiqueta = 'Ranking Trivia (Adivina Adivinador)';
-                        } else if (item.tipo === 'SERIE_CARRUSEL') {
+                                icono = '<i class="fas fa-trophy"></i>';
+                                etiqueta = 'Ranking Trivia de Series';
+                            } else if (item.tipo === 'SERIE_CARRUSEL') {
                             icono = '<i class="fas fa-clapperboard"></i>';
                             try {
                                 const res = await fetch(`${CONFIG.API_URL}/series/${item.seriesId}`, {
@@ -747,22 +747,38 @@ const adminFeed = {
                     },
 
                     async agregarSerieAlCarrusel() {
-                        try {
-                            const response = await fetch(`${CONFIG.API_URL}/admin/series-feed/carrusel/serie`, {
-                                method: 'POST',
-                                headers: { 'Authorization': `Bearer ${token}` }
-                            });
-                            if (!response.ok) {
-                                const err = await response.json().catch(() => ({}));
-                                throw new Error(err.error || 'Error al agregar');
-                            }
-                            await this.cargarCarrusel();
-                        } catch (error) {
-                            alert(error.message);
-                        }
-                    },
+                                            try {
+                                                const response = await fetch(`${CONFIG.API_URL}/admin/series-feed/carrusel/serie`, {
+                                                    method: 'POST',
+                                                    headers: { 'Authorization': `Bearer ${token}` }
+                                                });
+                                                if (!response.ok) {
+                                                    const err = await response.json().catch(() => ({}));
+                                                    throw new Error(err.error || 'Error al agregar');
+                                                }
+                                                await this.cargarCarrusel();
+                                            } catch (error) {
+                                                alert(error.message);
+                                            }
+                                        },
 
-                    abrirSelectorPremio(tipo) {
+                                        async agregarRankingAlCarrusel() {
+                                            try {
+                                                const response = await fetch(`${CONFIG.API_URL}/admin/series-feed/carrusel/ranking-trivia`, {
+                                                    method: 'POST',
+                                                    headers: { 'Authorization': `Bearer ${token}` }
+                                                });
+                                                if (!response.ok) {
+                                                    const err = await response.json().catch(() => ({}));
+                                                    throw new Error(err.error || 'Error al agregar');
+                                                }
+                                                await this.cargarCarrusel();
+                                            } catch (error) {
+                                                alert(error.message);
+                                            }
+                                        },
+
+                                        abrirSelectorPremio(tipo) {
                         this.tipoPremioSeleccionando = tipo;
                         document.getElementById('carruselSelectorPremioSerie').style.display = 'block';
                         document.getElementById('carruselBuscarPremioSerie').value = '';
