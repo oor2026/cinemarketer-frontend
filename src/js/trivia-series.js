@@ -98,6 +98,7 @@ window.abrirTriviaSeries = async function() {
 };
 
 function renderTriviaSeriesAdvertencia(estado) {
+    window._triviaSeriesEnCurso = false;
     document.getElementById('triviaSeriesModalContenido').innerHTML = `
         <div class="trivia-advertencia">
             <i class="fas fa-question-circle"></i>
@@ -122,9 +123,52 @@ window.triviaSeriesConfirmarInicio = function() {
 };
 
 window.cerrarTriviaSeries = function() {
+    if (window._triviaSeriesEnCurso) {
+        window._triviaSeriesRestanteAlPausar = window._triviaSeriesRestanteActual ?? 10;
+        if (window._triviaSeriesTimerInterval) clearInterval(window._triviaSeriesTimerInterval);
+        renderTriviaSeriesConfirmarSalida();
+        return;
+    }
     document.getElementById('triviaSeriesModal').style.display = 'none';
     document.body.style.overflow = '';
     if (window._triviaSeriesTimerInterval) clearInterval(window._triviaSeriesTimerInterval);
+};
+
+function renderTriviaSeriesConfirmarSalida() {
+    document.getElementById('triviaSeriesModalContenido').innerHTML = `
+        <div class="trivia-advertencia">
+            <i class="fas fa-exclamation-triangle" style="color:#e5a723;"></i>
+            <h3>¿Salir de la trivia?</h3>
+            <p>Si salís ahora, tu intento de hoy termina acá. Sumás los puntos de lo que ya acertaste, pero no vas a poder seguir jugando hasta mañana.</p>
+            <div class="trivia-advertencia-botones">
+                <button class="trivia-btn-primario" onclick="window.triviaSeriesSeguirJugando()">Seguir jugando</button>
+                <button class="trivia-btn-secundario" onclick="window.triviaSeriesConfirmarSalida()">Salir de todos modos</button>
+            </div>
+        </div>
+    `;
+}
+
+window.triviaSeriesSeguirJugando = function() {
+    const d = window._triviaSeriesPreguntaEnCursoData;
+    const restante = Math.max(1, Math.round(window._triviaSeriesRestanteAlPausar ?? 10));
+    if (d) {
+        renderTriviaSeriesPregunta(d.pregunta, d.numero, d.total, restante);
+    } else {
+        window.abrirTriviaSeries();
+    }
+};
+
+window.triviaSeriesConfirmarSalida = async function() {
+    try {
+        await fetch(`${CONFIG.API_URL}/trivia-series/abandonar${triviaSeriesQueryParam()}`, {
+            method: 'POST',
+            headers: triviaSeriesAuthHeaders()
+        });
+    } catch (e) {}
+    window._triviaSeriesEnCurso = false;
+    document.getElementById('triviaSeriesModal').style.display = 'none';
+    document.body.style.overflow = '';
+    window.cargarTriviaSeriesBadge();
 };
 
 function renderTriviaSeriesEstado(estado) {
@@ -144,8 +188,10 @@ const ETIQUETAS_TIPO_SERIE = {
     TEMPORADA_STILL: '¿De qué temporada es?'
 };
 
-function renderTriviaSeriesPregunta(pregunta, numero, total) {
+function renderTriviaSeriesPregunta(pregunta, numero, total, segundosIniciales = 10) {
+    window._triviaSeriesEnCurso = true;
     window._triviaSeriesTotalPreguntas = total;
+    window._triviaSeriesPreguntaEnCursoData = { pregunta, numero, total }; // para reanudar sin re-fetch
     const cont = document.getElementById('triviaSeriesModalContenido');
 
     let mediaHtml;
@@ -181,28 +227,30 @@ function renderTriviaSeriesPregunta(pregunta, numero, total) {
             </div>
         `;
 
-        window._triviaSeriesInicioPregunta = Date.now();
-        iniciarTimerSeries();
-}
-
-function iniciarTimerSeries() {
-    let restante = 10;
-    const fill = document.getElementById('triviaSeriesBarraFill');
-    const num = document.getElementById('triviaSeriesTimerNum');
-
-    if (window._triviaSeriesTimerInterval) clearInterval(window._triviaSeriesTimerInterval);
-
-    window._triviaSeriesTimerInterval = setInterval(() => {
-        restante -= 0.2;
-        if (fill) fill.style.width = Math.max(0, (restante / 10) * 100) + '%';
-        if (num) num.textContent = Math.max(0, Math.ceil(restante)) + 's';
-
-        if (restante <= 0) {
-            clearInterval(window._triviaSeriesTimerInterval);
-            window.triviaSeriesResponder(-1);
+        const segundosYaConsumidos = 10 - segundosIniciales;
+                window._triviaSeriesInicioPregunta = Date.now() - (segundosYaConsumidos * 1000);
+                iniciarTimerSeries(segundosIniciales);
         }
-    }, 200);
-}
+
+        function iniciarTimerSeries(segundosIniciales = 10) {
+            let restante = segundosIniciales;
+            const fill = document.getElementById('triviaSeriesBarraFill');
+            const num = document.getElementById('triviaSeriesTimerNum');
+
+            if (window._triviaSeriesTimerInterval) clearInterval(window._triviaSeriesTimerInterval);
+
+            window._triviaSeriesTimerInterval = setInterval(() => {
+                restante -= 0.2;
+                window._triviaSeriesRestanteActual = restante;
+                if (fill) fill.style.width = Math.max(0, (restante / 10) * 100) + '%';
+                if (num) num.textContent = Math.max(0, Math.ceil(restante)) + 's';
+
+                if (restante <= 0) {
+                    clearInterval(window._triviaSeriesTimerInterval);
+                    window.triviaSeriesResponder(-1);
+                }
+            }, 200);
+        }
 
 window.triviaSeriesResponder = async function(opcionElegida) {
     if (window._triviaSeriesEnviando) return;
@@ -314,6 +362,7 @@ function botonCompartirHtmlSeries() {
 }
 
 function renderTriviaSeriesGanada(puntos) {
+    window._triviaSeriesEnCurso = false;
     document.getElementById('triviaSeriesModalContenido').innerHTML = `
         <div class="trivia-resultado">
             <i class="fas fa-trophy" style="color:#f5a623;"></i>
@@ -326,6 +375,7 @@ function renderTriviaSeriesGanada(puntos) {
 }
 
 function renderTriviaSeriesPerdida(puntos, aciertos, total) {
+    window._triviaSeriesEnCurso = false;
     document.getElementById('triviaSeriesModalContenido').innerHTML = `
         <div class="trivia-resultado">
             <i class="fas fa-hourglass-half" style="color:#999;"></i>
