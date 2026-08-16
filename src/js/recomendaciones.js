@@ -6,6 +6,7 @@ window._recMovieId = null;
 window._recMovieTitulo = null;
 window._recTodosUsuarios = [];
 window._recSeleccionados = new Set();
+window._recSeleccionadosNombres = new Map(); // id -> nombre, sobrevive aunque el chip se saque de la lista
 window._recContextoSeleccionado = null;
 
 let _recPaginaActual = 0;
@@ -19,9 +20,10 @@ window.abrirPanelRecomendar = async function(movieId, event) {
     if (event) event.stopPropagation();
 
     window._recMovieId = movieId;
-    window._recSeriesId = null;
-    window._recSeleccionados = new Set();
-    window._recContextoSeleccionado = null;
+        window._recSeriesId = null;
+        window._recSeleccionados = new Set();
+        window._recSeleccionadosNombres = new Map();
+        window._recContextoSeleccionado = null;
     _recPaginaActual = 0;
     _recQueryActual = '';
     _recCargando = false;
@@ -67,10 +69,11 @@ window.cerrarPanelRecomendar = function() {
         document.body.classList.remove('modal-open');
     }
     window._recMovieId = null;
-    window._recSeriesId = null;
-    window._recTodosUsuarios = [];
-    window._recSeleccionados = new Set();
-    window._recContextoSeleccionado = null;
+        window._recSeriesId = null;
+        window._recTodosUsuarios = [];
+        window._recSeleccionados = new Set();
+        window._recSeleccionadosNombres = new Map();
+        window._recContextoSeleccionado = null;
     _recPaginaActual = 0;
     _recQueryActual = '';
     _recCargando = false;
@@ -121,21 +124,21 @@ async function _cargarUsuarios(movieId) {
 // -----------------------------------------------
 function _renderizarUsuarios(usuarios) {
     const lista = document.getElementById('recListaUsuarios');
+    const pendientes = (usuarios || []).filter(u => !window._recSeleccionados.has(u.id));
 
-    if (!usuarios || usuarios.length === 0) {
+    if (pendientes.length === 0) {
         lista.innerHTML = '<div style="font-size:12px;color:#999;padding:8px 0;">No hay usuarios disponibles por ahora.</div>';
         return;
     }
 
-    lista.innerHTML = usuarios.map(u => {
+    lista.innerHTML = pendientes.map(u => {
         const iniciales = (u.name || u.nombre || '??').split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase();
         const avatarHtml = (u.profileImageUrl || u.profile_image_url || u.avatarUrl)
             ? `<img src="${u.profileImageUrl || u.profile_image_url || u.avatarUrl}" alt="${iniciales}">`
             : iniciales;
         const nombre = u.name || u.nombre || 'Usuario';
-        const seleccionado = window._recSeleccionados.has(u.id) ? 'selected' : '';
         return `
-            <div class="rec-usuario-chip ${seleccionado}" data-id="${u.id}" data-nombre="${nombre}" onclick="window.toggleUsuarioRec(this)">
+            <div class="rec-usuario-chip" data-id="${u.id}" data-nombre="${nombre}" onclick="window.toggleUsuarioRec(this)">
                 <div class="chip-avatar">${avatarHtml}</div>
                 <span>${nombre}</span>
             </div>
@@ -187,21 +190,20 @@ async function _cargarPaginaUsuarios(reemplazar = false) {
             lista.innerHTML = '';
         }
 
-        // Agregar chips
-        usuarios.forEach(u => {
-            const iniciales = (u.name || '??').split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase();
-            const avatarHtml = u.avatarUrl
-                ? `<img src="${u.avatarUrl}" alt="${iniciales}">`
-                : iniciales;
-            const seleccionado = window._recSeleccionados.has(u.id) ? 'selected' : '';
-            const chip = document.createElement('div');
-            chip.className = `rec-usuario-chip ${seleccionado}`;
-            chip.dataset.id = u.id;
-            chip.dataset.nombre = u.name;
-            chip.setAttribute('onclick', 'window.toggleUsuarioRec(this)');
-            chip.innerHTML = `<div class="chip-avatar">${avatarHtml}</div><span>${u.name}</span>`;
-            lista.appendChild(chip);
-        });
+        // Agregar chips — se saltea a los ya seleccionados, viven solo en "Seleccionados"
+                usuarios.filter(u => !window._recSeleccionados.has(u.id)).forEach(u => {
+                    const iniciales = (u.name || '??').split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase();
+                    const avatarHtml = u.avatarUrl
+                        ? `<img src="${u.avatarUrl}" alt="${iniciales}">`
+                        : iniciales;
+                    const chip = document.createElement('div');
+                    chip.className = 'rec-usuario-chip';
+                    chip.dataset.id = u.id;
+                    chip.dataset.nombre = u.name;
+                    chip.setAttribute('onclick', 'window.toggleUsuarioRec(this)');
+                    chip.innerHTML = `<div class="chip-avatar">${avatarHtml}</div><span>${u.name}</span>`;
+                    lista.appendChild(chip);
+                });
 
         // Quitar sentinel anterior
         const oldSentinel = lista.querySelector('.rec-scroll-sentinel');
@@ -238,20 +240,44 @@ async function _cargarPaginaUsuarios(reemplazar = false) {
 // -----------------------------------------------
 // TOGGLE SELECCIÓN DE USUARIO
 // -----------------------------------------------
+const REC_MAX_DESTINATARIOS = 10;
+
 window.toggleUsuarioRec = function(chip) {
     const id = parseInt(chip.dataset.id);
     const nombre = chip.dataset.nombre;
 
-    if (window._recSeleccionados.has(id)) {
-        window._recSeleccionados.delete(id);
-        chip.classList.remove('selected');
-    } else {
-        window._recSeleccionados.add(id);
-        chip.classList.add('selected');
+    if (window._recSeleccionados.has(id)) return; // no debería poder pasar, el chip ya no está en la lista una vez elegido
+
+    if (window._recSeleccionados.size >= REC_MAX_DESTINATARIOS) {
+        if (typeof showToast === 'function') {
+            showToast('error', `Podés recomendar hasta ${REC_MAX_DESTINATARIOS} usuarios por vez`);
+        }
+        return;
     }
+
+    window._recSeleccionados.add(id);
+    window._recSeleccionadosNombres.set(id, nombre);
+    chip.remove(); // ya cumplió su función acá — de ahora en más solo vive en "Seleccionados"
 
     _actualizarSeleccionados();
     _actualizarBotonEnviar();
+};
+
+// -----------------------------------------------
+// QUITAR DE SELECCIONADOS (click en el tag o en su ×)
+// -----------------------------------------------
+window.quitarSeleccionadoRec = function(id) {
+    window._recSeleccionados.delete(id);
+    window._recSeleccionadosNombres.delete(id);
+    _actualizarSeleccionados();
+    _actualizarBotonEnviar();
+
+    // Vuelve a aparecer en la lista de resultados, respetando el filtro actual
+    if (_recQueryActual) {
+        window.filtrarUsuariosRec(_recQueryActual);
+    } else {
+        _renderizarUsuarios(window._recTodosUsuarios);
+    }
 };
 
 // -----------------------------------------------
@@ -283,12 +309,11 @@ function _actualizarSeleccionados() {
 
     row.style.display = 'block';
 
-    // Recolectar nombres desde chips visibles en el DOM
-    const chipsVisibles = document.querySelectorAll('.rec-usuario-chip.selected');
-    const nombres = Array.from(chipsVisibles).map(c => c.dataset.nombre || 'Usuario');
-
-    tags.innerHTML = nombres.map(n => `
-        <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:#e8eef7;color:#1a3a6b;border:1px solid #c5d3f0;">${n}</span>
+    tags.innerHTML = Array.from(window._recSeleccionadosNombres.entries()).map(([id, nombre]) => `
+        <span onclick="window.quitarSeleccionadoRec(${id})"
+              style="font-size:11px;padding:3px 8px 3px 10px;border-radius:99px;background:#e8eef7;color:#1a3a6b;border:1px solid #c5d3f0;cursor:pointer;display:inline-flex;align-items:center;gap:4px;">
+            ${nombre} <i class="fas fa-times" style="font-size:9px;opacity:0.7;"></i>
+        </span>
     `).join('');
 }
 
