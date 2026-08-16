@@ -70,16 +70,20 @@
 
     <!-- ADIVINA ADIVINADOR (trivia diaria) -->
     <div id="triviaBadgeContainer" style="display:none;" onclick="window.abrirTrivia()">
-        <div class="trivia-badge">
+        <div class="trivia-badge trivia-badge-peliculas">
             <i class="fas fa-clapperboard trivia-bg-icon" style="top:-10px; left:8%; font-size:34px; transform:rotate(-18deg);"></i>
             <i class="fas fa-film trivia-bg-icon" style="bottom:-12px; left:32%; font-size:26px; transform:rotate(12deg);"></i>
             <i class="fas fa-star trivia-bg-icon" style="top:6px; left:58%; font-size:18px; transform:rotate(-8deg);"></i>
             <i class="fas fa-video trivia-bg-icon" style="bottom:-8px; right:14%; font-size:30px; transform:rotate(20deg);"></i>
             <i class="fas fa-ticket trivia-bg-icon" style="top:-8px; right:2%; font-size:22px; transform:rotate(-15deg);"></i>
+            <i class="fas fa-popcorn trivia-bg-icon" style="top:40%; left:46%; font-size:20px; transform:rotate(-6deg);"></i>
+            <i class="fas fa-star trivia-bg-icon" style="bottom:30%; left:18%; font-size:14px; transform:rotate(10deg);"></i>
+            <i class="fas fa-clapperboard trivia-bg-icon" style="top:50%; right:26%; font-size:18px; transform:rotate(16deg);"></i>
+            <i class="fas fa-film trivia-bg-icon" style="bottom:-10px; right:38%; font-size:22px; transform:rotate(-12deg);"></i>
 
             <div class="trivia-badge-icon"><i class="fas fa-question-circle"></i></div>
             <div class="trivia-badge-texto">
-                <p class="trivia-badge-titulo">Adivina adivinador</p>
+                <p class="trivia-badge-titulo">Trivia de películas</p>
                 <p class="trivia-badge-sub" id="triviaBadgeSub">Cargando...</p>
             </div>
             <i class="fas fa-chevron-right trivia-badge-chevron"></i>
@@ -87,16 +91,52 @@
     </div>
 
     <div id="triviaModal" class="trivia-modal-overlay" style="display:none;">
-        <div class="trivia-modal">
+        <div class="trivia-modal trivia-modal-peliculas">
             <button class="trivia-cerrar" onclick="window.cerrarTrivia()"><i class="fas fa-times"></i></button>
             <div id="triviaModalContenido"></div>
         </div>
     </div>
 
     <div id="rankingTriviaModal" class="trivia-modal-overlay" style="display:none;">
-        <div class="trivia-modal">
+        <div class="trivia-modal trivia-modal-peliculas">
             <button class="trivia-cerrar" onclick="window.cerrarRankingTrivia()"><i class="fas fa-times"></i></button>
             <div id="rankingTriviaContenido"></div>
+        </div>
+    </div>
+
+    <!-- TRIVIA DE SERIES (badge y modales — misma estructura que la de Películas) -->
+    <div id="triviaSeriesBadgeContainer" style="display:none;" onclick="window.abrirTriviaSeries()">
+        <div class="trivia-badge trivia-badge-series">
+            <i class="fas fa-tv trivia-bg-icon" style="top:-10px; left:8%; font-size:34px; transform:rotate(-18deg);"></i>
+            <i class="fas fa-satellite-dish trivia-bg-icon" style="bottom:-12px; left:32%; font-size:26px; transform:rotate(12deg);"></i>
+            <i class="fas fa-star trivia-bg-icon" style="top:6px; left:58%; font-size:18px; transform:rotate(-8deg);"></i>
+            <i class="fas fa-couch trivia-bg-icon" style="bottom:-8px; right:14%; font-size:30px; transform:rotate(20deg);"></i>
+            <i class="fas fa-tablet-alt trivia-bg-icon" style="top:-8px; right:2%; font-size:22px; transform:rotate(-15deg);"></i>
+            <i class="fas fa-play-circle trivia-bg-icon" style="top:40%; left:46%; font-size:20px; transform:rotate(-6deg);"></i>
+            <i class="fas fa-star trivia-bg-icon" style="bottom:30%; left:18%; font-size:14px; transform:rotate(10deg);"></i>
+            <i class="fas fa-tv trivia-bg-icon" style="top:50%; right:26%; font-size:18px; transform:rotate(16deg);"></i>
+            <i class="fas fa-headphones trivia-bg-icon" style="bottom:-10px; right:38%; font-size:22px; transform:rotate(-12deg);"></i>
+
+            <div class="trivia-badge-icon"><i class="fas fa-question-circle"></i></div>
+            <div class="trivia-badge-texto">
+                <p class="trivia-badge-titulo">Trivia de Series</p>
+                <p class="trivia-badge-sub" id="triviaSeriesBadgeSub">Cargando...</p>
+            </div>
+            <i class="fas fa-chevron-right trivia-badge-chevron"></i>
+        </div>
+    </div>
+
+    <div id="triviaSeriesModal" class="trivia-modal-overlay" style="display:none;">
+        <div class="trivia-modal trivia-modal-series">
+            <button class="trivia-cerrar" onclick="window.cerrarTriviaSeries()"><i class="fas fa-times"></i></button>
+            <div id="triviaSeriesModalContenido"></div>
+        </div>
+    </div>
+
+    <div id="rankingTriviaSeriesModal" class="trivia-modal-overlay" style="display:none;">
+        <div class="trivia-modal trivia-modal-series">
+            <button class="trivia-cerrar" onclick="window.cerrarRankingTriviaSeries()"><i class="fas fa-times"></i></button>
+            <div id="rankingTriviaSeriesContenido"></div>
         </div>
     </div>
 

@@ -42,9 +42,14 @@ window.cargarTriviaBadge = async function() {
         if (!res.ok) { contenedor.style.display = 'none'; return; }
 
         const estado = await res.json();
-        window._triviaEstadoCargado = true;
-        contenedor.style.display = 'block';
-        actualizarBadgeSub(estado);
+                window._triviaEstadoCargado = true;
+                // Solo se muestra si el tab activo es Películas — evita que un
+                // llamado disparado en segundo plano (prefetch) pise la visibilidad
+                // que seleccionarTabFeed ya dejó en 'none' al estar en otro tab.
+                if (window._tabActivo === 'peliculas' || !window._tabActivo) {
+                    contenedor.style.display = 'block';
+                }
+                actualizarBadgeSub(estado);
     } catch (e) {
         contenedor.style.display = 'none';
     }
@@ -90,7 +95,7 @@ function renderTriviaAdvertencia(estado) {
     document.getElementById('triviaModalContenido').innerHTML = `
         <div class="trivia-advertencia">
             <i class="fas fa-question-circle"></i>
-            <h3>Adivina Adivinador</h3>
+            <h3>Trivia de Películas</h3>
             <p>Son 10 preguntas, un tiro por pregunta — 10 segundos cada una.</p>
             <p>Tenés <strong>un solo intento por día</strong>. Respondé las 10 preguntas — te equivoques o no, seguís hasta el final, y ahí vemos cuántas acertaste.</p>
             <div class="trivia-advertencia-botones">

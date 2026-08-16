@@ -1115,11 +1115,25 @@
             flex-shrink: 0;
             }
         .trivia-badge-texto { flex: 1; min-width: 0; }
-        .trivia-badge-titulo { font-size: 22px; font-weight: 800; color: #4c1d95; margin: 0; }
-        .trivia-badge-sub { font-size: 16px; color: #888; margin: 2px 0 0; }
-        .trivia-badge-chevron { color: #a78bfa; font-size: 14px; }
+            .trivia-badge-titulo { font-size: 22px; font-weight: 800; color: #4c1d95; margin: 0; }
+            .trivia-badge-sub { font-size: 16px; color: #888; margin: 2px 0 0; }
+            .trivia-badge-chevron { color: #a78bfa; font-size: 14px; }
 
-        .trivia-modal-overlay {
+            /* Trivia de Películas — rojo de marca */
+            .trivia-badge-peliculas { border-color: #f3c6ca; }
+            .trivia-badge-peliculas .trivia-badge-titulo { color: #e50914; }
+            .trivia-badge-peliculas .trivia-badge-icon { background: #fde8e9; color: #e50914; }
+            .trivia-badge-peliculas .trivia-badge-chevron { color: #e5737c; }
+            .trivia-badge-peliculas .trivia-bg-icon { color: #e50914; }
+
+            /* Trivia de Series — azul de marca */
+            .trivia-badge-series { border-color: #c3cde3; }
+            .trivia-badge-series .trivia-badge-titulo { color: #324c89; }
+            .trivia-badge-series .trivia-badge-icon { background: #e6eaf3; color: #324c89; }
+            .trivia-badge-series .trivia-badge-chevron { color: #6b7fac; }
+            .trivia-badge-series .trivia-bg-icon { color: #324c89; }
+
+            .trivia-modal-overlay {
             position: fixed; inset: 0;
             background: rgba(0,0,0,0.6);
             z-index: 9998;
@@ -1148,7 +1162,7 @@
         .trivia-timer { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 800; color: #6d28d9; }
         .trivia-barra-tiempo { height: 4px; background: #eee; border-radius: 99px; overflow: hidden; margin-bottom: 16px; }
         .trivia-barra-tiempo-fill { height: 100%; background: #7c3aed; transition: width 0.2s linear; }
-        .trivia-tipo-label { font-size: 12px; color: #888; margin: 0 0 10px; }
+        .trivia-tipo-label { font-size: 15px; font-weight: 700; color: #333; margin: 0 0 10px; }
         .trivia-imagen {
                     width: 200px; max-width: 60%; aspect-ratio: 2 / 3;
                     border-radius: 12px;
@@ -1227,6 +1241,26 @@
             color: white; font-size: 14px; font-weight: 700; cursor: pointer;
             display: inline-flex; align-items: center; gap: 8px;
         }
+
+        /* Trivia de Películas — acento rojo de marca en todo el modal */
+        .trivia-modal-peliculas .trivia-timer { color: #e50914; }
+        .trivia-modal-peliculas .trivia-barra-tiempo-fill { background: #e50914; }
+        .trivia-modal-peliculas .trivia-advertencia i { color: #e50914; }
+        .trivia-modal-peliculas .trivia-btn-primario { background: #e50914; }
+        .trivia-modal-peliculas .trivia-sinopsis { background: #fdf1f1; }
+        .trivia-modal-peliculas .trivia-btn-compartir { background: linear-gradient(135deg,#e50914,#a4070f); }
+        .trivia-modal-peliculas .ranking-header { background: #fdf1f1; color: #e50914; }
+        .trivia-modal-peliculas .ranking-fila.yo { background: #fdf1f1; }
+
+        /* Trivia de Series — acento azul de marca en todo el modal */
+        .trivia-modal-series .trivia-timer { color: #324c89; }
+        .trivia-modal-series .trivia-barra-tiempo-fill { background: #324c89; }
+        .trivia-modal-series .trivia-advertencia i { color: #324c89; }
+        .trivia-modal-series .trivia-btn-primario { background: #324c89; }
+        .trivia-modal-series .trivia-sinopsis { background: #eef1f7; }
+        .trivia-modal-series .trivia-btn-compartir { background: linear-gradient(135deg,#324c89,#1f2f57); }
+        .trivia-modal-series .ranking-header { background: #eef1f7; color: #324c89; }
+        .trivia-modal-series .ranking-fila.yo { background: #eef1f7; }
 
 
 #modalPelicula .modal-sinopsis h4 {
