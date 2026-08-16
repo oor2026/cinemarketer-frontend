@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adivina Adivinador — Cinemarketer</title>
+    <title>Trivia de Series — Cinemarketer</title>
 
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Cinemarketer">
-    <meta property="og:title" content="🎬 Adivina Adivinador — la trivia diaria de Cinemarketer">
+    <meta property="og:title" content="📺 Trivia de Series — la trivia diaria de Cinemarketer">
     <meta property="og:description" content="10 preguntas, un intento por día. ¿Cuántas acertás?">
     <meta property="og:image" content="https://cinemarketer.com.ar/assets/images/og-default.png">
     <meta id="ogUrl" property="og:url" content="https://cinemarketer.com.ar">
@@ -50,7 +50,7 @@
 
         <div id="pubContenido" style="display:none;">
             <div class="pub-card">
-                <div id="triviaModalContenido" class="trivia-modal-peliculas"></div>
+                <div id="triviaSeriesModalContenido" class="trivia-modal-series"></div>
             </div>
         </div>
 
@@ -64,24 +64,24 @@
 </div>
 
 <script src="js/config.js"></script>
-<script src="js/trivia.js"></script>
+<script src="js/trivia-series.js"></script>
 <script>
     // Reemplaza el cierre del modal (no aplica acá, no hay modal — la página
     // entera es el juego) por un mensaje simple en el mismo lugar.
-    window.cerrarTrivia = function() {
-        if (window._triviaTimerInterval) clearInterval(window._triviaTimerInterval);
-        document.getElementById('triviaModalContenido').innerHTML = `
+    window.cerrarTriviaSeries = function() {
+        if (window._triviaSeriesTimerInterval) clearInterval(window._triviaSeriesTimerInterval);
+        document.getElementById('triviaSeriesModalContenido').innerHTML = `
             <div class="trivia-resultado">
-                <i class="fas fa-clapperboard" style="color:#7c3aed;"></i>
+                <i class="fas fa-tv" style="color:#324c89;"></i>
                 <h3>Cuando quieras</h3>
                 <p>La trivia de hoy te espera — volvé a esta página cuando tengas ganas de jugar.</p>
             </div>`;
     };
 
-   async function iniciarTriviaPublica() {
+   async function iniciarTriviaSeriesPublica() {
       try {
-          let res = await fetch(`${CONFIG.API_URL}/trivia/estado${triviaQueryParam()}`, {
-              headers: triviaAuthHeaders()
+          let res = await fetch(`${CONFIG.API_URL}/trivia-series/estado${triviaSeriesQueryParam()}`, {
+              headers: triviaSeriesAuthHeaders()
           });
 
           if (res.status === 401) {
@@ -89,8 +89,8 @@
               // exigir sesión, así que lo descartamos y probamos de nuevo
               // como invitado en vez de romper.
               localStorage.removeItem('token');
-              res = await fetch(`${CONFIG.API_URL}/trivia/estado${triviaQueryParam()}`, {
-                  headers: triviaAuthHeaders()
+              res = await fetch(`${CONFIG.API_URL}/trivia-series/estado${triviaSeriesQueryParam()}`, {
+                  headers: triviaSeriesAuthHeaders()
               });
           }
 
@@ -98,10 +98,10 @@
           const estado = await res.json();
 
             const esPrimeraPregunta = estado.estado === 'EN_CURSO' && estado.preguntaActual === 1;
-            if (esPrimeraPregunta && !triviaYaAdvertido()) {
-                renderTriviaAdvertencia(estado);
+            if (esPrimeraPregunta && !triviaSeriesYaAdvertido()) {
+                renderTriviaSeriesAdvertencia(estado);
             } else {
-                renderTriviaEstado(estado);
+                renderTriviaSeriesEstado(estado);
             }
 
             document.getElementById('ogUrl').content = window.location.href;
@@ -113,11 +113,12 @@
         }
     }
 
-    iniciarTriviaPublica();
-    cargarPostersLaterales();
+    iniciarTriviaSeriesPublica();
+    cargarPostersLateralesSeries();
 
-    // Mismo mecanismo de rieles decorativos que publicacion.html — sin cambios.
-    async function cargarPostersLaterales() {
+    // Mismo mecanismo de rieles decorativos que publicacion.html — sin
+    // cambios en la mecánica, solo apunta a /tv/ (series) en vez de /movie/.
+    async function cargarPostersLateralesSeries() {
         const cols = {
             leftOuter:  document.getElementById('pubPosterColLeftOuter'),
             leftInner:  document.getElementById('pubPosterColLeftInner'),
@@ -133,7 +134,7 @@
         const fetchTmdb = async (endpoint, page) => {
             try {
                 const res = await fetch(
-                    `https://api.themoviedb.org/3/movie/${endpoint}?language=es-AR&region=AR&page=${page}`,
+                    `https://api.themoviedb.org/3/tv/${endpoint}?language=es-AR&page=${page}`,
                     { headers: { 'Authorization': `Bearer ${TMDB_TOKEN}`, 'accept': 'application/json' } }
                 );
                 const data = await res.json();
@@ -146,20 +147,20 @@
         try {
             let pool = [];
             const agregar = (lista) => {
-                lista.filter(m => m.poster_path && !pool.find(p => p.id === m.id))
-                     .forEach(m => pool.push(m));
+                lista.filter(s => s.poster_path && !pool.find(p => p.id === s.id))
+                     .forEach(s => pool.push(s));
             };
 
-            agregar(await fetchTmdb('now_playing', 1));
+            agregar(await fetchTmdb('on_the_air', 1));
             if (pool.length < NECESARIAS) agregar(await fetchTmdb('popular', 1));
-            if (pool.length < NECESARIAS) agregar(await fetchTmdb('now_playing', 2));
+            if (pool.length < NECESARIAS) agregar(await fetchTmdb('on_the_air', 2));
             if (pool.length < NECESARIAS) agregar(await fetchTmdb('popular', 2));
 
             if (pool.length === 0) return;
 
-            const armarPoster = (m) => `
-                <a href="/pelicula?id=${m.id}" class="pub-poster-rail-item" title="${(m.title || '').replace(/"/g,'')}">
-                    <img src="${BASE_IMG}${m.poster_path}" alt="${m.title || ''}" loading="lazy">
+            const armarPoster = (s) => `
+                <a href="/serie?id=${s.id}" class="pub-poster-rail-item" title="${(s.name || '').replace(/"/g,'')}">
+                    <img src="${BASE_IMG}${s.poster_path}" alt="${s.name || ''}" loading="lazy">
                 </a>`;
 
             const tandas = [
