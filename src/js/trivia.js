@@ -92,6 +92,7 @@ window.abrirTrivia = async function() {
 };
 
 function renderTriviaAdvertencia(estado) {
+    window._triviaEnCurso = false;
     document.getElementById('triviaModalContenido').innerHTML = `
         <div class="trivia-advertencia">
             <i class="fas fa-question-circle"></i>
@@ -116,9 +117,57 @@ window.triviaConfirmarInicio = function() {
 };
 
 window.cerrarTrivia = function() {
+    // Si hay una pregunta activa en juego, cerrar cuenta como abandonar el
+    // intento de hoy — se avisa antes, no se cierra directo.
+    if (window._triviaEnCurso) {
+        window._triviaRestanteAlPausar = window._triviaRestanteActual ?? 10;
+        if (window._triviaTimerInterval) clearInterval(window._triviaTimerInterval);
+        renderTriviaConfirmarSalida();
+        return;
+    }
     document.getElementById('triviaModal').style.display = 'none';
     document.body.style.overflow = '';
     if (window._triviaTimerInterval) clearInterval(window._triviaTimerInterval);
+};
+
+function renderTriviaConfirmarSalida() {
+    document.getElementById('triviaModalContenido').innerHTML = `
+        <div class="trivia-advertencia">
+            <i class="fas fa-exclamation-triangle" style="color:#e5a723;"></i>
+            <h3>¿Salir de la trivia?</h3>
+            <p>Si salís ahora, tu intento de hoy termina acá. Sumás los puntos de lo que ya acertaste, pero no vas a poder seguir jugando hasta mañana.</p>
+            <div class="trivia-advertencia-botones">
+                <button class="trivia-btn-primario" onclick="window.triviaSeguirJugando()">Seguir jugando</button>
+                <button class="trivia-btn-secundario" onclick="window.triviaConfirmarSalida()">Salir de todos modos</button>
+            </div>
+        </div>
+    `;
+}
+
+window.triviaSeguirJugando = function() {
+    // Reanuda sin re-fetchear al servidor — misma pregunta, con el tiempo
+    // restante exacto que tenía al momento de pausar (mínimo 1s para que
+    // no se mande una respuesta -1 al instante).
+    const d = window._triviaPreguntaEnCursoData;
+    const restante = Math.max(1, Math.round(window._triviaRestanteAlPausar ?? 10));
+    if (d) {
+        renderTriviaPregunta(d.pregunta, d.numero, d.total, restante);
+    } else {
+        window.abrirTrivia(); // fallback por las dudas, no debería pasar
+    }
+};
+
+window.triviaConfirmarSalida = async function() {
+    try {
+        await fetch(`${CONFIG.API_URL}/trivia/abandonar${triviaQueryParam()}`, {
+            method: 'POST',
+            headers: triviaAuthHeaders()
+        });
+    } catch (e) {}
+    window._triviaEnCurso = false;
+    document.getElementById('triviaModal').style.display = 'none';
+    document.body.style.overflow = '';
+    window.cargarTriviaBadge();
 };
 
 function renderTriviaEstado(estado) {
@@ -131,8 +180,10 @@ function renderTriviaEstado(estado) {
     }
 }
 
-function renderTriviaPregunta(pregunta, numero, total) {
-    window._triviaTotalPreguntas = total; // se guarda para reusarlo al avanzar de pregunta
+function renderTriviaPregunta(pregunta, numero, total, segundosIniciales = 10) {
+    window._triviaEnCurso = true;
+    window._triviaTotalPreguntas = total;// se guarda para reusarlo al avanzar de pregunta
+    window._triviaPreguntaEnCursoData = { pregunta, numero, total }; // para reanudar sin re-fetch
     const cont = document.getElementById('triviaModalContenido');
 
     let mediaHtml;
@@ -159,28 +210,33 @@ function renderTriviaPregunta(pregunta, numero, total) {
             </div>
         `;
 
-        window._triviaInicioPregunta = Date.now();
-        iniciarTimer();
-}
-
-function iniciarTimer() {
-    let restante = 10;
-    const fill = document.getElementById('triviaBarraFill');
-    const num = document.getElementById('triviaTimerNum');
-
-    if (window._triviaTimerInterval) clearInterval(window._triviaTimerInterval);
-
-    window._triviaTimerInterval = setInterval(() => {
-        restante -= 0.2;
-        if (fill) fill.style.width = Math.max(0, (restante / 10) * 100) + '%';
-        if (num) num.textContent = Math.max(0, Math.ceil(restante)) + 's';
-
-        if (restante <= 0) {
-            clearInterval(window._triviaTimerInterval);
-            window.triviaResponder(-1); // se acabó el tiempo — se manda una opción inválida
+        // Si se está reanudando tras una pausa, el "inicio" se corre hacia
+                // atrás por lo ya consumido — así el tiempo de respuesta final sigue
+                // siendo el real acumulado, no arranca de cero por haber pausado.
+                const segundosYaConsumidos = 10 - segundosIniciales;
+                window._triviaInicioPregunta = Date.now() - (segundosYaConsumidos * 1000);
+                iniciarTimer(segundosIniciales);
         }
-    }, 200);
-}
+
+        function iniciarTimer(segundosIniciales = 10) {
+            let restante = segundosIniciales;
+            const fill = document.getElementById('triviaBarraFill');
+            const num = document.getElementById('triviaTimerNum');
+
+            if (window._triviaTimerInterval) clearInterval(window._triviaTimerInterval);
+
+            window._triviaTimerInterval = setInterval(() => {
+                restante -= 0.2;
+                window._triviaRestanteActual = restante; // último valor conocido, por si se pausa acá
+                if (fill) fill.style.width = Math.max(0, (restante / 10) * 100) + '%';
+                if (num) num.textContent = Math.max(0, Math.ceil(restante)) + 's';
+
+                if (restante <= 0) {
+                    clearInterval(window._triviaTimerInterval);
+                    window.triviaResponder(-1); // se acabó el tiempo — se manda una opción inválida
+                }
+            }, 200);
+        }
 
 window.triviaResponder = async function(opcionElegida) {
     if (window._triviaEnviando) return; // ya hay una respuesta en curso — ignorar
@@ -283,6 +339,7 @@ function botonCompartirHtml() {
 }
 
 function renderTriviaGanada(puntos) {
+    window._triviaEnCurso = false;
     document.getElementById('triviaModalContenido').innerHTML = `
         <div class="trivia-resultado">
             <i class="fas fa-trophy" style="color:#f5a623;"></i>
@@ -295,6 +352,7 @@ function renderTriviaGanada(puntos) {
 }
 
 function renderTriviaPerdida(puntos, aciertos, total) {
+    window._triviaEnCurso = false;
     document.getElementById('triviaModalContenido').innerHTML = `
         <div class="trivia-resultado">
             <i class="fas fa-hourglass-half" style="color:#999;"></i>
