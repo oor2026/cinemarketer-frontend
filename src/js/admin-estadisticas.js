@@ -315,67 +315,96 @@ const adminEstadisticas = {
         },
 
     // Renderizar tabla de comentarios
-    renderizarComentarios: function() {
-        const c = this.datos.comments;
-        const topPelis = c.topMovies?.map(m =>
-            `<li><strong>${m.title}</strong>: ${m.comments} comentarios</li>`
-        ).join('') || '<li>Sin datos</li>';
+        renderizarComentarios: function() {
+            const c = this.datos.comments;
 
-        const topUsers = c.topUsers?.map(u =>
-            `<li><strong>${u.name}</strong>: ${u.comments} comentarios</li>`
-        ).join('') || '<li>Sin datos</li>';
+            document.getElementById('stats-comentarios-body').innerHTML = `
+                <div class="stats-subtabs">
+                    <button class="stats-subtab-btn active" data-subtab="total" onclick="adminEstadisticas.cambiarSubtabComentarios('total', this)">Total</button>
+                    <button class="stats-subtab-btn" data-subtab="peliculas" onclick="adminEstadisticas.cambiarSubtabComentarios('peliculas', this)">Películas</button>
+                    <button class="stats-subtab-btn" data-subtab="series" onclick="adminEstadisticas.cambiarSubtabComentarios('series', this)">Series</button>
+                </div>
+                <div id="stats-comentarios-subtab-total" class="stats-subtab-panel active">
+                    ${this.renderComentariosTotal(c)}
+                </div>
+                <div id="stats-comentarios-subtab-peliculas" class="stats-subtab-panel">
+                    ${this.renderComentariosSeccion(c.peliculas, '🎬 Top 5 películas', 'peliculas')}
+                </div>
+                <div id="stats-comentarios-subtab-series" class="stats-subtab-panel">
+                    ${this.renderComentariosSeccion(c.series, '📺 Top 5 series', 'series')}
+                </div>
+            `;
+        },
 
-        const html = `
-            <tr>
-                <td><strong>Total de comentarios</strong></td>
-                <td class="stat-valor">${this.formatearNumero(c.totalComments)}</td>
-                <td rowspan="3">
-                    <div class="stats-top">
-                        <h4>🎬 Top 5 películas</h4>
-                        <ul>${topPelis}</ul>
+        cambiarSubtabComentarios: function(tab, btn) {
+            document.querySelectorAll('#stats-comentarios-body .stats-subtab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('#stats-comentarios-body .stats-subtab-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('stats-comentarios-subtab-' + tab).classList.add('active');
+        },
+
+        renderComentariosTotal: function(c) {
+            const t = c.total;
+            return `
+                <div class="stats-hero-numero">${this.formatearNumero(t.totalComments)}</div>
+                <div class="stats-hero-label">comentarios totales este período</div>
+
+                <div class="stats-split-bar">
+                    <div class="fill-peliculas" style="width:${c.pctPeliculas}%;"></div>
+                    <div class="fill-series" style="width:${c.pctSeries}%;"></div>
+                </div>
+                <div class="stats-split-legend">
+                    <span><span class="dot" style="background:#e50914;"></span>Películas · ${c.pctPeliculas.toFixed(0)}%</span>
+                    <span><span class="dot" style="background:#324c89;"></span>Series · ${c.pctSeries.toFixed(0)}%</span>
+                </div>
+
+                <div class="stats-kpi-row">
+                    <div class="stats-kpi-card"><div class="kpi-valor">${t.commentsPerDay.toFixed(1)}</div><div class="kpi-label">Por día</div></div>
+                    <div class="stats-kpi-card"><div class="kpi-valor">${this.formatearNumero(c.totalReplies)}</div><div class="kpi-label">Respuestas</div></div>
+                    <div class="stats-kpi-card"><div class="kpi-valor">${this.formatearNumero(c.gifsEnComentarios)}</div><div class="kpi-label">GIFs en comentarios</div></div>
+                    <div class="stats-kpi-card"><div class="kpi-valor">${(c.tasaGifComentarios || 0).toFixed(1)}%</div><div class="kpi-label">Tasa GIF comentarios</div></div>
+                    <div class="stats-kpi-card"><div class="kpi-valor">${this.formatearNumero(c.gifsEnRespuestas)}</div><div class="kpi-label">GIFs en respuestas</div></div>
+                    <div class="stats-kpi-card"><div class="kpi-valor">${(c.tasaGifRespuestas || 0).toFixed(1)}%</div><div class="kpi-label">Tasa GIF respuestas</div></div>
+                </div>
+                <p style="font-size:0.72rem;color:#999;margin-top:-0.3rem;">Respuestas y GIFs son globales — no se dividen por Películas/Series.</p>
+            `;
+        },
+
+        renderComentariosSeccion: function(s, tituloTop, color) {
+            const acento = color === 'series' ? '#324c89' : '#e50914';
+
+            const topContent = s.topContent?.map(m =>
+                `<li><strong>${m.title}</strong>: ${m.comments} comentarios</li>`
+            ).join('') || '<li>Sin datos</li>';
+
+            const topUsers = s.topUsers?.map(u =>
+                `<li><strong>${u.name}</strong>: ${u.comments} comentarios</li>`
+            ).join('') || '<li>Sin datos</li>';
+
+            return `
+                <div class="stats-hero-numero" style="color:${acento};">${this.formatearNumero(s.totalComments)}</div>
+                <div class="stats-hero-label">comentarios en este contenido</div>
+
+                <div class="stats-kpi-row">
+                    <div class="stats-kpi-card"><div class="kpi-valor">${s.commentsPerDay.toFixed(1)}</div><div class="kpi-label">Por día</div></div>
+                </div>
+
+                <div class="stats-votos-cols">
+                    <div class="stats-votos-col-izq">
+                        <div class="stats-top" style="border-top-color:${acento};">
+                            <h4>${tituloTop}</h4>
+                            <ul>${topContent}</ul>
+                        </div>
                     </div>
-                </td>
-            </tr>
-            <tr>
-                <td><strong>Total de respuestas</strong></td>
-                <td class="stat-valor">${this.formatearNumero(c.totalReplies)}</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td><strong>Comentarios por día</strong></td>
-                <td class="stat-valor">${c.commentsPerDay.toFixed(1)}</td>
-            </tr>
-            <tr>
-                <td><strong>Top usuarios</strong></td>
-                <td colspan="2">
-                    <div class="stats-top">
-                        <ul>${topUsers}</ul>
+                    <div class="stats-votos-col-der">
+                        <div class="stats-top" style="border-top-color:${acento};">
+                            <h4>👤 Top 5 usuarios</h4>
+                            <ul>${topUsers}</ul>
+                        </div>
                     </div>
-                </td>
-            </tr>
-            <tr>
-                <td><strong>GIFs en comentarios</strong></td>
-                <td class="stat-valor">${this.formatearNumero(c.gifsEnComentarios)}</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td><strong>GIFs en respuestas</strong></td>
-                <td class="stat-valor">${this.formatearNumero(c.gifsEnRespuestas)}</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td><strong>Tasa de GIF en comentarios</strong></td>
-                <td class="stat-valor">${c.tasaGifComentarios?.toFixed(1)}%</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td><strong>Tasa de GIF en respuestas</strong></td>
-                <td class="stat-valor">${c.tasaGifRespuestas?.toFixed(1)}%</td>
-                <td></td>
-            </tr>
-        `;
-        document.getElementById('stats-comentarios-body').innerHTML = html;
-    },
+                </div>
+            `;
+        },
 
     renderizarRecomendaciones: function() {
             const r = this.datos.recommendations;
