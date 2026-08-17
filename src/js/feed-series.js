@@ -10,12 +10,13 @@ window.cargarFilasSeries = async function() {
     const cont = document.getElementById('filasSeriesContainer');
     if (!cont) return;
 
-    if (window._filasSeriesCargadas) {
-            renderPillsFilasSerie();
-            renderFilasSeries();
-            window.cargarTriviaSeriesBadge();
-            return;
-        }
+        if (window._filasSeriesCargadas) {
+                renderPillsFilasSerie();
+                renderFilasSeries();
+                window.cargarTriviaSeriesBadge();
+                if (typeof window.cargarVotoRelampagoSerie === 'function') window.cargarVotoRelampagoSerie();
+                return;
+            }
 
     const fijas = [
         { key: 'fecha', label: '🔥 Más populares', tipo: 'fijo' },
@@ -59,13 +60,14 @@ window.cargarFilasSeries = async function() {
         }
     } catch (e) {}
 
-    window._filasSeries = [...fijas, ...generos].map(f => ({ ...f, series: [], cargado: false, pagina: 1, finDelCatalogo: false, cargandoMas: false }));
-            window._filasSeriesCargadas = true;
+        window._filasSeries = [...fijas, ...generos].map(f => ({ ...f, series: [], cargado: false, pagina: 1, finDelCatalogo: false, cargandoMas: false }));
+                window._filasSeriesCargadas = true;
 
-            renderPillsFilasSerie();
-            renderFilasSeries();
-            window.cargarTriviaSeriesBadge();
-        };
+                renderPillsFilasSerie();
+                renderFilasSeries();
+                window.cargarTriviaSeriesBadge();
+                if (typeof window.cargarVotoRelampagoSerie === 'function') window.cargarVotoRelampagoSerie();
+            };
 
     function renderPillsFilasSerie() {
             const pillsCont = document.getElementById('ordenarPillsSerie');
@@ -3709,4 +3711,219 @@ function renderSlideDestacadoSerie(idx) {
                 </div>
             </div>`;
     }
+}
+
+// ==============================================
+// VOTO RELÁMPAGO — SERIES (calco del de Películas)
+// ==============================================
+window._votoRelampagoSerie = { seriesId: null, chainFromId: null, streak: 0, vistas: [] };
+window._votoRelampagoSerieVotadas = null;
+window._votoRelampagoSerieOmitidas = null;
+
+async function vrsObtenerVotadas() {
+    if (window._votoRelampagoSerieVotadas) return window._votoRelampagoSerieVotadas;
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/reviews/series/voted-ids`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const ids = res.ok ? await res.json() : [];
+        window._votoRelampagoSerieVotadas = new Set(ids);
+    } catch (e) {
+        window._votoRelampagoSerieVotadas = new Set();
+    }
+    return window._votoRelampagoSerieVotadas;
+}
+
+async function vrsObtenerOmitidas() {
+    if (window._votoRelampagoSerieOmitidas) return window._votoRelampagoSerieOmitidas;
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/reviews/series/omitidas-activas`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const ids = res.ok ? await res.json() : [];
+        window._votoRelampagoSerieOmitidas = new Set(ids);
+    } catch (e) {
+        window._votoRelampagoSerieOmitidas = new Set();
+    }
+    return window._votoRelampagoSerieOmitidas;
+}
+
+function vrsStorageKey() {
+    const token = localStorage.getItem('token') || '';
+    return 'vrEstadoSerie_' + token;
+}
+
+window.cargarVotoRelampagoSerie = async function() {
+    const contenedor = document.getElementById('votoRelampagoSeriesContainer');
+    if (!contenedor) return;
+
+    const token = localStorage.getItem('token');
+    if (!token) { contenedor.style.display = 'none'; return; }
+
+    try {
+        const guardado = JSON.parse(localStorage.getItem(vrsStorageKey()) || 'null');
+        if (guardado && guardado.seriesId) {
+            window._votoRelampagoSerie = guardado;
+            const res = await fetch(`${CONFIG.API_URL}/series/${guardado.seriesId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                if (window._tabActivo === 'series') contenedor.style.display = 'block';
+                renderVotoRelampagoSerie(await res.json());
+                return;
+            }
+        }
+    } catch (e) {}
+
+    await window.vrsCargarSiguiente();
+};
+
+window.vrsCargarSiguiente = async function() {
+    const contenedor = document.getElementById('votoRelampagoSeriesContainer');
+    if (!contenedor) return;
+    const token = localStorage.getItem('token');
+    if (!token) { contenedor.style.display = 'none'; return; }
+
+    const state = window._votoRelampagoSerie;
+    const romperCadena = !state.chainFromId || state.streak >= 4 || Math.random() < 0.25;
+
+    try {
+        let candidatos = [];
+        if (!romperCadena && state.chainFromId) {
+            const res = await fetch(`${CONFIG.API_URL}/series/${state.chainFromId}/similar`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) candidatos = await res.json();
+        }
+        if (!candidatos || !candidatos.length) {
+            state.chainFromId = null;
+            state.streak = 0;
+            const pagina = Math.floor(Math.random() * 10) + 1;
+            const res = await fetch(`${CONFIG.API_URL}/series/popular?page=${pagina}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) candidatos = await res.json();
+        }
+
+        const votadas = await vrsObtenerVotadas();
+        const omitidas = await vrsObtenerOmitidas();
+
+        candidatos = (candidatos.results || candidatos || []).filter(s =>
+            s.poster_path && s.overview && !state.vistas.includes(s.id) && !votadas.has(s.id) && !omitidas.has(s.id)
+        );
+
+        if (!candidatos.length) {
+            contenedor.style.display = 'none';
+            return;
+        }
+
+        const elegido = candidatos[0];
+        const detalleRes = await fetch(`${CONFIG.API_URL}/series/${elegido.id}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!detalleRes.ok) { contenedor.style.display = 'none'; return; }
+        const serie = await detalleRes.json();
+
+        state.seriesId = serie.id;
+        state.vistas = [...state.vistas.slice(-19), serie.id];
+        localStorage.setItem(vrsStorageKey(), JSON.stringify(state));
+
+        if (window._tabActivo === 'series') contenedor.style.display = 'block';
+        renderVotoRelampagoSerie(serie);
+    } catch (e) {
+        contenedor.style.display = 'none';
+    }
+};
+
+function renderVotoRelampagoSerie(s) {
+    const card = document.getElementById('vrCardSerie');
+    if (!card) return;
+
+    const backdrop = s.backdrop_path
+        ? `https://image.tmdb.org/t/p/original${s.backdrop_path}`
+        : (s.poster_path ? `https://image.tmdb.org/t/p/w500${s.poster_path}` : '');
+    const anio = s.first_air_date ? new Date(s.first_air_date).getFullYear() : '—';
+    const generos = (s.genres || []).map(g => g.name).slice(0, 2).join(', ');
+    const duracion = (s.episode_run_time && s.episode_run_time.length) ? `${s.episode_run_time[0]} min/ep` : '';
+    const meta = [anio, generos, duracion].filter(Boolean).join(' · ');
+    const score = s.vote_average ? `${Math.round(s.vote_average * 10)}%` : '—';
+
+    card.onclick = () => window.abrirDetalleSerie(s.id);
+    card.innerHTML = `
+        <img class="vr-img-real" src="${backdrop}" alt="${s.name || ''}">
+        <div class="vr-overlay">
+            <div class="vr-score">${score}</div>
+            <div class="vr-titulo">${s.name || ''}</div>
+            <div class="vr-meta">${meta}</div>
+        </div>`;
+}
+
+window.votoRelampagoSerieVotar = async function(tipo) {
+    if (window._votoRelampagoSerieProcesando) return;
+    window._votoRelampagoSerieProcesando = true;
+
+    const state = window._votoRelampagoSerie;
+    const seriesId = state.seriesId;
+    if (!seriesId) { window._votoRelampagoSerieProcesando = false; return; }
+
+    vrsDispararRayo();
+
+    if (tipo === 'like' || tipo === 'dislike') {
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch(`${CONFIG.API_URL}/reviews/series/${seriesId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ voteType: tipo.toUpperCase() })
+            });
+            if (res.ok) {
+                const stats = await res.json();
+                if (typeof mostrarPuntosGanados === 'function') mostrarPuntosGanados(stats.pointsAwarded);
+            }
+        } catch (e) {}
+
+        if (window._votoRelampagoSerieVotadas) window._votoRelampagoSerieVotadas.add(seriesId);
+
+        if (tipo === 'like') {
+            state.chainFromId = seriesId;
+            state.streak = (state.streak || 0) + 1;
+        } else {
+            state.chainFromId = null;
+            state.streak = 0;
+        }
+    } else if (tipo === 'skip') {
+        const token = localStorage.getItem('token');
+        try {
+            await fetch(`${CONFIG.API_URL}/reviews/series/${seriesId}/omitir`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+        } catch (e) {}
+        if (window._votoRelampagoSerieOmitidas) window._votoRelampagoSerieOmitidas.add(seriesId);
+    }
+
+    setTimeout(async () => {
+        await window.vrsCargarSiguiente();
+        window._votoRelampagoSerieProcesando = false;
+    }, 320);
+};
+
+function vrsDispararRayo() {
+    const flash = document.getElementById('vrFlashSerie');
+    const bolt = document.getElementById('vrBoltSerie');
+    if (!flash || !bolt) return;
+    flash.style.transition = 'none';
+    bolt.style.transition = 'none';
+    flash.style.opacity = '0.55';
+    bolt.style.opacity = '1';
+    bolt.style.transform = 'translate(-50%,-50%) scale(1.1) rotate(0deg)';
+    requestAnimationFrame(() => {
+        flash.style.transition = 'opacity .5s ease';
+        bolt.style.transition = 'opacity .5s ease, transform .5s ease';
+        flash.style.opacity = '0';
+        bolt.style.opacity = '0';
+        bolt.style.transform = 'translate(-50%,-50%) scale(1.6) rotate(6deg)';
+    });
 }
