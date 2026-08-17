@@ -982,66 +982,94 @@ const adminEstadisticas = {
         },
 
         // Renderizar tabla de guardadas
-        renderizarGuardadas: function() {
-            const w = this.datos.watchlist;
-            if (!w) return;
+                renderizarGuardadas: function() {
+                    const w = this.datos.watchlist;
+                    if (!w) return;
 
-            const topPeliculasHtml = (w.topPeliculas || []).length > 0
-                ? w.topPeliculas.map((p, i) => `
-                    <tr>
-                        <td>${i + 1}. ${p.titulo}</td>
-                        <td class="stat-valor">${p.total} usuarios</td>
-                    </tr>`).join('')
-                : '<tr><td colspan="2" style="color:#999;">Sin datos aún</td></tr>';
+                    document.getElementById('stats-guardadas-body').innerHTML = `
+                        <div class="stats-subtabs">
+                            <button class="stats-subtab-btn active" data-subtab="total" onclick="adminEstadisticas.cambiarSubtabGuardadas('total', this)">Total</button>
+                            <button class="stats-subtab-btn" data-subtab="peliculas" onclick="adminEstadisticas.cambiarSubtabGuardadas('peliculas', this)">Películas</button>
+                            <button class="stats-subtab-btn" data-subtab="series" onclick="adminEstadisticas.cambiarSubtabGuardadas('series', this)">Series</button>
+                        </div>
+                        <div id="stats-guardadas-subtab-total" class="stats-subtab-panel active">
+                            ${this.renderGuardadasTotal(w)}
+                        </div>
+                        <div id="stats-guardadas-subtab-peliculas" class="stats-subtab-panel">
+                            ${this.renderGuardadasSeccion(w.peliculas, '🎬 Top 10 películas más guardadas', 'peliculas')}
+                        </div>
+                        <div id="stats-guardadas-subtab-series" class="stats-subtab-panel">
+                            ${this.renderGuardadasSeccion(w.series, '📺 Top 10 series más guardadas', 'series')}
+                        </div>
+                    `;
+                },
 
-            const generosHtml = (w.generos || []).length > 0
-                ? w.generos.map(g => `
-                    <tr>
-                        <td><strong>${g.genero}</strong></td>
-                        <td class="stat-valor">${g.total}</td>
-                        <td class="stat-valor">${g.porcentaje}%</td>
-                    </tr>`).join('')
-                : '<tr><td colspan="3" style="color:#999;">Sin datos aún</td></tr>';
+                cambiarSubtabGuardadas: function(tab, btn) {
+                    document.querySelectorAll('#stats-guardadas-body .stats-subtab-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.querySelectorAll('#stats-guardadas-body .stats-subtab-panel').forEach(p => p.classList.remove('active'));
+                    document.getElementById('stats-guardadas-subtab-' + tab).classList.add('active');
+                },
 
-            const html = `
-                <tr>
-                    <td><strong>Total películas guardadas</strong></td>
-                    <td class="stat-valor">${this.formatearNumero(w.totalGuardadas)}</td>
-                    <td colspan="2"></td>
-                </tr>
-                <tr>
-                    <td><strong>Usuarios con lista</strong></td>
-                    <td class="stat-valor">${this.formatearNumero(w.usuariosConLista)}</td>
-                    <td colspan="2"></td>
-                </tr>
-                <tr>
-                    <td><strong>Promedio por usuario</strong></td>
-                    <td class="stat-valor">${w.promedioPorUsuario}</td>
-                    <td colspan="2"></td>
-                </tr>
-                <tr>
-                    <td colspan="4">
-                        <div class="stats-grid">
-                            <div class="stats-col">
-                                <h4>🎬 Top 10 películas más guardadas</h4>
-                                <table class="admin-table" style="margin-top:0.5rem;">
-                                    <thead><tr><th>Película</th><th>Usuarios</th></tr></thead>
-                                    <tbody>${topPeliculasHtml}</tbody>
-                                </table>
+                renderGuardadasTotal: function(w) {
+                    const t = w.total;
+                    return `
+                        <div class="stats-hero-numero">${this.formatearNumero(t.totalGuardadas)}</div>
+                        <div class="stats-hero-label">items guardados (histórico)</div>
+
+                        <div class="stats-split-bar">
+                            <div class="fill-peliculas" style="width:${w.pctPeliculas}%;"></div>
+                            <div class="fill-series" style="width:${w.pctSeries}%;"></div>
+                        </div>
+                        <div class="stats-split-legend">
+                            <span><span class="dot" style="background:#e50914;"></span>Películas · ${w.pctPeliculas.toFixed(0)}%</span>
+                            <span><span class="dot" style="background:#324c89;"></span>Series · ${w.pctSeries.toFixed(0)}%</span>
+                        </div>
+
+                        <div class="stats-kpi-row">
+                            <div class="stats-kpi-card"><div class="kpi-valor">${this.formatearNumero(t.usuariosConLista)}</div><div class="kpi-label">Usuarios con lista</div></div>
+                            <div class="stats-kpi-card"><div class="kpi-valor">${t.promedioPorUsuario}</div><div class="kpi-label">Promedio por usuario</div></div>
+                        </div>
+                        <p style="font-size:0.72rem;color:#999;margin-top:-0.3rem;">Totales históricos — no se filtran por el selector de fecha. "Usuarios con lista" puede contar dos veces a quien guardó de ambos tipos.</p>
+                    `;
+                },
+
+                renderGuardadasSeccion: function(s, tituloTop, color) {
+                    const acento = color === 'series' ? '#324c89' : '#e50914';
+
+                    const topContent = (s.topContent || []).map((p, i) =>
+                        `<li><strong>${i + 1}. ${p.titulo}</strong>: ${p.total} usuarios</li>`
+                    ).join('') || '<li>Sin datos</li>';
+
+                    const generos = (s.generos || []).map(g =>
+                        `<li><strong>${g.genero}</strong>: ${g.total} (${g.porcentaje}%)</li>`
+                    ).join('') || '<li>Sin datos</li>';
+
+                    return `
+                        <div class="stats-hero-numero" style="color:${acento};">${this.formatearNumero(s.totalGuardadas)}</div>
+                        <div class="stats-hero-label">items guardados</div>
+
+                        <div class="stats-kpi-row">
+                            <div class="stats-kpi-card"><div class="kpi-valor">${this.formatearNumero(s.usuariosConLista)}</div><div class="kpi-label">Usuarios con lista</div></div>
+                            <div class="stats-kpi-card"><div class="kpi-valor">${s.promedioPorUsuario}</div><div class="kpi-label">Promedio por usuario</div></div>
+                        </div>
+
+                        <div class="stats-votos-cols">
+                            <div class="stats-votos-col-izq">
+                                <div class="stats-top" style="border-top-color:${acento};">
+                                    <h4>${tituloTop}</h4>
+                                    <ul>${topContent}</ul>
+                                </div>
                             </div>
-                            <div class="stats-col">
-                                <h4>🎭 Géneros más guardados</h4>
-                                <table class="admin-table" style="margin-top:0.5rem;">
-                                    <thead><tr><th>Género</th><th>Total</th><th>%</th></tr></thead>
-                                    <tbody>${generosHtml}</tbody>
-                                </table>
+                            <div class="stats-votos-col-der">
+                                <div class="stats-top" style="border-top-color:${acento};">
+                                    <h4>🎭 Géneros más guardados</h4>
+                                    <ul>${generos}</ul>
+                                </div>
                             </div>
                         </div>
-                    </td>
-                </tr>
-            `;
-            document.getElementById('stats-guardadas-body').innerHTML = html;
-        },
+                    `;
+                },
 
         // Formatear números grandes (ej: 1234 → 1.2K)
         formatearNumero: function(num) {
