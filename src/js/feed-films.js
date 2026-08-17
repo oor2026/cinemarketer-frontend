@@ -1162,11 +1162,15 @@ function renderSlideDestacado(idx) {
                 const res = await fetch(`${CONFIG.API_URL}/movies/${guardado.movieId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                if (res.ok) {
+            if (res.ok) {
+                // Solo se muestra si el tab activo es Películas — evita que
+                // una carga lenta termine mostrándose encima de Series.
+                if (window._tabActivo === 'peliculas' || !window._tabActivo) {
                     contenedor.style.display = 'block';
-                    renderVotoRelampago(await res.json());
-                    return;
                 }
+                renderVotoRelampago(await res.json());
+                return;
+            }
             }
         } catch (e) {}
 
@@ -1223,7 +1227,9 @@ function renderSlideDestacado(idx) {
                     state.vistas = [...state.vistas.slice(-19), pelicula.id];
                     localStorage.setItem(vrStorageKey(), JSON.stringify(state));
 
-                    contenedor.style.display = 'block';
+                    if (window._tabActivo === 'peliculas' || !window._tabActivo) {
+                        contenedor.style.display = 'block';
+                    }
                     renderVotoRelampago(pelicula);
         } catch (e) {
             contenedor.style.display = 'none';
@@ -4257,8 +4263,9 @@ window.seleccionarTabFeed = function(tab, el) {
         const btnFiltrosAvanzados = document.querySelector('.feed-tab-filtro');
         let comunidadContainer = document.getElementById('comunidad-container');
 
-        const destacada = document.getElementById('destacadaContainer');
+                const destacada = document.getElementById('destacadaContainer');
                                         const votoRelampago = document.getElementById('votoRelampagoContainer');
+                                        const votoRelampagoSerie = document.getElementById('votoRelampagoSeriesContainer');
                                         const triviaBadge = document.getElementById('triviaBadgeContainer');
                                         const triviaSeriesBadge = document.getElementById('triviaSeriesBadgeContainer');
                                         const filasGenero = document.getElementById('filasGeneroContainer');
@@ -4275,6 +4282,7 @@ window.seleccionarTabFeed = function(tab, el) {
                                     if (filasSeries) filasSeries.style.display = 'none';
                                     if (pillsSerie) pillsSerie.style.display = 'none';
                                     if (triviaSeriesBadge) triviaSeriesBadge.style.display = 'none';
+                                    if (votoRelampagoSerie) votoRelampagoSerie.style.display = 'none';
                                     const destacadaSerieOculta = document.getElementById('destacadaContainerSerie');
                                     if (destacadaSerieOculta) destacadaSerieOculta.style.display = 'none';
                                     // Si ya se cargó antes, mostrarla directo. Si todavía no (por
@@ -4304,6 +4312,7 @@ window.seleccionarTabFeed = function(tab, el) {
                                     if (btnFiltrosAvanzados) btnFiltrosAvanzados.style.visibility = 'hidden';
                                     if (destacada) destacada.style.display = 'none';
                                     if (votoRelampago) votoRelampago.style.display = 'none';
+                                    if (votoRelampagoSerie) votoRelampagoSerie.style.display = 'none';
                                     if (triviaBadge) triviaBadge.style.display = 'none';
                                     if (triviaSeriesBadge) triviaSeriesBadge.style.display = 'none';
                                     if (filasGenero) filasGenero.style.display = 'none';
@@ -4337,12 +4346,17 @@ window.seleccionarTabFeed = function(tab, el) {
                         if (typeof window.cargarSerieDestacada === 'function') {
                             window.cargarSerieDestacada();
                         }
-                if (votoRelampago) votoRelampago.style.display = 'none';
-                if (triviaBadge) triviaBadge.style.display = 'none';
-                // Se dispara acá directamente (no solo confiando en la cadena
-                // interna de cargarFilasSeries) — así cada entrada al tab
-                // Series siempre reintenta cargar el badge, sin depender de
-                // en qué estado de caché haya quedado feed-series.js.
+                        if (votoRelampago) votoRelampago.style.display = 'none';
+                        if (triviaBadge) triviaBadge.style.display = 'none';
+                        // Mismo criterio que Voto Relámpago de Películas: solo si ya
+                        // hay una serie cargada. Se dispara directo acá también, no
+                        // solo desde cargarFilasSeries, mismo motivo que Trivia.
+                        if (votoRelampagoSerie && window._votoRelampagoSerie && window._votoRelampagoSerie.seriesId) votoRelampagoSerie.style.display = 'block';
+                        if (typeof window.cargarVotoRelampagoSerie === 'function') window.cargarVotoRelampagoSerie();
+                        // Se dispara acá directamente (no solo confiando en la cadena
+                        // interna de cargarFilasSeries) — así cada entrada al tab
+                        // Series siempre reintenta cargar el badge, sin depender de
+                        // en qué estado de caché haya quedado feed-series.js.
                 if (triviaSeriesBadge && window._triviaSeriesEstadoCargado) triviaSeriesBadge.style.display = 'block';
                 if (typeof window.cargarTriviaSeriesBadge === 'function') window.cargarTriviaSeriesBadge();
                 if (filasGenero) filasGenero.style.display = 'none';
