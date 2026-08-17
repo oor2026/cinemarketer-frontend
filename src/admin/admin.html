@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="512x512" href="favicon.png">
     <link rel="apple-touch-icon" href="assets/images/favicon.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="../css/admin.css?v=2">
     <script src="../js/config.js"></script>
     <script src="../js/api.js"></script>
     <script>
@@ -1080,21 +1080,25 @@
                     </select>
                 </div>
             </div>
-            <div class="stats-resumen" id="statsResumen"></div>
-            <div class="stats-tabs">
-                <button class="tab-btn active" onclick="adminEstadisticas.cambiarPestana('usuarios', this)">👥 Usuarios</button>
-                <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('votos', this)">👍 Votaciones</button>
-                <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('comentarios', this)">💬 Comentarios</button>
-                <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('recomendaciones', this)">🎬 Recomendaciones</button>
-                <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('publicaciones', this)">📝 Publicaciones</button>
-                <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('guardadas', this)">🔖 Guardadas</button>
-                <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('premios', this)">🎁 Premios y Canjes</button>
-                <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('premium', this)">🏆 Premium y Sorteos</button>
-                <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('suscripciones', this)">👑 Suscripciones</button>
-                <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('ganancias', this)">💰 Ganancias</button>
-                <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('puntos', this)">💰 Puntos</button>
-                <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('soporte', this)">🎫 Soporte</button>
-                <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('crecimiento', this)">📈 Crecimiento</button>
+            <div class="admin-stats" id="statsResumen"></div>
+            <div class="stats-tabs-wrapper">
+                <button class="stats-tabs-flecha stats-tabs-flecha-izq" onclick="adminEstadisticas.scrollTabs(-1)" aria-label="Ver pestañas anteriores"><i class="fas fa-chevron-left"></i></button>
+                <div class="stats-tabs" id="statsTabs">
+                    <button class="tab-btn active" onclick="adminEstadisticas.cambiarPestana('usuarios', this)">👥 Usuarios</button>
+                    <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('votos', this)">👍 Votaciones</button>
+                    <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('comentarios', this)">💬 Comentarios</button>
+                    <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('recomendaciones', this)">🎬 Recomendaciones</button>
+                    <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('publicaciones', this)">📝 Publicaciones</button>
+                    <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('guardadas', this)">🔖 Guardadas</button>
+                    <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('premios', this)">🎁 Premios y Canjes</button>
+                    <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('premium', this)">🏆 Premium y Sorteos</button>
+                    <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('suscripciones', this)">👑 Suscripciones</button>
+                    <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('ganancias', this)">💰 Ganancias</button>
+                    <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('puntos', this)">💰 Puntos</button>
+                    <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('soporte', this)">🎫 Soporte</button>
+                    <button class="tab-btn" onclick="adminEstadisticas.cambiarPestana('crecimiento', this)">📈 Crecimiento</button>
+                </div>
+                <button class="stats-tabs-flecha stats-tabs-flecha-der" onclick="adminEstadisticas.scrollTabs(1)" aria-label="Ver pestañas siguientes"><i class="fas fa-chevron-right"></i></button>
             </div>
             <div class="stats-contenido">
                 <div id="stats-usuarios" class="stats-panel active">
@@ -1106,12 +1110,7 @@
                     </div>
                 </div>
                 <div id="stats-votos" class="stats-panel">
-                    <div class="stats-tabla-container">
-                        <table class="stats-tabla">
-                            <thead><tr><th>KPI</th><th>Valor</th><th>Top/Ranking</th></tr></thead>
-                            <tbody id="stats-votos-body"></tbody>
-                        </table>
-                    </div>
+                    <div id="stats-votos-body"></div>
                 </div>
                 <div id="stats-comentarios" class="stats-panel">
                     <div class="stats-tabla-container">
