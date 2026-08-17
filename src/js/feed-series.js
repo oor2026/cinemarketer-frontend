@@ -115,7 +115,7 @@ function renderFilasSeries() {
                 <div class="fila-genero-viewport">
                     <button class="fila-genero-nav fila-genero-nav-prev" onclick="window.moverFilaSerie('${f.key}', -1)" aria-label="Anterior"><i class="fas fa-chevron-left"></i></button>
                     <div class="fila-genero-track" id="filaSerieTrack-${f.key}">
-                        <div class="fila-genero-loading"><i class="fas fa-spinner fa-spin"></i></div>
+                        ${skeletonFilaHTML()}
                     </div>
                     <button class="fila-genero-nav fila-genero-nav-next" onclick="window.moverFilaSerie('${f.key}', 1)" aria-label="Siguiente"><i class="fas fa-chevron-right"></i></button>
                 </div>`;
@@ -130,7 +130,7 @@ function renderFilasSeries() {
     configurarLazyLoadFilasSeries();
 
     if (window._filasSeries[0] && !window._filasSeries[0].cargado) {
-        cargarSeriesFila(window._filasSeries[0]);
+       cargarFilaConCola(window._filasSeries[0], () => cargarSeriesFila(window._filasSeries[0]));
     }
 }
 
@@ -143,7 +143,7 @@ function configurarLazyLoadFilasSeries() {
             if (!fila) return;
 
             if (entry.isIntersecting) {
-                if (!fila.cargado) cargarSeriesFila(fila);
+                if (!fila.cargado) cargarFilaConCola(fila, () => cargarSeriesFila(fila));
                 const track = document.getElementById(`filaSerieTrack-${fila.key}`);
                 if (track) iniciarGuinoIntermitenteSerie(fila, track);
             } else {
@@ -205,27 +205,18 @@ async function cargarSeriesFila(fila) {
             const data = await res.json();
             resultados = (data.results || []).filter(s => esValidaSerie(s, true, anioActual));
 
-        } else if (fila.key === 'votos') {
-            const res = await fetch(`${CONFIG.API_URL}/series/popular?page=1`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await res.json();
-            const pool = (data.results || []).filter(s => esValidaSerie(s, false, anioActual)).slice(0, 15);
-
-            const conVotos = await Promise.all(pool.map(async s => {
-                try {
-                    const r = await fetch(`${CONFIG.API_URL}/public/series/${s.id}/stats`, {
+                } else if (fila.key === 'votos') {
+                    const res = await fetch(`${CONFIG.API_URL}/series/popular?page=1`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
-                    const stats = r.ok ? await r.json() : { likes: 0, dislikes: 0 };
-                    return { ...s, _totalVotos: (stats.likes || 0) + (stats.dislikes || 0) };
-                } catch (e) {
-                    return { ...s, _totalVotos: 0 };
-                }
-            }));
-            resultados = conVotos.sort((a, b) => b._totalVotos - a._totalVotos);
+                    const data = await res.json();
+                    // Mismo criterio que Películas: se muestra ya con el orden
+                    // "populares" de TMDb, sin esperar los votos — el orden real
+                    // se corrige solo en segundo plano (reordenarFilaSeriePorVotos).
+                    resultados = (data.results || []).filter(s => esValidaSerie(s, false, anioActual)).slice(0, 15);
+                    fila._votosPendientes = true;
 
-        } else if (fila.tipo === 'genero') {
+                } else if (fila.tipo === 'genero') {
             const res = await fetch(`${CONFIG.API_URL}/series/search?withGenres=${fila.generoId}&page=1`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -248,14 +239,37 @@ async function cargarSeriesFila(fila) {
                     window._primerosSeriesUsados.add(resultados[0].id);
                 }
 
-                fila.series = resultados.slice(0, 15);
-                await renderCardsFilaSerie(fila);
+                                fila.series = resultados.slice(0, 15);
+                                await renderCardsFilaSerie(fila);
 
-    } catch (e) {
-        const track = document.getElementById(`filaSerieTrack-${fila.key}`);
-        if (track) track.innerHTML = '<div class="fila-genero-vacia">No pudimos cargar esta sección.</div>';
-    }
-}
+                                if (fila._votosPendientes) {
+                                    fila._votosPendientes = false;
+                                    reordenarFilaSeriePorVotos(fila, token); // no se espera — corrige el orden en segundo plano
+                                }
+
+                    } catch (e) {
+                        const track = document.getElementById(`filaSerieTrack-${fila.key}`);
+                        if (track) track.innerHTML = '<div class="fila-genero-vacia">No pudimos cargar esta sección.</div>';
+                    }
+                }
+                
+                async function reordenarFilaSeriePorVotos(fila, token) {
+                    try {
+                        const conVotos = await Promise.all(fila.series.map(async s => {
+                            try {
+                                const r = await fetch(`${CONFIG.API_URL}/public/series/${s.id}/stats`, {
+                                    headers: { 'Authorization': `Bearer ${token}` }
+                                });
+                                const stats = r.ok ? await r.json() : { likes: 0, dislikes: 0 };
+                                return { ...s, _totalVotos: (stats.likes || 0) + (stats.dislikes || 0) };
+                            } catch (e) {
+                                return { ...s, _totalVotos: 0 };
+                            }
+                        }));
+                        fila.series = conVotos.sort((a, b) => b._totalVotos - a._totalVotos);
+                        await renderCardsFilaSerie(fila);
+                    } catch (e) {}
+                }
 
 function generarTarjetaSerieHTML(serie) {
     const posterUrl = serie.poster_path

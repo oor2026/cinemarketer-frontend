@@ -3717,9 +3717,48 @@ window.abrirElencoCard = async function(movieId, event) {
                     .fila-genero-flecha { display: flex; }
                     .fila-genero-nav { display: none; }
                 }
-        .fila-genero-loading, .fila-genero-vacia {
-            padding: 40px 20px; text-align: center; color: #999; flex: 0 0 100%;
-        }
+                .fila-genero-loading, .fila-genero-vacia {
+                    padding: 40px 20px; text-align: center; color: #999; flex: 0 0 100%;
+                }
+
+                /* Skeleton loader — mismo tamaño/forma que una card real, para que
+                   el "cargando" no se sienta como un vacío feo mientras llega el fetch. */
+                .fila-genero-skeleton {
+                    flex: 0 0 400px;
+                    background: white;
+                    border-radius: 15px;
+                    overflow: hidden;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                }
+                .fila-genero-skeleton .sk-poster {
+                    aspect-ratio: 1/1;
+                    background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+                    background-size: 200% 100%;
+                    animation: skeletonShimmer 1.4s ease-in-out infinite;
+                }
+                .fila-genero-skeleton .sk-linea {
+                    height: 12px;
+                    margin: 14px 16px;
+                    border-radius: 6px;
+                    background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+                    background-size: 200% 100%;
+                    animation: skeletonShimmer 1.4s ease-in-out infinite;
+                }
+                .fila-genero-skeleton .sk-linea.corta { width: 60%; }
+
+                @keyframes skeletonShimmer {
+                    0% { background-position: 200% 0; }
+                    100% { background-position: -200% 0; }
+                }
+
+                @media (max-width: 768px) {
+                    .fila-genero-skeleton {
+                        flex: 0 0 100%;
+                        border-radius: 0;
+                        box-shadow: none;
+                        border-bottom: 16px solid #f0f0f0;
+                    }
+                }
 
         @keyframes guinoAsoma {
                     0%, 100% { transform: translateX(0); }

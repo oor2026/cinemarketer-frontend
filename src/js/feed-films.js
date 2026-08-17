@@ -299,8 +299,13 @@ window.cargarFilasGenero = async function() {
 
     const grid = document.getElementById('peliculasGrid');
     const filasCont = document.getElementById('filasGeneroContainer');
-    if (grid) grid.style.display = 'none';
-    if (filasCont) filasCont.style.display = 'block';
+    // Solo se muestra si el tab activo es Películas (o todavía no se
+    // definió ninguno, caso de la carga inicial) — así se puede precargar
+    // en segundo plano estando en otro tab sin que se vea nada.
+    if (window._tabActivo === 'peliculas' || !window._tabActivo) {
+        if (grid) grid.style.display = 'none';
+        if (filasCont) filasCont.style.display = 'block';
+    }
 
     if (window._filasGeneroCargadas) {
         renderFilasGenero();
@@ -421,6 +426,51 @@ window.priorizarFilaGenero = function(key, btn) {
         }
 };
 
+// ==============================================
+// COLA DE CARGA DE FILAS — máximo 2 filas pidiendo datos a la vez.
+// Compartida entre Películas y Series (misma variable global) para que
+// el límite sea real independientemente de qué tab dispare más filas.
+// Sin esto, un scroll rápido mete 4-5 filas en rango del observer casi
+// juntas y todas compiten por banda al mismo tiempo — sobre todo notorio
+// en mobile con conexión limitada.
+// ==============================================
+window._filaCargaEnCurso = window._filaCargaEnCurso || 0;
+window._filaCargaCola = window._filaCargaCola || [];
+const FILA_CARGA_MAX_CONCURRENTE = 2;
+
+function procesarColaFilas() {
+    while (window._filaCargaEnCurso < FILA_CARGA_MAX_CONCURRENTE && window._filaCargaCola.length > 0) {
+        const fn = window._filaCargaCola.shift();
+        window._filaCargaEnCurso++;
+        Promise.resolve(fn()).finally(() => {
+            window._filaCargaEnCurso--;
+            procesarColaFilas();
+        });
+    }
+}
+
+// fila.cargado se marca ACÁ, al encolar — no cuando arranca a ejecutarse
+// de verdad — así el observer no vuelve a encolar la misma fila mientras
+// espera su turno en la cola.
+function cargarFilaConCola(fila, fnCargar) {
+    if (fila.cargado) return;
+    fila.cargado = true;
+    window._filaCargaCola.push(fnCargar);
+    procesarColaFilas();
+}
+
+function skeletonFilaHTML() {
+    // 3 cards fantasma — suficiente para llenar el ancho visible en
+    // desktop y dar sensación de fila real, sin exagerar el DOM temporal.
+    return Array(3).fill(0).map(() => `
+        <div class="fila-genero-skeleton">
+            <div class="sk-poster"></div>
+            <div class="sk-linea"></div>
+            <div class="sk-linea corta"></div>
+        </div>
+    `).join('');
+}
+
 function renderFilasGenero() {
     const cont = document.getElementById('filasGeneroContainer');
     if (!cont) return;
@@ -440,7 +490,7 @@ function renderFilasGenero() {
                                     <div class="fila-genero-viewport">
                                         <button class="fila-genero-nav fila-genero-nav-prev" onclick="window.moverFilaGenero('${f.key}', -1)" aria-label="Anterior"><i class="fas fa-chevron-left"></i></button>
                                         <div class="fila-genero-track" id="filaTrack-${f.key}">
-                                            <div class="fila-genero-loading"><i class="fas fa-spinner fa-spin"></i></div>
+                                            ${skeletonFilaHTML()}
                                         </div>
                                         <button class="fila-genero-nav fila-genero-nav-next" onclick="window.moverFilaGenero('${f.key}', 1)" aria-label="Siguiente"><i class="fas fa-chevron-right"></i></button>
                                     </div>`;
@@ -454,9 +504,9 @@ function renderFilasGenero() {
 
     configurarLazyLoadFilas();
 
-    if (window._filasGenero[0] && !window._filasGenero[0].cargado) {
-        cargarPeliculasFila(window._filasGenero[0]);
-    }
+        if (window._filasGenero[0] && !window._filasGenero[0].cargado) {
+            cargarFilaConCola(window._filasGenero[0], () => cargarPeliculasFila(window._filasGenero[0]));
+        }
 }
 
 let _observerFilas = null;
@@ -468,7 +518,7 @@ function configurarLazyLoadFilas() {
                 if (!fila) return;
 
                 if (entry.isIntersecting) {
-                    if (!fila.cargado) cargarPeliculasFila(fila);
+                    if (!fila.cargado) cargarFilaConCola(fila, () => cargarPeliculasFila(fila));
                     const track = document.getElementById(`filaTrack-${fila.key}`);
                     if (track) iniciarGuinoIntermitente(fila, track);
                 } else {
@@ -513,7 +563,7 @@ window.moverFilaGenero = function(key, direccion) {
 };
 
 async function cargarPeliculasFila(fila) {
-    fila.cargado = true;
+    fila.cargado = true; // redundante si vino de cargarFilaConCola (ya lo marcó al encolar), pero se deja por si se llama directo
     const token = localStorage.getItem('token');
     const anioActual = new Date().getFullYear();
     const soloLatinos = /^[a-zA-ZÀ-ÿ0-9\s\-:,.!?'"()\u00C0-\u024F\u1E00-\u1EFF]+$/;
@@ -542,27 +592,20 @@ async function cargarPeliculasFila(fila) {
             const data = await res.json();
             resultados = (data.results || []).filter(p => esValida(p, true));
 
-        } else if (fila.key === 'votos') {
-            const res = await fetch(`${CONFIG.API_URL}/movies/popular?page=1`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await res.json();
-            const pool = (data.results || []).filter(p => esValida(p, false)).slice(0, 15);
-
-            const conVotos = await Promise.all(pool.map(async p => {
-                try {
-                    const r = await fetch(`${CONFIG.API_URL}/reviews/movies/${p.id}/stats`, {
+                } else if (fila.key === 'votos') {
+                    const res = await fetch(`${CONFIG.API_URL}/movies/popular?page=1`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
-                    const stats = r.ok ? await r.json() : { likes: 0, dislikes: 0 };
-                    return { ...p, _totalVotos: (stats.likes || 0) + (stats.dislikes || 0) };
-                } catch (e) {
-                    return { ...p, _totalVotos: 0 };
-                }
-            }));
-            resultados = conVotos.sort((a, b) => b._totalVotos - a._totalVotos);
+                    const data = await res.json();
+                    // Se muestra de una con el orden que ya trae TMDb (populares),
+                    // sin esperar los 15 fetches de votos — evita que esta fila en
+                    // particular tarde mucho más que las demás. El orden real "por
+                    // más votadas" se corrige solo, en segundo plano, apenas esos
+                    // datos llegan (ver reordenarFilaPorVotos más abajo).
+                    resultados = (data.results || []).filter(p => esValida(p, false)).slice(0, 15);
+                    fila._votosPendientes = true;
 
-        } else if (fila.tipo === 'genero') {
+                } else if (fila.tipo === 'genero') {
             const res = await fetch(`${CONFIG.API_URL}/movies/search?withGenres=${fila.generoId}&page=1`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -585,14 +628,37 @@ async function cargarPeliculasFila(fila) {
                     window._primerosPeliculasUsados.add(resultados[0].id);
                 }
 
-                fila.peliculas = resultados.slice(0, 15);
-                await renderCardsFila(fila);
+                                fila.peliculas = resultados.slice(0, 15);
+                                await renderCardsFila(fila);
 
-    } catch (e) {
-        const track = document.getElementById(`filaTrack-${fila.key}`);
-        if (track) track.innerHTML = '<div class="fila-genero-vacia">No pudimos cargar esta sección.</div>';
-    }
-}
+                                if (fila._votosPendientes) {
+                                    fila._votosPendientes = false;
+                                    reordenarFilaPorVotos(fila, token); // no se espera — corrige el orden en segundo plano
+                                }
+
+                    } catch (e) {
+                        const track = document.getElementById(`filaTrack-${fila.key}`);
+                        if (track) track.innerHTML = '<div class="fila-genero-vacia">No pudimos cargar esta sección.</div>';
+                    }
+                }
+
+                async function reordenarFilaPorVotos(fila, token) {
+                    try {
+                        const conVotos = await Promise.all(fila.peliculas.map(async p => {
+                            try {
+                                const r = await fetch(`${CONFIG.API_URL}/reviews/movies/${p.id}/stats`, {
+                                    headers: { 'Authorization': `Bearer ${token}` }
+                                });
+                                const stats = r.ok ? await r.json() : { likes: 0, dislikes: 0 };
+                                return { ...p, _totalVotos: (stats.likes || 0) + (stats.dislikes || 0) };
+                            } catch (e) {
+                                return { ...p, _totalVotos: 0 };
+                            }
+                        }));
+                        fila.peliculas = conVotos.sort((a, b) => b._totalVotos - a._totalVotos);
+                        await renderCardsFila(fila);
+                    } catch (e) {}
+                }
 
 async function renderCardsFila(fila) {
     const track = document.getElementById(`filaTrack-${fila.key}`);
@@ -4028,23 +4094,34 @@ window['init_feed-films'] = async function() {
             }
         }, 200);
 
-    window.cargarFilasGenero();
-                inicializarContadorCaracteres();
-            window.addEventListener('resize', window.actualizarBotonesPaginacion);
+        // Se lee ANTES de decidir qué se muestra — así se evita el flash de
+        // Películas que aparecía brevemente antes de pasar a Series/Comunidad,
+        // y las dos cargas (Películas/Series) arrancan en paralelo desde el
+        // arranque en vez de una atrás de la otra.
+        const tabGuardada = localStorage.getItem('feedTabActivo');
 
-            // Restaurar la tab que el usuario tenía elegida antes del refresh.
-            // Se hace al final, después de que el grid de Películas por defecto
-            // ya terminó de montarse, así que hay un flash breve de Películas
-            // antes de pasar a Series/Comunidad si esa era la tab guardada.
-            const tabGuardada = localStorage.getItem('feedTabActivo');
-            if (tabGuardada && tabGuardada !== 'peliculas') {
-                const idsPorTab = { series: 'tabSeries', comunidad: 'tabComunidad' };
-                const btnGuardado = document.getElementById(idsPorTab[tabGuardada]);
-                if (btnGuardado) {
-                    window.seleccionarTabFeed(tabGuardada, btnGuardado);
-                }
+        if (tabGuardada && tabGuardada !== 'peliculas') {
+            const idsPorTab = { series: 'tabSeries', comunidad: 'tabComunidad' };
+            const btnGuardado = document.getElementById(idsPorTab[tabGuardada]);
+            if (btnGuardado) {
+                // Fija window._tabActivo antes de que cargarFilasGenero corra,
+                // así el guard de arriba ya sabe que no debe mostrarse.
+                window.seleccionarTabFeed(tabGuardada, btnGuardado);
             }
-        };
+        }
+
+        window.cargarFilasGenero();
+                    inicializarContadorCaracteres();
+                window.addEventListener('resize', window.actualizarBotonesPaginacion);
+
+                // Precarga silenciosa de Series en segundo plano cuando Películas
+                // es la tab activa — para que ya esté lista si el usuario cambia
+                // de tab más tarde. Si la tab guardada YA era Series, no hace
+                // falta: seleccionarTabFeed ya la disparó arriba.
+                if ((!tabGuardada || tabGuardada === 'peliculas') && typeof window.cargarFilasSeries === 'function') {
+                    window.cargarFilasSeries();
+                }
+            };
 
 // ==============================================
 // MODAL OCULTAR RESPUESTA PROPIA
