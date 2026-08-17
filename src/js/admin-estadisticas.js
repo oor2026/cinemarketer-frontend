@@ -55,15 +55,22 @@ const adminEstadisticas = {
         },
 
     // Cambiar pestaña
-    cambiarPestana: function(pestana, element) {
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        element.classList.add('active');
+        cambiarPestana: function(pestana, element) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
 
-        document.querySelectorAll('.stats-panel').forEach(panel => panel.classList.remove('active'));
-        document.getElementById(`stats-${pestana}`).classList.add('active');
-    },
+            document.querySelectorAll('.stats-panel').forEach(panel => panel.classList.remove('active'));
+            document.getElementById(`stats-${pestana}`).classList.add('active');
+        },
 
-    // Cargar estadísticas desde el backend
+        // Desplaza la fila de tabs con las flechas del carrusel
+        scrollTabs: function(direccion) {
+            const contenedor = document.getElementById('statsTabs');
+            if (!contenedor) return;
+            contenedor.scrollBy({ left: direccion * 220, behavior: 'smooth' });
+        },
+
+        // Cargar estadísticas desde el backend
     cargarEstadisticas: async function() {
         try {
             // Mostrar loading
@@ -111,48 +118,36 @@ const adminEstadisticas = {
 
     // Renderizar tarjetas de resumen
     renderizarResumen: function() {
-        const s = this.datos.summary;
-        const html = `
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-users"></i></div>
-                <div class="stat-content">
-                    <span class="stat-value">${this.formatearNumero(s.totalUsers)}</span>
+            const s = this.datos.summary;
+            const html = `
+                <div class="admin-stat-box">
+                    <span class="stat-num">${this.formatearNumero(s.totalUsers)}</span>
                     <span class="stat-label">Usuarios totales</span>
+                    <div class="stat-trend ${s.userGrowth >= 0 ? 'positive' : 'negative'}">
+                        ${s.userGrowth >= 0 ? '▲' : '▼'} ${Math.abs(s.userGrowth).toFixed(1)}%
+                    </div>
                 </div>
-                <div class="stat-trend ${s.userGrowth >= 0 ? 'positive' : 'negative'}">
-                    ${s.userGrowth >= 0 ? '▲' : '▼'} ${Math.abs(s.userGrowth).toFixed(1)}%
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-thumbs-up"></i></div>
-                <div class="stat-content">
-                    <span class="stat-value">${s.approvalRate.toFixed(1)}%</span>
+                <div class="admin-stat-box">
+                    <span class="stat-num">${s.approvalRate.toFixed(1)}%</span>
                     <span class="stat-label">Aprobación</span>
+                    <div class="stat-trend ${s.approvalGrowth >= 0 ? 'positive' : 'negative'}">
+                        ${s.approvalGrowth >= 0 ? '▲' : '▼'} ${Math.abs(s.approvalGrowth).toFixed(1)}%
+                    </div>
                 </div>
-                <div class="stat-trend ${s.approvalGrowth >= 0 ? 'positive' : 'negative'}">
-                    ${s.approvalGrowth >= 0 ? '▲' : '▼'} ${Math.abs(s.approvalGrowth).toFixed(1)}%
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-gift"></i></div>
-                <div class="stat-content">
-                    <span class="stat-value">${this.formatearNumero(s.totalRedemptions)}</span>
+                <div class="admin-stat-box">
+                    <span class="stat-num">${this.formatearNumero(s.totalRedemptions)}</span>
                     <span class="stat-label">Canjes</span>
+                    <div class="stat-trend ${s.redemptionGrowth >= 0 ? 'positive' : 'negative'}">
+                        ${s.redemptionGrowth >= 0 ? '▲' : '▼'} ${Math.abs(s.redemptionGrowth).toFixed(1)}%
+                    </div>
                 </div>
-                <div class="stat-trend ${s.redemptionGrowth >= 0 ? 'positive' : 'negative'}">
-                    ${s.redemptionGrowth >= 0 ? '▲' : '▼'} ${Math.abs(s.redemptionGrowth).toFixed(1)}%
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-headset"></i></div>
-                <div class="stat-content">
-                    <span class="stat-value">${s.openTicketsCount}</span>
+                <div class="admin-stat-box">
+                    <span class="stat-num">${s.openTicketsCount}</span>
                     <span class="stat-label">Tickets abiertos</span>
                 </div>
-            </div>
-        `;
-        document.getElementById('statsResumen').innerHTML = html;
-    },
+            `;
+            document.getElementById('statsResumen').innerHTML = html;
+        },
 
     // Renderizar tabla de usuarios
     renderizarUsuarios: function() {
@@ -213,51 +208,111 @@ const adminEstadisticas = {
         document.getElementById('stats-usuarios-body').innerHTML = html;
     },
 
-    // Renderizar tabla de votaciones
-    renderizarVotos: function() {
-        const v = this.datos.votes;
-        const topPelis = v.topMovies?.map(m =>
-            `<li><strong>${m.title}</strong>: ${m.votes} votos (${m.likes} 👍 | ${m.dislikes} 👎)</li>`
-        ).join('') || '<li>Sin datos</li>';
+    // Renderizar tarjeta de votaciones (tabs Total / Películas / Series)
+        renderizarVotos: function() {
+            const v = this.datos.votes;
+            this.datos._votosPorTab = { total: v.total, peliculas: v.peliculas, series: v.series };
 
-        const topUsers = v.topUsers?.map(u =>
-            `<li><strong>${u.name}</strong>: ${u.votes} votos</li>`
-        ).join('') || '<li>Sin datos</li>';
+            document.getElementById('stats-votos-body').innerHTML = `
+                <div class="stats-subtabs">
+                    <button class="stats-subtab-btn active" data-subtab="total" onclick="adminEstadisticas.cambiarSubtabVotos('total', this)">Total</button>
+                    <button class="stats-subtab-btn" data-subtab="peliculas" onclick="adminEstadisticas.cambiarSubtabVotos('peliculas', this)">Películas</button>
+                    <button class="stats-subtab-btn" data-subtab="series" onclick="adminEstadisticas.cambiarSubtabVotos('series', this)">Series</button>
+                </div>
+                <div id="stats-votos-subtab-total" class="stats-subtab-panel active">
+                    ${this.renderVotosTotal(v)}
+                </div>
+                <div id="stats-votos-subtab-peliculas" class="stats-subtab-panel">
+                    ${this.renderVotosSeccion(v.peliculas, '🎬 Top 5 películas', 'peliculas')}
+                </div>
+                <div id="stats-votos-subtab-series" class="stats-subtab-panel">
+                    ${this.renderVotosSeccion(v.series, '📺 Top 5 series', 'series')}
+                </div>
+            `;
+        },
 
-        const html = `
-            <tr>
-                <td><strong>Total de votos</strong></td>
-                <td class="stat-valor">${this.formatearNumero(v.totalVotes)}</td>
-                <td rowspan="4">
-                    <div class="stats-top">
-                        <h4>🎬 Top 5 películas</h4>
-                        <ul>${topPelis}</ul>
+        cambiarSubtabVotos: function(tab, btn) {
+            document.querySelectorAll('#stats-votos-body .stats-subtab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('#stats-votos-body .stats-subtab-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('stats-votos-subtab-' + tab).classList.add('active');
+        },
+
+        renderVotosTotal: function(v) {
+            const t = v.total;
+            return `
+                <div class="stats-hero-numero">${this.formatearNumero(t.totalVotes)}</div>
+                <div class="stats-hero-label">votos totales este período</div>
+
+                <div class="stats-split-bar">
+                    <div class="fill-peliculas" style="width:${v.pctPeliculas}%;"></div>
+                    <div class="fill-series" style="width:${v.pctSeries}%;"></div>
+                </div>
+                <div class="stats-split-legend">
+                    <span><span class="dot" style="background:#e50914;"></span>Películas · ${v.pctPeliculas.toFixed(0)}%</span>
+                    <span><span class="dot" style="background:#324c89;"></span>Series · ${v.pctSeries.toFixed(0)}%</span>
+                </div>
+
+                <div class="stats-kpi-row">
+                    <div class="stats-kpi-card"><div class="kpi-valor">${this.formatearNumero(t.totalLikes)}</div><div class="kpi-label">Likes</div></div>
+                    <div class="stats-kpi-card"><div class="kpi-valor">${this.formatearNumero(t.totalDislikes)}</div><div class="kpi-label">Dislikes</div></div>
+                    <div class="stats-kpi-card"><div class="kpi-valor">${t.approvalRate.toFixed(1)}%</div><div class="kpi-label">Aprobación</div></div>
+                </div>
+            `;
+        },
+
+            renderVotosSeccion: function(s, tituloTop, color) {
+                const acento = color === 'series' ? '#324c89' : '#e50914';
+
+                const topContent = s.topContent?.map(m =>
+                    `<li><strong>${m.title}</strong>: ${m.votes} votos (${m.likes} 👍 | ${m.dislikes} 👎)</li>`
+                ).join('') || '<li>Sin datos</li>';
+
+                const topUsers = s.topUsers?.map(u =>
+                    `<li><strong>${u.name}</strong>: ${u.votes} votos</li>`
+                ).join('') || '<li>Sin datos</li>';
+
+                const tendencia = Object.entries(s.dailyTrend || {}).map(([fecha, cantidad]) =>
+                    `<li>${this.formatearFechaCorta(fecha)}: <strong>${cantidad} votos</strong></li>`
+                ).join('') || '<li>Sin datos</li>';
+
+                return `
+                    <div class="stats-hero-numero" style="color:${acento};">${this.formatearNumero(s.totalVotes)}</div>
+                    <div class="stats-hero-label">votos en este contenido</div>
+
+                    <div class="stats-kpi-row">
+                        <div class="stats-kpi-card"><div class="kpi-valor">${this.formatearNumero(s.totalLikes)}</div><div class="kpi-label">Likes</div></div>
+                        <div class="stats-kpi-card"><div class="kpi-valor">${this.formatearNumero(s.totalDislikes)}</div><div class="kpi-label">Dislikes</div></div>
+                        <div class="stats-kpi-card"><div class="kpi-valor">${s.approvalRate.toFixed(1)}%</div><div class="kpi-label">Aprobación</div></div>
                     </div>
-                </td>
-            </tr>
-            <tr>
-                <td><strong>Total de likes</strong></td>
-                <td class="stat-valor">${this.formatearNumero(v.totalLikes)}</td>
-            </tr>
-            <tr>
-                <td><strong>Total de dislikes</strong></td>
-                <td class="stat-valor">${this.formatearNumero(v.totalDislikes)}</td>
-            </tr>
-            <tr>
-                <td><strong>Ratio de aprobación</strong></td>
-                <td class="stat-valor">${v.approvalRate.toFixed(1)}%</td>
-            </tr>
-            <tr>
-                <td><strong>Top 5 usuarios</strong></td>
-                <td colspan="2">
-                    <div class="stats-top">
-                        <ul>${topUsers}</ul>
+
+                    <div class="stats-votos-cols">
+                        <div class="stats-votos-col-izq">
+                            <div class="stats-top" style="border-top-color:${acento};">
+                                <h4>${tituloTop}</h4>
+                                <ul>${topContent}</ul>
+                            </div>
+                        </div>
+                        <div class="stats-votos-col-der">
+                            <div class="stats-top" style="border-top-color:${acento};">
+                                <h4>👤 Top 5 usuarios</h4>
+                                <ul>${topUsers}</ul>
+                            </div>
+                            <div class="stats-top" style="border-top-color:${acento};">
+                                <h4>📅 Tendencia diaria</h4>
+                                <ul>${tendencia}</ul>
+                            </div>
+                        </div>
                     </div>
-                </td>
-            </tr>
-        `;
-        document.getElementById('stats-votos-body').innerHTML = html;
-    },
+                `;
+            },
+
+        formatearFechaCorta: function(fechaIso) {
+            const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+            const partes = fechaIso.split('-');
+            if (partes.length !== 3) return fechaIso;
+            return `${parseInt(partes[2])} ${meses[parseInt(partes[1]) - 1]}`;
+        },
 
     // Renderizar tabla de comentarios
     renderizarComentarios: function() {
