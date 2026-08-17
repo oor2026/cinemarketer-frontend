@@ -406,64 +406,95 @@ const adminEstadisticas = {
             `;
         },
 
-    renderizarRecomendaciones: function() {
+        renderizarRecomendaciones: function() {
             const r = this.datos.recommendations;
             if (!r) return;
 
-            const topPeliculas = (r.topPeliculas || [])
-                .map((p, i) => `${i + 1}. ${p.titulo} (${p.total})`)
-                .join(' | ') || '—';
-
-            const topContextos = (r.topContextos || [])
-                .map((c, i) => `${i + 1}. ${c.contexto} (${c.total})`)
-                .join(' | ') || '—';
-
-            const html = `
-                <tr>
-                    <td><strong>Total enviadas</strong></td>
-                    <td class="stat-valor">${this.formatearNumero(r.totalEnviadas)}</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td><strong>Total vistas (Ya la ví)</strong></td>
-                    <td class="stat-valor">${this.formatearNumero(r.totalVistas)}</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td><strong>Tasa de visualización</strong></td>
-                    <td class="stat-valor">${r.tasaVisualizacion?.toFixed(1)}%</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td><strong>Total calificadas</strong></td>
-                    <td class="stat-valor">${this.formatearNumero(r.totalCalificadas)}</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td><strong>Tasa de calificación</strong></td>
-                    <td class="stat-valor">${r.tasaCalificacion?.toFixed(1)}%</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td><strong>Recomendaciones con contexto</strong></td>
-                    <td class="stat-valor">${this.formatearNumero(r.totalConContexto)}</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td><strong>Tasa de contexto</strong></td>
-                    <td class="stat-valor">${r.tasaContexto?.toFixed(1)}%</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td><strong>Top 5 películas más recomendadas</strong></td>
-                    <td colspan="2" class="stat-valor" style="font-size:0.82rem;">${topPeliculas}</td>
-                </tr>
-                <tr>
-                    <td><strong>Top 5 contextos más usados</strong></td>
-                    <td colspan="2" class="stat-valor" style="font-size:0.82rem;">${topContextos}</td>
-                </tr>
+            document.getElementById('stats-recomendaciones-body').innerHTML = `
+                <div class="stats-subtabs">
+                    <button class="stats-subtab-btn active" data-subtab="total" onclick="adminEstadisticas.cambiarSubtabRecomendaciones('total', this)">Total</button>
+                    <button class="stats-subtab-btn" data-subtab="peliculas" onclick="adminEstadisticas.cambiarSubtabRecomendaciones('peliculas', this)">Películas</button>
+                    <button class="stats-subtab-btn" data-subtab="series" onclick="adminEstadisticas.cambiarSubtabRecomendaciones('series', this)">Series</button>
+                </div>
+                <div id="stats-recomendaciones-subtab-total" class="stats-subtab-panel active">
+                    ${this.renderRecomendacionesTotal(r)}
+                </div>
+                <div id="stats-recomendaciones-subtab-peliculas" class="stats-subtab-panel">
+                    ${this.renderRecomendacionesSeccion(r.peliculas, '🎬 Top 5 películas más recomendadas', 'peliculas')}
+                </div>
+                <div id="stats-recomendaciones-subtab-series" class="stats-subtab-panel">
+                    ${this.renderRecomendacionesSeccion(r.series, '📺 Top 5 series más recomendadas', 'series')}
+                </div>
             `;
-            document.getElementById('stats-recomendaciones-body').innerHTML = html;
+        },
+
+        cambiarSubtabRecomendaciones: function(tab, btn) {
+            document.querySelectorAll('#stats-recomendaciones-body .stats-subtab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('#stats-recomendaciones-body .stats-subtab-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('stats-recomendaciones-subtab-' + tab).classList.add('active');
+        },
+
+        renderRecomendacionesTotal: function(r) {
+            const t = r.total;
+            return `
+                <div class="stats-hero-numero">${this.formatearNumero(t.totalEnviadas)}</div>
+                <div class="stats-hero-label">recomendaciones enviadas (histórico)</div>
+
+                <div class="stats-split-bar">
+                    <div class="fill-peliculas" style="width:${r.pctPeliculas}%;"></div>
+                    <div class="fill-series" style="width:${r.pctSeries}%;"></div>
+                </div>
+                <div class="stats-split-legend">
+                    <span><span class="dot" style="background:#e50914;"></span>Películas · ${r.pctPeliculas.toFixed(0)}%</span>
+                    <span><span class="dot" style="background:#324c89;"></span>Series · ${r.pctSeries.toFixed(0)}%</span>
+                </div>
+
+                <div class="stats-kpi-row">
+                    <div class="stats-kpi-card"><div class="kpi-valor">${t.tasaVisualizacion.toFixed(1)}%</div><div class="kpi-label">Tasa visualización</div></div>
+                    <div class="stats-kpi-card"><div class="kpi-valor">${t.tasaCalificacion.toFixed(1)}%</div><div class="kpi-label">Tasa calificación</div></div>
+                    <div class="stats-kpi-card"><div class="kpi-valor">${t.tasaContexto.toFixed(1)}%</div><div class="kpi-label">Tasa contexto</div></div>
+                </div>
+                <p style="font-size:0.72rem;color:#999;margin-top:-0.3rem;">Estos totales son históricos — no se filtran por el selector de fecha.</p>
+            `;
+        },
+
+        renderRecomendacionesSeccion: function(s, tituloTop, color) {
+            const acento = color === 'series' ? '#324c89' : '#e50914';
+
+            const topContent = (s.topContent || [])
+                .map((p, i) => `<li><strong>${i + 1}. ${p.titulo}</strong>: ${p.total}</li>`)
+                .join('') || '<li>Sin datos</li>';
+
+            const topContextos = (s.topContextos || [])
+                .map((c, i) => `<li><strong>${i + 1}. ${c.contexto}</strong>: ${c.total}</li>`)
+                .join('') || '<li>Sin datos</li>';
+
+            return `
+                <div class="stats-hero-numero" style="color:${acento};">${this.formatearNumero(s.totalEnviadas)}</div>
+                <div class="stats-hero-label">recomendaciones enviadas</div>
+
+                <div class="stats-kpi-row">
+                    <div class="stats-kpi-card"><div class="kpi-valor">${this.formatearNumero(s.totalVistas)}</div><div class="kpi-label">Vistas</div></div>
+                    <div class="stats-kpi-card"><div class="kpi-valor">${this.formatearNumero(s.totalCalificadas)}</div><div class="kpi-label">Calificadas</div></div>
+                    <div class="stats-kpi-card"><div class="kpi-valor">${this.formatearNumero(s.totalConContexto)}</div><div class="kpi-label">Con contexto</div></div>
+                </div>
+
+                <div class="stats-votos-cols">
+                    <div class="stats-votos-col-izq">
+                        <div class="stats-top" style="border-top-color:${acento};">
+                            <h4>${tituloTop}</h4>
+                            <ul>${topContent}</ul>
+                        </div>
+                    </div>
+                    <div class="stats-votos-col-der">
+                        <div class="stats-top" style="border-top-color:${acento};">
+                            <h4>🏷️ Top 5 contextos</h4>
+                            <ul>${topContextos}</ul>
+                        </div>
+                    </div>
+                </div>
+            `;
         },
 
     renderizarPublicaciones: function() {
