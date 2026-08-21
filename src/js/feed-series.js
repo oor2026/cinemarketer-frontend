@@ -69,15 +69,20 @@ window.cargarFilasSeries = async function() {
                 if (typeof window.cargarVotoRelampagoSerie === 'function') window.cargarVotoRelampagoSerie();
             };
 
-    function renderPillsFilasSerie() {
-            const pillsCont = document.getElementById('ordenarPillsSerie');
-            if (!pillsCont) return;
-            pillsCont.innerHTML = window._filasSeries.map((f, i) =>
-                `<button class="pill-orden${i === 0 ? ' active' : ''}" data-key="${f.key}" onclick="window.priorizarFilaGeneroSerie('${f.key}', this)">${f.label}</button>`
-            ).join('');
-            pillsCont.style.display = '';
-            if (typeof activarDragScrollPills === 'function') activarDragScrollPills(pillsCont);
-        }
+        function renderPillsFilasSerie() {
+                const pillsCont = document.getElementById('ordenarPillsSerie');
+                if (!pillsCont) return;
+                pillsCont.innerHTML = window._filasSeries.map((f, i) =>
+                    `<button class="pill-orden${i === 0 ? ' active' : ''}" data-key="${f.key}" onclick="window.priorizarFilaGeneroSerie('${f.key}', this)">${f.label}</button>`
+                ).join('');
+                // La precarga en segundo plano (feed-films.js) llama a esta función
+                // mientras el usuario sigue en la tab Películas — no hay que
+                // mostrar la fila hasta que Series sea efectivamente la tab
+                // activa, o queda duplicada arriba de la de Películas.
+                const tabActiva = document.querySelector('.feed-tab.active')?.dataset.tab;
+                if (tabActiva === 'series') pillsCont.style.display = '';
+                if (typeof activarDragScrollPills === 'function') activarDragScrollPills(pillsCont);
+            }
 
     window.priorizarFilaGeneroSerie = function(key, btn) {
         document.querySelectorAll('#ordenarPillsSerie .pill-orden').forEach(p => p.classList.remove('active'));
