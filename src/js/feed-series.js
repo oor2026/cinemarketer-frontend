@@ -252,7 +252,7 @@ async function cargarSeriesFila(fila) {
                         if (track) track.innerHTML = '<div class="fila-genero-vacia">No pudimos cargar esta sección.</div>';
                     }
                 }
-                
+
                 async function reordenarFilaSeriePorVotos(fila, token) {
                     try {
                         const conVotos = await Promise.all(fila.series.map(async s => {
@@ -2105,52 +2105,89 @@ let _votacionesSeriesPage = 0;
 let _votacionesSeriesHayMas = false;
 let _votacionesSeriesCargando = false;
 
+let _stackVotacionesSeries = [];
+let _stackIndiceSeries = 0;
+
 window.renderVotacionesSeries = function(votaciones) {
     const wrapper = document.getElementById('perfilVotacionesSeriesWrapper');
     if (!wrapper) return;
 
     if (!votaciones || votaciones.length === 0) {
-        wrapper.innerHTML = '<div class="perfil-vacio">Sin votaciones aún</div>';
+                wrapper.innerHTML = '<div class="cine-stack-vacio-wrap"><div class="cine-stack-vacio cine-stack-vacio--series"></div><p class="cine-stack-vacio-lbl">Sin votaciones aún</p></div>';
         return;
     }
 
-    _votacionesSeriesPage   = 0;
-    _votacionesSeriesHayMas = votaciones.length === 8;
+    _votacionesSeriesPage    = 0;
+    _votacionesSeriesHayMas  = votaciones.length === 8;
+    _stackVotacionesSeries   = votaciones;
+    _stackIndiceSeries       = 0;
 
-    wrapper.innerHTML = `
-        <div class="perfil-carrusel-outer">
-            <button class="perfil-carrusel-arrow left" onclick="window.scrollCarruselSeries(-1)">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <div class="perfil-carrusel-track" id="perfilCarruselSeriesTrack">
-                ${votaciones.map(v => buildVotoItemSerie(v)).join('')}
-            </div>
-            <button class="perfil-carrusel-arrow right" onclick="window.scrollCarruselSeries(1)">
-                <i class="fas fa-chevron-right"></i>
-            </button>
+        wrapper.innerHTML = `
+                   <p class="cine-stack-eyebrow">VOTACIONES (${window._perfilCounts?.votacionesSeries || 0})</p>
+        <div class="cine-stack-area">
+            <button class="cine-stack-nav prev" onclick="window._moverStackSeries(-1)"><i class="fas fa-chevron-left"></i></button>
+            <div id="cineStackSeriesContainer" style="position:relative; width:100%; height:100%;"></div>
+            <button class="cine-stack-nav next" onclick="window._moverStackSeries(1)"><i class="fas fa-chevron-right"></i></button>
         </div>
+        <p class="cine-stack-titulo" id="cineStackSeriesTitulo"></p>
     `;
+
+    const cont = document.getElementById('cineStackSeriesContainer');
+    cont.innerHTML = votaciones.map(v => {
+        const poster = v.posterPath
+            ? `<img src="https://image.tmdb.org/t/p/w185${v.posterPath}" alt="${v.seriesTitle || ''}">`
+            : `<div class="placeholder"><i class="fas fa-tv"></i></div>`;
+        const badgeClass = v.voto === 'LIKE' ? 'like' : 'dislike';
+        const badgeIcon  = v.voto === 'LIKE' ? 'fa-thumbs-up' : 'fa-thumbs-down';
+        return `
+        <div class="cine-stack-card" onclick="window._abrirSerieDesdePerfil(${v.seriesId})">
+            ${poster}
+            <div class="cine-stack-badge ${badgeClass}"><i class="fas ${badgeIcon}" style="font-size:0.6rem;color:white;"></i></div>
+        </div>`;
+    }).join('');
+
+    window._renderStackPosicionesSeries();
 };
 
-function buildVotoItemSerie(v) {
-    const poster = v.posterPath
-        ? `<img src="https://image.tmdb.org/t/p/w185${v.posterPath}" alt="${v.seriesTitle || ''}">`
-        : `<i class="fas fa-tv"></i>`;
-    const badgeClass = v.voto === 'LIKE' ? 'like' : 'dislike';
-    const badgeIcon  = v.voto === 'LIKE' ? 'fa-thumbs-up' : 'fa-thumbs-down';
-    return `
-    <div class="perfil-voto-item" title="${v.seriesTitle || ''}"
-         onclick="window._abrirSerieDesdePerfil(${v.seriesId})"
-         style="cursor:pointer;">
-        <div class="perfil-voto-poster">
-            ${poster}
-            <div class="perfil-voto-badge ${badgeClass}">
-                <i class="fas ${badgeIcon}" style="font-size:0.55rem;color:white;"></i>
-            </div>
-        </div>
-        <span class="perfil-voto-titulo">${v.seriesTitle || '—'}</span>
-    </div>`;
-}
+window._renderStackPosicionesSeries = function() {
+    const cards = document.querySelectorAll('#cineStackSeriesContainer .cine-stack-card');
+    const N = _stackVotacionesSeries.length;
+    cards.forEach((card, i) => {
+        let diff = i - _stackIndiceSeries;
+        if (diff > N / 2) diff -= N;
+        if (diff < -N / 2) diff += N;
+                const offset = (diff >= 0 && diff <= 2) ? diff : -1;
+
+        if (offset === 0) {
+            card.style.transform = 'translateX(0) translateY(0) scale(1) rotate(0deg)';
+            card.style.opacity = 1; card.style.zIndex = 10;
+        } else if (offset === 1) {
+            card.style.transform = 'translateX(-18px) translateY(10px) scale(0.94) rotate(-3deg)';
+            card.style.opacity = 0.6; card.style.zIndex = 8;
+        } else if (offset === 2) {
+            card.style.transform = 'translateX(-36px) translateY(20px) scale(0.88) rotate(-6deg)';
+            card.style.opacity = 0.3; card.style.zIndex = 7;
+        } else {
+            card.style.transform = 'translateX(260px) translateY(-10px) scale(0.8) rotate(16deg)';
+            card.style.opacity = 0; card.style.zIndex = 5;
+        }
+    });
+    const tituloEl = document.getElementById('cineStackSeriesTitulo');
+    if (tituloEl && _stackVotacionesSeries[_stackIndiceSeries]) {
+        tituloEl.textContent = _stackVotacionesSeries[_stackIndiceSeries].seriesTitle || '—';
+    }
+};
+
+window._moverStackSeries = function(dir) {
+    const N = _stackVotacionesSeries.length;
+    if (N === 0) return;
+    _stackIndiceSeries = (_stackIndiceSeries + dir + N) % N;
+    window._renderStackPosicionesSeries();
+
+    if (dir > 0 && _stackIndiceSeries >= N - 2 && _votacionesSeriesHayMas && !_votacionesSeriesCargando) {
+        window.scrollCarruselSeries(1);
+    }
+};
 
 window.scrollCarruselSeries = async function(dir) {
     const track = document.getElementById('perfilCarruselSeriesTrack');

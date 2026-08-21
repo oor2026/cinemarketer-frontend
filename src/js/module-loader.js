@@ -235,15 +235,33 @@ async function loadModule(moduleName, element = null, updateHash = true) {
             // elementos todavía y el banner quedaba vacío para esa visita.
             cargarBanners(moduleName);
 
-        // CSS
-        const cssId = `css-${moduleName}`;
-        const existingCss = document.getElementById(cssId);
-        if (existingCss) existingCss.remove();
-        const link = document.createElement('link');
-        link.id = cssId;
-        link.rel = 'stylesheet';
-        link.href = `${CSS_PATH}${moduleName}.css?v=${Date.now()}`;
-        document.head.appendChild(link);
+                // CSS
+                const cssId = `css-${moduleName}`;
+                const existingCss = document.getElementById(cssId);
+                if (existingCss) existingCss.remove();
+                const link = document.createElement('link');
+                link.id = cssId;
+                link.rel = 'stylesheet';
+                link.href = `${CSS_PATH}${moduleName}.css?v=${Date.now()}`;
+                document.head.appendChild(link);
+
+                // CSS mobile — solo para el módulo Perfil, y solo el navegador
+                // lo aplica cuando el media query matchea. Al ir en un <link>
+                // aparte (no en un @media adentro del archivo), es el propio
+                // navegador el que decide si corre o no, ANTES de leer una sola
+                // regla — así estas reglas no pueden filtrarse a desktop pase
+                // lo que pase con el contenido del archivo.
+                if (moduleName === 'perfil') {
+                    const cssMobileId = `css-${moduleName}-mobile`;
+                    const existingCssMobile = document.getElementById(cssMobileId);
+                    if (existingCssMobile) existingCssMobile.remove();
+                    const linkMobile = document.createElement('link');
+                    linkMobile.id = cssMobileId;
+                    linkMobile.rel = 'stylesheet';
+                    linkMobile.media = '(max-width: 768px)';
+                    linkMobile.href = `${CSS_PATH}${moduleName}-mobile.css?v=${Date.now()}`;
+                    document.head.appendChild(linkMobile);
+                }
 
         // JS
         const jsId = `js-${moduleName}`;

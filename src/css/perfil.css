@@ -10,6 +10,10 @@
     overflow: visible;
     box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     animation: fadeIn 0.3s ease;
+    transition: background 0.3s ease;
+}
+.perfil-card.modo-oscuro {
+    background: linear-gradient(155deg, #12141b, #0d0f14);
 }
 
 @keyframes fadeIn {
@@ -170,7 +174,6 @@
 /* ── Bio ─────────────────────────────────────── */
 .perfil-bio {
     padding-top: 0.5rem;
-    border-top: 1px solid #f0f0f0;
 }
 
 .perfil-bio-titulo {
@@ -442,12 +445,11 @@
         border-radius: 12px;
     }
 
-    .perfil-bio {
-            width: 100%;
-            margin-top: 0.5rem;
-            padding-top: 0.75rem;
-            border-top: 1px solid #f0f0f0;
-        }
+        .perfil-bio {
+                width: 100%;
+                margin-top: 0.5rem;
+                padding-top: 0.75rem;
+            }
 
         .perfil-info-row {
             flex-direction: column;
@@ -688,4 +690,12 @@
 /* ── Publicaciones en perfil (grilla de tiles) ─── */
 .perfil-pub-tile:hover .perfil-pub-overlay {
     opacity: 1;
+}
+
+/* Fondo oscuro del área de módulo, solo mientras Mi Sala/Perfil está
+   activo — scopeado con :has() para no tocar dashboard.css ni afectar
+   a los demás módulos (Comunidad, Mis Puntos, etc.), que comparten el
+   mismo #module-container. */
+#module-container:has(.perfil-card.modo-oscuro) {
+    background: linear-gradient(155deg, #12141b, #0d0f14);
 }

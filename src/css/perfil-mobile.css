@@ -1,0 +1,377 @@
+/* ==============================================
+   perfil-mobile.css — Mi Sala, solo mobile
+   Se carga con <link media="(max-width: 768px)">
+   desde module-loader.js — el navegador decide si
+   aplica el archivo ANTES de leer una sola regla,
+   así que nunca puede filtrarse a desktop, pase lo
+   que pase con el contenido de acá adentro.
+   ============================================== */
+
+.perfil-card .cine-switch { display: none; }
+.perfil-card .cine-tema-toggle { display: none; }
+.perfil-card .cine-eyebrow { display: none; }
+
+.perfil-card .cine-eyebrow-mobile { display: none; }
+
+.perfil-card .cine-fab-tema, .perfil-card .cine-fab-modo {
+    position: fixed; right: 1.25rem; width: 46px; height: 46px;
+    border-radius: 50%; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; z-index: 900;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+}
+/* Contraste propio, no el del switch sutil de desktop: en modo
+   claro se oscurece bastante (queda un botón oscuro sobre fondo
+   claro); en modo oscuro se aclara (botón claro sobre fondo oscuro)
+   — el sentido inverso siempre destaca más que "seguir el modo". */
+.perfil-card .cine-fab-tema {
+    bottom: 1.25rem;
+    background: rgba(0,0,0,0.55); color: #ffffff;
+    border: 1px solid rgba(0,0,0,0.15);
+}
+.perfil-card.modo-oscuro .cine-fab-tema {
+    background: rgba(255,255,255,0.85); color: #1a1a1a;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+.perfil-card .cine-fab-modo {
+    bottom: 5.25rem;
+    background: var(--cine-section-accent); color: #ffffff;
+}
+
+/* Apilar avatar/contenido en una sola columna */
+.perfil-card .cine-window { flex-direction: column; gap: 1.2rem; padding: 1.2rem; }
+
+/* Avatar a la izquierda; insignia y ranking trivia apilados al lado
+   (no debajo) — grid-area, mismos hermanos directos de siempre
+   dentro de .cine-margin, sin tocar el DOM. */
+.perfil-card .cine-margin {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto auto auto;
+    grid-template-areas: "avatar badge ranking";
+    justify-content: start; align-items: end;
+    column-gap: 0.6rem;
+}
+.perfil-card .cine-avatar-wrap { grid-area: avatar; margin-bottom: 0; }
+.perfil-card .cine-level { grid-area: badge; margin-bottom: 0; margin-top: -5.6rem; position: relative; z-index: 2; }
+.perfil-card #rankingTriviaPeliculasWrapper, .perfil-card #rankingTriviaSeriesWrapper { grid-area: ranking; margin-top: -4.6rem; position: relative; z-index: 2; }
+
+/* Ranking Trivia pasa de caja grande a chip — mismo tamaño que la
+   insignia "Amateur" que tiene al lado. Se esconde la etiqueta
+   "RANKING TRIVIA" (queda implícito por el trofeo + el "#"). */
+.perfil-card .cine-ranking-trivia {
+    width: auto; display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border-radius: 20px; margin-top: 0;
+}
+.perfil-card .cine-ranking-trivia i.fa-trophy { display: inline; font-size: 0.75rem; margin-bottom: 0; }
+.perfil-card .cine-ranking-num { display: inline; font-size: 0.75rem; }
+.perfil-card .cine-ranking-lbl { display: none; }
+.perfil-card .cine-ranking-tipo {
+    display: inline; font-size: 0.82rem; font-weight: 700;
+    text-transform: lowercase; margin-right: 2px;
+    color: var(--cine-accent);
+}
+
+/* Nombre y bio a la izquierda, acompañando al avatar */
+
+/* Se oculta el "QUIÉN SOY" original (arriba del nombre) pero NO el
+   duplicado nuevo (arriba de la bio) — :not() para que no compitan
+   en especificidad entre sí. */
+.perfil-card .cine-section-title.sin-borde:not(.cine-quien-soy-mobile) { display: none; }
+
+/* Escala general — todo lo pensado para desktop es demasiado grande
+   para ~360px de ancho real. */
+.perfil-card .cine-avatar-wrap, .perfil-card .cine-avatar-glow ~ .perfil-avatar { width: 86px; height: 86px; }
+.perfil-card .cine-avatar-glow { inset: -8px; }
+
+.perfil-card .cine-level { font-size: 0.72rem; padding: 3px 9px; gap: 3px; }
+
+.perfil-card .cine-ranking-trivia { padding: 0.5rem 0.4rem; margin-top: 0; }
+.perfil-card .cine-ranking-trivia i.fa-trophy { font-size: 0.85rem; margin-bottom: 0.15rem; }
+.perfil-card .cine-ranking-num { font-size: 1.15rem; }
+.perfil-card .cine-ranking-lbl { font-size: 0.52rem; }
+.perfil-card .cine-quien-soy-mobile { display: inline-block; }
+.perfil-card .cine-name { font-size: 1.3rem; margin-bottom: 0.8rem; }
+.perfil-card .cine-stat-icon { display: inline; font-size: 1rem; margin-right: 0; }
+.perfil-card .perfil-bio { padding-top: 0; }
+.perfil-card .perfil-stat-inline:has(.cine-stat-icon) .cine-stat-lbl { display: none; }
+.perfil-card .cine-stats-inline .cine-stat-icon,
+.perfil-card .cine-stats-inline .cine-stat-num { display: inline; vertical-align: middle; }
+.perfil-card .cine-stat-icon-compuesto { display: inline-flex !important; }
+.perfil-card .perfil-stat-inline { display: inline-flex; align-items: center; gap: 0.35rem; }
+/* En mobile, el lápiz sube hasta la altura del chip "QUIÉN SOY" en
+   vez de quedarse a la altura del título de bio — mismo elemento,
+   solo se reposiciona el "top" del position:absolute que ya trae
+   desde el <style> principal (relativo a .perfil-bio). */
+.perfil-card #btnEditarBio { top: -1.9rem; }
+
+/* Las 6 métricas — fila que envuelve sola, no grilla fija */
+.perfil-card .cine-stats-inline {
+    display: flex; flex-wrap: wrap; gap: 0.6rem 1.1rem; margin: 0 0 1.4rem;
+}
+.perfil-card .cine-stats-inline .perfil-stat-inline { text-align: left; }
+.perfil-card .cine-stats-inline .cine-stat-num,
+.perfil-card .cine-stats-inline .cine-stat-lbl { display: block; margin: 0; }
+.perfil-card .cine-stats-inline .cine-stat-num { font-size: 1.05rem; }
+.perfil-card .cine-stats-inline .cine-stat-lbl { font-size: 0.66rem; }
+
+.perfil-card .cine-bio-title { font-size: 0.88rem; }
+.perfil-card .cine-bio-text { font-size: 0.82rem; line-height: 1.55; }
+
+.perfil-card .cine-section-title { font-size: 0.62rem; padding: 0.28rem 0.65rem; margin: 1.2rem 0 0.9rem; }
+
+.perfil-card .cine-totem-wrap, .perfil-card .cine-totem { width: 90px; height: 90px; }
+.perfil-card .cine-totem { font-size: 2.6rem; }
+.perfil-card .cine-totem-glow { inset: -12px; }
+
+.perfil-card .cine-snapshot { width: 120px; }
+.perfil-card .cine-stack-area { width: 120px; height: 210px; }
+.perfil-card .cine-stack-card { width: 120px; height: 180px; }
+/* Título más ancho (170px) que el mazo (120px) a propósito, para
+   que entren más palabras por línea — pero con márgenes negativos
+   simétricos de -25px c/u (la mitad de esos 50px extra), así el
+   ancho que "ve" el grid para centrar sigue siendo 120px (el mismo
+   que el mazo). El mazo no se mueve; el título queda centrado sobre
+   el mismo eje, aunque visualmente sea más ancho que la imagen. */
+.perfil-card .cine-stack-titulo {
+    width: 170px;
+    margin: 0.8rem -25px 0 -25px;
+    font-size: 0.85rem;
+    text-align: center;
+    padding-left: 0;
+}
+
+/* Banner de foto — restaurado del diseño anterior. La lógica de
+   subida (window.subirBanner) y de mostrar/ocultar el botón según
+   sea tu perfil u otro ya vive en perfil.js, sin cambios acá. Ahora
+   vive afuera de .cine-window (que tiene padding propio), como hijo
+   directo de .perfil-card (sin padding) — así el ancho completo no
+   depende de calzar ningún número con márgenes negativos. */
+.perfil-card .perfil-banner {
+    display: block; width: 100%; height: 130px;
+    border-radius: 20px 20px 0 0;
+    background: #d8d8dc center/cover no-repeat; position: relative;
+}
+.perfil-card .perfil-banner-btn {
+    position: absolute; top: 10px; left: 10px;
+    background: rgba(0,0,0,0.55); color: #ffffff; font-size: 0.75rem;
+    padding: 6px 10px; border-radius: 8px;
+    display: flex; align-items: center; gap: 6px; cursor: pointer;
+}
+
+/* El avatar se superpone al borde inferior del banner. Necesita
+   z-index explícito porque .perfil-banner (perfil.css, legado) ya
+   trae z-index:1 propio, que le ganaría por delante aunque el
+   avatar esté después en el DOM. */
+.perfil-card .cine-avatar-wrap { margin-top: -4.6rem; position: relative; z-index: 2; }
+
+/* Tótem y pills lado a lado, como en desktop (no se apilan entre
+   sí). El grid les da a cada uno su celda fija: tótem arriba-
+   izquierda, pills arriba-derecha, dots abajo-derecha (debajo de
+   las pills, no del tótem). */
+.perfil-card .cine-espiritu-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas: "totem legend" ".     dots";
+    align-items: start;
+    column-gap: 0.8rem;
+    row-gap: 0.5rem;
+}
+.perfil-card .cine-totem-slot { grid-area: totem; }
+.perfil-card #perfilAdnLegend { grid-area: legend; min-width: 0; margin: 0; }
+.perfil-card .cine-adn-dots { grid-area: dots; }
+
+/* Mini-carrusel de pills — solo se desplazan los pills; el tótem
+   queda fijo, en su propia celda del grid, ajeno al scroll. */
+.perfil-card #perfilAdnLegend {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.perfil-card #perfilAdnLegend::-webkit-scrollbar { display: none; }
+
+/* Cada página ocupa el 100% del ancho visible y agrupa hasta 3
+   pills, que se acomodan en 2 filas gracias a su propio flex-wrap
+   (2 arriba + 1 abajo) — así el swipe avanza de a 3, no de a 1. */
+.perfil-card .cine-adn-pagina {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    display: flex; flex-wrap: wrap;
+    align-content: flex-start;
+    justify-content: center;
+    gap: 8px;
+}
+.perfil-card .cine-adn-dots { display: flex; justify-content: center; gap: 6px; }
+.perfil-card .cine-adn-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--cine-switch-border);
+    transition: width 0.2s, border-radius 0.2s;
+}
+.perfil-card .cine-adn-dot.active { background: var(--cine-section-accent); width: 16px; border-radius: 4px; }
+
+/* "Mis gustos" — las 4 tarjetas (favorita, última en cine, no me
+   canso de ver, no la banco) pasan de wrap (2 filas de 2) a
+   carrusel horizontal con snap. Aplica también a #cineSpreadSeries
+   porque comparte la misma clase .cine-spread. */
+.perfil-card .cine-spread {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 1rem;
+    margin-top: 1rem;
+    /* Padding a la izquierda — le da aire al box-shadow del primer
+       póster, que si no queda recortado justo en el borde de scroll
+       (el contenedor no "sabe" que la sombra se extiende más allá
+       de la tarjeta y la corta ahí mismo). */
+    padding-left: 10px;
+    /* Fade en el borde derecho — insinúa que hay más contenido para
+       deslizar sin necesitar flechas ni texto. Los últimos ~40px del
+       contenedor se desvanecen a transparente. */
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 40px), transparent 100%);
+            mask-image: linear-gradient(to right, black calc(100% - 40px), transparent 100%);
+}
+.perfil-card .cine-spread::-webkit-scrollbar { display: none; }
+.perfil-card .cine-spread .cine-snapshot { flex: 0 0 auto; scroll-snap-align: start; }
+
+/* Se agrega vía JS cuando el scroll llega al final — ya no queda
+   contenido oculto, así que el fade no tiene sentido. */
+.perfil-card .cine-spread.cine-fade-oculto {
+    -webkit-mask-image: none;
+            mask-image: none;
+}
+
+/* "Mi actividad" — menú de criterios a la izquierda + mazo activo a
+   la derecha. Se acabó el carrusel externo: ahora solo hay UN mazo
+   visible por vez, así que el drag/tap de sus posters ya no compite
+   con nada más en la pantalla. */
+.perfil-card .cine-actividad-wrap {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: start;
+    column-gap: 1rem;
+    margin-top: 1rem;
+}
+.perfil-card .cine-actividad-menu {
+    display: flex; flex-direction: column; gap: 0.5rem;
+    width: 132px; flex-shrink: 0;
+}
+
+.perfil-card .cine-actividad-menu-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 0.4rem;
+    width: 132px !important; box-sizing: border-box !important; flex-shrink: 0 !important;
+    text-align: left; background: var(--cine-switch-bg);
+    border: 1px solid var(--cine-switch-border); border-radius: 12px;
+    padding: 0.55rem 0.7rem; font-size: 0.72rem; font-weight: 600;
+    color: var(--cine-text-soft); cursor: pointer;
+    overflow: hidden;
+}
+.perfil-card .cine-actividad-menu-item.active {
+    background: var(--cine-section-accent); color: #ffffff; border-color: transparent;
+}
+/* El label cede espacio primero (se trunca con "…" si no entra);
+   el número nunca se achica ni se corta, sea "3" o "1000". */
+.perfil-card .cine-actividad-menu-lbl {
+    flex: 1 1 auto; min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.perfil-card .cine-actividad-menu-count {
+    flex: 0 0 auto;
+    font-size: 0.68rem; font-weight: 700; opacity: 0.85;
+}
+
+/* En mobile la navegación es 100% por swipe (ver
+   _inicializarSwipeStacks en perfil.js) — los chevrones quedan
+   ocultos, ya que dependían de :hover (que no existe en touch) y
+   ahora son redundantes. */
+.perfil-card .cine-stack-nav { display: none !important; }
+
+/* Ya no hace falta — el nombre del criterio queda arriba, en el
+   pill activo del menú. Repetirlo acá era redundante. */
+.perfil-card .cine-stack-eyebrow { display: none; }
+
+/* La fila de wrappers deja de ser flex-wrap (ya no hace falta que
+   convivan varios): un grid de 1 columna alcanza, y el que no
+   corresponde al criterio elegido se oculta por completo. */
+.perfil-card .cine-actividad-row {
+    display: grid !important;
+    margin-left: 0 !important;
+    gap: 0 !important;
+    justify-self: center;
+}
+.perfil-card .cine-actividad-row > div { grid-column: 1; grid-row: 1; max-width: none !important; }
+.perfil-card .cine-actividad-row > div.cine-actividad-oculto { display: none !important; }
+
+/* "Publicaciones en comunidad" — de 3 a 2 columnas en mobile.
+   La grilla original es 100% inline (grid-template-columns puesto
+   directo en el <div> desde perfil.js), así que necesita !important
+   para pisarla desde acá sin tocar el JS. Con 2 columnas cada
+   miniatura queda notablemente más grande. */
+.perfil-card .perfil-pub-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+}
+
+/* "Publicaciones en comunidad" vive fuera de .cine-window, con su
+   propio padding pensado para desktop (2.6rem). En mobile lo bajamos
+   al mismo inset que usa el resto de las secciones (1.2rem), para
+   que el título y la grilla queden alineados con "Mi actividad" y
+   compañía. La regla original usa #id, así que necesita !important
+   para ganarle sin duplicar el selector completo. */
+.perfil-card #perfilPublicacionesSeccion {
+    padding: 0 1.2rem 1.5rem !important;
+    margin: 0 !important;
+}
+
+/* Ícono + número más pegados entre sí (antes tenían doble espaciado:
+   margin-right en el ícono + gap del contenedor). Colores propios
+   por métrica, reusando la misma paleta que ya usa la app en cada
+   concepto equivalente (verde "me gusta", dorado "recomendada",
+   rojo "guardada", etc.) en vez de un color inventado. */
+.perfil-card .perfil-stat-inline { gap: 0.25rem; }
+.perfil-card .fa-thumbs-up.cine-stat-icon { color: #324C89; }
+.perfil-card .fa-comment.cine-stat-icon { color: #f5f5f5; -webkit-text-stroke: 1px rgba(0,0,0,0.5); }
+.perfil-card .fa-envelope.cine-stat-icon { color: #e8b923; }
+.perfil-card .fa-bookmark.cine-stat-icon { color: var(--cine-accent); }
+.perfil-card .fa-users.cine-stat-icon { color: #6b3fa0; }
+.perfil-card .cine-stat-icon-compuesto { color: #0f7a68; }
+
+/* Modal "editar gusto" — el cascarón pasa a ser una tarjeta blanca
+   real (hoy no tenía ningún estilo propio), y como las 8 cajas
+   originales (fondo oscuro pensado para desktop) terminan todas
+   viviendo ADENTRO de este mismo cascarón una vez movidas, alcanza
+   con pisar sus colores por descendencia genérica — no hace falta
+   repetir la regla 8 veces por id. */
+#modalEditarGustoMobileBox {
+    background: #ffffff;
+    border-radius: 0 0 14px 14px;
+    padding: 0 1rem 1rem;
+}
+#modalEditarGustoMobileBox > div {
+    width: 100% !important;
+    margin: 0 !important;
+}
+#modalEditarGustoMobileBox input[type="text"] {
+    background: #f5f5f7 !important;
+    color: #1a1a1a !important;
+    border-color: #ddd !important;
+}
+#modalEditarGustoMobileBox input[type="text"]::placeholder { color: #999 !important; }
+#modalEditarGustoMobileBox button {
+    background: #eee !important;
+    color: #555 !important;
+}
+#modalEditarGustoMobileBox [id$="Resultados"] {
+    background: #ffffff !important;
+    border-color: #eee !important;
+}
+#modalEditarGustoMobileBox [id$="Resultados"] p { color: #1a1a1a !important; }
+#modalEditarGustoMobileBox [id$="Resultados"] p[style*="999"] { color: #999 !important; }
+
+/* "Ver todas las publicaciones" — el azul (#324C89) fijo inline se
+   pierde contra el fondo oscuro. Un celeste claro mantiene la
+   misma familia de color pero con contraste suficiente. */
+.perfil-card.modo-oscuro .cine-ver-todas-pub { color: #8fb4ff !important; }

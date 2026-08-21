@@ -1,111 +1,666 @@
-<div class="perfil-card" id="perfilContenido">
+<div class="perfil-card" id="perfilContenido" style="max-width:1100px; margin-left:auto; margin-right:auto;">
 
-    <!-- BANNER -->
-    <div class="perfil-banner">
-        <div id="btnCambiarBanner" style="display:none;">
-            <label for="inputBanner" class="perfil-banner-btn">
-                <i class="fas fa-paperclip"></i> Cambiar banner
-            </label>
-            <input type="file" id="inputBanner" accept="image/*" style="display:none;" onchange="window.subirBanner(this)">
-        </div>
+    <button id="btnFabTema" class="cine-fab-tema" onclick="window._toggleModoOscuro()" title="Modo oscuro">
+        <i class="fas fa-moon"></i>
+    </button>
+    <div id="cineModoFlash" style="display:none; position:fixed; inset:0; z-index:99998; pointer-events:none;"></div>
+    <div id="cineModoToast" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:99999; background:#1a1a1a; color:#fff; font-size:1.15rem; font-weight:700; padding:1.1rem 1.8rem; border-radius:30px; box-shadow:0 8px 24px rgba(0,0,0,0.3); white-space:nowrap;"></div>
+
+    <button id="btnFabModo" class="cine-fab-modo" onclick="window._toggleFabModo()" title="Cambiar a Series">
+        <i class="fas fa-film"></i>
+    </button>
+
+    <style>
+        /* ==============================================
+           TEMA — claro por defecto, oscuro solo con .modo-oscuro
+           ============================================== */
+                        .perfil-card {
+            --cine-section-accent: var(--cine-accent);
+            --cine-section-accent-rgb: var(--cine-accent-rgb);
+            --cine-bg: linear-gradient(155deg, #ffffff, #f7f7fa);
+            --cine-bg-shadow: 0 0 0 1px rgba(0,0,0,0.06), 0 30px 60px -30px rgba(0,0,0,0.1);
+            --cine-text: #1a1a1a;
+            --cine-text-soft: #6b6f7a;
+            --cine-text-muted: #8b8f9c;
+            --cine-text-body: #555555;
+            --cine-accent: #e50914;
+            --cine-accent-rgb: 229,9,20;
+            --cine-accent-series: #2e6fd6;
+            --cine-accent-series-rgb: 46,111,214;
+            --cine-switch-active-bg: var(--cine-accent);
+            --cine-switch-active-text: #ffffff;
+            --cine-switch-active-bg-series: var(--cine-accent-series);
+            --cine-switch-active-text-series: #ffffff;
+            --cine-totem-glow: transparent;
+            --cine-totem-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            --cine-poster-shadow: 0 14px 28px -8px rgba(0,0,0,0.18);
+            --cine-poster-shadow-series: 0 14px 28px -8px rgba(0,0,0,0.18);
+            --cine-poster-border: var(--cine-accent);
+            --cine-poster-border-series: var(--cine-accent-series);
+            --cine-border: rgba(0,0,0,0.08);
+            --cine-switch-bg: rgba(0,0,0,0.04);
+            --cine-switch-border: rgba(0,0,0,0.12);
+            --cine-card-bg: #f2f2f5;
+            --cine-totem-bg: linear-gradient(155deg, #f4f4f7, #eaeaee);
+            --cine-edit-btn-bg: rgba(0,0,0,0.06);
+            --cine-edit-btn-color: #555555;
+        }
+                        .perfil-card.modo-series {
+            --cine-section-accent: var(--cine-accent-series);
+            --cine-section-accent-rgb: var(--cine-accent-series-rgb);
+        }
+        .perfil-card.modo-oscuro {
+            --cine-bg: linear-gradient(155deg, #12141b, #0d0f14);
+            --cine-bg-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 30px 60px -30px rgba(255,59,92,0.18);
+            --cine-text: #f2f0ea;
+            --cine-text-soft: #6b6f7a;
+            --cine-text-muted: #8b8f9c;
+            --cine-text-body: #b8b6ae;
+            --cine-accent: #ff3b5c;
+            --cine-accent-rgb: 255,59,92;
+            --cine-accent-series: #7ab1ff;
+            --cine-accent-series-rgb: 122,177,255;
+            --cine-switch-active-bg: rgba(var(--cine-accent-rgb),0.18);
+            --cine-switch-active-text: #ffffff;
+            --cine-switch-active-bg-series: rgba(var(--cine-accent-series-rgb),0.18);
+            --cine-switch-active-text-series: #ffffff;
+            --cine-totem-glow: radial-gradient(circle, rgba(var(--cine-accent-rgb),0.26), transparent 65%);
+            --cine-totem-shadow: none;
+            --cine-poster-shadow: 0 20px 42px -10px rgba(var(--cine-accent-rgb),0.55);
+            --cine-poster-shadow-series: 0 20px 42px -10px rgba(var(--cine-accent-series-rgb),0.55);
+            --cine-poster-border: transparent;
+            --cine-poster-border-series: transparent;
+            --cine-border: rgba(255,255,255,0.08);
+            --cine-switch-bg: rgba(255,255,255,0.06);
+            --cine-switch-border: rgba(255,255,255,0.15);
+            --cine-card-bg: #1b1e27;
+            --cine-totem-bg: linear-gradient(155deg, #1b1e27, #14161c);
+            --cine-edit-btn-bg: rgba(255,255,255,0.1);
+            --cine-edit-btn-color: #d7d5cd;
+        }
+
+        /* ── Toggle modo oscuro ──────────────────────── */
+        .cine-tema-toggle {
+            background: var(--cine-switch-bg); border: 1px solid var(--cine-switch-border);
+            color: var(--cine-text-soft); border-radius: 50%; width: 38px; height: 38px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            font-size: 0.95rem; transition: all 0.2s ease; flex-shrink: 0;
+        }
+        .cine-tema-toggle:hover { color: var(--cine-accent); border-color: var(--cine-accent); }
+
+        .cine-window {
+            background: var(--cine-bg);
+            border-radius: 20px;
+            padding: 2.4rem 2.6rem;
+            display: flex;
+            gap: 2.4rem;
+            box-shadow: var(--cine-bg-shadow);
+            transition: background 0.3s ease;
+        }
+        .cine-margin {
+            width: 150px; flex-shrink: 0;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .cine-avatar-wrap { position: relative; width: 130px; height: 130px; margin-bottom: 1rem; }
+        .cine-avatar-glow { position: absolute; inset: -12px; border-radius: 50%; background: radial-gradient(circle, rgba(var(--cine-accent-rgb),0.32), transparent 70%); filter: blur(5px); }
+        .cine-avatar-glow ~ .perfil-avatar { position: relative; width: 130px; height: 130px; border-radius: 50%; overflow: hidden; border: 3px solid var(--cine-accent); }
+        .cine-level { display: inline-flex; align-items: center; gap: 6px; font-size: 0.92rem; font-weight: 600; color: #ffb84d; background: rgba(255,184,77,0.14); border: 1px solid rgba(255,184,77,0.35); border-radius: 24px; padding: 6px 14px; margin-bottom: 1.2rem; }
+
+        .cine-ranking-trivia {
+            width: 100%; text-align: center; margin-top: 1.2rem; padding: 1rem 0.5rem;
+            border-radius: 14px; background: linear-gradient(155deg, rgba(var(--cine-accent-rgb),0.14), rgba(var(--cine-accent-rgb),0.03));
+            border: 1px solid rgba(var(--cine-accent-rgb),0.32); box-shadow: 0 10px 24px -12px rgba(var(--cine-accent-rgb),0.4);
+        }
+        .cine-ranking-trivia i.fa-trophy { display: block; font-size: 1.15rem; color: var(--cine-accent); margin-bottom: 0.35rem; }
+        .cine-ranking-num { display: block; font-family: 'Space Grotesk', sans-serif; font-size: 1.9rem; font-weight: 800; color: var(--cine-accent); line-height: 1.1; }
+        .cine-ranking-lbl { display: block; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.09em; color: var(--cine-accent); opacity: 0.85; margin-top: 0.2rem; }
+
+        .cine-ranking-trivia--series { background: linear-gradient(155deg, rgba(var(--cine-accent-series-rgb),0.14), rgba(var(--cine-accent-series-rgb),0.03)); border-color: rgba(var(--cine-accent-series-rgb),0.32); box-shadow: 0 10px 24px -12px rgba(var(--cine-accent-series-rgb),0.4); }
+        .cine-ranking-trivia--series i.fa-trophy, .cine-ranking-trivia--series .cine-ranking-num, .cine-ranking-trivia--series .cine-ranking-lbl, .cine-ranking-trivia--series .cine-ranking-tipo { color: var(--cine-accent-series); }
+        .cine-stat { margin-bottom: 0.7rem; cursor: default; }
+        .cine-stat.clickable { cursor: pointer; }
+        .cine-stat-num { font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; font-weight: 700; display: block; color: var(--cine-text); }
+        .cine-stat-lbl { font-size: 0.78rem; color: var(--cine-text-muted); }
+
+        .cine-stats-inline { display: flex; flex-wrap: wrap; align-items: baseline; gap: 1.6rem; margin: 0 0 1.4rem; }
+        .cine-stats-inline .cine-stat-num { display: inline; font-size: 1.05rem; margin-right: 0.35rem; }
+                .cine-stats-inline .cine-stat-lbl { font-size: 0.88rem; }
+                .cine-stat-icon { display: none; }
+                        .cine-stat-icon--flip { transform: scaleX(-1); }
+                .cine-quien-soy-mobile { display: none; }
+                .cine-adn-dots { display: none; }
+        .cine-actividad-menu { display: none; }
+        .cine-stat-icon-compuesto { align-items: center; gap: 2px; }
+        .cine-stat-icon-compuesto .fa-user { font-size: 0.78rem; }
+        .cine-stat-icon-compuesto .fa-angles-right { font-size: 0.62rem; }
+
+        .cine-entry { flex: 1; min-width: 0; color: var(--cine-text); font-family: inherit; position: relative; }
+        .cine-eyebrow { letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; margin: 0 0 0.4rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+        #perfilAdnEyebrow { color: var(--cine-accent); font-size: 1.3rem; transition: color 0.3s ease; }
+        #perfilAdnEyebrow.cine-eyebrow--series { color: var(--cine-accent-series); }
+        .cine-name { font-family: 'Space Grotesk', sans-serif; font-size: 1.9rem; font-weight: 700; margin: 0 0 1.4rem; line-height: 1.15; color: var(--cine-text); }
+
+        .cine-switch { display: inline-flex; background: var(--cine-switch-bg); border: 1px solid var(--cine-switch-border); border-radius: 24px; padding: 4px; gap: 3px; flex-shrink: 0; }
+        .cine-switch-option { background: none; border: none; cursor: pointer; color: var(--cine-text-soft); font-size: 0.92rem; padding: 0.5rem 1rem; border-radius: 20px; display: flex; align-items: center; gap: 0.4rem; transition: all 0.2s ease; }
+        .cine-switch-option.active[data-tipo="peliculas"] { background: var(--cine-switch-active-bg); color: var(--cine-switch-active-text); }
+        .cine-switch-option.active[data-tipo="series"] { background: var(--cine-switch-active-bg-series); color: var(--cine-switch-active-text-series); }
+
+        .cine-header-row { display: flex; gap: 2rem; align-items: stretch; }
+        .cine-header-text { flex: 1; min-width: 0; position: relative; }
+        .cine-totem-slot { width: 180px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .cine-espiritu-row { display: flex; gap: 2rem; align-items: center; }
+        .cine-totem-wrap { position: relative; width: 130px; height: 130px; }
+        .cine-totem-glow { position: absolute; inset: -18px; border-radius: 50%; background: var(--cine-totem-glow); }
+        .cine-totem { position: relative; width: 130px; height: 130px; border-radius: 50%; background: var(--cine-totem-bg); border: 1px solid var(--cine-border); box-shadow: var(--cine-totem-shadow); display: flex; align-items: center; justify-content: center; font-size: 3.8rem; animation: cineTotemFloat 4.5s ease-in-out infinite; }
+
+        @keyframes cineTotemFloat {
+            0%   { transform: translateY(0) rotate(0deg); }
+            50%  { transform: translateY(-8px) rotate(2deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+
+        .cine-bio-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 700; margin: 0 0 0.5rem; color: var(--cine-text); }
+        .cine-bio-text { font-size: 0.92rem; line-height: 1.7; color: var(--cine-text-body); margin: 0; }
+
+        .cine-stamp-row { clear: right; display: flex; flex-wrap: wrap; gap: 8px; margin: 1.8rem 0 2rem; }
+
+                 .cine-spread { display: flex; flex-wrap: wrap; gap: 2rem; align-items: flex-start; }
+                .cine-section-title {
+            display: inline-block;
+            font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase;
+            color: var(--cine-section-accent); font-weight: 700;
+            background: rgba(var(--cine-section-accent-rgb), 0.12);
+            padding: 0.35rem 0.8rem; border-radius: 8px;
+            margin: 1.8rem 0 1.2rem;
+        }
+        .cine-section-title.sin-borde { margin-top: 0; }
+        .cine-snapshot { width: 170px; flex-shrink: 0; transform: rotate(-3deg); }
+        .cine-snapshot .poster { width: 100%; aspect-ratio: 2/3; border-radius: 8px; overflow: hidden; box-sizing: border-box; background: var(--cine-card-bg); box-shadow: var(--cine-poster-shadow), 0 0 0 1px var(--cine-border); border: 2px solid var(--cine-poster-border); }
+        /* Tinte según el modo activo — coherente con el switch (rojo
+           Películas, azul Series). En oscuro solo cambia el glow del
+           box-shadow; en claro, el borde de color. */
+        #cineSpreadSeries .cine-snapshot .poster { box-shadow: var(--cine-poster-shadow-series, var(--cine-poster-shadow)), 0 0 0 1px var(--cine-border); border-color: var(--cine-poster-border-series); }
+        .cine-snapshot-lbl { font-size: 0.8rem; color: var(--cine-text-muted); margin: 0.8rem 0 0; line-height: 1.4; }
+        .cine-snapshot-title { display: block; color: var(--cine-text); font-weight: 600; font-size: 1.05rem; margin-top: 4px; font-family: 'Space Grotesk', sans-serif; }
+
+                .cine-edit-btn { background: rgba(0,0,0,0.55); border: none; cursor: pointer; color: #ffffff; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.72rem; position: absolute; top: 8px; right: 8px; z-index: 5; }
+                                                .cine-edit-btn-bio { background: rgba(0,0,0,0.06); border: none; cursor: pointer; color: var(--cine-edit-btn-color); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.72rem; position: absolute; top: 0; right: 0; }
+
+        .cine-stack-eyebrow { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cine-accent); font-weight: 600; margin: 0 0 1.2rem; }
+
+        #perfilVotacionesSeriesWrapper .cine-stack-eyebrow,
+        #perfilComentariosSeriesList .cine-stack-eyebrow,
+        #perfilRecomendadasSeriesWrapper .cine-stack-eyebrow,
+        #perfilGuardadasSeriesWrapper .cine-stack-eyebrow { color: var(--cine-accent-series); }
+
+        .cine-badge-recomendada, .cine-badge-guardada {
+    position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4); font-size: 0.85rem; color: white;
+}
+                        .cine-badge-recomendada { background: #e8b923; }
+
+        .cine-veces-tag {
+            position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.65); color: #fff; font-size: 0.72rem; font-weight: 700;
+            padding: 4px 10px; border-radius: 12px; white-space: nowrap; z-index: 5;
+        }
+        .cine-badge-guardada { background: var(--cine-accent); }
+        .cine-stack-area { position: relative; height: 300px; width: 170px; display: flex; align-items: center; justify-content: flex-start; margin: 0; padding-left: 0; }
+        .cine-stack-area #cineStackContainer,
+        .cine-stack-area #cineStackSeriesContainer,
+        .cine-stack-area #cineStackComentariosContainer,
+        .cine-stack-area #cineStackComentariosSeriesContainer { margin-left: 0px; }
+                .cine-stack-card {
+            position: absolute; width: 170px; height: 255px; border-radius: 10px; overflow: hidden;
+            box-sizing: border-box; background: var(--cine-card-bg); cursor: pointer;
+            transition: all 0.35s cubic-bezier(.22,.61,.36,1);
+            box-shadow: var(--cine-poster-shadow), 0 0 0 1px var(--cine-border);
+            border: 2px solid var(--cine-poster-border);
+        }
+        /* Series votadas/comentadas — mismo tratamiento, tinte azul */
+        #cineStackSeriesContainer .cine-stack-card,
+        #cineStackComentariosSeriesContainer .cine-stack-card,
+        #cineStackRecomendadasSeriesContainer .cine-stack-card,
+        #cineStackGuardadasSeriesContainer .cine-stack-card {
+            box-shadow: var(--cine-poster-shadow-series, var(--cine-poster-shadow)), 0 0 0 1px var(--cine-border);
+            border-color: var(--cine-poster-border-series);
+        }
+        .cine-stack-card img { width: 100%; height: 100%; object-fit: cover; }
+        .cine-stack-card .placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--cine-text-soft); font-size: 2rem; }
+        .cine-stack-badge {
+            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.4); font-size: 0.85rem;
+        }
+        .cine-stack-badge.like { background: #1baf7a; }
+        .cine-stack-badge.dislike { background: #e34948; }
+                .cine-stack-nav {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 32px; height: 32px; background: none; border: none;
+            color: #ffffff; font-size: 1.3rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            filter: drop-shadow(0 1px 4px rgba(0,0,0,0.7));
+            z-index: 25; opacity: 0; transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .cine-stack-area:hover .cine-stack-nav { opacity: 1; }
+        .cine-stack-nav:hover { transform: translateY(-50%) scale(1.15); }
+        .cine-stack-nav.prev { left: 4px; }
+        .cine-stack-nav.next { right: 4px; }
+        .cine-stack-titulo { text-align: left; margin-top: 1.6rem; font-size: 1.05rem; font-weight: 700; font-family: 'Space Grotesk', sans-serif; padding-left: 24px; width: 170px; box-sizing: border-box; overflow-wrap: break-word; color: var(--cine-text); }
+
+        .cine-stack-vacio-wrap { width: 170px; }
+        .cine-stack-vacio { width: 100%; aspect-ratio: 2/3; border-radius: 10px; background: var(--cine-totem-bg); box-shadow: 0 20px 42px -10px rgba(var(--cine-accent-rgb),0.4), 0 0 0 1px var(--cine-border); }
+        .cine-stack-vacio--series { box-shadow: 0 20px 42px -10px rgba(var(--cine-accent-series-rgb),0.4), 0 0 0 1px var(--cine-border); }
+        .cine-stack-vacio-lbl { text-align: center; font-size: 0.82rem; color: var(--cine-text-muted); margin: 0.9rem 0 0; }
+
+        .cine-badge-comentario {
+    position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 32px; height: 32px; border-radius: 50%;
+    background: var(--cine-accent-series); display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4); font-size: 0.85rem; color: white;
+}
+        .cine-vineta-overlay { position: fixed; inset: 0; z-index: 998; display: none; }
+        .cine-vineta {
+            position: absolute; background: #fdf6e3; color: #211c16; border-radius: 18px;
+            padding: 1.1rem 1.3rem; width: 240px; font-size: 0.92rem; line-height: 1.5;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); z-index: 999; display: none;
+            transform: scale(0.85); opacity: 0;
+            transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), opacity 0.2s ease;
+        }
+        .cine-vineta.show { transform: scale(1); opacity: 1; }
+        .cine-vineta::after {
+            content: ''; position: absolute; bottom: -14px; left: 34px; width: 0; height: 0;
+            border-left: 10px solid transparent; border-right: 14px solid transparent; border-top: 16px solid #fdf6e3;
+        }
+        .cine-vineta-fuente { font-size: 0.72rem; color: #8a8371; text-transform: uppercase; letter-spacing: 0.04em; margin: 0 0 6px; font-weight: 700; }
+        .cine-vineta-texto { margin: 0; }
+                .cine-vineta-spoiler { background: #ffe0b2; color: #7a4a00; font-size: 0.65rem; padding: 2px 8px; border-radius: 10px; font-weight: 700; display: inline-block; margin-bottom: 6px; }
+                .cine-vineta-acciones { margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(0,0,0,0.08); }
+        .cine-vineta-responder { background: none; border: none; color: #b2070f; font-weight: 700; font-size: 0.78rem; cursor: pointer; padding: 0; }
+        .cine-vineta-responder:hover { text-decoration: underline; }
+
+        /* Publicaciones en Comunidad — mismo criterio visual que el resto
+           de Mi Sala (sin caja blanca ni cabecera azul de perfil.css).
+           No toco la clase/id: perfil.js los usa para ocultar esta
+           sección en perfiles bloqueados/privados. */
+        #perfilPublicacionesSeccion {
+            max-width: 1100px; margin: 0 auto; padding: 0 2.6rem 2.4rem;
+            background: none; border: none; box-shadow: none; border-radius: 0;
+        }
+                #perfilPublicacionesSeccion .perfil-seccion-titulo {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            color: var(--cine-section-accent); font-size: 0.7rem;
+            letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700;
+            background: rgba(var(--cine-section-accent-rgb), 0.12);
+            padding: 0.35rem 0.8rem; border-radius: 8px;
+            margin: 1.8rem 0 1.2rem;
+        }
+        #perfilPublicacionesSeccion .perfil-seccion-titulo i { color: var(--cine-section-accent); }
+        #perfilPublicacionesSeccion > *:not(.perfil-seccion-titulo) { padding: 0; }
+
+                                .cine-fab-tema, .cine-fab-modo { display: none; }
+
+                        .cine-eyebrow-mobile { display: none; }
+                        .perfil-banner { display: none; }
+    </style>
+
+    <div class="perfil-banner perfil-header" id="perfilBannerHeader">
+        <label id="btnCambiarBanner" class="perfil-banner-btn" style="display:none;">
+            <i class="fas fa-camera"></i> Cambiar banner
+            <input type="file" accept="image/*" style="display:none;" onchange="window.subirBanner(this)">
+        </label>
     </div>
 
-    <!-- FILA: avatar izq + info der -->
-    <div class="perfil-info-row" style="position:relative;">
-        <!-- Botón editar bio — esquina superior derecha -->
-        <button id="btnEditarBio" onclick="window.abrirModalBio()"
-                style="display:none; position:absolute; top:1rem; right:1rem; background:none; border:none; cursor:pointer; color:#aaa; padding:0; font-size:0.82rem; align-items:center; gap:0.4rem;">
-            <i class="fas fa-pencil-alt"></i>
-        </button>
-        <!-- COL IZQUIERDA: avatar + insignia -->
-        <div class="perfil-col-avatar">
-            <div class="perfil-avatar" id="perfilAvatar">
-                <i class="fas fa-user-circle"></i>
+    <div class="cine-window">
+
+        <p id="perfilAdnEyebrowMobile" class="cine-eyebrow-mobile">Mi Sala Cinéfila</p>
+
+        <div class="cine-margin">
+            <div class="cine-avatar-wrap">
+                <div class="cine-avatar-glow"></div>
+                <div class="perfil-avatar" id="perfilAvatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
             </div>
-            <div class="perfil-level-badge" id="perfilLevelBadge">
+            <div class="perfil-level-badge cine-level" id="perfilLevelBadge">
                 <span class="level-icon" id="perfilLevelEmoji">🟢</span>
                 <span class="level-name" id="perfilLevelName">Amateur</span>
             </div>
+
+            <!-- Ranking Trivia — solo una de las dos visible a la vez,
+     según el modo Películas/Series del switch, y solo si el
+     usuario jugó esa trivia alguna vez (ver _renderRankingTrivia). -->
+            <div class="cine-ranking-trivia" id="rankingTriviaPeliculasWrapper" style="display:none;">
+                <i class="fas fa-trophy"></i>
+                <span class="cine-ranking-tipo">CINE</span>
+                <span class="cine-ranking-num" id="rankingTriviaPeliculasNumero">—</span>
+                <span class="cine-ranking-lbl">ranking trivia</span>
+            </div>
+            <div class="cine-ranking-trivia cine-ranking-trivia--series" id="rankingTriviaSeriesWrapper" style="display:none;">
+                <i class="fas fa-trophy"></i>
+                <span class="cine-ranking-tipo">SERIES</span>
+                <span class="cine-ranking-num" id="rankingTriviaSeriesNumero">—</span>
+                <span class="cine-ranking-lbl">ranking trivia</span>
+            </div>
         </div>
 
-        <!-- COL DERECHA: nombre + stats + bio -->
-        <div class="perfil-col-info">
-
-            <!-- NOMBRE + ACCIONES -->
-            <div class="perfil-nombre-row">
-                <h1 class="perfil-nombre" id="perfilNombre" style="margin:0;">Cargando...</h1>
-                <div class="perfil-accion">
-                    <button class="btn-seguir" id="btnSeguir" onclick="window.toggleSeguir()" style="display:none;">
-                        <i class="fas fa-user-plus"></i> Seguir
+        <div class="cine-entry">
+            <div class="cine-eyebrow">
+                <span id="perfilAdnEyebrow">Mi Sala Cinéfila</span>
+                <div style="display:flex; align-items:center; gap:0.8rem;">
+                    <button type="button" class="cine-tema-toggle" id="btnTemaToggle" onclick="window._toggleModoOscuro()" title="Modo oscuro">
+                        <i class="fas fa-moon"></i>
                     </button>
-                    <button class="btn-seguir" id="btnDesbloquear" onclick="window.desbloquearUsuario()" style="display:none;">
-                        <i class="fas fa-unlock"></i> Desbloquear
+                    <div class="cine-switch">
+                    <button type="button" class="cine-switch-option active" data-tipo="peliculas" onclick="window.setAdnTipo('peliculas')">
+                        <i class="fas fa-film"></i> Películas
                     </button>
-                    <button id="btnBloquearPerfil" onclick="window.abrirModalBloquearPerfil()" style="display:none; background:#e50914; border:2px solid #e50914; border-radius:8px; padding:0.45rem 0.7rem; cursor:pointer; color:white; font-size:0.9rem;" title="Bloquear usuario">
-                        <i class="fas fa-ban"></i>
-                    </button>
+                        <button type="button" class="cine-switch-option" data-tipo="series" onclick="window.setAdnTipo('series')">
+                            <i class="fas fa-tv"></i> Series
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <!-- STATS -->
-            <div class="perfil-stats-inline">
-                <span class="perfil-stat-inline"><strong id="perfilVotaciones">0</strong> votaciones</span>
-                <span class="perfil-stat-inline"><strong id="perfilComentarios">0</strong> comentarios</span>
-                <span class="perfil-stat-inline perfil-stat-clickable" onclick="window.abrirModalSeguidores('seguidores')">
-                    <strong id="perfilSeguidores">0</strong> seguidores
-                </span>
-                <span class="perfil-stat-inline perfil-stat-clickable" onclick="window.abrirModalSeguidores('seguidos')">
-                    <strong id="perfilSiguiendo">0</strong> seguidos
-                </span>
+            <p class="cine-section-title sin-borde">Quién soy</p>
+            <div class="cine-header-row">
+                <div class="cine-header-text">
+                    <h1 class="cine-name" id="perfilNombre">Cargando...</h1>
+
+                    <div class="cine-stats-inline">
+                        <span class="perfil-stat-inline" onclick="window._irAActividadDesdeMetrica('votaciones')" style="cursor:pointer;"><i class="fas fa-thumbs-up cine-stat-icon"></i><span class="cine-stat-num" id="perfilVotaciones">0</span><span class="cine-stat-lbl">votaciones</span></span>
+                        <span class="perfil-stat-inline" onclick="window._irAActividadDesdeMetrica('comentarios')" style="cursor:pointer;"><i class="fas fa-comment cine-stat-icon"></i><span class="cine-stat-num" id="perfilComentarios">0</span><span class="cine-stat-lbl">comentarios</span></span>
+                        <span class="perfil-stat-inline" onclick="window._irAActividadDesdeMetrica('recomendadas')" style="cursor:pointer;"><i class="fas fa-envelope cine-stat-icon"></i><span class="cine-stat-num" id="perfilRecomendadas">0</span><span class="cine-stat-lbl">recomendadas</span></span>
+                        <span class="perfil-stat-inline" onclick="window._irAActividadDesdeMetrica('guardadas')" style="cursor:pointer;"><i class="fas fa-bookmark cine-stat-icon"></i><span class="cine-stat-num" id="perfilGuardadas">0</span><span class="cine-stat-lbl">guardadas</span></span>
+                        <span class="perfil-stat-inline" id="perfilSeguidoresWrap"><i class="fas fa-users cine-stat-icon cine-stat-icon--flip"></i><span class="cine-stat-num" id="perfilSeguidores">0</span><span class="cine-stat-lbl">seguidores</span></span>
+                        <span class="perfil-stat-inline" id="perfilSiguiendoWrap"><span class="cine-stat-icon-compuesto cine-stat-icon"><i class="fas fa-user"></i><i class="fas fa-angles-right"></i></span><span class="cine-stat-num" id="perfilSiguiendo">0</span><span class="cine-stat-lbl">seguidos</span></span>
+                        <div class="clickable" id="perfilSeguirWrap" style="display:flex; gap:0.5rem;">
+                            <button class="btn-seguir" id="btnSeguir" onclick="window.toggleSeguir()" style="display:none;">
+                                <i class="fas fa-user-plus"></i> Seguir
+                            </button>
+                            <button class="btn-seguir" id="btnDesbloquear" onclick="window.desbloquearUsuario()" style="display:none;">
+                                <i class="fas fa-unlock"></i> Desbloquear
+                            </button>
+                            <button id="btnBloquearPerfil" onclick="window.abrirModalBloquearPerfil()" style="display:none; background:#e50914; border:2px solid #e50914; border-radius:8px; padding:0.4rem 0.6rem; cursor:pointer; color:white; font-size:0.85rem;" title="Bloquear usuario">
+                                <i class="fas fa-ban"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <p class="cine-section-title sin-borde cine-quien-soy-mobile">Quién soy</p>
+
+                    <div class="perfil-bio" id="perfilBio" style="display:none; position:relative;">
+                        <button id="btnEditarBio" onclick="window.abrirModalBio()" class="cine-edit-btn-bio" style="display:none;">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+                        <p class="cine-bio-title" id="perfilBioTitulo"></p>
+                        <p class="cine-bio-text" id="perfilBioTexto"></p>
+                    </div>
+                </div>
             </div>
 
-            <!-- BIO -->
-            <div class="perfil-bio" id="perfilBio" style="display:none;">
-                <p class="perfil-bio-titulo" id="perfilBioTitulo"></p>
-                <p class="perfil-bio-texto" id="perfilBioTexto"></p>
+            <p class="cine-section-title">Mi espíritu</p>
+            <p class="cine-bio-title" id="perfilAdnTitular"></p>
+
+            <div class="cine-espiritu-row">
+                <div class="cine-totem-slot">
+                    <div class="cine-totem-wrap">
+                        <div class="cine-totem-glow"></div>
+                        <div class="cine-totem" id="perfilAdnEmoji"></div>
+                    </div>
+                    <p style="text-align:center; font-size:0.82rem; color:#8b8f9c; margin:0.9rem 0 0;">Mi tótem es: <span id="perfilAdnTotemNombre" style="color:#ff3b5c; font-weight:600;"></span></p>
+                </div>
+
+                <div class="cine-stamp-row" id="perfilAdnLegend"></div>
+                <div class="cine-adn-dots" id="perfilAdnDots"></div>
+            </div>
+
+            <p class="cine-section-title">Mis gustos o preferencias</p>
+            <div class="cine-spread" id="cineSpreadPeliculas">
+                <div class="cine-snapshot" style="position:relative;">
+                    <button id="btnEditarFavorita" onclick="window.abrirEdicionFavorita()" class="cine-edit-btn" style="display:none;">
+                        <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <div id="perfilFavoritaEdicion" style="display:none; width:220px; margin-bottom:0.5rem;">
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <input type="text" id="inputFavoritaBusqueda" placeholder="Buscá tu película"
+                                   autocomplete="off" oninput="window._buscarFavorita(this.value)"
+                                   style="flex:1; box-sizing:border-box; padding:0.5rem 0.6rem; border:1px solid #444; border-radius:8px; font-size:0.8rem; background:#1b1e27; color:#f2f0ea;">
+                            <button onclick="window.cancelarEdicionFavorita()" style="background:rgba(255,255,255,0.1); border:none; cursor:pointer; color:#f2f0ea; font-size:0.9rem; width:24px; height:24px; border-radius:6px;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div id="favoritaResultados" style="display:none; background:#1b1e27; border:1px solid #444; border-radius:8px; margin-top:4px; max-height:220px; overflow-y:auto;"></div>
+                    </div>
+
+                    <div id="perfilFavoritaVista" style="display:flex; flex-direction:column; align-items:flex-start; gap:0.6rem;">
+                        <div class="poster" id="perfilFavoritaPoster"></div>
+                        <p class="cine-snapshot-lbl">Mi favorita:<span class="cine-snapshot-title" id="perfilFavoritaTitulo">Sin elegir todavía</span></p>
+                    </div>
+                </div>
+
+                <div class="cine-snapshot" style="position:relative;">
+                    <button id="btnEditarVistaCine" onclick="window.abrirEdicionVistaCine()" class="cine-edit-btn" style="display:none;">
+                        <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <div id="perfilVistaCineEdicion" style="display:none; width:220px; margin-bottom:0.5rem;">
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <input type="text" id="inputVistaCineBusqueda" placeholder="Buscá tu película"
+                                   autocomplete="off" oninput="window._buscarVistaCine(this.value)"
+                                   style="flex:1; box-sizing:border-box; padding:0.5rem 0.6rem; border:1px solid #444; border-radius:8px; font-size:0.8rem; background:#1b1e27; color:#f2f0ea;">
+                            <button onclick="window.cancelarEdicionVistaCine()" style="background:rgba(255,255,255,0.1); border:none; cursor:pointer; color:#f2f0ea; font-size:0.9rem; width:24px; height:24px; border-radius:6px;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div id="vistaCineResultados" style="display:none; background:#1b1e27; border:1px solid #444; border-radius:8px; margin-top:4px; max-height:220px; overflow-y:auto;"></div>
+                    </div>
+
+                    <div id="perfilVistaCineVista" style="display:flex; flex-direction:column; align-items:flex-start; gap:0.6rem;">
+                        <div class="poster" id="perfilVistaCinePoster"></div>
+                        <p class="cine-snapshot-lbl">La última que vi en el cine:<span class="cine-snapshot-title" id="perfilVistaCineTitulo">Sin elegir todavía</span></p>
+                    </div>
+                </div>
+
+                <div class="cine-snapshot" style="position:relative;">
+                    <button id="btnEditarNoMeCanso" onclick="window.abrirEdicionNoMeCanso()" class="cine-edit-btn" style="display:none;">
+                        <i class="fas fa-pencil-alt"></i>
+                    </button>
+
+                    <div id="perfilNoMeCansoEdicion" style="display:none; width:220px; margin-bottom:0.5rem;">
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <input type="text" id="inputNoMeCansoBusqueda" placeholder="Buscá tu película"
+                                   autocomplete="off" oninput="window._buscarNoMeCanso(this.value)"
+                                   style="flex:1; box-sizing:border-box; padding:0.5rem 0.6rem; border:1px solid #444; border-radius:8px; font-size:0.8rem; background:#1b1e27; color:#f2f0ea;">
+                            <button onclick="window.cancelarEdicionNoMeCanso()" style="background:rgba(255,255,255,0.1); border:none; cursor:pointer; color:#f2f0ea; font-size:0.9rem; width:24px; height:24px; border-radius:6px;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div id="noMeCansoResultados" style="display:none; background:#1b1e27; border:1px solid #444; border-radius:8px; margin-top:4px; max-height:220px; overflow-y:auto;"></div>
+                    </div>
+
+                    <div id="perfilNoMeCansoVista" style="display:flex; flex-direction:column; align-items:flex-start; gap:0.6rem;">
+                        <div class="poster" id="perfilNoMeCansoPoster"></div>
+                        <p class="cine-snapshot-lbl">La que no me canso de ver:<span class="cine-snapshot-title" id="perfilNoMeCansoTitulo">Sin elegir todavía</span></p>
+                    </div>
+                </div>
+
+                <div class="cine-snapshot" style="position:relative;">
+                    <button id="btnEditarNoLaBanco" onclick="window.abrirEdicionNoLaBanco()" class="cine-edit-btn" style="display:none;">
+                        <i class="fas fa-pencil-alt"></i>
+                    </button>
+
+                    <div id="perfilNoLaBancoEdicion" style="display:none; width:220px; margin-bottom:0.5rem;">
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <input type="text" id="inputNoLaBancoBusqueda" placeholder="Buscá tu película"
+                                   autocomplete="off" oninput="window._buscarNoLaBanco(this.value)"
+                                   style="flex:1; box-sizing:border-box; padding:0.5rem 0.6rem; border:1px solid #444; border-radius:8px; font-size:0.8rem; background:#1b1e27; color:#f2f0ea;">
+                            <button onclick="window.cancelarEdicionNoLaBanco()" style="background:rgba(255,255,255,0.1); border:none; cursor:pointer; color:#f2f0ea; font-size:0.9rem; width:24px; height:24px; border-radius:6px;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div id="noLaBancoResultados" style="display:none; background:#1b1e27; border:1px solid #444; border-radius:8px; margin-top:4px; max-height:220px; overflow-y:auto;"></div>
+                    </div>
+
+                    <div id="perfilNoLaBancoVista" style="display:flex; flex-direction:column; align-items:flex-start; gap:0.6rem;">
+                        <div class="poster" id="perfilNoLaBancoPoster"></div>
+                        <p class="cine-snapshot-lbl">La que todos aman y yo no banco:<span class="cine-snapshot-title" id="perfilNoLaBancoTitulo">Sin elegir todavía</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cine-spread" id="cineSpreadSeries" style="display:none;">
+                <div class="cine-snapshot" style="position:relative;">
+                    <button id="btnEditarSerieFavorita" onclick="window.abrirEdicionSerieFavorita()" class="cine-edit-btn" style="display:none;">
+                        <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <div id="perfilSerieFavoritaEdicion" style="display:none; width:220px; margin-bottom:0.5rem;">
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <input type="text" id="inputSerieFavoritaBusqueda" placeholder="Buscá tu serie"
+                                   autocomplete="off" oninput="window._buscarSerieFavorita(this.value)"
+                                   style="flex:1; box-sizing:border-box; padding:0.5rem 0.6rem; border:1px solid #444; border-radius:8px; font-size:0.8rem; background:#1b1e27; color:#f2f0ea;">
+                            <button onclick="window.cancelarEdicionSerieFavorita()" style="background:rgba(255,255,255,0.1); border:none; cursor:pointer; color:#f2f0ea; font-size:0.9rem; width:24px; height:24px; border-radius:6px;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div id="serieFavoritaResultados" style="display:none; background:#1b1e27; border:1px solid #444; border-radius:8px; margin-top:4px; max-height:220px; overflow-y:auto;"></div>
+                    </div>
+
+                    <div id="perfilSerieFavoritaVista" style="display:flex; flex-direction:column; align-items:flex-start; gap:0.6rem;">
+                        <div class="poster" id="perfilSerieFavoritaPoster"></div>
+                        <p class="cine-snapshot-lbl">Mi serie favorita:<span class="cine-snapshot-title" id="perfilSerieFavoritaTitulo">Sin elegir todavía</span></p>
+                    </div>
+                </div>
+
+                <div class="cine-snapshot" style="position:relative;">
+                    <button id="btnEditarUltimaMaraton" onclick="window.abrirEdicionUltimaMaraton()" class="cine-edit-btn" style="display:none;">
+                        <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <div id="perfilUltimaMaratonEdicion" style="display:none; width:220px; margin-bottom:0.5rem;">
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <input type="text" id="inputUltimaMaratonBusqueda" placeholder="Buscá tu serie"
+                                   autocomplete="off" oninput="window._buscarUltimaMaraton(this.value)"
+                                   style="flex:1; box-sizing:border-box; padding:0.5rem 0.6rem; border:1px solid #444; border-radius:8px; font-size:0.8rem; background:#1b1e27; color:#f2f0ea;">
+                            <button onclick="window.cancelarEdicionUltimaMaraton()" style="background:rgba(255,255,255,0.1); border:none; cursor:pointer; color:#f2f0ea; font-size:0.9rem; width:24px; height:24px; border-radius:6px;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div id="ultimaMaratonResultados" style="display:none; background:#1b1e27; border:1px solid #444; border-radius:8px; margin-top:4px; max-height:220px; overflow-y:auto;"></div>
+                    </div>
+
+                    <div id="perfilUltimaMaratonVista" style="display:flex; flex-direction:column; align-items:flex-start; gap:0.6rem;">
+                        <div class="poster" id="perfilUltimaMaratonPoster"></div>
+                        <p class="cine-snapshot-lbl">La última que ví en maratón:<span class="cine-snapshot-title" id="perfilUltimaMaratonTitulo">Sin elegir todavía</span></p>
+                    </div>
+                </div>
+
+                <div class="cine-snapshot" style="position:relative;">
+                    <button id="btnEditarNoMeCansoSerie" onclick="window.abrirEdicionNoMeCansoSerie()" class="cine-edit-btn" style="display:none;">
+                        <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <div id="perfilNoMeCansoSerieEdicion" style="display:none; width:220px; margin-bottom:0.5rem;">
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <input type="text" id="inputNoMeCansoSerieBusqueda" placeholder="Buscá tu serie"
+                                   autocomplete="off" oninput="window._buscarNoMeCansoSerie(this.value)"
+                                   style="flex:1; box-sizing:border-box; padding:0.5rem 0.6rem; border:1px solid #444; border-radius:8px; font-size:0.8rem; background:#1b1e27; color:#f2f0ea;">
+                            <button onclick="window.cancelarEdicionNoMeCansoSerie()" style="background:rgba(255,255,255,0.1); border:none; cursor:pointer; color:#f2f0ea; font-size:0.9rem; width:24px; height:24px; border-radius:6px;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div id="noMeCansoSerieResultados" style="display:none; background:#1b1e27; border:1px solid #444; border-radius:8px; margin-top:4px; max-height:220px; overflow-y:auto;"></div>
+                    </div>
+
+                    <div id="perfilNoMeCansoSerieVista" style="display:flex; flex-direction:column; align-items:flex-start; gap:0.6rem;">
+                        <div class="poster" id="perfilNoMeCansoSeriePoster"></div>
+                        <p class="cine-snapshot-lbl">La que no me canso de ver:<span class="cine-snapshot-title" id="perfilNoMeCansoSerieTitulo">Sin elegir todavía</span></p>
+                    </div>
+                </div>
+
+                <div class="cine-snapshot" style="position:relative;">
+                    <button id="btnEditarNoLaBancoSerie" onclick="window.abrirEdicionNoLaBancoSerie()" class="cine-edit-btn" style="display:none;">
+                        <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <div id="perfilNoLaBancoSerieEdicion" style="display:none; width:220px; margin-bottom:0.5rem;">
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <input type="text" id="inputNoLaBancoSerieBusqueda" placeholder="Buscá tu serie"
+                                   autocomplete="off" oninput="window._buscarNoLaBancoSerie(this.value)"
+                                   style="flex:1; box-sizing:border-box; padding:0.5rem 0.6rem; border:1px solid #444; border-radius:8px; font-size:0.8rem; background:#1b1e27; color:#f2f0ea;">
+                            <button onclick="window.cancelarEdicionNoLaBancoSerie()" style="background:rgba(255,255,255,0.1); border:none; cursor:pointer; color:#f2f0ea; font-size:0.9rem; width:24px; height:24px; border-radius:6px;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div id="noLaBancoSerieResultados" style="display:none; background:#1b1e27; border:1px solid #444; border-radius:8px; margin-top:4px; max-height:220px; overflow-y:auto;"></div>
+                    </div>
+
+                    <div id="perfilNoLaBancoSerieVista" style="display:flex; flex-direction:column; align-items:flex-start; gap:0.6rem;">
+                        <div class="poster" id="perfilNoLaBancoSeriePoster"></div>
+                        <p class="cine-snapshot-lbl">La que todos aman y yo no banco:<span class="cine-snapshot-title" id="perfilNoLaBancoSerieTitulo">Sin elegir todavía</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <p class="cine-section-title" id="cineActividadTitulo">Mi actividad cinéfila</p>
+            <div class="cine-actividad-wrap">
+                <div class="cine-actividad-menu" id="cineActividadMenu">
+                    <button class="cine-actividad-menu-item active" data-criterio="votaciones" onclick="window._seleccionarCriterioActividad('votaciones')">
+                        <span class="cine-actividad-menu-lbl">Votaciones</span>
+                        <span class="cine-actividad-menu-count" id="cineActividadCountVotaciones"></span>
+                    </button>
+                    <button class="cine-actividad-menu-item" data-criterio="comentarios" onclick="window._seleccionarCriterioActividad('comentarios')">
+                        <span class="cine-actividad-menu-lbl">Comentarios</span>
+                        <span class="cine-actividad-menu-count" id="cineActividadCountComentarios"></span>
+                    </button>
+                    <button class="cine-actividad-menu-item" data-criterio="recomendadas" onclick="window._seleccionarCriterioActividad('recomendadas')">
+                        <span class="cine-actividad-menu-lbl">Recomendadas</span>
+                        <span class="cine-actividad-menu-count" id="cineActividadCountRecomendadas"></span>
+                    </button>
+                    <button class="cine-actividad-menu-item" data-criterio="guardadas" onclick="window._seleccionarCriterioActividad('guardadas')">
+                        <span class="cine-actividad-menu-lbl">Guardadas</span>
+                        <span class="cine-actividad-menu-count" id="cineActividadCountGuardadas"></span>
+                    </button>
+                </div>
+                <div class="cine-actividad-row" style="display:flex; flex-wrap:wrap; gap:2.6rem; margin-left:-40px;">
+                    <div id="perfilVotacionesWrapper" style="max-width:200px;">
+                    <div class="perfil-loading"><i class="fas fa-spinner fa-spin"></i></div>
+                </div>
+                <div id="perfilVotacionesSeriesWrapper" style="max-width:200px;">
+                    <div class="perfil-loading"><i class="fas fa-spinner fa-spin"></i></div>
+                </div>
+                <div id="perfilComentariosList" style="max-width:200px;">
+                    <div class="perfil-loading"><i class="fas fa-spinner fa-spin"></i></div>
+                </div>
+                <div id="perfilComentariosSeriesList" style="max-width:200px;">
+                    <div class="perfil-loading"><i class="fas fa-spinner fa-spin"></i></div>
+                </div>
+                <div id="perfilRecomendadasWrapper" style="max-width:200px;">
+                    <div class="perfil-loading"><i class="fas fa-spinner fa-spin"></i></div>
+                </div>
+                <div id="perfilRecomendadasSeriesWrapper" style="max-width:200px;">
+                    <div class="perfil-loading"><i class="fas fa-spinner fa-spin"></i></div>
+                </div>
+                <div id="perfilGuardadasWrapper" style="max-width:200px;">
+                    <div class="perfil-loading"><i class="fas fa-spinner fa-spin"></i></div>
+                </div>
+                    <div id="perfilGuardadasSeriesWrapper" style="max-width:200px;">
+                        <div class="perfil-loading"><i class="fas fa-spinner fa-spin"></i></div>
+                    </div>
+                </div>
             </div>
 
         </div>
-    </div>
-
-    <!-- ÚLTIMAS VOTACIONES -->
-    <div class="perfil-seccion">
-        <h3 class="perfil-seccion-titulo">
-            <i class="fas fa-film"></i> Últimas películas votadas
-        </h3>
-        <div id="perfilVotacionesWrapper">
-            <div class="perfil-loading"><i class="fas fa-spinner fa-spin"></i></div>
+        <div class="cine-vineta-overlay" id="cineVinetaOverlay" onclick="window._cerrarVineta()">
+            <div class="cine-vineta" id="cineVinetaBox" onclick="event.stopPropagation()">
+                <span class="cine-vineta-spoiler" id="cineVinetaSpoiler" style="display:none;">spoiler</span>
+                <p class="cine-vineta-fuente" id="cineVinetaFuente"></p>
+                <p class="cine-vineta-texto" id="cineVinetaTexto"></p>
+                <div class="cine-vineta-acciones">
+                    <button class="cine-vineta-responder" id="cineVinetaResponder" onclick="window._responderDesdeVineta()">Ver más</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- ÚLTIMAS VOTACIONES DE SERIES -->
-    <div class="perfil-seccion">
-        <h3 class="perfil-seccion-titulo">
-            <i class="fas fa-tv"></i> Últimas series votadas
-        </h3>
-        <div id="perfilVotacionesSeriesWrapper">
-            <div class="perfil-loading"><i class="fas fa-spinner fa-spin"></i></div>
-        </div>
-    </div>
-
-    <!-- ÚLTIMOS COMENTARIOS -->
-    <div class="perfil-seccion">
-        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
-            <h3 class="perfil-seccion-titulo" id="perfilComentariosTitulo" style="margin:0;">
-                <i class="fas fa-comment"></i> Últimas películas comentadas
-            </h3>
-            <button id="perfilComentariosToggle" onclick="window.toggleComentariosPerfilTipo()"
-                    title="Ver últimas series comentadas"
-                    style="background:none; border:1.5px solid #ddd; border-radius:20px; padding:0.3rem 0.7rem; cursor:pointer; color:#888; font-size:0.8rem; display:flex; align-items:center; gap:0.4rem; transition:all 0.2s; flex-shrink:0;">
-                <i class="fas fa-tv"></i> Series
-            </button>
-        </div>
-        <div class="perfil-comentarios" id="perfilComentariosList">
-            <div class="perfil-loading"><i class="fas fa-spinner fa-spin"></i></div>
-        </div>
-    </div>
-
-    <!-- PUBLICACIONES EN COMUNIDAD -->
+    <!-- PUBLICACIONES EN COMUNIDAD — dentro de .perfil-card (hereda fondo
+         claro/oscuro), pero fuera de .cine-window (que es flex de 2
+         columnas: margin + entry) para no romper ese layout. -->
     <div class="perfil-seccion" id="perfilPublicacionesSeccion">
         <h3 class="perfil-seccion-titulo">
             <i class="fas fa-pen-alt"></i> Publicaciones en Comunidad
@@ -114,6 +669,7 @@
             <div class="perfil-loading"><i class="fas fa-spinner fa-spin"></i></div>
         </div>
     </div>
+</div>
 
     <!-- MODAL CONFIRMAR DEJAR DE SEGUIR -->
     <div id="modalDejarSeguir" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
@@ -133,8 +689,21 @@
         </div>
     </div>
 
-    <!-- MODAL EDITAR BIO -->
-    <div id="modalEditarBio" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
+
+<!-- MODAL EDITAR GUSTO (mobile) — cascarón simple y estático,
+     fuera de cualquier carrusel. El contenido real (input +
+     resultados) se mueve acá adentro vía JS solo en mobile,
+     ver _inicializarModalGustoMobile en perfil.js. En desktop
+     nunca se usa: las cajas se quedan donde siempre estuvieron. -->
+<div id="modalEditarGustoMobile" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
+    <div style="max-width:320px; width:100%;" onclick="event.stopPropagation()">
+        <p id="modalEditarGustoMobileTitulo" style="background:#ffffff; border-radius:14px 14px 0 0; margin:0; padding:1rem 1rem 0; font-size:0.88rem; font-weight:700; color:#1a1a1a;"></p>
+        <div id="modalEditarGustoMobileBox"></div>
+    </div>
+</div>
+
+<!-- MODAL EDITAR BIO -->
+<div id="modalEditarBio" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
         <div style="background:white; border-radius:16px; padding:2rem; max-width:460px; width:100%;" onclick="event.stopPropagation()">
             <h3 style="margin:0 0 1.25rem; font-size:1rem; color:#333;">
                 <i class="fas fa-pencil-alt" style="color:#324C89;"></i> Editar biografía
@@ -142,7 +711,7 @@
 
             <div style="margin-bottom:1rem;">
                 <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                    <label style="font-size:0.82rem; font-weight:600; color:#555;">Título</label>
+                    <label style="font-size:0.82rem; font-weight:600; color:#555;">Frase o lema personal</label>
                     <span id="contadorBioTitulo" style="font-size:0.75rem; color:#aaa;">0/50</span>
                 </div>
                 <input type="text" id="inputBioTitulo" maxlength="50"
@@ -153,10 +722,10 @@
 
             <div style="margin-bottom:1.5rem;">
                 <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                    <label style="font-size:0.82rem; font-weight:600; color:#555;">Descripción</label>
-                    <span id="contadorBioTexto" style="font-size:0.75rem; color:#aaa;">0/180</span>
+                    <label style="font-size:0.82rem; font-weight:600; color:#555;">¿Quién soy?</label>
+                    <span id="contadorBioTexto" style="font-size:0.75rem; color:#aaa;">0/255</span>
                 </div>
-                <textarea id="inputBioTexto" maxlength="180" rows="4"
+                <textarea id="inputBioTexto" maxlength="255" rows="4"
                           placeholder="Contale a otros usuarios quién sos y qué tipo de películas te apasionan..."
                           oninput="window._actualizarContadoresBio && window._actualizarContadoresBio()"
                           style="width:100%; box-sizing:border-box; padding:0.6rem 0.8rem; border:1.5px solid #e0e0e0; border-radius:8px; font-size:0.88rem; font-family:inherit; resize:none;"></textarea>
@@ -176,20 +745,20 @@
     </div>
 
     <!-- MODAL SEGUIDORES / SEGUIDOS -->
-    <div id="modalSeguidores" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
-        <div style="background:white; border-radius:16px; padding:1.5rem; max-width:420px; width:100%; max-height:80vh; display:flex; flex-direction:column;" onclick="event.stopPropagation()">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                <h3 id="modalSeguidoresTitulo" style="margin:0; font-size:1rem; color:#333;">Seguidores</h3>
-                <button onclick="window.cerrarModalSeguidores()" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#666;">×</button>
-            </div>
-            <input type="text" id="buscarSeguidor" placeholder="Buscar..."
-                   oninput="window.filtrarSeguidores(this.value)"
-                   style="padding:0.5rem 0.8rem; border:1.5px solid #e0e0e0; border-radius:8px; font-size:0.88rem; margin-bottom:1rem; font-family:inherit;">
-            <div id="listaSeguidores" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:0.5rem;">
-                <div style="text-align:center; color:#ccc; padding:2rem;">Cargando...</div>
-            </div>
+<div id="modalSeguidores" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
+    <div style="background:white; border-radius:16px; padding:1.5rem; max-width:420px; width:100%; max-height:80vh; display:flex; flex-direction:column;" onclick="event.stopPropagation()">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <h3 id="modalSeguidoresTitulo" style="margin:0; font-size:1rem; color:#1a1a1a; font-family:'Space Grotesk',sans-serif;">Seguidores</h3>
+            <button onclick="window.cerrarModalSeguidores()" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#999;">×</button>
+        </div>
+        <input type="text" id="buscarSeguidor" placeholder="Buscar..."
+               oninput="window.filtrarSeguidores(this.value)"
+               style="padding:0.5rem 0.8rem; border:1px solid #ddd; border-radius:8px; font-size:0.88rem; margin-bottom:1rem; font-family:inherit; background:white; color:#333;">
+        <div id="listaSeguidores" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:0.5rem;">
+            <div style="text-align:center; color:#ccc; padding:2rem;">Cargando...</div>
         </div>
     </div>
+</div>
 
     <!-- MODAL CONFIRMAR DESBLOQUEO -->
     <div id="modalDesbloquear" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
