@@ -7,6 +7,31 @@ let perfilUsuarioId = null;
 // ==============================================
 // INICIALIZACIÓN
 // ==============================================
+// ==============================================
+// MODO OSCURO — apagado por defecto. El diseño que
+// construimos (fondo oscuro, glow rojo/azul) queda guardado
+// atrás de este toggle; por defecto se ve la versión clara.
+// ==============================================
+window._toggleModoOscuro = function() {
+    const card = document.getElementById('perfilContenido');
+    if (!card) return;
+    const activo = card.classList.toggle('modo-oscuro');
+    localStorage.setItem('perfilModoOscuro', activo ? '1' : '0');
+    document.querySelectorAll('#btnTemaToggle i, #btnFabTema i').forEach(icon => {
+        icon.className = activo ? 'fas fa-sun' : 'fas fa-moon';
+    });
+};
+
+window._aplicarModoOscuroGuardado = function() {
+    const card = document.getElementById('perfilContenido');
+    if (!card) return;
+    const activo = localStorage.getItem('perfilModoOscuro') === '1';
+    card.classList.toggle('modo-oscuro', activo);
+    document.querySelectorAll('#btnTemaToggle i, #btnFabTema i').forEach(icon => {
+        icon.className = activo ? 'fas fa-sun' : 'fas fa-moon';
+    });
+};
+
 window['init_perfil'] = async function(userId) {
     if (!userId) {
         const params = new URLSearchParams(window.location.search);
@@ -75,19 +100,39 @@ async function cargarPerfil(userId) {
         if (!response.ok) throw new Error(`Error ${response.status}`);
         const perfil = await response.json();
 
-        renderIdentidad(perfil);
-                renderStats(perfil);
-                renderVotaciones(perfil.ultimasVotaciones);
+                       window._aplicarModoOscuroGuardado();
+
+                       window._perfilCounts = {
+                            votacionesPeliculas: perfil.totalVotacionesPeliculas,
+                            votacionesSeries: perfil.totalVotacionesSeries,
+                            comentariosPeliculas: perfil.totalComentariosPeliculas,
+                            comentariosSeries: perfil.totalComentariosSeries,
+                            recomendadasPeliculas: perfil.totalRecomendadasPeliculas,
+                            recomendadasSeries: perfil.totalRecomendadasSeries,
+                            guardadasPeliculas: perfil.totalGuardadasPeliculas,
+                            guardadasSeries: perfil.totalGuardadasSeries
+                        };
+
+                renderIdentidad(perfil);
+                        renderStats(perfil);
+                        renderVotaciones(perfil.ultimasVotaciones);
                 if (typeof window.renderVotacionesSeries === 'function') {
                     window.renderVotacionesSeries(perfil.ultimasVotacionesSeries);
                 }
                 window._perfilTotalComentarios = perfil.totalComentarios || 0;
                                 window._perfilComentariosCache = perfil.ultimosComentarios || [];
                                 window._perfilComentariosSerieCache = perfil.ultimosComentariosSeries || [];
+                                renderComentariosSerie(window._perfilComentariosSerieCache);
                                 renderComentarios(perfil.ultimosComentarios);
+                                renderRecomendadas(perfil.ultimasRecomendadas);
+                                renderRecomendadasSerie(perfil.ultimasRecomendadasSeries);
+                                renderGuardadas(perfil.ultimasGuardadas);
+                                renderGuardadasSerie(perfil.ultimasGuardadasSeries);
 
-                        _comentariosTotal = perfil.totalComentarios || 0;
-                        _actualizarNavComentarios();
+                                window._inicializarFadeSpreads();
+                                window._seleccionarCriterioActividad(window._actividadCriterioActual);
+                                window._inicializarSwipeStacks();
+                                window._inicializarModalGustoMobile();
 
         cargarPublicacionesPerfil(userId);
 
@@ -97,6 +142,7 @@ async function cargarPerfil(userId) {
                 '<div style="text-align:center;padding:3rem;color:#e50914;">Error al cargar el perfil</div>';
         }
 }
+
 
 // ==============================================
 // RENDER IDENTIDAD
@@ -125,22 +171,27 @@ function renderIdentidad(perfil) {
         const bioEl = document.getElementById('perfilBio');
         const bioTitulo = document.getElementById('perfilBioTitulo');
         const bioTexto = document.getElementById('perfilBioTexto');
-        if (bioEl && (perfil.bioTitulo || perfil.bioTexto)) {
-            if (bioTitulo) bioTitulo.textContent = perfil.bioTitulo || '';
-            if (bioTexto) bioTexto.textContent = perfil.bioTexto || '';
-            bioEl.style.display = 'block';
-        }
-
+                if (bioEl && (perfil.bioTitulo || perfil.bioTexto)) {
+                    if (bioTitulo) bioTitulo.textContent = perfil.bioTitulo || '';
+                    if (bioTexto) bioTexto.textContent = perfil.bioTexto || '';
+                    bioEl.style.display = 'block';
+                } else if (bioEl) {
+                    if (bioTitulo) bioTitulo.textContent = '';
+                    if (bioTexto) bioTexto.textContent = 'Aún tengo la tarea de contarte quién soy…';
+                    bioEl.style.display = 'block';
+                }
         const miId = localStorage.getItem('userId');
         const btnSeguir = document.getElementById('btnSeguir');
         const btnBanner = document.getElementById('btnCambiarBanner');
         const btnEditBio = document.getElementById('btnEditarBio');
 
-        const btnBloquearPerfil = document.getElementById('btnBloquearPerfil');
+                const btnBloquearPerfil = document.getElementById('btnBloquearPerfil');
+                const btnEditFavorita = document.getElementById('btnEditarFavorita');
 
-                if (miId && String(miId) !== String(perfil.id)) {
-                    if (btnBanner) btnBanner.style.display = 'none';
-                    if (btnEditBio) btnEditBio.style.display = 'none';
+                        if (miId && String(miId) !== String(perfil.id)) {
+                            if (btnBanner) btnBanner.style.display = 'none';
+                            if (btnEditBio) btnEditBio.style.display = 'none';
+                            if (btnEditFavorita) btnEditFavorita.style.display = 'none';
                     if (btnBloquearPerfil && !perfil.bloqueado) btnBloquearPerfil.style.display = 'flex';
 
                 if (perfil.bloqueado) {
@@ -154,12 +205,46 @@ function renderIdentidad(perfil) {
                     btnSeguir.style.display = 'flex';
                     actualizarBtnSeguir(perfil.followStatus);
                 }
-            } else {
-            if (btnSeguir) btnSeguir.style.display = 'none';
-            if (btnBanner) btnBanner.style.display = 'block';
-            if (btnEditBio) btnEditBio.style.display = 'inline-flex';
-        }
-}
+                        } else {
+                        if (btnSeguir) btnSeguir.style.display = 'none';
+                        if (btnBanner) btnBanner.style.display = 'block';
+                        if (btnEditBio) btnEditBio.style.display = 'inline-flex';
+                        if (btnEditFavorita) btnEditFavorita.style.display = 'inline-flex';
+                        const btnEditVistaCine = document.getElementById('btnEditarVistaCine');
+                        if (btnEditVistaCine) btnEditVistaCine.style.display = 'inline-flex';
+                        const btnEditNoMeCanso = document.getElementById('btnEditarNoMeCanso');
+                        if (btnEditNoMeCanso) btnEditNoMeCanso.style.display = 'inline-flex';
+                        const btnEditNoLaBanco = document.getElementById('btnEditarNoLaBanco');
+                        if (btnEditNoLaBanco) btnEditNoLaBanco.style.display = 'inline-flex';
+                        const btnEditSerieFavorita = document.getElementById('btnEditarSerieFavorita');
+                        if (btnEditSerieFavorita) btnEditSerieFavorita.style.display = 'inline-flex';
+                        const btnEditUltimaMaraton = document.getElementById('btnEditarUltimaMaraton');
+                        if (btnEditUltimaMaraton) btnEditUltimaMaraton.style.display = 'inline-flex';
+                        const btnEditNoMeCansoSerie = document.getElementById('btnEditarNoMeCansoSerie');
+                        if (btnEditNoMeCansoSerie) btnEditNoMeCansoSerie.style.display = 'inline-flex';
+                        const btnEditNoLaBancoSerie = document.getElementById('btnEditarNoLaBancoSerie');
+                        if (btnEditNoLaBancoSerie) btnEditNoLaBancoSerie.style.display = 'inline-flex';
+                    }
+
+                                window._renderFavoritaVista(perfil.peliculaFavoritaId);
+                                window._renderVistaCineVista(perfil.ultimaVistaCineId);
+                                window._renderNoMeCansoVista(perfil.noMeCansoDeVerId);
+                                window._renderNoLaBancoVista(perfil.noLaBancoId);
+                                window._renderSerieFavoritaVista(perfil.serieFavoritaId);
+                                window._renderUltimaMaratonVista(perfil.ultimaMaratonId);
+                                window._renderNoMeCansoSerieVista(perfil.noMeCansoDeVerSerieId);
+                                window._renderNoLaBancoSerieVista(perfil.noLaBancoSerieId);
+                                window._adnSeries = perfil.adnCinefiloSeries || [];
+                                window._renderAdnCinefilo(perfil.adnCinefilo);
+                                window._renderRankingTrivia(perfil.rankingTriviaPeliculas, perfil.rankingTriviaSeries);
+
+                                // Fuerza el estado inicial a Películas — sin esto, los 4 bloques de
+                                // Series (Votadas/Comentadas) quedan con su display default (visible)
+                                // hasta el primer click en el switch, mostrándose junto con Películas.
+                                window.setAdnTipo('peliculas');
+                }
+
+
 
 // ==============================================
 // RENDER STATS
@@ -169,6 +254,11 @@ function renderStats(perfil) {
     document.getElementById('perfilSiguiendo').textContent   = perfil.siguiendo || 0;
     document.getElementById('perfilVotaciones').textContent  = perfil.totalVotaciones || 0;
     document.getElementById('perfilComentarios').textContent = perfil.totalComentarios || 0;
+    document.getElementById('perfilRecomendadas').textContent = perfil.totalRecomendadas || 0;
+    document.getElementById('perfilGuardadas').textContent = perfil.totalGuardadas || 0;
+
+    window._activarStatClickeable('perfilSeguidoresWrap', perfil.seguidores, () => window.abrirModalSeguidores('seguidores'));
+    window._activarStatClickeable('perfilSiguiendoWrap', perfil.siguiendo, () => window.abrirModalSeguidores('seguidos'));
 }
 
 // ==============================================
@@ -178,52 +268,89 @@ let _votacionesPage     = 0;
 let _votacionesHayMas   = false;
 let _votacionesCargando = false;
 
+let _stackVotaciones = [];
+let _stackIndice = 0;
+
 function renderVotaciones(votaciones) {
     const wrapper = document.getElementById('perfilVotacionesWrapper');
     if (!wrapper) return;
 
     if (!votaciones || votaciones.length === 0) {
-        wrapper.innerHTML = '<div class="perfil-vacio">Sin votaciones aún</div>';
+                wrapper.innerHTML = '<div class="cine-stack-vacio-wrap"><div class="cine-stack-vacio"></div><p class="cine-stack-vacio-lbl">Sin votaciones aún</p></div>';
         return;
     }
 
     _votacionesPage   = 0;
     _votacionesHayMas = votaciones.length === 8;
+    _stackVotaciones  = votaciones;
+    _stackIndice      = 0;
 
-    wrapper.innerHTML = `
-        <div class="perfil-carrusel-outer">
-            <button class="perfil-carrusel-arrow left" onclick="window.scrollCarrusel(-1)">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <div class="perfil-carrusel-track" id="perfilCarruselTrack">
-                ${votaciones.map(v => buildVotoItem(v)).join('')}
-            </div>
-            <button class="perfil-carrusel-arrow right" onclick="window.scrollCarrusel(1)">
-                <i class="fas fa-chevron-right"></i>
-            </button>
+        wrapper.innerHTML = `
+                      <p class="cine-stack-eyebrow">VOTACIONES (${window._perfilCounts?.votacionesPeliculas || 0})</p>
+        <div class="cine-stack-area">
+            <button class="cine-stack-nav prev" onclick="window._moverStackVotos(-1)"><i class="fas fa-chevron-left"></i></button>
+            <div id="cineStackContainer" style="position:relative; width:100%; height:100%;"></div>
+            <button class="cine-stack-nav next" onclick="window._moverStackVotos(1)"><i class="fas fa-chevron-right"></i></button>
         </div>
+        <p class="cine-stack-titulo" id="cineStackTitulo"></p>
     `;
+
+    const cont = document.getElementById('cineStackContainer');
+    cont.innerHTML = votaciones.map(v => {
+        const poster = v.posterPath
+            ? `<img src="https://image.tmdb.org/t/p/w185${v.posterPath}" alt="${v.movieTitle || ''}">`
+            : `<div class="placeholder"><i class="fas fa-film"></i></div>`;
+        const badgeClass = v.voto === 'LIKE' ? 'like' : 'dislike';
+        const badgeIcon  = v.voto === 'LIKE' ? 'fa-thumbs-up' : 'fa-thumbs-down';
+        return `
+        <div class="cine-stack-card" onclick="window._abrirPeliculaDesdePerfil(${v.movieId})">
+            ${poster}
+            <div class="cine-stack-badge ${badgeClass}"><i class="fas ${badgeIcon}" style="font-size:0.6rem;color:white;"></i></div>
+        </div>`;
+    }).join('');
+
+    window._renderStackPosiciones();
 }
 
-function buildVotoItem(v) {
-    const poster = v.posterPath
-        ? `<img src="https://image.tmdb.org/t/p/w185${v.posterPath}" alt="${v.movieTitle || ''}">`
-        : `<i class="fas fa-film"></i>`;
-    const badgeClass = v.voto === 'LIKE' ? 'like' : 'dislike';
-    const badgeIcon  = v.voto === 'LIKE' ? 'fa-thumbs-up' : 'fa-thumbs-down';
-    return `
-    <div class="perfil-voto-item" title="${v.movieTitle || ''}"
-         onclick="window._abrirPeliculaDesdePerfil(${v.movieId})"
-         style="cursor:pointer;">
-        <div class="perfil-voto-poster">
-            ${poster}
-            <div class="perfil-voto-badge ${badgeClass}">
-                <i class="fas ${badgeIcon}" style="font-size:0.55rem;color:white;"></i>
-            </div>
-        </div>
-        <span class="perfil-voto-titulo">${v.movieTitle || '—'}</span>
-    </div>`;
-}
+window._renderStackPosiciones = function() {
+    const cards = document.querySelectorAll('#cineStackContainer .cine-stack-card');
+    const N = _stackVotaciones.length;
+    cards.forEach((card, i) => {
+        let diff = i - _stackIndice;
+        if (diff > N / 2) diff -= N;
+        if (diff < -N / 2) diff += N;
+        const offset = (diff >= 0 && diff <= 2) ? diff : -1;
+
+        if (offset === 0) {
+            card.style.transform = 'translateX(0) translateY(0) scale(1) rotate(0deg)';
+            card.style.opacity = 1; card.style.zIndex = 10;
+        } else if (offset === 1) {
+            card.style.transform = 'translateX(-18px) translateY(10px) scale(0.94) rotate(-3deg)';
+            card.style.opacity = 0.6; card.style.zIndex = 8;
+        } else if (offset === 2) {
+            card.style.transform = 'translateX(-36px) translateY(20px) scale(0.88) rotate(-6deg)';
+            card.style.opacity = 0.3; card.style.zIndex = 7;
+        } else {
+            card.style.transform = 'translateX(260px) translateY(-10px) scale(0.8) rotate(16deg)';
+            card.style.opacity = 0; card.style.zIndex = 5;
+        }
+    });
+    const tituloEl = document.getElementById('cineStackTitulo');
+    if (tituloEl && _stackVotaciones[_stackIndice]) {
+        tituloEl.textContent = _stackVotaciones[_stackIndice].movieTitle || '—';
+    }
+};
+
+window._moverStackVotos = function(dir) {
+    const N = _stackVotaciones.length;
+    if (N === 0) return;
+    _stackIndice = (_stackIndice + dir + N) % N;
+    window._renderStackPosiciones();
+
+    if (dir > 0 && _stackIndice >= N - 2 && _votacionesHayMas && !_votacionesCargando) {
+        window._cargarMasVotaciones();
+    }
+};
 
 window.scrollCarrusel = async function(dir) {
     const track = document.getElementById('perfilCarruselTrack');
@@ -289,205 +416,146 @@ function mostrarFinVotaciones(track) {
 // ==============================================
 // RENDER COMENTARIOS CON PAGINACIÓN
 // ==============================================
-let _comentariosPage   = 0;
-let _comentariosTotal  = 0;
-const _comentariosSize = 5;
+let _stackComentarios = [];
+let _stackIndiceComentarios = 0;
 
 function renderComentarios(comentarios) {
-    _comentariosPage  = 0;
-    _comentariosTotal = window._perfilTotalComentarios || comentarios?.length || 0;
+    const wrapper = document.getElementById('perfilComentariosList');
+    if (!wrapper) return;
 
-    const seccion = document.getElementById('perfilComentariosList');
     if (!comentarios || comentarios.length === 0) {
-        seccion.innerHTML = '<div class="perfil-vacio">Sin comentarios aún</div>';
+                wrapper.innerHTML = '<div class="cine-stack-vacio-wrap"><div class="cine-stack-vacio"></div><p class="cine-stack-vacio-lbl">Sin comentarios aún</p></div>';
         return;
     }
 
-    const esMobile = window.innerWidth <= 600;
+    _stackComentarios = comentarios;
+    _stackIndiceComentarios = 0;
 
-    if (esMobile) {
-        seccion.innerHTML = `
-            <div class="perfil-comentarios-swipe" id="perfilComentariosSwipe"></div>
-            <div class="perfil-comentarios-dots" id="perfilComentariosDots"></div>
-        `;
-        _renderSwipeComentarios(comentarios);
-    } else {
-        seccion.innerHTML = `
-            <div id="perfilComentariosItems"></div>
-            <div class="perfil-comentarios-nav" id="perfilComentariosNav">
-                <button class="perfil-carrusel-arrow left" onclick="window.cambiarPaginaComentarios(-1)">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <span id="perfilComentariosInfo" style="font-size:0.8rem;color:#999;"></span>
-                <button class="perfil-carrusel-arrow right" onclick="window.cambiarPaginaComentarios(1)">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            </div>
-        `;
-        _renderItemsComentarios(comentarios);
-        _actualizarNavComentarios();
-    }
-}
+        wrapper.innerHTML = `
+                        <p class="cine-stack-eyebrow">COMENTARIOS (${window._perfilCounts?.comentariosPeliculas || 0})</p>
+        <div class="cine-stack-area">
+            <button class="cine-stack-nav prev" onclick="window._moverStackComentarios(-1)"><i class="fas fa-chevron-left"></i></button>
+            <div id="cineStackComentariosContainer" style="position:relative; width:100%; height:100%;"></div>
+            <button class="cine-stack-nav next" onclick="window._moverStackComentarios(1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <p class="cine-stack-titulo" id="cineStackComentariosTitulo"></p>
+    `;
 
-function _comentarioItemHTML(c) {
-    const textoClass = c.spoiler ? 'perfil-comentario-texto spoiler' : 'perfil-comentario-texto';
-    const spoilerTag = c.spoiler ? '<span class="perfil-tag-spoiler">spoiler</span>' : '';
-    const poster = c.posterPath
-        ? `<img src="https://image.tmdb.org/t/p/w92${c.posterPath}" alt="${c.movieTitle || ''}" style="width:100%;height:100%;object-fit:cover;">`
-        : `<i class="fas fa-film"></i>`;
-    const banco      = c.bancoCount       || 0;
-    const merece     = c.merecePuntoCount || 0;
-    const respuestas = c.replyCount       || 0;
-    const uid        = `cmnt-${c.commentId}`;
-
-    const CHARS_LIMIT = window.innerWidth <= 600 ? 150 : 300;
-    const contenido   = c.contenido || '';
-    const esMuyLargo = contenido.length > CHARS_LIMIT;
-    const textoCorto = esMuyLargo ? contenido.substring(0, CHARS_LIMIT) + '...' : contenido;
-
-    if (esMuyLargo) {
-            window[`_verMas_${uid}`] = function(btn) {
-                const el = document.getElementById(`txt-${uid}`);
-                if (btn.dataset.expanded === '1') {
-                    el.textContent = textoCorto;
-                    btn.textContent = 'Ver más';
-                    btn.dataset.expanded = '0';
-                } else {
-                    el.textContent = contenido;
-                    btn.textContent = 'Ver menos';
-                    btn.dataset.expanded = '1';
-                }
-            };
-        }
-
-        const textoHTML = esMuyLargo ? `
-            <p class="${textoClass}" id="txt-${uid}">${textoCorto}</p>
-            <span class="perfil-ver-mas" onclick="window['_verMas_${uid}'](this)" data-expanded="0">Ver más</span>
-        ` : `<p class="${textoClass}">${contenido}</p>`;
-
-    return `
-        <div class="perfil-comentario-item"
-             onclick="window._abrirPeliculaDesdeComentario(${c.movieId}, ${c.commentId}, ${c.spoiler || false})"
-             style="cursor:pointer;">
-            <div class="perfil-comentario-poster">${poster}</div>
-            <div class="perfil-comentario-body">
-                <p class="perfil-comentario-pelicula">${c.movieTitle || 'Película no disponible'}</p>
-                ${textoHTML}
-                <div class="perfil-comentario-meta">
-                    <span>${c.fechaRelativa || ''}</span>
-                    ${spoilerTag}
-                </div>
-                <div class="perfil-comentario-reacciones">
-                    <span title="Te banco"><i class="fas fa-thumbs-up"></i> ${banco}</span>
-                    <span title="Merecés un punto"><i class="fas fa-star"></i> ${merece}</span>
-                    <span title="Respuestas"><i class="fas fa-reply"></i> ${respuestas}</span>
-                </div>
-            </div>
+    const cont = document.getElementById('cineStackComentariosContainer');
+    cont.innerHTML = comentarios.map((c, i) => {
+        const poster = c.posterPath
+            ? `<img src="https://image.tmdb.org/t/p/w185${c.posterPath}" alt="${c.movieTitle || ''}">`
+            : `<div class="placeholder"><i class="fas fa-film"></i></div>`;
+        return `
+        <div class="cine-stack-card" onclick="window._abrirVinetaComentario(${i})">
+            ${poster}
+            <div class="cine-badge-comentario"><i class="fas fa-comment-dots"></i></div>
         </div>`;
+    }).join('');
+
+    window._renderStackPosicionesComentarios();
 }
 
-function _buildSlideHTML(grupo) {
-    return `<div class="perfil-swipe-slide">${grupo.map(c => _comentarioItemHTML(c)).join('')}</div>`;
-}
+window._renderStackPosicionesComentarios = function() {
+    const cards = document.querySelectorAll('#cineStackComentariosContainer .cine-stack-card');
+    const N = _stackComentarios.length;
+    cards.forEach((card, i) => {
+        let diff = i - _stackIndiceComentarios;
+        if (diff > N / 2) diff -= N;
+        if (diff < -N / 2) diff += N;
+        const offset = (diff >= 0 && diff <= 2) ? diff : -1;
 
-async function _renderSwipeComentarios(comentarios) {
-    const swipe = document.getElementById('perfilComentariosSwipe');
-    const dots  = document.getElementById('perfilComentariosDots');
-    if (!swipe) return;
+        // Solo la card de adelante (offset 0) es clickeable — las de atrás
+        // asoman visualmente por debajo pero su hitbox es el cuadrado
+        // completo de la card, así que sin esto un click "al costado" del
+        // poster de adelante termina cayendo en la de atrás y abre la
+        // viñeta de otro comentario. Para pasar a la siguiente se usan
+        // las flechas prev/next, no el click directo sobre la de atrás.
+        card.style.pointerEvents = offset === 0 ? 'auto' : 'none';
 
-    // Cargar todas las páginas disponibles
-    let todos = [...comentarios];
-    const totalPags = Math.ceil(_comentariosTotal / _comentariosSize);
-    const token = localStorage.getItem('token');
-
-    for (let p = 1; p < totalPags; p++) {
-        try {
-            const res = await fetch(
-                `${CONFIG.API_URL}/users/${perfilUsuarioId}/comentarios?page=${p}&size=${_comentariosSize}`,
-                { headers: { 'Authorization': `Bearer ${token}` } }
-            );
-            if (!res.ok) break;
-            const data = await res.json();
-            todos = [...todos, ...data.comentarios];
-        } catch(e) { break; }
+        if (offset === 0) {
+            card.style.transform = 'translateX(0) translateY(0) scale(1) rotate(0deg)';
+            card.style.opacity = 1; card.style.zIndex = 10;
+        } else if (offset === 1) {
+            card.style.transform = 'translateX(-18px) translateY(10px) scale(0.94) rotate(-3deg)';
+            card.style.opacity = 0.6; card.style.zIndex = 8;
+        } else if (offset === 2) {
+            card.style.transform = 'translateX(-36px) translateY(20px) scale(0.88) rotate(-6deg)';
+            card.style.opacity = 0.3; card.style.zIndex = 7;
+        } else {
+            card.style.transform = 'translateX(260px) translateY(-10px) scale(0.8) rotate(16deg)';
+            card.style.opacity = 0; card.style.zIndex = 5;
+        }
+    });
+    const tituloEl = document.getElementById('cineStackComentariosTitulo');
+    if (tituloEl && _stackComentarios[_stackIndiceComentarios]) {
+        tituloEl.textContent = _stackComentarios[_stackIndiceComentarios].movieTitle || '—';
     }
-
-    // Agrupar de a 5
-    const grupos = [];
-    for (let i = 0; i < todos.length; i += _comentariosSize) {
-        grupos.push(todos.slice(i, i + _comentariosSize));
-    }
-
-    swipe.innerHTML = grupos.map(g => _buildSlideHTML(g)).join('');
-
-    // Dots
-    const totalGrupos = grupos.length;
-
-        const _actualizarDots = (idx) => {
-            if (!dots) return;
-            if (totalGrupos <= 1) { dots.innerHTML = ''; return; }
-
-            const maxDots = totalGrupos === 2 ? 2 : 3;
-            let activoDot;
-            if (idx === 0) activoDot = 0;
-            else if (idx >= totalGrupos - 1) activoDot = maxDots - 1;
-            else activoDot = maxDots === 2 ? 1 : 1;
-
-            dots.innerHTML = Array.from({length: maxDots}, (_, i) =>
-                `<span class="perfil-dot${i === activoDot ? ' active' : ''}"></span>`
-            ).join('');
-        };
-        _actualizarDots(0);
-
-        swipe.addEventListener('scroll', () => {
-            const idx = Math.round(swipe.scrollLeft / swipe.offsetWidth);
-            _actualizarDots(idx);
-        }, { passive: true });
-}
-
-function _renderItemsComentarios(comentarios) {
-    const lista = document.getElementById('perfilComentariosItems');
-    if (!lista) return;
-    lista.innerHTML = comentarios.map(c => _comentarioItemHTML(c)).join('');
-}
-
-window.cambiarPaginaComentarios = async function(dir) {
-    const nuevaPagina = _comentariosPage + dir;
-    const totalPaginas = Math.ceil(_comentariosTotal / _comentariosSize);
-    if (nuevaPagina < 0 || nuevaPagina >= totalPaginas) return;
-
-    const token = localStorage.getItem('token');
-    try {
-        const res = await fetch(
-            `${CONFIG.API_URL}/users/${perfilUsuarioId}/comentarios?page=${nuevaPagina}&size=${_comentariosSize}`,
-            { headers: { 'Authorization': `Bearer ${token}` } }
-        );
-        if (!res.ok) return;
-        const data = await res.json();
-
-        _comentariosPage  = nuevaPagina;
-        _comentariosTotal = data.total;
-
-        _renderItemsComentarios(data.comentarios);
-        _actualizarNavComentarios();
-
-    } catch(e) {}
 };
 
-function _actualizarNavComentarios() {
-    const esMobile = window.innerWidth <= 600;
-    if (esMobile) return;
+window._moverStackComentarios = function(dir) {
+    const N = _stackComentarios.length;
+    if (N === 0) return;
+    _stackIndiceComentarios = (_stackIndiceComentarios + dir + N) % N;
+    window._renderStackPosicionesComentarios();
+    window._cerrarVineta();
+};
 
-    const totalPaginas = Math.ceil(_comentariosTotal / _comentariosSize);
-    const info = document.getElementById('perfilComentariosInfo');
-    if (info) info.textContent = `${_comentariosPage + 1} / ${totalPaginas}`;
+window._abrirVinetaComentario = function(i) {
+    const c = _stackComentarios[i];
+    if (!c) return;
+    const overlay   = document.getElementById('cineVinetaOverlay');
+    const box       = document.getElementById('cineVinetaBox');
+    const spoilerEl = document.getElementById('cineVinetaSpoiler');
 
-    const nav = document.getElementById('perfilComentariosNav');
-    if (!nav) return;
-    const btns = nav.querySelectorAll('.perfil-carrusel-arrow');
-    btns[0].disabled = _comentariosPage <= 0;
-    btns[1].disabled = _comentariosPage >= totalPaginas - 1;
-}
+        document.getElementById('cineVinetaFuente').textContent = c.movieTitle || '';
+        document.getElementById('cineVinetaTexto').textContent  = c.contenido || '';
+        spoilerEl.style.display = c.spoiler ? 'inline-block' : 'none';
+
+        // Contexto para "Ver más" — reusa el mismo flujo de scroll+resaltado
+        // que ya existía antes de la viñeta.
+        window._vinetaContexto = { tipo: 'pelicula', id: c.movieId, commentId: c.commentId, spoiler: c.spoiler };
+
+        const cardEl = document.querySelectorAll('#cineStackComentariosContainer .cine-stack-card')[i];
+        const rect = cardEl.getBoundingClientRect();
+        // Clamp contra el borde derecho de la pantalla — la viñeta mide
+        // 240px fijos (.cine-vineta), y rect.left a veces deja muy poco
+        // margen a la derecha (ej. en mobile, con el menú de criterios
+        // empujando la tarjeta hacia la derecha).
+        const maxLeft = window.innerWidth - 240 - 12;
+        box.style.left = Math.min(rect.left, maxLeft) + 'px';
+        box.style.top  = (rect.top - 160) + 'px';
+
+    overlay.style.display = 'block';
+    box.style.display = 'block';
+    requestAnimationFrame(() => box.classList.add('show'));
+
+    window.addEventListener('scroll', window._cerrarVinetaPorScroll, { passive: true });
+};
+
+window._cerrarVinetaPorScroll = function() {
+    window._cerrarVineta();
+};
+
+window._responderDesdeVineta = function() {
+    const ctx = window._vinetaContexto;
+    if (!ctx || !ctx.id) return;
+    window._cerrarVineta();
+    if (ctx.tipo === 'serie') {
+        window._abrirSerieDesdeComentario(ctx.id, ctx.commentId, ctx.spoiler);
+    } else {
+        window._abrirPeliculaDesdeComentario(ctx.id, ctx.commentId, ctx.spoiler);
+    }
+};
+
+window._cerrarVineta = function() {
+    const overlay = document.getElementById('cineVinetaOverlay');
+    const box = document.getElementById('cineVinetaBox');
+    if (!overlay || !box) return;
+    box.classList.remove('show');
+    setTimeout(() => { overlay.style.display = 'none'; box.style.display = 'none'; }, 200);
+    window.removeEventListener('scroll', window._cerrarVinetaPorScroll);
+};
 
 // ==============================================
 // SEGUIR / DEJAR DE SEGUIR
@@ -614,21 +682,21 @@ window.subirBanner = async function(input) {
                 document.body.classList.remove('modal-open');
             };
 
-        window._actualizarContadoresBio = function _actualizarContadoresBio() {
-            const t = document.getElementById('inputBioTitulo')?.value.length || 0;
-            const d = document.getElementById('inputBioTexto')?.value.length  || 0;
-            const ct = document.getElementById('contadorBioTitulo');
-            const cd = document.getElementById('contadorBioTexto');
-            if (ct) ct.textContent = `${t}/50`;
-            if (cd) cd.textContent = `${d}/180`;
-        }
+            window._actualizarContadoresBio = function _actualizarContadoresBio() {
+                const t = document.getElementById('inputBioTitulo')?.value.length || 0;
+                const d = document.getElementById('inputBioTexto')?.value.length  || 0;
+                const ct = document.getElementById('contadorBioTitulo');
+                const cd = document.getElementById('contadorBioTexto');
+                if (ct) ct.textContent = `${t}/50`;
+                if (cd) cd.textContent = `${d}/255`;
+            }
 
         window.guardarBio = async function() {
             const bioTitulo = document.getElementById('inputBioTitulo')?.value.trim() || '';
             const bioTexto  = document.getElementById('inputBioTexto')?.value.trim()  || '';
 
             if (bioTitulo.length > 50)  { alert('El título no puede superar los 50 caracteres.'); return; }
-            if (bioTexto.length  > 180) { alert('La descripción no puede superar los 180 caracteres.'); return; }
+            if (bioTexto.length  > 255) { alert('La descripción no puede superar los 255 caracteres.'); return; }
 
             const btn = document.getElementById('btnGuardarBio');
             if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
@@ -666,6 +734,966 @@ window.subirBanner = async function(input) {
             } finally {
                 if (btn) { btn.disabled = false; btn.textContent = 'Guardar'; }
             }
+        };
+
+        // ==============================================
+        // PELÍCULA FAVORITA
+        // ==============================================
+        window._renderFavoritaVista = async function(movieId) {
+            const posterEl = document.getElementById('perfilFavoritaPoster');
+            const tituloEl = document.getElementById('perfilFavoritaTitulo');
+            if (!posterEl || !tituloEl) return;
+
+            if (!movieId) {
+                tituloEl.textContent = 'Sin elegir todavía';
+                posterEl.innerHTML = '';
+                return;
+            }
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${CONFIG.API_URL}/movies/${movieId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error();
+                const m = await res.json();
+                tituloEl.textContent = m.title || '—';
+                posterEl.innerHTML = m.poster_path
+                    ? `<img src="https://image.tmdb.org/t/p/w185${m.poster_path}" alt="${m.title || ''}" style="width:100%;height:100%;object-fit:cover;">`
+                    : '';
+            } catch (e) {
+                tituloEl.textContent = '—';
+            }
+        };
+
+        // ==============================================
+        // ADN CINÉFILO — balde 3D
+        // ==============================================
+        const EMOJI_POR_GENERO = {
+            'Acción': '💥', 'Aventura': '🗺️', 'Animación': '🎨', 'Comedia': '😂',
+            'Crimen': '🔪', 'Documental': '🎥', 'Drama': '🎭', 'Familia': '👨‍👩‍👧',
+            'Fantasía': '🧙', 'Historia': '📜', 'Terror': '👻', 'Música': '🎵',
+            'Misterio': '🔎', 'Romance': '💕', 'Ciencia ficción': '🚀',
+            'Película de TV': '📺', 'Suspense': '😰', 'Bélica': '⚔️', 'Western': '🤠',
+            'Action & Adventure': '🏹', 'Sci-Fi & Fantasy': '🛸', 'War & Politics': '🎖️',
+            'Soap': '💔', 'Kids': '🧸', 'News': '📰', 'Reality': '🎪', 'Talk': '🎙️'
+        };
+        const ADN_COLORES = [
+            0x2a78d6, 0xeb6834, 0x1baf7a, 0xeda100, 0xe87ba4, 0x4a3aa7, 0xe34948, 0x008300,
+            0x9c27b0, 0x00bcd4, 0x795548, 0xff5722, 0x607d8b, 0xcddc39, 0x3f51b5, 0xff9800,
+            0x009688, 0xc2185b, 0x8bc34a
+        ];
+        const NOMBRE_TOTEM_POR_GENERO = {
+            'Acción': 'Bang', 'Aventura': 'Explorador', 'Animación': 'Garabato', 'Comedia': 'Risitas',
+            'Crimen': 'Fisgón', 'Documental': 'Bitácora', 'Drama': 'Lágrima', 'Familia': 'Familiero',
+            'Fantasía': 'Duende', 'Historia': 'Retro', 'Terror': 'Boo', 'Música': 'Compás',
+            'Misterio': 'Enigma', 'Romance': 'Cupido', 'Ciencia ficción': 'Astro',
+            'Película de TV': 'Maratón', 'Suspense': 'Escalofrío', 'Bélica': 'Trinchera', 'Western': 'Cowboy',
+            'Action & Adventure': 'Aventurón', 'Sci-Fi & Fantasy': 'Portal', 'War & Politics': 'Debate',
+            'Soap': 'Culebrón', 'Kids': 'Osito', 'News': 'Flash', 'Reality': 'Chisme', 'Talk': 'Charla'
+        };
+
+                const GENERO_RASGO = {
+                    'Acción': { adj: 'audaz', sust: 'acción' },
+                    'Aventura': { adj: 'aventurero', sust: 'aventura' },
+                    'Animación': { adj: 'animado', sust: 'animación' },
+                    'Comedia': { adj: 'divertido', sust: 'comedia' },
+                    'Crimen': { adj: 'intrigante', sust: 'crimen' },
+                    'Documental': { adj: 'curioso', sust: 'documentales' },
+                    'Drama': { adj: 'sensible', sust: 'drama' },
+                    'Familia': { adj: 'hogareño', sust: 'cine familiar' },
+                    'Fantasía': { adj: 'fantasioso', sust: 'fantasía' },
+                    'Historia': { adj: 'nostálgico', sust: 'cine histórico' },
+                    'Terror': { adj: 'tenebroso', sust: 'terror' },
+                    'Música': { adj: 'melómano', sust: 'música' },
+                    'Misterio': { adj: 'detectivesco', sust: 'misterio' },
+                    'Romance': { adj: 'romántico', sust: 'romance' },
+                    'Ciencia Ficción': { adj: 'futurista', sust: 'ciencia ficción' },
+                    'Ciencia ficción': { adj: 'futurista', sust: 'ciencia ficción' },
+                    'Película de TV': { adj: 'televisivo', sust: 'series' },
+                    'Suspenso': { adj: 'intrigante', sust: 'suspenso' },
+                    'Suspense': { adj: 'intrigante', sust: 'suspenso' },
+                                        'Bélica': { adj: 'combativo', sust: 'cine bélico' },
+                                        'Western': { adj: 'vaquero', sust: 'western' },
+                                        'Action & Adventure': { adj: 'aventurero', sust: 'acción y aventura' },
+                                        'Sci-Fi & Fantasy': { adj: 'futurista', sust: 'ciencia ficción y fantasía' },
+                                        'War & Politics': { adj: 'combativo', sust: 'series bélicas y políticas' },
+                                        'Soap': { adj: 'melodramático', sust: 'telenovelas' },
+                                        'Kids': { adj: 'infantil', sust: 'series infantiles' },
+                                        'News': { adj: 'informado', sust: 'noticieros' },
+                                        'Reality': { adj: 'curioso', sust: 'reality shows' },
+                                        'Talk': { adj: 'conversador', sust: 'talk shows' }
+                                    };
+
+                function _adnGenerarTitular(adnCinefilo) {
+                    if (!adnCinefilo || adnCinefilo.length === 0) return '';
+                    const top1 = adnCinefilo[0];
+                    const top2 = adnCinefilo[1];
+                    const top3 = adnCinefilo[2];
+
+                    const esDominante = top1.porcentaje >= 35 || (top2 && (top1.porcentaje - top2.porcentaje) >= 20);
+                        if (esDominante || !top2) {
+                            return `Soy especialista en ${top1.genero}`;
+                        }
+
+                    const r1 = GENERO_RASGO[top1.genero] || { adj: 'apasionado', sust: top1.genero.toLowerCase() };
+                    const r2 = GENERO_RASGO[top2.genero] || { adj: 'apasionado', sust: top2.genero.toLowerCase() };
+
+                                        let frase = `Tengo espíritu ${r1.adj}, con algo de ${r2.sust}`;
+
+                    if (top3) {
+                        const r3 = GENERO_RASGO[top3.genero] || { adj: 'apasionado', sust: top3.genero.toLowerCase() };
+                        frase += ` y un toque de ${r3.sust}`;
+                    }
+
+                    return frase + '.';
+                }
+
+                                        window._renderAdnCinefilo = function(adnCinefilo) {
+                                            const emojiEl = document.getElementById('perfilAdnEmoji');
+                                            if (!emojiEl) return;
+
+                                            window._adnPeliculas = adnCinefilo || [];
+                                            window._pintarAdn(window._adnPeliculas);
+                                        };
+
+                                        window._pintarAdn = function(datos) {
+                                            const emojiEl = document.getElementById('perfilAdnEmoji');
+                                                        document.getElementById('perfilAdnTitular').textContent = datos.length > 0
+                                                            ? _adnGenerarTitular(datos)
+                                                            : 'Aún tengo pendiente revelar mi verdadero yo...';
+                                            const totemEl = document.getElementById('perfilAdnTotemNombre');
+                                            if (totemEl) {
+                                                totemEl.textContent = datos.length > 0
+                                                    ? (NOMBRE_TOTEM_POR_GENERO[datos[0].genero] || datos[0].genero)
+                                                    : '';
+                                            }
+                                emojiEl.textContent = datos.length > 0 ? (EMOJI_POR_GENERO[datos[0].genero] || '🎞️') : '🎞️';
+
+                                                                        const legend = document.getElementById('perfilAdnLegend');
+                                                                        legend.innerHTML = '';
+                                                                        legend.scrollLeft = 0;
+                                                                        // Agrupar de a 3 SOLO en mobile: en desktop los pills siguen
+                                                                        // siendo hijos directos de #perfilAdnLegend, sin cambios.
+                                                                        const esMobile = window.matchMedia('(max-width: 768px)').matches;
+                                                                        let paginaActual = null;
+                                                                        datos.forEach((g, i) => {
+                                const hex = '#' + ADN_COLORES[i % ADN_COLORES.length].toString(16).padStart(6, '0');
+                                const emoji = EMOJI_POR_GENERO[g.genero] || '🎞️';
+                                const pill = document.createElement('span');
+                                pill.style.cssText = 'display:inline-flex; align-items:center; gap:5px; background:' + hex + '35; border:1px solid ' + hex + '70; border-radius:20px; padding:4px 10px 4px 6px;';
+                                pill.innerHTML =
+                                    '<span style="width:18px;height:18px;border-radius:50%;background:' + hex + '25;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">' + emoji + '</span>' +
+                                                                '<span style="font-size:0.78rem;color:var(--cine-text);">' + g.genero + '</span>' +
+                                                    '<span style="font-size:0.78rem;font-weight:700;color:' + hex + ';">' + g.porcentaje + '%</span>';
+                                                if (esMobile) {
+                                                    if (i % 3 === 0) {
+                                                        paginaActual = document.createElement('div');
+                                                        paginaActual.className = 'cine-adn-pagina';
+                                                        legend.appendChild(paginaActual);
+                                                    }
+                                                    paginaActual.appendChild(pill);
+                                                } else {
+                                                    legend.appendChild(pill);
+                                                }
+                                            });
+                                            window._adnInicializarDots(datos.length);
+                                        };
+
+                                                                        // Mini-carrusel de pills — solo tiene efecto visual en mobile:
+                                                                        // en desktop #perfilAdnLegend no tiene overflow-x (perfil-mobile.css
+                                                                        // no se carga ahí), así que el scroll no existe y los dots quedan
+                                                                        // ocultos por el "display:none" por defecto en perfil.html.
+                                                                        window._adnInicializarDots = function(totalPills) {
+                                                                            const legend = document.getElementById('perfilAdnLegend');
+                                                                            const dotsEl = document.getElementById('perfilAdnDots');
+                                                                            if (!legend || !dotsEl) return;
+
+                                                                            const totalPaginas = Math.ceil(totalPills / 3);
+                                                                            dotsEl.innerHTML = '';
+                                                                            if (totalPaginas <= 1) return; // 3 géneros o menos: no hace falta carrusel
+
+                                                                            for (let i = 0; i < totalPaginas; i++) {
+                                                                                const dot = document.createElement('span');
+                                                                                dot.className = 'cine-adn-dot' + (i === 0 ? ' active' : '');
+                                                                                dotsEl.appendChild(dot);
+                                                                            }
+
+                                                                            legend.onscroll = function() {
+                                                                                const pagina = Math.round(legend.scrollLeft / legend.clientWidth);
+                                                                                dotsEl.querySelectorAll('.cine-adn-dot').forEach((dot, i) => {
+                                                                                    dot.classList.toggle('active', i === pagina);
+                                                                                });
+                                                                            };
+                                                                        };
+
+                                                                        // Fade lateral de "Mis gustos" — se apaga cuando el scroll llega
+                                                                        // al final (no queda más contenido oculto para insinuar).
+                                                                        // Corre para Películas y Series por igual (ambas comparten
+                                                                        // .cine-spread), y funciona apenas se genera el DOM porque no
+                                                                        // depende de datos async, solo de medidas de layout.
+                                                                        window._inicializarFadeSpreads = function() {
+                                                                            document.querySelectorAll('.perfil-card .cine-spread').forEach(spread => {
+                                                                                const chequear = () => {
+                                                                                    const finAlcanzado = spread.scrollLeft + spread.clientWidth >= spread.scrollWidth - 4;
+                                                                                    spread.classList.toggle('cine-fade-oculto', finAlcanzado);
+                                                                                };
+                                                                                chequear();
+                                                                                spread.onscroll = chequear;
+                                                                            });
+                                                                        };
+
+                                                                        // Swipe táctil sobre el mazo — dispara el mismo click que ya
+                                                                        // tienen las flechas prev/next (sin duplicar la lógica de cada
+                                                                        // uno de los 8 _moverStackX). Delegado sobre .cine-actividad-wrap
+                                                                        // (nunca se destruye) para no tener que re-bindear cada vez que
+                                                                        // un wrapper se rerenderiza con innerHTML nuevo.
+                                                                        window._inicializarSwipeStacks = function() {
+                                                                            const contenedor = document.querySelector('.cine-actividad-wrap');
+                                                                            if (!contenedor || contenedor._swipeInit) return;
+                                                                            contenedor._swipeInit = true;
+
+                                                                            let startX = 0, startY = 0, area = null;
+
+                                                                            contenedor.addEventListener('touchstart', (e) => {
+                                                                                area = e.target.closest('.cine-stack-area');
+                                                                                if (!area) return;
+                                                                                startX = e.touches[0].clientX;
+                                                                                startY = e.touches[0].clientY;
+                                                                            }, { passive: true });
+
+                                                                            contenedor.addEventListener('touchend', (e) => {
+                                                                                if (!area) return;
+                                                                                const dx = e.changedTouches[0].clientX - startX;
+                                                                                const dy = e.changedTouches[0].clientY - startY;
+                                                                                if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+                                                                                    const btn = area.querySelector(dx < 0 ? '.cine-stack-nav.prev' : '.cine-stack-nav.next');
+                                                                                    if (btn) btn.click();
+                                                                                }
+                                                                                area = null;
+                                                                            }, { passive: true });
+                                                                        };
+
+                                                                            // Modal simple para "editar gusto" en mobile — sin tocar ninguna
+                                                                            // de las 8 funciones abrir/cancelar/elegir ya existentes. Un
+                                                                            // MutationObserver detecta cuándo cada caja pasa a
+                                                                            // visible/oculta (algo que esas funciones YA hacen con
+                                                                            // style.display) y la mueve dentro/fuera del modal shell. En
+                                                                            // desktop no hace nada — esMobile() corta antes de mover nada.
+                                                                            window._inicializarModalGustoMobile = function() {
+                                                                                const esMobile = () => window.matchMedia('(max-width: 768px)').matches;
+                                                                            // Mismas frases que ya se usan como label debajo de cada
+                                                                            // póster (.cine-snapshot-lbl en perfil.html) — se reutilizan
+                                                                            // acá como título del modal, sin inventar redacción nueva.
+                                                                            const titulos = {
+                                                                                perfilFavoritaEdicion:        'Mi favorita:',
+                                                                                perfilVistaCineEdicion:       'La última que vi en el cine:',
+                                                                                perfilNoMeCansoEdicion:       'La que no me canso de ver:',
+                                                                                perfilNoLaBancoEdicion:       'La que todos aman y yo no banco:',
+                                                                                perfilSerieFavoritaEdicion:   'Mi serie favorita:',
+                                                                                perfilUltimaMaratonEdicion:   'La última que ví en maratón:',
+                                                                                perfilNoMeCansoSerieEdicion:  'La que no me canso de ver:',
+                                                                                perfilNoLaBancoSerieEdicion:  'La que todos aman y yo no banco:'
+                                                                            };
+                                                                            const ids = Object.keys(titulos);
+
+                                                                                ids.forEach(id => {
+                                                                                    const el = document.getElementById(id);
+                                                                                    if (!el || el._modalGustoInit) return;
+                                                                                    el._modalGustoInit = true;
+
+                                                                                    const hogarOriginal = el.parentNode;
+                                                                                    const hermanoOriginal = el.nextSibling;
+
+                                                                                    new MutationObserver(() => {
+                                                                                        if (!esMobile()) return;
+                                                                                        const shell = document.getElementById('modalEditarGustoMobileBox');
+                                                                                        const overlay = document.getElementById('modalEditarGustoMobile');
+                                                                                        if (!shell || !overlay) return;
+
+                                                                                        if (el.style.display === 'none') {
+                                                                                            overlay.style.display = 'none';
+                                                                                            document.body.style.overflow = '';
+                                                                                            if (el.parentNode === shell) {
+                                                                                                hogarOriginal.insertBefore(el, hermanoOriginal);
+                                                                                            }
+                                                                                                } else {
+                                                                                                    shell.appendChild(el);
+                                                                                                    const tituloEl = document.getElementById('modalEditarGustoMobileTitulo');
+                                                                                                    if (tituloEl) tituloEl.textContent = titulos[id] || '';
+                                                                                                    overlay.style.display = 'flex';
+                                                                                                    document.body.style.overflow = 'hidden';
+                                                                                                }
+                                                                                    }).observe(el, { attributes: true, attributeFilter: ['style'] });
+                                                                                });
+                                                                            };
+
+                                                                        // Menú de criterios de "Mi actividad" (mobile) — de los 8
+                                                                        // wrappers (4 criterios x Películas/Series) muestra 1 solo:
+                                                                        // el que matchea el criterio elegido ACÁ y el tipo elegido
+                                                                        // en el switch Películas/Series de arriba. La clase
+                                                                        // 'cine-actividad-oculto' no hace nada en desktop (no existe
+                                                                        // esa regla fuera de perfil-mobile.css) — ahí siguen
+                                                                        // viéndose los 4 de siempre, sin este menú de por medio.
+                                                                        window._actividadCriterioActual = window._actividadCriterioActual || 'votaciones';
+
+                                                                        // Formato corto para contadores grandes — 999 se ve entero,
+                                                                        // de 1.000 en adelante pasa a "k", de 1.000.000 a "M". Si el
+                                                                        // resultado es un número redondo (2000 -> 2k) no muestra
+                                                                        // decimales; si no, muestra uno solo (12500 -> 12.5k).
+                                                                        window._formatearContador = function(n) {
+                                                                            n = Number(n) || 0;
+                                                                            if (n < 1000) return String(n);
+                                                                            if (n < 1000000) {
+                                                                                const val = n / 1000;
+                                                                                return (val % 1 === 0 ? val : val.toFixed(1)) + 'k';
+                                                                            }
+                                                                            const val = n / 1000000;
+                                                                            return (val % 1 === 0 ? val : val.toFixed(1)) + 'M';
+                                                                        };
+
+                                                                        window._seleccionarCriterioActividad = function(criterio) {
+                                                                            window._actividadCriterioActual = criterio;
+
+                                                                            document.querySelectorAll('.cine-actividad-menu-item').forEach(btn => {
+                                                                                btn.classList.toggle('active', btn.dataset.criterio === criterio);
+                                                                            });
+
+                                                                            const grupos = {
+                                                                                votaciones:   ['perfilVotacionesWrapper', 'perfilVotacionesSeriesWrapper'],
+                                                                                comentarios:  ['perfilComentariosList', 'perfilComentariosSeriesList'],
+                                                                                recomendadas: ['perfilRecomendadasWrapper', 'perfilRecomendadasSeriesWrapper'],
+                                                                                guardadas:    ['perfilGuardadasWrapper', 'perfilGuardadasSeriesWrapper']
+                                                                            };
+
+                                                                            Object.entries(grupos).forEach(([nombre, ids]) => {
+                                                                                ids.forEach(id => {
+                                                                                    const el = document.getElementById(id);
+                                                                                    if (el) el.classList.toggle('cine-actividad-oculto', nombre !== criterio);
+                                                                                });
+                                                                            });
+
+                                                                            // Conteos dentro de cada pill del menú — mismos números que
+                                                                            // ya se usaban en el título "VOTACIONES (48)" de cada mazo
+                                                                            // (window._perfilCounts), ahora movidos acá para no repetir
+                                                                            // el nombre del criterio dos veces en pantalla.
+                                                                            const modoSeries = document.getElementById('perfilContenido')?.classList.contains('modo-series');
+                                                                            const counts = window._perfilCounts || {};
+                                                                            const valores = {
+                                                                                Votaciones:   modoSeries ? counts.votacionesSeries   : counts.votacionesPeliculas,
+                                                                                Comentarios:  modoSeries ? counts.comentariosSeries  : counts.comentariosPeliculas,
+                                                                                Recomendadas: modoSeries ? counts.recomendadasSeries : counts.recomendadasPeliculas,
+                                                                                Guardadas:    modoSeries ? counts.guardadasSeries    : counts.guardadasPeliculas
+                                                                            };
+                                                                            Object.entries(valores).forEach(([nombre, valor]) => {
+                                                                                const el = document.getElementById('cineActividadCount' + nombre);
+                                                                                if (el) el.textContent = window._formatearContador(valor ?? 0);
+                                                                            });
+                                                                        };
+
+                                                                        // Desde las 4 métricas de arriba (votaciones/comentarios/
+                                                                        // recomendadas/guardadas), scrollea hasta "Mi actividad" y
+                                                                        // activa el criterio tocado — reusa la misma función que ya
+                                                                        // usa el menú de criterios, no duplica lógica.
+                                                                        window._irAActividadDesdeMetrica = function(criterio) {
+                                                                            window._seleccionarCriterioActividad(criterio);
+                                                                            const destino = document.getElementById('cineActividadTitulo');
+                                                                            if (!destino) return;
+                                                                            // scrollIntoView no sabe que hay un navbar sticky tapando
+                                                                            // parte de arriba — calculamos su altura real y la restamos,
+                                                                            // más un pequeño respiro, para que el título quede justo
+                                                                            // debajo de él, no escondido detrás.
+                                                                            const navbar = document.querySelector('.navbar');
+                                                                            const offset = (navbar ? navbar.offsetHeight : 0) + 12;
+                                                                            const y = destino.getBoundingClientRect().top + window.scrollY - offset;
+                                                                            window.scrollTo({ top: y, behavior: 'smooth' });
+                                                                        };
+
+                                                window.setAdnTipo = function(tipo) {
+                            document.querySelectorAll('.cine-switch-option').forEach(btn => {
+                                btn.classList.toggle('active', btn.dataset.tipo === tipo);
+                            });
+
+                            document.getElementById('perfilContenido')?.classList.toggle('modo-series', tipo === 'series');
+
+                            const eyebrow = document.getElementById('perfilAdnEyebrow');
+                            const eyebrowMobile = document.getElementById('perfilAdnEyebrowMobile');
+                            const totem = document.getElementById('perfilAdnEmoji');
+                            const totemNombre = document.getElementById('perfilAdnTotemNombre');
+
+                            const spreadPeliculas = document.getElementById('cineSpreadPeliculas');
+                            const spreadSeries = document.getElementById('cineSpreadSeries');
+
+                            // Votadas — misma actividad del usuario, mismo criterio de swap
+                            // que el resto de los bloques (favorita, ADN, etc.)
+                            const votacionesPeliculas = document.getElementById('perfilVotacionesWrapper');
+                            const votacionesSeries = document.getElementById('perfilVotacionesSeriesWrapper');
+
+                            // Comentadas — mismo criterio.
+                            const comentariosPeliculas = document.getElementById('perfilComentariosList');
+                            const comentariosSeries = document.getElementById('perfilComentariosSeriesList');
+
+                            // Recomendadas y Guardadas — mismo criterio, actividad del usuario.
+                            const recomendadasPeliculas = document.getElementById('perfilRecomendadasWrapper');
+                            const recomendadasSeries = document.getElementById('perfilRecomendadasSeriesWrapper');
+                            const guardadasPeliculas = document.getElementById('perfilGuardadasWrapper');
+                            const guardadasSeries = document.getElementById('perfilGuardadasSeriesWrapper');
+
+                                                                    const actividadTitulo = document.getElementById('cineActividadTitulo');
+
+                                if (tipo === 'series') {
+                                    if (eyebrow) { eyebrow.textContent = 'Mi Lado Seriéfilo'; eyebrow.classList.add('cine-eyebrow--series'); }
+                                    if (eyebrowMobile) eyebrowMobile.textContent = 'Mi Lado Seriéfilo';
+                                    if (actividadTitulo) actividadTitulo.textContent = 'Mi actividad seriéfila';
+                                if (totem) totem.style.background = 'linear-gradient(155deg, rgba(122,177,255,0.16), rgba(122,177,255,0.04))';
+                                if (totemNombre) totemNombre.style.color = '#7ab1ff';
+                                window._pintarAdn(window._adnSeries || []);
+                                if (spreadPeliculas) spreadPeliculas.style.display = 'none';
+                                if (spreadSeries) spreadSeries.style.display = 'flex';
+                                if (votacionesPeliculas) votacionesPeliculas.style.display = 'none';
+                                if (votacionesSeries) votacionesSeries.style.display = 'block';
+                                if (comentariosPeliculas) comentariosPeliculas.style.display = 'none';
+                                if (comentariosSeries) comentariosSeries.style.display = 'block';
+                                if (recomendadasPeliculas) recomendadasPeliculas.style.display = 'none';
+                                if (recomendadasSeries) recomendadasSeries.style.display = 'block';
+                                if (guardadasPeliculas) guardadasPeliculas.style.display = 'none';
+                                if (guardadasSeries) guardadasSeries.style.display = 'block';
+                                } else {
+                                    if (eyebrow) { eyebrow.textContent = 'Mi Sala Cinéfila'; eyebrow.classList.remove('cine-eyebrow--series'); }
+                                    if (eyebrowMobile) eyebrowMobile.textContent = 'Mi Sala Cinéfila';
+                                    if (actividadTitulo) actividadTitulo.textContent = 'Mi actividad cinéfila';
+                                if (totem) totem.style.background = 'linear-gradient(155deg, rgba(255,59,92,0.16), rgba(255,59,92,0.04))';
+                                if (totemNombre) totemNombre.style.color = '#ff3b5c';
+                                window._pintarAdn(window._adnPeliculas || []);
+                                if (spreadSeries) spreadSeries.style.display = 'none';
+                                if (spreadPeliculas) spreadPeliculas.style.display = 'flex';
+                                if (votacionesSeries) votacionesSeries.style.display = 'none';
+                                if (votacionesPeliculas) votacionesPeliculas.style.display = 'block';
+                                if (comentariosSeries) comentariosSeries.style.display = 'none';
+                                if (comentariosPeliculas) comentariosPeliculas.style.display = 'block';
+                                if (recomendadasSeries) recomendadasSeries.style.display = 'none';
+                                if (recomendadasPeliculas) recomendadasPeliculas.style.display = 'block';
+                                if (guardadasSeries) guardadasSeries.style.display = 'none';
+                                if (guardadasPeliculas) guardadasPeliculas.style.display = 'block';
+                            }
+
+                        window._actualizarVisibilidadRankingTrivia();
+                        window._actualizarColorStatsSeguir();
+                        window._seleccionarCriterioActividad(window._actividadCriterioActual);
+                    };
+
+                        // FAB mobile — un solo botón que alterna Películas/Series
+                        // (en desktop el switch de 2 opciones sigue intacto y visible).
+                                               window._toggleFabModo = function() {
+                                                   const activoBtn = document.querySelector('.cine-switch-option.active');
+                                                   const actual = activoBtn ? activoBtn.dataset.tipo : 'peliculas';
+                                                   const nuevo = actual === 'peliculas' ? 'series' : 'peliculas';
+                                                   window.setAdnTipo(nuevo);
+                                                   const fab = document.getElementById('btnFabModo');
+                                                   if (fab) {
+                                                       fab.innerHTML = nuevo === 'series' ? '<i class="fas fa-tv"></i>' : '<i class="fas fa-film"></i>';
+                                                       fab.title = nuevo === 'series' ? 'Cambiar a Películas' : 'Cambiar a Series';
+                                                   }
+                                                   window._flashCambioModo(nuevo);
+                                               };
+
+                                               // Como ya no queda ningún título fijo en pantalla ("Mi Sala
+                                               // Cinéfila"/"Mi lado seriéfilo"), este flash + toast es la
+                                               // única señal de que TODO el contenido de abajo cambió de
+                                               // categoría — sin esto, un cambio repentino de color en toda
+                                               // la pantalla se lee como un glitch, no como información.
+                                               window._flashCambioModo = function(nuevo) {
+                                                   const flash = document.getElementById('cineModoFlash');
+                                                   const toast = document.getElementById('cineModoToast');
+                                                   if (!flash || !toast) return;
+
+                                                   const color = nuevo === 'series' ? '#2e6fd6' : '#e50914';
+                                                   const mensaje = nuevo === 'series' ? 'Bienvenido a mi lado seriéfilo' : 'Bienvenido a mi lado cinéfilo';
+
+                                                   flash.style.background = color;
+                                                   flash.style.opacity = '0.35';
+                                                   flash.style.transition = 'none';
+                                                   flash.style.display = 'block';
+                                                   requestAnimationFrame(() => {
+                                                       flash.style.transition = 'opacity 0.5s ease';
+                                                       flash.style.opacity = '0';
+                                                   });
+                                                   setTimeout(() => { flash.style.display = 'none'; }, 550);
+
+                                                   toast.textContent = mensaje;
+                                                   toast.style.background = color;
+                                                   toast.style.opacity = '0';
+                                                   toast.style.transition = 'none';
+                                                   toast.style.display = 'block';
+                                                   requestAnimationFrame(() => {
+                                                       toast.style.transition = 'opacity 0.3s ease';
+                                                       toast.style.opacity = '1';
+                                                   });
+                                                   clearTimeout(window._cineModoToastTimeout);
+                                                   window._cineModoToastTimeout = setTimeout(() => {
+                                                       toast.style.opacity = '0';
+                                                       setTimeout(() => { toast.style.display = 'none'; }, 300);
+                                                   }, 2000);
+                                               };
+        window._renderFavoritaVista = async function(movieId) {
+            const posterEl = document.getElementById('perfilFavoritaPoster');
+            const tituloEl = document.getElementById('perfilFavoritaTitulo');
+            if (!posterEl || !tituloEl) return;
+
+                        if (!movieId) {
+                            tituloEl.textContent = 'Sin elegir todavía';
+                            posterEl.innerHTML = '';
+                            posterEl.style.cursor = 'default';
+                            posterEl.onclick = null;
+                            return;
+                        }
+                        try {
+                            const token = localStorage.getItem('token');
+                            const res = await fetch(`${CONFIG.API_URL}/movies/${movieId}`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (!res.ok) throw new Error();
+                            const m = await res.json();
+                            tituloEl.textContent = m.title || '—';
+                            posterEl.innerHTML = m.poster_path
+                                ? `<img src="https://image.tmdb.org/t/p/w185${m.poster_path}" alt="${m.title || ''}" style="width:100%;height:100%;object-fit:cover;">`
+                                : '';
+                            posterEl.style.cursor = 'pointer';
+                            posterEl.onclick = () => window._abrirPeliculaDesdePerfil(movieId);
+                        } catch (e) {
+                            tituloEl.textContent = '—';
+                        }
+                    };
+
+                    window._renderVistaCineVista = async function(movieId) {
+            const posterEl = document.getElementById('perfilVistaCinePoster');
+            const tituloEl = document.getElementById('perfilVistaCineTitulo');
+            if (!posterEl || !tituloEl) return;
+
+            if (!movieId) {
+                tituloEl.textContent = 'Sin elegir todavía';
+                posterEl.innerHTML = '';
+                return;
+            }
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${CONFIG.API_URL}/movies/${movieId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error();
+                const m = await res.json();
+                tituloEl.textContent = m.title || '—';
+                posterEl.innerHTML = m.poster_path
+                    ? `<img src="https://image.tmdb.org/t/p/w185${m.poster_path}" alt="${m.title || ''}" style="width:100%;height:100%;object-fit:cover;">`
+                    : '';
+            } catch (e) {
+                tituloEl.textContent = '—';
+            }
+        };
+
+                window.abrirEdicionFavorita = function() {
+                    window.cancelarEdicionVistaCine();
+                    window.cancelarEdicionNoMeCanso();
+                    window.cancelarEdicionNoLaBanco();
+            document.getElementById('perfilFavoritaVista').style.display = 'none';
+            document.getElementById('perfilFavoritaEdicion').style.display = 'block';
+            document.getElementById('btnEditarFavorita').style.display = 'none';
+            const input = document.getElementById('inputFavoritaBusqueda');
+            input.value = '';
+            input.focus();
+        };
+
+        window.cancelarEdicionFavorita = function() {
+            document.getElementById('perfilFavoritaEdicion').style.display = 'none';
+            document.getElementById('favoritaResultados').style.display = 'none';
+            document.getElementById('perfilFavoritaVista').style.display = 'flex';
+            document.getElementById('btnEditarFavorita').style.display = 'inline-flex';
+        };
+
+                window._elegirFavorita = async function(movieId) {
+                    const token = localStorage.getItem('token');
+                    try {
+                        const res = await fetch(`${CONFIG.API_URL}/users/me/pelicula-favorita`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({ movieId })
+                        });
+                        if (!res.ok) throw new Error();
+                        document.getElementById('perfilFavoritaEdicion').style.display = 'none';
+                        document.getElementById('favoritaResultados').style.display = 'none';
+                        document.getElementById('perfilFavoritaVista').style.display = 'flex';
+                        document.getElementById('btnEditarFavorita').style.display = 'inline-flex';
+                        await window._renderFavoritaVista(movieId);
+                    } catch (e) {
+                        alert('Error al guardar. Intentá de nuevo.');
+                    }
+                };
+
+                window._elegirVistaCine = async function(movieId) {
+                    const token = localStorage.getItem('token');
+                    try {
+                        const res = await fetch(`${CONFIG.API_URL}/users/me/ultima-vista-cine`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({ movieId })
+                        });
+                        if (!res.ok) throw new Error();
+                        document.getElementById('perfilVistaCineEdicion').style.display = 'none';
+                        document.getElementById('vistaCineResultados').style.display = 'none';
+                        document.getElementById('btnEditarVistaCine').style.display = 'inline-flex';
+                        await window._renderVistaCineVista(movieId);
+                    } catch (e) {
+                        alert('Error al guardar. Intentá de nuevo.');
+                    }
+                };
+
+                let _favoritaTimeout = null;
+                window._buscarFavorita = function(query) {
+            clearTimeout(_favoritaTimeout);
+            const resultados = document.getElementById('favoritaResultados');
+            if (!query || query.trim().length < 2) {
+                resultados.style.display = 'none';
+                resultados.innerHTML = '';
+                return;
+            }
+            _favoritaTimeout = setTimeout(async () => {
+                try {
+                    const token = localStorage.getItem('token');
+                    const params = new URLSearchParams();
+                    params.append('query', query.trim());
+                    params.append('page', 1);
+                    const res = await fetch(`${CONFIG.API_URL}/movies/search?${params.toString()}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) throw new Error();
+                    const data = await res.json();
+                    const items = (data.results || []).slice(0, 6);
+
+                    if (items.length === 0) {
+                        resultados.innerHTML = '<div style="padding:0.6rem;color:#999;font-size:0.85rem;">Sin resultados</div>';
+                        resultados.style.display = 'block';
+                        return;
+                    }
+
+                    resultados.innerHTML = items.map(m => {
+                        const anio = m.release_date ? m.release_date.slice(0, 4) : '';
+                        const poster = m.poster_path
+                            ? `<img src="https://image.tmdb.org/t/p/w92${m.poster_path}" style="width:32px;height:46px;object-fit:cover;border-radius:4px;">`
+                            : `<div style="width:32px;height:46px;background:#f5f5f5;border-radius:4px;"></div>`;
+                        return `
+                            <div class="favorita-resultado-item" onclick="window._elegirFavorita(${m.id})"
+                                 style="display:flex;align-items:center;gap:10px;padding:8px 10px;cursor:pointer;">
+                                ${poster}
+                                <div>
+                                    <p style="font-size:0.85rem;margin:0;">${m.title || ''}</p>
+                                    <p style="font-size:0.75rem;color:#999;margin:0;">${anio}</p>
+                                </div>
+                            </div>`;
+                    }).join('');
+                    resultados.style.display = 'block';
+                } catch (e) {
+                    resultados.style.display = 'none';
+                }
+            }, 300);
+        };
+
+        window._elegirFavorita = async function(movieId) {
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${CONFIG.API_URL}/users/me/pelicula-favorita`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ movieId })
+                });
+                if (!res.ok) throw new Error();
+
+                document.getElementById('perfilFavoritaEdicion').style.display = 'none';
+                document.getElementById('favoritaResultados').style.display = 'none';
+                document.getElementById('perfilFavoritaVista').style.display = 'flex';
+                document.getElementById('btnEditarFavorita').style.display = 'inline-flex';
+
+                await window._renderFavoritaVista(movieId);
+            } catch (e) {
+                alert('Error al guardar tu película favorita. Intentá de nuevo.');
+            }
+        };
+
+        window._renderVistaCineVista = async function(movieId) {
+            const posterEl = document.getElementById('perfilVistaCinePoster');
+            const tituloEl = document.getElementById('perfilVistaCineTitulo');
+            if (!posterEl || !tituloEl) return;
+
+                    if (!movieId) {
+                        tituloEl.textContent = 'Sin elegir todavía';
+                        posterEl.innerHTML = '';
+                        posterEl.style.cursor = 'default';
+                        posterEl.onclick = null;
+                        return;
+                    }
+                    try {
+                        const token = localStorage.getItem('token');
+                        const res = await fetch(`${CONFIG.API_URL}/movies/${movieId}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (!res.ok) throw new Error();
+                        const m = await res.json();
+                        tituloEl.textContent = m.title || '—';
+                        posterEl.innerHTML = m.poster_path
+                            ? `<img src="https://image.tmdb.org/t/p/w185${m.poster_path}" alt="${m.title || ''}" style="width:100%;height:100%;object-fit:cover;">`
+                            : '';
+                        posterEl.style.cursor = 'pointer';
+                        posterEl.onclick = () => window._abrirPeliculaDesdePerfil(movieId);
+                    } catch (e) {
+                        tituloEl.textContent = '—';
+                    }
+                };
+
+                            window.abrirEdicionVistaCine = function() {
+                    window.cancelarEdicionFavorita();
+                    window.cancelarEdicionNoMeCanso();
+                    window.cancelarEdicionNoLaBanco();
+            document.getElementById('perfilVistaCineVista').style.display = 'none';
+            document.getElementById('perfilVistaCineEdicion').style.display = 'block';
+            document.getElementById('btnEditarVistaCine').style.display = 'none';
+            const input = document.getElementById('inputVistaCineBusqueda');
+            input.value = '';
+            input.focus();
+        };
+
+            window.cancelarEdicionVistaCine = function() {
+                document.getElementById('perfilVistaCineEdicion').style.display = 'none';
+                document.getElementById('vistaCineResultados').style.display = 'none';
+                document.getElementById('perfilVistaCineVista').style.display = 'flex';
+                document.getElementById('btnEditarVistaCine').style.display = 'inline-flex';
+            };
+
+        let _vistaCineTimeout = null;
+        window._buscarVistaCine = function(query) {
+            clearTimeout(_vistaCineTimeout);
+            const resultados = document.getElementById('vistaCineResultados');
+            if (!query || query.trim().length < 2) {
+                resultados.style.display = 'none';
+                resultados.innerHTML = '';
+                return;
+            }
+            _vistaCineTimeout = setTimeout(async () => {
+                try {
+                    const token = localStorage.getItem('token');
+                    const params = new URLSearchParams();
+                    params.append('query', query.trim());
+                    params.append('page', 1);
+                    const res = await fetch(`${CONFIG.API_URL}/movies/search?${params.toString()}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) throw new Error();
+                    const data = await res.json();
+                    const items = (data.results || []).slice(0, 6);
+                    if (items.length === 0) {
+                        resultados.innerHTML = '<div style="padding:0.6rem;color:#999;font-size:0.85rem;">Sin resultados</div>';
+                        resultados.style.display = 'block';
+                        return;
+                    }
+                    resultados.innerHTML = items.map(m => {
+                        const anio = m.release_date ? m.release_date.slice(0, 4) : '';
+                        const poster = m.poster_path
+                            ? `<img src="https://image.tmdb.org/t/p/w92${m.poster_path}" style="width:32px;height:46px;object-fit:cover;border-radius:4px;">`
+                            : `<div style="width:32px;height:46px;background:#333;border-radius:4px;"></div>`;
+                        return `
+                            <div class="vistacine-resultado-item" onclick="window._elegirVistaCine(${m.id})"
+                                 style="display:flex;align-items:center;gap:10px;padding:8px 10px;cursor:pointer;">
+                                ${poster}
+                                <div>
+                                    <p style="font-size:0.85rem;margin:0;color:#f2f0ea;">${m.title || ''}</p>
+                                    <p style="font-size:0.75rem;color:#999;margin:0;">${anio}</p>
+                                </div>
+                            </div>`;
+                    }).join('');
+                    resultados.style.display = 'block';
+                } catch (e) {
+                    resultados.style.display = 'none';
+                }
+            }, 300);
+        };
+
+        window._elegirVistaCine = async function(movieId) {
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${CONFIG.API_URL}/users/me/ultima-vista-cine`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ movieId })
+                });
+                if (!res.ok) throw new Error();
+
+                    document.getElementById('perfilVistaCineEdicion').style.display = 'none';
+                    document.getElementById('vistaCineResultados').style.display = 'none';
+                    document.getElementById('perfilVistaCineVista').style.display = 'flex';
+                    document.getElementById('btnEditarVistaCine').style.display = 'inline-flex';
+
+                await window._renderVistaCineVista(movieId);
+            } catch (e) {
+                alert('Error al guardar. Intentá de nuevo.');
+            }
+        };
+
+            window._renderNoMeCansoVista = async function(movieId) {
+                const posterEl = document.getElementById('perfilNoMeCansoPoster');
+                const tituloEl = document.getElementById('perfilNoMeCansoTitulo');
+                if (!posterEl || !tituloEl) return;
+                if (!movieId) { tituloEl.textContent = 'Sin elegir todavía'; posterEl.innerHTML = ''; posterEl.style.cursor = 'default'; posterEl.onclick = null; return; }
+                try {
+                    const token = localStorage.getItem('token');
+                    const res = await fetch(`${CONFIG.API_URL}/movies/${movieId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    if (!res.ok) throw new Error();
+                    const m = await res.json();
+                    tituloEl.textContent = m.title || '—';
+                    posterEl.innerHTML = m.poster_path ? `<img src="https://image.tmdb.org/t/p/w185${m.poster_path}" alt="${m.title || ''}" style="width:100%;height:100%;object-fit:cover;">` : '';
+                    posterEl.style.cursor = 'pointer';
+                    posterEl.onclick = () => window._abrirPeliculaDesdePerfil(movieId);
+                } catch (e) { tituloEl.textContent = '—'; }
+            };
+
+            window._renderNoLaBancoVista = async function(movieId) {
+                const posterEl = document.getElementById('perfilNoLaBancoPoster');
+                const tituloEl = document.getElementById('perfilNoLaBancoTitulo');
+                if (!posterEl || !tituloEl) return;
+                if (!movieId) { tituloEl.textContent = 'Sin elegir todavía'; posterEl.innerHTML = ''; posterEl.style.cursor = 'default'; posterEl.onclick = null; return; }
+                try {
+                    const token = localStorage.getItem('token');
+                    const res = await fetch(`${CONFIG.API_URL}/movies/${movieId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    if (!res.ok) throw new Error();
+                    const m = await res.json();
+                    tituloEl.textContent = m.title || '—';
+                    posterEl.innerHTML = m.poster_path ? `<img src="https://image.tmdb.org/t/p/w185${m.poster_path}" alt="${m.title || ''}" style="width:100%;height:100%;object-fit:cover;">` : '';
+                    posterEl.style.cursor = 'pointer';
+                    posterEl.onclick = () => window._abrirPeliculaDesdePerfil(movieId);
+                } catch (e) { tituloEl.textContent = '—'; }
+            };
+
+        window.abrirEdicionNoMeCanso = function() {
+            window.cancelarEdicionFavorita();
+            window.cancelarEdicionVistaCine();
+            window.cancelarEdicionNoLaBanco();
+            document.getElementById('perfilNoMeCansoVista').style.display = 'none';
+            document.getElementById('perfilNoMeCansoEdicion').style.display = 'block';
+            document.getElementById('btnEditarNoMeCanso').style.display = 'none';
+            const input = document.getElementById('inputNoMeCansoBusqueda');
+            input.value = '';
+            input.focus();
+        };
+
+        window.cancelarEdicionNoMeCanso = function() {
+            document.getElementById('perfilNoMeCansoEdicion').style.display = 'none';
+            document.getElementById('noMeCansoResultados').style.display = 'none';
+            document.getElementById('perfilNoMeCansoVista').style.display = 'flex';
+            document.getElementById('btnEditarNoMeCanso').style.display = 'inline-flex';
+        };
+
+        window.abrirEdicionNoLaBanco = function() {
+            window.cancelarEdicionFavorita();
+            window.cancelarEdicionVistaCine();
+            window.cancelarEdicionNoMeCanso();
+            document.getElementById('perfilNoLaBancoVista').style.display = 'none';
+            document.getElementById('perfilNoLaBancoEdicion').style.display = 'block';
+            document.getElementById('btnEditarNoLaBanco').style.display = 'none';
+            const input = document.getElementById('inputNoLaBancoBusqueda');
+            input.value = '';
+            input.focus();
+        };
+
+        window.cancelarEdicionNoLaBanco = function() {
+            document.getElementById('perfilNoLaBancoEdicion').style.display = 'none';
+            document.getElementById('noLaBancoResultados').style.display = 'none';
+            document.getElementById('perfilNoLaBancoVista').style.display = 'flex';
+            document.getElementById('btnEditarNoLaBanco').style.display = 'inline-flex';
+        };
+
+        let _noMeCansoTimeout = null;
+        window._buscarNoMeCanso = function(query) {
+            clearTimeout(_noMeCansoTimeout);
+            const resultados = document.getElementById('noMeCansoResultados');
+            if (!query || query.trim().length < 2) { resultados.style.display = 'none'; resultados.innerHTML = ''; return; }
+            _noMeCansoTimeout = setTimeout(async () => {
+                try {
+                    const token = localStorage.getItem('token');
+                    const params = new URLSearchParams();
+                    params.append('query', query.trim());
+                    params.append('page', 1);
+                    const res = await fetch(`${CONFIG.API_URL}/movies/search?${params.toString()}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    if (!res.ok) throw new Error();
+                    const data = await res.json();
+                    const items = (data.results || []).slice(0, 6);
+                    if (items.length === 0) { resultados.innerHTML = '<div style="padding:0.6rem;color:#999;font-size:0.85rem;">Sin resultados</div>'; resultados.style.display = 'block'; return; }
+                    resultados.innerHTML = items.map(m => {
+                        const anio = m.release_date ? m.release_date.slice(0, 4) : '';
+                        const poster = m.poster_path ? `<img src="https://image.tmdb.org/t/p/w92${m.poster_path}" style="width:32px;height:46px;object-fit:cover;border-radius:4px;">` : `<div style="width:32px;height:46px;background:#333;border-radius:4px;"></div>`;
+                        return `<div class="nomecanso-resultado-item" onclick="window._elegirNoMeCanso(${m.id})" style="display:flex;align-items:center;gap:10px;padding:8px 10px;cursor:pointer;">${poster}<div><p style="font-size:0.85rem;margin:0;color:#f2f0ea;">${m.title || ''}</p><p style="font-size:0.75rem;color:#999;margin:0;">${anio}</p></div></div>`;
+                    }).join('');
+                    resultados.style.display = 'block';
+                } catch (e) { resultados.style.display = 'none'; }
+            }, 300);
+        };
+
+        let _noLaBancoTimeout = null;
+        window._buscarNoLaBanco = function(query) {
+            clearTimeout(_noLaBancoTimeout);
+            const resultados = document.getElementById('noLaBancoResultados');
+            if (!query || query.trim().length < 2) { resultados.style.display = 'none'; resultados.innerHTML = ''; return; }
+            _noLaBancoTimeout = setTimeout(async () => {
+                try {
+                    const token = localStorage.getItem('token');
+                    const params = new URLSearchParams();
+                    params.append('query', query.trim());
+                    params.append('page', 1);
+                    const res = await fetch(`${CONFIG.API_URL}/movies/search?${params.toString()}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    if (!res.ok) throw new Error();
+                    const data = await res.json();
+                    const items = (data.results || []).slice(0, 6);
+                    if (items.length === 0) { resultados.innerHTML = '<div style="padding:0.6rem;color:#999;font-size:0.85rem;">Sin resultados</div>'; resultados.style.display = 'block'; return; }
+                    resultados.innerHTML = items.map(m => {
+                        const anio = m.release_date ? m.release_date.slice(0, 4) : '';
+                        const poster = m.poster_path ? `<img src="https://image.tmdb.org/t/p/w92${m.poster_path}" style="width:32px;height:46px;object-fit:cover;border-radius:4px;">` : `<div style="width:32px;height:46px;background:#333;border-radius:4px;"></div>`;
+                        return `<div class="nolabanco-resultado-item" onclick="window._elegirNoLaBanco(${m.id})" style="display:flex;align-items:center;gap:10px;padding:8px 10px;cursor:pointer;">${poster}<div><p style="font-size:0.85rem;margin:0;color:#f2f0ea;">${m.title || ''}</p><p style="font-size:0.75rem;color:#999;margin:0;">${anio}</p></div></div>`;
+                    }).join('');
+                    resultados.style.display = 'block';
+                } catch (e) { resultados.style.display = 'none'; }
+            }, 300);
+        };
+
+        window._elegirNoMeCanso = async function(movieId) {
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${CONFIG.API_URL}/users/me/no-me-canso-de-ver`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ movieId })
+                });
+                if (!res.ok) throw new Error();
+                document.getElementById('perfilNoMeCansoEdicion').style.display = 'none';
+                document.getElementById('noMeCansoResultados').style.display = 'none';
+                document.getElementById('perfilNoMeCansoVista').style.display = 'flex';
+                document.getElementById('btnEditarNoMeCanso').style.display = 'inline-flex';
+                await window._renderNoMeCansoVista(movieId);
+            } catch (e) { alert('Error al guardar. Intentá de nuevo.'); }
+        };
+
+        window._elegirNoLaBanco = async function(movieId) {
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${CONFIG.API_URL}/users/me/no-la-banco`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ movieId })
+                });
+                if (!res.ok) throw new Error();
+                document.getElementById('perfilNoLaBancoEdicion').style.display = 'none';
+                document.getElementById('noLaBancoResultados').style.display = 'none';
+                document.getElementById('perfilNoLaBancoVista').style.display = 'flex';
+                document.getElementById('btnEditarNoLaBanco').style.display = 'inline-flex';
+                await window._renderNoLaBancoVista(movieId);
+            } catch (e) { alert('Error al guardar. Intentá de nuevo.'); }
         };
 
         // ==============================================
@@ -942,6 +1970,17 @@ window._abrirPeliculaDesdePerfil = async function(movieId) {
     }
 };
 
+window._abrirSerieDesdePerfil = async function(seriesId) {
+    if (!seriesId) return;
+
+    if (typeof window._asegurarModalPeliculaEnDOM === 'function') {
+        await window._asegurarModalPeliculaEnDOM();
+    }
+    if (typeof window.abrirDetalleSerie === 'function') {
+        window.abrirDetalleSerie(seriesId);
+    }
+};
+
 window._abrirPeliculaDesdeComentario = async function(movieId, commentId, esSpoiler) {
     if (!movieId) return;
 
@@ -1040,12 +2079,12 @@ async function cargarPublicacionesPerfil(userId) {
                         // Botón ver más si hay más de 9 — abre la vista completa con scroll infinito
                         if (!data.last) {
                             lista.insertAdjacentHTML('beforeend', `
-                                <div style="text-align:center;padding:0.75rem;">
-                                    <span onclick="window.abrirTodasLasPublicacionesPerfil(${userId})"
-                                          style="font-size:0.82rem;color:#324C89;cursor:pointer;font-weight:600;">
-                                        Ver todas las publicaciones →
-                                    </span>
-                                </div>`);
+                            <div style="text-align:center;padding:0.75rem;">
+                                <span class="cine-ver-todas-pub" onclick="window.abrirTodasLasPublicacionesPerfil(${userId})"
+                                      style="font-size:0.82rem;color:#324C89;cursor:pointer;font-weight:600;">
+                                    Ver todas las publicaciones →
+                                </span>
+                            </div>`);
                         }
 
             // Cargar contadores reales (banco + comentarios) de cada tile
@@ -1381,230 +2420,148 @@ function formatTeritorioPerfil(key) {
     return map[key] || key;
 }
 
+window._activarStatClickeable = function(wrapId, cantidad, onClickFn) {
+    const wrap = document.getElementById(wrapId);
+    if (!wrap) return;
+    wrap.dataset.cantidad = cantidad;
+    if (cantidad > 0) {
+        wrap.style.cursor = 'pointer';
+        wrap.onclick = onClickFn;
+    } else {
+        wrap.style.cursor = 'default';
+        wrap.onclick = null;
+    }
+    window._actualizarColorStatsSeguir();
+};
+
+// Rojo en modo Películas, azul en modo Series — mismo criterio de color
+// que el resto de "Mi Sala". Se re-llama desde setAdnTipo cada vez que
+// cambia el switch, así el color sigue al modo aunque la cantidad de
+// seguidores/seguidos no haya cambiado.
+window._actualizarColorStatsSeguir = function() {
+    const tipo = document.querySelector('.cine-switch-option.active')?.dataset.tipo || 'peliculas';
+    const color = tipo === 'series' ? 'var(--cine-accent-series)' : 'var(--cine-accent)';
+    ['perfilSeguidoresWrap', 'perfilSiguiendoWrap'].forEach(id => {
+        const wrap = document.getElementById(id);
+        if (!wrap) return;
+        const lbl = wrap.querySelector('.cine-stat-lbl');
+        const cantidad = Number(wrap.dataset.cantidad || 0);
+        if (!lbl) return;
+        if (cantidad > 0) { lbl.style.color = color; lbl.style.textDecoration = 'underline'; }
+        else { lbl.style.color = ''; lbl.style.textDecoration = 'none'; }
+    });
+};
+
 // ==============================================
 // ÚLTIMOS COMENTARIOS DE SERIES — toggle en el mismo header
 // ==============================================
 window._perfilComentariosTipo = 'pelicula';
-let _comentariosSeriePage  = 0;
-let _comentariosSerieTotal = 0;
-
-window.toggleComentariosPerfilTipo = function() {
-    const titulo = document.getElementById('perfilComentariosTitulo');
-    const toggle = document.getElementById('perfilComentariosToggle');
-    if (!titulo || !toggle) return;
-
-    if (window._perfilComentariosTipo === 'pelicula') {
-        window._perfilComentariosTipo = 'serie';
-        titulo.innerHTML = '<i class="fas fa-tv"></i> Últimas series comentadas';
-        titulo.style.background = '#e50914';
-        toggle.innerHTML = '<i class="fas fa-film"></i> Películas';
-        toggle.title = 'Ver últimas películas comentadas';
-
-        _comentariosSeriePage = 0;
-        renderComentariosSerie(window._perfilComentariosSerieCache || []);
-    } else {
-        window._perfilComentariosTipo = 'pelicula';
-        titulo.innerHTML = '<i class="fas fa-comment"></i> Últimas películas comentadas';
-        titulo.style.background = '';
-        toggle.innerHTML = '<i class="fas fa-tv"></i> Series';
-        toggle.title = 'Ver últimas series comentadas';
-
-        renderComentarios(window._perfilComentariosCache || []);
-    }
-};
+let _stackComentariosSeries = [];
+let _stackIndiceComentariosSeries = 0;
 
 function renderComentariosSerie(comentarios) {
-    _comentariosSeriePage  = 0;
-    _comentariosSerieTotal = window._perfilTotalComentariosSeries || comentarios?.length || 0;
+    const wrapper = document.getElementById('perfilComentariosSeriesList');
+    if (!wrapper) return;
 
-    const seccion = document.getElementById('perfilComentariosList');
     if (!comentarios || comentarios.length === 0) {
-        seccion.innerHTML = '<div class="perfil-vacio">Sin comentarios de series aún</div>';
+                wrapper.innerHTML = '<div class="cine-stack-vacio-wrap"><div class="cine-stack-vacio cine-stack-vacio--series"></div><p class="cine-stack-vacio-lbl">Sin comentarios aún</p></div>';
         return;
     }
 
-    const esMobile = window.innerWidth <= 600;
+    _stackComentariosSeries = comentarios;
+    _stackIndiceComentariosSeries = 0;
 
-    if (esMobile) {
-        seccion.innerHTML = `
-            <div class="perfil-comentarios-swipe" id="perfilComentariosSwipe"></div>
-            <div class="perfil-comentarios-dots" id="perfilComentariosDots"></div>
-        `;
-        _renderSwipeComentariosSerie(comentarios);
-    } else {
-        seccion.innerHTML = `
-            <div id="perfilComentariosItems"></div>
-            <div class="perfil-comentarios-nav" id="perfilComentariosNav">
-                <button class="perfil-carrusel-arrow left" onclick="window.cambiarPaginaComentariosSerie(-1)">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <span id="perfilComentariosInfo" style="font-size:0.8rem;color:#999;"></span>
-                <button class="perfil-carrusel-arrow right" onclick="window.cambiarPaginaComentariosSerie(1)">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            </div>
-        `;
-        _renderItemsComentariosSerie(comentarios);
-        _actualizarNavComentariosSerie();
-    }
-}
+        wrapper.innerHTML = `
+                          <p class="cine-stack-eyebrow">COMENTARIOS (${window._perfilCounts?.comentariosSeries || 0})</p>
+        <div class="cine-stack-area">
+            <button class="cine-stack-nav prev" onclick="window._moverStackComentariosSeries(-1)"><i class="fas fa-chevron-left"></i></button>
+            <div id="cineStackComentariosSeriesContainer" style="position:relative; width:100%; height:100%;"></div>
+            <button class="cine-stack-nav next" onclick="window._moverStackComentariosSeries(1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <p class="cine-stack-titulo" id="cineStackComentariosSeriesTitulo"></p>
+    `;
 
-function _comentarioItemHTMLSerie(c) {
-    const textoClass = c.spoiler ? 'perfil-comentario-texto spoiler' : 'perfil-comentario-texto';
-    const spoilerTag = c.spoiler ? '<span class="perfil-tag-spoiler">spoiler</span>' : '';
-    const poster = c.posterPath
-        ? `<img src="https://image.tmdb.org/t/p/w92${c.posterPath}" alt="${c.seriesTitle || ''}" style="width:100%;height:100%;object-fit:cover;">`
-        : `<i class="fas fa-tv"></i>`;
-    const banco      = c.bancoCount       || 0;
-    const merece     = c.merecePuntoCount || 0;
-    const respuestas = c.replyCount       || 0;
-    const uid        = `cmnt-serie-${c.commentId}`;
-
-    const CHARS_LIMIT = window.innerWidth <= 600 ? 150 : 300;
-    const contenido   = c.contenido || '';
-    const esMuyLargo = contenido.length > CHARS_LIMIT;
-    const textoCorto = esMuyLargo ? contenido.substring(0, CHARS_LIMIT) + '...' : contenido;
-
-    if (esMuyLargo) {
-        window[`_verMas_${uid}`] = function(btn) {
-            const el = document.getElementById(`txt-${uid}`);
-            if (btn.dataset.expanded === '1') {
-                el.textContent = textoCorto;
-                btn.textContent = 'Ver más';
-                btn.dataset.expanded = '0';
-            } else {
-                el.textContent = contenido;
-                btn.textContent = 'Ver menos';
-                btn.dataset.expanded = '1';
-            }
-        };
-    }
-
-    const textoHTML = esMuyLargo ? `
-        <p class="${textoClass}" id="txt-${uid}">${textoCorto}</p>
-        <span class="perfil-ver-mas" onclick="window['_verMas_${uid}'](this)" data-expanded="0">Ver más</span>
-    ` : `<p class="${textoClass}">${contenido}</p>`;
-
-    return `
-        <div class="perfil-comentario-item"
-             onclick="window._abrirSerieDesdeComentario(${c.seriesId}, ${c.commentId}, ${c.spoiler || false})"
-             style="cursor:pointer;">
-            <div class="perfil-comentario-poster">${poster}</div>
-            <div class="perfil-comentario-body">
-                <p class="perfil-comentario-pelicula">${c.seriesTitle || 'Serie no disponible'}</p>
-                ${textoHTML}
-                <div class="perfil-comentario-meta">
-                    <span>${c.fechaRelativa || ''}</span>
-                    ${spoilerTag}
-                </div>
-                <div class="perfil-comentario-reacciones">
-                    <span title="Te banco"><i class="fas fa-thumbs-up"></i> ${banco}</span>
-                    <span title="Merecés un punto"><i class="fas fa-star"></i> ${merece}</span>
-                    <span title="Respuestas"><i class="fas fa-reply"></i> ${respuestas}</span>
-                </div>
-            </div>
+    const cont = document.getElementById('cineStackComentariosSeriesContainer');
+    cont.innerHTML = comentarios.map((c, i) => {
+        const poster = c.posterPath
+            ? `<img src="https://image.tmdb.org/t/p/w185${c.posterPath}" alt="${c.seriesTitle || ''}">`
+            : `<div class="placeholder"><i class="fas fa-tv"></i></div>`;
+        return `
+        <div class="cine-stack-card" onclick="window._abrirVinetaComentarioSerie(${i})">
+            ${poster}
+            <div class="cine-badge-comentario"><i class="fas fa-comment-dots"></i></div>
         </div>`;
+    }).join('');
+
+    window._renderStackPosicionesComentariosSeries();
 }
 
-function _buildSlideHTMLSerie(grupo) {
-    return `<div class="perfil-swipe-slide">${grupo.map(c => _comentarioItemHTMLSerie(c)).join('')}</div>`;
-}
+window._renderStackPosicionesComentariosSeries = function() {
+    const cards = document.querySelectorAll('#cineStackComentariosSeriesContainer .cine-stack-card');
+    const N = _stackComentariosSeries.length;
+    cards.forEach((card, i) => {
+        let diff = i - _stackIndiceComentariosSeries;
+        if (diff > N / 2) diff -= N;
+        if (diff < -N / 2) diff += N;
+        const offset = (diff >= 0 && diff <= 2) ? diff : -1;
 
-async function _renderSwipeComentariosSerie(comentarios) {
-    const swipe = document.getElementById('perfilComentariosSwipe');
-    const dots  = document.getElementById('perfilComentariosDots');
-    if (!swipe) return;
+        // Mismo fix que en Películas comentadas: solo la card de adelante
+        // es clickeable, las de atrás quedan inertes hasta pasar al frente.
+        card.style.pointerEvents = offset === 0 ? 'auto' : 'none';
 
-    let todos = [...comentarios];
-    const totalPags = Math.ceil(_comentariosSerieTotal / _comentariosSize);
-    const token = localStorage.getItem('token');
-
-    for (let p = 1; p < totalPags; p++) {
-        try {
-            const res = await fetch(
-                `${CONFIG.API_URL}/users/${perfilUsuarioId}/comentarios-series?page=${p}&size=${_comentariosSize}`,
-                { headers: { 'Authorization': `Bearer ${token}` } }
-            );
-            if (!res.ok) break;
-            const data = await res.json();
-            todos = [...todos, ...data.comentarios];
-        } catch(e) { break; }
+        if (offset === 0) {
+            card.style.transform = 'translateX(0) translateY(0) scale(1) rotate(0deg)';
+            card.style.opacity = 1; card.style.zIndex = 10;
+        } else if (offset === 1) {
+            card.style.transform = 'translateX(-18px) translateY(10px) scale(0.94) rotate(-3deg)';
+            card.style.opacity = 0.6; card.style.zIndex = 8;
+        } else if (offset === 2) {
+            card.style.transform = 'translateX(-36px) translateY(20px) scale(0.88) rotate(-6deg)';
+            card.style.opacity = 0.3; card.style.zIndex = 7;
+        } else {
+            card.style.transform = 'translateX(260px) translateY(-10px) scale(0.8) rotate(16deg)';
+            card.style.opacity = 0; card.style.zIndex = 5;
+        }
+    });
+    const tituloEl = document.getElementById('cineStackComentariosSeriesTitulo');
+    if (tituloEl && _stackComentariosSeries[_stackIndiceComentariosSeries]) {
+        tituloEl.textContent = _stackComentariosSeries[_stackIndiceComentariosSeries].seriesTitle || '—';
     }
-
-    const grupos = [];
-    for (let i = 0; i < todos.length; i += _comentariosSize) {
-        grupos.push(todos.slice(i, i + _comentariosSize));
-    }
-
-    swipe.innerHTML = grupos.map(g => _buildSlideHTMLSerie(g)).join('');
-
-    const totalGrupos = grupos.length;
-
-    const _actualizarDots = (idx) => {
-        if (!dots) return;
-        if (totalGrupos <= 1) { dots.innerHTML = ''; return; }
-
-        const maxDots = totalGrupos === 2 ? 2 : 3;
-        let activoDot;
-        if (idx === 0) activoDot = 0;
-        else if (idx >= totalGrupos - 1) activoDot = maxDots - 1;
-        else activoDot = maxDots === 2 ? 1 : 1;
-
-        dots.innerHTML = Array.from({length: maxDots}, (_, i) =>
-            `<span class="perfil-dot${i === activoDot ? ' active' : ''}"></span>`
-        ).join('');
-    };
-    _actualizarDots(0);
-
-    swipe.addEventListener('scroll', () => {
-        const idx = Math.round(swipe.scrollLeft / swipe.offsetWidth);
-        _actualizarDots(idx);
-    }, { passive: true });
-}
-
-function _renderItemsComentariosSerie(comentarios) {
-    const lista = document.getElementById('perfilComentariosItems');
-    if (!lista) return;
-    lista.innerHTML = comentarios.map(c => _comentarioItemHTMLSerie(c)).join('');
-}
-
-window.cambiarPaginaComentariosSerie = async function(dir) {
-    const nuevaPagina = _comentariosSeriePage + dir;
-    const totalPaginas = Math.ceil(_comentariosSerieTotal / _comentariosSize);
-    if (nuevaPagina < 0 || nuevaPagina >= totalPaginas) return;
-
-    const token = localStorage.getItem('token');
-    try {
-        const res = await fetch(
-            `${CONFIG.API_URL}/users/${perfilUsuarioId}/comentarios-series?page=${nuevaPagina}&size=${_comentariosSize}`,
-            { headers: { 'Authorization': `Bearer ${token}` } }
-        );
-        if (!res.ok) return;
-        const data = await res.json();
-
-        _comentariosSeriePage  = nuevaPagina;
-        _comentariosSerieTotal = data.total;
-
-        _renderItemsComentariosSerie(data.comentarios);
-        _actualizarNavComentariosSerie();
-
-    } catch(e) {}
 };
 
-function _actualizarNavComentariosSerie() {
-    const esMobile = window.innerWidth <= 600;
-    if (esMobile) return;
+window._moverStackComentariosSeries = function(dir) {
+    const N = _stackComentariosSeries.length;
+    if (N === 0) return;
+    _stackIndiceComentariosSeries = (_stackIndiceComentariosSeries + dir + N) % N;
+    window._renderStackPosicionesComentariosSeries();
+    window._cerrarVineta();
+};
 
-    const totalPaginas = Math.ceil(_comentariosSerieTotal / _comentariosSize);
-    const info = document.getElementById('perfilComentariosInfo');
-    if (info) info.textContent = `${_comentariosSeriePage + 1} / ${totalPaginas}`;
+window._abrirVinetaComentarioSerie = function(i) {
+    const c = _stackComentariosSeries[i];
+    if (!c) return;
+    const overlay   = document.getElementById('cineVinetaOverlay');
+    const box       = document.getElementById('cineVinetaBox');
+    const spoilerEl = document.getElementById('cineVinetaSpoiler');
 
-    const nav = document.getElementById('perfilComentariosNav');
-    if (!nav) return;
-    const btns = nav.querySelectorAll('.perfil-carrusel-arrow');
-    btns[0].disabled = _comentariosSeriePage <= 0;
-    btns[1].disabled = _comentariosSeriePage >= totalPaginas - 1;
-}
+        document.getElementById('cineVinetaFuente').textContent = c.seriesTitle || '';
+        document.getElementById('cineVinetaTexto').textContent  = c.contenido || '';
+        spoilerEl.style.display = c.spoiler ? 'inline-block' : 'none';
+
+        window._vinetaContexto = { tipo: 'serie', id: c.seriesId, commentId: c.commentId, spoiler: c.spoiler };
+
+        const cardEl = document.querySelectorAll('#cineStackComentariosSeriesContainer .cine-stack-card')[i];
+        const rect = cardEl.getBoundingClientRect();
+        const maxLeft = window.innerWidth - 240 - 12;
+        box.style.left = Math.min(rect.left, maxLeft) + 'px';
+        box.style.top  = (rect.top - 160) + 'px';
+
+    overlay.style.display = 'block';
+    box.style.display = 'block';
+    requestAnimationFrame(() => box.classList.add('show'));
+
+    window.addEventListener('scroll', window._cerrarVinetaPorScroll, { passive: true });
+};
 
 window._abrirSerieDesdeComentario = async function(seriesId, commentId, esSpoiler) {
     if (!seriesId) return;
@@ -1656,3 +2613,798 @@ window._abrirSerieDesdeComentario = async function(seriesId, commentId, esSpoile
         }, 800);
     }
 };
+
+// ==============================================
+// SERIE FAVORITA
+// ==============================================
+window._renderSerieFavoritaVista = async function(seriesId) {
+    const posterEl = document.getElementById('perfilSerieFavoritaPoster');
+    const tituloEl = document.getElementById('perfilSerieFavoritaTitulo');
+    if (!posterEl || !tituloEl) return;
+    if (!seriesId) { tituloEl.textContent = 'Sin elegir todavía'; posterEl.innerHTML = ''; posterEl.style.cursor = 'default'; posterEl.onclick = null; return; }
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${CONFIG.API_URL}/series/${seriesId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) throw new Error();
+        const s = await res.json();
+        tituloEl.textContent = s.name || '—';
+        posterEl.innerHTML = s.poster_path
+            ? `<img src="https://image.tmdb.org/t/p/w185${s.poster_path}" alt="${s.name || ''}" style="width:100%;height:100%;object-fit:cover;">`
+            : '';
+        posterEl.style.cursor = 'pointer';
+        posterEl.onclick = () => window._abrirSerieDesdePerfil(seriesId);
+    } catch (e) { tituloEl.textContent = '—'; }
+};
+
+window.abrirEdicionSerieFavorita = function() {
+    window.cancelarEdicionUltimaMaraton();
+    window.cancelarEdicionNoMeCansoSerie();
+    window.cancelarEdicionNoLaBancoSerie();
+    document.getElementById('perfilSerieFavoritaVista').style.display = 'none';
+    document.getElementById('perfilSerieFavoritaEdicion').style.display = 'block';
+    document.getElementById('btnEditarSerieFavorita').style.display = 'none';
+    const input = document.getElementById('inputSerieFavoritaBusqueda');
+    input.value = '';
+    input.focus();
+};
+
+window.cancelarEdicionSerieFavorita = function() {
+    document.getElementById('perfilSerieFavoritaEdicion').style.display = 'none';
+    document.getElementById('serieFavoritaResultados').style.display = 'none';
+    document.getElementById('perfilSerieFavoritaVista').style.display = 'flex';
+    document.getElementById('btnEditarSerieFavorita').style.display = 'inline-flex';
+};
+
+let _serieFavoritaTimeout = null;
+window._buscarSerieFavorita = function(query) {
+    clearTimeout(_serieFavoritaTimeout);
+    const resultados = document.getElementById('serieFavoritaResultados');
+    if (!query || query.trim().length < 2) { resultados.style.display = 'none'; resultados.innerHTML = ''; return; }
+    _serieFavoritaTimeout = setTimeout(async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const params = new URLSearchParams();
+            params.append('query', query.trim());
+            params.append('page', 1);
+            const res = await fetch(`${CONFIG.API_URL}/series/search?${params.toString()}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            const items = (data.results || []).slice(0, 6);
+            if (items.length === 0) {
+                resultados.innerHTML = '<div style="padding:0.6rem;color:#999;font-size:0.85rem;">Sin resultados</div>';
+                resultados.style.display = 'block';
+                return;
+            }
+            resultados.innerHTML = items.map(s => {
+                const anio = s.first_air_date ? s.first_air_date.slice(0, 4) : '';
+                const poster = s.poster_path
+                    ? `<img src="https://image.tmdb.org/t/p/w92${s.poster_path}" style="width:32px;height:46px;object-fit:cover;border-radius:4px;">`
+                    : `<div style="width:32px;height:46px;background:#f5f5f5;border-radius:4px;"></div>`;
+                return `
+                    <div class="favorita-resultado-item" onclick="window._elegirSerieFavorita(${s.id})"
+                         style="display:flex;align-items:center;gap:10px;padding:8px 10px;cursor:pointer;">
+                        ${poster}
+                        <div>
+                            <p style="font-size:0.85rem;margin:0;">${s.name || ''}</p>
+                            <p style="font-size:0.75rem;color:#999;margin:0;">${anio}</p>
+                        </div>
+                    </div>`;
+            }).join('');
+            resultados.style.display = 'block';
+        } catch (e) { resultados.style.display = 'none'; }
+    }, 300);
+};
+
+window._elegirSerieFavorita = async function(seriesId) {
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/users/me/serie-favorita`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ seriesId })
+        });
+        if (!res.ok) throw new Error();
+        document.getElementById('perfilSerieFavoritaEdicion').style.display = 'none';
+        document.getElementById('serieFavoritaResultados').style.display = 'none';
+        document.getElementById('perfilSerieFavoritaVista').style.display = 'flex';
+        document.getElementById('btnEditarSerieFavorita').style.display = 'inline-flex';
+        await window._renderSerieFavoritaVista(seriesId);
+    } catch (e) { alert('Error al guardar. Intentá de nuevo.'); }
+};
+
+// ==============================================
+// ÚLTIMA QUE VI EN MARATÓN
+// ==============================================
+window._renderUltimaMaratonVista = async function(seriesId) {
+    const posterEl = document.getElementById('perfilUltimaMaratonPoster');
+    const tituloEl = document.getElementById('perfilUltimaMaratonTitulo');
+    if (!posterEl || !tituloEl) return;
+    if (!seriesId) { tituloEl.textContent = 'Sin elegir todavía'; posterEl.innerHTML = ''; posterEl.style.cursor = 'default'; posterEl.onclick = null; return; }
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${CONFIG.API_URL}/series/${seriesId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) throw new Error();
+        const s = await res.json();
+        tituloEl.textContent = s.name || '—';
+        posterEl.innerHTML = s.poster_path
+            ? `<img src="https://image.tmdb.org/t/p/w185${s.poster_path}" alt="${s.name || ''}" style="width:100%;height:100%;object-fit:cover;">`
+            : '';
+        posterEl.style.cursor = 'pointer';
+        posterEl.onclick = () => window._abrirSerieDesdePerfil(seriesId);
+    } catch (e) { tituloEl.textContent = '—'; }
+};
+
+window.abrirEdicionUltimaMaraton = function() {
+    window.cancelarEdicionSerieFavorita();
+    window.cancelarEdicionNoMeCansoSerie();
+    window.cancelarEdicionNoLaBancoSerie();
+    document.getElementById('perfilUltimaMaratonVista').style.display = 'none';
+    document.getElementById('perfilUltimaMaratonEdicion').style.display = 'block';
+    document.getElementById('btnEditarUltimaMaraton').style.display = 'none';
+    const input = document.getElementById('inputUltimaMaratonBusqueda');
+    input.value = '';
+    input.focus();
+};
+
+window.cancelarEdicionUltimaMaraton = function() {
+    document.getElementById('perfilUltimaMaratonEdicion').style.display = 'none';
+    document.getElementById('ultimaMaratonResultados').style.display = 'none';
+    document.getElementById('perfilUltimaMaratonVista').style.display = 'flex';
+    document.getElementById('btnEditarUltimaMaraton').style.display = 'inline-flex';
+};
+
+let _ultimaMaratonTimeout = null;
+window._buscarUltimaMaraton = function(query) {
+    clearTimeout(_ultimaMaratonTimeout);
+    const resultados = document.getElementById('ultimaMaratonResultados');
+    if (!query || query.trim().length < 2) { resultados.style.display = 'none'; resultados.innerHTML = ''; return; }
+    _ultimaMaratonTimeout = setTimeout(async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const params = new URLSearchParams();
+            params.append('query', query.trim());
+            params.append('page', 1);
+            const res = await fetch(`${CONFIG.API_URL}/series/search?${params.toString()}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            const items = (data.results || []).slice(0, 6);
+            if (items.length === 0) {
+                resultados.innerHTML = '<div style="padding:0.6rem;color:#999;font-size:0.85rem;">Sin resultados</div>';
+                resultados.style.display = 'block';
+                return;
+            }
+            resultados.innerHTML = items.map(s => {
+                const anio = s.first_air_date ? s.first_air_date.slice(0, 4) : '';
+                const poster = s.poster_path
+                    ? `<img src="https://image.tmdb.org/t/p/w92${s.poster_path}" style="width:32px;height:46px;object-fit:cover;border-radius:4px;">`
+                    : `<div style="width:32px;height:46px;background:#f5f5f5;border-radius:4px;"></div>`;
+                return `
+                    <div class="favorita-resultado-item" onclick="window._elegirUltimaMaraton(${s.id})"
+                         style="display:flex;align-items:center;gap:10px;padding:8px 10px;cursor:pointer;">
+                        ${poster}
+                        <div>
+                            <p style="font-size:0.85rem;margin:0;">${s.name || ''}</p>
+                            <p style="font-size:0.75rem;color:#999;margin:0;">${anio}</p>
+                        </div>
+                    </div>`;
+            }).join('');
+            resultados.style.display = 'block';
+        } catch (e) { resultados.style.display = 'none'; }
+    }, 300);
+};
+
+window._elegirUltimaMaraton = async function(seriesId) {
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/users/me/ultima-maraton`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ seriesId })
+        });
+        if (!res.ok) throw new Error();
+        document.getElementById('perfilUltimaMaratonEdicion').style.display = 'none';
+        document.getElementById('ultimaMaratonResultados').style.display = 'none';
+        document.getElementById('perfilUltimaMaratonVista').style.display = 'flex';
+        document.getElementById('btnEditarUltimaMaraton').style.display = 'inline-flex';
+        await window._renderUltimaMaratonVista(seriesId);
+    } catch (e) { alert('Error al guardar. Intentá de nuevo.'); }
+};
+
+// ==============================================
+// LA QUE NO ME CANSO DE VER (SERIE)
+// ==============================================
+window._renderNoMeCansoSerieVista = async function(seriesId) {
+    const posterEl = document.getElementById('perfilNoMeCansoSeriePoster');
+    const tituloEl = document.getElementById('perfilNoMeCansoSerieTitulo');
+    if (!posterEl || !tituloEl) return;
+    if (!seriesId) { tituloEl.textContent = 'Sin elegir todavía'; posterEl.innerHTML = ''; posterEl.style.cursor = 'default'; posterEl.onclick = null; return; }
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${CONFIG.API_URL}/series/${seriesId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) throw new Error();
+        const s = await res.json();
+        tituloEl.textContent = s.name || '—';
+        posterEl.innerHTML = s.poster_path
+            ? `<img src="https://image.tmdb.org/t/p/w185${s.poster_path}" alt="${s.name || ''}" style="width:100%;height:100%;object-fit:cover;">`
+            : '';
+        posterEl.style.cursor = 'pointer';
+        posterEl.onclick = () => window._abrirSerieDesdePerfil(seriesId);
+    } catch (e) { tituloEl.textContent = '—'; }
+};
+
+window.abrirEdicionNoMeCansoSerie = function() {
+    window.cancelarEdicionSerieFavorita();
+    window.cancelarEdicionUltimaMaraton();
+    window.cancelarEdicionNoLaBancoSerie();
+    document.getElementById('perfilNoMeCansoSerieVista').style.display = 'none';
+    document.getElementById('perfilNoMeCansoSerieEdicion').style.display = 'block';
+    document.getElementById('btnEditarNoMeCansoSerie').style.display = 'none';
+    const input = document.getElementById('inputNoMeCansoSerieBusqueda');
+    input.value = '';
+    input.focus();
+};
+
+window.cancelarEdicionNoMeCansoSerie = function() {
+    document.getElementById('perfilNoMeCansoSerieEdicion').style.display = 'none';
+    document.getElementById('noMeCansoSerieResultados').style.display = 'none';
+    document.getElementById('perfilNoMeCansoSerieVista').style.display = 'flex';
+    document.getElementById('btnEditarNoMeCansoSerie').style.display = 'inline-flex';
+};
+
+let _noMeCansoSerieTimeout = null;
+window._buscarNoMeCansoSerie = function(query) {
+    clearTimeout(_noMeCansoSerieTimeout);
+    const resultados = document.getElementById('noMeCansoSerieResultados');
+    if (!query || query.trim().length < 2) { resultados.style.display = 'none'; resultados.innerHTML = ''; return; }
+    _noMeCansoSerieTimeout = setTimeout(async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const params = new URLSearchParams();
+            params.append('query', query.trim());
+            params.append('page', 1);
+            const res = await fetch(`${CONFIG.API_URL}/series/search?${params.toString()}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            const items = (data.results || []).slice(0, 6);
+            if (items.length === 0) {
+                resultados.innerHTML = '<div style="padding:0.6rem;color:#999;font-size:0.85rem;">Sin resultados</div>';
+                resultados.style.display = 'block';
+                return;
+            }
+            resultados.innerHTML = items.map(s => {
+                const anio = s.first_air_date ? s.first_air_date.slice(0, 4) : '';
+                const poster = s.poster_path
+                    ? `<img src="https://image.tmdb.org/t/p/w92${s.poster_path}" style="width:32px;height:46px;object-fit:cover;border-radius:4px;">`
+                    : `<div style="width:32px;height:46px;background:#f5f5f5;border-radius:4px;"></div>`;
+                return `
+                    <div class="favorita-resultado-item" onclick="window._elegirNoMeCansoSerie(${s.id})"
+                         style="display:flex;align-items:center;gap:10px;padding:8px 10px;cursor:pointer;">
+                        ${poster}
+                        <div>
+                            <p style="font-size:0.85rem;margin:0;">${s.name || ''}</p>
+                            <p style="font-size:0.75rem;color:#999;margin:0;">${anio}</p>
+                        </div>
+                    </div>`;
+            }).join('');
+            resultados.style.display = 'block';
+        } catch (e) { resultados.style.display = 'none'; }
+    }, 300);
+};
+
+window._elegirNoMeCansoSerie = async function(seriesId) {
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/users/me/no-me-canso-de-ver-serie`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ seriesId })
+        });
+        if (!res.ok) throw new Error();
+        document.getElementById('perfilNoMeCansoSerieEdicion').style.display = 'none';
+        document.getElementById('noMeCansoSerieResultados').style.display = 'none';
+        document.getElementById('perfilNoMeCansoSerieVista').style.display = 'flex';
+        document.getElementById('btnEditarNoMeCansoSerie').style.display = 'inline-flex';
+        await window._renderNoMeCansoSerieVista(seriesId);
+    } catch (e) { alert('Error al guardar. Intentá de nuevo.'); }
+};
+
+// ==============================================
+// LA QUE TODOS AMAN Y YO NO BANCO (SERIE)
+// ==============================================
+window._renderNoLaBancoSerieVista = async function(seriesId) {
+    const posterEl = document.getElementById('perfilNoLaBancoSeriePoster');
+    const tituloEl = document.getElementById('perfilNoLaBancoSerieTitulo');
+    if (!posterEl || !tituloEl) return;
+    if (!seriesId) { tituloEl.textContent = 'Sin elegir todavía'; posterEl.innerHTML = ''; posterEl.style.cursor = 'default'; posterEl.onclick = null; return; }
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${CONFIG.API_URL}/series/${seriesId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) throw new Error();
+        const s = await res.json();
+        tituloEl.textContent = s.name || '—';
+        posterEl.innerHTML = s.poster_path
+            ? `<img src="https://image.tmdb.org/t/p/w185${s.poster_path}" alt="${s.name || ''}" style="width:100%;height:100%;object-fit:cover;">`
+            : '';
+        posterEl.style.cursor = 'pointer';
+        posterEl.onclick = () => window._abrirSerieDesdePerfil(seriesId);
+    } catch (e) { tituloEl.textContent = '—'; }
+};
+
+window.abrirEdicionNoLaBancoSerie = function() {
+    window.cancelarEdicionSerieFavorita();
+    window.cancelarEdicionUltimaMaraton();
+    window.cancelarEdicionNoMeCansoSerie();
+    document.getElementById('perfilNoLaBancoSerieVista').style.display = 'none';
+    document.getElementById('perfilNoLaBancoSerieEdicion').style.display = 'block';
+    document.getElementById('btnEditarNoLaBancoSerie').style.display = 'none';
+    const input = document.getElementById('inputNoLaBancoSerieBusqueda');
+    input.value = '';
+    input.focus();
+};
+
+window.cancelarEdicionNoLaBancoSerie = function() {
+    document.getElementById('perfilNoLaBancoSerieEdicion').style.display = 'none';
+    document.getElementById('noLaBancoSerieResultados').style.display = 'none';
+    document.getElementById('perfilNoLaBancoSerieVista').style.display = 'flex';
+    document.getElementById('btnEditarNoLaBancoSerie').style.display = 'inline-flex';
+};
+
+let _noLaBancoSerieTimeout = null;
+window._buscarNoLaBancoSerie = function(query) {
+    clearTimeout(_noLaBancoSerieTimeout);
+    const resultados = document.getElementById('noLaBancoSerieResultados');
+    if (!query || query.trim().length < 2) { resultados.style.display = 'none'; resultados.innerHTML = ''; return; }
+    _noLaBancoSerieTimeout = setTimeout(async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const params = new URLSearchParams();
+            params.append('query', query.trim());
+            params.append('page', 1);
+            const res = await fetch(`${CONFIG.API_URL}/series/search?${params.toString()}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            const items = (data.results || []).slice(0, 6);
+            if (items.length === 0) {
+                resultados.innerHTML = '<div style="padding:0.6rem;color:#999;font-size:0.85rem;">Sin resultados</div>';
+                resultados.style.display = 'block';
+                return;
+            }
+            resultados.innerHTML = items.map(s => {
+                const anio = s.first_air_date ? s.first_air_date.slice(0, 4) : '';
+                const poster = s.poster_path
+                    ? `<img src="https://image.tmdb.org/t/p/w92${s.poster_path}" style="width:32px;height:46px;object-fit:cover;border-radius:4px;">`
+                    : `<div style="width:32px;height:46px;background:#f5f5f5;border-radius:4px;"></div>`;
+                return `
+                    <div class="favorita-resultado-item" onclick="window._elegirNoLaBancoSerie(${s.id})"
+                         style="display:flex;align-items:center;gap:10px;padding:8px 10px;cursor:pointer;">
+                        ${poster}
+                        <div>
+                            <p style="font-size:0.85rem;margin:0;">${s.name || ''}</p>
+                            <p style="font-size:0.75rem;color:#999;margin:0;">${anio}</p>
+                        </div>
+                    </div>`;
+            }).join('');
+            resultados.style.display = 'block';
+        } catch (e) { resultados.style.display = 'none'; }
+    }, 300);
+};
+
+window._elegirNoLaBancoSerie = async function(seriesId) {
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/users/me/no-la-banco-serie`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ seriesId })
+        });
+        if (!res.ok) throw new Error();
+        document.getElementById('perfilNoLaBancoSerieEdicion').style.display = 'none';
+        document.getElementById('noLaBancoSerieResultados').style.display = 'none';
+        document.getElementById('perfilNoLaBancoSerieVista').style.display = 'flex';
+        document.getElementById('btnEditarNoLaBancoSerie').style.display = 'inline-flex';
+        await window._renderNoLaBancoSerieVista(seriesId);
+    } catch (e) { alert('Error al guardar. Intentá de nuevo.'); }
+};
+
+// ==============================================
+// RANKING TRIVIA — pilar "Saber"
+// Cada card se muestra solo si el usuario jugó esa trivia alguna vez
+// (ranking null = nunca jugó, no se renderiza esa card puntual).
+// ==============================================
+window._renderRankingTrivia = function(rankingPeliculas, rankingSeries) {
+    const wrapperPeliculas = document.getElementById('rankingTriviaPeliculasWrapper');
+    const numeroPeliculas = document.getElementById('rankingTriviaPeliculasNumero');
+    if (wrapperPeliculas && numeroPeliculas) {
+        if (rankingPeliculas != null) {
+            numeroPeliculas.textContent = '#' + rankingPeliculas;
+            wrapperPeliculas.dataset.tieneRanking = '1';
+        } else {
+            wrapperPeliculas.dataset.tieneRanking = '0';
+        }
+    }
+
+    const wrapperSeries = document.getElementById('rankingTriviaSeriesWrapper');
+    const numeroSeries = document.getElementById('rankingTriviaSeriesNumero');
+    if (wrapperSeries && numeroSeries) {
+        if (rankingSeries != null) {
+            numeroSeries.textContent = '#' + rankingSeries;
+            wrapperSeries.dataset.tieneRanking = '1';
+        } else {
+            wrapperSeries.dataset.tieneRanking = '0';
+        }
+    }
+
+    // La visibilidad real (cuál de las dos se ve) la decide el switch
+    // Películas/Series, no esta función — solo deja marcado si hay dato.
+        window._actualizarVisibilidadRankingTrivia();
+        window._actualizarColorStatsSeguir();
+    };
+
+window._actualizarVisibilidadRankingTrivia = function() {
+    const tipo = document.querySelector('.cine-switch-option.active')?.dataset.tipo || 'peliculas';
+    const wrapperPeliculas = document.getElementById('rankingTriviaPeliculasWrapper');
+    const wrapperSeries = document.getElementById('rankingTriviaSeriesWrapper');
+    if (wrapperPeliculas) {
+        wrapperPeliculas.style.display = (tipo === 'peliculas' && wrapperPeliculas.dataset.tieneRanking === '1') ? 'block' : 'none';
+    }
+    if (wrapperSeries) {
+        wrapperSeries.style.display = (tipo === 'series' && wrapperSeries.dataset.tieneRanking === '1') ? 'block' : 'none';
+    }
+};
+
+// ==============================================
+// RECOMENDADAS (PELÍCULAS)
+// ==============================================
+let _stackRecomendadas = [];
+let _stackIndiceRecomendadas = 0;
+
+function renderRecomendadas(items) {
+    const wrapper = document.getElementById('perfilRecomendadasWrapper');
+    if (!wrapper) return;
+
+    if (!items || items.length === 0) {
+        wrapper.innerHTML = '<div class="cine-stack-vacio-wrap"><div class="cine-stack-vacio"></div><p class="cine-stack-vacio-lbl">Sin recomendaciones aún</p></div>';
+        return;
+    }
+
+    _stackRecomendadas = items;
+    _stackIndiceRecomendadas = 0;
+
+        wrapper.innerHTML = `
+                          <p class="cine-stack-eyebrow">RECOMENDADAS (${window._perfilCounts?.recomendadasPeliculas || 0})</p>
+        <div class="cine-stack-area">
+            <button class="cine-stack-nav prev" onclick="window._moverStackRecomendadas(-1)"><i class="fas fa-chevron-left"></i></button>
+            <div id="cineStackRecomendadasContainer" style="position:relative; width:100%; height:100%;"></div>
+            <button class="cine-stack-nav next" onclick="window._moverStackRecomendadas(1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <p class="cine-stack-titulo" id="cineStackRecomendadasTitulo"></p>
+    `;
+
+        const cont = document.getElementById('cineStackRecomendadasContainer');
+        cont.innerHTML = items.map(r => {
+            const poster = r.posterPath
+                ? `<img src="https://image.tmdb.org/t/p/w185${r.posterPath}" alt="${r.movieTitle || ''}">`
+                : `<div class="placeholder"><i class="fas fa-film"></i></div>`;
+            return `
+            <div class="cine-stack-card" onclick="window._abrirPeliculaDesdePerfil(${r.movieId})">
+                ${poster}
+                                <div class="cine-veces-tag">${r.veces} ${r.veces == 1 ? 'vez' : 'veces'}</div>
+                <div class="cine-badge-recomendada"><i class="fas fa-envelope"></i></div>
+            </div>`;
+        }).join('');
+
+    window._renderStackPosicionesRecomendadas();
+}
+
+window._renderStackPosicionesRecomendadas = function() {
+    const cards = document.querySelectorAll('#cineStackRecomendadasContainer .cine-stack-card');
+    const N = _stackRecomendadas.length;
+    cards.forEach((card, i) => {
+        let diff = i - _stackIndiceRecomendadas;
+        if (diff > N / 2) diff -= N;
+        if (diff < -N / 2) diff += N;
+        const offset = (diff >= 0 && diff <= 2) ? diff : -1;
+
+        card.style.pointerEvents = offset === 0 ? 'auto' : 'none';
+
+        if (offset === 0) {
+            card.style.transform = 'translateX(0) translateY(0) scale(1) rotate(0deg)';
+            card.style.opacity = 1; card.style.zIndex = 10;
+        } else if (offset === 1) {
+            card.style.transform = 'translateX(-18px) translateY(10px) scale(0.94) rotate(-3deg)';
+            card.style.opacity = 0.6; card.style.zIndex = 8;
+        } else if (offset === 2) {
+            card.style.transform = 'translateX(-36px) translateY(20px) scale(0.88) rotate(-6deg)';
+            card.style.opacity = 0.3; card.style.zIndex = 7;
+        } else {
+            card.style.transform = 'translateX(260px) translateY(-10px) scale(0.8) rotate(16deg)';
+            card.style.opacity = 0; card.style.zIndex = 5;
+        }
+    });
+    const tituloEl = document.getElementById('cineStackRecomendadasTitulo');
+    if (tituloEl && _stackRecomendadas[_stackIndiceRecomendadas]) {
+        tituloEl.textContent = _stackRecomendadas[_stackIndiceRecomendadas].movieTitle || '—';
+    }
+};
+
+window._moverStackRecomendadas = function(dir) {
+    const N = _stackRecomendadas.length;
+    if (N === 0) return;
+    _stackIndiceRecomendadas = (_stackIndiceRecomendadas + dir + N) % N;
+    window._renderStackPosicionesRecomendadas();
+};
+
+// ==============================================
+// RECOMENDADAS (SERIES)
+// ==============================================
+let _stackRecomendadasSeries = [];
+let _stackIndiceRecomendadasSeries = 0;
+
+function renderRecomendadasSerie(items) {
+    const wrapper = document.getElementById('perfilRecomendadasSeriesWrapper');
+    if (!wrapper) return;
+
+    if (!items || items.length === 0) {
+        wrapper.innerHTML = '<div class="cine-stack-vacio-wrap"><div class="cine-stack-vacio cine-stack-vacio--series"></div><p class="cine-stack-vacio-lbl">Sin recomendaciones aún</p></div>';
+        return;
+    }
+
+    _stackRecomendadasSeries = items;
+    _stackIndiceRecomendadasSeries = 0;
+
+        wrapper.innerHTML = `
+                         <p class="cine-stack-eyebrow">RECOMENDADAS (${window._perfilCounts?.recomendadasSeries || 0})</p>
+        <div class="cine-stack-area">
+            <button class="cine-stack-nav prev" onclick="window._moverStackRecomendadasSeries(-1)"><i class="fas fa-chevron-left"></i></button>
+            <div id="cineStackRecomendadasSeriesContainer" style="position:relative; width:100%; height:100%;"></div>
+            <button class="cine-stack-nav next" onclick="window._moverStackRecomendadasSeries(1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <p class="cine-stack-titulo" id="cineStackRecomendadasSeriesTitulo"></p>
+    `;
+
+        const cont = document.getElementById('cineStackRecomendadasSeriesContainer');
+        cont.innerHTML = items.map(r => {
+            const poster = r.posterPath
+                ? `<img src="https://image.tmdb.org/t/p/w185${r.posterPath}" alt="${r.seriesTitle || ''}">`
+                : `<div class="placeholder"><i class="fas fa-film"></i></div>`;
+                        return `
+                                        <div class="cine-stack-card" onclick="window._abrirSerieDesdePerfil(${r.seriesId})">
+                                            ${poster}
+                                            <div class="cine-veces-tag">${r.veces} ${r.veces == 1 ? 'vez' : 'veces'}</div>
+                                            <div class="cine-badge-recomendada"><i class="fas fa-envelope"></i></div>
+                                        </div>`;
+        }).join('');
+
+    window._renderStackPosicionesRecomendadasSeries();
+}
+
+window._renderStackPosicionesRecomendadasSeries = function() {
+    const cards = document.querySelectorAll('#cineStackRecomendadasSeriesContainer .cine-stack-card');
+    const N = _stackRecomendadasSeries.length;
+    cards.forEach((card, i) => {
+        let diff = i - _stackIndiceRecomendadasSeries;
+        if (diff > N / 2) diff -= N;
+        if (diff < -N / 2) diff += N;
+                // Profundidad simbólica: SOLO diff 0/1/2 son las 3 cards visibles.
+                // Todo lo demás (aunque sean miles) va a la posición "invisible",
+                // así el mazo se ve igual de grueso sin importar la cantidad real.
+                const offset = (diff >= 0 && diff <= 2) ? diff : -1;
+
+        card.style.pointerEvents = offset === 0 ? 'auto' : 'none';
+
+        if (offset === 0) {
+            card.style.transform = 'translateX(0) translateY(0) scale(1) rotate(0deg)';
+            card.style.opacity = 1; card.style.zIndex = 10;
+        } else if (offset === 1) {
+            card.style.transform = 'translateX(-18px) translateY(10px) scale(0.94) rotate(-3deg)';
+            card.style.opacity = 0.6; card.style.zIndex = 8;
+        } else if (offset === 2) {
+            card.style.transform = 'translateX(-36px) translateY(20px) scale(0.88) rotate(-6deg)';
+            card.style.opacity = 0.3; card.style.zIndex = 7;
+        } else {
+            card.style.transform = 'translateX(260px) translateY(-10px) scale(0.8) rotate(16deg)';
+            card.style.opacity = 0; card.style.zIndex = 5;
+        }
+    });
+    const tituloEl = document.getElementById('cineStackRecomendadasSeriesTitulo');
+    if (tituloEl && _stackRecomendadasSeries[_stackIndiceRecomendadasSeries]) {
+        tituloEl.textContent = _stackRecomendadasSeries[_stackIndiceRecomendadasSeries].seriesTitle || '—';
+    }
+};
+
+window._moverStackRecomendadasSeries = function(dir) {
+    const N = _stackRecomendadasSeries.length;
+    if (N === 0) return;
+    _stackIndiceRecomendadasSeries = (_stackIndiceRecomendadasSeries + dir + N) % N;
+    window._renderStackPosicionesRecomendadasSeries();
+};
+
+// ==============================================
+// GUARDADAS (PELÍCULAS)
+// ==============================================
+let _stackGuardadas = [];
+let _stackIndiceGuardadas = 0;
+
+function renderGuardadas(items) {
+    const wrapper = document.getElementById('perfilGuardadasWrapper');
+    if (!wrapper) return;
+
+    if (!items || items.length === 0) {
+        wrapper.innerHTML = '<div class="cine-stack-vacio-wrap"><div class="cine-stack-vacio"></div><p class="cine-stack-vacio-lbl">Sin guardadas aún</p></div>';
+        return;
+    }
+
+    _stackGuardadas = items;
+    _stackIndiceGuardadas = 0;
+
+        wrapper.innerHTML = `
+                                        <p class="cine-stack-eyebrow">GUARDADAS (${window._perfilCounts?.guardadasPeliculas || 0})</p>
+        <div class="cine-stack-area">
+            <button class="cine-stack-nav prev" onclick="window._moverStackGuardadas(-1)"><i class="fas fa-chevron-left"></i></button>
+            <div id="cineStackGuardadasContainer" style="position:relative; width:100%; height:100%;"></div>
+            <button class="cine-stack-nav next" onclick="window._moverStackGuardadas(1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <p class="cine-stack-titulo" id="cineStackGuardadasTitulo"></p>
+    `;
+
+    const cont = document.getElementById('cineStackGuardadasContainer');
+    cont.innerHTML = items.map(g => {
+        const poster = g.posterPath
+            ? `<img src="https://image.tmdb.org/t/p/w185${g.posterPath}" alt="${g.movieTitle || ''}">`
+            : `<div class="placeholder"><i class="fas fa-film"></i></div>`;
+        return `
+        <div class="cine-stack-card" onclick="window._abrirPeliculaDesdePerfil(${g.movieId})">
+            ${poster}
+            <div class="cine-badge-guardada"><i class="fas fa-bookmark"></i></div>
+        </div>`;
+    }).join('');
+
+    window._renderStackPosicionesGuardadas();
+}
+
+window._renderStackPosicionesGuardadas = function() {
+    const cards = document.querySelectorAll('#cineStackGuardadasContainer .cine-stack-card');
+    const N = _stackGuardadas.length;
+    cards.forEach((card, i) => {
+        let diff = i - _stackIndiceGuardadas;
+        if (diff > N / 2) diff -= N;
+        if (diff < -N / 2) diff += N;
+        const offset = (diff >= 0 && diff <= 2) ? diff : -1;
+
+        card.style.pointerEvents = offset === 0 ? 'auto' : 'none';
+
+        if (offset === 0) {
+            card.style.transform = 'translateX(0) translateY(0) scale(1) rotate(0deg)';
+            card.style.opacity = 1; card.style.zIndex = 10;
+        } else if (offset === 1) {
+            card.style.transform = 'translateX(-18px) translateY(10px) scale(0.94) rotate(-3deg)';
+            card.style.opacity = 0.6; card.style.zIndex = 8;
+        } else if (offset === 2) {
+            card.style.transform = 'translateX(-36px) translateY(20px) scale(0.88) rotate(-6deg)';
+            card.style.opacity = 0.3; card.style.zIndex = 7;
+        } else {
+            card.style.transform = 'translateX(260px) translateY(-10px) scale(0.8) rotate(16deg)';
+            card.style.opacity = 0; card.style.zIndex = 5;
+        }
+    });
+    const tituloEl = document.getElementById('cineStackGuardadasTitulo');
+    if (tituloEl && _stackGuardadas[_stackIndiceGuardadas]) {
+        tituloEl.textContent = _stackGuardadas[_stackIndiceGuardadas].movieTitle || '—';
+    }
+};
+
+window._moverStackGuardadas = function(dir) {
+    const N = _stackGuardadas.length;
+    if (N === 0) return;
+    _stackIndiceGuardadas = (_stackIndiceGuardadas + dir + N) % N;
+    window._renderStackPosicionesGuardadas();
+};
+
+// ==============================================
+// GUARDADAS (SERIES)
+// ==============================================
+let _stackGuardadasSeries = [];
+let _stackIndiceGuardadasSeries = 0;
+
+function renderGuardadasSerie(items) {
+    const wrapper = document.getElementById('perfilGuardadasSeriesWrapper');
+    if (!wrapper) return;
+
+    if (!items || items.length === 0) {
+        wrapper.innerHTML = '<div class="cine-stack-vacio-wrap"><div class="cine-stack-vacio cine-stack-vacio--series"></div><p class="cine-stack-vacio-lbl">Sin guardadas aún</p></div>';
+        return;
+    }
+
+    _stackGuardadasSeries = items;
+    _stackIndiceGuardadasSeries = 0;
+
+        wrapper.innerHTML = `
+                                        <p class="cine-stack-eyebrow">GUARDADAS (${window._perfilCounts?.guardadasPeliculas || 0})</p>
+        <div class="cine-stack-area">
+            <button class="cine-stack-nav prev" onclick="window._moverStackGuardadasSeries(-1)"><i class="fas fa-chevron-left"></i></button>
+            <div id="cineStackGuardadasSeriesContainer" style="position:relative; width:100%; height:100%;"></div>
+            <button class="cine-stack-nav next" onclick="window._moverStackGuardadasSeries(1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <p class="cine-stack-titulo" id="cineStackGuardadasSeriesTitulo"></p>
+    `;
+
+    const cont = document.getElementById('cineStackGuardadasSeriesContainer');
+    cont.innerHTML = items.map(g => {
+        const poster = g.posterPath
+            ? `<img src="https://image.tmdb.org/t/p/w185${g.posterPath}" alt="${g.seriesTitle || ''}">`
+            : `<div class="placeholder"><i class="fas fa-film"></i></div>`;
+        return `
+        <div class="cine-stack-card" onclick="window._abrirSerieDesdePerfil(${g.seriesId})">
+            ${poster}
+            <div class="cine-badge-guardada"><i class="fas fa-bookmark"></i></div>
+        </div>`;
+    }).join('');
+
+    window._renderStackPosicionesGuardadasSeries();
+}
+
+window._renderStackPosicionesGuardadasSeries = function() {
+    const cards = document.querySelectorAll('#cineStackGuardadasSeriesContainer .cine-stack-card');
+    const N = _stackGuardadasSeries.length;
+    cards.forEach((card, i) => {
+        let diff = i - _stackIndiceGuardadasSeries;
+        if (diff > N / 2) diff -= N;
+        if (diff < -N / 2) diff += N;
+        const offset = (diff >= 0 && diff <= 2) ? diff : -1;
+
+        card.style.pointerEvents = offset === 0 ? 'auto' : 'none';
+
+        if (offset === 0) {
+            card.style.transform = 'translateX(0) translateY(0) scale(1) rotate(0deg)';
+            card.style.opacity = 1; card.style.zIndex = 10;
+        } else if (offset === 1) {
+            card.style.transform = 'translateX(-18px) translateY(10px) scale(0.94) rotate(-3deg)';
+            card.style.opacity = 0.6; card.style.zIndex = 8;
+        } else if (offset === 2) {
+            card.style.transform = 'translateX(-36px) translateY(20px) scale(0.88) rotate(-6deg)';
+            card.style.opacity = 0.3; card.style.zIndex = 7;
+        } else {
+            card.style.transform = 'translateX(260px) translateY(-10px) scale(0.8) rotate(16deg)';
+            card.style.opacity = 0; card.style.zIndex = 5;
+        }
+    });
+    const tituloEl = document.getElementById('cineStackGuardadasSeriesTitulo');
+    if (tituloEl && _stackGuardadasSeries[_stackIndiceGuardadasSeries]) {
+        tituloEl.textContent = _stackGuardadasSeries[_stackIndiceGuardadasSeries].seriesTitle || '—';
+    }
+};
+
+window._moverStackGuardadasSeries = function(dir) {
+    const N = _stackGuardadasSeries.length;
+    if (N === 0) return;
+    _stackIndiceGuardadasSeries = (_stackIndiceGuardadasSeries + dir + N) % N;
+    window._renderStackPosicionesGuardadasSeries();
+};
+
+// ==============================================
+// CERRAR EDICIÓN AL CLICKEAR AFUERA — "Mis gustos o
+// preferencias" (Favorita/VistaCine/NoMeCanso/NoLaBanco,
+// Películas y Series). Un click en cualquier parte de la
+// pantalla que no sea el panel abierto ni su lápiz cierra
+// la edición y vuelve el mazo a su vista normal.
+// ==============================================
+document.addEventListener('click', function(e) {
+    const paneles = [
+        ['perfilFavoritaEdicion', 'btnEditarFavorita', 'cancelarEdicionFavorita'],
+        ['perfilVistaCineEdicion', 'btnEditarVistaCine', 'cancelarEdicionVistaCine'],
+        ['perfilNoMeCansoEdicion', 'btnEditarNoMeCanso', 'cancelarEdicionNoMeCanso'],
+        ['perfilNoLaBancoEdicion', 'btnEditarNoLaBanco', 'cancelarEdicionNoLaBanco'],
+        ['perfilSerieFavoritaEdicion', 'btnEditarSerieFavorita', 'cancelarEdicionSerieFavorita'],
+        ['perfilUltimaMaratonEdicion', 'btnEditarUltimaMaraton', 'cancelarEdicionUltimaMaraton'],
+        ['perfilNoMeCansoSerieEdicion', 'btnEditarNoMeCansoSerie', 'cancelarEdicionNoMeCansoSerie'],
+        ['perfilNoLaBancoSerieEdicion', 'btnEditarNoLaBancoSerie', 'cancelarEdicionNoLaBancoSerie']
+    ];
+    paneles.forEach(function(item) {
+        const panel = document.getElementById(item[0]);
+        const boton = document.getElementById(item[1]);
+        if (!panel || panel.style.display === 'none') return;
+        if (panel.contains(e.target)) return;
+        if (boton && boton.contains(e.target)) return;
+        if (typeof window[item[2]] === 'function') window[item[2]]();
+    });
+});
