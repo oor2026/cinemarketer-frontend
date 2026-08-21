@@ -4349,9 +4349,13 @@ window.seleccionarTabFeed = function(tab, el) {
                                         const filasSeries = document.getElementById('filasSeriesContainer');
                                         const pillsSerie = document.getElementById('ordenarPillsSerie');
 
-                                if (tab === 'peliculas') {
-                                    if (gridPeliculas) gridPeliculas.style.display = '';
-                                    if (paginacion) paginacion.style.display = '';
+                                    if (tab === 'peliculas') {
+                                        if (gridPeliculas) gridPeliculas.style.display = '';
+                                        // Resabio del paginado viejo (pre-carruseles) — ya no hace nada
+                                        // útil, el grid al que apunta queda siempre vacío y oculto por
+                                        // cargarFilasGenero(). Se deja explícitamente oculto acá para
+                                        // que no persista si venías de otro tab donde se mostró.
+                                        if (paginacion) paginacion.style.display = 'none';
                                     if (pills) pills.style.display = '';
                                     if (filtros) filtros.style.display = '';
                                     if (btnFiltrosAvanzados) btnFiltrosAvanzados.style.visibility = 'visible';
