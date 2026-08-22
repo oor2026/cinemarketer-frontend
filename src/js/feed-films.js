@@ -4326,8 +4326,16 @@ window.seleccionarTabFeed = function(tab, el) {
         }
     }
 
-    // Si es comunidad y ya estaba activo, reinicializar igual
-    if (mismoTab && tab !== 'comunidad') return;
+        // Reinicializar igual aunque ya estuvieras en este tab — no solo
+        // para Comunidad. window._tabActivo puede sobrevivir a una
+        // navegación entre menús (variable JS) mientras el DOM se
+        // reconstruye vacío; sin este exit temprano quitado, volver al
+        // feed con Series como tab "recordado" podía saltearse por
+        // completo la llamada a cargarSerieDestacada() (y sus pares) y
+        // dejar el carrusel colgado hasta un refresh completo. Cada
+        // rama de abajo ya es idempotente por su cuenta (cachean en
+        // sessionStorage / window._destacadaMovieId), así que reintentar
+        // no duplica trabajo real, solo revalida el estado visual.
 
     // Actualizar estado visual de los tabs
     document.querySelectorAll('.feed-tab').forEach(b => b.classList.remove('active'));
