@@ -1027,6 +1027,20 @@ window.subirBanner = async function(input) {
                                                                                 });
                                                                             };
 
+                                                                            // Ícono de ranking (Mi Sala) — abre el mismo modal de solo
+                                                                            // lectura que ya usa el carrusel de destacada, según cuál de
+                                                                            // los dos chips se tocó. Gateado a mobile acá adentro (no con
+                                                                            // CSS) para no depender de que exista un "modo desktop" del
+                                                                            // click — en desktop el chip no reacciona en absoluto.
+                                                                            window._abrirRankingDesdeChip = function(tipo) {
+                                                                                if (!window.matchMedia('(max-width: 768px)').matches) return;
+                                                                                if (tipo === 'series' && typeof window.abrirRankingTriviaSeries === 'function') {
+                                                                                    window.abrirRankingTriviaSeries();
+                                                                                } else if (tipo === 'peliculas' && typeof window.abrirRankingTrivia === 'function') {
+                                                                                    window.abrirRankingTrivia();
+                                                                                }
+                                                                            };
+
                                                                         // Menú de criterios de "Mi actividad" (mobile) — de los 8
                                                                         // wrappers (4 criterios x Películas/Series) muestra 1 solo:
                                                                         // el que matchea el criterio elegido ACÁ y el tipo elegido

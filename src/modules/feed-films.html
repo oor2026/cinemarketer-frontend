@@ -51,7 +51,9 @@
             💬 Comunidad
         </button>
         <button class="feed-tab-filtro" onclick="window.abrirFiltrosMobile()" title="Filtros">
-            <span class="feed-tab-filtro-label">Filtros avanzados</span> <i class="fas fa-sliders-h"></i>
+            <span class="feed-tab-filtro-label">Filtros avanzados</span>
+            <i class="fas fa-sliders-h feed-tab-filtro-icono-desktop"></i>
+            <i class="fas fa-search feed-tab-filtro-icono-mobile"></i>
         </button>
     </div>
 
@@ -945,6 +947,25 @@
     </div>
 
     <style>
+        /* Paginado viejo (pre-carruseles) — resabio del diseño
+           anterior a las filas por género. Se oculta directo por CSS,
+           sin depender del orden en que corran las funciones de JS
+           que lo tocan (cargarComponente lo inyecta visible por
+           defecto en el primer load, antes de que cualquier otra
+           función llegue a ocultarlo). Aplica a mobile y desktop por
+           igual — no es un ajuste solo-mobile esta vez. */
+        #paginacion-container { display: none !important; }
+
+        /* Ícono de "Filtros avanzados" — lupa en mobile, sliders en
+           desktop. Dos <i> separados conmutados por media query, en
+           vez de uno solo reusado, porque este archivo no tiene un
+           CSS mobile-only aparte donde aislar el cambio. */
+        .feed-tab-filtro-icono-mobile { display: none; }
+        @media (max-width: 768px) {
+            .feed-tab-filtro-icono-desktop { display: none; }
+            .feed-tab-filtro-icono-mobile { display: inline; }
+        }
+
         .rec-ctx-chip {
             font-size: 12px;
             padding: 5px 11px;

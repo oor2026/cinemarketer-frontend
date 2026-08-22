@@ -375,3 +375,5 @@
    pierde contra el fondo oscuro. Un celeste claro mantiene la
    misma familia de color pero con contraste suficiente. */
 .perfil-card.modo-oscuro .cine-ver-todas-pub { color: #8fb4ff !important; }
+
+.perfil-card .cine-ranking-trivia { cursor: pointer; }
