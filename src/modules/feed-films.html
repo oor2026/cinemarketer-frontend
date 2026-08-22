@@ -947,6 +947,15 @@
     </div>
 
     <style>
+        /* Paginado viejo (pre-carruseles) — resabio del diseño
+           anterior a las filas por género. Se oculta directo por CSS,
+           sin depender del orden en que corran las funciones de JS
+           que lo tocan (cargarComponente lo inyecta visible por
+           defecto en el primer load, antes de que cualquier otra
+           función llegue a ocultarlo). Aplica a mobile y desktop por
+           igual — no es un ajuste solo-mobile esta vez. */
+        #paginacion-container { display: none !important; }
+
         /* Ícono de "Filtros avanzados" — lupa en mobile, sliders en
            desktop. Dos <i> separados conmutados por media query, en
            vez de uno solo reusado, porque este archivo no tiene un
