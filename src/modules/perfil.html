@@ -329,15 +329,15 @@
             <!-- Ranking Trivia — solo una de las dos visible a la vez,
      según el modo Películas/Series del switch, y solo si el
      usuario jugó esa trivia alguna vez (ver _renderRankingTrivia). -->
-            <div class="cine-ranking-trivia" id="rankingTriviaPeliculasWrapper" style="display:none;">
+            <div class="cine-ranking-trivia" id="rankingTriviaPeliculasWrapper" style="display:none;" onclick="window._abrirRankingDesdeChip('peliculas')">
                 <i class="fas fa-trophy"></i>
-                <span class="cine-ranking-tipo">CINE</span>
+                <span class="cine-ranking-tipo">cine</span>
                 <span class="cine-ranking-num" id="rankingTriviaPeliculasNumero">—</span>
                 <span class="cine-ranking-lbl">ranking trivia</span>
             </div>
-            <div class="cine-ranking-trivia cine-ranking-trivia--series" id="rankingTriviaSeriesWrapper" style="display:none;">
+            <div class="cine-ranking-trivia cine-ranking-trivia--series" id="rankingTriviaSeriesWrapper" style="display:none;" onclick="window._abrirRankingDesdeChip('series')">
                 <i class="fas fa-trophy"></i>
-                <span class="cine-ranking-tipo">SERIES</span>
+                <span class="cine-ranking-tipo">series</span>
                 <span class="cine-ranking-num" id="rankingTriviaSeriesNumero">—</span>
                 <span class="cine-ranking-lbl">ranking trivia</span>
             </div>
@@ -703,6 +703,24 @@
 </div>
 
 <!-- MODAL EDITAR BIO -->
+<!-- MODALES DE RANKING TRIVIA (solo lectura) — mismo markup que
+     feed-films.html/feed-series.js, necesarios acá porque
+     trivia.js/trivia-series.js buscan estos ids directo por
+     getElementById sin chequear si existen. -->
+<div id="rankingTriviaModal" class="trivia-modal-overlay" style="display:none;">
+    <div class="trivia-modal trivia-modal-peliculas">
+        <button class="trivia-cerrar" onclick="window.cerrarRankingTrivia()"><i class="fas fa-times"></i></button>
+        <div id="rankingTriviaContenido"></div>
+    </div>
+</div>
+
+<div id="rankingTriviaSeriesModal" class="trivia-modal-overlay" style="display:none;">
+    <div class="trivia-modal trivia-modal-series">
+        <button class="trivia-cerrar" onclick="window.cerrarRankingTriviaSeries()"><i class="fas fa-times"></i></button>
+        <div id="rankingTriviaSeriesContenido"></div>
+    </div>
+</div>
+
 <div id="modalEditarBio" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
         <div style="background:white; border-radius:16px; padding:2rem; max-width:460px; width:100%;" onclick="event.stopPropagation()">
             <h3 style="margin:0 0 1.25rem; font-size:1rem; color:#333;">
