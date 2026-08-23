@@ -226,14 +226,14 @@ function renderIdentidad(perfil) {
                         if (btnEditNoLaBancoSerie) btnEditNoLaBancoSerie.style.display = 'inline-flex';
                     }
 
-                                window._renderFavoritaVista(perfil.peliculaFavoritaId);
-                                window._renderVistaCineVista(perfil.ultimaVistaCineId);
-                                window._renderNoMeCansoVista(perfil.noMeCansoDeVerId);
-                                window._renderNoLaBancoVista(perfil.noLaBancoId);
-                                window._renderSerieFavoritaVista(perfil.serieFavoritaId);
-                                window._renderUltimaMaratonVista(perfil.ultimaMaratonId);
-                                window._renderNoMeCansoSerieVista(perfil.noMeCansoDeVerSerieId);
-                                window._renderNoLaBancoSerieVista(perfil.noLaBancoSerieId);
+                                window._renderFavoritaVista(perfil.peliculaFavoritaId, { titulo: perfil.peliculaFavoritaTitulo, poster: perfil.peliculaFavoritaPoster });
+                                window._renderVistaCineVista(perfil.ultimaVistaCineId, { titulo: perfil.ultimaVistaCineTitulo, poster: perfil.ultimaVistaCinePoster });
+                                window._renderNoMeCansoVista(perfil.noMeCansoDeVerId, { titulo: perfil.noMeCansoDeVerTitulo, poster: perfil.noMeCansoDeVerPoster });
+                                window._renderNoLaBancoVista(perfil.noLaBancoId, { titulo: perfil.noLaBancoTitulo, poster: perfil.noLaBancoPoster });
+                                window._renderSerieFavoritaVista(perfil.serieFavoritaId, { titulo: perfil.serieFavoritaTitulo, poster: perfil.serieFavoritaPoster });
+                                window._renderUltimaMaratonVista(perfil.ultimaMaratonId, { titulo: perfil.ultimaMaratonTitulo, poster: perfil.ultimaMaratonPoster });
+                                window._renderNoMeCansoSerieVista(perfil.noMeCansoDeVerSerieId, { titulo: perfil.noMeCansoDeVerSerieTitulo, poster: perfil.noMeCansoDeVerSeriePoster });
+                                window._renderNoLaBancoSerieVista(perfil.noLaBancoSerieId, { titulo: perfil.noLaBancoSerieTitulo, poster: perfil.noLaBancoSeriePoster });
                                 window._adnSeries = perfil.adnCinefiloSeries || [];
                                 window._renderAdnCinefilo(perfil.adnCinefilo);
                                 window._renderRankingTrivia(perfil.rankingTriviaPeliculas, perfil.rankingTriviaSeries);
@@ -899,228 +899,228 @@ window.subirBanner = async function(input) {
                                             window._adnInicializarDots(datos.length);
                                         };
 
-                                                                        // Mini-carrusel de pills — solo tiene efecto visual en mobile:
-                                                                        // en desktop #perfilAdnLegend no tiene overflow-x (perfil-mobile.css
-                                                                        // no se carga ahí), así que el scroll no existe y los dots quedan
-                                                                        // ocultos por el "display:none" por defecto en perfil.html.
-                                                                        window._adnInicializarDots = function(totalPills) {
-                                                                            const legend = document.getElementById('perfilAdnLegend');
-                                                                            const dotsEl = document.getElementById('perfilAdnDots');
-                                                                            if (!legend || !dotsEl) return;
+                                // Mini-carrusel de pills — solo tiene efecto visual en mobile:
+                                // en desktop #perfilAdnLegend no tiene overflow-x (perfil-mobile.css
+                                // no se carga ahí), así que el scroll no existe y los dots quedan
+                                // ocultos por el "display:none" por defecto en perfil.html.
+                                window._adnInicializarDots = function(totalPills) {
+                                    const legend = document.getElementById('perfilAdnLegend');
+                                    const dotsEl = document.getElementById('perfilAdnDots');
+                                    if (!legend || !dotsEl) return;
 
-                                                                            const totalPaginas = Math.ceil(totalPills / 3);
-                                                                            dotsEl.innerHTML = '';
-                                                                            if (totalPaginas <= 1) return; // 3 géneros o menos: no hace falta carrusel
+                                    const totalPaginas = Math.ceil(totalPills / 3);
+                                    dotsEl.innerHTML = '';
+                                    if (totalPaginas <= 1) return; // 3 géneros o menos: no hace falta carrusel
 
-                                                                            for (let i = 0; i < totalPaginas; i++) {
-                                                                                const dot = document.createElement('span');
-                                                                                dot.className = 'cine-adn-dot' + (i === 0 ? ' active' : '');
-                                                                                dotsEl.appendChild(dot);
-                                                                            }
+                                    for (let i = 0; i < totalPaginas; i++) {
+                                        const dot = document.createElement('span');
+                                        dot.className = 'cine-adn-dot' + (i === 0 ? ' active' : '');
+                                        dotsEl.appendChild(dot);
+                                    }
 
-                                                                            legend.onscroll = function() {
-                                                                                const pagina = Math.round(legend.scrollLeft / legend.clientWidth);
-                                                                                dotsEl.querySelectorAll('.cine-adn-dot').forEach((dot, i) => {
-                                                                                    dot.classList.toggle('active', i === pagina);
-                                                                                });
-                                                                            };
-                                                                        };
+                                    legend.onscroll = function() {
+                                        const pagina = Math.round(legend.scrollLeft / legend.clientWidth);
+                                        dotsEl.querySelectorAll('.cine-adn-dot').forEach((dot, i) => {
+                                            dot.classList.toggle('active', i === pagina);
+                                        });
+                                    };
+                                };
 
-                                                                        // Fade lateral de "Mis gustos" — se apaga cuando el scroll llega
-                                                                        // al final (no queda más contenido oculto para insinuar).
-                                                                        // Corre para Películas y Series por igual (ambas comparten
-                                                                        // .cine-spread), y funciona apenas se genera el DOM porque no
-                                                                        // depende de datos async, solo de medidas de layout.
-                                                                        window._inicializarFadeSpreads = function() {
-                                                                            document.querySelectorAll('.perfil-card .cine-spread').forEach(spread => {
-                                                                                const chequear = () => {
-                                                                                    const finAlcanzado = spread.scrollLeft + spread.clientWidth >= spread.scrollWidth - 4;
-                                                                                    spread.classList.toggle('cine-fade-oculto', finAlcanzado);
-                                                                                };
-                                                                                chequear();
-                                                                                spread.onscroll = chequear;
-                                                                            });
-                                                                        };
+                                // Fade lateral de "Mis gustos" — se apaga cuando el scroll llega
+                                // al final (no queda más contenido oculto para insinuar).
+                                // Corre para Películas y Series por igual (ambas comparten
+                                // .cine-spread), y funciona apenas se genera el DOM porque no
+                                // depende de datos async, solo de medidas de layout.
+                                window._inicializarFadeSpreads = function() {
+                                    document.querySelectorAll('.perfil-card .cine-spread').forEach(spread => {
+                                        const chequear = () => {
+                                            const finAlcanzado = spread.scrollLeft + spread.clientWidth >= spread.scrollWidth - 4;
+                                            spread.classList.toggle('cine-fade-oculto', finAlcanzado);
+                                        };
+                                        chequear();
+                                        spread.onscroll = chequear;
+                                    });
+                                };
 
-                                                                        // Swipe táctil sobre el mazo — dispara el mismo click que ya
-                                                                        // tienen las flechas prev/next (sin duplicar la lógica de cada
-                                                                        // uno de los 8 _moverStackX). Delegado sobre .cine-actividad-wrap
-                                                                        // (nunca se destruye) para no tener que re-bindear cada vez que
-                                                                        // un wrapper se rerenderiza con innerHTML nuevo.
-                                                                        window._inicializarSwipeStacks = function() {
-                                                                            const contenedor = document.querySelector('.cine-actividad-wrap');
-                                                                            if (!contenedor || contenedor._swipeInit) return;
-                                                                            contenedor._swipeInit = true;
+                                // Swipe táctil sobre el mazo — dispara el mismo click que ya
+                                // tienen las flechas prev/next (sin duplicar la lógica de cada
+                                // uno de los 8 _moverStackX). Delegado sobre .cine-actividad-wrap
+                                // (nunca se destruye) para no tener que re-bindear cada vez que
+                                // un wrapper se rerenderiza con innerHTML nuevo.
+                                window._inicializarSwipeStacks = function() {
+                                    const contenedor = document.querySelector('.cine-actividad-wrap');
+                                    if (!contenedor || contenedor._swipeInit) return;
+                                    contenedor._swipeInit = true;
 
-                                                                            let startX = 0, startY = 0, area = null;
+                                    let startX = 0, startY = 0, area = null;
 
-                                                                            contenedor.addEventListener('touchstart', (e) => {
-                                                                                area = e.target.closest('.cine-stack-area');
-                                                                                if (!area) return;
-                                                                                startX = e.touches[0].clientX;
-                                                                                startY = e.touches[0].clientY;
-                                                                            }, { passive: true });
+                                    contenedor.addEventListener('touchstart', (e) => {
+                                        area = e.target.closest('.cine-stack-area');
+                                        if (!area) return;
+                                        startX = e.touches[0].clientX;
+                                        startY = e.touches[0].clientY;
+                                    }, { passive: true });
 
-                                                                            contenedor.addEventListener('touchend', (e) => {
-                                                                                if (!area) return;
-                                                                                const dx = e.changedTouches[0].clientX - startX;
-                                                                                const dy = e.changedTouches[0].clientY - startY;
-                                                                                if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
-                                                                                    const btn = area.querySelector(dx < 0 ? '.cine-stack-nav.prev' : '.cine-stack-nav.next');
-                                                                                    if (btn) btn.click();
-                                                                                }
-                                                                                area = null;
-                                                                            }, { passive: true });
-                                                                        };
+                                    contenedor.addEventListener('touchend', (e) => {
+                                        if (!area) return;
+                                        const dx = e.changedTouches[0].clientX - startX;
+                                        const dy = e.changedTouches[0].clientY - startY;
+                                        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+                                            const btn = area.querySelector(dx < 0 ? '.cine-stack-nav.prev' : '.cine-stack-nav.next');
+                                            if (btn) btn.click();
+                                        }
+                                        area = null;
+                                    }, { passive: true });
+                                };
 
-                                                                            // Modal simple para "editar gusto" en mobile — sin tocar ninguna
-                                                                            // de las 8 funciones abrir/cancelar/elegir ya existentes. Un
-                                                                            // MutationObserver detecta cuándo cada caja pasa a
-                                                                            // visible/oculta (algo que esas funciones YA hacen con
-                                                                            // style.display) y la mueve dentro/fuera del modal shell. En
-                                                                            // desktop no hace nada — esMobile() corta antes de mover nada.
-                                                                            window._inicializarModalGustoMobile = function() {
-                                                                                const esMobile = () => window.matchMedia('(max-width: 768px)').matches;
-                                                                            // Mismas frases que ya se usan como label debajo de cada
-                                                                            // póster (.cine-snapshot-lbl en perfil.html) — se reutilizan
-                                                                            // acá como título del modal, sin inventar redacción nueva.
-                                                                            const titulos = {
-                                                                                perfilFavoritaEdicion:        'Mi favorita:',
-                                                                                perfilVistaCineEdicion:       'La última que vi en el cine:',
-                                                                                perfilNoMeCansoEdicion:       'La que no me canso de ver:',
-                                                                                perfilNoLaBancoEdicion:       'La que todos aman y yo no banco:',
-                                                                                perfilSerieFavoritaEdicion:   'Mi serie favorita:',
-                                                                                perfilUltimaMaratonEdicion:   'La última que ví en maratón:',
-                                                                                perfilNoMeCansoSerieEdicion:  'La que no me canso de ver:',
-                                                                                perfilNoLaBancoSerieEdicion:  'La que todos aman y yo no banco:'
-                                                                            };
-                                                                            const ids = Object.keys(titulos);
+                                    // Modal simple para "editar gusto" en mobile — sin tocar ninguna
+                                    // de las 8 funciones abrir/cancelar/elegir ya existentes. Un
+                                    // MutationObserver detecta cuándo cada caja pasa a
+                                    // visible/oculta (algo que esas funciones YA hacen con
+                                    // style.display) y la mueve dentro/fuera del modal shell. En
+                                    // desktop no hace nada — esMobile() corta antes de mover nada.
+                                    window._inicializarModalGustoMobile = function() {
+                                        const esMobile = () => window.matchMedia('(max-width: 768px)').matches;
+                                    // Mismas frases que ya se usan como label debajo de cada
+                                    // póster (.cine-snapshot-lbl en perfil.html) — se reutilizan
+                                    // acá como título del modal, sin inventar redacción nueva.
+                                    const titulos = {
+                                        perfilFavoritaEdicion:        'Mi favorita:',
+                                        perfilVistaCineEdicion:       'La última que vi en el cine:',
+                                        perfilNoMeCansoEdicion:       'La que no me canso de ver:',
+                                        perfilNoLaBancoEdicion:       'La que todos aman y yo no banco:',
+                                        perfilSerieFavoritaEdicion:   'Mi serie favorita:',
+                                        perfilUltimaMaratonEdicion:   'La última que ví en maratón:',
+                                        perfilNoMeCansoSerieEdicion:  'La que no me canso de ver:',
+                                        perfilNoLaBancoSerieEdicion:  'La que todos aman y yo no banco:'
+                                    };
+                                    const ids = Object.keys(titulos);
 
-                                                                                ids.forEach(id => {
-                                                                                    const el = document.getElementById(id);
-                                                                                    if (!el || el._modalGustoInit) return;
-                                                                                    el._modalGustoInit = true;
+                                        ids.forEach(id => {
+                                            const el = document.getElementById(id);
+                                            if (!el || el._modalGustoInit) return;
+                                            el._modalGustoInit = true;
 
-                                                                                    const hogarOriginal = el.parentNode;
-                                                                                    const hermanoOriginal = el.nextSibling;
+                                            const hogarOriginal = el.parentNode;
+                                            const hermanoOriginal = el.nextSibling;
 
-                                                                                    new MutationObserver(() => {
-                                                                                        if (!esMobile()) return;
-                                                                                        const shell = document.getElementById('modalEditarGustoMobileBox');
-                                                                                        const overlay = document.getElementById('modalEditarGustoMobile');
-                                                                                        if (!shell || !overlay) return;
+                                            new MutationObserver(() => {
+                                                if (!esMobile()) return;
+                                                const shell = document.getElementById('modalEditarGustoMobileBox');
+                                                const overlay = document.getElementById('modalEditarGustoMobile');
+                                                if (!shell || !overlay) return;
 
-                                                                                        if (el.style.display === 'none') {
-                                                                                            overlay.style.display = 'none';
-                                                                                            document.body.style.overflow = '';
-                                                                                            if (el.parentNode === shell) {
-                                                                                                hogarOriginal.insertBefore(el, hermanoOriginal);
-                                                                                            }
-                                                                                                } else {
-                                                                                                    shell.appendChild(el);
-                                                                                                    const tituloEl = document.getElementById('modalEditarGustoMobileTitulo');
-                                                                                                    if (tituloEl) tituloEl.textContent = titulos[id] || '';
-                                                                                                    overlay.style.display = 'flex';
-                                                                                                    document.body.style.overflow = 'hidden';
-                                                                                                }
-                                                                                    }).observe(el, { attributes: true, attributeFilter: ['style'] });
-                                                                                });
-                                                                            };
+                                                if (el.style.display === 'none') {
+                                                    overlay.style.display = 'none';
+                                                    document.body.style.overflow = '';
+                                                    if (el.parentNode === shell) {
+                                                        hogarOriginal.insertBefore(el, hermanoOriginal);
+                                                    }
+                                                        } else {
+                                                            shell.appendChild(el);
+                                                            const tituloEl = document.getElementById('modalEditarGustoMobileTitulo');
+                                                            if (tituloEl) tituloEl.textContent = titulos[id] || '';
+                                                            overlay.style.display = 'flex';
+                                                            document.body.style.overflow = 'hidden';
+                                                        }
+                                            }).observe(el, { attributes: true, attributeFilter: ['style'] });
+                                        });
+                                    };
 
-                                                                            // Ícono de ranking (Mi Sala) — abre el mismo modal de solo
-                                                                            // lectura que ya usa el carrusel de destacada, según cuál de
-                                                                            // los dos chips se tocó. Gateado a mobile acá adentro (no con
-                                                                            // CSS) para no depender de que exista un "modo desktop" del
-                                                                            // click — en desktop el chip no reacciona en absoluto.
-                                                                            window._abrirRankingDesdeChip = function(tipo) {
-                                                                                if (!window.matchMedia('(max-width: 768px)').matches) return;
-                                                                                if (tipo === 'series' && typeof window.abrirRankingTriviaSeries === 'function') {
-                                                                                    window.abrirRankingTriviaSeries();
-                                                                                } else if (tipo === 'peliculas' && typeof window.abrirRankingTrivia === 'function') {
-                                                                                    window.abrirRankingTrivia();
-                                                                                }
-                                                                            };
+                                    // Ícono de ranking (Mi Sala) — abre el mismo modal de solo
+                                    // lectura que ya usa el carrusel de destacada, según cuál de
+                                    // los dos chips se tocó. Gateado a mobile acá adentro (no con
+                                    // CSS) para no depender de que exista un "modo desktop" del
+                                    // click — en desktop el chip no reacciona en absoluto.
+                                    window._abrirRankingDesdeChip = function(tipo) {
+                                        if (!window.matchMedia('(max-width: 768px)').matches) return;
+                                        if (tipo === 'series' && typeof window.abrirRankingTriviaSeries === 'function') {
+                                            window.abrirRankingTriviaSeries();
+                                        } else if (tipo === 'peliculas' && typeof window.abrirRankingTrivia === 'function') {
+                                            window.abrirRankingTrivia();
+                                        }
+                                    };
 
-                                                                        // Menú de criterios de "Mi actividad" (mobile) — de los 8
-                                                                        // wrappers (4 criterios x Películas/Series) muestra 1 solo:
-                                                                        // el que matchea el criterio elegido ACÁ y el tipo elegido
-                                                                        // en el switch Películas/Series de arriba. La clase
-                                                                        // 'cine-actividad-oculto' no hace nada en desktop (no existe
-                                                                        // esa regla fuera de perfil-mobile.css) — ahí siguen
-                                                                        // viéndose los 4 de siempre, sin este menú de por medio.
-                                                                        window._actividadCriterioActual = window._actividadCriterioActual || 'votaciones';
+                                // Menú de criterios de "Mi actividad" (mobile) — de los 8
+                                // wrappers (4 criterios x Películas/Series) muestra 1 solo:
+                                // el que matchea el criterio elegido ACÁ y el tipo elegido
+                                // en el switch Películas/Series de arriba. La clase
+                                // 'cine-actividad-oculto' no hace nada en desktop (no existe
+                                // esa regla fuera de perfil-mobile.css) — ahí siguen
+                                // viéndose los 4 de siempre, sin este menú de por medio.
+                                window._actividadCriterioActual = window._actividadCriterioActual || 'votaciones';
 
-                                                                        // Formato corto para contadores grandes — 999 se ve entero,
-                                                                        // de 1.000 en adelante pasa a "k", de 1.000.000 a "M". Si el
-                                                                        // resultado es un número redondo (2000 -> 2k) no muestra
-                                                                        // decimales; si no, muestra uno solo (12500 -> 12.5k).
-                                                                        window._formatearContador = function(n) {
-                                                                            n = Number(n) || 0;
-                                                                            if (n < 1000) return String(n);
-                                                                            if (n < 1000000) {
-                                                                                const val = n / 1000;
-                                                                                return (val % 1 === 0 ? val : val.toFixed(1)) + 'k';
-                                                                            }
-                                                                            const val = n / 1000000;
-                                                                            return (val % 1 === 0 ? val : val.toFixed(1)) + 'M';
-                                                                        };
+                                // Formato corto para contadores grandes — 999 se ve entero,
+                                // de 1.000 en adelante pasa a "k", de 1.000.000 a "M". Si el
+                                // resultado es un número redondo (2000 -> 2k) no muestra
+                                // decimales; si no, muestra uno solo (12500 -> 12.5k).
+                                window._formatearContador = function(n) {
+                                    n = Number(n) || 0;
+                                    if (n < 1000) return String(n);
+                                    if (n < 1000000) {
+                                        const val = n / 1000;
+                                        return (val % 1 === 0 ? val : val.toFixed(1)) + 'k';
+                                    }
+                                    const val = n / 1000000;
+                                    return (val % 1 === 0 ? val : val.toFixed(1)) + 'M';
+                                };
 
-                                                                        window._seleccionarCriterioActividad = function(criterio) {
-                                                                            window._actividadCriterioActual = criterio;
+                                window._seleccionarCriterioActividad = function(criterio) {
+                                    window._actividadCriterioActual = criterio;
 
-                                                                            document.querySelectorAll('.cine-actividad-menu-item').forEach(btn => {
-                                                                                btn.classList.toggle('active', btn.dataset.criterio === criterio);
-                                                                            });
+                                    document.querySelectorAll('.cine-actividad-menu-item').forEach(btn => {
+                                        btn.classList.toggle('active', btn.dataset.criterio === criterio);
+                                    });
 
-                                                                            const grupos = {
-                                                                                votaciones:   ['perfilVotacionesWrapper', 'perfilVotacionesSeriesWrapper'],
-                                                                                comentarios:  ['perfilComentariosList', 'perfilComentariosSeriesList'],
-                                                                                recomendadas: ['perfilRecomendadasWrapper', 'perfilRecomendadasSeriesWrapper'],
-                                                                                guardadas:    ['perfilGuardadasWrapper', 'perfilGuardadasSeriesWrapper']
-                                                                            };
+                                    const grupos = {
+                                        votaciones:   ['perfilVotacionesWrapper', 'perfilVotacionesSeriesWrapper'],
+                                        comentarios:  ['perfilComentariosList', 'perfilComentariosSeriesList'],
+                                        recomendadas: ['perfilRecomendadasWrapper', 'perfilRecomendadasSeriesWrapper'],
+                                        guardadas:    ['perfilGuardadasWrapper', 'perfilGuardadasSeriesWrapper']
+                                    };
 
-                                                                            Object.entries(grupos).forEach(([nombre, ids]) => {
-                                                                                ids.forEach(id => {
-                                                                                    const el = document.getElementById(id);
-                                                                                    if (el) el.classList.toggle('cine-actividad-oculto', nombre !== criterio);
-                                                                                });
-                                                                            });
+                                    Object.entries(grupos).forEach(([nombre, ids]) => {
+                                        ids.forEach(id => {
+                                            const el = document.getElementById(id);
+                                            if (el) el.classList.toggle('cine-actividad-oculto', nombre !== criterio);
+                                        });
+                                    });
 
-                                                                            // Conteos dentro de cada pill del menú — mismos números que
-                                                                            // ya se usaban en el título "VOTACIONES (48)" de cada mazo
-                                                                            // (window._perfilCounts), ahora movidos acá para no repetir
-                                                                            // el nombre del criterio dos veces en pantalla.
-                                                                            const modoSeries = document.getElementById('perfilContenido')?.classList.contains('modo-series');
-                                                                            const counts = window._perfilCounts || {};
-                                                                            const valores = {
-                                                                                Votaciones:   modoSeries ? counts.votacionesSeries   : counts.votacionesPeliculas,
-                                                                                Comentarios:  modoSeries ? counts.comentariosSeries  : counts.comentariosPeliculas,
-                                                                                Recomendadas: modoSeries ? counts.recomendadasSeries : counts.recomendadasPeliculas,
-                                                                                Guardadas:    modoSeries ? counts.guardadasSeries    : counts.guardadasPeliculas
-                                                                            };
-                                                                            Object.entries(valores).forEach(([nombre, valor]) => {
-                                                                                const el = document.getElementById('cineActividadCount' + nombre);
-                                                                                if (el) el.textContent = window._formatearContador(valor ?? 0);
-                                                                            });
-                                                                        };
+                                    // Conteos dentro de cada pill del menú — mismos números que
+                                    // ya se usaban en el título "VOTACIONES (48)" de cada mazo
+                                    // (window._perfilCounts), ahora movidos acá para no repetir
+                                    // el nombre del criterio dos veces en pantalla.
+                                    const modoSeries = document.getElementById('perfilContenido')?.classList.contains('modo-series');
+                                    const counts = window._perfilCounts || {};
+                                    const valores = {
+                                        Votaciones:   modoSeries ? counts.votacionesSeries   : counts.votacionesPeliculas,
+                                        Comentarios:  modoSeries ? counts.comentariosSeries  : counts.comentariosPeliculas,
+                                        Recomendadas: modoSeries ? counts.recomendadasSeries : counts.recomendadasPeliculas,
+                                        Guardadas:    modoSeries ? counts.guardadasSeries    : counts.guardadasPeliculas
+                                    };
+                                    Object.entries(valores).forEach(([nombre, valor]) => {
+                                        const el = document.getElementById('cineActividadCount' + nombre);
+                                        if (el) el.textContent = window._formatearContador(valor ?? 0);
+                                    });
+                                };
 
-                                                                        // Desde las 4 métricas de arriba (votaciones/comentarios/
-                                                                        // recomendadas/guardadas), scrollea hasta "Mi actividad" y
-                                                                        // activa el criterio tocado — reusa la misma función que ya
-                                                                        // usa el menú de criterios, no duplica lógica.
-                                                                        window._irAActividadDesdeMetrica = function(criterio) {
-                                                                            window._seleccionarCriterioActividad(criterio);
-                                                                            const destino = document.getElementById('cineActividadTitulo');
-                                                                            if (!destino) return;
-                                                                            // scrollIntoView no sabe que hay un navbar sticky tapando
-                                                                            // parte de arriba — calculamos su altura real y la restamos,
-                                                                            // más un pequeño respiro, para que el título quede justo
-                                                                            // debajo de él, no escondido detrás.
-                                                                            const navbar = document.querySelector('.navbar');
-                                                                            const offset = (navbar ? navbar.offsetHeight : 0) + 12;
-                                                                            const y = destino.getBoundingClientRect().top + window.scrollY - offset;
-                                                                            window.scrollTo({ top: y, behavior: 'smooth' });
-                                                                        };
+                                // Desde las 4 métricas de arriba (votaciones/comentarios/
+                                // recomendadas/guardadas), scrollea hasta "Mi actividad" y
+                                // activa el criterio tocado — reusa la misma función que ya
+                                // usa el menú de criterios, no duplica lógica.
+                                window._irAActividadDesdeMetrica = function(criterio) {
+                                    window._seleccionarCriterioActividad(criterio);
+                                    const destino = document.getElementById('cineActividadTitulo');
+                                    if (!destino) return;
+                                    // scrollIntoView no sabe que hay un navbar sticky tapando
+                                    // parte de arriba — calculamos su altura real y la restamos,
+                                    // más un pequeño respiro, para que el título quede justo
+                                    // debajo de él, no escondido detrás.
+                                    const navbar = document.querySelector('.navbar');
+                                    const offset = (navbar ? navbar.offsetHeight : 0) + 12;
+                                    const y = destino.getBoundingClientRect().top + window.scrollY - offset;
+                                    window.scrollTo({ top: y, behavior: 'smooth' });
+                                };
 
                                                 window.setAdnTipo = function(tipo) {
                             document.querySelectorAll('.cine-switch-option').forEach(btn => {
@@ -1248,35 +1248,49 @@ window.subirBanner = async function(input) {
                                                        setTimeout(() => { toast.style.display = 'none'; }, 300);
                                                    }, 2000);
                                                };
-        window._renderFavoritaVista = async function(movieId) {
-            const posterEl = document.getElementById('perfilFavoritaPoster');
-            const tituloEl = document.getElementById('perfilFavoritaTitulo');
-            if (!posterEl || !tituloEl) return;
+                window._renderFavoritaVista = async function(movieId, datos) {
+                    const posterEl = document.getElementById('perfilFavoritaPoster');
+                    const tituloEl = document.getElementById('perfilFavoritaTitulo');
+                    if (!posterEl || !tituloEl) return;
 
-                        if (!movieId) {
-                            tituloEl.textContent = 'Sin elegir todavía';
-                            posterEl.innerHTML = '';
-                            posterEl.style.cursor = 'default';
-                            posterEl.onclick = null;
-                            return;
-                        }
-                        try {
-                            const token = localStorage.getItem('token');
-                            const res = await fetch(`${CONFIG.API_URL}/movies/${movieId}`, {
-                                headers: { 'Authorization': `Bearer ${token}` }
-                            });
-                            if (!res.ok) throw new Error();
-                            const m = await res.json();
-                            tituloEl.textContent = m.title || '—';
-                            posterEl.innerHTML = m.poster_path
-                                ? `<img src="https://image.tmdb.org/t/p/w185${m.poster_path}" alt="${m.title || ''}" style="width:100%;height:100%;object-fit:cover;">`
-                                : '';
-                            posterEl.style.cursor = 'pointer';
-                            posterEl.onclick = () => window._abrirPeliculaDesdePerfil(movieId);
-                        } catch (e) {
-                            tituloEl.textContent = '—';
-                        }
-                    };
+                                if (!movieId) {
+                                    tituloEl.textContent = 'Sin elegir todavía';
+                                    posterEl.innerHTML = '';
+                                    posterEl.style.cursor = 'default';
+                                    posterEl.onclick = null;
+                                    return;
+                                }
+                                // Si ya vienen resueltos desde el payload del perfil (carga
+                                // inicial), pintamos directo sin pedir nada más — evita el
+                                // fetch a /movies/{id} que hacía lenta la carga de "Mis
+                                // gustos". Si no vienen (recién elegido a mano), sigue
+                                // pidiéndolo como siempre.
+                                if (datos) {
+                                    tituloEl.textContent = datos.titulo || '—';
+                                    posterEl.innerHTML = datos.poster
+                                        ? `<img src="https://image.tmdb.org/t/p/w185${datos.poster}" alt="${datos.titulo || ''}" style="width:100%;height:100%;object-fit:cover;">`
+                                        : '';
+                                    posterEl.style.cursor = 'pointer';
+                                    posterEl.onclick = () => window._abrirPeliculaDesdePerfil(movieId);
+                                    return;
+                                }
+                                try {
+                                    const token = localStorage.getItem('token');
+                                    const res = await fetch(`${CONFIG.API_URL}/movies/${movieId}`, {
+                                        headers: { 'Authorization': `Bearer ${token}` }
+                                    });
+                                    if (!res.ok) throw new Error();
+                                    const m = await res.json();
+                                    tituloEl.textContent = m.title || '—';
+                                    posterEl.innerHTML = m.poster_path
+                                        ? `<img src="https://image.tmdb.org/t/p/w185${m.poster_path}" alt="${m.title || ''}" style="width:100%;height:100%;object-fit:cover;">`
+                                        : '';
+                                    posterEl.style.cursor = 'pointer';
+                                    posterEl.onclick = () => window._abrirPeliculaDesdePerfil(movieId);
+                                } catch (e) {
+                                    tituloEl.textContent = '—';
+                                }
+                            };
 
                     window._renderVistaCineVista = async function(movieId) {
             const posterEl = document.getElementById('perfilVistaCinePoster');
@@ -1434,35 +1448,44 @@ window.subirBanner = async function(input) {
             }
         };
 
-        window._renderVistaCineVista = async function(movieId) {
-            const posterEl = document.getElementById('perfilVistaCinePoster');
-            const tituloEl = document.getElementById('perfilVistaCineTitulo');
-            if (!posterEl || !tituloEl) return;
+                window._renderVistaCineVista = async function(movieId, datos) {
+                    const posterEl = document.getElementById('perfilVistaCinePoster');
+                    const tituloEl = document.getElementById('perfilVistaCineTitulo');
+                    if (!posterEl || !tituloEl) return;
 
-                    if (!movieId) {
-                        tituloEl.textContent = 'Sin elegir todavía';
-                        posterEl.innerHTML = '';
-                        posterEl.style.cursor = 'default';
-                        posterEl.onclick = null;
-                        return;
-                    }
-                    try {
-                        const token = localStorage.getItem('token');
-                        const res = await fetch(`${CONFIG.API_URL}/movies/${movieId}`, {
-                            headers: { 'Authorization': `Bearer ${token}` }
-                        });
-                        if (!res.ok) throw new Error();
-                        const m = await res.json();
-                        tituloEl.textContent = m.title || '—';
-                        posterEl.innerHTML = m.poster_path
-                            ? `<img src="https://image.tmdb.org/t/p/w185${m.poster_path}" alt="${m.title || ''}" style="width:100%;height:100%;object-fit:cover;">`
-                            : '';
-                        posterEl.style.cursor = 'pointer';
-                        posterEl.onclick = () => window._abrirPeliculaDesdePerfil(movieId);
-                    } catch (e) {
-                        tituloEl.textContent = '—';
-                    }
-                };
+                            if (!movieId) {
+                                tituloEl.textContent = 'Sin elegir todavía';
+                                posterEl.innerHTML = '';
+                                posterEl.style.cursor = 'default';
+                                posterEl.onclick = null;
+                                return;
+                            }
+                            if (datos) {
+                                tituloEl.textContent = datos.titulo || '—';
+                                posterEl.innerHTML = datos.poster
+                                    ? `<img src="https://image.tmdb.org/t/p/w185${datos.poster}" alt="${datos.titulo || ''}" style="width:100%;height:100%;object-fit:cover;">`
+                                    : '';
+                                posterEl.style.cursor = 'pointer';
+                                posterEl.onclick = () => window._abrirPeliculaDesdePerfil(movieId);
+                                return;
+                            }
+                            try {
+                                const token = localStorage.getItem('token');
+                                const res = await fetch(`${CONFIG.API_URL}/movies/${movieId}`, {
+                                    headers: { 'Authorization': `Bearer ${token}` }
+                                });
+                                if (!res.ok) throw new Error();
+                                const m = await res.json();
+                                tituloEl.textContent = m.title || '—';
+                                posterEl.innerHTML = m.poster_path
+                                    ? `<img src="https://image.tmdb.org/t/p/w185${m.poster_path}" alt="${m.title || ''}" style="width:100%;height:100%;object-fit:cover;">`
+                                    : '';
+                                posterEl.style.cursor = 'pointer';
+                                posterEl.onclick = () => window._abrirPeliculaDesdePerfil(movieId);
+                            } catch (e) {
+                                tituloEl.textContent = '—';
+                            }
+                        };
 
                             window.abrirEdicionVistaCine = function() {
                     window.cancelarEdicionFavorita();
@@ -1552,39 +1575,53 @@ window.subirBanner = async function(input) {
             }
         };
 
-            window._renderNoMeCansoVista = async function(movieId) {
-                const posterEl = document.getElementById('perfilNoMeCansoPoster');
-                const tituloEl = document.getElementById('perfilNoMeCansoTitulo');
-                if (!posterEl || !tituloEl) return;
-                if (!movieId) { tituloEl.textContent = 'Sin elegir todavía'; posterEl.innerHTML = ''; posterEl.style.cursor = 'default'; posterEl.onclick = null; return; }
-                try {
-                    const token = localStorage.getItem('token');
-                    const res = await fetch(`${CONFIG.API_URL}/movies/${movieId}`, { headers: { 'Authorization': `Bearer ${token}` } });
-                    if (!res.ok) throw new Error();
-                    const m = await res.json();
-                    tituloEl.textContent = m.title || '—';
-                    posterEl.innerHTML = m.poster_path ? `<img src="https://image.tmdb.org/t/p/w185${m.poster_path}" alt="${m.title || ''}" style="width:100%;height:100%;object-fit:cover;">` : '';
-                    posterEl.style.cursor = 'pointer';
-                    posterEl.onclick = () => window._abrirPeliculaDesdePerfil(movieId);
-                } catch (e) { tituloEl.textContent = '—'; }
-            };
+        window._renderNoMeCansoVista = async function(movieId, datos) {
+            const posterEl = document.getElementById('perfilNoMeCansoPoster');
+            const tituloEl = document.getElementById('perfilNoMeCansoTitulo');
+            if (!posterEl || !tituloEl) return;
+            if (!movieId) { tituloEl.textContent = 'Sin elegir todavía'; posterEl.innerHTML = ''; posterEl.style.cursor = 'default'; posterEl.onclick = null; return; }
+            if (datos) {
+                tituloEl.textContent = datos.titulo || '—';
+                posterEl.innerHTML = datos.poster ? `<img src="https://image.tmdb.org/t/p/w185${datos.poster}" alt="${datos.titulo || ''}" style="width:100%;height:100%;object-fit:cover;">` : '';
+                posterEl.style.cursor = 'pointer';
+                posterEl.onclick = () => window._abrirPeliculaDesdePerfil(movieId);
+                return;
+            }
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${CONFIG.API_URL}/movies/${movieId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) throw new Error();
+                const m = await res.json();
+                tituloEl.textContent = m.title || '—';
+                posterEl.innerHTML = m.poster_path ? `<img src="https://image.tmdb.org/t/p/w185${m.poster_path}" alt="${m.title || ''}" style="width:100%;height:100%;object-fit:cover;">` : '';
+                posterEl.style.cursor = 'pointer';
+                posterEl.onclick = () => window._abrirPeliculaDesdePerfil(movieId);
+            } catch (e) { tituloEl.textContent = '—'; }
+        };
 
-            window._renderNoLaBancoVista = async function(movieId) {
-                const posterEl = document.getElementById('perfilNoLaBancoPoster');
-                const tituloEl = document.getElementById('perfilNoLaBancoTitulo');
-                if (!posterEl || !tituloEl) return;
-                if (!movieId) { tituloEl.textContent = 'Sin elegir todavía'; posterEl.innerHTML = ''; posterEl.style.cursor = 'default'; posterEl.onclick = null; return; }
-                try {
-                    const token = localStorage.getItem('token');
-                    const res = await fetch(`${CONFIG.API_URL}/movies/${movieId}`, { headers: { 'Authorization': `Bearer ${token}` } });
-                    if (!res.ok) throw new Error();
-                    const m = await res.json();
-                    tituloEl.textContent = m.title || '—';
-                    posterEl.innerHTML = m.poster_path ? `<img src="https://image.tmdb.org/t/p/w185${m.poster_path}" alt="${m.title || ''}" style="width:100%;height:100%;object-fit:cover;">` : '';
-                    posterEl.style.cursor = 'pointer';
-                    posterEl.onclick = () => window._abrirPeliculaDesdePerfil(movieId);
-                } catch (e) { tituloEl.textContent = '—'; }
-            };
+        window._renderNoLaBancoVista = async function(movieId, datos) {
+            const posterEl = document.getElementById('perfilNoLaBancoPoster');
+            const tituloEl = document.getElementById('perfilNoLaBancoTitulo');
+            if (!posterEl || !tituloEl) return;
+            if (!movieId) { tituloEl.textContent = 'Sin elegir todavía'; posterEl.innerHTML = ''; posterEl.style.cursor = 'default'; posterEl.onclick = null; return; }
+            if (datos) {
+                tituloEl.textContent = datos.titulo || '—';
+                posterEl.innerHTML = datos.poster ? `<img src="https://image.tmdb.org/t/p/w185${datos.poster}" alt="${datos.titulo || ''}" style="width:100%;height:100%;object-fit:cover;">` : '';
+                posterEl.style.cursor = 'pointer';
+                posterEl.onclick = () => window._abrirPeliculaDesdePerfil(movieId);
+                return;
+            }
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${CONFIG.API_URL}/movies/${movieId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) throw new Error();
+                const m = await res.json();
+                tituloEl.textContent = m.title || '—';
+                posterEl.innerHTML = m.poster_path ? `<img src="https://image.tmdb.org/t/p/w185${m.poster_path}" alt="${m.title || ''}" style="width:100%;height:100%;object-fit:cover;">` : '';
+                posterEl.style.cursor = 'pointer';
+                posterEl.onclick = () => window._abrirPeliculaDesdePerfil(movieId);
+            } catch (e) { tituloEl.textContent = '—'; }
+        };
 
         window.abrirEdicionNoMeCanso = function() {
             window.cancelarEdicionFavorita();
@@ -2631,11 +2668,18 @@ window._abrirSerieDesdeComentario = async function(seriesId, commentId, esSpoile
 // ==============================================
 // SERIE FAVORITA
 // ==============================================
-window._renderSerieFavoritaVista = async function(seriesId) {
+window._renderSerieFavoritaVista = async function(seriesId, datos) {
     const posterEl = document.getElementById('perfilSerieFavoritaPoster');
     const tituloEl = document.getElementById('perfilSerieFavoritaTitulo');
     if (!posterEl || !tituloEl) return;
     if (!seriesId) { tituloEl.textContent = 'Sin elegir todavía'; posterEl.innerHTML = ''; posterEl.style.cursor = 'default'; posterEl.onclick = null; return; }
+    if (datos) {
+        tituloEl.textContent = datos.titulo || '—';
+        posterEl.innerHTML = datos.poster ? `<img src="https://image.tmdb.org/t/p/w185${datos.poster}" alt="${datos.titulo || ''}" style="width:100%;height:100%;object-fit:cover;">` : '';
+        posterEl.style.cursor = 'pointer';
+        posterEl.onclick = () => window._abrirSerieDesdePerfil(seriesId);
+        return;
+    }
     try {
         const token = localStorage.getItem('token');
         const res = await fetch(`${CONFIG.API_URL}/series/${seriesId}`, { headers: { 'Authorization': `Bearer ${token}` } });
@@ -2729,11 +2773,18 @@ window._elegirSerieFavorita = async function(seriesId) {
 // ==============================================
 // ÚLTIMA QUE VI EN MARATÓN
 // ==============================================
-window._renderUltimaMaratonVista = async function(seriesId) {
+window._renderUltimaMaratonVista = async function(seriesId, datos) {
     const posterEl = document.getElementById('perfilUltimaMaratonPoster');
     const tituloEl = document.getElementById('perfilUltimaMaratonTitulo');
     if (!posterEl || !tituloEl) return;
     if (!seriesId) { tituloEl.textContent = 'Sin elegir todavía'; posterEl.innerHTML = ''; posterEl.style.cursor = 'default'; posterEl.onclick = null; return; }
+    if (datos) {
+        tituloEl.textContent = datos.titulo || '—';
+        posterEl.innerHTML = datos.poster ? `<img src="https://image.tmdb.org/t/p/w185${datos.poster}" alt="${datos.titulo || ''}" style="width:100%;height:100%;object-fit:cover;">` : '';
+        posterEl.style.cursor = 'pointer';
+        posterEl.onclick = () => window._abrirSerieDesdePerfil(seriesId);
+        return;
+    }
     try {
         const token = localStorage.getItem('token');
         const res = await fetch(`${CONFIG.API_URL}/series/${seriesId}`, { headers: { 'Authorization': `Bearer ${token}` } });
@@ -2827,11 +2878,18 @@ window._elegirUltimaMaraton = async function(seriesId) {
 // ==============================================
 // LA QUE NO ME CANSO DE VER (SERIE)
 // ==============================================
-window._renderNoMeCansoSerieVista = async function(seriesId) {
+window._renderNoMeCansoSerieVista = async function(seriesId, datos) {
     const posterEl = document.getElementById('perfilNoMeCansoSeriePoster');
     const tituloEl = document.getElementById('perfilNoMeCansoSerieTitulo');
     if (!posterEl || !tituloEl) return;
     if (!seriesId) { tituloEl.textContent = 'Sin elegir todavía'; posterEl.innerHTML = ''; posterEl.style.cursor = 'default'; posterEl.onclick = null; return; }
+    if (datos) {
+        tituloEl.textContent = datos.titulo || '—';
+        posterEl.innerHTML = datos.poster ? `<img src="https://image.tmdb.org/t/p/w185${datos.poster}" alt="${datos.titulo || ''}" style="width:100%;height:100%;object-fit:cover;">` : '';
+        posterEl.style.cursor = 'pointer';
+        posterEl.onclick = () => window._abrirSerieDesdePerfil(seriesId);
+        return;
+    }
     try {
         const token = localStorage.getItem('token');
         const res = await fetch(`${CONFIG.API_URL}/series/${seriesId}`, { headers: { 'Authorization': `Bearer ${token}` } });
@@ -2925,11 +2983,18 @@ window._elegirNoMeCansoSerie = async function(seriesId) {
 // ==============================================
 // LA QUE TODOS AMAN Y YO NO BANCO (SERIE)
 // ==============================================
-window._renderNoLaBancoSerieVista = async function(seriesId) {
+window._renderNoLaBancoSerieVista = async function(seriesId, datos) {
     const posterEl = document.getElementById('perfilNoLaBancoSeriePoster');
     const tituloEl = document.getElementById('perfilNoLaBancoSerieTitulo');
     if (!posterEl || !tituloEl) return;
     if (!seriesId) { tituloEl.textContent = 'Sin elegir todavía'; posterEl.innerHTML = ''; posterEl.style.cursor = 'default'; posterEl.onclick = null; return; }
+    if (datos) {
+        tituloEl.textContent = datos.titulo || '—';
+        posterEl.innerHTML = datos.poster ? `<img src="https://image.tmdb.org/t/p/w185${datos.poster}" alt="${datos.titulo || ''}" style="width:100%;height:100%;object-fit:cover;">` : '';
+        posterEl.style.cursor = 'pointer';
+        posterEl.onclick = () => window._abrirSerieDesdePerfil(seriesId);
+        return;
+    }
     try {
         const token = localStorage.getItem('token');
         const res = await fetch(`${CONFIG.API_URL}/series/${seriesId}`, { headers: { 'Authorization': `Bearer ${token}` } });
