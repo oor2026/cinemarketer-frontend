@@ -129,7 +129,63 @@
                         .cine-stat-icon--flip { transform: scaleX(-1); }
                 .cine-quien-soy-mobile { display: none; }
                 .cine-adn-dots { display: none; }
-        .cine-actividad-menu { display: none; }
+                .cine-actividad-menu { display: none; }
+
+        /* Flechas del modal "Género de Mi espíritu" — ocultas por
+           defecto (mobile: solo swipe/drag). En desktop se muestran y
+           el modal se agranda para que entren ~3-4 pósters de una. */
+                        .modal-genero-adn-nav {
+            display: none;
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 40px; height: 40px; border-radius: 50%; border: none;
+            background: #e50914; color: #ffffff;
+            align-items: center; justify-content: center;
+            cursor: pointer; z-index: 10; font-size: 1rem;
+        }
+        .modal-genero-adn-nav-prev { left: 8px; }
+        .modal-genero-adn-nav-next { right: 8px; }
+
+               /* Mazo apilado — mobile por defecto (misma estética y misma
+           mecánica de animación que ya usamos en "Mi actividad":
+           .cine-stack-card con transition:all 0.35s cubic-bezier).
+           Navegación por swipe, sin flechas. Se pisa el flex/overflow
+           inline que trae el div por defecto para el modo desktop. */
+        #modalGeneroAdnCarrusel.mazo-mobile {
+            display: flex !important;
+            align-items: center; justify-content: center;
+            position: relative !important;
+            height: 240px !important;
+            overflow: visible !important;
+            padding: 1.2rem !important;
+        }
+        .modal-genero-adn-card {
+            position: absolute;
+            width: 140px; height: 210px;
+            border-radius: 10px; overflow: hidden;
+            background: #eee;
+            box-shadow: var(--cine-poster-shadow), 0 0 0 1px var(--cine-border);
+            border: 2px solid var(--cine-poster-border);
+            box-sizing: border-box;
+            transition: all 0.35s cubic-bezier(.22,.61,.36,1);
+            cursor: pointer;
+        }
+
+        .modal-genero-adn-nombre-centrado {
+    display: block; text-align: center;
+    font-size: 1.15rem; margin-top: 0.2rem;
+    color: #e50914;
+}
+        #modalGeneroAdnMazoTitulo {
+            margin: 0.6rem 1.2rem 1.2rem;
+            font-size: 0.82rem; color: #333; text-align: center;
+        }
+
+        @media (min-width: 769px) {
+            .modal-genero-adn-box { max-width: 680px !important; max-height: 90vh !important; }
+            .modal-genero-adn-nav { display: flex; width: 48px !important; height: 48px !important; }
+            #modalGeneroAdnCarrusel > div { flex: 0 0 150px !important; }
+            #modalGeneroAdnCarrusel > div > div { width: 150px !important; height: 225px !important; }
+        }
         .cine-stat-icon-compuesto { align-items: center; gap: 2px; }
         .cine-stat-icon-compuesto .fa-user { font-size: 0.78rem; }
         .cine-stat-icon-compuesto .fa-angles-right { font-size: 0.62rem; }
@@ -718,6 +774,24 @@
     <div class="trivia-modal trivia-modal-series">
         <button class="trivia-cerrar" onclick="window.cerrarRankingTriviaSeries()"><i class="fas fa-times"></i></button>
         <div id="rankingTriviaSeriesContenido"></div>
+    </div>
+</div>
+
+<!-- MODAL "PELÍCULAS/SERIES DE ESTE GÉNERO" — se abre al tocar cualquier
+     pill de "Mi espíritu". Simple: título + carrusel horizontal con
+     snap (swipe en touch, flechas visibles en desktop vía CSS :hover
+     sobre el contenedor, mismo patrón que .cine-stack-nav). -->
+<div id="modalGeneroAdn" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;" onclick="window._cerrarModalGeneroAdn()">
+    <div class="modal-genero-adn-box" style="background:#ffffff; border-radius:16px; max-width:420px; width:100%; max-height:80vh; display:flex; flex-direction:column; overflow:hidden;" onclick="event.stopPropagation()">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:1rem 1.2rem; border-bottom:1px solid #eee;">
+            <p id="modalGeneroAdnTitulo" style="margin:0; font-weight:700; font-size:1rem; color:#1a1a1a;"></p>
+            <button onclick="window._cerrarModalGeneroAdn()" style="background:#f0f0f0; border:none; cursor:pointer; width:30px; height:30px; border-radius:50%; font-size:0.9rem; color:#555;"><i class="fas fa-times"></i></button>
+        </div>
+        <div style="position:relative;">
+            <button class="modal-genero-adn-nav modal-genero-adn-nav-prev" onclick="window._moverCarruselGeneroAdn(-1)" aria-label="Anterior"><i class="fas fa-chevron-left"></i></button>
+            <div id="modalGeneroAdnCarrusel" style="display:flex; gap:0.8rem; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; padding:1.2rem; scrollbar-width:none;"></div>
+            <button class="modal-genero-adn-nav modal-genero-adn-nav-next" onclick="window._moverCarruselGeneroAdn(1)" aria-label="Siguiente"><i class="fas fa-chevron-right"></i></button>
+        </div>
     </div>
 </div>
 

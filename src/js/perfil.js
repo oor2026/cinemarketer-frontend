@@ -894,8 +894,10 @@ window.subirBanner = async function(input) {
                                 const hex = '#' + ADN_COLORES[i % ADN_COLORES.length].toString(16).padStart(6, '0');
                                 const emoji = EMOJI_POR_GENERO[g.genero] || '🎞️';
                                 const nombreMostrado = TRADUCCIONES_GENERO_SERIE[g.genero] || g.genero;
+                                const modoSeries = document.getElementById('perfilContenido')?.classList.contains('modo-series');
                                 const pill = document.createElement('span');
-                                pill.style.cssText = 'display:inline-flex; align-items:center; gap:5px; background:' + hex + '35; border:1px solid ' + hex + '70; border-radius:20px; padding:4px 10px 4px 6px;';
+                                pill.style.cssText = 'display:inline-flex; align-items:center; gap:5px; background:' + hex + '35; border:1px solid ' + hex + '70; border-radius:20px; padding:4px 10px 4px 6px; cursor:pointer;';
+                                pill.onclick = () => window._abrirModalGeneroAdn(g.generoId, nombreMostrado, modoSeries ? 'series' : 'peliculas', emoji);
                                 pill.innerHTML =
                                     '<span style="width:18px;height:18px;border-radius:50%;background:' + hex + '25;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">' + emoji + '</span>' +
                                                                 '<span style="font-size:0.78rem;color:var(--cine-text);">' + nombreMostrado + '</span>' +
@@ -3133,6 +3135,140 @@ window._renderRankingTrivia = function(rankingPeliculas, rankingSeries) {
         window._actualizarVisibilidadRankingTrivia();
         window._actualizarColorStatsSeguir();
     };
+
+window._abrirModalGeneroAdn = async function(generoId, generoNombre, tipo, emoji) {
+    const modal = document.getElementById('modalGeneroAdn');
+    const tituloEl = document.getElementById('modalGeneroAdnTitulo');
+    const carrusel = document.getElementById('modalGeneroAdnCarrusel');
+    if (!modal || !tituloEl || !carrusel) return;
+
+        const palabraTipo = tipo === 'series' ? 'series' : 'pelis';
+        const esMobile = window.matchMedia('(max-width: 768px)').matches;
+                    const colorGenero = tipo === 'series' ? '#2e6fd6' : '#e50914';
+                tituloEl.innerHTML = esMobile
+                    ? `Estas ${palabraTipo} componen mi lado de:<br><span class="modal-genero-adn-nombre-centrado" style="color:${colorGenero};">${generoNombre} ${emoji || ''}</span>`
+                    : `Estas ${palabraTipo} componen mi lado de ${generoNombre} ${emoji || ''}`;
+    carrusel.innerHTML = '<div style="padding:1rem;"><i class="fas fa-spinner fa-spin"></i></div>';
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    const url = tipo === 'series'
+        ? `${CONFIG.API_URL}/users/${perfilUsuarioId}/adn-cinefilo-series/genero/${generoId}/series`
+        : `${CONFIG.API_URL}/users/${perfilUsuarioId}/adn-cinefilo/genero/${generoId}/peliculas`;
+
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) throw new Error();
+        const items = await res.json();
+
+                if (items.length === 0) {
+                    carrusel.classList.remove('mazo-mobile');
+                    carrusel.innerHTML = '<p style="padding:1rem; color:#999; font-size:0.85rem;">No hay nada para mostrar todavía.</p>';
+                    return;
+                }
+
+                if (window.matchMedia('(max-width: 768px)').matches) {
+                    window._pintarMazoGeneroAdn(items, tipo, carrusel);
+                } else {
+                    carrusel.classList.remove('mazo-mobile');
+                    carrusel.innerHTML = items.map(item => {
+                        const id = tipo === 'series' ? item.seriesId : item.movieId;
+                        const abrir = tipo === 'series' ? `window._abrirSerieDesdePerfil(${id})` : `window._abrirPeliculaDesdePerfil(${id})`;
+                        const poster = item.poster
+                            ? `<img src="https://image.tmdb.org/t/p/w185${item.poster}" alt="${item.titulo || ''}" style="width:100%;height:100%;object-fit:cover;">`
+                            : '';
+                        return `<div onclick="${abrir}" style="flex:0 0 100px; scroll-snap-align:start; cursor:pointer;">
+                            <div style="width:100px; height:150px; border-radius:10px; overflow:hidden; background:#eee;">${poster}</div>
+                            <p style="margin:0.4rem 0 0; font-size:0.72rem; color:#333; line-height:1.3;">${item.titulo || ''}</p>
+                        </div>`;
+                    }).join('');
+                }
+            } catch (e) {
+                carrusel.classList.remove('mazo-mobile');
+                carrusel.innerHTML = '<p style="padding:1rem; color:#999; font-size:0.85rem;">No se pudo cargar. Probá de nuevo.</p>';
+            }
+        };
+
+        // Mazo apilado (mobile) — misma idea visual que "Mi actividad": una
+        // carta arriba (clickeable, abre la ficha), 2 asomando atrás como
+        // referencia, y swipe para pasar a la siguiente. Autocontenido, no
+        // depende de _inicializarSwipeStacks (esa está atada a los 8
+        // wrappers fijos de "Mi actividad"; acá la cantidad es variable
+        // según el género).
+        window._pintarMazoGeneroAdn = function(items, tipo, carrusel) {
+            carrusel.classList.add('mazo-mobile');
+            let indice = 0;
+            const N = items.length;
+
+            let tituloMazo = document.getElementById('modalGeneroAdnMazoTitulo');
+            if (tituloMazo) tituloMazo.remove();
+            tituloMazo = document.createElement('p');
+            tituloMazo.id = 'modalGeneroAdnMazoTitulo';
+            carrusel.after(tituloMazo);
+
+            // Todas las cartas se crean una sola vez (todas centradas en el
+            // mismo punto vía CSS), y lo único que cambia al navegar es su
+            // transform/opacity/z-index — igual que _renderStackPosiciones en
+            // "Mi actividad", no se recrea el HTML en cada swipe.
+            carrusel.innerHTML = items.map(item => {
+                const id = tipo === 'series' ? item.seriesId : item.movieId;
+                const abrir = tipo === 'series' ? `window._abrirSerieDesdePerfil(${id})` : `window._abrirPeliculaDesdePerfil(${id})`;
+                const poster = item.poster
+                    ? `<img src="https://image.tmdb.org/t/p/w185${item.poster}" alt="" style="width:100%;height:100%;object-fit:cover;">`
+                    : '';
+                return `<div class="modal-genero-adn-card" onclick="${abrir}">${poster}</div>`;
+            }).join('');
+
+            const cards = carrusel.querySelectorAll('.modal-genero-adn-card');
+
+            const pintar = () => {
+                cards.forEach((card, i) => {
+                    let diff = i - indice;
+                    if (diff > N / 2) diff -= N;
+                    if (diff < -N / 2) diff += N;
+                    const offset = (diff >= 0 && diff <= 2) ? diff : -1;
+
+                    if (offset === 0) {
+                        card.style.transform = 'translateX(0) translateY(0) scale(1) rotate(0deg)';
+                        card.style.opacity = 1; card.style.zIndex = 10;
+                    } else if (offset === 1) {
+                        card.style.transform = 'translateX(-18px) translateY(10px) scale(0.94) rotate(-3deg)';
+                        card.style.opacity = 0.6; card.style.zIndex = 8;
+                    } else if (offset === 2) {
+                        card.style.transform = 'translateX(-36px) translateY(20px) scale(0.88) rotate(-6deg)';
+                        card.style.opacity = 0.3; card.style.zIndex = 7;
+                    } else {
+                        card.style.transform = 'translateX(260px) translateY(-10px) scale(0.8) rotate(16deg)';
+                        card.style.opacity = 0; card.style.zIndex = 5;
+                    }
+                });
+                tituloMazo.textContent = items[indice] ? items[indice].titulo : '';
+            };
+
+            pintar();
+
+            let startX = 0;
+            carrusel.ontouchstart = (e) => { startX = e.touches[0].clientX; };
+            carrusel.ontouchend = (e) => {
+                const dx = e.changedTouches[0].clientX - startX;
+                if (Math.abs(dx) < 40) return;
+                indice = dx < 0 ? (indice - 1 + N) % N : (indice + 1) % N;
+                pintar();
+            };
+        };
+
+window._cerrarModalGeneroAdn = function() {
+    const modal = document.getElementById('modalGeneroAdn');
+    if (modal) modal.style.display = 'none';
+    document.body.style.overflow = '';
+};
+
+window._moverCarruselGeneroAdn = function(direccion) {
+    const carrusel = document.getElementById('modalGeneroAdnCarrusel');
+    if (!carrusel) return;
+    carrusel.scrollBy({ left: direccion * 340, behavior: 'smooth' });
+};
 
 window._actualizarVisibilidadRankingTrivia = function() {
     const tipo = document.querySelector('.cine-switch-option.active')?.dataset.tipo || 'peliculas';
