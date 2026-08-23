@@ -3669,6 +3669,200 @@ window._moverStackGuardadasSeries = function(dir) {
 };
 
 // ==============================================
+// SELECTOR DE AVATAR (calcado de mi-cuenta.js, adaptado a Mi Sala:
+// actualiza #perfilAvatar en vez de #profileAvatar, y usa
+// showToast(tipo, msg) en vez de mostrarToast(msg, tipo) — perfil.js
+// ya usa esa firma en otro lado de este mismo archivo).
+// ==============================================
+let avatarSeleccionado = null;
+let avatarCategoriaActual = 'predefinidos';
+
+window.abrirSelectorAvatar = function() {
+    avatarSeleccionado = null;
+    document.getElementById('avatarError').style.display = 'none';
+
+    document.querySelectorAll('.avatar-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector('.avatar-tab:first-child').classList.add('active');
+
+    document.getElementById('avatarFileInput').value = '';
+    document.getElementById('avatarPreview').style.display = 'none';
+
+    document.getElementById('modalSelectorAvatar').style.display = 'flex';
+
+    const tabPredefinidos = document.querySelector('.avatar-tab:first-child');
+    window.cambiarCategoriaAvatar('predefinidos', tabPredefinidos);
+};
+
+window.cerrarSelectorAvatar = function() {
+    document.getElementById('modalSelectorAvatar').style.display = 'none';
+};
+
+window.cambiarCategoriaAvatar = function(categoria, btn) {
+    document.querySelectorAll('.avatar-tab').forEach(tab => tab.classList.remove('active'));
+    btn.classList.add('active');
+
+    avatarCategoriaActual = categoria;
+
+    if (categoria === 'predefinidos') {
+        document.getElementById('avatarPredefinidos').style.display = 'grid';
+        document.getElementById('avatarPersonalizado').style.display = 'none';
+        _cargarAvataresPredefinidosPerfil();
+    } else {
+        document.getElementById('avatarPredefinidos').style.display = 'none';
+        document.getElementById('avatarPersonalizado').style.display = 'block';
+        _inicializarFileInputAvatarPerfil();
+
+        const fileInput = document.getElementById('avatarFileInput');
+        const preview = document.getElementById('avatarPreview');
+        const previewImg = document.getElementById('avatarPreviewImg');
+        if (fileInput?.files[0] && preview && previewImg) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                previewImg.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+        }
+    }
+};
+
+async function _cargarAvataresPredefinidosPerfil() {
+    const grid = document.getElementById('avatarPredefinidos');
+    grid.innerHTML = '<div class="avatar-loading"><i class="fas fa-spinner fa-spin"></i> Cargando avatares...</div>';
+
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${CONFIG.API_URL}/avatars/available`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Error al cargar avatares');
+        const avatares = await response.json();
+
+        if (avatares.length === 0) {
+            grid.innerHTML = '<div class="avatar-loading">No hay avatares disponibles</div>';
+            return;
+        }
+
+        grid.innerHTML = avatares.map(avatar => `
+            <div class="avatar-item" onclick="window.seleccionarAvatar(${avatar.id}, this)">
+                <img src="${avatar.imageUrl}" alt="${avatar.name}">
+                <span class="avatar-item-name">${avatar.name}</span>
+            </div>
+        `).join('');
+    } catch (error) {
+        grid.innerHTML = '<div class="avatar-loading">Error al cargar avatares</div>';
+    }
+}
+
+window.seleccionarAvatar = function(avatarId, elemento) {
+    document.querySelectorAll('.avatar-item').forEach(item => item.classList.remove('selected'));
+    elemento.classList.add('selected');
+    avatarSeleccionado = avatarId;
+};
+
+function _inicializarFileInputAvatarPerfil() {
+    const fileInput = document.getElementById('avatarFileInput');
+    if (!fileInput || fileInput._listenerAttached) return;
+    fileInput._listenerAttached = true;
+
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const errorEl = document.getElementById('avatarError');
+
+        if (!file.type.startsWith('image/')) {
+            errorEl.textContent = 'Solo se permiten archivos de imagen (JPG, PNG, WEBP)';
+            errorEl.style.display = 'block';
+            this.value = '';
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            errorEl.textContent = 'La imagen no puede superar los 5MB';
+            errorEl.style.display = 'block';
+            this.value = '';
+            return;
+        }
+
+        errorEl.style.display = 'none';
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('avatarPreview');
+            const img = document.getElementById('avatarPreviewImg');
+            img.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+window.guardarAvatar = async function() {
+    const errorEl = document.getElementById('avatarError');
+    errorEl.style.display = 'none';
+
+    const btn    = document.getElementById('btnGuardarAvatar');
+    const texto  = document.getElementById('btnGuardarAvatarTexto');
+    const loader = document.getElementById('btnGuardarAvatarLoader');
+
+    btn.disabled = true;
+    texto.style.display  = 'none';
+    loader.style.display = 'inline-block';
+
+    try {
+        const token = localStorage.getItem('token');
+        let response;
+
+        if (avatarCategoriaActual === 'predefinidos') {
+            if (!avatarSeleccionado) throw new Error('Seleccioná un avatar');
+            response = await fetch(`${CONFIG.API_URL}/users/me/avatar/${avatarSeleccionado}`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+        } else {
+            const fileInput = document.getElementById('avatarFileInput');
+            const file = fileInput.files[0];
+            if (!file) throw new Error('Seleccioná una imagen');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            response = await fetch(`${CONFIG.API_URL}/users/me/avatar/upload`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData
+            });
+        }
+
+        const data = await response.json();
+
+        if (response.ok) {
+            // Foto en Mi Sala
+            const avatarContainer = document.getElementById('perfilAvatar');
+            if (avatarContainer) avatarContainer.innerHTML = `<img src="${data.avatarUrl}" alt="Avatar" class="avatar-img">`;
+
+            // Y en el header del dashboard, si está presente
+            const headerAvatar = document.getElementById('headerAvatar');
+            if (headerAvatar) headerAvatar.innerHTML = `<img src="${data.avatarUrl}" alt="Avatar" class="avatar-img">`;
+
+            window.cerrarSelectorAvatar();
+            if (typeof showToast === 'function') {
+                showToast('success', data.message || 'Avatar actualizado');
+            }
+        } else {
+            throw new Error(data.message || 'Error al guardar avatar');
+        }
+    } catch (error) {
+        errorEl.textContent = error.message;
+        errorEl.style.display = 'block';
+    } finally {
+        btn.disabled = false;
+        texto.style.display  = 'inline';
+        loader.style.display = 'none';
+    }
+};
+
+// ==============================================
 // CERRAR EDICIÓN AL CLICKEAR AFUERA — "Mis gustos o
 // preferencias" (Favorita/VistaCine/NoMeCanso/NoLaBanco,
 // Películas y Series). Un click en cualquier parte de la

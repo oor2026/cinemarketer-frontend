@@ -102,8 +102,8 @@
             display: flex; flex-direction: column; align-items: center;
         }
         .cine-avatar-wrap { position: relative; width: 130px; height: 130px; margin-bottom: 1rem; }
-        .cine-avatar-glow { position: absolute; inset: -12px; border-radius: 50%; background: radial-gradient(circle, rgba(var(--cine-accent-rgb),0.32), transparent 70%); filter: blur(5px); }
-        .cine-avatar-glow ~ .perfil-avatar { position: relative; width: 130px; height: 130px; border-radius: 50%; overflow: hidden; border: 3px solid var(--cine-accent); }
+                .cine-avatar-glow { position: absolute; inset: -12px; border-radius: 50%; background: radial-gradient(circle, rgba(var(--cine-section-accent-rgb),0.32), transparent 70%); filter: blur(5px); }
+        .cine-avatar-glow ~ .perfil-avatar { position: relative; width: 130px; height: 130px; border-radius: 50%; overflow: hidden; border: 3px solid var(--cine-section-accent); }
         .cine-level { display: inline-flex; align-items: center; gap: 6px; font-size: 0.92rem; font-weight: 600; color: #ffb84d; background: rgba(255,184,77,0.14); border: 1px solid rgba(255,184,77,0.35); border-radius: 24px; padding: 6px 14px; margin-bottom: 1.2rem; }
 
         .cine-ranking-trivia {
@@ -389,6 +389,10 @@
         <div class="cine-margin">
             <div class="cine-avatar-wrap">
                 <div class="cine-avatar-glow"></div>
+                <button class="btn-change-avatar" onclick="window.abrirSelectorAvatar()" title="Cambiar foto de perfil"
+                        style="position:absolute; bottom:2px; right:2px; z-index:3;">
+                    <i class="fas fa-camera"></i>
+                </button>
                 <div class="perfil-avatar" id="perfilAvatar">
                     <i class="fas fa-user-circle"></i>
                 </div>
@@ -814,6 +818,47 @@
 <div class="totem-vineta-overlay" id="totemVinetaOverlay" onclick="window._cerrarTotemVineta()"></div>
 <div class="totem-vineta" id="totemVinetaBox" onclick="event.stopPropagation()">
     <p id="totemVinetaTexto" style="margin:0;"></p>
+</div>
+
+<!-- MODAL SELECTOR DE AVATAR — mismo modal que Configuración
+     (mi-cuenta.css ya está cargado globalmente vía dashboard.html,
+     así que estas clases ya tienen estilo sin agregar nada acá). -->
+<div id="modalSelectorAvatar" class="modal-edicion" style="display:none;">
+    <div class="modal-edicion-overlay" onclick="window.cerrarSelectorAvatar()"></div>
+    <div class="modal-edicion-caja modal-avatar-caja">
+        <div class="modal-edicion-header">
+            <h3>🎨 Elegí tu avatar</h3>
+            <button class="modal-edicion-cerrar" onclick="window.cerrarSelectorAvatar()">×</button>
+        </div>
+        <div class="modal-edicion-body">
+            <div class="avatar-tabs">
+                <button class="avatar-tab active" onclick="window.cambiarCategoriaAvatar('predefinidos', this)">Predefinidos</button>
+                <button class="avatar-tab" onclick="window.cambiarCategoriaAvatar('personalizado', this)">Subir propio</button>
+            </div>
+            <div id="avatarPredefinidos" class="avatar-grid">
+                <div class="avatar-loading">Cargando avatares...</div>
+            </div>
+            <div id="avatarPersonalizado" style="display:none;">
+                <div class="avatar-upload-area" onclick="document.getElementById('avatarFileInput').click()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Hacé clic para subir una imagen</p>
+                    <small>JPG, PNG o WEBP — máx. 5MB</small>
+                </div>
+                <input type="file" id="avatarFileInput" accept="image/*" style="display:none;">
+                <div id="avatarPreview" class="avatar-preview" style="display:none;">
+                    <img id="avatarPreviewImg" src="" alt="Preview">
+                </div>
+            </div>
+            <p id="avatarError" class="modal-edicion-error" style="display:none;"></p>
+        </div>
+        <div class="modal-edicion-footer">
+            <button class="btn-cancelar-edicion" onclick="window.cerrarSelectorAvatar()">Cancelar</button>
+            <button class="btn-guardar-edicion" id="btnGuardarAvatar" onclick="window.guardarAvatar()">
+                <span id="btnGuardarAvatarTexto">Guardar</span>
+                <i id="btnGuardarAvatarLoader" class="fas fa-spinner fa-spin" style="display:none;"></i>
+            </button>
+        </div>
+    </div>
 </div>
 
 <div id="modalEditarBio" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
