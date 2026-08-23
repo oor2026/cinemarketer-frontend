@@ -2665,7 +2665,6 @@ window._abrirVinetaComentarioSerie = function(i) {
 };
 
 window._abrirTotemVineta = function() {
-    if (!window.matchMedia('(max-width: 768px)').matches) return;
     if (!window._adnGeneroActual) return;
 
     const overlay = document.getElementById('totemVinetaOverlay');
