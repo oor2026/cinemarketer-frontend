@@ -14,8 +14,7 @@ window.loadProfile = async function() {
     try {
         const profile = await API.getProfile();
 
-        document.getElementById('userName').textContent         = profile.name || '';
-        document.getElementById('userFullName').textContent     = profile.name  || '—';
+                document.getElementById('userFullName').textContent     = profile.name  || '—';
         document.getElementById('userEmail').textContent        = profile.email || '';
         document.getElementById('userDni').textContent          = profile.dni   || '—';
         document.getElementById('userPhone').textContent        = profile.phone || '—';
@@ -58,10 +57,15 @@ window.loadProfile = async function() {
         window._perfilData  = profile;
         cargarAvatarYNivel(profile);
 
-        // Guardar ID para perfil público
-        if (profile.id) localStorage.setItem('userId', profile.id);
+                // Guardar ID para perfil público
+                if (profile.id) localStorage.setItem('userId', profile.id);
 
-        // Resetear cache y cargar Mi red
+                // Configuración de cuenta (privacidad, push, bloqueados) — antes
+                // se cargaba solo al abrir el modal; ahora es sección fija, se
+                // carga siempre al entrar a la página.
+                window._inicializarConfiguracionCuenta();
+
+                // Detectar si es cuenta Google y ajustar campo contraseña
         _siguiendoCache = [];
         _seguidoresCache = [];
         _redTab = 'siguiendo';
@@ -700,10 +704,7 @@ window.guardarEdicion = async function() {
             if (campoActual === 'sexo') {
                 valorDisplay = valor === 'M' ? 'Masculino' : valor === 'F' ? 'Femenino' : 'Otro';
             }
-            document.getElementById(config.spanId).textContent = valorDisplay;
-            if (campoActual === 'name') {
-                document.getElementById('userName').textContent = valor;
-            }
+                        document.getElementById(config.spanId).textContent = valorDisplay;
             // Si cambió la provincia, blanquear localidad
             if (campoActual === 'provincia') {
                 document.getElementById('userLocalidad').textContent = '—';
@@ -1584,11 +1585,7 @@ window.verMiSala = function() {
 // ==============================================
 let _perfilEsPrivado = false;
 
-window.abrirConfiguracion = async function() {
-    const modal = document.getElementById('modalConfiguracion');
-    modal.style.display = 'flex';
-    document.body.classList.add('modal-open');
-
+window._inicializarConfiguracionCuenta = async function() {
     const token = localStorage.getItem('token');
 
     // Cargar estado actual de privacidad
@@ -1660,11 +1657,6 @@ window.desbloquearDesdeConfig = async function(userId, btn) {
         btn.textContent = 'Desbloquear';
         alert('Error al desbloquear. Intentá de nuevo.');
     }
-};
-
-window.cerrarConfiguracion = function() {
-    document.getElementById('modalConfiguracion').style.display = 'none';
-    document.body.classList.remove('modal-open');
 };
 
 function _actualizarTogglePrivacidad() {

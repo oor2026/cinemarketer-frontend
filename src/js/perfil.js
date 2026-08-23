@@ -3233,22 +3233,10 @@ window._abrirModalGeneroAdn = async function(generoId, generoNombre, tipo, emoji
                     return;
                 }
 
-                if (window.matchMedia('(max-width: 768px)').matches) {
-                    window._pintarMazoGeneroAdn(items, tipo, carrusel);
-                } else {
-                    carrusel.classList.remove('mazo-mobile');
-                                   carrusel.innerHTML = items.map(item => {
-                                       const id = tipo === 'series' ? item.seriesId : item.movieId;
-                                       const abrir = tipo === 'series'
-                                           ? `window._cerrarModalGeneroAdn(); window._abrirSerieDesdePerfil(${id})`
-                                           : `window._cerrarModalGeneroAdn(); window._abrirPeliculaDesdePerfil(${id})`;
-                                       const poster = item.poster
-                                           ? `<img src="https://image.tmdb.org/t/p/w185${item.poster}" alt="" style="width:100%;height:100%;object-fit:cover;">`
-                                           : '';
-                                       return `<div class="modal-genero-adn-card" onclick="${abrir}">${poster}</div>`;
-                                   }).join('');
-                }
-            } catch (e) {
+                                // Mazo apilado en ambos casos — desktop navega con las
+                                // flechas, mobile con swipe, pero el look es el mismo.
+                                window._pintarMazoGeneroAdn(items, tipo, carrusel);
+                            } catch (e) {
                 carrusel.classList.remove('mazo-mobile');
                 carrusel.innerHTML = '<p style="padding:1rem; color:#999; font-size:0.85rem;">No se pudo cargar. Probá de nuevo.</p>';
             }
@@ -3260,10 +3248,19 @@ window._abrirModalGeneroAdn = async function(generoId, generoNombre, tipo, emoji
         // depende de _inicializarSwipeStacks (esa está atada a los 8
         // wrappers fijos de "Mi actividad"; acá la cantidad es variable
         // según el género).
-        window._pintarMazoGeneroAdn = function(items, tipo, carrusel) {
-            carrusel.classList.add('mazo-mobile');
-            let indice = 0;
-            const N = items.length;
+                window._pintarMazoGeneroAdn = function(items, tipo, carrusel) {
+                    carrusel.classList.add('mazo-mobile');
+                    let indice = 0;
+                    const N = items.length;
+
+                    // Las flechas de desktop (fuera de esta función) llaman a
+                    // window._moverCarruselGeneroAdn(direccion) — se reasigna acá
+                    // adentro, con closure sobre indice/pintar/N, mismo criterio
+                    // que ya usa el swipe táctil un poco más abajo.
+                    window._moverCarruselGeneroAdn = function(direccion) {
+                        indice = direccion < 0 ? (indice - 1 + N) % N : (indice + 1) % N;
+                        pintar();
+                    };
 
             let tituloMazo = document.getElementById('modalGeneroAdnMazoTitulo');
             if (tituloMazo) tituloMazo.remove();
@@ -3328,12 +3325,6 @@ window._cerrarModalGeneroAdn = function() {
     const modal = document.getElementById('modalGeneroAdn');
     if (modal) modal.style.display = 'none';
     document.body.style.overflow = '';
-};
-
-window._moverCarruselGeneroAdn = function(direccion) {
-    const carrusel = document.getElementById('modalGeneroAdnCarrusel');
-    if (!carrusel) return;
-    carrusel.scrollBy({ left: direccion * 340, behavior: 'smooth' });
 };
 
 window._actualizarVisibilidadRankingTrivia = function() {
