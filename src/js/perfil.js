@@ -3238,17 +3238,16 @@ window._abrirModalGeneroAdn = async function(generoId, generoNombre, tipo, emoji
                     window._pintarMazoGeneroAdn(items, tipo, carrusel);
                 } else {
                     carrusel.classList.remove('mazo-mobile');
-                    carrusel.innerHTML = items.map(item => {
-                        const id = tipo === 'series' ? item.seriesId : item.movieId;
-                        const abrir = tipo === 'series' ? `window._abrirSerieDesdePerfil(${id})` : `window._abrirPeliculaDesdePerfil(${id})`;
-                        const poster = item.poster
-                            ? `<img src="https://image.tmdb.org/t/p/w185${item.poster}" alt="${item.titulo || ''}" style="width:100%;height:100%;object-fit:cover;">`
-                            : '';
-                        return `<div onclick="${abrir}" style="flex:0 0 100px; scroll-snap-align:start; cursor:pointer;">
-                            <div style="width:100px; height:150px; border-radius:10px; overflow:hidden; background:#eee;">${poster}</div>
-                            <p style="margin:0.4rem 0 0; font-size:0.72rem; color:#333; line-height:1.3;">${item.titulo || ''}</p>
-                        </div>`;
-                    }).join('');
+                                   carrusel.innerHTML = items.map(item => {
+                                       const id = tipo === 'series' ? item.seriesId : item.movieId;
+                                       const abrir = tipo === 'series'
+                                           ? `window._cerrarModalGeneroAdn(); window._abrirSerieDesdePerfil(${id})`
+                                           : `window._cerrarModalGeneroAdn(); window._abrirPeliculaDesdePerfil(${id})`;
+                                       const poster = item.poster
+                                           ? `<img src="https://image.tmdb.org/t/p/w185${item.poster}" alt="" style="width:100%;height:100%;object-fit:cover;">`
+                                           : '';
+                                       return `<div class="modal-genero-adn-card" onclick="${abrir}">${poster}</div>`;
+                                   }).join('');
                 }
             } catch (e) {
                 carrusel.classList.remove('mazo-mobile');
@@ -3277,14 +3276,16 @@ window._abrirModalGeneroAdn = async function(generoId, generoNombre, tipo, emoji
             // mismo punto vía CSS), y lo único que cambia al navegar es su
             // transform/opacity/z-index — igual que _renderStackPosiciones en
             // "Mi actividad", no se recrea el HTML en cada swipe.
-            carrusel.innerHTML = items.map(item => {
-                const id = tipo === 'series' ? item.seriesId : item.movieId;
-                const abrir = tipo === 'series' ? `window._abrirSerieDesdePerfil(${id})` : `window._abrirPeliculaDesdePerfil(${id})`;
-                const poster = item.poster
-                    ? `<img src="https://image.tmdb.org/t/p/w185${item.poster}" alt="" style="width:100%;height:100%;object-fit:cover;">`
-                    : '';
-                return `<div class="modal-genero-adn-card" onclick="${abrir}">${poster}</div>`;
-            }).join('');
+                carrusel.innerHTML = items.map(item => {
+                    const id = tipo === 'series' ? item.seriesId : item.movieId;
+                    const abrir = tipo === 'series'
+                        ? `window._cerrarModalGeneroAdn(); window._abrirSerieDesdePerfil(${id})`
+                        : `window._cerrarModalGeneroAdn(); window._abrirPeliculaDesdePerfil(${id})`;
+                    const poster = item.poster
+                        ? `<img src="https://image.tmdb.org/t/p/w185${item.poster}" alt="" style="width:100%;height:100%;object-fit:cover;">`
+                        : '';
+                    return `<div class="modal-genero-adn-card" onclick="${abrir}">${poster}</div>`;
+                }).join('');
 
             const cards = carrusel.querySelectorAll('.modal-genero-adn-card');
 
