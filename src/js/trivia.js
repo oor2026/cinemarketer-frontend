@@ -433,14 +433,14 @@ function renderRankingTrivia(ranking) {
                     <span class="ranking-aciertos">Aciertos</span>
                     <span class="ranking-tiempo">Tiempo</span>
                 </div>
-                ${ranking.map(r => `
-                    <div class="ranking-fila${r.esUsuarioActual ? ' yo' : ''}">
-                        <span class="ranking-pos${r.posicion <= 3 ? ' top3' : ''}">#${r.posicion}</span>
-                        <span>${r.nombre}${r.esUsuarioActual ? ' (vos)' : ''}</span>
-                        <span class="ranking-aciertos">${r.aciertos}</span>
-                        <span class="ranking-tiempo">${formatTiempo(r.tiempoTotalSegundos)}</span>
-                    </div>
-                `).join('')}
+                    ${ranking.map(r => `
+                        <div class="ranking-fila${r.esUsuarioActual ? ' yo' : ''}">
+                            <span class="ranking-pos${r.posicion <= 3 ? ' top3' : ''}">#${r.posicion}</span>
+                            <span style="cursor:pointer;" onclick="event.stopPropagation(); window.cerrarRankingTrivia(); window.abrirPerfilUsuario(${r.userId})">${r.nombre}${r.esUsuarioActual ? ' (vos)' : ''}</span>
+                            <span class="ranking-aciertos">${r.aciertos}</span>
+                            <span class="ranking-tiempo">${formatTiempo(r.tiempoTotalSegundos)}</span>
+                        </div>
+                    `).join('')}
             </div>
         `;
 }

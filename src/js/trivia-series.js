@@ -454,7 +454,7 @@ function renderRankingTriviaSeries(ranking) {
                 ${ranking.map(r => `
                     <div class="ranking-fila${r.esUsuarioActual ? ' yo' : ''}">
                         <span class="ranking-pos${r.posicion <= 3 ? ' top3' : ''}">#${r.posicion}</span>
-                        <span>${r.nombre}${r.esUsuarioActual ? ' (vos)' : ''}</span>
+                        <span style="cursor:pointer;" onclick="event.stopPropagation(); window.cerrarRankingTriviaSeries(); window.abrirPerfilUsuario(${r.userId})">${r.nombre}${r.esUsuarioActual ? ' (vos)' : ''}</span>
                         <span class="ranking-aciertos">${r.aciertos}</span>
                         <span class="ranking-tiempo">${formatTiempo(r.tiempoTotalSegundos)}</span>
                     </div>
