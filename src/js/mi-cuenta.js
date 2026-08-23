@@ -1961,17 +1961,19 @@ function _renderProgresoBody(nivel, p) {
     let emoji  = '';
     let items  = '';
 
-    if (nivel === 'AMATEUR') {
-        titulo = 'Colaborador'; emoji = '🔵';
-        const emailOk     = p.emailVerified || !!p.googleId;
-        const perfilOk    = !!(p.name && p.dni && p.phone && p.avatarUrl && p.provincia && p.localidad);
-        const peliculasOk = (p.reviewsCount || 0) >= 100;
-        const comentOk    = (p.commentsCount || 0) >= 50;
-        items = _item(emailOk,     'Email verificado') +
-                _item(perfilOk,    'Perfil completo al 100%') +
-                _item(peliculasOk, '100 películas únicas votadas') +
-                _item(comentOk,    '50 comentarios en películas distintas');
-    }
+        if (nivel === 'AMATEUR') {
+            titulo = 'Colaborador'; emoji = '🔵';
+            const emailOk     = p.emailVerified || !!p.googleId;
+            const perfilOk    = !!(p.name && p.dni && p.phone && p.avatarUrl && p.provincia && p.localidad);
+            const peliculasOk = (p.reviewsCount || 0) >= 100;
+            const comentOk    = (p.commentsUniqueMoviesCount || 0) >= 50;
+            const bioOk       = !!(p.bioTitulo && p.bioTexto);
+            items = _item(emailOk,     'Email verificado') +
+                    _item(perfilOk,    'Perfil completo al 100%') +
+                    _item(peliculasOk, '100 películas únicas votadas') +
+                    _item(comentOk,    '50 comentarios en películas distintas') +
+                    _item(bioOk,       'Bio completada en Mi Sala');
+        }
 
     if (nivel === 'COLABORADOR') {
                 titulo = 'Crítico'; emoji = '🟣';
