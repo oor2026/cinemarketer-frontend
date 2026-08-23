@@ -792,6 +792,36 @@ window.subirBanner = async function(input) {
             'Soap': 'Culebrón', 'Kids': 'Osito', 'News': 'Flash', 'Reality': 'Chisme', 'Talk': 'Charla'
         };
 
+        const TOTEM_FRASE = {
+            'Acción': '¡Bang! ¿Viste esa explosión?',
+            'Aventura': '¿Nos vamos de aventura?',
+            'Animación': '¡Dibujame una sonrisa!',
+            'Comedia': 'Jajaja, ¿ya te reíste hoy?',
+            'Crimen': 'Shh... estoy investigando',
+            'Documental': 'Todo dato es un tesoro',
+            'Drama': 'Traeme un pañuelo, por favor',
+            'Familia': '¿Vemos algo todos juntos?',
+            'Fantasía': '¡Abracadabra, patas de...?!',
+            'Historia': 'Antes todo era mejor... ¿o no?',
+            'Terror': '¡Buu! ¿Te asusté?',
+            'Música': 'Subile el volumen a la vida',
+            'Misterio': '¿Quién lo hizo? Yo ya lo sé',
+            'Romance': 'Flechazo asegurado 💘',
+            'Ciencia ficción': 'Houston, tenemos una peli',
+            'Película de TV': 'Un capítulo más y ya',
+            'Suspense': 'No mires atrás...',
+            'Bélica': 'A las trincheras, soldado',
+            'Western': 'En este pueblo mando yo 🤠',
+            'Action & Adventure': 'Misión: maratonear todo hoy',
+            'Sci-Fi & Fantasy': 'Cruzá el portal conmigo',
+            'War & Politics': 'Un tema, dos bandos, mil opiniones',
+            'Soap': '¡Qué draaama, contame todo!',
+            'Kids': '¿Jugamos un rato?',
+            'News': 'Titular del día: viste todo, ¿no',
+            'Reality': '¿Viste lo que pasó ayer?',
+            'Talk': 'Hablemos, tengo mucho para decir'
+        };
+
                 const GENERO_RASGO = {
                     'Acción': { adj: 'audaz', sust: 'acción' },
                     'Aventura': { adj: 'aventurero', sust: 'aventura' },
@@ -861,13 +891,16 @@ window.subirBanner = async function(input) {
                                                         document.getElementById('perfilAdnTitular').textContent = datos.length > 0
                                                             ? _adnGenerarTitular(datos)
                                                             : 'Aún tengo pendiente revelar mi verdadero yo...';
-                                            const totemEl = document.getElementById('perfilAdnTotemNombre');
-                                            if (totemEl) {
-                                                totemEl.textContent = datos.length > 0
-                                                    ? (NOMBRE_TOTEM_POR_GENERO[datos[0].genero] || datos[0].genero)
-                                                    : '';
-                                            }
-                                emojiEl.textContent = datos.length > 0 ? (EMOJI_POR_GENERO[datos[0].genero] || '🎞️') : '🎞️';
+                                                                            const totemEl = document.getElementById('perfilAdnTotemNombre');
+                                                                                        if (totemEl) {
+                                                                                            totemEl.textContent = datos.length > 0
+                                                                                                ? (NOMBRE_TOTEM_POR_GENERO[datos[0].genero] || datos[0].genero)
+                                                                                                : '';
+                                                                                        }
+                                                                            window._adnGeneroActual = datos.length > 0 ? datos[0].genero : null;
+                                                                            emojiEl.textContent = datos.length > 0 ? (EMOJI_POR_GENERO[datos[0].genero] || '🎞️') : '🎞️';
+                                                                            emojiEl.style.cursor = 'pointer';
+                                                                            emojiEl.onclick = window._abrirTotemVineta;
 
                                                                         const legend = document.getElementById('perfilAdnLegend');
                                                                         legend.innerHTML = '';
@@ -2629,6 +2662,39 @@ window._abrirVinetaComentarioSerie = function(i) {
     requestAnimationFrame(() => box.classList.add('show'));
 
     window.addEventListener('scroll', window._cerrarVinetaPorScroll, { passive: true });
+};
+
+window._abrirTotemVineta = function() {
+    if (!window.matchMedia('(max-width: 768px)').matches) return;
+    if (!window._adnGeneroActual) return;
+
+    const overlay = document.getElementById('totemVinetaOverlay');
+    const box = document.getElementById('totemVinetaBox');
+    const textoEl = document.getElementById('totemVinetaTexto');
+    const totemEl = document.getElementById('perfilAdnEmoji');
+    if (!overlay || !box || !textoEl || !totemEl) return;
+
+    textoEl.textContent = TOTEM_FRASE[window._adnGeneroActual] || '¡Hola! 👋';
+
+        const rect = totemEl.getBoundingClientRect();
+        const maxLeft = window.innerWidth - 160 - 12;
+        box.style.left = Math.min(Math.max(rect.left, 12), maxLeft) + window.scrollX + 'px';
+        box.style.top  = (rect.top - 60) + window.scrollY + 'px';
+
+    overlay.style.display = 'block';
+    box.style.display = 'block';
+    requestAnimationFrame(() => box.classList.add('show'));
+
+    window.addEventListener('scroll', window._cerrarTotemVineta, { passive: true });
+};
+
+window._cerrarTotemVineta = function() {
+    const overlay = document.getElementById('totemVinetaOverlay');
+    const box = document.getElementById('totemVinetaBox');
+    if (!overlay || !box) return;
+    box.classList.remove('show');
+    setTimeout(() => { overlay.style.display = 'none'; box.style.display = 'none'; }, 200);
+    window.removeEventListener('scroll', window._cerrarTotemVineta);
 };
 
 window._abrirSerieDesdeComentario = async function(seriesId, commentId, esSpoiler) {
