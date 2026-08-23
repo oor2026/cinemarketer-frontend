@@ -4237,29 +4237,50 @@ function cerrarFiltrosModal() {
     const sheet = document.getElementById('filtrosModalSheet');
     if (overlay) {
         overlay.classList.remove('active', 'force-show');
+        overlay.style.display = 'none';
     }
     if (sheet) {
         sheet.classList.remove('active', 'force-show');
+        sheet.style.display = 'none';
     }
     document.body.style.overflow = '';
 }
 
 function aplicarFiltrosMobile() {
-    document.getElementById('busquedaInput').value     = document.getElementById('busquedaInputMobile').value;
-    document.getElementById('filtroAnio').value        = document.getElementById('filtroAnioMobile').value;
-    document.getElementById('filtroDuracion').value    = document.getElementById('filtroDuracionMobile').value;
+    // Todo el bloque de sincronización va en un try/catch — si CUALQUIER
+    // getElementById de acá adentro devuelve null y tira error, antes
+    // cortaba la función entera y nunca se llegaba a cerrarFiltrosModal(),
+    // dejando document.body.style.overflow='hidden' pegado para siempre
+    // (pantalla congelada, pase lo que pase con la búsqueda después).
+    try {
+        const busquedaInput = document.getElementById('busquedaInput');
+        const busquedaInputMobile = document.getElementById('busquedaInputMobile');
+        if (busquedaInput && busquedaInputMobile) busquedaInput.value = busquedaInputMobile.value;
 
-    const temporadasMobile = document.getElementById('filtroTemporadasMobile');
-    const temporadasDesktop = document.getElementById('filtroTemporadas');
-    if (temporadasMobile && temporadasDesktop) temporadasDesktop.value = temporadasMobile.value;
+        const filtroAnio = document.getElementById('filtroAnio');
+        const filtroAnioMobile = document.getElementById('filtroAnioMobile');
+        if (filtroAnio && filtroAnioMobile) filtroAnio.value = filtroAnioMobile.value;
 
-    // Sincronizar director mobile → desktop
-    const directorMobile = document.getElementById('busquedaDirectorMobile');
-    const directorDesktop = document.getElementById('busquedaDirector');
-    if (directorMobile && directorDesktop) {
-        directorDesktop.value = directorMobile.value;
+        const filtroDuracion = document.getElementById('filtroDuracion');
+        const filtroDuracionMobile = document.getElementById('filtroDuracionMobile');
+        if (filtroDuracion && filtroDuracionMobile) filtroDuracion.value = filtroDuracionMobile.value;
+
+        const temporadasMobile = document.getElementById('filtroTemporadasMobile');
+        const temporadasDesktop = document.getElementById('filtroTemporadas');
+        if (temporadasMobile && temporadasDesktop) temporadasDesktop.value = temporadasMobile.value;
+
+        // Sincronizar director mobile → desktop
+        const directorMobile = document.getElementById('busquedaDirectorMobile');
+        const directorDesktop = document.getElementById('busquedaDirector');
+        if (directorMobile && directorDesktop) {
+            directorDesktop.value = directorMobile.value;
+        }
+    } catch (e) {
+        console.error('Error sincronizando filtros mobile→desktop:', e);
     }
 
+    // Fuera del try — se ejecuta SIEMPRE, haya pasado lo que haya pasado
+    // arriba. Es la garantía real de que la pantalla nunca queda trabada.
     cerrarFiltrosModal();
     window.aplicarFiltros();
 }
