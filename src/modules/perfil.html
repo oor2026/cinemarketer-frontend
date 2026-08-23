@@ -180,11 +180,13 @@
             font-size: 0.82rem; color: #333; text-align: center;
         }
 
-        @media (min-width: 769px) {
-            .modal-genero-adn-box { max-width: 680px !important; max-height: 90vh !important; }
+                        @media (min-width: 769px) {
+            /* Mismo mazo apilado que en mobile, solo que más grande
+               (el modal tiene más lugar) y con flechas en vez de swipe. */
+            .modal-genero-adn-box { max-width: 420px !important; max-height: 90vh !important; }
             .modal-genero-adn-nav { display: flex; width: 48px !important; height: 48px !important; }
-            #modalGeneroAdnCarrusel > div { flex: 0 0 150px !important; }
-            #modalGeneroAdnCarrusel > div > div { width: 150px !important; height: 225px !important; }
+            #modalGeneroAdnCarrusel.mazo-mobile { height: 320px !important; }
+            .modal-genero-adn-card { width: 180px !important; height: 270px !important; }
         }
         .cine-stat-icon-compuesto { align-items: center; gap: 2px; }
         .cine-stat-icon-compuesto .fa-user { font-size: 0.78rem; }

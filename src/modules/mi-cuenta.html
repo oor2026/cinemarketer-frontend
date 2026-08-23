@@ -2,24 +2,6 @@
 
     <div class="profile-header">
 
-        <!-- BANNER AZUL -->
-        <div class="welcome-badge">
-            <h1>¡Hola, <span id="userName"></span>!</h1>
-            <div style="display:flex;align-items:center;gap:0.75rem;flex-shrink:0;">
-                <button onclick="window.verMiSala()"
-                        style="background:none;border:1.5px solid rgba(255,255,255,0.6);color:white;padding:0.45rem 1.1rem;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:0.5rem;"
-                        onmouseover="this.style.background='rgba(255,255,255,0.15)'"
-                        onmouseout="this.style.background='none'">
-                    <i class="fas fa-door-open"></i> Ver mi sala
-                </button>
-                <button onclick="window.abrirConfiguracion()"
-                        style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.7);font-size:1.1rem;padding:0.3rem;display:flex;align-items:center;"
-                        title="Configuración de cuenta">
-                    <i class="fas fa-cog"></i>
-                </button>
-            </div>
-        </div>
-
         <!-- PANEL ROJO -->
         <div class="profile-avatar-section">
             <div class="profile-avatar-container">
@@ -297,86 +279,6 @@
 
     </div>
 
-    <!-- MI ACTIVIDAD -->
-    <div class="cuenta-seccion">
-        <h3 class="cuenta-seccion-titulo cuenta-seccion-titulo--rojo"><i class="fas fa-chart-bar"></i> Mi actividad</h3>
-        <div class="historial-tabs-visual">
-            <div class="historial-tab-item">
-                <i class="fas fa-thumbs-up"></i>
-                <span class="historial-tab-numero" id="reviewsCountFormatted">0</span>
-                <span class="historial-tab-label">Votaciones</span>
-            </div>
-            <div class="historial-tab-item">
-                <i class="fas fa-comment"></i>
-                <span class="historial-tab-numero" id="redemptionsCount">0</span>
-                <span class="historial-tab-label">Comentarios</span>
-            </div>
-            <div class="historial-tab-item">
-                <i class="fas fa-paper-plane"></i>
-                <span class="historial-tab-numero" id="recomendadasCount">0</span>
-                <span class="historial-tab-label">Recomendadas</span>
-            </div>
-            <div class="historial-tab-item">
-                <i class="fas fa-star"></i>
-                <span class="historial-tab-numero" id="puntosCount">0</span>
-                <span class="historial-tab-label">Pts merecidos</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- MI RED -->
-    <div class="cuenta-seccion">
-        <h3 class="cuenta-seccion-titulo"><i class="fas fa-users"></i> Mi red</h3>
-        <div class="mi-red-seccion">
-            <div class="mi-red-tabs">
-                <button class="mi-red-tab active" id="tabSiguiendo" onclick="window.switchRedTab('siguiendo')">
-                    Siguiendo (<span id="countSiguiendo">0</span>)
-                </button>
-                <button class="mi-red-tab" id="tabSeguidores" onclick="window.switchRedTab('seguidores')">
-                    Seguidores (<span id="countSeguidores">0</span>)
-                </button>
-            </div>
-            <div id="miRedLista">
-                <div class="mi-red-loading"><i class="fas fa-spinner fa-spin"></i></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MIS PREFERENCIAS -->
-    <div class="cuenta-seccion">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
-            <h3 class="cuenta-seccion-titulo"><i class="fas fa-heart"></i> Mis preferencias</h3>
-            <div style="display:flex;gap:6px;">
-                <button class="mi-lista-switch-btn active" id="btnPrefPeliculas" onclick="window.switchPreferenciasTipo('peliculas')"
-                        style="font-size:0.8rem;font-weight:600;padding:5px 14px;border-radius:20px;border:1px solid #1a3a6b;background:#1a3a6b;color:#fff;cursor:pointer;">
-                    🎬 Películas
-                </button>
-                <button class="mi-lista-switch-btn" id="btnPrefSeries" onclick="window.switchPreferenciasTipo('series')"
-                        style="font-size:0.8rem;font-weight:600;padding:5px 14px;border-radius:20px;border:1px solid #ddd;background:#fff;color:#666;cursor:pointer;">
-                    📺 Series
-                </button>
-            </div>
-        </div>
-        <div class="mi-red-seccion">
-            <div class="mi-red-tabs">
-                <button class="mi-red-tab active" id="tabMiLista" onclick="window.switchListaTab('mi-lista')">
-                    Mi lista (<span id="countMiLista">0</span>)
-                </button>
-                <button class="mi-red-tab" id="tabRecomendaciones" onclick="window.switchListaTab('recomendaciones')">
-                    Recomendaciones (<span id="countRecomendaciones">0</span>)
-                </button>
-            </div>
-            <div id="panelMiLista">
-                <div class="mi-red-vacio">Tu lista de películas guardadas aparecerá acá.</div>
-            </div>
-            <div id="panelRecomendaciones" style="display:none;">
-                <div id="meRecomendaronLista">
-                    <div class="mi-red-loading"><i class="fas fa-spinner fa-spin"></i></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- DATOS PERSONALES -->
     <div class="cuenta-seccion">
         <h3 class="cuenta-seccion-titulo"><i class="fas fa-id-card"></i> Datos personales</h3>
@@ -498,6 +400,84 @@
             <button class="btn-eliminar-cuenta" onclick="window.abrirEliminarCuenta()">
                 <i class="fas fa-trash-alt"></i> Eliminar mi cuenta
             </button>
+        </div>
+    </div>
+
+    <!-- CONFIGURACIÓN DE MI CUENTA -->
+    <div class="cuenta-seccion">
+        <h3 class="cuenta-seccion-titulo"><i class="fas fa-cog"></i> Configuración de mi cuenta:</h3>
+        <div style="border:1px solid #f0f0f0; border-radius:12px; padding:1.25rem; margin-bottom:1rem;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:1rem;">
+                <div>
+                    <p style="margin:0 0 4px; font-size:0.9rem; font-weight:600; color:#333;">Privacidad del perfil</p>
+                    <p style="margin:0; font-size:0.8rem; color:#aaa; line-height:1.5;" id="privacidadDesc">Tu perfil es público. Cualquier usuario puede ver tu contenido.</p>
+                </div>
+                <div style="display:flex; align-items:center; gap:0.5rem; flex-shrink:0;">
+                    <span style="font-size:0.8rem; color:#aaa;" id="privacidadLabel">Público</span>
+                    <div id="togglePrivacidad" onclick="window.togglePrivacidad()"
+                         style="width:44px; height:24px; border-radius:12px; background:#ddd; cursor:pointer; position:relative; transition:background 0.2s;">
+                        <div id="togglePrivacidadDot" style="width:20px; height:20px; border-radius:50%; background:white; position:absolute; top:2px; left:2px; transition:left 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- NOTIFICACIONES PUSH -->
+        <div style="border:1px solid #f0f0f0; border-radius:12px; padding:1.25rem; margin-bottom:1rem;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:1rem;">
+                <div>
+                    <p style="margin:0 0 4px; font-size:0.9rem; font-weight:600; color:#333;">Notificaciones en tu dispositivo</p>
+                    <p style="margin:0; font-size:0.8rem; color:#aaa; line-height:1.5;" id="pushNotifDesc">Activá para recibir avisos de nuevos premios, sorteos y más, aunque no estés en la app.</p>
+                </div>
+                <div style="display:flex; align-items:center; gap:0.5rem; flex-shrink:0;">
+                    <span style="font-size:0.8rem; color:#aaa;" id="pushNotifLabel">Inactivo</span>
+                    <div id="togglePushNotif" onclick="window.togglePushNotificaciones()"
+                         style="width:44px; height:24px; border-radius:12px; background:#ddd; cursor:pointer; position:relative; transition:background 0.2s;">
+                        <div id="togglePushNotifDot" style="width:20px; height:20px; border-radius:50%; background:white; position:absolute; top:2px; left:2px; transition:left 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
+                    </div>
+                </div>
+            </div>
+            <p id="pushNotifBrowserMsg" style="display:none; margin:0.5rem 0 0; font-size:0.75rem; color:#e50914;"></p>
+        </div>
+        <div style="border:1px solid #f0f0f0; border-radius:12px; padding:1.25rem;">
+            <p style="margin:0 0 0.75rem; font-size:0.9rem; font-weight:600; color:#333;">Usuarios bloqueados</p>
+            <div id="configBloqueadosLista" style="max-height:180px; overflow-y:auto; padding-right:2px;">
+                <div style="text-align:center;padding:0.75rem;color:#bbb;font-size:0.82rem;">Cargando...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MIS PREFERENCIAS -->
+    <div class="cuenta-seccion">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
+            <h3 class="cuenta-seccion-titulo"><i class="fas fa-heart"></i> Mis preferencias</h3>
+            <div style="display:flex;gap:6px;">
+                <button class="mi-lista-switch-btn active" id="btnPrefPeliculas" onclick="window.switchPreferenciasTipo('peliculas')"
+                        style="font-size:0.8rem;font-weight:600;padding:5px 14px;border-radius:20px;border:1px solid #1a3a6b;background:#1a3a6b;color:#fff;cursor:pointer;">
+                    🎬 Películas
+                </button>
+                <button class="mi-lista-switch-btn" id="btnPrefSeries" onclick="window.switchPreferenciasTipo('series')"
+                        style="font-size:0.8rem;font-weight:600;padding:5px 14px;border-radius:20px;border:1px solid #ddd;background:#fff;color:#666;cursor:pointer;">
+                    📺 Series
+                </button>
+            </div>
+        </div>
+        <div class="mi-red-seccion">
+            <div class="mi-red-tabs">
+                <button class="mi-red-tab active" id="tabMiLista" onclick="window.switchListaTab('mi-lista')">
+                    Mi lista (<span id="countMiLista">0</span>)
+                </button>
+                <button class="mi-red-tab" id="tabRecomendaciones" onclick="window.switchListaTab('recomendaciones')">
+                    Recomendaciones (<span id="countRecomendaciones">0</span>)
+                </button>
+            </div>
+            <div id="panelMiLista">
+                <div class="mi-red-vacio">Tu lista de películas guardadas aparecerá acá.</div>
+            </div>
+            <div id="panelRecomendaciones" style="display:none;">
+                <div id="meRecomendaronLista">
+                    <div class="mi-red-loading"><i class="fas fa-spinner fa-spin"></i></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -746,55 +726,6 @@
                 <button onclick="window.cerrarModalEliminarRec()" style="padding:0.5rem 1.25rem;border-radius:8px;border:1px solid #ddd;background:white;color:#666;cursor:pointer;font-size:0.9rem;">Cancelar</button>
                 <button onclick="window.confirmarEliminarRec()" style="padding:0.5rem 1.25rem;border-radius:8px;border:none;background:#e50914;color:white;cursor:pointer;font-size:0.9rem;font-weight:600;">Eliminar</button>
             </div>
-        </div>
-    </div>
-
-    <!-- MODAL CONFIGURACIÓN -->
-    <div id="modalConfiguracion" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
-        <div style="background:white; border-radius:16px; padding:2rem; max-width:460px; width:100%;" onclick="event.stopPropagation()">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-                <h3 style="margin:0; font-size:1rem; color:#333;"><i class="fas fa-cog" style="color:#324C89;"></i> Configuración de cuenta</h3>
-                <button onclick="window.cerrarConfiguracion()" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#666;">×</button>
-            </div>
-            <div style="border:1px solid #f0f0f0; border-radius:12px; padding:1.25rem; margin-bottom:1rem;">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:1rem;">
-                    <div>
-                        <p style="margin:0 0 4px; font-size:0.9rem; font-weight:600; color:#333;">Privacidad del perfil</p>
-                        <p style="margin:0; font-size:0.8rem; color:#aaa; line-height:1.5;" id="privacidadDesc">Tu perfil es público. Cualquier usuario puede ver tu contenido.</p>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:0.5rem; flex-shrink:0;">
-                        <span style="font-size:0.8rem; color:#aaa;" id="privacidadLabel">Público</span>
-                        <div id="togglePrivacidad" onclick="window.togglePrivacidad()"
-                             style="width:44px; height:24px; border-radius:12px; background:#ddd; cursor:pointer; position:relative; transition:background 0.2s;">
-                            <div id="togglePrivacidadDot" style="width:20px; height:20px; border-radius:50%; background:white; position:absolute; top:2px; left:2px; transition:left 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- NOTIFICACIONES PUSH -->
-            <div style="border:1px solid #f0f0f0; border-radius:12px; padding:1.25rem; margin-bottom:1rem;">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:1rem;">
-                    <div>
-                        <p style="margin:0 0 4px; font-size:0.9rem; font-weight:600; color:#333;">Notificaciones en tu dispositivo</p>
-                        <p style="margin:0; font-size:0.8rem; color:#aaa; line-height:1.5;" id="pushNotifDesc">Activá para recibir avisos de nuevos premios, sorteos y más, aunque no estés en la app.</p>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:0.5rem; flex-shrink:0;">
-                        <span style="font-size:0.8rem; color:#aaa;" id="pushNotifLabel">Inactivo</span>
-                        <div id="togglePushNotif" onclick="window.togglePushNotificaciones()"
-                             style="width:44px; height:24px; border-radius:12px; background:#ddd; cursor:pointer; position:relative; transition:background 0.2s;">
-                            <div id="togglePushNotifDot" style="width:20px; height:20px; border-radius:50%; background:white; position:absolute; top:2px; left:2px; transition:left 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
-                        </div>
-                    </div>
-                </div>
-                <p id="pushNotifBrowserMsg" style="display:none; margin:0.5rem 0 0; font-size:0.75rem; color:#e50914;"></p>
-            </div>
-            <div style="border:1px solid #f0f0f0; border-radius:12px; padding:1.25rem; margin-bottom:1.5rem;">
-                <p style="margin:0 0 0.75rem; font-size:0.9rem; font-weight:600; color:#333;">Usuarios bloqueados</p>
-                <div id="configBloqueadosLista" style="max-height:180px; overflow-y:auto; padding-right:2px;">
-                    <div style="text-align:center;padding:0.75rem;color:#bbb;font-size:0.82rem;">Cargando...</div>
-                </div>
-            </div>
-            <button onclick="window.cerrarConfiguracion()" style="width:100%; padding:0.7rem; background:#324C89; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer; font-size:0.9rem;">Listo</button>
         </div>
     </div>
 
