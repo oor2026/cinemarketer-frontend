@@ -1079,15 +1079,15 @@
 
             const puedeEditarComent = esPropio && ((Date.now() - new Date(c.createdAt).getTime()) / 1000 / 60) <= 15;
 
-            return `
-            <div class="pub-comentario-item" id="pubComment-${c.id}">
-                <div style="flex-shrink:0;">${avatarHtml}</div>
-                <div style="flex:1;min-width:0;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;">
-                                <span style="display:flex;align-items:center;gap:5px;">
-                                    <span style="font-weight:600;font-size:0.83rem;color:#333;">${c.user?.name || 'Usuario'}</span>
-                                    ${esAutorPub ? `<span style="background:#e50914;color:white;font-size:0.62rem;font-weight:700;padding:1px 7px;border-radius:99px;letter-spacing:0.3px;">AUTOR</span>` : ''}
-                                </span>
+                        return `
+                        <div class="pub-comentario-item" id="pubComment-${c.id}">
+                            <div style="flex-shrink:0;cursor:pointer;" onclick="event.stopPropagation(); window.abrirPerfilUsuario(${c.user?.id})">${avatarHtml}</div>
+                            <div style="flex:1;min-width:0;">
+                                <div style="display:flex;justify-content:space-between;align-items:center;">
+                                            <span style="display:flex;align-items:center;gap:5px;">
+                                                <span style="font-weight:600;font-size:0.83rem;color:#333;cursor:pointer;" onclick="event.stopPropagation(); window.abrirPerfilUsuario(${c.user?.id})">${c.user?.name || 'Usuario'}</span>
+                                                ${esAutorPub ? `<span style="background:#e50914;color:white;font-size:0.62rem;font-weight:700;padding:1px 7px;border-radius:99px;letter-spacing:0.3px;">AUTOR</span>` : ''}
+                                            </span>
                                 ${esPropio
                             ? `<button onclick="window.ocultarComentarioPub(${c.id}, ${pubId})"
                                        style="background:none;border:none;cursor:pointer;color:#ccc;font-size:0.75rem;padding:2px 4px;" title="Ocultar">
