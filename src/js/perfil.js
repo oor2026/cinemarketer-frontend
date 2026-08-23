@@ -876,14 +876,29 @@ window.subirBanner = async function(input) {
                                                                         // siendo hijos directos de #perfilAdnLegend, sin cambios.
                                                                         const esMobile = window.matchMedia('(max-width: 768px)').matches;
                                                                         let paginaActual = null;
+                                                                        // Mismo diccionario que ya usa feed-series.js para los pills
+                                                                        // de género del feed de Series — TMDb no traduce estos al
+                                                                        // español ni pidiéndolo en es-MX, así que hace falta el parche
+                                                                        // acá también, solo para mostrar (el dato crudo en la base no
+                                                                        // se toca). Emoji, tótem y la frase de arriba ya funcionan bien
+                                                                        // con el nombre crudo — solo el texto del pill lo necesitaba.
+                                                                        const TRADUCCIONES_GENERO_SERIE = {
+                                                                            'Kids': 'Infantil',
+                                                                            'Action & Adventure': 'Acción y Aventura',
+                                                                            'Sci-Fi & Fantasy': 'Ciencia Ficción',
+                                                                            'Soap': 'Telenovela',
+                                                                            'Talk': 'Programas',
+                                                                            'War & Politics': 'Bélico'
+                                                                        };
                                                                         datos.forEach((g, i) => {
                                 const hex = '#' + ADN_COLORES[i % ADN_COLORES.length].toString(16).padStart(6, '0');
                                 const emoji = EMOJI_POR_GENERO[g.genero] || '🎞️';
+                                const nombreMostrado = TRADUCCIONES_GENERO_SERIE[g.genero] || g.genero;
                                 const pill = document.createElement('span');
                                 pill.style.cssText = 'display:inline-flex; align-items:center; gap:5px; background:' + hex + '35; border:1px solid ' + hex + '70; border-radius:20px; padding:4px 10px 4px 6px;';
                                 pill.innerHTML =
                                     '<span style="width:18px;height:18px;border-radius:50%;background:' + hex + '25;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">' + emoji + '</span>' +
-                                                                '<span style="font-size:0.78rem;color:var(--cine-text);">' + g.genero + '</span>' +
+                                                                '<span style="font-size:0.78rem;color:var(--cine-text);">' + nombreMostrado + '</span>' +
                                                     '<span style="font-size:0.78rem;font-weight:700;color:' + hex + ';">' + g.porcentaje + '%</span>';
                                                 if (esMobile) {
                                                     if (i % 3 === 0) {
