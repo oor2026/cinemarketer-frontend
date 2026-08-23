@@ -93,6 +93,7 @@ const adminEstadisticas = {
             this.renderizarResumen();
             this.renderizarUsuarios();
             this.renderizarVotos();
+            this.renderizarNoVistas();
             this.renderizarComentarios();
             this.renderizarRecomendaciones();
             this.renderizarPublicaciones();
@@ -307,7 +308,97 @@ const adminEstadisticas = {
                 `;
             },
 
-        formatearFechaCorta: function(fechaIso) {
+                // Renderizar tarjeta de "No la ví" (tabs Total / Películas / Series)
+                // Mismo patrón visual que Votaciones, pero sin like/dislike/aprobación
+                // — acá el dato es puramente cuantitativo: cuántos "no la ví" hay,
+                // y qué contenido acumula más marcas vigentes.
+                renderizarNoVistas: function() {
+                    const nv = this.datos.noVistas;
+                    if (!nv) return;
+
+                    document.getElementById('stats-no-vistas-body').innerHTML = `
+                        <div class="stats-subtabs">
+                            <button class="stats-subtab-btn active" data-subtab="total" onclick="adminEstadisticas.cambiarSubtabNoVistas('total', this)">Total</button>
+                            <button class="stats-subtab-btn" data-subtab="peliculas" onclick="adminEstadisticas.cambiarSubtabNoVistas('peliculas', this)">Películas</button>
+                            <button class="stats-subtab-btn" data-subtab="series" onclick="adminEstadisticas.cambiarSubtabNoVistas('series', this)">Series</button>
+                        </div>
+                        <div id="stats-no-vistas-subtab-total" class="stats-subtab-panel active">
+                            ${this.renderNoVistasTotal(nv)}
+                        </div>
+                        <div id="stats-no-vistas-subtab-peliculas" class="stats-subtab-panel">
+                            ${this.renderNoVistasSeccion(nv.peliculas, '🎬 Top 10 películas no vistas', 'peliculas')}
+                        </div>
+                        <div id="stats-no-vistas-subtab-series" class="stats-subtab-panel">
+                            ${this.renderNoVistasSeccion(nv.series, '📺 Top 10 series no vistas', 'series')}
+                        </div>
+                    `;
+                },
+
+                cambiarSubtabNoVistas: function(tab, btn) {
+                    document.querySelectorAll('#stats-no-vistas-body .stats-subtab-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.querySelectorAll('#stats-no-vistas-body .stats-subtab-panel').forEach(p => p.classList.remove('active'));
+                    document.getElementById('stats-no-vistas-subtab-' + tab).classList.add('active');
+                },
+
+                renderNoVistasTotal: function(nv) {
+                    const t = nv.total;
+                    return `
+                        <div class="stats-hero-numero">${this.formatearNumero(t.totalOmitidas)}</div>
+                        <div class="stats-hero-label">"No la ví" vigentes este período</div>
+
+                        <div class="stats-split-bar">
+                            <div class="fill-peliculas" style="width:${nv.pctPeliculas}%;"></div>
+                            <div class="fill-series" style="width:${nv.pctSeries}%;"></div>
+                        </div>
+                        <div class="stats-split-legend">
+                            <span><span class="dot" style="background:#e50914;"></span>Películas · ${nv.pctPeliculas.toFixed(0)}%</span>
+                            <span><span class="dot" style="background:#324c89;"></span>Series · ${nv.pctSeries.toFixed(0)}%</span>
+                        </div>
+
+                        <div class="stats-kpi-row">
+                            <div class="stats-kpi-card"><div class="kpi-valor">${t.growth >= 0 ? '+' : ''}${t.growth.toFixed(1)}%</div><div class="kpi-label">vs. período anterior</div></div>
+                        </div>
+                    `;
+                },
+
+                renderNoVistasSeccion: function(s, tituloTop, color) {
+                    const acento = color === 'series' ? '#324c89' : '#e50914';
+
+                    // topOmitidas es "estado actual" (sin filtro de fecha) — ver
+                    // AdminStatsController: mide quién sigue marcada como no vista
+                    // HOY, no lo que pasó puntualmente en el período elegido arriba.
+                    const topContent = s.topOmitidas?.map(m =>
+                        `<li><strong>${m.title}</strong>: ${m.total} usuarios la tienen marcada</li>`
+                    ).join('') || '<li>Sin datos</li>';
+
+                    const tendencia = Object.entries(s.dailyTrend || {}).map(([fecha, cantidad]) =>
+                        `<li>${this.formatearFechaCorta(fecha)}: <strong>${cantidad} "no la ví"</strong></li>`
+                    ).join('') || '<li>Sin datos</li>';
+
+                    return `
+                        <div class="stats-hero-numero" style="color:${acento};">${this.formatearNumero(s.totalOmitidas)}</div>
+                        <div class="stats-hero-label">"No la ví" vigentes en este período</div>
+
+                        <div class="stats-votos-cols">
+                            <div class="stats-votos-col-izq">
+                                <div class="stats-top" style="border-top-color:${acento};">
+                                    <h4>${tituloTop}</h4>
+                                    <small style="color:#888;">Estado actual — no depende del filtro de fecha de arriba</small>
+                                    <ul>${topContent}</ul>
+                                </div>
+                            </div>
+                            <div class="stats-votos-col-der">
+                                <div class="stats-top" style="border-top-color:${acento};">
+                                    <h4>📅 Tendencia diaria</h4>
+                                    <ul>${tendencia}</ul>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                },
+
+                formatearFechaCorta: function(fechaIso) {
             const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
             const partes = fechaIso.split('-');
             if (partes.length !== 3) return fechaIso;
