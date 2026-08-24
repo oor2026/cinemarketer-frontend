@@ -126,8 +126,6 @@ async function cargarPerfil(userId) {
                                 renderComentarios(perfil.ultimosComentarios);
                                 renderRecomendadas(perfil.ultimasRecomendadas);
                                 renderRecomendadasSerie(perfil.ultimasRecomendadasSeries);
-                                renderGuardadas(perfil.ultimasGuardadas);
-                                renderGuardadasSerie(perfil.ultimasGuardadasSeries);
 
                                 window._inicializarFadeSpreads();
                                 window._seleccionarCriterioActividad(window._actividadCriterioActual);
@@ -254,10 +252,9 @@ function renderStats(perfil) {
     document.getElementById('perfilSiguiendo').textContent   = perfil.siguiendo || 0;
     document.getElementById('perfilVotaciones').textContent  = perfil.totalVotaciones || 0;
     document.getElementById('perfilComentarios').textContent = perfil.totalComentarios || 0;
-    document.getElementById('perfilRecomendadas').textContent = perfil.totalRecomendadas || 0;
-    document.getElementById('perfilGuardadas').textContent = perfil.totalGuardadas || 0;
+        document.getElementById('perfilRecomendadas').textContent = perfil.totalRecomendadas || 0;
 
-    window._activarStatClickeable('perfilSeguidoresWrap', perfil.seguidores, () => window.abrirModalSeguidores('seguidores'));
+        window._activarStatClickeable('perfilSeguidoresWrap', perfil.seguidores, () => window.abrirModalSeguidores('seguidores'));
     window._activarStatClickeable('perfilSiguiendoWrap', perfil.siguiendo, () => window.abrirModalSeguidores('seguidos'));
 }
 
@@ -1125,8 +1122,7 @@ window.subirBanner = async function(input) {
                                     const grupos = {
                                         votaciones:   ['perfilVotacionesWrapper', 'perfilVotacionesSeriesWrapper'],
                                         comentarios:  ['perfilComentariosList', 'perfilComentariosSeriesList'],
-                                        recomendadas: ['perfilRecomendadasWrapper', 'perfilRecomendadasSeriesWrapper'],
-                                        guardadas:    ['perfilGuardadasWrapper', 'perfilGuardadasSeriesWrapper']
+                                        recomendadas: ['perfilRecomendadasWrapper', 'perfilRecomendadasSeriesWrapper']
                                     };
 
                                     Object.entries(grupos).forEach(([nombre, ids]) => {
@@ -1145,8 +1141,7 @@ window.subirBanner = async function(input) {
                                     const valores = {
                                         Votaciones:   modoSeries ? counts.votacionesSeries   : counts.votacionesPeliculas,
                                         Comentarios:  modoSeries ? counts.comentariosSeries  : counts.comentariosPeliculas,
-                                        Recomendadas: modoSeries ? counts.recomendadasSeries : counts.recomendadasPeliculas,
-                                        Guardadas:    modoSeries ? counts.guardadasSeries    : counts.guardadasPeliculas
+                                        Recomendadas: modoSeries ? counts.recomendadasSeries : counts.recomendadasPeliculas
                                     };
                                     Object.entries(valores).forEach(([nombre, valor]) => {
                                         const el = document.getElementById('cineActividadCount' + nombre);
@@ -3504,168 +3499,6 @@ window._moverStackRecomendadasSeries = function(dir) {
     if (N === 0) return;
     _stackIndiceRecomendadasSeries = (_stackIndiceRecomendadasSeries + dir + N) % N;
     window._renderStackPosicionesRecomendadasSeries();
-};
-
-// ==============================================
-// GUARDADAS (PELÍCULAS)
-// ==============================================
-let _stackGuardadas = [];
-let _stackIndiceGuardadas = 0;
-
-function renderGuardadas(items) {
-    const wrapper = document.getElementById('perfilGuardadasWrapper');
-    if (!wrapper) return;
-
-    if (!items || items.length === 0) {
-        wrapper.innerHTML = '<div class="cine-stack-vacio-wrap"><div class="cine-stack-vacio"></div><p class="cine-stack-vacio-lbl">Sin guardadas aún</p></div>';
-        return;
-    }
-
-    _stackGuardadas = items;
-    _stackIndiceGuardadas = 0;
-
-        wrapper.innerHTML = `
-                                        <p class="cine-stack-eyebrow">GUARDADAS (${window._perfilCounts?.guardadasPeliculas || 0})</p>
-        <div class="cine-stack-area">
-            <button class="cine-stack-nav prev" onclick="window._moverStackGuardadas(-1)"><i class="fas fa-chevron-left"></i></button>
-            <div id="cineStackGuardadasContainer" style="position:relative; width:100%; height:100%;"></div>
-            <button class="cine-stack-nav next" onclick="window._moverStackGuardadas(1)"><i class="fas fa-chevron-right"></i></button>
-        </div>
-        <p class="cine-stack-titulo" id="cineStackGuardadasTitulo"></p>
-    `;
-
-    const cont = document.getElementById('cineStackGuardadasContainer');
-    cont.innerHTML = items.map(g => {
-        const poster = g.posterPath
-            ? `<img src="https://image.tmdb.org/t/p/w185${g.posterPath}" alt="${g.movieTitle || ''}">`
-            : `<div class="placeholder"><i class="fas fa-film"></i></div>`;
-        return `
-        <div class="cine-stack-card" onclick="window._abrirPeliculaDesdePerfil(${g.movieId})">
-            ${poster}
-            <div class="cine-badge-guardada"><i class="fas fa-bookmark"></i></div>
-        </div>`;
-    }).join('');
-
-    window._renderStackPosicionesGuardadas();
-}
-
-window._renderStackPosicionesGuardadas = function() {
-    const cards = document.querySelectorAll('#cineStackGuardadasContainer .cine-stack-card');
-    const N = _stackGuardadas.length;
-    cards.forEach((card, i) => {
-        let diff = i - _stackIndiceGuardadas;
-        if (diff > N / 2) diff -= N;
-        if (diff < -N / 2) diff += N;
-        const offset = (diff >= 0 && diff <= 2) ? diff : -1;
-
-        card.style.pointerEvents = offset === 0 ? 'auto' : 'none';
-
-        if (offset === 0) {
-            card.style.transform = 'translateX(0) translateY(0) scale(1) rotate(0deg)';
-            card.style.opacity = 1; card.style.zIndex = 10;
-        } else if (offset === 1) {
-            card.style.transform = 'translateX(-18px) translateY(10px) scale(0.94) rotate(-3deg)';
-            card.style.opacity = 0.6; card.style.zIndex = 8;
-        } else if (offset === 2) {
-            card.style.transform = 'translateX(-36px) translateY(20px) scale(0.88) rotate(-6deg)';
-            card.style.opacity = 0.3; card.style.zIndex = 7;
-        } else {
-            card.style.transform = 'translateX(260px) translateY(-10px) scale(0.8) rotate(16deg)';
-            card.style.opacity = 0; card.style.zIndex = 5;
-        }
-    });
-    const tituloEl = document.getElementById('cineStackGuardadasTitulo');
-    if (tituloEl && _stackGuardadas[_stackIndiceGuardadas]) {
-        tituloEl.textContent = _stackGuardadas[_stackIndiceGuardadas].movieTitle || '—';
-    }
-};
-
-window._moverStackGuardadas = function(dir) {
-    const N = _stackGuardadas.length;
-    if (N === 0) return;
-    _stackIndiceGuardadas = (_stackIndiceGuardadas + dir + N) % N;
-    window._renderStackPosicionesGuardadas();
-};
-
-// ==============================================
-// GUARDADAS (SERIES)
-// ==============================================
-let _stackGuardadasSeries = [];
-let _stackIndiceGuardadasSeries = 0;
-
-function renderGuardadasSerie(items) {
-    const wrapper = document.getElementById('perfilGuardadasSeriesWrapper');
-    if (!wrapper) return;
-
-    if (!items || items.length === 0) {
-        wrapper.innerHTML = '<div class="cine-stack-vacio-wrap"><div class="cine-stack-vacio cine-stack-vacio--series"></div><p class="cine-stack-vacio-lbl">Sin guardadas aún</p></div>';
-        return;
-    }
-
-    _stackGuardadasSeries = items;
-    _stackIndiceGuardadasSeries = 0;
-
-        wrapper.innerHTML = `
-                                        <p class="cine-stack-eyebrow">GUARDADAS (${window._perfilCounts?.guardadasPeliculas || 0})</p>
-        <div class="cine-stack-area">
-            <button class="cine-stack-nav prev" onclick="window._moverStackGuardadasSeries(-1)"><i class="fas fa-chevron-left"></i></button>
-            <div id="cineStackGuardadasSeriesContainer" style="position:relative; width:100%; height:100%;"></div>
-            <button class="cine-stack-nav next" onclick="window._moverStackGuardadasSeries(1)"><i class="fas fa-chevron-right"></i></button>
-        </div>
-        <p class="cine-stack-titulo" id="cineStackGuardadasSeriesTitulo"></p>
-    `;
-
-    const cont = document.getElementById('cineStackGuardadasSeriesContainer');
-    cont.innerHTML = items.map(g => {
-        const poster = g.posterPath
-            ? `<img src="https://image.tmdb.org/t/p/w185${g.posterPath}" alt="${g.seriesTitle || ''}">`
-            : `<div class="placeholder"><i class="fas fa-film"></i></div>`;
-        return `
-        <div class="cine-stack-card" onclick="window._abrirSerieDesdePerfil(${g.seriesId})">
-            ${poster}
-            <div class="cine-badge-guardada"><i class="fas fa-bookmark"></i></div>
-        </div>`;
-    }).join('');
-
-    window._renderStackPosicionesGuardadasSeries();
-}
-
-window._renderStackPosicionesGuardadasSeries = function() {
-    const cards = document.querySelectorAll('#cineStackGuardadasSeriesContainer .cine-stack-card');
-    const N = _stackGuardadasSeries.length;
-    cards.forEach((card, i) => {
-        let diff = i - _stackIndiceGuardadasSeries;
-        if (diff > N / 2) diff -= N;
-        if (diff < -N / 2) diff += N;
-        const offset = (diff >= 0 && diff <= 2) ? diff : -1;
-
-        card.style.pointerEvents = offset === 0 ? 'auto' : 'none';
-
-        if (offset === 0) {
-            card.style.transform = 'translateX(0) translateY(0) scale(1) rotate(0deg)';
-            card.style.opacity = 1; card.style.zIndex = 10;
-        } else if (offset === 1) {
-            card.style.transform = 'translateX(-18px) translateY(10px) scale(0.94) rotate(-3deg)';
-            card.style.opacity = 0.6; card.style.zIndex = 8;
-        } else if (offset === 2) {
-            card.style.transform = 'translateX(-36px) translateY(20px) scale(0.88) rotate(-6deg)';
-            card.style.opacity = 0.3; card.style.zIndex = 7;
-        } else {
-            card.style.transform = 'translateX(260px) translateY(-10px) scale(0.8) rotate(16deg)';
-            card.style.opacity = 0; card.style.zIndex = 5;
-        }
-    });
-    const tituloEl = document.getElementById('cineStackGuardadasSeriesTitulo');
-    if (tituloEl && _stackGuardadasSeries[_stackIndiceGuardadasSeries]) {
-        tituloEl.textContent = _stackGuardadasSeries[_stackIndiceGuardadasSeries].seriesTitle || '—';
-    }
-};
-
-window._moverStackGuardadasSeries = function(dir) {
-    const N = _stackGuardadasSeries.length;
-    if (N === 0) return;
-    _stackIndiceGuardadasSeries = (_stackIndiceGuardadasSeries + dir + N) % N;
-    window._renderStackPosicionesGuardadasSeries();
 };
 
 // ==============================================
