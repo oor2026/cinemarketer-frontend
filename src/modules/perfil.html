@@ -446,7 +446,6 @@
                         <span class="perfil-stat-inline" onclick="window._irAActividadDesdeMetrica('votaciones')" style="cursor:pointer;"><i class="fas fa-thumbs-up cine-stat-icon"></i><span class="cine-stat-num" id="perfilVotaciones">0</span><span class="cine-stat-lbl">votaciones</span></span>
                         <span class="perfil-stat-inline" onclick="window._irAActividadDesdeMetrica('comentarios')" style="cursor:pointer;"><i class="fas fa-comment cine-stat-icon"></i><span class="cine-stat-num" id="perfilComentarios">0</span><span class="cine-stat-lbl">comentarios</span></span>
                         <span class="perfil-stat-inline" onclick="window._irAActividadDesdeMetrica('recomendadas')" style="cursor:pointer;"><i class="fas fa-envelope cine-stat-icon"></i><span class="cine-stat-num" id="perfilRecomendadas">0</span><span class="cine-stat-lbl">recomendadas</span></span>
-                        <span class="perfil-stat-inline" onclick="window._irAActividadDesdeMetrica('guardadas')" style="cursor:pointer;"><i class="fas fa-bookmark cine-stat-icon"></i><span class="cine-stat-num" id="perfilGuardadas">0</span><span class="cine-stat-lbl">guardadas</span></span>
                         <span class="perfil-stat-inline" id="perfilSeguidoresWrap"><i class="fas fa-users cine-stat-icon cine-stat-icon--flip"></i><span class="cine-stat-num" id="perfilSeguidores">0</span><span class="cine-stat-lbl">seguidores</span></span>
                         <span class="perfil-stat-inline" id="perfilSiguiendoWrap"><span class="cine-stat-icon-compuesto cine-stat-icon"><i class="fas fa-user"></i><i class="fas fa-angles-right"></i></span><span class="cine-stat-num" id="perfilSiguiendo">0</span><span class="cine-stat-lbl">seguidos</span></span>
                         <div class="clickable" id="perfilSeguirWrap" style="display:flex; gap:0.5rem;">
@@ -688,10 +687,6 @@
                         <span class="cine-actividad-menu-lbl">Recomendadas</span>
                         <span class="cine-actividad-menu-count" id="cineActividadCountRecomendadas"></span>
                     </button>
-                    <button class="cine-actividad-menu-item" data-criterio="guardadas" onclick="window._seleccionarCriterioActividad('guardadas')">
-                        <span class="cine-actividad-menu-lbl">Guardadas</span>
-                        <span class="cine-actividad-menu-count" id="cineActividadCountGuardadas"></span>
-                    </button>
                 </div>
                 <div class="cine-actividad-row" style="display:flex; flex-wrap:wrap; gap:2.6rem; margin-left:-40px;">
                     <div id="perfilVotacionesWrapper" style="max-width:200px;">
@@ -712,12 +707,6 @@
                 <div id="perfilRecomendadasSeriesWrapper" style="max-width:200px;">
                     <div class="perfil-loading"><i class="fas fa-spinner fa-spin"></i></div>
                 </div>
-                <div id="perfilGuardadasWrapper" style="max-width:200px;">
-                    <div class="perfil-loading"><i class="fas fa-spinner fa-spin"></i></div>
-                </div>
-                    <div id="perfilGuardadasSeriesWrapper" style="max-width:200px;">
-                        <div class="perfil-loading"><i class="fas fa-spinner fa-spin"></i></div>
-                    </div>
                 </div>
             </div>
 
