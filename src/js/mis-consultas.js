@@ -1,3 +1,465 @@
+window._soporteYaCargado = false;
+
+window.cambiarTabBandeja = function(tab, btn) {
+    document.querySelectorAll('.bandeja-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.bandeja-tab-panel').forEach(p => p.classList.remove('active'));
+
+    const panelId = tab === 'soporte' ? 'bandejaPanelSoporte'
+        : tab === 'mensajes' ? 'bandejaPanelMensajes'
+        : 'bandejaPanelUsuarios';
+    document.getElementById(panelId).classList.add('active');
+
+    if (tab === 'soporte' && !window._soporteYaCargado) {
+        window._soporteYaCargado = true;
+        consultasCargarLista();
+    }
+};
+
+// ==============================================
+// TAB USUARIOS — recomendaciones recibidas, agrupadas por remitente
+// (misma fuente de datos que ya existía: /recommendations/received
+// y /series-recommendations/received; acá solo se agrupan distinto).
+// ==============================================
+window._bandejaGruposUsuarios = [];
+
+window.cargarBandejaUsuarios = async function() {
+    const cont = document.getElementById('bandejaUsuariosLista');
+    cont.innerHTML = '<div class="consultas-loading"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>';
+
+    try {
+        const token = localStorage.getItem('token');
+        const headers = { 'Authorization': `Bearer ${token}` };
+
+        const [resPelRecib, resSerRecib, resPelEnv, resSerEnv] = await Promise.all([
+            fetch(`${CONFIG.API_URL}/recommendations/received`, { headers }),
+            fetch(`${CONFIG.API_URL}/series-recommendations/received`, { headers }),
+            fetch(`${CONFIG.API_URL}/recommendations/sent`, { headers }),
+            fetch(`${CONFIG.API_URL}/series-recommendations/sent`, { headers })
+        ]);
+
+        // Unifica el nombre del campo "la otra persona" sea cual sea la
+        // dirección — recibidas usan sender*, enviadas usan receiver*.
+        const recibidasPel = resPelRecib.ok ? (await resPelRecib.json()).map(r => ({ ...r, tipo: 'pelicula', direccion: 'recibida', otroId: r.senderId, otroNombre: r.senderName, otroAvatar: r.senderAvatarUrl })) : [];
+        const recibidasSer = resSerRecib.ok ? (await resSerRecib.json()).map(r => ({ ...r, tipo: 'serie', direccion: 'recibida', otroId: r.senderId, otroNombre: r.senderName, otroAvatar: r.senderAvatarUrl })) : [];
+        const enviadasPel = resPelEnv.ok ? (await resPelEnv.json()).map(r => ({ ...r, tipo: 'pelicula', direccion: 'enviada', otroId: r.receiverId, otroNombre: r.receiverName, otroAvatar: r.receiverAvatarUrl })) : [];
+        const enviadasSer = resSerEnv.ok ? (await resSerEnv.json()).map(r => ({ ...r, tipo: 'serie', direccion: 'enviada', otroId: r.receiverId, otroNombre: r.receiverName, otroAvatar: r.receiverAvatarUrl })) : [];
+
+        const todas = [...recibidasPel, ...recibidasSer, ...enviadasPel, ...enviadasSer];
+
+        if (todas.length === 0) {
+            cont.innerHTML = `
+                <div class="bandeja-usuarios-vacio">
+                    <i class="fas fa-comments"></i>
+                    <p>Todavía no tenés conversaciones acá.</p>
+                </div>`;
+            return;
+        }
+
+        // Un canal por persona — mezcla enviadas y recibidas del mismo
+        // par de usuarios en un solo grupo, separadas en 2 arrays.
+        const gruposMap = new Map();
+        todas.forEach(item => {
+            const key = item.otroId;
+            if (!gruposMap.has(key)) {
+                gruposMap.set(key, {
+                    otroId: item.otroId,
+                    otroNombre: item.otroNombre,
+                    otroAvatar: item.otroAvatar,
+                    recibidas: [],
+                    enviadas: []
+                });
+            }
+            gruposMap.get(key)[item.direccion === 'recibida' ? 'recibidas' : 'enviadas'].push(item);
+        });
+
+        const grupos = Array.from(gruposMap.values());
+        grupos.forEach(g => {
+            g.recibidas.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            g.enviadas.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        });
+
+        // Ordena la lista por el intercambio más reciente, sea cual sea la dirección.
+        grupos.sort((a, b) => {
+            const ultA = Math.max(a.recibidas[0] ? new Date(a.recibidas[0].createdAt) : 0, a.enviadas[0] ? new Date(a.enviadas[0].createdAt) : 0);
+            const ultB = Math.max(b.recibidas[0] ? new Date(b.recibidas[0].createdAt) : 0, b.enviadas[0] ? new Date(b.enviadas[0].createdAt) : 0);
+            return ultB - ultA;
+        });
+
+        window._bandejaGruposUsuarios = grupos;
+
+        cont.innerHTML = grupos.map((g, i) => {
+            const ultimaRecib = g.recibidas[0];
+            const ultimaEnv = g.enviadas[0];
+            let ultima, direccionTexto;
+            if (ultimaRecib && (!ultimaEnv || new Date(ultimaRecib.createdAt) > new Date(ultimaEnv.createdAt))) {
+                ultima = ultimaRecib; direccionTexto = 'Te recomendó';
+            } else {
+                ultima = ultimaEnv; direccionTexto = 'Le recomendaste';
+            }
+            const titulo = ultima.tipo === 'serie' ? ultima.seriesTitle : ultima.movieTitle;
+            const sinVer = g.recibidas.filter(it => !it.seenAt).length;
+            const avatar = g.otroAvatar
+                ? `<img class="bandeja-usuario-avatar" src="${g.otroAvatar}" alt="">`
+                : `<div class="bandeja-usuario-avatar"></div>`;
+            return `
+                <div class="bandeja-usuario-fila"
+                     onclick="window._clickFilaUsuarioBandeja(${i})"
+                     ontouchstart="window._iniciarLongPressBandeja(${i})"
+                     ontouchend="window._cancelarLongPressBandeja()"
+                     ontouchmove="window._cancelarLongPressBandeja()">
+                    ${avatar}
+                    <div class="bandeja-usuario-info">
+                        <p class="bandeja-usuario-nombre">${g.otroNombre || 'Usuario'}</p>
+                        <p class="bandeja-usuario-preview">${direccionTexto}: ${titulo || ''}</p>
+                    </div>
+                    <div class="bandeja-usuario-meta">
+                        <span class="bandeja-usuario-fecha">${consultasFormatearFecha(ultima.createdAt)}</span>
+                        ${sinVer > 0 ? `<span class="bandeja-usuario-badge">${sinVer}</span>` : ''}
+                    </div>
+                </div>`;
+        }).join('');
+    } catch (e) {
+        cont.innerHTML = '<div class="consultas-vacio">Error al cargar tus mensajes.</div>';
+    }
+};
+
+window.abrirHiloUsuario = function(idx) {
+    const grupo = window._bandejaGruposUsuarios[idx];
+    if (!grupo) return;
+    window._bandejaHiloActual = grupo;
+    window._bandejaSubtabActual = 'recibidas';
+
+    document.getElementById('bandejaUsuariosLista').style.display = 'none';
+    document.getElementById('bandejaHiloUsuario').style.display = 'block';
+
+    document.getElementById('bandejaHiloAvatar').src = grupo.otroAvatar || '';
+    const nombreEl = document.getElementById('bandejaHiloNombre');
+    nombreEl.textContent = grupo.otroNombre || 'Usuario';
+    nombreEl.style.cursor = 'pointer';
+    nombreEl.onclick = () => window.abrirPerfilUsuario(grupo.otroId);
+
+    document.getElementById('bandejaSubtabBtnRecibidas').classList.add('active');
+    document.getElementById('bandejaSubtabBtnEnviadas').classList.remove('active');
+    document.getElementById('btnHiloSeleccionar').style.display = 'flex';
+
+    window._pintarHiloUsuario();
+};
+
+window._cambiarSubtabHilo = function(subtab) {
+    window._bandejaSubtabActual = subtab;
+    document.getElementById('bandejaSubtabBtnRecibidas').classList.toggle('active', subtab === 'recibidas');
+    document.getElementById('bandejaSubtabBtnEnviadas').classList.toggle('active', subtab === 'enviadas');
+
+    // El modo selección solo existe en Recibidas — es lo único que se
+    // puede borrar (no hay endpoint para borrar lo que vos enviaste).
+    if (subtab === 'enviadas' && window._bandejaModoSeleccion) {
+        window._bandejaModoSeleccion = false;
+        window._bandejaSeleccionados.clear();
+        document.getElementById('btnHiloSeleccionar').classList.remove('activo');
+        document.getElementById('bandejaHiloBarraSeleccion').style.display = 'none';
+    }
+    document.getElementById('btnHiloSeleccionar').style.display = subtab === 'recibidas' ? 'flex' : 'none';
+
+    window._pintarHiloUsuario();
+};
+
+window.volverAListaUsuarios = function() {
+    document.getElementById('bandejaHiloUsuario').style.display = 'none';
+    document.getElementById('bandejaUsuariosLista').style.display = 'block';
+    window.cargarBandejaUsuarios(); // refresca por si cambió algo (vistas/calificaciones)
+};
+
+window._bandejaModoSeleccion = false;
+window._bandejaSeleccionados = new Set(); // guarda "tipo-id", ej "pelicula-42"
+
+window._pintarHiloUsuario = function() {
+    const grupo = window._bandejaHiloActual;
+    const cont = document.getElementById('bandejaHiloItems');
+    const esEnviadas = window._bandejaSubtabActual === 'enviadas';
+    const items = esEnviadas ? grupo.enviadas : grupo.recibidas;
+
+    if (items.length === 0) {
+        cont.innerHTML = `<p style="text-align:center;color:#999;font-size:0.85rem;padding:1.5rem 0;">${esEnviadas ? 'Todavía no le recomendaste nada.' : 'Todavía no te recomendó nada.'}</p>`;
+        return;
+    }
+
+    cont.innerHTML = items.map(item => {
+        const esSerie = item.tipo === 'serie';
+        const titulo = esSerie ? item.seriesTitle : item.movieTitle;
+        const poster = esSerie ? item.seriesPosterPath : item.moviePosterPath;
+        const posterHtml = poster
+            ? `<img src="https://image.tmdb.org/t/p/w154${poster}" alt="${titulo || ''}">`
+            : '';
+        const idContenido = esSerie ? item.seriesId : item.movieId;
+
+        let accion;
+        if (esEnviadas) {
+            // Solo lectura — no hay endpoint para que quien envía marque
+            // vista/califique lo suyo, eso lo hace quien lo recibió.
+            if (!item.seenAt) {
+                accion = `<p style="font-size:0.78rem;color:#999;margin:0;">Todavía no la vio</p>`;
+            } else if (!item.rating) {
+                accion = `<p style="font-size:0.78rem;color:#999;margin:0;">La vio, sin calificar</p>`;
+            } else {
+                accion = `<div class="bandeja-hilo-estrellas solo-lectura">${[1,2,3,4,5].map(n =>
+                    `<i class="fas fa-star${n <= item.rating ? ' activa' : ''}"></i>`
+                ).join('')}</div>`;
+            }
+        } else if (!item.seenAt) {
+            accion = `<button class="btn-marcar-vista" onclick="window._marcarVistaBandeja(${item.id}, '${item.tipo}')">Marcar como vista</button>`;
+        } else if (!item.rating) {
+            accion = `<div class="bandeja-hilo-estrellas">${[1,2,3,4,5].map(n =>
+                `<i class="fas fa-star" onclick="window._calificarBandeja(${item.id}, '${item.tipo}', ${n})"></i>`
+            ).join('')}</div>`;
+        } else {
+            accion = `<div class="bandeja-hilo-estrellas solo-lectura">${[1,2,3,4,5].map(n =>
+                `<i class="fas fa-star${n <= item.rating ? ' activa' : ''}"></i>`
+            ).join('')}</div>`;
+        }
+
+        const claveSel = `${item.tipo}-${item.id}`;
+        const checkbox = (!esEnviadas && window._bandejaModoSeleccion)
+            ? `<input type="checkbox" class="bandeja-hilo-checkbox" ${window._bandejaSeleccionados.has(claveSel) ? 'checked' : ''} onchange="window._toggleSeleccionItemBandeja('${claveSel}')">`
+            : '';
+
+        return `
+            <div class="bandeja-hilo-card">
+                ${checkbox}
+                <div class="bandeja-hilo-poster" style="cursor:pointer;" onclick="window._abrirFichaRapidaBandeja(${idContenido}, '${item.tipo}')">${posterHtml}</div>
+                <div class="bandeja-hilo-card-body">
+                    <p class="bandeja-hilo-card-tipo">${esSerie ? '📺 Serie' : '🎬 Película'}</p>
+                    <p class="bandeja-hilo-card-titulo" style="cursor:pointer;" onclick="window._abrirFichaRapidaBandeja(${idContenido}, '${item.tipo}')">${titulo || ''}</p>
+                    <p class="bandeja-hilo-card-fecha">${consultasFormatearFechaHora(item.createdAt)}</p>
+                    ${accion}
+                </div>
+            </div>`;
+    }).join('');
+};
+
+window._toggleSeleccionModoBandeja = function() {
+    window._bandejaModoSeleccion = !window._bandejaModoSeleccion;
+    window._bandejaSeleccionados.clear();
+    document.getElementById('btnHiloSeleccionar').classList.toggle('activo', window._bandejaModoSeleccion);
+    document.getElementById('bandejaHiloBarraSeleccion').style.display = 'none';
+    window._pintarHiloUsuario();
+};
+
+window._toggleSeleccionItemBandeja = function(clave) {
+    if (window._bandejaSeleccionados.has(clave)) {
+        window._bandejaSeleccionados.delete(clave);
+    } else {
+        window._bandejaSeleccionados.add(clave);
+    }
+    const n = window._bandejaSeleccionados.size;
+    const barra = document.getElementById('bandejaHiloBarraSeleccion');
+    barra.style.display = n > 0 ? 'flex' : 'none';
+    document.getElementById('bandejaHiloSeleccionCount').textContent = `${n} seleccionada${n === 1 ? '' : 's'}`;
+};
+
+window._deleteRecomendacionBackend = async function(id, tipo) {
+    const url = tipo === 'serie'
+        ? `${CONFIG.API_URL}/series-recommendations/${id}`
+        : `${CONFIG.API_URL}/recommendations/${id}`;
+    const token = localStorage.getItem('token');
+    await fetch(url, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+};
+
+window._ocultarEnviadaBackend = async function(id, tipo) {
+    const url = tipo === 'serie'
+        ? `${CONFIG.API_URL}/series-recommendations/sent/${id}`
+        : `${CONFIG.API_URL}/recommendations/sent/${id}`;
+    const token = localStorage.getItem('token');
+    await fetch(url, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+};
+
+window._eliminarSeleccionadosBandeja = function() {
+    const n = window._bandejaSeleccionados.size;
+    if (n === 0) return;
+
+    window._abrirConfirmGenericoBandeja(
+        `¿Eliminar ${n} recomendación${n === 1 ? '' : 'es'}? Esta acción no se puede deshacer.`,
+        async () => {
+                        const grupo = window._bandejaHiloActual;
+                        for (const clave of window._bandejaSeleccionados) {
+                            const [tipo, idStr] = clave.split('-');
+                            const id = parseInt(idStr, 10);
+                            await window._deleteRecomendacionBackend(id, tipo);
+                            grupo.recibidas = grupo.recibidas.filter(it => !(it.tipo === tipo && it.id === id));
+                        }
+
+                        window._bandejaSeleccionados.clear();
+                        window._bandejaModoSeleccion = false;
+                        document.getElementById('btnHiloSeleccionar').classList.remove('activo');
+                        document.getElementById('bandejaHiloBarraSeleccion').style.display = 'none';
+
+                        window._pintarHiloUsuario();
+        }
+    );
+};
+window._eliminarConversacionBandeja = function() {
+    const grupo = window._bandejaHiloActual;
+    if (grupo.recibidas.length === 0 && grupo.enviadas.length === 0) return;
+    window._abrirConfirmGenericoBandeja(
+        `¿Estás seguro de eliminar todo el chat de recomendaciones con ${grupo.otroNombre}? Vas a dejar de verlo de tu lado — ${grupo.otroNombre} conserva su parte intacta.`,
+        async () => {
+            for (const item of grupo.recibidas) {
+                await window._deleteRecomendacionBackend(item.id, item.tipo);
+            }
+            for (const item of grupo.enviadas) {
+                await window._ocultarEnviadaBackend(item.id, item.tipo);
+            }
+            window.volverAListaUsuarios();
+        }
+    );
+};
+
+window._marcarVistaBandeja = function(id, tipo) {
+    const nombre = window._bandejaHiloActual?.senderName || 'esta persona';
+    window._abrirConfirmGenericoBandeja(
+        `Una vez marcada como vista, no vas a poder volver atrás — y a ${nombre} le va a llegar el aviso de que la viste. ¿Confirmás?`,
+        async () => {
+            const url = tipo === 'serie'
+                ? `${CONFIG.API_URL}/series-recommendations/${id}/seen`
+                : `${CONFIG.API_URL}/recommendations/${id}/seen`;
+            try {
+                const token = localStorage.getItem('token');
+                await fetch(url, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+                                const item = window._bandejaHiloActual.recibidas.find(it => it.id === id && it.tipo === tipo);
+                                if (item) item.seenAt = new Date().toISOString();
+                                window._pintarHiloUsuario();
+                            } catch (e) {}
+                        }
+                    );
+                };
+
+window._calificarBandeja = async function(id, tipo, rating) {
+    const url = tipo === 'serie'
+        ? `${CONFIG.API_URL}/series-recommendations/${id}/rate`
+        : `${CONFIG.API_URL}/recommendations/${id}/rate`;
+    try {
+        const token = localStorage.getItem('token');
+        await fetch(url, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rating })
+        });
+        const item = window._bandejaHiloActual.recibidas.find(it => it.id === id && it.tipo === tipo);
+        if (item) item.rating = rating;
+        window._pintarHiloUsuario();
+    } catch (e) {}
+};
+
+window._abrirFichaRapidaBandeja = async function(id, tipo) {
+    const modal = document.getElementById('bandejaFichaRapida');
+    const body = document.getElementById('bandejaFichaRapidaBody');
+    body.innerHTML = '<div style="text-align:center;padding:2rem;"><i class="fas fa-spinner fa-spin"></i></div>';
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    const url = tipo === 'serie'
+        ? `${CONFIG.API_URL}/series/${id}`
+        : `${CONFIG.API_URL}/movies/${id}`;
+
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) throw new Error();
+        const d = await res.json();
+
+        const titulo = tipo === 'serie' ? d.name : d.title;
+        const posterHtml = d.poster_path
+            ? `<img class="bandeja-ficha-poster" src="https://image.tmdb.org/t/p/w300${d.poster_path}" alt="${titulo || ''}">`
+            : '';
+
+        body.innerHTML = `
+            ${posterHtml}
+            <p class="bandeja-ficha-titulo">${titulo || ''}</p>
+            <p class="bandeja-ficha-tipo">${tipo === 'serie' ? '📺 Serie' : '🎬 Película'}</p>
+            <p class="bandeja-ficha-overview">${d.overview || 'Sin sinopsis disponible.'}</p>
+            <button class="bandeja-ficha-cerrar" onclick="window._cerrarFichaRapidaBandeja()">Cerrar</button>
+        `;
+    } catch (e) {
+        body.innerHTML = '<p style="text-align:center;color:#999;padding:1rem;">No se pudo cargar. Probá de nuevo.</p>';
+    }
+};
+
+window._cerrarFichaRapidaBandeja = function() {
+    document.getElementById('bandejaFichaRapida').style.display = 'none';
+    document.body.style.overflow = '';
+};
+
+// ==============================================
+// LONG-PRESS PARA ELIMINAR CHAT (mobile) — mantener presionada la
+// fila en la lista, patrón estándar de mensajería. touchstart arranca
+// un timer de 550ms; si se suelta o se mueve el dedo antes (scroll),
+// se cancela y queda como un tap normal (abre el hilo).
+// ==============================================
+window._bandejaLongPressTimer = null;
+window._bandejaLongPressDisparado = false;
+window._bandejaChatAEliminarIdx = null;
+
+window._iniciarLongPressBandeja = function(idx) {
+    window._bandejaLongPressDisparado = false;
+    window._bandejaLongPressTimer = setTimeout(() => {
+        window._bandejaLongPressDisparado = true;
+        if (navigator.vibrate) navigator.vibrate(30); // feedback táctil sutil, si el dispositivo lo soporta
+        window._confirmarEliminarChatBandeja(idx);
+    }, 550);
+};
+
+window._cancelarLongPressBandeja = function() {
+    clearTimeout(window._bandejaLongPressTimer);
+};
+
+window._clickFilaUsuarioBandeja = function(idx) {
+    if (window._bandejaLongPressDisparado) {
+        // Ya se disparó el long-press — este click es el "fantasma"
+        // que dispara el touch al soltar, no un tap real. Se ignora.
+        window._bandejaLongPressDisparado = false;
+        return;
+    }
+    window.abrirHiloUsuario(idx);
+};
+
+// Modal de confirmación genérico — un mensaje + una acción a
+// ejecutar si se confirma. Reusado por las 3 vías de borrado.
+window._bandejaConfirmCallback = null;
+
+window._abrirConfirmGenericoBandeja = function(mensaje, callback) {
+    document.getElementById('bandejaConfirmGenericoTexto').textContent = mensaje;
+    window._bandejaConfirmCallback = callback;
+    document.getElementById('bandejaConfirmGenerico').style.display = 'flex';
+};
+
+window._cerrarConfirmGenericoBandeja = function() {
+    document.getElementById('bandejaConfirmGenerico').style.display = 'none';
+    window._bandejaConfirmCallback = null;
+};
+
+window._ejecutarConfirmGenericoBandeja = function() {
+    const cb = window._bandejaConfirmCallback;
+    window._cerrarConfirmGenericoBandeja();
+    if (cb) cb();
+};
+
+window._confirmarEliminarChatBandeja = function(idx) {
+    const grupo = window._bandejaGruposUsuarios[idx];
+    if (!grupo || (grupo.recibidas.length === 0 && grupo.enviadas.length === 0)) return;
+    window._abrirConfirmGenericoBandeja(
+        `¿Estás seguro de eliminar todo el chat de recomendaciones con ${grupo.otroNombre || 'este usuario'}? Vas a dejar de verlo de tu lado — ${grupo.otroNombre || 'la otra persona'} conserva su parte intacta.`,
+        async () => {
+            for (const item of grupo.recibidas) {
+                await window._deleteRecomendacionBackend(item.id, item.tipo);
+            }
+            for (const item of grupo.enviadas) {
+                await window._ocultarEnviadaBackend(item.id, item.tipo);
+            }
+            window.cargarBandejaUsuarios();
+        }
+    );
+};
+
 // ========== MIS CONSULTAS ==========
 
 let consultasTicketActualId = null;
@@ -54,7 +516,7 @@ function sanitizeNumber(value) {
 
 // ── Inicialización ────────────────────────────────────────────────────────────
 window['init_mis-consultas'] = function() {
-    consultasCargarLista();
+    window.cargarBandejaUsuarios();
 };
 
 // ── Cargar lista de tickets ───────────────────────────────────────────────────

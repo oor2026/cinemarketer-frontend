@@ -1,3 +1,33 @@
+.bandeja-container { max-width: 1000px; margin: 0 auto; padding: 1rem; }
+
+.bandeja-tabs {
+    display: flex; gap: 0.5rem; margin-bottom: 1.2rem;
+    border-bottom: 2px solid #f0f0f0;
+}
+.bandeja-tab {
+    background: none; border: none; cursor: pointer;
+    padding: 0.75rem 1.2rem; font-size: 0.92rem; font-weight: 600; color: #888;
+    border-bottom: 3px solid transparent; margin-bottom: -2px;
+    display: flex; align-items: center; gap: 0.5rem;
+    transition: color 0.2s, border-color 0.2s;
+}
+.bandeja-tab.active { color: #324C89; border-bottom-color: #324C89; }
+.bandeja-tab:hover:not(.active) { color: #555; }
+
+.bandeja-tab-panel { display: none; }
+.bandeja-tab-panel.active { display: block; }
+
+.bandeja-usuarios-vacio {
+    text-align: center; padding: 4rem 1rem; color: #999;
+}
+.bandeja-usuarios-vacio i { font-size: 2.5rem; display: block; margin-bottom: 0.75rem; color: #ddd; }
+.bandeja-usuarios-vacio p { font-size: 0.95rem; margin: 0; }
+
+@media (max-width: 768px) {
+    .bandeja-container { padding: 0.5rem; }
+    .bandeja-tab { padding: 0.6rem 0.9rem; font-size: 0.85rem; }
+}
+
 .consultas-container {
     max-width: 1000px;
     margin: 0 auto;
@@ -491,3 +521,127 @@
         padding: 2px 6px;
     }
 }
+
+.bandeja-soporte-toolbar { display: flex; justify-content: flex-end; margin-bottom: 1rem; }
+
+/* ==========================================================
+   TAB USUARIOS — recomendaciones agrupadas por remitente
+   ========================================================== */
+.bandeja-usuarios-lista { display: flex; flex-direction: column; }
+
+.bandeja-usuario-fila {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 1rem 0.5rem; border-bottom: 1px solid #f0f0f0;
+    cursor: pointer; transition: background 0.15s;
+}
+.bandeja-usuario-fila:hover { background: #fafafa; }
+.bandeja-usuario-fila:last-child { border-bottom: none; }
+
+.bandeja-usuario-avatar {
+    width: 48px; height: 48px; border-radius: 50%; object-fit: cover;
+    background: #eee; flex-shrink: 0;
+}
+.bandeja-usuario-info { flex: 1; min-width: 0; }
+.bandeja-usuario-nombre {
+    font-weight: 600; color: #333; font-size: 0.92rem; margin: 0 0 0.2rem;
+    display: flex; align-items: center; gap: 0.4rem;
+}
+.bandeja-usuario-preview {
+    color: #888; font-size: 0.83rem; margin: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.bandeja-usuario-meta {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 0.3rem; flex-shrink: 0;
+}
+.bandeja-usuario-fecha { font-size: 0.75rem; color: #bbb; }
+.bandeja-usuario-badge {
+    background: #e50914; color: white; font-size: 0.7rem; font-weight: 700;
+    min-width: 20px; height: 20px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; padding: 0 5px;
+}
+
+/* Hilo (thread) por usuario */
+.bandeja-hilo-usuario { }
+.bandeja-hilo-header {
+    display: flex; align-items: center; gap: 1rem;
+    padding-bottom: 1rem; margin-bottom: 1rem; border-bottom: 1px solid #f0f0f0;
+}
+.bandeja-hilo-info { display: flex; align-items: center; gap: 0.7rem; }
+.bandeja-hilo-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: #eee; }
+.bandeja-hilo-info h3 { font-size: 1rem; color: #333; margin: 0; }
+.bandeja-hilo-info h3:hover { text-decoration: underline; }
+
+.bandeja-hilo-items { display: flex; flex-direction: column; gap: 1rem; }
+.bandeja-hilo-card {
+    display: flex; gap: 0.9rem; padding: 0.9rem;
+    border: 1px solid #f0f0f0; border-radius: 12px;
+}
+.bandeja-hilo-poster {
+    width: 60px; height: 90px; border-radius: 8px; overflow: hidden;
+    background: #eee; flex-shrink: 0;
+}
+.bandeja-hilo-poster img { width: 100%; height: 100%; object-fit: cover; }
+.bandeja-hilo-card-body { flex: 1; min-width: 0; }
+.bandeja-hilo-card-tipo { font-size: 0.7rem; color: #999; margin: 0 0 0.2rem; }
+.bandeja-hilo-card-titulo { font-weight: 600; color: #333; font-size: 0.92rem; margin: 0 0 0.3rem; }
+.bandeja-hilo-card-fecha { font-size: 0.75rem; color: #bbb; margin: 0 0 0.6rem; }
+
+.bandeja-hilo-estrellas { display: flex; gap: 4px; }
+.bandeja-hilo-estrellas i { color: #ddd; font-size: 1rem; cursor: pointer; }
+.bandeja-hilo-estrellas i.activa { color: #f5a623; }
+.bandeja-hilo-estrellas.solo-lectura i { cursor: default; }
+
+.btn-marcar-vista {
+    background: #f5f5f5; border: none; padding: 0.4rem 0.9rem; border-radius: 8px;
+    font-size: 0.8rem; color: #555; cursor: pointer; font-weight: 600;
+}
+.btn-marcar-vista:hover { background: #e50914; color: white; }
+
+.bandeja-ficha-poster {
+    width: 100%; max-width: 220px; margin: 0 auto 1rem; display: block;
+    border-radius: 10px; box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+}
+.bandeja-ficha-titulo { font-size: 1.1rem; font-weight: 700; color: #1a1a1a; margin: 0 0 0.4rem; text-align: center; }
+.bandeja-ficha-tipo { font-size: 0.78rem; color: #999; text-align: center; margin: 0 0 0.9rem; }
+.bandeja-ficha-overview { font-size: 0.85rem; color: #444; line-height: 1.55; margin: 0 0 1rem; }
+.bandeja-ficha-cerrar {
+    display: block; margin: 0 auto; background: #f0f0f0; border: none;
+    padding: 0.5rem 1.2rem; border-radius: 20px; font-size: 0.82rem; color: #555; cursor: pointer;
+}
+
+.bandeja-hilo-header { flex-wrap: wrap; }
+.bandeja-hilo-acciones { display: flex; align-items: center; gap: 0.5rem; margin-left: auto; }
+.btn-hilo-seleccionar {
+    background: #f5f5f5; border: none; padding: 0.4rem 0.8rem; border-radius: 8px;
+    font-size: 0.78rem; color: #555; cursor: pointer; font-weight: 600;
+    display: flex; align-items: center; gap: 0.4rem;
+}
+.btn-hilo-seleccionar.activo { background: #324C89; color: white; }
+.btn-hilo-eliminar-todo {
+    background: none; border: none; color: #ccc; cursor: pointer;
+    padding: 0.4rem; border-radius: 6px; font-size: 0.9rem;
+}
+.btn-hilo-eliminar-todo:hover { color: #e50914; background: #fff0f0; }
+
+.bandeja-hilo-barra-seleccion {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #fff8f8; border: 1px solid #ffdddd; border-radius: 10px;
+    padding: 0.6rem 1rem; margin-bottom: 1rem; font-size: 0.82rem; color: #555;
+}
+.btn-hilo-eliminar-seleccion {
+    background: #e50914; color: white; border: none; padding: 0.4rem 0.9rem;
+    border-radius: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; gap: 0.4rem;
+}
+
+.bandeja-hilo-card { position: relative; }
+.bandeja-hilo-checkbox {
+    position: absolute; top: 0.7rem; left: 0.7rem; width: 20px; height: 20px; z-index: 2;
+}
+
+.bandeja-hilo-subtabs { display: flex; gap: 0.4rem; margin-bottom: 1rem; }
+.bandeja-hilo-subtab {
+    flex: 1; background: #f5f5f5; border: none; padding: 0.55rem; border-radius: 8px;
+    font-size: 0.85rem; font-weight: 600; color: #888; cursor: pointer;
+}
+.bandeja-hilo-subtab.active { background: #324C89; color: white; }

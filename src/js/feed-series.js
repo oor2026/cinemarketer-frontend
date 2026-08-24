@@ -1765,18 +1765,22 @@ window.enviarRecomendacionSerie = async function() {
             )
         );
 
-        const exitosas  = responses.filter(r => r.ok);
-        const duplicadas = responses.filter(r => !r.ok && r.data?.error?.includes('Ya le recomendaste'));
-        const sinPuntos  = exitosas.some(r => r.data?.sinPuntos === true);
-        const puntosTotal = exitosas.reduce((acc, r) => acc + (r.data?.pointsAwarded || 0), 0);
-        if (typeof mostrarPuntosGanados === 'function') mostrarPuntosGanados(puntosTotal);
+                const exitosas  = responses.filter(r => r.ok);
+                const duplicadas = responses.filter(r => !r.ok && r.data?.error?.includes('Ya le recomendaste'));
+                const sinPuntos  = exitosas.some(r => r.data?.sinPuntos === true);
+                const puntosTotal = exitosas.reduce((acc, r) => acc + (r.data?.pointsAwarded || 0), 0);
+                if (typeof mostrarPuntosGanados === 'function') mostrarPuntosGanados(puntosTotal);
 
-        window.cerrarPanelRecomendar();
+                // Los nombres hay que leerlos ANTES de cerrar el panel — una vez
+                // cerrado, los chips .rec-usuario-chip.selected ya no existen en
+                // el DOM, y el querySelectorAll de abajo devolvía vacío siempre.
+                const nombres = Array.from(document.querySelectorAll('.rec-usuario-chip.selected'))
+                    .map(c => c.dataset.nombre).join(', ');
 
-        if (duplicadas.length > 0 && exitosas.length === 0) {
-            const nombres = Array.from(document.querySelectorAll('.rec-usuario-chip.selected'))
-                .map(c => c.dataset.nombre).join(', ');
-            _mostrarToast(`Ya le recomendaste esta serie a ${nombres}.`, true);
+                window.cerrarPanelRecomendar();
+
+                if (duplicadas.length > 0 && exitosas.length === 0) {
+                    _mostrarToast(`Ya le recomendaste esta serie a ${nombres}.`, true);
         } else if (sinPuntos) {
             _mostrarModalLimiteRecomendacion();
         } else if (exitosas.length > 0) {
