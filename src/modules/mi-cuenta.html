@@ -446,41 +446,6 @@
         </div>
     </div>
 
-    <!-- MIS PREFERENCIAS -->
-    <div class="cuenta-seccion">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
-            <h3 class="cuenta-seccion-titulo"><i class="fas fa-heart"></i> Mis preferencias</h3>
-            <div style="display:flex;gap:6px;">
-                <button class="mi-lista-switch-btn active" id="btnPrefPeliculas" onclick="window.switchPreferenciasTipo('peliculas')"
-                        style="font-size:0.8rem;font-weight:600;padding:5px 14px;border-radius:20px;border:1px solid #1a3a6b;background:#1a3a6b;color:#fff;cursor:pointer;">
-                    🎬 Películas
-                </button>
-                <button class="mi-lista-switch-btn" id="btnPrefSeries" onclick="window.switchPreferenciasTipo('series')"
-                        style="font-size:0.8rem;font-weight:600;padding:5px 14px;border-radius:20px;border:1px solid #ddd;background:#fff;color:#666;cursor:pointer;">
-                    📺 Series
-                </button>
-            </div>
-        </div>
-        <div class="mi-red-seccion">
-            <div class="mi-red-tabs">
-                <button class="mi-red-tab active" id="tabMiLista" onclick="window.switchListaTab('mi-lista')">
-                    Mi lista (<span id="countMiLista">0</span>)
-                </button>
-                <button class="mi-red-tab" id="tabRecomendaciones" onclick="window.switchListaTab('recomendaciones')">
-                    Recomendaciones (<span id="countRecomendaciones">0</span>)
-                </button>
-            </div>
-            <div id="panelMiLista">
-                <div class="mi-red-vacio">Tu lista de películas guardadas aparecerá acá.</div>
-            </div>
-            <div id="panelRecomendaciones" style="display:none;">
-                <div id="meRecomendaronLista">
-                    <div class="mi-red-loading"><i class="fas fa-spinner fa-spin"></i></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- MODAL SELECTOR DE AVATAR -->
     <div id="modalSelectorAvatar" class="modal-edicion" style="display:none;">
         <div class="modal-edicion-overlay" onclick="window.cerrarSelectorAvatar()"></div>
@@ -700,31 +665,6 @@
             <div style="display:flex; gap:0.75rem;">
                 <button onclick="window.cerrarModalDejarSeguirRed()" style="flex:1; padding:0.7rem; border:1.5px solid #ddd; background:none; border-radius:8px; color:#666; cursor:pointer;">Cancelar</button>
                 <button onclick="window.confirmarDejarSeguirRed()" style="flex:1; padding:0.7rem; background:#e50914; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer;">Dejar de seguir</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL YA LA VI -->
-    <div id="modalYaLaVi" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
-        <div style="background:white; border-radius:16px; padding:2rem; max-width:380px; width:100%;" onclick="event.stopPropagation()">
-            <h3 style="margin:0 0 0.75rem; font-size:1rem; color:#333;">¿Ya viste esta película?</h3>
-            <p style="color:#888; font-size:0.88rem; margin:0 0 1.5rem;">Esta acción es <strong>irreversible</strong>. Una vez marcada como vista no podrás deshacerlo.</p>
-            <div style="display:flex; gap:0.75rem;">
-                <button onclick="window.cerrarModalYaLaVi()" style="flex:1; padding:0.7rem; border:1.5px solid #ddd; background:none; border-radius:8px; color:#666; cursor:pointer;">Cancelar</button>
-                <button onclick="window.confirmarYaLaVi()" style="flex:1; padding:0.7rem; background:#1a3a6b; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer;">Sí, ya la vi</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL ELIMINAR RECOMENDACIÓN -->
-    <div id="modalEliminarRec" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
-        <div style="background:white;border-radius:12px;padding:2rem;max-width:380px;width:90%;text-align:center;">
-            <div style="font-size:2rem;margin-bottom:0.5rem;">🗑️</div>
-            <h3 style="margin:0 0 0.5rem;color:#333;font-size:1.1rem;">¿Eliminar recomendación?</h3>
-            <p style="color:#666;font-size:0.9rem;margin:0 0 1.5rem;">Esta acción es permanente. La recomendación desaparecerá de tu bandeja.</p>
-            <div style="display:flex;gap:0.75rem;justify-content:center;">
-                <button onclick="window.cerrarModalEliminarRec()" style="padding:0.5rem 1.25rem;border-radius:8px;border:1px solid #ddd;background:white;color:#666;cursor:pointer;font-size:0.9rem;">Cancelar</button>
-                <button onclick="window.confirmarEliminarRec()" style="padding:0.5rem 1.25rem;border-radius:8px;border:none;background:#e50914;color:white;cursor:pointer;font-size:0.9rem;font-weight:600;">Eliminar</button>
             </div>
         </div>
     </div>
