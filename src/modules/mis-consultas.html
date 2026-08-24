@@ -1,23 +1,104 @@
-<div class="consultas-container">
-
-    <!-- HEADER -->
+<div class="bandeja-container">
+    <!-- HEADER GENERAL — arriba de las pestañas, visible en las 2.
+         El botón "Nueva consulta" se movió adentro de Soporte, es
+         una acción específica de esa pestaña, no del módulo entero. -->
     <div class="consultas-header">
         <div class="consultas-header-left">
             <div class="header-icon">
-                <i class="fas fa-inbox"></i>
+                <i class="fas fa-comment-dots"></i>
             </div>
             <div class="header-text">
-                <h2>Mis Consultas</h2>
-                <p>Seguimiento de tus conversaciones con soporte</p>
+                <h2>Mis Mensajes</h2>
+                <p>Acá podrás manejar todas tus conversaciones y contactar a Soporte</p>
             </div>
         </div>
-        <button class="btn-nueva-consulta" onclick="consultasAbrirNueva()">
-            <i class="fas fa-plus"></i>
-            Nueva consulta
+    </div>
+
+    <div class="bandeja-tabs">
+        <button class="bandeja-tab" id="bandejaTabBtnMensajes" onclick="window.cambiarTabBandeja('mensajes', this)">
+            <i class="fas fa-comment-dots"></i> Mensajes
+        </button>
+        <button class="bandeja-tab active" id="bandejaTabBtnUsuarios" onclick="window.cambiarTabBandeja('usuarios', this)">
+            <i class="fas fa-envelope"></i> Recomendaciones
+        </button>
+        <button class="bandeja-tab" id="bandejaTabBtnSoporte" onclick="window.cambiarTabBandeja('soporte', this)">
+            <i class="fas fa-headset"></i> Soporte
         </button>
     </div>
 
-    <!-- LISTA DE TICKETS -->
+    <!-- TAB MENSAJES — placeholder, todavía no existe mensajería libre
+         entre usuarios (más adelante, canal aparte de Recomendaciones,
+         que quedó con peso propio: marcar vista, calificar). -->
+    <div id="bandejaPanelMensajes" class="bandeja-tab-panel">
+        <div class="bandeja-usuarios-vacio">
+            <i class="fas fa-comment-dots"></i>
+            <p>Próximamente, vas a poder conversar con tus amigos y amigas cinéfilos.</p>
+        </div>
+    </div>
+
+    <!-- TAB RECOMENDACIONES (ids internos siguen diciendo "Usuarios" —
+         solo cambió el texto visible, nada de la lógica) —
+         recomendaciones recibidas (películas + series),
+         agrupadas por quién te las mandó, a modo de conversación. Misma
+         fuente de datos que ya existía (GET /recommendations/received y
+         /series-recommendations/received) — la única novedad es que acá
+         se agrupan por remitente en vez de listarse una por una. -->
+    <div id="bandejaPanelUsuarios" class="bandeja-tab-panel active">
+
+        <div id="bandejaUsuariosLista" class="bandeja-usuarios-lista">
+            <div class="consultas-loading"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>
+        </div>
+
+        <div id="bandejaHiloUsuario" class="bandeja-hilo-usuario" style="display:none;">
+            <div class="bandeja-hilo-header">
+                <button class="btn-volver" onclick="window.volverAListaUsuarios()">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+                <div class="bandeja-hilo-info">
+                    <img id="bandejaHiloAvatar" class="bandeja-hilo-avatar" src="" alt="">
+                    <h3 id="bandejaHiloNombre">—</h3>
+                </div>
+                <div class="bandeja-hilo-acciones">
+                    <button class="btn-hilo-seleccionar" id="btnHiloSeleccionar" onclick="window._toggleSeleccionModoBandeja()">
+                        <i class="fas fa-check-square"></i> Seleccionar
+                    </button>
+                    <button class="btn-hilo-eliminar-todo" onclick="window._eliminarConversacionBandeja()" title="Eliminar conversación">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="bandejaHiloBarraSeleccion" class="bandeja-hilo-barra-seleccion" style="display:none;">
+                <span id="bandejaHiloSeleccionCount">0 seleccionadas</span>
+                <button class="btn-hilo-eliminar-seleccion" onclick="window._eliminarSeleccionadosBandeja()">
+                    <i class="fas fa-trash-alt"></i> Eliminar
+                </button>
+            </div>
+
+            <!-- Dos compartimentos, no un timeline mezclado — esto no
+                 es una conversación, es una bandeja de entrada/salida. -->
+            <div class="bandeja-hilo-subtabs">
+                <button class="bandeja-hilo-subtab active" id="bandejaSubtabBtnRecibidas" onclick="window._cambiarSubtabHilo('recibidas')">📥 Recibidas</button>
+                <button class="bandeja-hilo-subtab" id="bandejaSubtabBtnEnviadas" onclick="window._cambiarSubtabHilo('enviadas')">📤 Enviadas</button>
+            </div>
+
+            <div id="bandejaHiloItems" class="bandeja-hilo-items"></div>
+        </div>
+
+    </div>
+
+    <!-- TAB SOPORTE — mismo contenido que ya existía, sin ningún
+         cambio estructural adentro, solo movido a esta pestaña. -->
+    <div id="bandejaPanelSoporte" class="bandeja-tab-panel">
+        <div class="consultas-container">
+
+            <div class="bandeja-soporte-toolbar">
+                <button class="btn-nueva-consulta" onclick="consultasAbrirNueva()">
+                    <i class="fas fa-plus"></i>
+                    Nueva consulta
+                </button>
+            </div>
+
+            <!-- LISTA DE TICKETS -->
     <div class="consultas-lista-section">
         <div id="consultasLista" class="consultas-lista">
             <div class="consultas-loading">
@@ -112,4 +193,31 @@
         </div>
     </div>
 
+        </div>
+    </div>
+    <!-- MODAL FICHA RÁPIDA — vistazo simple de una película/serie desde
+     una recomendación recibida. No depende de feed-films.js (que acá
+     no está cargado); pega directo a GET /movies/{id} o
+     /series/{id}, igual que el modal de género de Mi Espíritu. -->
+    <div id="bandejaFichaRapida" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;" onclick="window._cerrarFichaRapidaBandeja()">
+        <div style="background:#ffffff; border-radius:16px; max-width:420px; width:100%; max-height:85vh; overflow-y:auto;" onclick="event.stopPropagation()">
+            <div id="bandejaFichaRapidaBody" style="padding:1rem;">
+                <div style="text-align:center;padding:2rem;"><i class="fas fa-spinner fa-spin"></i></div>
+            </div>
+        </div>
+    </div>
+    <!-- CONFIRMACIÓN GENÉRICA — reusada por las 3 acciones de borrado
+     de esta pestaña (long-press en la lista, tacho del hilo,
+     "eliminar seleccionadas"). Mismo estilo propio en las 3, en vez
+     del confirm() nativo del navegador. -->
+    <div id="bandejaConfirmGenerico" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
+        <div style="background:#fff; border-radius:16px; max-width:320px; width:100%; padding:1.5rem; text-align:center;">
+            <i class="fas fa-trash-alt" style="font-size:1.6rem; color:#e50914; margin-bottom:0.8rem; display:block;"></i>
+            <p id="bandejaConfirmGenericoTexto" style="font-size:0.9rem; color:#333; margin:0 0 1.2rem; line-height:1.5;"></p>
+            <div style="display:flex; gap:0.6rem;">
+                <button onclick="window._cerrarConfirmGenericoBandeja()" style="flex:1; padding:0.6rem; border-radius:8px; border:1px solid #ddd; background:#fff; color:#555; cursor:pointer; font-weight:600;">Cancelar</button>
+                <button onclick="window._ejecutarConfirmGenericoBandeja()" style="flex:1; padding:0.6rem; border-radius:8px; border:none; background:#e50914; color:#fff; cursor:pointer; font-weight:600;">Eliminar</button>
+            </div>
+        </div>
+    </div>
 </div>
