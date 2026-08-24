@@ -124,8 +124,6 @@ async function cargarPerfil(userId) {
                                 window._perfilComentariosSerieCache = perfil.ultimosComentariosSeries || [];
                                 renderComentariosSerie(window._perfilComentariosSerieCache);
                                 renderComentarios(perfil.ultimosComentarios);
-                                renderRecomendadas(perfil.ultimasRecomendadas);
-                                renderRecomendadasSerie(perfil.ultimasRecomendadasSeries);
 
                                 window._inicializarFadeSpreads();
                                 window._seleccionarCriterioActividad(window._actividadCriterioActual);
@@ -252,7 +250,6 @@ function renderStats(perfil) {
     document.getElementById('perfilSiguiendo').textContent   = perfil.siguiendo || 0;
     document.getElementById('perfilVotaciones').textContent  = perfil.totalVotaciones || 0;
     document.getElementById('perfilComentarios').textContent = perfil.totalComentarios || 0;
-        document.getElementById('perfilRecomendadas').textContent = perfil.totalRecomendadas || 0;
 
         window._activarStatClickeable('perfilSeguidoresWrap', perfil.seguidores, () => window.abrirModalSeguidores('seguidores'));
     window._activarStatClickeable('perfilSiguiendoWrap', perfil.siguiendo, () => window.abrirModalSeguidores('seguidos'));
@@ -1121,8 +1118,7 @@ window.subirBanner = async function(input) {
 
                                     const grupos = {
                                         votaciones:   ['perfilVotacionesWrapper', 'perfilVotacionesSeriesWrapper'],
-                                        comentarios:  ['perfilComentariosList', 'perfilComentariosSeriesList'],
-                                        recomendadas: ['perfilRecomendadasWrapper', 'perfilRecomendadasSeriesWrapper']
+                                        comentarios:  ['perfilComentariosList', 'perfilComentariosSeriesList']
                                     };
 
                                     Object.entries(grupos).forEach(([nombre, ids]) => {
@@ -1140,8 +1136,7 @@ window.subirBanner = async function(input) {
                                     const counts = window._perfilCounts || {};
                                     const valores = {
                                         Votaciones:   modoSeries ? counts.votacionesSeries   : counts.votacionesPeliculas,
-                                        Comentarios:  modoSeries ? counts.comentariosSeries  : counts.comentariosPeliculas,
-                                        Recomendadas: modoSeries ? counts.recomendadasSeries : counts.recomendadasPeliculas
+                                        Comentarios:  modoSeries ? counts.comentariosSeries  : counts.comentariosPeliculas
                                     };
                                     Object.entries(valores).forEach(([nombre, valor]) => {
                                         const el = document.getElementById('cineActividadCount' + nombre);
@@ -1161,6 +1156,18 @@ window.subirBanner = async function(input) {
                                     // parte de arriba — calculamos su altura real y la restamos,
                                     // más un pequeño respiro, para que el título quede justo
                                     // debajo de él, no escondido detrás.
+                                    const navbar = document.querySelector('.navbar');
+                                    const offset = (navbar ? navbar.offsetHeight : 0) + 12;
+                                    const y = destino.getBoundingClientRect().top + window.scrollY - offset;
+                                    window.scrollTo({ top: y, behavior: 'smooth' });
+                                };
+
+                                // Mismo criterio de scroll que _irAActividadDesdeMetrica, pero
+                                // apuntando a "Publicaciones en Comunidad" — no pasa por el menú
+                                // de criterios de Mi actividad, es una sección aparte más abajo.
+                                window._irAPublicacionesDesdeMetrica = function() {
+                                    const destino = document.getElementById('perfilPublicacionesSeccion');
+                                    if (!destino) return;
                                     const navbar = document.querySelector('.navbar');
                                     const offset = (navbar ? navbar.offsetHeight : 0) + 12;
                                     const y = destino.getBoundingClientRect().top + window.scrollY - offset;
@@ -2159,14 +2166,18 @@ async function cargarPublicacionesPerfil(userId) {
                 `${CONFIG.API_URL}/publications/user/${userId}?page=0&size=9`,
                 { headers: { 'Authorization': `Bearer ${token}` } }
             );
-            if (!res.ok) throw new Error();
-            const data = await res.json();
-            const pubs = data.content || [];
+                        if (!res.ok) throw new Error();
+                        const data = await res.json();
+                        const pubs = data.content || [];
 
-            if (pubs.length === 0) {
-                lista.innerHTML = '<div class="perfil-vacio">Todavía no hay publicaciones.</div>';
-                return;
-            }
+                        // Ya venía en la respuesta (es un Page de Spring), solo faltaba leerlo.
+                        const metricaPub = document.getElementById('perfilPublicaciones');
+                        if (metricaPub) metricaPub.textContent = data.totalElements ?? pubs.length;
+
+                        if (pubs.length === 0) {
+                            lista.innerHTML = '<div class="perfil-vacio">Todavía no hay publicaciones.</div>';
+                            return;
+                        }
 
             lista.innerHTML = `<div class="perfil-pub-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">
                         ${pubs.map(pub => renderTilePublicacionPerfil(pub)).join('')}
@@ -3334,172 +3345,6 @@ window._actualizarVisibilidadRankingTrivia = function() {
     }
 };
 
-// ==============================================
-// RECOMENDADAS (PELÍCULAS)
-// ==============================================
-let _stackRecomendadas = [];
-let _stackIndiceRecomendadas = 0;
-
-function renderRecomendadas(items) {
-    const wrapper = document.getElementById('perfilRecomendadasWrapper');
-    if (!wrapper) return;
-
-    if (!items || items.length === 0) {
-        wrapper.innerHTML = '<div class="cine-stack-vacio-wrap"><div class="cine-stack-vacio"></div><p class="cine-stack-vacio-lbl">Sin recomendaciones aún</p></div>';
-        return;
-    }
-
-    _stackRecomendadas = items;
-    _stackIndiceRecomendadas = 0;
-
-        wrapper.innerHTML = `
-                          <p class="cine-stack-eyebrow">RECOMENDADAS (${window._perfilCounts?.recomendadasPeliculas || 0})</p>
-        <div class="cine-stack-area">
-            <button class="cine-stack-nav prev" onclick="window._moverStackRecomendadas(-1)"><i class="fas fa-chevron-left"></i></button>
-            <div id="cineStackRecomendadasContainer" style="position:relative; width:100%; height:100%;"></div>
-            <button class="cine-stack-nav next" onclick="window._moverStackRecomendadas(1)"><i class="fas fa-chevron-right"></i></button>
-        </div>
-        <p class="cine-stack-titulo" id="cineStackRecomendadasTitulo"></p>
-    `;
-
-        const cont = document.getElementById('cineStackRecomendadasContainer');
-        cont.innerHTML = items.map(r => {
-            const poster = r.posterPath
-                ? `<img src="https://image.tmdb.org/t/p/w185${r.posterPath}" alt="${r.movieTitle || ''}">`
-                : `<div class="placeholder"><i class="fas fa-film"></i></div>`;
-            return `
-            <div class="cine-stack-card" onclick="window._abrirPeliculaDesdePerfil(${r.movieId})">
-                ${poster}
-                                <div class="cine-veces-tag">${r.veces} ${r.veces == 1 ? 'vez' : 'veces'}</div>
-                <div class="cine-badge-recomendada"><i class="fas fa-envelope"></i></div>
-            </div>`;
-        }).join('');
-
-    window._renderStackPosicionesRecomendadas();
-}
-
-window._renderStackPosicionesRecomendadas = function() {
-    const cards = document.querySelectorAll('#cineStackRecomendadasContainer .cine-stack-card');
-    const N = _stackRecomendadas.length;
-    cards.forEach((card, i) => {
-        let diff = i - _stackIndiceRecomendadas;
-        if (diff > N / 2) diff -= N;
-        if (diff < -N / 2) diff += N;
-        const offset = (diff >= 0 && diff <= 2) ? diff : -1;
-
-        card.style.pointerEvents = offset === 0 ? 'auto' : 'none';
-
-        if (offset === 0) {
-            card.style.transform = 'translateX(0) translateY(0) scale(1) rotate(0deg)';
-            card.style.opacity = 1; card.style.zIndex = 10;
-        } else if (offset === 1) {
-            card.style.transform = 'translateX(-18px) translateY(10px) scale(0.94) rotate(-3deg)';
-            card.style.opacity = 0.6; card.style.zIndex = 8;
-        } else if (offset === 2) {
-            card.style.transform = 'translateX(-36px) translateY(20px) scale(0.88) rotate(-6deg)';
-            card.style.opacity = 0.3; card.style.zIndex = 7;
-        } else {
-            card.style.transform = 'translateX(260px) translateY(-10px) scale(0.8) rotate(16deg)';
-            card.style.opacity = 0; card.style.zIndex = 5;
-        }
-    });
-    const tituloEl = document.getElementById('cineStackRecomendadasTitulo');
-    if (tituloEl && _stackRecomendadas[_stackIndiceRecomendadas]) {
-        tituloEl.textContent = _stackRecomendadas[_stackIndiceRecomendadas].movieTitle || '—';
-    }
-};
-
-window._moverStackRecomendadas = function(dir) {
-    const N = _stackRecomendadas.length;
-    if (N === 0) return;
-    _stackIndiceRecomendadas = (_stackIndiceRecomendadas + dir + N) % N;
-    window._renderStackPosicionesRecomendadas();
-};
-
-// ==============================================
-// RECOMENDADAS (SERIES)
-// ==============================================
-let _stackRecomendadasSeries = [];
-let _stackIndiceRecomendadasSeries = 0;
-
-function renderRecomendadasSerie(items) {
-    const wrapper = document.getElementById('perfilRecomendadasSeriesWrapper');
-    if (!wrapper) return;
-
-    if (!items || items.length === 0) {
-        wrapper.innerHTML = '<div class="cine-stack-vacio-wrap"><div class="cine-stack-vacio cine-stack-vacio--series"></div><p class="cine-stack-vacio-lbl">Sin recomendaciones aún</p></div>';
-        return;
-    }
-
-    _stackRecomendadasSeries = items;
-    _stackIndiceRecomendadasSeries = 0;
-
-        wrapper.innerHTML = `
-                         <p class="cine-stack-eyebrow">RECOMENDADAS (${window._perfilCounts?.recomendadasSeries || 0})</p>
-        <div class="cine-stack-area">
-            <button class="cine-stack-nav prev" onclick="window._moverStackRecomendadasSeries(-1)"><i class="fas fa-chevron-left"></i></button>
-            <div id="cineStackRecomendadasSeriesContainer" style="position:relative; width:100%; height:100%;"></div>
-            <button class="cine-stack-nav next" onclick="window._moverStackRecomendadasSeries(1)"><i class="fas fa-chevron-right"></i></button>
-        </div>
-        <p class="cine-stack-titulo" id="cineStackRecomendadasSeriesTitulo"></p>
-    `;
-
-        const cont = document.getElementById('cineStackRecomendadasSeriesContainer');
-        cont.innerHTML = items.map(r => {
-            const poster = r.posterPath
-                ? `<img src="https://image.tmdb.org/t/p/w185${r.posterPath}" alt="${r.seriesTitle || ''}">`
-                : `<div class="placeholder"><i class="fas fa-film"></i></div>`;
-                        return `
-                                        <div class="cine-stack-card" onclick="window._abrirSerieDesdePerfil(${r.seriesId})">
-                                            ${poster}
-                                            <div class="cine-veces-tag">${r.veces} ${r.veces == 1 ? 'vez' : 'veces'}</div>
-                                            <div class="cine-badge-recomendada"><i class="fas fa-envelope"></i></div>
-                                        </div>`;
-        }).join('');
-
-    window._renderStackPosicionesRecomendadasSeries();
-}
-
-window._renderStackPosicionesRecomendadasSeries = function() {
-    const cards = document.querySelectorAll('#cineStackRecomendadasSeriesContainer .cine-stack-card');
-    const N = _stackRecomendadasSeries.length;
-    cards.forEach((card, i) => {
-        let diff = i - _stackIndiceRecomendadasSeries;
-        if (diff > N / 2) diff -= N;
-        if (diff < -N / 2) diff += N;
-                // Profundidad simbólica: SOLO diff 0/1/2 son las 3 cards visibles.
-                // Todo lo demás (aunque sean miles) va a la posición "invisible",
-                // así el mazo se ve igual de grueso sin importar la cantidad real.
-                const offset = (diff >= 0 && diff <= 2) ? diff : -1;
-
-        card.style.pointerEvents = offset === 0 ? 'auto' : 'none';
-
-        if (offset === 0) {
-            card.style.transform = 'translateX(0) translateY(0) scale(1) rotate(0deg)';
-            card.style.opacity = 1; card.style.zIndex = 10;
-        } else if (offset === 1) {
-            card.style.transform = 'translateX(-18px) translateY(10px) scale(0.94) rotate(-3deg)';
-            card.style.opacity = 0.6; card.style.zIndex = 8;
-        } else if (offset === 2) {
-            card.style.transform = 'translateX(-36px) translateY(20px) scale(0.88) rotate(-6deg)';
-            card.style.opacity = 0.3; card.style.zIndex = 7;
-        } else {
-            card.style.transform = 'translateX(260px) translateY(-10px) scale(0.8) rotate(16deg)';
-            card.style.opacity = 0; card.style.zIndex = 5;
-        }
-    });
-    const tituloEl = document.getElementById('cineStackRecomendadasSeriesTitulo');
-    if (tituloEl && _stackRecomendadasSeries[_stackIndiceRecomendadasSeries]) {
-        tituloEl.textContent = _stackRecomendadasSeries[_stackIndiceRecomendadasSeries].seriesTitle || '—';
-    }
-};
-
-window._moverStackRecomendadasSeries = function(dir) {
-    const N = _stackRecomendadasSeries.length;
-    if (N === 0) return;
-    _stackIndiceRecomendadasSeries = (_stackIndiceRecomendadasSeries + dir + N) % N;
-    window._renderStackPosicionesRecomendadasSeries();
-};
 
 // ==============================================
 // SELECTOR DE AVATAR (calcado de mi-cuenta.js, adaptado a Mi Sala:

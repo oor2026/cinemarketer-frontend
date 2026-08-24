@@ -246,24 +246,14 @@
 
         .cine-stack-eyebrow { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cine-accent); font-weight: 600; margin: 0 0 1.2rem; }
 
-        #perfilVotacionesSeriesWrapper .cine-stack-eyebrow,
-        #perfilComentariosSeriesList .cine-stack-eyebrow,
-        #perfilRecomendadasSeriesWrapper .cine-stack-eyebrow,
-        #perfilGuardadasSeriesWrapper .cine-stack-eyebrow { color: var(--cine-accent-series); }
+                #perfilVotacionesSeriesWrapper .cine-stack-eyebrow,
+        #perfilComentariosSeriesList .cine-stack-eyebrow { color: var(--cine-accent-series); }
 
-        .cine-badge-recomendada, .cine-badge-guardada {
-    position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 32px; height: 32px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.4); font-size: 0.85rem; color: white;
-}
-                        .cine-badge-recomendada { background: #e8b923; }
-
-        .cine-veces-tag {
+                .cine-veces-tag {
             position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
             background: rgba(0,0,0,0.65); color: #fff; font-size: 0.72rem; font-weight: 700;
             padding: 4px 10px; border-radius: 12px; white-space: nowrap; z-index: 5;
         }
-        .cine-badge-guardada { background: var(--cine-accent); }
         .cine-stack-area { position: relative; height: 300px; width: 170px; display: flex; align-items: center; justify-content: flex-start; margin: 0; padding-left: 0; }
         .cine-stack-area #cineStackContainer,
         .cine-stack-area #cineStackSeriesContainer,
@@ -277,10 +267,8 @@
             border: 2px solid var(--cine-poster-border);
         }
         /* Series votadas/comentadas — mismo tratamiento, tinte azul */
-        #cineStackSeriesContainer .cine-stack-card,
-        #cineStackComentariosSeriesContainer .cine-stack-card,
-        #cineStackRecomendadasSeriesContainer .cine-stack-card,
-        #cineStackGuardadasSeriesContainer .cine-stack-card {
+                #cineStackSeriesContainer .cine-stack-card,
+        #cineStackComentariosSeriesContainer .cine-stack-card {
             box-shadow: var(--cine-poster-shadow-series, var(--cine-poster-shadow)), 0 0 0 1px var(--cine-border);
             border-color: var(--cine-poster-border-series);
         }
@@ -445,7 +433,7 @@
                     <div class="cine-stats-inline">
                         <span class="perfil-stat-inline" onclick="window._irAActividadDesdeMetrica('votaciones')" style="cursor:pointer;"><i class="fas fa-thumbs-up cine-stat-icon"></i><span class="cine-stat-num" id="perfilVotaciones">0</span><span class="cine-stat-lbl">votaciones</span></span>
                         <span class="perfil-stat-inline" onclick="window._irAActividadDesdeMetrica('comentarios')" style="cursor:pointer;"><i class="fas fa-comment cine-stat-icon"></i><span class="cine-stat-num" id="perfilComentarios">0</span><span class="cine-stat-lbl">comentarios</span></span>
-                        <span class="perfil-stat-inline" onclick="window._irAActividadDesdeMetrica('recomendadas')" style="cursor:pointer;"><i class="fas fa-envelope cine-stat-icon"></i><span class="cine-stat-num" id="perfilRecomendadas">0</span><span class="cine-stat-lbl">recomendadas</span></span>
+                        <span class="perfil-stat-inline" onclick="window._irAPublicacionesDesdeMetrica()" style="cursor:pointer;"><i class="fas fa-file-alt cine-stat-icon"></i><span class="cine-stat-num" id="perfilPublicaciones">0</span><span class="cine-stat-lbl">publicaciones</span></span>
                         <span class="perfil-stat-inline" id="perfilSeguidoresWrap"><i class="fas fa-users cine-stat-icon cine-stat-icon--flip"></i><span class="cine-stat-num" id="perfilSeguidores">0</span><span class="cine-stat-lbl">seguidores</span></span>
                         <span class="perfil-stat-inline" id="perfilSiguiendoWrap"><span class="cine-stat-icon-compuesto cine-stat-icon"><i class="fas fa-user"></i><i class="fas fa-angles-right"></i></span><span class="cine-stat-num" id="perfilSiguiendo">0</span><span class="cine-stat-lbl">seguidos</span></span>
                         <div class="clickable" id="perfilSeguirWrap" style="display:flex; gap:0.5rem;">
@@ -683,10 +671,6 @@
                         <span class="cine-actividad-menu-lbl">Comentarios</span>
                         <span class="cine-actividad-menu-count" id="cineActividadCountComentarios"></span>
                     </button>
-                    <button class="cine-actividad-menu-item" data-criterio="recomendadas" onclick="window._seleccionarCriterioActividad('recomendadas')">
-                        <span class="cine-actividad-menu-lbl">Recomendadas</span>
-                        <span class="cine-actividad-menu-count" id="cineActividadCountRecomendadas"></span>
-                    </button>
                 </div>
                 <div class="cine-actividad-row" style="display:flex; flex-wrap:wrap; gap:2.6rem; margin-left:-40px;">
                     <div id="perfilVotacionesWrapper" style="max-width:200px;">
@@ -698,15 +682,9 @@
                 <div id="perfilComentariosList" style="max-width:200px;">
                     <div class="perfil-loading"><i class="fas fa-spinner fa-spin"></i></div>
                 </div>
-                <div id="perfilComentariosSeriesList" style="max-width:200px;">
-                    <div class="perfil-loading"><i class="fas fa-spinner fa-spin"></i></div>
-                </div>
-                <div id="perfilRecomendadasWrapper" style="max-width:200px;">
-                    <div class="perfil-loading"><i class="fas fa-spinner fa-spin"></i></div>
-                </div>
-                <div id="perfilRecomendadasSeriesWrapper" style="max-width:200px;">
-                    <div class="perfil-loading"><i class="fas fa-spinner fa-spin"></i></div>
-                </div>
+                    <div id="perfilComentariosSeriesList" style="max-width:200px;">
+                        <div class="perfil-loading"><i class="fas fa-spinner fa-spin"></i></div>
+                    </div>
                 </div>
             </div>
 
