@@ -1,0 +1,28 @@
+<div class="mi-lista-contenedor">
+    <div class="mi-lista-header">
+        <div class="mi-lista-header-icon">
+            <i class="fas fa-bookmark"></i>
+        </div>
+        <div class="mi-lista-header-text">
+            <h2>Mi lista</h2>
+            <p>Acá podés ver todas las pelis y series que fuiste guardando y te interesan.</p>
+        </div>
+    </div>
+
+    <div class="mi-lista-switch">
+        <button class="mi-lista-switch-btn active" id="miListaBtnPeliculas" onclick="window.cambiarTipoMiLista('peliculas')">🎬 Películas</button>
+        <button class="mi-lista-switch-btn" id="miListaBtnSeries" onclick="window.cambiarTipoMiLista('series')">📺 Series</button>
+    </div>
+
+    <div class="mi-lista-buscador">
+        <div class="mi-lista-buscador-input-wrap">
+            <input type="text" id="miListaBuscarInput" placeholder="Buscar en mi lista..." oninput="window._buscarEnMiLista(this.value)" autocomplete="off">
+            <button type="button" id="miListaBuscarClear" class="mi-lista-buscar-clear" onclick="window._limpiarBusquedaMiLista()"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="miListaBuscarResultados" class="mi-lista-buscar-resultados"></div>
+    </div>
+
+    <div id="miListaCarrusel" class="mi-lista-carrusel">
+        <div style="padding:1rem;"><i class="fas fa-spinner fa-spin"></i></div>
+    </div>
+</div>
