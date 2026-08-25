@@ -307,10 +307,18 @@ window.cargarFilasGenero = async function() {
         if (filasCont) filasCont.style.display = 'block';
     }
 
-    if (window._filasGeneroCargadas) {
-        renderFilasGenero();
-        return;
-    }
+        if (window._filasGeneroCargadas) {
+            // Los datos (window._filasGenero) sobreviven en memoria entre
+            // navegaciones dentro de la SPA, pero el DOM del feed se
+            // recarga de cero cada vez — con los 4 pills viejos
+            // hardcodeados en el HTML. Sin este renderPillsFilas(), esa
+            // fila nunca se actualizaba al volver al feed, aunque los
+            // carruseles de abajo sí lo hacían (por eso el bug era
+            // intermitente y "silencioso": todo lo demás funcionaba bien).
+            renderPillsFilas();
+            renderFilasGenero();
+            return;
+        }
 
     const fijas = [
         { key: 'fecha', label: '🔥 Más populares', tipo: 'fijo' },
