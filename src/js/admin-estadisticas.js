@@ -94,6 +94,7 @@ const adminEstadisticas = {
             this.renderizarUsuarios();
             this.renderizarVotos();
             this.renderizarNoVistas();
+            this.renderizarPreferencias();
             this.renderizarComentarios();
             this.renderizarRecomendaciones();
             this.renderizarPublicaciones();
@@ -397,6 +398,93 @@ const adminEstadisticas = {
                         </div>
                     `;
                 },
+
+
+                    // Renderizar tarjeta de "Preferencias" (tabs Total / Películas / Series,
+                    // y dentro de cada uno una sub-navegación de 4 vistas: Espíritu,
+                    // Favoritas, No me canso, No la banco).
+                    renderizarPreferencias: function() {
+                        const p = this.datos.preferencias;
+                        if (!p) return;
+
+                        document.getElementById('stats-preferencias-body').innerHTML = `
+                            <div class="stats-subtabs">
+                                <button class="stats-subtab-btn active" data-subtab="total" onclick="adminEstadisticas.cambiarSubtabPreferencias('total', this)">Total</button>
+                                <button class="stats-subtab-btn" data-subtab="peliculas" onclick="adminEstadisticas.cambiarSubtabPreferencias('peliculas', this)">Películas</button>
+                                <button class="stats-subtab-btn" data-subtab="series" onclick="adminEstadisticas.cambiarSubtabPreferencias('series', this)">Series</button>
+                            </div>
+                            <div id="stats-preferencias-subtab-total" class="stats-subtab-panel active">
+                                ${this.renderPreferenciasSeccion(p.total, 'total')}
+                            </div>
+                            <div id="stats-preferencias-subtab-peliculas" class="stats-subtab-panel">
+                                ${this.renderPreferenciasSeccion(p.peliculas, 'peliculas')}
+                            </div>
+                            <div id="stats-preferencias-subtab-series" class="stats-subtab-panel">
+                                ${this.renderPreferenciasSeccion(p.series, 'series')}
+                            </div>
+                        `;
+                    },
+
+                    cambiarSubtabPreferencias: function(tab, btn) {
+                        document.querySelectorAll('#stats-preferencias-body > .stats-subtabs .stats-subtab-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        document.querySelectorAll('#stats-preferencias-body > .stats-subtab-panel').forEach(p => p.classList.remove('active'));
+                        document.getElementById('stats-preferencias-subtab-' + tab).classList.add('active');
+                    },
+
+                    // Cada sección (Total/Películas/Series) trae SUS 4 vistas — la
+                    // sub-navegación interna vive con id único por sección para que
+                    // las 3 no se pisen entre sí.
+                    renderPreferenciasSeccion: function(s, seccionId) {
+                        return `
+                            <div class="stats-subtabs" style="margin-top:0.75rem;">
+                                <button class="stats-subtab-btn active" onclick="adminEstadisticas.cambiarVistaPreferencias('${seccionId}', 'espiritu', this)">🧬 Espíritu</button>
+                                <button class="stats-subtab-btn" onclick="adminEstadisticas.cambiarVistaPreferencias('${seccionId}', 'favoritas', this)">❤️ Favoritas</button>
+                                <button class="stats-subtab-btn" onclick="adminEstadisticas.cambiarVistaPreferencias('${seccionId}', 'no-me-canso', this)">🔁 No me canso</button>
+                                <button class="stats-subtab-btn" onclick="adminEstadisticas.cambiarVistaPreferencias('${seccionId}', 'no-la-banco', this)">🙅 No la banco</button>
+                            </div>
+                            <div id="pref-${seccionId}-vista-espiritu" class="stats-subtab-panel active">
+                                ${this.renderEspirituLista(s.distribucionEspiritu)}
+                            </div>
+                            <div id="pref-${seccionId}-vista-favoritas" class="stats-subtab-panel">
+                                ${this.renderGustoLista(s.topFavoritas, 'Sin cambios de "Mi favorita" en este período')}
+                            </div>
+                            <div id="pref-${seccionId}-vista-no-me-canso" class="stats-subtab-panel">
+                                ${this.renderGustoLista(s.topNoMeCanso, 'Sin cambios de "No me canso de ver" en este período')}
+                            </div>
+                            <div id="pref-${seccionId}-vista-no-la-banco" class="stats-subtab-panel">
+                                ${this.renderGustoLista(s.topNoLaBanco, 'Sin cambios de "No la banco" en este período')}
+                            </div>
+                        `;
+                    },
+
+                    cambiarVistaPreferencias: function(seccionId, vista, btn) {
+                        const cont = document.getElementById('pref-' + seccionId + '-vista-espiritu').parentElement;
+                        cont.querySelectorAll(':scope > .stats-subtabs .stats-subtab-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        cont.querySelectorAll(':scope > .stats-subtab-panel').forEach(p => p.classList.remove('active'));
+                        document.getElementById('pref-' + seccionId + '-vista-' + vista).classList.add('active');
+                    },
+
+                    renderEspirituLista: function(distribucion) {
+                        if (!distribucion || distribucion.length === 0) {
+                            return '<p style="padding:1rem;color:#888;">Sin datos en este período.</p>';
+                        }
+                        const items = distribucion.map((d, i) =>
+                            `<li>#${i + 1} <strong>${d.genero}</strong> (${d.totem}) — ${d.porcentaje}% <span style="color:#888;">(${this.formatearNumero(d.total)})</span></li>`
+                        ).join('');
+                        return `<div class="stats-top"><ul>${items}</ul></div>`;
+                    },
+
+                    renderGustoLista: function(lista, mensajeVacio) {
+                        if (!lista || lista.length === 0) {
+                            return `<p style="padding:1rem;color:#888;">${mensajeVacio}</p>`;
+                        }
+                        const items = lista.map((g, i) =>
+                            `<li>#${i + 1} <strong>${g.titulo || 'Sin título'}</strong> — ${this.formatearNumero(g.total)} usuario${g.total == 1 ? '' : 's'}</li>`
+                        ).join('');
+                        return `<div class="stats-top"><ul>${items}</ul></div>`;
+                    },
 
                 formatearFechaCorta: function(fechaIso) {
             const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
