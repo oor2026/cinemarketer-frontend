@@ -30,10 +30,16 @@ window.cambiarTipoMiLista = async function(tipo) {
         // sin volver a pedirle nada al servidor por cada letra tipeada.
         window._itemsMiListaActual = items;
 
-        if (items.length === 0) {
-            carrusel.innerHTML = '<p class="mi-lista-vacio">Todavía no guardaste nada acá.</p>';
-            return;
-        }
+                if (items.length === 0) {
+                    carrusel.innerHTML = '<p class="mi-lista-vacio">Todavía no guardaste nada acá.</p>';
+                    // El título del mazo vive FUERA del carrusel (es un hermano,
+                    // insertado con carrusel.after(...) en _pintarMazoMiLista) —
+                    // si no se limpia acá, sobrevive al cambio de pestaña
+                    // mostrando el nombre de lo último que se vio en el mazo.
+                    const tituloMazo = document.getElementById('miListaMazoTitulo');
+                    if (tituloMazo) tituloMazo.remove();
+                    return;
+                }
 
         if (window.matchMedia('(max-width: 768px)').matches) {
             window._pintarMazoMiLista(items, tipo, carrusel);
@@ -53,6 +59,9 @@ window._pintarCarruselPlanoMiLista = function(items, tipo, carrusel) {
             ? `<img src="https://image.tmdb.org/t/p/w300${poster}" alt="${titulo || ''}">`
             : '';
         return `<div class="mi-lista-card" data-idx="${i}">
+            <button class="mi-lista-card-eliminar" onclick="event.stopPropagation(); window._eliminarDeMiLista(${item.id}, '${tipo}')" title="Quitar de mi lista">
+                <i class="fas fa-times"></i>
+            </button>
             <div class="mi-lista-card-poster">${posterHtml}</div>
             <p class="mi-lista-card-titulo">${titulo || ''}</p>
         </div>`;
@@ -77,14 +86,19 @@ window._pintarMazoMiLista = function(items, tipo, carrusel) {
     tituloMazo.className = 'mi-lista-mazo-titulo';
     carrusel.after(tituloMazo);
 
-    carrusel.innerHTML = items.map(item => {
-        const titulo = tipo === 'series' ? item.seriesTitle : item.movieTitle;
-        const poster = tipo === 'series' ? item.seriesPosterPath : item.moviePosterPath;
-        const posterHtml = poster
-            ? `<img src="https://image.tmdb.org/t/p/w300${poster}" alt="${titulo || ''}">`
-            : '';
-        return `<div class="mi-lista-card-mazo">${posterHtml}</div>`;
-    }).join('');
+        carrusel.innerHTML = items.map(item => {
+            const titulo = tipo === 'series' ? item.seriesTitle : item.movieTitle;
+            const poster = tipo === 'series' ? item.seriesPosterPath : item.moviePosterPath;
+            const posterHtml = poster
+                ? `<img src="https://image.tmdb.org/t/p/w300${poster}" alt="${titulo || ''}">`
+                : '';
+            return `<div class="mi-lista-card-mazo">
+                <button class="mi-lista-card-mazo-eliminar" onclick="event.stopPropagation(); window._eliminarDeMiLista(${item.id}, '${tipo}')" title="Quitar de mi lista">
+                    <i class="fas fa-times"></i>
+                </button>
+                ${posterHtml}
+            </div>`;
+        }).join('');
 
     const cards = carrusel.querySelectorAll('.mi-lista-card-mazo');
 
@@ -185,3 +199,44 @@ window._irAResultadoMiLista = function(idx) {
         if (card) card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
     }
 };
+
+// Misma acción que "destildar el bookmark" en la ficha de la
+// película/serie — pega al mismo DELETE, solo que desde acá directo.
+window._eliminarDeMiLista = async function(watchlistId, tipo) {
+    const url = tipo === 'series'
+        ? `${CONFIG.API_URL}/series-watchlist/${watchlistId}`
+        : `${CONFIG.API_URL}/watchlist/${watchlistId}`;
+
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(url, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+                if (!res.ok) return;
+
+                window._mostrarToastMiLista('Fue quitada de tu lista correctamente');
+
+                // Recarga completa — más simple y confiable que intentar
+                // remover solo esa carta a mano del mazo/carrusel (evita tener
+                // que recalcular índices del mazo en vivo).
+                window.cambiarTipoMiLista(window._tipoMiListaActual);
+            } catch (e) {}
+        };
+
+        window._mostrarToastMiLista = function(mensaje) {
+            const toast = document.createElement('div');
+            toast.textContent = mensaje;
+            toast.style.cssText = `
+                position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+                background: #1a3a6b; color: white; padding: 0.75rem 1.5rem;
+                border-radius: 99px; font-size: 0.9rem; font-weight: 500;
+                z-index: 9999999; box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+                transition: opacity 0.3s;
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        };
