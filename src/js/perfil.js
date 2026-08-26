@@ -1081,10 +1081,11 @@ window.subirBanner = async function(input) {
                                     // click — en desktop el chip no reacciona en absoluto.
                                     window._abrirRankingDesdeChip = function(tipo) {
                                         if (!window.matchMedia('(max-width: 768px)').matches) return;
+                                        const nombreDelPerfil = document.getElementById('perfilNombre')?.textContent || '';
                                         if (tipo === 'series' && typeof window.abrirRankingTriviaSeries === 'function') {
-                                            window.abrirRankingTriviaSeries(perfil.id, perfil.name);
+                                            window.abrirRankingTriviaSeries(perfilUsuarioId, nombreDelPerfil);
                                         } else if (tipo === 'peliculas' && typeof window.abrirRankingTrivia === 'function') {
-                                            window.abrirRankingTrivia(perfil.id, perfil.name);
+                                            window.abrirRankingTrivia(perfilUsuarioId, nombreDelPerfil);
                                         }
                                     };
 

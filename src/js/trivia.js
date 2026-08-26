@@ -474,7 +474,7 @@ function renderComparacionRankingTrivia(ranking, otroUsuarioId, otroNombre) {
     } else if (!yo) {
         leyenda = `Todavía no jugaste trivia — animate a ver cómo te va contra ${nombre}.`;
     } else if (!otro) {
-        leyenda = `${nombre} todavía no jugó trivia — no hay con qué comparar.`;
+        leyenda = `${nombre} todavía no jugó trivia — habrá que esperar.`;
     } else if (yo.posicion < otro.posicion) {
         leyenda = `¡Le sacás ventaja a ${nombre}!`;
     } else if (yo.posicion > otro.posicion) {
