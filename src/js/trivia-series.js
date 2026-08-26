@@ -8,8 +8,16 @@ window._triviaSeriesTimerInterval = null;
 function triviaSeriesFechaHoy() {
     return new Date().toISOString().slice(0, 10);
 }
+// Mismo fix que en trivia.js — aislar por usuario/guest token, si no
+// una cuenta "tapa" la advertencia que le correspondía a otra en el
+// mismo navegador.
+function triviaSeriesAdvertenciaKey() {
+    const token = localStorage.getItem('token');
+    const identificador = token ? localStorage.getItem('userId') : triviaSeriesGuestToken();
+    return `triviaSeriesAdvertenciaFecha_${identificador}`;
+}
 function triviaSeriesYaAdvertido() {
-    return localStorage.getItem('triviaSeriesAdvertenciaFecha') === triviaSeriesFechaHoy();
+    return localStorage.getItem(triviaSeriesAdvertenciaKey()) === triviaSeriesFechaHoy();
 }
 
 function triviaSeriesGuestToken() {
@@ -115,7 +123,7 @@ function renderTriviaSeriesAdvertencia(estado) {
 }
 
 window.triviaSeriesConfirmarInicio = function() {
-    localStorage.setItem('triviaSeriesAdvertenciaFecha', triviaSeriesFechaHoy());
+        localStorage.setItem(triviaSeriesAdvertenciaKey(), triviaSeriesFechaHoy());
     if (window._triviaSeriesEstadoPendiente) {
         renderTriviaSeriesEstado(window._triviaSeriesEstadoPendiente);
         window._triviaSeriesEstadoPendiente = null;

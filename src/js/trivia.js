@@ -7,8 +7,17 @@ window._triviaTimerInterval = null;
 function triviaFechaHoy() {
     return new Date().toISOString().slice(0, 10);
 }
+// La clave se aísla por usuario (o por guest token si no hay sesión) —
+// si no, en un navegador compartido entre 2 cuentas, la advertencia que
+// vio la Cuenta A "tapaba" la que le correspondía ver a la Cuenta B ese
+// mismo día, aunque fuera su primera vez.
+function triviaAdvertenciaKey() {
+    const token = localStorage.getItem('token');
+    const identificador = token ? localStorage.getItem('userId') : triviaGuestToken();
+    return `triviaAdvertenciaFecha_${identificador}`;
+}
 function triviaYaAdvertido() {
-    return localStorage.getItem('triviaAdvertenciaFecha') === triviaFechaHoy();
+    return localStorage.getItem(triviaAdvertenciaKey()) === triviaFechaHoy();
 }
 
 function triviaGuestToken() {
@@ -109,7 +118,7 @@ function renderTriviaAdvertencia(estado) {
 }
 
 window.triviaConfirmarInicio = function() {
-    localStorage.setItem('triviaAdvertenciaFecha', triviaFechaHoy());
+    localStorage.setItem(triviaAdvertenciaKey(), triviaFechaHoy());
     if (window._triviaEstadoPendiente) {
         renderTriviaEstado(window._triviaEstadoPendiente);
         window._triviaEstadoPendiente = null;
