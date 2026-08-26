@@ -194,6 +194,24 @@
         </div>
     </footer>
 
+    <!-- MODAL "¿POR QUÉ LA GUARDASTE?" — 100% opcional, aparece después
+     de guardar (nunca antes, no bloquea el guardado). Tono amigable,
+     no de encuesta — se puede cerrar sin elegir nada. -->
+    <div id="modalMotivoGuardado" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;" onclick="window._cerrarModalMotivoGuardado()">
+        <div style="background:#fff; border-radius:16px; max-width:340px; width:100%; padding:1.5rem; text-align:center;" onclick="event.stopPropagation()">
+            <p style="font-size:1.5rem; margin:0 0 0.5rem;">📌</p>
+            <p style="font-size:0.95rem; font-weight:700; color:#333; margin:0 0 0.3rem;">¡Guardada!</p>
+            <p style="font-size:0.82rem; color:#888; margin:0 0 1.2rem;">¿Por qué la guardaste? (no es obligatorio)</p>
+            <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                <button class="motivo-chip" onclick="window._elegirMotivoGuardado('verla_despues')">🍿 La quiero ver después</button>
+                <button class="motivo-chip" onclick="window._elegirMotivoGuardado('coleccion')">🗂️ Es parte de mi colección</button>
+                <button class="motivo-chip" onclick="window._elegirMotivoGuardado('recomendada')">💬 Me la recomendaron</button>
+                <button class="motivo-chip" onclick="window._elegirMotivoGuardado('con_alguien')">👥 Quiero verla con alguien</button>
+            </div>
+            <button onclick="window._cerrarModalMotivoGuardado()" style="margin-top:1rem; background:none; border:none; color:#aaa; font-size:0.78rem; cursor:pointer;">Ahora no, gracias</button>
+        </div>
+    </div>
+
     <!-- MODAL PARA DOCUMENTOS LEGALES -->
     <div id="footerModalOverlay" class="footer-modal-overlay">
         <div class="footer-modal-container">
