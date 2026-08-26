@@ -1213,42 +1213,60 @@ const adminEstadisticas = {
                     `;
                 },
 
-                renderGuardadasSeccion: function(s, tituloTop, color) {
-                    const acento = color === 'series' ? '#324c89' : '#e50914';
+                                renderGuardadasSeccion: function(s, tituloTop, color) {
+                                    const acento = color === 'series' ? '#324c89' : '#e50914';
 
-                    const topContent = (s.topContent || []).map((p, i) =>
-                        `<li><strong>${i + 1}. ${p.titulo}</strong>: ${p.total} usuarios</li>`
-                    ).join('') || '<li>Sin datos</li>';
+                                    const topContent = (s.topContent || []).map((p, i) =>
+                                        `<li><strong>${i + 1}. ${p.titulo}</strong>: ${p.total} usuarios</li>`
+                                    ).join('') || '<li>Sin datos</li>';
 
-                    const generos = (s.generos || []).map(g =>
-                        `<li><strong>${g.genero}</strong>: ${g.total} (${g.porcentaje}%)</li>`
-                    ).join('') || '<li>Sin datos</li>';
+                                    const generos = (s.generos || []).map(g =>
+                                        `<li><strong>${g.genero}</strong>: ${g.total} (${g.porcentaje}%)</li>`
+                                    ).join('') || '<li>Sin datos</li>';
 
-                    return `
-                        <div class="stats-hero-numero" style="color:${acento};">${this.formatearNumero(s.totalGuardadas)}</div>
-                        <div class="stats-hero-label">items guardados</div>
+                                    // Etiquetas legibles para los 4 chips del modal — el
+                                    // backend solo guarda la key corta (verla_despues, etc.)
+                                    const ETIQUETAS_MOTIVO = {
+                                        verla_despues: '🍿 La quiero ver después',
+                                        coleccion: '🗂️ Es parte de mi colección',
+                                        recomendada: '💬 Me la recomendaron',
+                                        con_alguien: '👥 Quiero verla con alguien'
+                                    };
+                                    const motivos = (s.motivos || []).map(m =>
+                                        `<li><strong>${ETIQUETAS_MOTIVO[m.motivo] || m.motivo}</strong>: ${m.total} (${m.porcentaje}%)</li>`
+                                    ).join('') || '<li>Sin datos</li>';
 
-                        <div class="stats-kpi-row">
-                            <div class="stats-kpi-card"><div class="kpi-valor">${this.formatearNumero(s.usuariosConLista)}</div><div class="kpi-label">Usuarios con lista</div></div>
-                            <div class="stats-kpi-card"><div class="kpi-valor">${s.promedioPorUsuario}</div><div class="kpi-label">Promedio por usuario</div></div>
-                        </div>
+                                    return `
+                                        <div class="stats-hero-numero" style="color:${acento};">${this.formatearNumero(s.totalGuardadas)}</div>
+                                        <div class="stats-hero-label">items guardados (histórico)</div>
 
-                        <div class="stats-votos-cols">
-                            <div class="stats-votos-col-izq">
-                                <div class="stats-top" style="border-top-color:${acento};">
-                                    <h4>${tituloTop}</h4>
-                                    <ul>${topContent}</ul>
-                                </div>
-                            </div>
-                            <div class="stats-votos-col-der">
-                                <div class="stats-top" style="border-top-color:${acento};">
-                                    <h4>🎭 Géneros más guardados</h4>
-                                    <ul>${generos}</ul>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                },
+                                        <div class="stats-kpi-row">
+                                            <div class="stats-kpi-card"><div class="kpi-valor">${this.formatearNumero(s.usuariosConLista)}</div><div class="kpi-label">Usuarios con lista</div></div>
+                                            <div class="stats-kpi-card"><div class="kpi-valor">${s.promedioPorUsuario}</div><div class="kpi-label">Promedio por usuario</div></div>
+                                            <div class="stats-kpi-card"><div class="kpi-valor">${s.pctConMotivo}%</div><div class="kpi-label">Respondió el motivo</div></div>
+                                        </div>
+
+                                        <div class="stats-votos-cols">
+                                            <div class="stats-votos-col-izq">
+                                                <div class="stats-top" style="border-top-color:${acento};">
+                                                    <h4>${tituloTop}</h4>
+                                                    <ul>${topContent}</ul>
+                                                </div>
+                                            </div>
+                                            <div class="stats-votos-col-der">
+                                                <div class="stats-top" style="border-top-color:${acento};">
+                                                    <h4>🎭 Géneros más guardados</h4>
+                                                    <ul>${generos}</ul>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="stats-top" style="border-top-color:${acento}; margin-top:1rem;">
+                                            <h4>📌 ¿Por qué la guardaron?</h4>
+                                            <ul>${motivos}</ul>
+                                        </div>
+                                    `;
+                                },
 
         // Formatear números grandes (ej: 1234 → 1.2K)
         formatearNumero: function(num) {
