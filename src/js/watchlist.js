@@ -23,30 +23,37 @@ window.toggleWatchlist = async function(movieId, event) {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (!res.ok) return;
-        const data = await res.json();
-        const saved = data.saved;
+                if (!res.ok) return;
+                const data = await res.json();
+                const saved = data.saved;
 
-        // Actualizar cards del feed
-        document.querySelectorAll(`.btn-watchlist[data-movie-id="${movieId}"]`).forEach(btn => {
-            _actualizarBtnWatchlist(btn, saved);
-        });
-        // Actualizar botón del modal si está abierto
-        const btnModal = document.getElementById('btnWatchlistModal');
-        if (btnModal) _actualizarBtnWatchlist(btnModal, saved);
+                // Actualizar cards del feed
+                document.querySelectorAll(`.btn-watchlist[data-movie-id="${movieId}"]`).forEach(btn => {
+                    _actualizarBtnWatchlist(btn, saved);
+                });
+                // Actualizar botón del modal si está abierto
+                const btnModal = document.getElementById('btnWatchlistModal');
+                if (btnModal) _actualizarBtnWatchlist(btnModal, saved);
 
-        // Toast feedback
-                _mostrarToastWatchlist(saved ? 'Guardada en tu lista' : 'Quitada de tu lista');
+                // Toast feedback
+                        _mostrarToastWatchlist(saved ? 'Guardada en tu lista' : 'Quitada de tu lista');
 
-                // Refrescar conteo en tab
-                const countEl = document.getElementById('countMiLista');
-                if (countEl) {
-                    const n = parseInt(countEl.textContent) || 0;
-                    countEl.textContent = saved ? n + 1 : Math.max(0, n - 1);
-                }
+                        // Refrescar conteo en tab
+                        const countEl = document.getElementById('countMiLista');
+                        if (countEl) {
+                            const n = parseInt(countEl.textContent) || 0;
+                            countEl.textContent = saved ? n + 1 : Math.max(0, n - 1);
+                        }
 
-                // Siempre refrescar la lista — esté visible o no
-                window.cargarMiLista();
+                        // Siempre refrescar la lista — esté visible o no
+                        window.cargarMiLista();
+
+                        // Solo al AGREGAR (nunca al quitar) — el modal amigable,
+                        // 100% posterior al guardado real, nunca lo bloquea.
+                        if (saved && data.id) {
+                            window._motivoGuardadoActual = { id: data.id, tipo: 'pelicula' };
+                            document.getElementById('modalMotivoGuardado').style.display = 'flex';
+                        }
 
     } catch (e) {
             // Revertir si falló
@@ -310,16 +317,21 @@ window.toggleWatchlistSerie = async function(seriesId, event) {
         const data = await res.json();
         const saved = data.saved;
 
-        document.querySelectorAll(`.btn-watchlist-serie[data-serie-id="${seriesId}"]`).forEach(btn => {
-            _actualizarBtnWatchlist(btn, saved);
-        });
+                document.querySelectorAll(`.btn-watchlist-serie[data-serie-id="${seriesId}"]`).forEach(btn => {
+                    _actualizarBtnWatchlist(btn, saved);
+                });
 
-        _mostrarToastWatchlist(saved ? 'Guardada en tu lista' : 'Quitada de tu lista');
+                _mostrarToastWatchlist(saved ? 'Guardada en tu lista' : 'Quitada de tu lista');
 
-    } catch (e) {
-        btns.forEach(btn => _actualizarBtnWatchlist(btn, yaGuardado));
-    }
-};
+                if (saved && data.id) {
+                    window._motivoGuardadoActual = { id: data.id, tipo: 'serie' };
+                    document.getElementById('modalMotivoGuardado').style.display = 'flex';
+                }
+
+            } catch (e) {
+                btns.forEach(btn => _actualizarBtnWatchlist(btn, yaGuardado));
+            }
+        };
 
 window.marcarWatchlistSerieEnFeed = async function() {
     const token = localStorage.getItem('token');
@@ -333,6 +345,30 @@ window.marcarWatchlistSerieEnFeed = async function() {
         document.querySelectorAll('.btn-watchlist-serie[data-serie-id]').forEach(btn => {
             const seriesId = parseInt(btn.dataset.serieId);
             _actualizarBtnWatchlist(btn, savedIds.includes(seriesId));
+        });
+    } catch (e) {}
+};
+
+window._cerrarModalMotivoGuardado = function() {
+    document.getElementById('modalMotivoGuardado').style.display = 'none';
+    window._motivoGuardadoActual = null;
+};
+
+window._elegirMotivoGuardado = async function(motivo) {
+    const actual = window._motivoGuardadoActual;
+    window._cerrarModalMotivoGuardado();
+    if (!actual) return;
+
+    const url = actual.tipo === 'serie'
+        ? `${CONFIG.API_URL}/series-watchlist/${actual.id}/motivo`
+        : `${CONFIG.API_URL}/watchlist/${actual.id}/motivo`;
+
+    try {
+        const token = localStorage.getItem('token');
+        await fetch(url, {
+            method: 'PATCH',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ motivo })
         });
     } catch (e) {}
 };
