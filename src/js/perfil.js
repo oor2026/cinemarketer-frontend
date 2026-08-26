@@ -152,6 +152,14 @@ function renderIdentidad(perfil) {
         avatarEl.innerHTML = `<span style="font-size:1.8rem;font-weight:700;color:white;">${inicial}</span>`;
     }
 
+    // El banner nunca se aplicaba acá — se guardaba bien en el backend,
+    // pero cargarPerfil jamás leía perfil.bannerUrl para pintarlo, así
+    // que al recargar la página siempre volvía a verse vacío.
+    const bannerEl = document.querySelector('.perfil-banner');
+    if (bannerEl && perfil.bannerUrl) {
+        bannerEl.style.backgroundImage = `url('${perfil.bannerUrl}')`;
+    }
+
     document.getElementById('perfilNombre').textContent = perfil.nombre || '—';
 
     const badge = document.getElementById('perfilLevelBadge');
@@ -699,13 +707,15 @@ window.subirBanner = async function(input) {
 
         const data = await res.json();
 
-        // Actualizar el header visualmente sin recargar
-        const header = document.querySelector('.perfil-header');
-                if (header && data.bannerUrl) {
-                    header.style.backgroundImage = `url('${data.bannerUrl}')`;
-                }
+                // Actualizar el banner visualmente sin recargar — antes apuntaba
+                // a .perfil-header, un selector distinto al que usa el resto del
+                // archivo (.perfil-banner) para mostrar/ocultar el banner real.
+                const banner = document.querySelector('.perfil-banner');
+                        if (banner && data.bannerUrl) {
+                            banner.style.backgroundImage = `url('${data.bannerUrl}')`;
+                        }
 
-                alert('Banner actualizado correctamente.');
+                        alert('Banner actualizado correctamente.');
 
             } catch(e) {
                 alert('Error al subir el banner. Intentá de nuevo.');
