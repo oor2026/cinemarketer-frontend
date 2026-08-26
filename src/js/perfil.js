@@ -1082,9 +1082,9 @@ window.subirBanner = async function(input) {
                                     window._abrirRankingDesdeChip = function(tipo) {
                                         if (!window.matchMedia('(max-width: 768px)').matches) return;
                                         if (tipo === 'series' && typeof window.abrirRankingTriviaSeries === 'function') {
-                                            window.abrirRankingTriviaSeries();
+                                            window.abrirRankingTriviaSeries(perfil.id, perfil.name);
                                         } else if (tipo === 'peliculas' && typeof window.abrirRankingTrivia === 'function') {
-                                            window.abrirRankingTrivia();
+                                            window.abrirRankingTrivia(perfil.id, perfil.name);
                                         }
                                     };
 

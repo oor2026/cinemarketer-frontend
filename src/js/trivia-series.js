@@ -405,7 +405,7 @@ window.triviaSeriesIntentarReclamar = async function() {
     } catch (e) {}
 };
 
-window.abrirRankingTriviaSeries = async function() {
+window.abrirRankingTriviaSeries = async function(otroUsuarioId, otroNombre) {
     const modal = document.getElementById('rankingTriviaSeriesModal');
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
@@ -415,7 +415,15 @@ window.abrirRankingTriviaSeries = async function() {
     try {
         const res = await fetch(`${CONFIG.API_URL}/trivia-series/ranking`, { headers: triviaSeriesAuthHeaders() });
         const ranking = await res.json();
-        renderRankingTriviaSeries(ranking);
+
+        const miId = localStorage.getItem('userId');
+        const esOtroPerfil = otroUsuarioId && String(otroUsuarioId) !== String(miId);
+
+        if (esOtroPerfil) {
+            renderComparacionRankingTriviaSeries(ranking, otroUsuarioId, otroNombre);
+        } else {
+            renderRankingTriviaSeries(ranking);
+        }
     } catch (e) {
         document.getElementById('rankingTriviaSeriesContenido').innerHTML =
             '<div class="trivia-resultado"><p>No pudimos cargar el ranking.</p></div>';
@@ -461,4 +469,57 @@ function renderRankingTriviaSeries(ranking) {
                 `).join('')}
             </div>
         `;
+}
+
+function renderComparacionRankingTriviaSeries(ranking, otroUsuarioId, otroNombre) {
+    const cont = document.getElementById('rankingTriviaSeriesContenido');
+    const yo = ranking.find(r => r.esUsuarioActual);
+    const otro = ranking.find(r => String(r.userId) === String(otroUsuarioId));
+    const nombre = otroNombre || 'esta persona';
+
+    const formatTiempo = (seg) => {
+        const m = Math.floor(seg / 60);
+        const s = seg % 60;
+        return m > 0 ? `${m}m ${s}s` : `${s}s`;
+    };
+
+    let leyenda;
+    if (!yo && !otro) {
+        leyenda = `Ninguno de los dos jugó trivia todavía.`;
+    } else if (!yo) {
+        leyenda = `Todavía no jugaste trivia — animate a ver cómo te va contra ${nombre}.`;
+    } else if (!otro) {
+        leyenda = `${nombre} todavía no jugó trivia — no hay con qué comparar.`;
+    } else if (yo.posicion < otro.posicion) {
+        leyenda = `¡Le sacás ventaja a ${nombre}!`;
+    } else if (yo.posicion > otro.posicion) {
+        leyenda = `${nombre} te saca ventaja. Todavía podés alcanzarla.`;
+    } else {
+        leyenda = `¡Están empatados!`;
+    }
+
+    const columna = (r, etiqueta) => {
+        if (!r) {
+            return `<div style="flex:1; text-align:center;">
+                <p style="font-weight:700; font-size:0.95rem; margin:0 0 0.5rem;">${etiqueta}</p>
+                <p style="color:#999; font-size:0.82rem;">Sin jugar aún</p>
+            </div>`;
+        }
+        return `<div style="flex:1; text-align:center;">
+            <p style="font-weight:700; font-size:0.95rem; margin:0 0 0.5rem;">${etiqueta}</p>
+            <p style="font-size:1.6rem; font-weight:800; margin:0; color:${r.posicion <= 3 ? '#e8a800' : '#333'};">#${r.posicion}</p>
+            <p style="font-size:0.85rem; color:#666; margin:0.3rem 0 0;">${r.aciertos} aciertos</p>
+            <p style="font-size:0.78rem; color:#999; margin:0.1rem 0 0;">${formatTiempo(r.tiempoTotalSegundos)}</p>
+        </div>`;
+    };
+
+    cont.innerHTML = `
+        <h3 class="ranking-titulo">🏆 Comparación de ranking</h3>
+        <div style="display:flex; align-items:center; gap:1rem; padding:1.2rem 0;">
+            ${columna(yo, '🏆 Vos')}
+            <div style="font-weight:700; color:#ccc; font-size:0.85rem;">VS</div>
+            ${columna(otro, '👤 ' + nombre)}
+        </div>
+        <p style="text-align:center; font-size:0.88rem; color:#555; padding:0 1rem; margin:0;">${leyenda}</p>
+    `;
 }
