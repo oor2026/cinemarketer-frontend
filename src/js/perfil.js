@@ -181,14 +181,16 @@ function renderIdentidad(perfil) {
         const btnBanner = document.getElementById('btnCambiarBanner');
         const btnEditBio = document.getElementById('btnEditarBio');
 
-                const btnBloquearPerfil = document.getElementById('btnBloquearPerfil');
-                const btnEditFavorita = document.getElementById('btnEditarFavorita');
+        const btnBloquearPerfil = document.getElementById('btnBloquearPerfil');
+        const btnEditFavorita = document.getElementById('btnEditarFavorita');
+        const btnCambiarAvatar = document.getElementById('btnCambiarAvatar');
 
-                        if (miId && String(miId) !== String(perfil.id)) {
-                            if (btnBanner) btnBanner.style.display = 'none';
-                            if (btnEditBio) btnEditBio.style.display = 'none';
-                            if (btnEditFavorita) btnEditFavorita.style.display = 'none';
-                    if (btnBloquearPerfil && !perfil.bloqueado) btnBloquearPerfil.style.display = 'flex';
+                if (miId && String(miId) !== String(perfil.id)) {
+                    if (btnBanner) btnBanner.style.display = 'none';
+                    if (btnEditBio) btnEditBio.style.display = 'none';
+                    if (btnEditFavorita) btnEditFavorita.style.display = 'none';
+                    if (btnCambiarAvatar) btnCambiarAvatar.style.display = 'none';
+            if (btnBloquearPerfil && !perfil.bloqueado) btnBloquearPerfil.style.display = 'flex';
 
                 if (perfil.bloqueado) {
                     if (btnSeguir) btnSeguir.style.display = 'none';
@@ -206,6 +208,7 @@ function renderIdentidad(perfil) {
                         if (btnBanner) btnBanner.style.display = 'block';
                         if (btnEditBio) btnEditBio.style.display = 'inline-flex';
                         if (btnEditFavorita) btnEditFavorita.style.display = 'inline-flex';
+                        if (btnCambiarAvatar) btnCambiarAvatar.style.display = 'flex';
                         const btnEditVistaCine = document.getElementById('btnEditarVistaCine');
                         if (btnEditVistaCine) btnEditVistaCine.style.display = 'inline-flex';
                         const btnEditNoMeCanso = document.getElementById('btnEditarNoMeCanso');
