@@ -425,8 +425,11 @@ function renderComentarios(comentarios) {
         return;
     }
 
-    _stackComentarios = comentarios;
-    _stackIndiceComentarios = 0;
+        _stackComentarios = comentarios;
+        _stackIndiceComentarios = 0;
+        window._comentariosPage = 0;
+        window._comentariosHayMas = true; // se confirma solo cuando se pide la próxima tanda
+        window._comentariosCargandoMas = false;
 
         wrapper.innerHTML = `
                         <p class="cine-stack-eyebrow">COMENTARIOS (${window._perfilCounts?.comentariosPeliculas || 0})</p>
@@ -490,13 +493,63 @@ window._renderStackPosicionesComentarios = function() {
     }
 };
 
-window._moverStackComentarios = function(dir) {
+window._comentariosPage = 0;
+window._comentariosHayMas = true;
+window._comentariosCargandoMas = false;
+
+window._moverStackComentarios = async function(dir) {
     const N = _stackComentarios.length;
     if (N === 0) return;
-    _stackIndiceComentarios = (_stackIndiceComentarios + dir + N) % N;
+
+    const proximoIndice = (_stackIndiceComentarios + dir + N) % N;
+
+    // Si avanzamos y estamos por volver al principio del mazo (ya vimos
+    // todos los que tenemos cargados), pedimos la próxima página ANTES
+    // de dar la vuelta — así el mazo sigue creciendo en vez de repetir
+    // en loop siempre los mismos 5 primeros.
+    if (dir > 0 && proximoIndice === 0 && window._comentariosHayMas && !window._comentariosCargandoMas) {
+        window._comentariosCargandoMas = true;
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${CONFIG.API_URL}/users/${perfilUsuarioId}/comentarios?page=${window._comentariosPage + 1}&size=5`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.comentarios && data.comentarios.length > 0) {
+                    window._comentariosPage++;
+                    window._comentariosHayMas = data.hayMas;
+                    _agregarComentariosAlStack(data.comentarios);
+                } else {
+                    window._comentariosHayMas = false;
+                }
+            }
+        } catch (e) {}
+        window._comentariosCargandoMas = false;
+    }
+
+    const NFinal = _stackComentarios.length;
+    _stackIndiceComentarios = (_stackIndiceComentarios + dir + NFinal) % NFinal;
     window._renderStackPosicionesComentarios();
     window._cerrarVineta();
 };
+
+function _agregarComentariosAlStack(nuevos) {
+    _stackComentarios = _stackComentarios.concat(nuevos);
+    const cont = document.getElementById('cineStackComentariosContainer');
+    const offsetIdx = _stackComentarios.length - nuevos.length;
+    const nuevoHtml = nuevos.map((c, i) => {
+        const poster = c.posterPath
+            ? `<img src="https://image.tmdb.org/t/p/w185${c.posterPath}" alt="${c.movieTitle || ''}">`
+            : `<div class="placeholder"><i class="fas fa-film"></i></div>`;
+        return `
+        <div class="cine-stack-card" onclick="window._abrirVinetaComentario(${offsetIdx + i})">
+            ${poster}
+            <div class="cine-badge-comentario"><i class="fas fa-comment-dots"></i></div>
+        </div>`;
+    }).join('');
+    cont.insertAdjacentHTML('beforeend', nuevoHtml);
+}
 
 window._abrirVinetaComentario = function(i) {
     const c = _stackComentarios[i];
@@ -2579,8 +2632,11 @@ function renderComentariosSerie(comentarios) {
         return;
     }
 
-    _stackComentariosSeries = comentarios;
-    _stackIndiceComentariosSeries = 0;
+        _stackComentariosSeries = comentarios;
+        _stackIndiceComentariosSeries = 0;
+        window._comentariosSeriesPage = 0;
+        window._comentariosSeriesHayMas = true;
+        window._comentariosSeriesCargandoMas = false;
 
         wrapper.innerHTML = `
                           <p class="cine-stack-eyebrow">COMENTARIOS (${window._perfilCounts?.comentariosSeries || 0})</p>
@@ -2640,13 +2696,55 @@ window._renderStackPosicionesComentariosSeries = function() {
     }
 };
 
-window._moverStackComentariosSeries = function(dir) {
+window._moverStackComentariosSeries = async function(dir) {
     const N = _stackComentariosSeries.length;
     if (N === 0) return;
-    _stackIndiceComentariosSeries = (_stackIndiceComentariosSeries + dir + N) % N;
+
+    const proximoIndice = (_stackIndiceComentariosSeries + dir + N) % N;
+
+    if (dir > 0 && proximoIndice === 0 && window._comentariosSeriesHayMas && !window._comentariosSeriesCargandoMas) {
+        window._comentariosSeriesCargandoMas = true;
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${CONFIG.API_URL}/users/${perfilUsuarioId}/comentarios-series?page=${window._comentariosSeriesPage + 1}&size=5`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.comentarios && data.comentarios.length > 0) {
+                    window._comentariosSeriesPage++;
+                    window._comentariosSeriesHayMas = data.hayMas;
+                    _agregarComentariosSerieAlStack(data.comentarios);
+                } else {
+                    window._comentariosSeriesHayMas = false;
+                }
+            }
+        } catch (e) {}
+        window._comentariosSeriesCargandoMas = false;
+    }
+
+    const NFinal = _stackComentariosSeries.length;
+    _stackIndiceComentariosSeries = (_stackIndiceComentariosSeries + dir + NFinal) % NFinal;
     window._renderStackPosicionesComentariosSeries();
     window._cerrarVineta();
 };
+
+function _agregarComentariosSerieAlStack(nuevos) {
+    _stackComentariosSeries = _stackComentariosSeries.concat(nuevos);
+    const cont = document.getElementById('cineStackComentariosSeriesContainer');
+    const offsetIdx = _stackComentariosSeries.length - nuevos.length;
+    const nuevoHtml = nuevos.map((c, i) => {
+        const poster = c.posterPath
+            ? `<img src="https://image.tmdb.org/t/p/w185${c.posterPath}" alt="${c.seriesTitle || ''}">`
+            : `<div class="placeholder"><i class="fas fa-tv"></i></div>`;
+        return `
+        <div class="cine-stack-card" onclick="window._abrirVinetaComentarioSerie(${offsetIdx + i})">
+            ${poster}
+            <div class="cine-badge-comentario"><i class="fas fa-comment-dots"></i></div>
+        </div>`;
+    }).join('');
+    cont.insertAdjacentHTML('beforeend', nuevoHtml);
+}
 
 window._abrirVinetaComentarioSerie = function(i) {
     const c = _stackComentariosSeries[i];
