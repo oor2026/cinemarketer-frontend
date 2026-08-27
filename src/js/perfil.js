@@ -92,13 +92,30 @@ async function cargarPerfil(userId) {
     const avatarReset = document.getElementById('perfilAvatar');
     if (avatarReset) { avatarReset.style.background = ''; }
 
-    try {
-        const response = await fetch(`${CONFIG.API_URL}/users/${userId}/profile`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+        try {
+            // Se piden en paralelo, no en cadena: el ADN Cinéfilo (pesado)
+            // ya no viene adentro de /profile, así que no bloquea el
+            // primer pintado del resto de Mi Sala.
+            const [response, adnResponse] = await Promise.all([
+                fetch(`${CONFIG.API_URL}/users/${userId}/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }),
+                fetch(`${CONFIG.API_URL}/users/${userId}/adn-cinefilo-completo`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+            ]);
 
-        if (!response.ok) throw new Error(`Error ${response.status}`);
-        const perfil = await response.json();
+            if (!response.ok) throw new Error(`Error ${response.status}`);
+            const perfil = await response.json();
+
+            if (adnResponse.ok) {
+                const adn = await adnResponse.json();
+                perfil.adnCinefilo = adn.adnCinefilo;
+                perfil.adnCinefiloSeries = adn.adnCinefiloSeries;
+            } else {
+                perfil.adnCinefilo = [];
+                perfil.adnCinefiloSeries = [];
+            }
 
                        window._aplicarModoOscuroGuardado();
 
