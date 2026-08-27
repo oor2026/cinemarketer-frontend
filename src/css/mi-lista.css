@@ -1,49 +1,50 @@
-.mi-lista-contenedor { max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem; }
+.mi-lista-contenedor { max-width: 1150px; margin: 0 auto; padding: 0 1rem 1.5rem; }
 
-/* Header — mismo patrón visual que el resto de los módulos (ver
-   .consultas-header en mis-consultas.css): banner azul, ícono
-   circular a la izquierda, título + leyenda en blanco. */
+/* Header — mismo estilo visual que Club de Beneficios: degradé navy
+   radial, ícono circular en fila con el título, ícono decorativo
+   grande de fondo (mismo mi-lista-header-icon, en versión gigante). */
 .mi-lista-header {
-    background: #324C89;
+    position: relative; overflow: hidden;
+    background: radial-gradient(circle at 15% 20%, #001D7D 0%, #000d3d 70%);
     color: white;
-    padding: 2rem;
-    border-radius: 15px;
-    margin-bottom: 2rem;
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
+    padding: 2.2rem 2.5rem;
+    border-radius: 18px;
+    margin-bottom: 1.5rem;
 }
+.mi-lista-header-decor {
+    position: absolute; right: -10px; top: -20px; font-size: 9rem;
+    color: transparent; -webkit-text-stroke: 2px rgba(229,9,20,0.55); transform: rotate(12deg); z-index: 0;
+}
+.mi-lista-header-titulo-row { display: flex; align-items: center; gap: 1rem; position: relative; z-index: 1; }
 .mi-lista-header-icon {
     background: rgba(255,255,255,0.2);
-    width: 60px;
-    height: 60px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
 }
-.mi-lista-header-icon i { font-size: 2rem; }
-.mi-lista-header-text h2 { font-size: 2rem; margin-bottom: 0.3rem; }
-.mi-lista-header-text p { opacity: 0.9; font-size: 1rem; margin: 0; }
+.mi-lista-header-icon i { font-size: 1.5rem; }
+.mi-lista-header-text h2 { font-size: 1.8rem; margin: 0 0 0.3rem; }
+.mi-lista-header-text p { opacity: 0.75; font-size: 0.95rem; margin: 0; }
 
 @media (max-width: 768px) {
     .mi-lista-header {
-        flex-direction: row;
-        align-items: center;
-        padding: 14px 16px;
+        padding: 1.5rem;
         border-radius: 12px;
         margin-bottom: 10px;
-        gap: 10px;
     }
+    .mi-lista-header-decor { font-size: 6rem; }
     .mi-lista-header-icon {
         width: 40px;
         height: 40px;
-        background: #e50914;
+        background: rgba(255,255,255,0.2);
     }
     .mi-lista-header-icon i { font-size: 1.2rem; }
-    .mi-lista-header-text h2 { font-size: 1rem; margin-bottom: 1px; }
-    .mi-lista-header-text p { font-size: 0.75rem; opacity: 0.75; }
+    .mi-lista-header-text h2 { font-size: 1.2rem; margin-bottom: 1px; }
+    .mi-lista-header-text p { font-size: 0.78rem; opacity: 0.7; }
 }
 .mi-lista-switch { display: inline-flex; gap: 6px; margin-bottom: 1.2rem; }
 .mi-lista-switch-btn {

@@ -6,6 +6,22 @@ const MODULE_PATH = 'modules/';
 const CSS_PATH = 'css/';
 const JS_PATH = 'js/';
 
+// Registro de todo <link>/<script> inyectado dinámicamente por
+// loadModule, de CUALQUIER módulo — antes cada módulo solo se
+// limpiaba a sí mismo al revisitarse, así que el CSS/JS de otros
+// módulos visitados en el medio quedaba vivo para siempre,
+// acumulándose y compitiendo entre sí (CSS pisándose, y JS que
+// nunca se re-ejecutaba porque el <script> viejo seguía ahí).
+window._tagsModuloActual = [];
+
+function limpiarTagsModuloAnterior() {
+    window._tagsModuloActual.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.remove();
+    });
+    window._tagsModuloActual = [];
+}
+
 // ==============================================
 // MÓDULOS CON BANNER PUBLICITARIO HABILITADO
 // Agregar aquí el nombre del módulo para activar
@@ -219,13 +235,18 @@ async function loadModule(moduleName, element = null, updateHash = true) {
         // Splash mobile — solo una vez por sesión por módulo
             mostrarSplashMobile(moduleName);
 
-        try {
-            // HTML
-            const htmlResponse = await fetch(`${MODULE_PATH}${moduleName}.html`);
-            if (!htmlResponse.ok) throw new Error(`Error HTTP: ${htmlResponse.status}`);
+                try {
+                    // Limpia TODO lo que haya quedado inyectado por el módulo
+                    // anterior (de cualquier nombre) antes de traer el nuevo HTML
+                    // — así el módulo que se va nunca convive con el que llega.
+                    limpiarTagsModuloAnterior();
 
-            container.innerHTML = await htmlResponse.text();
-            window.scrollTo(0, 0);
+                    // HTML
+                    const htmlResponse = await fetch(`${MODULE_PATH}${moduleName}.html`);
+                    if (!htmlResponse.ok) throw new Error(`Error HTTP: ${htmlResponse.status}`);
+
+                    container.innerHTML = await htmlResponse.text();
+                    window.scrollTo(0, 0);
 
             // Carga los banners correspondientes al módulo desde la API.
             // Se dispara acá adentro, recién ahora que el HTML del módulo ya
@@ -235,15 +256,14 @@ async function loadModule(moduleName, element = null, updateHash = true) {
             // elementos todavía y el banner quedaba vacío para esa visita.
             cargarBanners(moduleName);
 
-                // CSS
-                const cssId = `css-${moduleName}`;
-                const existingCss = document.getElementById(cssId);
-                if (existingCss) existingCss.remove();
-                const link = document.createElement('link');
-                link.id = cssId;
-                link.rel = 'stylesheet';
-                link.href = `${CSS_PATH}${moduleName}.css?v=${Date.now()}`;
-                document.head.appendChild(link);
+                                // CSS
+                                const cssId = `css-${moduleName}`;
+                                const link = document.createElement('link');
+                                link.id = cssId;
+                                link.rel = 'stylesheet';
+                                link.href = `${CSS_PATH}${moduleName}.css?v=${Date.now()}`;
+                                document.head.appendChild(link);
+                                window._tagsModuloActual.push(cssId);
 
                 // CSS mobile — solo para el módulo Perfil, y solo el navegador
                 // lo aplica cuando el media query matchea. Al ir en un <link>
@@ -253,30 +273,30 @@ async function loadModule(moduleName, element = null, updateHash = true) {
                 // lo que pase con el contenido del archivo.
                 if (moduleName === 'perfil') {
                     const cssMobileId = `css-${moduleName}-mobile`;
-                    const existingCssMobile = document.getElementById(cssMobileId);
-                    if (existingCssMobile) existingCssMobile.remove();
                     const linkMobile = document.createElement('link');
                     linkMobile.id = cssMobileId;
                     linkMobile.rel = 'stylesheet';
                     linkMobile.media = '(max-width: 768px)';
                     linkMobile.href = `${CSS_PATH}${moduleName}-mobile.css?v=${Date.now()}`;
                     document.head.appendChild(linkMobile);
+                    window._tagsModuloActual.push(cssMobileId);
                 }
 
-        // JS
-        const jsId = `js-${moduleName}`;
-        await new Promise((resolve) => {
-            if (document.getElementById(jsId)) {
-                resolve();
-            } else {
-                const script = document.createElement('script');
-                script.id = jsId;
-                script.src = `${JS_PATH}${moduleName}.js?v=${Date.now()}`;
-                script.onload = () => resolve();
-                script.onerror = () => resolve();
-                document.head.appendChild(script);
-            }
-        });
+                // JS — se recrea siempre desde cero (la limpieza de arriba ya
+                // sacó cualquier copia vieja), para que el archivo se re-ejecute
+                // entero en cada visita y ninguna variable de estado del módulo
+                // (contadores, flags de "ya cargado", etc.) quede pegada de una
+                // sesión anterior.
+                const jsId = `js-${moduleName}`;
+                await new Promise((resolve) => {
+                    const script = document.createElement('script');
+                    script.id = jsId;
+                    script.src = `${JS_PATH}${moduleName}.js?v=${Date.now()}`;
+                    script.onload = () => resolve();
+                    script.onerror = () => resolve();
+                    document.head.appendChild(script);
+                    window._tagsModuloActual.push(jsId);
+                });
 
         // Inicializadores específicos
         setTimeout(() => {
@@ -414,6 +434,12 @@ window.cargarPerfilHeader = cargarPerfilHeader;
 window.abrirPerfilUsuario = function(userId) {
     window._perfilUsuarioId = userId;
     sessionStorage.setItem('perfilUsuarioId', userId);
+    // Antes esto llamaba a loadModule('perfil', ...) de nuevo acá abajo,
+    // pero el propio cambio de hash YA dispara el listener de
+    // 'hashchange' (línea ~417), que llama a loadModule solo. Las dos
+    // llamadas casi simultáneas dejaban 2 copias de perfil.js/css
+    // conviviendo, y corrompían el registro de tags del módulo
+    // anterior — explicando bugs de estado "fantasma" en cualquier
+    // módulo al que se navegara justo después.
     window.location.hash = `perfil/${userId}`;
-    loadModule('perfil', null, false);
 };

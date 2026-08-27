@@ -257,11 +257,18 @@ function renderPanelPremium(data) {
     if (activo)    activo.style.display    = 'none';
     if (cancelado) cancelado.style.display = 'none';
 
-    if (data.active && data.status === 'ACTIVE') {
-        // Escenario A — suscripción activa
-        mostrarPanelActivo(data);
+        // Ojo: /api/subscriptions/me devuelve CUALQUIER suscripción activa
+        // del usuario, sin distinguir el plan — si tenés Creator pero no
+        // Premium, este mismo endpoint te la devuelve igual. Por eso hace
+        // falta filtrar explícitamente por planName === 'Premium' acá,
+        // para no mostrar "Premium Activo" cuando en realidad es Creator.
+        const esPlanPremium = data.planName === 'Premium';
 
-    } else if (data.status === 'CANCELLED' && data.endDate) {
+        if (data.active && data.status === 'ACTIVE' && esPlanPremium) {
+            // Escenario A — suscripción activa
+            mostrarPanelActivo(data);
+
+        } else if (data.status === 'CANCELLED' && data.endDate && esPlanPremium) {
         // Escenario B — cancelada con acceso vigente
         const hoy         = new Date();
         const vencimiento = new Date(data.endDate);

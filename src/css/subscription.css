@@ -307,7 +307,7 @@
 }
 
 .premium-modal-header {
-    background: #1a3a6b;
+    background: radial-gradient(circle at 15% 20%, #001D7D 0%, #000d3d 70%);
     padding: 1rem 1.5rem;
     color: white;
 }
