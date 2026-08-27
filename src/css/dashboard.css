@@ -428,13 +428,20 @@ body {
     .nav-link {
         padding: 0.4rem 0.4rem;
         font-size: 0.85rem;
+        flex-shrink: 0;
     }
     .nav-text {
         margin-left: 0.2rem;
+        white-space: nowrap;
+    }
+    .nav-menu {
+        flex-wrap: nowrap;
+        gap: 0.6rem;
     }
     .logo {
         width: 160px;
         padding: 0.5rem 1rem;
+        flex-shrink: 0;
     }
     .nav-menu-close {
         display: none;
