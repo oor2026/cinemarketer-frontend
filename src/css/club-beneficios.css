@@ -94,6 +94,8 @@
 .loading { text-align: center; padding: 3rem; color: #999; grid-column: 1 / -1; }
 .loading i { font-size: 2rem; }
 
+.club-carrusel-dots { display: none; }
+
 @media (max-width: 768px) {
     /* Un solo premio por vista (Free y Premium por igual, misma
        clase para ambos carruseles), deslizable por drag gracias al
@@ -101,8 +103,11 @@
        las flechas, que fuera de este media query siguen intactas
        en desktop. !important porque el JS (_actualizarChevronsClub)
        les pisa un style inline según la posición del scroll. */
-    .club-premios-grid > .premio-card { flex: 0 0 100% !important; }
-    .club-carrusel-nav { display: none !important; }
+        .club-premios-grid > .premio-card { flex: 0 0 100% !important; }
+        .club-carrusel-nav { display: none !important; }
+        .club-carrusel-dots { display: flex; justify-content: center; gap: 7px; margin-top: 10px; }
+        .club-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; cursor: pointer; transition: background 0.2s, transform 0.2s; }
+        .club-dot.activo { background: #e50914; transform: scale(1.3); }
 }
 
 /* ==========================================================
