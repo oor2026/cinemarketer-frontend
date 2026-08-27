@@ -341,6 +341,82 @@ window._inicializarCarruselClub = function(contenedorId) {
     // chevron derecho arranca oculto de una si el catálogo entero
     // entra sin necesidad de desplazar nada.
     requestAnimationFrame(() => window._actualizarChevronsClub(contenedorId));
+    window._inicializarDotsClub(contenedorId);
+};
+
+// Dots de paginación acotados a un máximo de 3 (patrón clásico de
+// paginación indicativa, no "1 dot por elemento"):
+//   - 1 elemento  -> 1 dot
+//   - 2 elementos -> 2 dots
+//   - 3+ elementos -> siempre 3 dots: el primero representa "estoy
+//     en el primer elemento", el último "estoy en el último
+//     elemento", y el del medio representa cualquier posición
+//     intermedia (simula que todavía falta para llegar al final).
+window._inicializarDotsClub = function(contenedorId) {
+    const cont = document.getElementById(contenedorId);
+    const dotsId = contenedorId.replace('clubGrid', 'clubDots');
+    const dotsCont = document.getElementById(dotsId);
+    if (!cont || !dotsCont) return;
+
+    const cards = cont.querySelectorAll('.premio-card');
+    const total = cards.length;
+    if (total <= 1) { dotsCont.innerHTML = ''; return; }
+
+    const cantidadDots = Math.min(total, 3);
+    dotsCont.innerHTML = Array.from({ length: cantidadDots }).map((_, i) =>
+        `<span class="club-dot${i === 0 ? ' activo' : ''}" onclick="window._irADotClub('${contenedorId}', ${i})"></span>`
+    ).join('');
+
+    const actualizarDotsActivos = () => {
+        const primeraCard = cont.querySelector('.premio-card');
+        if (!primeraCard) return;
+        const anchoCard = primeraCard.offsetWidth + 16; // + gap (1rem)
+        const indiceActual = Math.round(cont.scrollLeft / anchoCard);
+
+        let dotActivo;
+        if (total <= 3) {
+            dotActivo = indiceActual;
+        } else if (indiceActual === 0) {
+            dotActivo = 0;
+        } else if (indiceActual >= total - 1) {
+            dotActivo = 2;
+        } else {
+            dotActivo = 1; // cualquier posición intermedia
+        }
+
+        dotsCont.querySelectorAll('.club-dot').forEach((dot, i) => {
+            dot.classList.toggle('activo', i === dotActivo);
+        });
+    };
+    cont.addEventListener('scroll', actualizarDotsActivos);
+};
+
+window._irADotClub = function(contenedorId, indice) {
+    const cont = document.getElementById(contenedorId);
+    if (!cont) return;
+    const cards = cont.querySelectorAll('.premio-card');
+    const total = cards.length;
+    const primeraCard = cont.querySelector('.premio-card');
+    if (!primeraCard) return;
+    const anchoCard = primeraCard.offsetWidth + 16;
+
+    // Con más de 3 elementos, el dot 0 y el último (2) saltan a los
+    // extremos reales; el del medio (1, "en algún punto intermedio")
+    // no representa una tarjeta fija, así que avanza una posición
+    // desde donde esté el scroll actual.
+    let indiceDestino;
+    if (total <= 3) {
+        indiceDestino = indice;
+    } else if (indice === 0) {
+        indiceDestino = 0;
+    } else if (indice === 2) {
+        indiceDestino = total - 1;
+    } else {
+        const indiceActual = Math.round(cont.scrollLeft / anchoCard);
+        indiceDestino = Math.min(indiceActual + 1, total - 2);
+    }
+
+    cont.scrollTo({ left: indiceDestino * anchoCard, behavior: 'smooth' });
 };
 
 window._clubPremiumEstado = 'activos';
