@@ -1,4 +1,4 @@
-.bandeja-container { max-width: 1000px; margin: 0 auto; padding: 1rem; }
+.bandeja-container { max-width: 1150px; margin: 0 auto; padding: 0 1rem 1rem; }
 
 .bandeja-tabs {
     display: flex; gap: 0.5rem; margin-bottom: 1.2rem;
@@ -37,29 +37,35 @@
 
 /* Header */
 .consultas-header {
-    background: #324C89;
+    position: relative; overflow: hidden;
+    background: radial-gradient(circle at 15% 20%, #001D7D 0%, #000d3d 70%);
     color: white;
-    padding: 2rem;
-    border-radius: 15px;
-    margin-bottom: 2rem;
+    padding: 2.2rem 2.5rem;
+    border-radius: 18px;
+    margin-bottom: 1.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 1rem;
 }
+.consultas-header-decor {
+    position: absolute; right: -10px; top: -20px; font-size: 9rem;
+    color: transparent; -webkit-text-stroke: 2px rgba(229,9,20,0.55); transform: rotate(12deg); z-index: 0;
+}
 
 .consultas-header-left {
     display: flex;
     align-items: center;
-    gap: 1.25rem;
+    gap: 1rem;
     flex: 1;
+    position: relative; z-index: 1;
 }
 
 .consultas-header .header-icon {
     background: rgba(255,255,255,0.2);
-    width: 60px;
-    height: 60px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -67,9 +73,9 @@
     flex-shrink: 0;
 }
 
-.consultas-header .header-icon i { font-size: 2rem; }
-.consultas-header .header-text h2 { font-size: 2rem; margin-bottom: 0.3rem; }
-.consultas-header .header-text p { opacity: 0.9; font-size: 1rem; }
+.consultas-header .header-icon i { font-size: 1.5rem; }
+.consultas-header .header-text h2 { font-size: 1.8rem; margin-bottom: 0.3rem; }
+.consultas-header .header-text p { opacity: 0.75; font-size: 0.95rem; }
 
 .btn-nueva-consulta {
     background: white;
@@ -431,6 +437,7 @@
         gap: 10px;
         flex-wrap: nowrap;
     }
+    .consultas-header-decor { font-size: 6rem; }
 
     .consultas-header-left {
         flex-direction: row;

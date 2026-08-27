@@ -883,15 +883,14 @@ select.modal-edicion-input {
         margin-bottom: 0;
     }
 
-    .profile-avatar-section {
-        border-radius: 15px;
-        margin-top: 0.75rem;
-        margin-bottom: 0;
-        padding: 0.75rem 1rem;
-        flex-direction: row;
-        align-items: center;
-        gap: 0.75rem;
-    }
+        .profile-avatar-section {
+            border-radius: 15px;
+            margin-bottom: 0;
+            padding: 0.75rem 1rem;
+            flex-direction: row;
+            align-items: center;
+            gap: 0.75rem;
+        }
 
     .profile-level-info {
         flex-direction: column;
@@ -1139,4 +1138,37 @@ select.modal-edicion-input {
         opacity: 1 !important;
         overflow: visible !important;
     }
+}
+
+/* ==========================================================
+   BANNER SUPERIOR — mismo estilo que Club de Beneficios/Mi Lista/
+   Mis Mensajes/Contacto (degradé navy radial + ícono decorativo).
+   ========================================================== */
+.cuenta-header-v2 {
+    position: relative; overflow: hidden;
+    background: radial-gradient(circle at 15% 20%, #001D7D 0%, #000d3d 70%);
+    color: white;
+    padding: 2.2rem 2.5rem;
+    border-radius: 18px;
+    margin-bottom: 0.6rem;
+}
+.cuenta-header-v2-decor {
+    position: absolute; right: -10px; top: -20px; font-size: 9rem;
+    color: transparent; -webkit-text-stroke: 2px rgba(229,9,20,0.55); transform: rotate(12deg); z-index: 0;
+}
+.cuenta-header-v2-titulo-row { display: flex; align-items: center; gap: 1rem; position: relative; z-index: 1; }
+.cuenta-header-v2-icono {
+    background: rgba(255,255,255,0.2); width: 52px; height: 52px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.5rem;
+}
+.cuenta-header-v2-texto h2 { font-size: 1.8rem; margin: 0 0 0.3rem; }
+.cuenta-header-v2-texto p { opacity: 0.75; font-size: 0.95rem; margin: 0; }
+
+@media (max-width: 768px) {
+    .cuenta-header-v2 { padding: 1.5rem; border-radius: 12px; margin-bottom: 6px; }
+    .cuenta-header-v2-decor { font-size: 6rem; }
+    .cuenta-header-v2-icono { width: 40px; height: 40px; }
+    .cuenta-header-v2-icono i { font-size: 1.2rem; }
+    .cuenta-header-v2-texto h2 { font-size: 1.2rem; margin-bottom: 1px; }
+    .cuenta-header-v2-texto p { font-size: 0.78rem; opacity: 0.7; }
 }
