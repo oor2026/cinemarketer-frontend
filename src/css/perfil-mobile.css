@@ -137,7 +137,15 @@
 .perfil-card .cine-totem { font-size: 2.6rem; }
 .perfil-card .cine-totem-glow { inset: -12px; }
 
-.perfil-card .cine-snapshot { width: 120px; }
+.perfil-card .cine-snapshot {
+    width: 240px;
+    /* Inclinación breve (antes -3deg, ahora la mitad) — con la
+       tarjeta mucho más grande que antes, el mismo ángulo de desktop
+       la sacaba del contenedor y se recortaba. Con -1.5deg y el
+       padding-top que le dimos a .cine-spread de abajo, entra sin
+       cortarse. */
+    transform: rotate(-1.5deg);
+}
 .perfil-card .cine-stack-area { width: 160px; height: 260px; }
 .perfil-card .cine-stack-card { width: 160px; height: 240px; }
 /* Título más ancho (170px) que el mazo (120px) a propósito, para
@@ -224,9 +232,10 @@
 }
 .perfil-card .cine-adn-dot.active { background: var(--cine-section-accent); width: 16px; border-radius: 4px; }
 
-/* "Mis gustos" — las 4 tarjetas (favorita, última en cine, no me
-   canso de ver, no la banco) pasan de wrap (2 filas de 2) a
-   carrusel horizontal con snap. Aplica también a #cineSpreadSeries
+/* "Mis gustos" — mismo tamaño de tarjeta que "Mi actividad"
+   (240x360), y en vez de mostrarse varias "espiadas" al costado,
+   ahora es una por vez a pantalla completa — un carrusel real de
+   tarjetas, no un scroll con peek. Aplica también a #cineSpreadSeries
    porque comparte la misma clase .cine-spread. */
 .perfil-card .cine-spread {
     flex-wrap: nowrap;
@@ -234,21 +243,32 @@
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    gap: 1rem;
+    gap: 0;
     margin-top: 1rem;
-    /* Padding a la izquierda — le da aire al box-shadow del primer
-       póster, que si no queda recortado justo en el borde de scroll
-       (el contenedor no "sabe" que la sombra se extiende más allá
-       de la tarjeta y la corta ahí mismo). */
-    padding-left: 10px;
-    /* Fade en el borde derecho — insinúa que hay más contenido para
-       deslizar sin necesitar flechas ni texto. Los últimos ~40px del
-       contenedor se desvanecen a transparente. */
-    -webkit-mask-image: linear-gradient(to right, black calc(100% - 40px), transparent 100%);
-            mask-image: linear-gradient(to right, black calc(100% - 40px), transparent 100%);
+    justify-content: flex-start;
+    /* Aire arriba para que la esquina de la tarjeta inclinada
+       (rotate(-1.5deg)) tenga margen y no la recorte el scroll del
+       contenedor (overflow-x:auto también clippea en Y). */
+    padding-top: 14px;
 }
 .perfil-card .cine-spread::-webkit-scrollbar { display: none; }
-.perfil-card .cine-spread .cine-snapshot { flex: 0 0 auto; scroll-snap-align: start; }
+.perfil-card .cine-spread .cine-snapshot {
+    flex: 0 0 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+}
+/* El div interno (#perfilFavoritaVista y sus hermanos) necesita su
+   propio ancho explícito — con align-items:center en el padre, ya no
+   se estira solo como antes, y el póster (que depende de un 100% DE
+   ESE DIV, no del contenedor grande) colapsaba a su contenido mínimo
+   cuando estaba vacío (sin imagen real adentro que le diera tamaño
+   propio). Por eso solo se veía bien la que ya tenía una foto cargada. */
+.perfil-card .cine-spread .cine-snapshot > div {
+    width: 240px;
+}
 
 /* Se agrega vía JS cuando el scroll llega al final — ya no queda
    contenido oculto, así que el fade no tiene sentido. */
