@@ -599,3 +599,53 @@
 .club-banner-si-premium i { color: #1a9c56; font-size: 1.3rem; }
 .club-banner-si-premium p { margin: 0; font-size: 0.85rem; color: #1a6b3d; }
 .club-banner-si-premium strong { color: #12592f; }
+
+@media (min-width: 769px) {
+    /* La descripción queda fija, fuera del scroll interno — el scroll
+       pasa a vivir solo en .modal-premio-tabs-scroll (los paneles de
+       Información/Detalles/Términos), no en .modal-premio-info entero
+       como hasta ahora (que hacía scrollear todo junto, arrastrando
+       también la descripción). Solo desktop — mobile ya tiene su
+       propio esquema de scroll resuelto aparte, en el @media de 768px. */
+    .modal-premio-info { overflow: visible; }
+    .modal-premio-descripcion { flex-shrink: 0; }
+    .modal-tabs { flex-shrink: 0; }
+    .modal-premio-tabs-scroll { flex: 1; min-height: 0; overflow-y: auto; padding-right: 0.3rem; }
+
+                               /* "Tus puntos actuales" bajo la IMAGEN (columna izquierda),
+                                  en la misma línea que el botón de acción (que va bajo la
+                                  info, columna derecha). El grid ahora se arma en
+                                  .modal-premio-body (no en columna-derecha), que es donde sí
+                                  existen las dos columnas reales. .modal-premio-columna-derecha
+                                  se aplana con display:contents para que sus hijos (info,
+                                  acciones) compitan como hermanos directos de la imagen y de
+                                  puntos en el mismo grid de 2 columnas. */
+                               .modal-premio-columna-derecha { display: contents; }
+                               .modal-premio-body {
+                                   grid-template-rows: minmax(0, 1fr) auto;
+                                   grid-template-areas:
+                                       "imagen info"
+                                       "puntos acciones";
+                               }
+                               /* align-self:start es la clave — sin esto la imagen se estira
+                                  para llenar toda la fila (comportamiento por default de
+                                  grid) y tapa lo que va debajo. La info, en cambio, SÍ debe
+                                  estirarse (queda con su comportamiento normal) porque así
+                                  es como ya funciona su scroll interno. */
+                               .modal-premio-imagen { grid-area: imagen; align-self: start; }
+                               .modal-premio-info { grid-area: info; min-width: 0; }
+
+                               .modal-premio-acciones { grid-area: acciones; padding-top: 0; }
+                               .btn-canjear-modal { padding: 1rem; }
+
+                               .modal-premio-mis-puntos { display: none; }
+                               .modal-premio-mis-puntos-fijo { grid-area: puntos; display: flex; margin: 0; align-self: start; }
+
+        /* Mismo bug que ya resolvimos en mobile: el max-height:180px +
+           overflow-y:auto inline en el HTML le da su propio scroll interno
+           al texto de Términos — sumado al scroll nuevo de
+           .modal-premio-tabs-scroll, queda un scroll adentro de otro.
+           !important porque es la única forma de ganarle a un estilo
+           puesto inline. */
+        #clubModalPremioTerminos { max-height: none !important; overflow: visible !important; }
+    }
