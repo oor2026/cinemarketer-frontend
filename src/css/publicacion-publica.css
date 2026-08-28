@@ -270,6 +270,21 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     .pub-header { padding: 0.65rem 1rem; }
     .pub-header-btns .btn-login { display: none; }
     .pub-cta-btns { flex-direction: column; align-items: center; }
+
+    /* Las 3 métricas no entran en una sola fila en pantallas angostas
+       — en vez de apretarse sin espacio, pasan a wrap (2 arriba + 1
+       abajo, o las 3 en 2 filas según el ancho real) con su propio
+       espaciado, y cada una nunca se parte internamente. */
+    .pub-metricas {
+        flex-wrap: wrap;
+        row-gap: 0.6rem;
+        column-gap: 1rem;
+        padding: 0.85rem 1rem;
+    }
+    .pub-metrica {
+        white-space: nowrap;
+        font-size: 0.8rem;
+    }
 }
 
 /* ── Rieles de posters laterales — decorativos, solo desktop ancho ─── */
@@ -419,3 +434,20 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     background: white;
     border-radius: 10px;
 }
+
+.pub-btn-cargar-mas {
+    display: block;
+    width: 100%;
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    background: white;
+    border: 1.5px solid #eee;
+    border-radius: 10px;
+    color: #324C89;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+.pub-btn-cargar-mas:hover { background: #f8f9ff; border-color: #324C89; }
+.pub-btn-cargar-mas:disabled { opacity: 0.6; cursor: default; }

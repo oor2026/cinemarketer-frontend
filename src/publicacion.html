@@ -94,7 +94,7 @@
     </div>
 
     <!-- Comentarios -->
-    <div class="pub-comentarios-seccion">
+    <div class="pub-comentarios-seccion" id="pubComentariosSeccion">
       <div class="pub-seccion-titulo">
         <i class="fas fa-comments"></i>
         Comentarios de la comunidad
@@ -168,10 +168,49 @@
       } catch(e) {}
   }
 
+    const PUB_COMENTARIOS_SIZE = 5;
+  let _pubComentariosId = null;
+  let _pubComentariosPage = 0;
+  let _pubComentariosCargando = false;
+
+  function renderComentarioItem(c) {
+      const autor = c.user || {};
+      const inicial = (autor.name || 'U').charAt(0).toUpperCase();
+      const avatarHtml = autor.avatarUrl
+          ? `<img src="${autor.avatarUrl}" alt="${inicial}">`
+          : inicial;
+
+      return `
+      <div class="pub-comentario-item">
+          <div class="pub-comentario-avatar">${avatarHtml}</div>
+          <div class="pub-comentario-cuerpo">
+              <span class="pub-comentario-autor">${autor.name || 'Usuario'}</span>
+              <div class="pub-comentario-texto">${escapeHtml(c.content || '')}</div>
+              <span class="pub-comentario-fecha">${tiempoRelativo(c.createdAt)}</span>
+          </div>
+      </div>`;
+  }
+
+  function actualizarBotonCargarMas(hayMas) {
+      const existente = document.getElementById('pubBtnCargarMasComentarios');
+      if (existente) existente.remove();
+      if (!hayMas) return;
+
+      const btn = document.createElement('button');
+      btn.id = 'pubBtnCargarMasComentarios';
+      btn.className = 'pub-btn-cargar-mas';
+      btn.textContent = 'Cargar más comentarios';
+      btn.onclick = cargarMasComentariosPublicos;
+      document.getElementById('pubComentariosSeccion').appendChild(btn);
+  }
+
   async function cargarComentariosPublicos(id) {
       const lista = document.getElementById('pubComentariosList');
+      _pubComentariosId = id;
+      _pubComentariosPage = 0;
+
       try {
-          const res = await fetch(`${API_URL}/publications/${id}/comments?page=0&size=20`);
+          const res = await fetch(`${API_URL}/publications/${id}/comments?page=0&size=${PUB_COMENTARIOS_SIZE}`);
           if (!res.ok) throw new Error();
           const data = await res.json();
           const comentarios = data.content || [];
@@ -181,30 +220,44 @@
                   <i class="fas fa-comment-slash" style="font-size:1.5rem;color:#ccc;display:block;margin-bottom:0.5rem;"></i>
                   Todavía no hay comentarios en esta publicación.
               </div>`;
+              actualizarBotonCargarMas(false);
               return;
           }
 
-                    const itemsHtml = comentarios.map(c => {
-              const autor = c.user || {};
-              const inicial = (autor.name || 'U').charAt(0).toUpperCase();
-              const avatarHtml = autor.avatarUrl
-                  ? `<img src="${autor.avatarUrl}" alt="${inicial}">`
-                  : inicial;
+          lista.innerHTML = `<div class="pub-comentarios-lista">${comentarios.map(renderComentarioItem).join('')}</div>`;
 
-              return `
-              <div class="pub-comentario-item">
-                  <div class="pub-comentario-avatar">${avatarHtml}</div>
-                  <div class="pub-comentario-cuerpo">
-                      <span class="pub-comentario-autor">${autor.name || 'Usuario'}</span>
-                      <div class="pub-comentario-texto">${escapeHtml(c.content || '')}</div>
-                      <span class="pub-comentario-fecha">${tiempoRelativo(c.createdAt)}</span>
-                  </div>
-              </div>`;
-          }).join('');
-
-          lista.innerHTML = `<div class="pub-comentarios-lista">${itemsHtml}</div>`;
+          const hayMas = data.last === false || comentarios.length === PUB_COMENTARIOS_SIZE;
+          actualizarBotonCargarMas(hayMas);
       } catch(e) {
           lista.innerHTML = `<div class="pub-sin-comentarios">Error al cargar comentarios.</div>`;
+          actualizarBotonCargarMas(false);
+      }
+  }
+
+  async function cargarMasComentariosPublicos() {
+      if (_pubComentariosCargando || !_pubComentariosId) return;
+      _pubComentariosCargando = true;
+
+      const btn = document.getElementById('pubBtnCargarMasComentarios');
+      if (btn) { btn.disabled = true; btn.textContent = 'Cargando...'; }
+
+      try {
+          const siguientePage = _pubComentariosPage + 1;
+          const res = await fetch(`${API_URL}/publications/${_pubComentariosId}/comments?page=${siguientePage}&size=${PUB_COMENTARIOS_SIZE}`);
+          if (!res.ok) throw new Error();
+          const data = await res.json();
+          const comentarios = data.content || [];
+
+          const contenedor = document.querySelector('.pub-comentarios-lista');
+          if (contenedor) contenedor.insertAdjacentHTML('beforeend', comentarios.map(renderComentarioItem).join(''));
+
+          _pubComentariosPage = siguientePage;
+          const hayMas = data.last === false || comentarios.length === PUB_COMENTARIOS_SIZE;
+          actualizarBotonCargarMas(hayMas);
+      } catch(e) {
+          if (btn) { btn.disabled = false; btn.textContent = 'Reintentar'; }
+      } finally {
+          _pubComentariosCargando = false;
       }
   }
 
