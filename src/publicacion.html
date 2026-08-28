@@ -173,18 +173,19 @@
   let _pubComentariosPage = 0;
   let _pubComentariosCargando = false;
 
-  function renderComentarioItem(c) {
+    function renderComentarioItem(c) {
       const autor = c.user || {};
-      const inicial = (autor.name || 'U').charAt(0).toUpperCase();
+      const nombre = escapeHtml(autor.name || 'Usuario');
+      const inicial = escapeHtml((autor.name || 'U').charAt(0).toUpperCase());
       const avatarHtml = autor.avatarUrl
-          ? `<img src="${autor.avatarUrl}" alt="${inicial}">`
+          ? `<img src="${escapeHtml(autor.avatarUrl)}" alt="${inicial}">`
           : inicial;
 
       return `
       <div class="pub-comentario-item">
           <div class="pub-comentario-avatar">${avatarHtml}</div>
           <div class="pub-comentario-cuerpo">
-              <span class="pub-comentario-autor">${autor.name || 'Usuario'}</span>
+              <span class="pub-comentario-autor">${nombre}</span>
               <div class="pub-comentario-texto">${escapeHtml(c.content || '')}</div>
               <span class="pub-comentario-fecha">${tiempoRelativo(c.createdAt)}</span>
           </div>
@@ -440,7 +441,12 @@
   }
 
   function escapeHtml(str) {
-      return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return (str || '')
+          .replace(/&/g,'&amp;')
+          .replace(/</g,'&lt;')
+          .replace(/>/g,'&gt;')
+          .replace(/"/g,'&quot;')
+          .replace(/'/g,'&#39;');
   }
 
   function tiempoRelativo(fechaStr) {
