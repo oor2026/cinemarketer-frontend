@@ -357,47 +357,60 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 }
 .pub-seccion-titulo i { color: #e50914; }
 
-.pub-comentario-item {
+/* Una sola tarjeta contenedora para toda la lista, con separadores
+   finos entre comentarios (patrón Comunidad) en vez de una tarjeta
+   con sombra propia por cada comentario. */
+.pub-comentarios-lista {
     background: white;
-    border-radius: 10px;
-    padding: 1rem 1.1rem;
-    margin-bottom: 0.75rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border-radius: 16px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    overflow: hidden;
 }
 
-.pub-comentario-header {
+.pub-comentario-item {
     display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    margin-bottom: 0.5rem;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #f0f0f0;
 }
+.pub-comentario-item:last-child { border-bottom: none; }
 
 .pub-comentario-avatar {
-    width: 32px;
-    height: 32px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     background: #324C89;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: 700;
     flex-shrink: 0;
     overflow: hidden;
+    margin-top: 2px;
 }
 .pub-comentario-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-.pub-comentario-autor { font-size: 0.85rem; font-weight: 600; color: #1a1a1a; }
-.pub-comentario-fecha { font-size: 0.75rem; color: #aaa; margin-left: auto; }
+.pub-comentario-cuerpo { flex: 1; min-width: 0; }
+
+.pub-comentario-autor {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 3px;
+}
 
 .pub-comentario-texto {
     font-size: 0.88rem;
     color: #444;
     line-height: 1.6;
     word-break: break-word;
+    margin-bottom: 5px;
 }
 
+.pub-comentario-fecha { font-size: 0.75rem; color: #aaa; }
 .pub-sin-comentarios {
     text-align: center;
     color: #aaa;
