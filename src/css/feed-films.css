@@ -2566,12 +2566,13 @@
             display: flex !important;
         }
 
-        #modalPelicula #btnDondeVerlaModal   { order: 1; }
-        #modalPelicula #btnCompartirModal    { order: 2; }
-        #modalPelicula #btnRecomendarModalHeader { order: 3; }
-        #modalPelicula #btnWatchlistModal    { order: 4; }
-        #modalPelicula #btnPublicarModal     { order: 5; }
-        #modalPelicula .modal-cerrar         { order: 6; }
+                #modalPelicula #btnDondeVerlaModal   { order: 1; }
+                #modalPelicula #btnNoInteresaModal   { order: 2; }
+                #modalPelicula #btnCompartirModal    { order: 3; }
+                #modalPelicula #btnRecomendarModalHeader { order: 4; }
+                #modalPelicula #btnWatchlistModal    { order: 5; }
+                #modalPelicula #btnPublicarModal     { order: 6; }
+                #modalPelicula .modal-cerrar         { order: 7; }
 
 
     .pelicula-poster {

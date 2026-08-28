@@ -182,7 +182,25 @@ window.moverFilaSerie = function(key, direccion) {
     track.scrollBy({ left: direccion * track.clientWidth * 0.9, behavior: 'smooth' });
 };
 
+// Se carga una sola vez (no por cada fila) y se cachea en memoria —
+// mismo criterio que window._peliculasNoInteresaIds en feed-films.js.
+window._seriesNoInteresaIds = null;
+async function _cargarSeriesNoInteresaIds() {
+    if (window._seriesNoInteresaIds !== null) return window._seriesNoInteresaIds;
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/series/no-me-interesa/ids`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        window._seriesNoInteresaIds = res.ok ? await res.json() : [];
+    } catch (e) {
+        window._seriesNoInteresaIds = [];
+    }
+    return window._seriesNoInteresaIds;
+}
+
 function esValidaSerie(s, esProximamente, anioActual) {
+    if ((window._seriesNoInteresaIds || []).includes(s.id)) return false;
     if (!s.poster_path || !s.overview || s.overview.trim() === '') return false;
     const anio = s.first_air_date ? new Date(s.first_air_date).getFullYear() : null;
     return esProximamente ? true : (!anio || anio <= anioActual);
@@ -192,6 +210,7 @@ async function cargarSeriesFila(fila) {
     fila.cargado = true;
     const token = localStorage.getItem('token');
     const anioActual = new Date().getFullYear();
+    await _cargarSeriesNoInteresaIds();
 
     try {
         let resultados = [];
@@ -276,6 +295,98 @@ async function cargarSeriesFila(fila) {
                     } catch (e) {}
                 }
 
+// ==============================================
+// "NO ME INTERESA" — mismo criterio que en películas:
+// solo afecta qué se muestra en el feed hacia adelante.
+// ==============================================
+window.marcarNoInteresaSerie = function(seriesId, event) {
+    if (event) event.stopPropagation();
+    const card = document.querySelector(`.serie-card[data-id="${seriesId}"]`);
+    const titulo = card?.querySelector('.serie-titulo')?.textContent?.trim()
+        || document.getElementById('modalTituloSerie')?.textContent?.trim()
+        || 'esta serie';
+
+    _abrirModalNoInteresaSerie(titulo, async () => {
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch(`${CONFIG.API_URL}/series/${seriesId}/no-me-interesa`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error();
+        } catch (e) {
+            alert('No se pudo guardar tu preferencia. Intentá de nuevo.');
+            return;
+        }
+
+                        // Mismo criterio que en películas: se borra el .fila-genero-slide
+                        // entero, no solo la .serie-card de adentro.
+                        document.querySelectorAll(`.serie-card[data-id="${seriesId}"]`).forEach(el => {
+                            const slide = el.closest('.fila-genero-slide') || el;
+                            const track = slide.closest('.fila-genero-track');
+                            const indiceEliminado = track ? Array.from(track.children).indexOf(slide) : -1;
+
+                            slide.style.transition = 'opacity 0.25s ease';
+                            slide.style.opacity = '0';
+                            setTimeout(() => {
+                                slide.remove();
+                                if (track && indiceEliminado >= 0) {
+                                    const anchoCard = track.children[0]?.offsetWidth || track.clientWidth || 1;
+                                    track.scrollLeft = indiceEliminado * anchoCard;
+                                }
+                            }, 250);
+                        });
+
+                        // Mismo criterio que en películas: si estás viendo justo esta
+                        // serie en el modal, se cierra solo al confirmar.
+                        if (String(window.serieActualId) === String(seriesId) && typeof window.cerrarModalSerie === 'function') {
+                            window.cerrarModalSerie();
+                        }
+                    });
+                };
+
+function _abrirModalNoInteresaSerie(titulo, onConfirmar) {
+    let modal = document.getElementById('modalNoInteresaSerie');
+    if (!modal) {
+        document.body.insertAdjacentHTML('beforeend', `
+            <div id="modalNoInteresaSerie" onclick="window._cerrarModalNoInteresaSerie()" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
+                <div style="background:white; border-radius:16px; padding:2rem; max-width:400px; width:100%;" onclick="event.stopPropagation()">
+                    <h3 style="margin:0 0 0.75rem; font-size:1.05rem; color:#333; display:flex; align-items:center; gap:0.5rem;">
+                        <i class="fas fa-eye-slash" style="color:#e50914;"></i> No me interesa
+                    </h3>
+                    <p id="modalNoInteresaSerieTexto" style="margin:0 0 1.5rem; font-size:0.9rem; color:#666; line-height:1.5;"></p>
+                    <div style="display:flex; gap:0.75rem;">
+                        <button onclick="window._cerrarModalNoInteresaSerie()" style="flex:1; padding:0.7rem; border:1.5px solid #ddd; background:none; border-radius:8px; color:#666; cursor:pointer; font-size:0.9rem;">Cancelar</button>
+                        <button id="btnConfirmarNoInteresaSerie" style="flex:2; padding:0.7rem; background:#e50914; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer; font-size:0.9rem;">Sí, no me interesa</button>
+                    </div>
+                </div>
+            </div>`);
+        modal = document.getElementById('modalNoInteresaSerie');
+    }
+
+    document.getElementById('modalNoInteresaSerieTexto').textContent =
+        `No vas a volver a ver "${titulo}" en tu feed. Esta acción no se puede deshacer.`;
+
+        const btnViejo = document.getElementById('btnConfirmarNoInteresaSerie');
+        btnViejo.disabled = false;
+        btnViejo.textContent = 'Sí, no me interesa';
+        const btnNuevo = btnViejo.cloneNode(true);
+        btnViejo.replaceWith(btnNuevo);
+        btnNuevo.onclick = async () => {
+            btnNuevo.disabled = true;
+            btnNuevo.textContent = 'Guardando...';
+            await onConfirmar();
+            window._cerrarModalNoInteresaSerie();
+        };
+
+    modal.style.display = 'flex';
+}
+
+window._cerrarModalNoInteresaSerie = function() {
+    const modal = document.getElementById('modalNoInteresaSerie');
+    if (modal) modal.style.display = 'none';
+};
+
 function generarTarjetaSerieHTML(serie) {
     const posterUrl = serie.poster_path
         ? `https://image.tmdb.org/t/p/w500${serie.poster_path}`
@@ -293,13 +404,16 @@ function generarTarjetaSerieHTML(serie) {
             <div class="serie-poster">
                 <img src="${posterUrl}" alt="${serie.name || ''}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450?text=Error+imagen'">
                 <div class="serie-overlay">
-                    <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;">
+                <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;">
                         <span class="total-votos" id="totalVotosSerie-${serie.id}">0%</span>
                         <button class="btn-donde-verla-overlay" onclick="event.stopPropagation(); window.abrirDondeVerlaSerie(${serie.id}, event)" title="Dónde verla">
                             <i class="fas fa-tv"></i>
                         </button>
                         <button class="btn-donde-verla-overlay" onclick="event.stopPropagation(); window.abrirElencoCardSerie(${serie.id}, event)" title="Elenco y dirección">
                             <i class="fas fa-users"></i>
+                        </button>
+                        <button class="btn-donde-verla-overlay" onclick="event.stopPropagation(); window.marcarNoInteresaSerie(${serie.id}, event)" title="No me interesa">
+                            <i class="fas fa-eye-slash"></i>
                         </button>
                     </div>
                     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
@@ -311,8 +425,8 @@ function generarTarjetaSerieHTML(serie) {
                                 <i class="fas fa-share-alt" style="font-size:0.85rem;"></i>
                             </button>
                             <button onclick="event.stopPropagation(); window.abrirPanelRecomendarSerie(${serie.id}, event)" title="Recomendar" style="background:rgba(0,0,0,0.5);border:none;color:white;width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);">
-                                                        <i class="fas fa-envelope" style="font-size:0.85rem;"></i>
-                                                    </button>
+                                                    <i class="fas fa-envelope" style="font-size:0.85rem;"></i>
+                                                </button>
                         </div>
                     </div>
                 </div>
@@ -467,6 +581,7 @@ function actualizarDotActivoSerie(fila, indice) {
 }
 
 async function cargarMasSeriesFila(fila, track) {
+    await _cargarSeriesNoInteresaIds();
     fila.cargandoMas = true;
     fila.pagina = (fila.pagina || 1) + 1;
     const token = localStorage.getItem('token');

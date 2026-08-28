@@ -54,13 +54,140 @@ window._pintarContadorComentarios = function(el, count) {
     el.closest('.btn-comentarios-card')?.classList.toggle('tiene-comentarios', count > 0);
 };
 
+// ==============================================
+// "NO ME INTERESA" — solo afecta qué se muestra en
+// el feed hacia adelante; no toca votos, comentarios,
+// puntos ni notificaciones (decisión tomada explícitamente,
+// separado de "ocultar comentario" a propósito).
+// ==============================================
+window.marcarNoInteresaPelicula = function(movieId, event) {
+    if (event) event.stopPropagation();
+    const card = document.querySelector(`.pelicula-card[data-id="${movieId}"]`);
+    const titulo = card?.querySelector('.pelicula-titulo')?.textContent?.trim()
+        || document.getElementById('modalTitulo')?.textContent?.trim()
+        || 'esta película';
+
+    _abrirModalNoInteresa(titulo, async () => {
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch(`${CONFIG.API_URL}/movies/${movieId}/no-me-interesa`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error();
+        } catch (e) {
+            alert('No se pudo guardar tu preferencia. Intentá de nuevo.');
+            return;
+        }
+
+                        // Ocultado inmediato de todas las tarjetas de esta película
+                        // que estén en pantalla (puede repetirse en más de un carrusel).
+                        // Se borra el .fila-genero-slide entero (el que da el ancho fijo
+                        // para el scroll-snap), no solo la .pelicula-card de adentro —
+                        // si no, queda el "cascarón" vacío del slide ocupando su lugar.
+                        document.querySelectorAll(`.pelicula-card[data-id="${movieId}"]`).forEach(el => {
+                            const slide = el.closest('.fila-genero-slide') || el;
+                            const track = slide.closest('.fila-genero-track');
+                            const indiceEliminado = track ? Array.from(track.children).indexOf(slide) : -1;
+
+                            slide.style.transition = 'opacity 0.25s ease';
+                            slide.style.opacity = '0';
+                            setTimeout(() => {
+                                slide.remove();
+                                // Avanza automáticamente: al sacar el slide, todo lo que
+                                // venía después se corre un lugar — la que antes era "la
+                                // siguiente" ahora ocupa exactamente esta misma posición.
+                                if (track && indiceEliminado >= 0) {
+                                    const anchoCard = track.children[0]?.offsetWidth || track.clientWidth || 1;
+                                    track.scrollLeft = indiceEliminado * anchoCard;
+                                }
+                            }, 250);
+                        });
+
+                        // Si la acción se disparó desde ADENTRO del modal de detalle
+                        // (estás viendo justo esta película), no tiene sentido dejarlo
+                        // abierto mostrando algo que acabás de decir que no te interesa
+                        // — se cierra, y al volver al carrusel de atrás, la tarjeta ya
+                        // desapareció con la animación de arriba.
+                        if (String(window.peliculaActualId) === String(movieId) && typeof window.cerrarModal === 'function') {
+                            window.cerrarModal();
+                        }
+                    });
+                };
+
+function _abrirModalNoInteresa(titulo, onConfirmar) {
+    let modal = document.getElementById('modalNoInteresaPelicula');
+    if (!modal) {
+        document.body.insertAdjacentHTML('beforeend', `
+            <div id="modalNoInteresaPelicula" onclick="window._cerrarModalNoInteresaPelicula()" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
+                <div style="background:white; border-radius:16px; padding:2rem; max-width:400px; width:100%;" onclick="event.stopPropagation()">
+                    <h3 style="margin:0 0 0.75rem; font-size:1.05rem; color:#333; display:flex; align-items:center; gap:0.5rem;">
+                        <i class="fas fa-eye-slash" style="color:#e50914;"></i> No me interesa
+                    </h3>
+                    <p id="modalNoInteresaPeliculaTexto" style="margin:0 0 1.5rem; font-size:0.9rem; color:#666; line-height:1.5;"></p>
+                    <div style="display:flex; gap:0.75rem;">
+                        <button onclick="window._cerrarModalNoInteresaPelicula()" style="flex:1; padding:0.7rem; border:1.5px solid #ddd; background:none; border-radius:8px; color:#666; cursor:pointer; font-size:0.9rem;">Cancelar</button>
+                        <button id="btnConfirmarNoInteresaPelicula" style="flex:2; padding:0.7rem; background:#e50914; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer; font-size:0.9rem;">Sí, no me interesa</button>
+                    </div>
+                </div>
+            </div>`);
+        modal = document.getElementById('modalNoInteresaPelicula');
+    }
+
+    document.getElementById('modalNoInteresaPeliculaTexto').textContent =
+        `No vas a volver a ver "${titulo}" en tu feed. Esta acción no se puede deshacer.`;
+
+        // Reemplaza el botón para limpiar el listener de una tarjeta anterior
+        // (si se abrió este modal antes para otra película), Y lo resetea a
+        // su estado normal — si la vez anterior quedó en "Guardando..."
+        // (disabled), el cloneNode de acá abajo copiaría ese mismo estado
+        // roto si no se lo reseteamos primero.
+        const btnViejo = document.getElementById('btnConfirmarNoInteresaPelicula');
+        btnViejo.disabled = false;
+        btnViejo.textContent = 'Sí, no me interesa';
+        const btnNuevo = btnViejo.cloneNode(true);
+        btnViejo.replaceWith(btnNuevo);
+        btnNuevo.onclick = async () => {
+            btnNuevo.disabled = true;
+            btnNuevo.textContent = 'Guardando...';
+            await onConfirmar();
+            window._cerrarModalNoInteresaPelicula();
+        };
+
+    modal.style.display = 'flex';
+}
+
+window._cerrarModalNoInteresaPelicula = function() {
+    const modal = document.getElementById('modalNoInteresaPelicula');
+    if (modal) modal.style.display = 'none';
+};
+
+// Se carga una sola vez (no por cada fila/carrusel) y se cachea en
+// memoria — cada llamada a generarTarjetasHTML la reusa.
+window._peliculasNoInteresaIds = null;
+async function _cargarPeliculasNoInteresaIds() {
+    if (window._peliculasNoInteresaIds !== null) return window._peliculasNoInteresaIds;
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/movies/no-me-interesa/ids`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        window._peliculasNoInteresaIds = res.ok ? await res.json() : [];
+    } catch (e) {
+        window._peliculasNoInteresaIds = [];
+    }
+    return window._peliculasNoInteresaIds;
+}
+
 window.generarTarjetasHTML = async function(peliculas) {
     try {
          const soloLatinos = /^[a-zA-ZÀ-ÿ0-9\s\-:,.!?'"()\u00C0-\u024F\u1E00-\u1EFF]+$/;
          const anioActual = new Date().getFullYear();
          const criterio = window._criterioOrden || 'fecha';
+         const excluidas = await _cargarPeliculasNoInteresaIds();
 
          const peliculasFiltradas = peliculas.filter(p => {
+             if (excluidas.includes(p.id)) return false;
              if (!p.poster_path) return false;
              if (!p.overview || p.overview.trim() === '') return false;
              if (!p.title || !soloLatinos.test(p.title.trim())) return false;
