@@ -493,32 +493,39 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
         };
 
 async function _abrirModalPremioDesdeNotificacion(rewardId, esPremiumReward) {
-    loadModule('mis-premios');
+    // "mis-premios" (módulo viejo) fue reemplazado por "club-beneficios".
+    loadModule('club-beneficios');
     if (!rewardId) return; // notificación vieja, de antes de guardar el id — solo navega
+
+    let tabPremiumForzada = false;
     let intentos = 0;
     const esperar = setInterval(() => {
         intentos++;
-        const listo = esPremiumReward
-            ? (typeof window.abrirModalEspecial === 'function' && Array.isArray(window.premiosState?.especialesCache) && window.premiosState.especialesCache.length > 0)
-            : (typeof window.abrirModalPremio === 'function' && Array.isArray(window.premiosState?.premiosOriginalCache) && window.premiosState.premiosOriginalCache.length > 0);
+
+        // El catálogo Premium carga lazy recién al activar esa pestaña
+        // (window.cambiarTabClubBeneficios) — a diferencia de Free, que
+        // ya carga solo con entrar al módulo. Si la notificación es de
+        // un premio Premium, forzamos el cambio de tab una sola vez.
+        if (esPremiumReward && !tabPremiumForzada && typeof window.cambiarTabClubBeneficios === 'function') {
+            const btnPremium = document.getElementById('clubTabPremium');
+            if (btnPremium) {
+                tabPremiumForzada = true;
+                window.cambiarTabClubBeneficios('premium', btnPremium);
+            }
+        }
+
+        const cache = esPremiumReward ? window._clubPremiumCache : window._clubFreeCache;
+        const listo = typeof window._abrirModalPremioClub === 'function' && Array.isArray(cache) && cache.length > 0;
+
         if (listo) {
             clearInterval(esperar);
-            if (esPremiumReward) {
-                const p = window.premiosState.especialesCache.find(x => x.id === rewardId);
-                if (p) {
-                    const isPremium = document.getElementById('especialesBannerNoPremium')?.style.display === 'none';
-                    window.abrirModalEspecial(p, isPremium);
-                }
-            } else {
-                const p = window.premiosState.premiosOriginalCache.find(x => x.id === rewardId);
-                if (p) window.abrirModalPremio(p);
-            }
+            const p = cache.find(x => x.id === rewardId);
+            if (p) window._abrirModalPremioClub(rewardId, esPremiumReward ? 'premium' : 'free');
         } else if (intentos > 25) {
             clearInterval(esperar);
         }
     }, 200);
 }
-
 
 window.marcarTodasLeidas = async function() {
     const token = localStorage.getItem('token');
