@@ -184,7 +184,7 @@
               return;
           }
 
-          lista.innerHTML = comentarios.map(c => {
+                    const itemsHtml = comentarios.map(c => {
               const autor = c.user || {};
               const inicial = (autor.name || 'U').charAt(0).toUpperCase();
               const avatarHtml = autor.avatarUrl
@@ -193,14 +193,16 @@
 
               return `
               <div class="pub-comentario-item">
-                  <div class="pub-comentario-header">
-                      <div class="pub-comentario-avatar">${avatarHtml}</div>
+                  <div class="pub-comentario-avatar">${avatarHtml}</div>
+                  <div class="pub-comentario-cuerpo">
                       <span class="pub-comentario-autor">${autor.name || 'Usuario'}</span>
+                      <div class="pub-comentario-texto">${escapeHtml(c.content || '')}</div>
                       <span class="pub-comentario-fecha">${tiempoRelativo(c.createdAt)}</span>
                   </div>
-                  <div class="pub-comentario-texto">${escapeHtml(c.content || '')}</div>
               </div>`;
           }).join('');
+
+          lista.innerHTML = `<div class="pub-comentarios-lista">${itemsHtml}</div>`;
       } catch(e) {
           lista.innerHTML = `<div class="pub-sin-comentarios">Error al cargar comentarios.</div>`;
       }
