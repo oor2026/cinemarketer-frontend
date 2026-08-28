@@ -3012,6 +3012,21 @@
     #modalPelicula .modal-acciones .btn-dislike .btn-label-modal {
         display: inline !important;
     }
+
+    /* "No te banco" es el texto más largo de los dos y el que se
+       parte en dos líneas — se achica el padding horizontal del botón
+       (heredaba 12px 24px de desktop) y el texto en sí, para que
+       "No te banco" entre cómodo en una sola línea. */
+    #modalPelicula .modal-acciones .btn-like,
+    #modalPelicula .modal-acciones .btn-dislike {
+        padding: 10px 10px !important;
+        gap: 0.3rem !important;
+    }
+
+    #modalPelicula .modal-acciones .btn-label-modal {
+        font-size: 0.72rem !important;
+        white-space: nowrap;
+    }
 }
 
 @media (max-width: 768px) {
