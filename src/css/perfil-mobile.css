@@ -13,7 +13,7 @@
 
 .perfil-card .cine-eyebrow-mobile { display: none; }
 
-.perfil-card .cine-fab-tema, .perfil-card .cine-fab-modo {
+.perfil-card .cine-fab-tema, .perfil-card .cine-fab-modo, .perfil-card .cine-fab-privacidad {
     position: fixed; right: 1.25rem; width: 46px; height: 46px;
     border-radius: 50%; border: none; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
@@ -33,9 +33,22 @@
     background: rgba(255,255,255,0.85); color: #1a1a1a;
     border: 1px solid rgba(255,255,255,0.3);
 }
+/* Entre los otros dos, con más aire entre cada botón (2.5rem en vez
+   de 2rem). Solo visible para el dueño del perfil, igual que el
+   candado de desktop (perfil.js lo muestra). */
+.perfil-card .cine-fab-privacidad {
+    bottom: 4.5rem;
+    background: #324C89; color: #ffffff;
+}
 .perfil-card .cine-fab-modo {
-    bottom: 5.25rem;
+    bottom: 7.75rem;
     background: var(--cine-section-accent); color: #ffffff;
+}
+/* Visitando el perfil de otro: no hay candado de privacidad, así que
+   "Cambiar a Series" baja a ocupar ese lugar en vez de dejar el
+   hueco vacío entre los otros dos botones. */
+.perfil-card.perfil-visitante .cine-fab-modo {
+    bottom: 4.5rem;
 }
 
 /* Apilar avatar/contenido en una sola columna */

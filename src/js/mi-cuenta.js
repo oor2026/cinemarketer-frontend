@@ -1163,21 +1163,9 @@ window.verMiSala = function() {
 // ==============================================
 // CONFIGURACIÓN DE CUENTA
 // ==============================================
-let _perfilEsPrivado = false;
-
 window._inicializarConfiguracionCuenta = async function() {
-    const token = localStorage.getItem('token');
-
-    // Cargar estado actual de privacidad
-    try {
-        const res = await fetch(`${CONFIG.API_URL}/users/me`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        _perfilEsPrivado = data.profileVisibility === 'PRIVATE';
-        _actualizarTogglePrivacidad();
-    } catch(e) {}
+    // La privacidad del perfil se movió a Mi Sala — este módulo ya no
+    // necesita cargar ni mostrar ese estado.
 
     // Cargar lista de bloqueados
         _cargarBloqueadosEnConfig();
@@ -1236,46 +1224,6 @@ window.desbloquearDesdeConfig = async function(userId, btn) {
         btn.disabled = false;
         btn.textContent = 'Desbloquear';
         alert('Error al desbloquear. Intentá de nuevo.');
-    }
-};
-
-function _actualizarTogglePrivacidad() {
-    const toggle = document.getElementById('togglePrivacidad');
-    const dot    = document.getElementById('togglePrivacidadDot');
-    const label  = document.getElementById('privacidadLabel');
-    const desc   = document.getElementById('privacidadDesc');
-
-    if (_perfilEsPrivado) {
-        toggle.style.background = '#324C89';
-        dot.style.left = '22px';
-        label.textContent = 'Privado';
-        desc.textContent = 'Tu perfil es privado. Solo usuarios aprobados pueden ver tu contenido.';
-    } else {
-        toggle.style.background = '#ddd';
-        dot.style.left = '2px';
-        label.textContent = 'Público';
-        desc.textContent = 'Tu perfil es público. Cualquier usuario puede ver tu contenido.';
-    }
-}
-
-window.togglePrivacidad = async function() {
-    const nuevaVisibilidad = _perfilEsPrivado ? 'PUBLIC' : 'PRIVATE';
-    const token = localStorage.getItem('token');
-
-    try {
-        const res = await fetch(`${CONFIG.API_URL}/follows/privacy`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ visibility: nuevaVisibilidad })
-        });
-        if (!res.ok) return;
-        _perfilEsPrivado = nuevaVisibilidad === 'PRIVATE';
-        _actualizarTogglePrivacidad();
-    } catch(e) {
-        alert('Error al actualizar la privacidad. Intentá de nuevo.');
     }
 };
 
