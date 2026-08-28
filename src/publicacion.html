@@ -224,7 +224,7 @@
               return;
           }
 
-          lista.innerHTML = `<div class="pub-comentarios-lista">${comentarios.map(renderComentarioItem).join('')}</div>`;
+                    lista.innerHTML = `<div class="pub-comentarios-lista" id="pubComentariosLista">${comentarios.map(renderComentarioItem).join('')}</div>`;
 
           const hayMas = data.last === false || comentarios.length === PUB_COMENTARIOS_SIZE;
           actualizarBotonCargarMas(hayMas);
@@ -234,7 +234,7 @@
       }
   }
 
-  async function cargarMasComentariosPublicos() {
+    async function cargarMasComentariosPublicos() {
       if (_pubComentariosCargando || !_pubComentariosId) return;
       _pubComentariosCargando = true;
 
@@ -244,17 +244,22 @@
       try {
           const siguientePage = _pubComentariosPage + 1;
           const res = await fetch(`${API_URL}/publications/${_pubComentariosId}/comments?page=${siguientePage}&size=${PUB_COMENTARIOS_SIZE}`);
-          if (!res.ok) throw new Error();
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
           const comentarios = data.content || [];
 
-          const contenedor = document.querySelector('.pub-comentarios-lista');
-          if (contenedor) contenedor.insertAdjacentHTML('beforeend', comentarios.map(renderComentarioItem).join(''));
+          const contenedor = document.getElementById('pubComentariosLista');
+          if (!contenedor) {
+              console.error('cargarMasComentariosPublicos: no se encontró #pubComentariosLista en el DOM — no se pudieron agregar los comentarios.');
+              throw new Error('Contenedor de comentarios no encontrado');
+          }
+          contenedor.insertAdjacentHTML('beforeend', comentarios.map(renderComentarioItem).join(''));
 
           _pubComentariosPage = siguientePage;
           const hayMas = data.last === false || comentarios.length === PUB_COMENTARIOS_SIZE;
           actualizarBotonCargarMas(hayMas);
       } catch(e) {
+          console.error('Error al cargar más comentarios:', e);
           if (btn) { btn.disabled = false; btn.textContent = 'Reintentar'; }
       } finally {
           _pubComentariosCargando = false;
