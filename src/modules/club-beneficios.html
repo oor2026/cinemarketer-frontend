@@ -188,11 +188,12 @@
                     <p class="modal-premio-descripcion" id="clubModalPremioDescripcion"></p>
 
                     <div class="modal-tabs">
+                        <button class="modal-tab" id="clubTabPremio0" onclick="window._switchModalTabClub(0)">Imágenes</button>
                         <button class="modal-tab active" id="clubTabPremio1" data-label-mobile="Descripción" onclick="window._switchModalTabClub(1)">Información</button>
                         <button class="modal-tab" id="clubTabPremio2" onclick="window._switchModalTabClub(2)" style="display:none;">Detalles</button>
                         <button class="modal-tab" id="clubTabPremio3" onclick="window._switchModalTabClub(3)" style="display:none;">Términos</button>
-                        <button class="modal-tab" id="clubTabPremio4" onclick="window._switchModalTabClub(4)" style="display:none;">Resultados</button>
-                        <button class="modal-tab" id="clubTabPremio5" onclick="window._switchModalTabClub(5)" style="display:none;">Detalles del premio</button>
+                        <button class="modal-tab" id="clubTabPremio4" onclick="window._switchModalTabClub(4)" style="display:none;">Resultado</button>
+                        <button class="modal-tab" id="clubTabPremio5" onclick="window._switchModalTabClub(5)" style="display:none;">Detalles</button>
                     </div>
 
                     <div class="modal-premio-tabs-scroll" id="clubPremioTabsScroll">
@@ -275,6 +276,11 @@
                         </div>
                     </div>
 
+                </div>
+
+                <div class="modal-premio-mis-puntos-fijo" id="clubModalPremioMisPuntosFijo">
+                    <i class="fas fa-wallet"></i> Tus puntos actuales:
+                    <strong id="clubModalPremioMisPuntosFijoValor">0</strong>
                 </div>
 
                 <div class="modal-premio-acciones">
