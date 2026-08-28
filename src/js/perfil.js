@@ -311,11 +311,14 @@ function renderVotaciones(votaciones) {
         return;
     }
 
-    _votacionesPage   = 0;
-    _votacionesHayMas = votaciones.length === 8;
-    _stackVotaciones  = votaciones;
-    _stackIndice      = 0;
-
+        _votacionesPage   = 0;
+        // El lote inicial viene de perfil.ultimasVotaciones (fijo en 6,
+        // desde /profile) — comparar contra 8 acá SIEMPRE daba false, sin
+        // importar cuántas votaciones tenga el usuario en total. Se compara
+        // contra el contador real que ya se ve en el título del mazo.
+        _votacionesHayMas = (window._perfilCounts?.votacionesPeliculas || 0) > votaciones.length;
+        _stackVotaciones  = votaciones;
+        _stackIndice      = 0;
         wrapper.innerHTML = `
                       <p class="cine-stack-eyebrow">VOTACIONES (${window._perfilCounts?.votacionesPeliculas || 0})</p>
         <div class="cine-stack-area">
@@ -372,16 +375,69 @@ window._renderStackPosiciones = function() {
     }
 };
 
-window._moverStackVotos = function(dir) {
+window._moverStackVotos = async function(dir) {
     const N = _stackVotaciones.length;
     if (N === 0) return;
-    _stackIndice = (_stackIndice + dir + N) % N;
-    window._renderStackPosiciones();
 
-    if (dir > 0 && _stackIndice >= N - 2 && _votacionesHayMas && !_votacionesCargando) {
-        window._cargarMasVotaciones();
+    const proximoIndice = (_stackIndice + dir + N) % N;
+
+    // Mismo criterio que _moverStackComentarios: si avanzamos y
+    // estamos por volver al principio del mazo, pedimos la próxima
+    // página ANTES de dar la vuelta — así el mazo sigue creciendo en
+    // vez de repetir en loop siempre los mismos primeros posters.
+    // (Antes esto llamaba a window._cargarMasVotaciones(), una función
+    // que nunca llegó a definirse en ningún lado — por eso nunca
+    // cargaba más de la primera tanda.)
+    if (dir > 0 && proximoIndice === 0 && _votacionesHayMas && !_votacionesCargando) {
+        _votacionesCargando = true;
+        try {
+            const token = localStorage.getItem('token');
+                        // size=6, no 8 — el lote inicial (perfil.ultimasVotaciones)
+                        // ya vino en tandas de 6, así que la paginación siguiente
+                        // tiene que calzar con eso para no saltear ni duplicar.
+                        const res = await fetch(`${CONFIG.API_URL}/users/${perfilUsuarioId}/votaciones?page=${_votacionesPage + 1}&size=6`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (res.ok) {
+                            const data = await res.json();
+                            if (data.votaciones && data.votaciones.length > 0) {
+                                _votacionesPage++;
+                                _votacionesHayMas = data.hayMas;
+                                _agregarVotacionesAlStack(data.votaciones);
+                            } else {
+                                _votacionesHayMas = false;
+                            }
+                        } else {
+                            console.error('[_moverStackVotos] respuesta no-ok al pedir más votaciones:', res.status, await res.text().catch(() => ''));
+                        }
+                    } catch (e) {
+                        console.error('[_moverStackVotos] error al pedir más votaciones:', e);
+                    }
+                    _votacionesCargando = false;
     }
+
+    const NFinal = _stackVotaciones.length;
+    _stackIndice = (_stackIndice + dir + NFinal) % NFinal;
+    window._renderStackPosiciones();
 };
+
+function _agregarVotacionesAlStack(nuevas) {
+    _stackVotaciones = _stackVotaciones.concat(nuevas);
+    const cont = document.getElementById('cineStackContainer');
+    const nuevoHtml = nuevas.map(v => {
+        const poster = v.posterPath
+            ? `<img src="https://image.tmdb.org/t/p/w185${v.posterPath}" alt="${v.movieTitle || ''}">`
+            : `<div class="placeholder"><i class="fas fa-film"></i></div>`;
+        const badgeClass = v.voto === 'LIKE' ? 'like' : 'dislike';
+        const badgeIcon  = v.voto === 'LIKE' ? 'fa-thumbs-up' : 'fa-thumbs-down';
+        return `
+        <div class="cine-stack-card" onclick="window._abrirPeliculaDesdePerfil(${v.movieId})">
+            ${poster}
+            <div class="cine-stack-badge ${badgeClass}"><i class="fas ${badgeIcon}" style="font-size:0.6rem;color:white;"></i></div>
+        </div>`;
+    }).join('');
+    cont.insertAdjacentHTML('beforeend', nuevoHtml);
+}
 
 window.scrollCarrusel = async function(dir) {
     const track = document.getElementById('perfilCarruselTrack');
