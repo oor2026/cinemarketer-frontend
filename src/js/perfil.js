@@ -231,6 +231,8 @@ function renderIdentidad(perfil) {
                         } else {
                         if (btnSeguir) btnSeguir.style.display = 'none';
                         if (btnBanner) btnBanner.style.display = 'block';
+                        const btnEliminarBanner = document.getElementById('btnEliminarBanner');
+                        if (btnEliminarBanner) btnEliminarBanner.style.display = perfil.bannerUrl ? 'flex' : 'none';
                         if (btnEditBio) btnEditBio.style.display = 'inline-flex';
                         if (btnEditFavorita) btnEditFavorita.style.display = 'inline-flex';
                         if (btnCambiarAvatar) btnCambiarAvatar.style.display = 'flex';
@@ -732,16 +734,43 @@ window.subirBanner = async function(input) {
                             banner.style.backgroundImage = `url('${data.bannerUrl}')`;
                         }
 
-                        alert('Banner actualizado correctamente.');
+                                                alert('Banner actualizado correctamente.');
 
-            } catch(e) {
-                alert('Error al subir el banner. Intentá de nuevo.');
-            }
-        };
+                                    } catch(e) {
+                                        alert('Error al subir el banner. Intentá de nuevo.');
+                                    }
+                                };
 
-        // ==============================================
-        // BIO — MODAL EDITAR
-        // ==============================================
+                                window.eliminarBanner = async function() {
+                                    if (!confirm('¿Querés quitar tu banner personalizado? Se va a mostrar el banner por defecto.')) return;
+
+                                    const token = localStorage.getItem('token');
+                                    try {
+                                        const res = await fetch(`${CONFIG.API_URL}/users/me/banner`, {
+                                            method: 'DELETE',
+                                            headers: { 'Authorization': `Bearer ${token}` }
+                                        });
+
+                                        if (!res.ok) throw new Error();
+
+                                        // Vuelve al banner por defecto sin recargar — se le saca el
+                                        // backgroundImage inline y CSS vuelve a mostrar el de
+                                        // headerpublico.png (el mismo que .perfil-banner trae por
+                                        // defecto cuando no hay bannerUrl).
+                                        const banner = document.querySelector('.perfil-banner');
+                                        if (banner) banner.style.backgroundImage = '';
+
+                                        const btnEliminarBanner = document.getElementById('btnEliminarBanner');
+                                        if (btnEliminarBanner) btnEliminarBanner.style.display = 'none';
+
+                                    } catch (e) {
+                                        alert('Error al quitar el banner. Intentá de nuevo.');
+                                    }
+                                };
+
+                                // ==============================================
+                                // BIO — MODAL EDITAR
+                                // ==============================================
         window.abrirModalBio = function() {
             const titulo = document.getElementById('perfilBioTitulo')?.textContent || '';
             const texto  = document.getElementById('perfilBioTexto')?.textContent || '';

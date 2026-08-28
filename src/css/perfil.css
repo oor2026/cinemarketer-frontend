@@ -47,6 +47,44 @@
     border: 1px solid rgba(255,255,255,0.2);
 }
 
+.perfil-banner-btn-eliminar {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 32px;
+    height: 32px;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border-radius: 50%;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: background 0.2s;
+}
+
+.perfil-banner-btn-eliminar:hover { background: rgba(229,9,20,0.8); }
+
+.perfil-banner-btn {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    padding: 0.4rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
 /* Botón seguir — superpuesto banner abajo derecha */
 .perfil-accion {
     display: flex;
