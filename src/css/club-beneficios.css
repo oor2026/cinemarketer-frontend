@@ -340,6 +340,15 @@
 .modal-premio-mis-puntos i { color: #f59e0b; flex-shrink: 0; }
 .modal-premio-mis-puntos strong { color: #1a1a2e; font-size: 1rem; margin-left: 4px; word-break: break-word; }
 
+/* Copia fija para mobile — oculta por default (desktop sigue usando
+   .modal-premio-mis-puntos, adentro del pill de info, como siempre). */
+.modal-premio-mis-puntos-fijo {
+    display: none; background: #fff8e1; border: 1px solid #ffe082; border-radius: 8px; padding: 0.75rem 1rem;
+    font-size: 0.9rem; color: #666; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.75rem;
+}
+.modal-premio-mis-puntos-fijo i { color: #f59e0b; flex-shrink: 0; }
+.modal-premio-mis-puntos-fijo strong { color: #1a1a2e; font-size: 1rem; margin-left: 4px; word-break: break-word; }
+
 .modal-premio-terminos-panel { background: #f9f9f9; border-radius: 6px; padding: 0.75rem 1rem; border: 1px solid #eee; }
 .modal-premio-acciones { flex-shrink: 0; width: 100%; padding-top: 1rem; }
 .btn-canjear-modal {
@@ -368,11 +377,23 @@
 
 /* Tabs */
 .modal-tabs { display: flex; gap: 0; border-bottom: 1px solid #e8e8e8; margin-bottom: 0.75rem; }
+
+/* Solo para premios Premium tipo Sorteo: reordena los pills a
+   Imágenes, Descripción, Detalles (ex "Detalles del premio"),
+   Resultados, Términos — en vez del orden natural del DOM. Afecta
+   tanto desktop como mobile (no está adentro de ningún @media). La
+   clase la agrega/saca _abrirModalPremioClub según el tipo de premio.
+   #clubTabPremio1/2/0 no necesitan order explícito: al quedar en 0
+   por default, ya se ubican antes que estos tres por orden de DOM. */
+#modalPremioClub.club-sorteo-orden #clubTabPremio5 { order: 3; }
+#modalPremioClub.club-sorteo-orden #clubTabPremio4 { order: 4; }
+#modalPremioClub.club-sorteo-orden #clubTabPremio3 { order: 5; }
 .modal-tab { background: transparent; border: none; border-bottom: 2px solid transparent; padding: 6px 14px; font-size: 0.82rem; font-weight: 500; color: #888; cursor: pointer; transition: color 0.15s, border-color 0.15s; margin-bottom: -1px; }
 .modal-tab:hover { color: #555; }
 .modal-tab.active { color: #e50914; border-bottom-color: #e50914; }
 .modal-tab-panel { animation: fadeTabInClub 0.15s ease; }
 @keyframes fadeTabInClub { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+#clubTabPremio0 { display: none; }
 
 @media (max-width: 768px) {
     /* El modal aprovecha toda la pantalla en mobile — mismo criterio
@@ -425,36 +446,79 @@
                 .modal-premio-descripcion { display: none; }
                 .modal-premio-descripcion-tab { display: block; }
 
-                /* Los pills quedan fuera de la caja de scroll interno: el scroll
-                   ahora vive en .modal-premio-tabs-scroll (que solo contiene los
-                   5 paneles), no en .modal-premio-info (que los envolvía junto
-                   con los pills). Así los pills se quedan fijos debajo de la
-                   imagen y arriba de la caja que sí scrollea. */
-                    #modalPremioClub .modal-premio-info { overflow: visible; }
-                    #modalPremioClub .modal-tabs { flex-shrink: 0; }
-                    #modalPremioClub .modal-premio-tabs-scroll {
-                        overflow-y: scroll; flex: 1; min-height: 0; padding-right: 0.5rem;
-                        scrollbar-width: thin; scrollbar-color: #ccc transparent;
-                    }
-                    #modalPremioClub .modal-premio-tabs-scroll::-webkit-scrollbar { width: 6px; }
-                    #modalPremioClub .modal-premio-tabs-scroll::-webkit-scrollbar-track { background: transparent; }
-                    #modalPremioClub .modal-premio-tabs-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+                            /* Renombra el pill 1 de "Información" a "Descripción" solo acá —
+                               el texto real del botón no se toca (sigue siendo "Información"
+                               para no afectar desktop): se oculta con font-size:0 y se
+                               reemplaza visualmente con el ::before, que lee el atributo
+                               data-label-mobile agregado en el HTML. */
+                            #modalPremioClub .modal-tab[data-label-mobile] { font-size: 0; }
+                            #modalPremioClub .modal-tab[data-label-mobile]::before { content: attr(data-label-mobile); font-size: 0.82rem; }
 
-            /* Renombra el pill 1 de "Información" a "Descripción" solo acá —
-               el texto real del botón no se toca (sigue siendo "Información"
-               para no afectar desktop): se oculta con font-size:0 y se
-               reemplaza visualmente con el ::before, que lee el atributo
-               data-label-mobile agregado en el HTML. */
-            #modalPremioClub .modal-tab[data-label-mobile] { font-size: 0; }
-            #modalPremioClub .modal-tab[data-label-mobile]::before { content: attr(data-label-mobile); font-size: 0.82rem; }
+                        /* El scroll ya no vive en .modal-premio-body entero — vive en el
+                           bloque de contenido activo (imagen O panel de info) nada más.
+                           Así "Tus puntos actuales" y el botón de acción quedan afuera
+                           de ese scroll: siempre visibles, no se van con el resto. */
+                        #modalPremioClub .modal-premio-body {
+                            display: flex; flex-direction: column;
+                            overflow: visible; padding: 1.2rem 1.4rem;
+                        }
 
-    .modal-premio-body { grid-template-columns: 1fr; }
-    .premio-carrusel { overflow: hidden; touch-action: pan-y; width: 100%; height: 300px; }
-    .premio-carrusel img { width: 100%; height: 100%; object-fit: cover; padding: 0; user-select: none; }
-    .carrusel-btn { display: none !important; }
-    .carrusel-dots { display: flex !important; position: relative; z-index: 3; margin-top: 8px; justify-content: center; }
-    .modal-premio-imagen { display: flex; flex-direction: column; align-items: center; min-height: 300px; aspect-ratio: unset; height: auto; padding: 0; }
-}
+                        /* "Aplana" columna-derecha > info para que sus hijos (pills,
+                           imagen, panel de info, puntos fijos, botón de acción) compitan
+                           todos por el mismo espacio como hermanos directos de
+                           .modal-premio-body, y así se puedan reordenar con order. En
+                           desktop estas dos clases siguen con su display:flex de columna
+                           separada — acá no se toca nada de eso, display:contents solo
+                           existe en este bloque. */
+                        #modalPremioClub .modal-premio-columna-derecha,
+                        #modalPremioClub .modal-premio-info { display: contents; }
+
+                        #modalPremioClub .modal-tabs { order: 1; flex-shrink: 0; }
+                        #modalPremioClub .modal-tab#clubTabPremio0 { display: inline-block; }
+
+                        /* La imagen y el panel de info se turnan en el mismo lugar
+                           (order:2) según cuál pill esté activo — nunca se ven los dos
+                           a la vez. Acá es donde vive el scroll ahora (flex:1 +
+                           overflow-y:auto): solo esto se desplaza, todo lo de abajo
+                           queda fijo. La clase .club-pill-imagenes la pone
+                           _switchModalTabClub en #modalPremioClub cuando el pill activo
+                           es 0 ("Imágenes"). */
+                        #modalPremioClub .modal-premio-imagen {
+                            order: 2; display: none; flex-direction: column; align-items: center;
+                            flex: 1; min-height: 300px; overflow-y: auto;
+                            aspect-ratio: unset; height: auto; padding: 0;
+                        }
+                        #modalPremioClub.club-pill-imagenes .modal-premio-imagen { display: flex; }
+
+                        #modalPremioClub .modal-premio-tabs-scroll {
+                            order: 2; flex: 1; min-height: 0; overflow-y: auto;
+                        }
+                        #modalPremioClub.club-pill-imagenes .modal-premio-tabs-scroll { display: none; }
+
+                                /* Franja fija: puntos actuales + botón de acción, afuera del
+                                   scroll, siempre visibles sin importar qué pill esté activo. */
+                                #modalPremioClub .modal-premio-mis-puntos-fijo { order: 3; flex-shrink: 0; display: flex; }
+                                #modalPremioClub .modal-premio-acciones { order: 4; flex-shrink: 0; }
+
+                                /* La original (adentro del pill "Descripción") queda oculta acá
+                                   para no duplicar con la franja fija de afuera — en desktop
+                                   sigue apareciendo dentro del pill, como siempre. */
+                                .modal-premio-mis-puntos { display: none; }
+
+                            /* Términos: el max-height:180px inline dejaba un cuadradito chico
+                               con su propio scroll interno, desperdiciando el resto del
+                               espacio que ya da .modal-premio-tabs-scroll (flex:1). Se saca
+                               el tope para que use toda la altura disponible, y el scroll
+                               — si hace falta — lo sigue manejando ese contenedor de afuera,
+                               no un scroll anidado adentro de otro. !important porque es la
+                               única forma de ganarle a un max-height puesto inline en el HTML. */
+                            #modalPremioClub #clubModalPremioTerminos { max-height: none !important; }
+
+                    .premio-carrusel { overflow: hidden; touch-action: pan-y; width: 100%; height: 300px; }
+                    .premio-carrusel img { width: 100%; height: 100%; object-fit: cover; padding: 0; user-select: none; }
+                    .carrusel-btn { display: none !important; }
+                    .carrusel-dots { display: flex !important; position: relative; z-index: 3; margin-top: 8px; justify-content: center; }
+                }
 
 /* Sobrescribe la animación de entrada de mis-premios.css (que sigue
    cargado en simultáneo por el bug del router) — esta clase la

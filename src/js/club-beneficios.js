@@ -756,7 +756,12 @@ window._abrirModalPremioClub = function(id, origen) {
         webRow.style.display = 'none';
     }
 
-        document.getElementById('clubModalPremioMisPuntos').textContent = window._clubPuntosActuales;
+                document.getElementById('clubModalPremioMisPuntos').textContent = window._clubPuntosActuales;
+                // Copia para mobile — "Tus puntos actuales" ya no vive dentro
+                // del pill de info, es una franja fija siempre visible arriba
+                // del botón de acción.
+                const misPuntosFijo = document.getElementById('clubModalPremioMisPuntosFijoValor');
+                if (misPuntosFijo) misPuntosFijo.textContent = window._clubPuntosActuales;
 
             const tabTerminos = document.getElementById('clubTabPremio3');
             if (p.termsConditions) {
@@ -783,25 +788,33 @@ window._abrirModalPremioClub = function(id, origen) {
                 tabDetalles.style.display = 'none';
             }
 
-            // Tabs "Resultados" y "Detalles del premio" — solo sorteos (Premium).
-            const tabResultados = document.getElementById('clubTabPremio4');
-            const tabDetallesPremio = document.getElementById('clubTabPremio5');
-            if (origen === 'premium' && p.type === 'SORTEO') {
-                tabResultados.style.display = 'inline-block';
-                _clubRenderResultados(p);
+                        // Tabs "Resultados" y "Detalles" (ex "Detalles del premio")
+                        // — solo sorteos (Premium). El orden distinto de los pills
+                        // para este caso lo maneja la clase club-sorteo-orden en
+                        // #modalPremioClub (ver club-beneficios.css).
+                                    const tabResultados = document.getElementById('clubTabPremio4');
+                                    const tabDetallesPremio = document.getElementById('clubTabPremio5');
+                                    document.getElementById('modalPremioClub')?.classList.toggle('club-sorteo-orden', esSorteo);
 
-                if (p.prizeDetails) {
-                    tabDetallesPremio.style.display = 'inline-block';
-                    document.getElementById('clubModalPremioDetallesPremio').innerHTML = p.prizeDetails.replace(/\n/g, '<br>');
-                } else {
-                    tabDetallesPremio.style.display = 'none';
-                }
-            } else {
-                tabResultados.style.display = 'none';
-                tabDetallesPremio.style.display = 'none';
-            }
+                                    if (esSorteo) {
+                            tabResultados.style.display = 'inline-block';
+                            _clubRenderResultados(p);
 
-            window._switchModalTabClub(1); // siempre arranca en "Información"
+                            if (p.prizeDetails) {
+                                tabDetallesPremio.style.display = 'inline-block';
+                                document.getElementById('clubModalPremioDetallesPremio').innerHTML = p.prizeDetails.replace(/\n/g, '<br>');
+                            } else {
+                                tabDetallesPremio.style.display = 'none';
+                            }
+                        } else {
+                            tabResultados.style.display = 'none';
+                            tabDetallesPremio.style.display = 'none';
+                        }
+
+                        // En mobile arranca mostrando el pill "Imágenes" (0); en
+                        // desktop sigue arrancando en "Información" (1) como siempre
+                        // — ahí no existe el pill 0, así que nunca debe usarse.
+                        window._switchModalTabClub(window.matchMedia('(max-width: 768px)').matches ? 0 : 1);
 
         const btn = document.getElementById('clubModalPremioBtnAccion');
         if (origen === 'premium') {
@@ -836,14 +849,23 @@ window._abrirModalPremioClub = function(id, origen) {
         document.body.style.overflow = '';
     };
 
-    window._switchModalTabClub = function(n) {
-        [1, 2, 3, 4, 5].forEach(i => {
-            const panel = document.getElementById(`clubPanelPremio${i}`);
-            const tab = document.getElementById(`clubTabPremio${i}`);
-            if (panel) panel.style.display = i === n ? 'block' : 'none';
-            if (tab) tab.classList.toggle('active', i === n);
-        });
-    };
+        window._switchModalTabClub = function(n) {
+            // Pill 0 "Imágenes" no existe en desktop (ahí la imagen es una
+            // columna siempre visible) — esta clase solo tiene efecto real
+            // dentro del @media mobile de club-beneficios.css.
+            const contenedor = document.getElementById('modalPremioClub');
+            if (contenedor) contenedor.classList.toggle('club-pill-imagenes', n === 0);
+
+            const tab0 = document.getElementById('clubTabPremio0');
+            if (tab0) tab0.classList.toggle('active', n === 0);
+
+            [1,2,3,4,5].forEach(i => {
+                const panel = document.getElementById(`clubPanelPremio${i}`);
+                const tab = document.getElementById(`clubTabPremio${i}`);
+                if (panel) panel.style.display = i === n ? 'block' : 'none';
+                if (tab) tab.classList.toggle('active', i === n);
+            });
+        };
 
         window._renderCarruselClub = function(imagenes) {
             window._clubCarruselState = { imagenes, actual: 0 };
