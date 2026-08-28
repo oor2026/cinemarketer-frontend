@@ -352,7 +352,7 @@ function _abrirModalNoInteresaSerie(titulo, onConfirmar) {
             <div id="modalNoInteresaSerie" onclick="window._cerrarModalNoInteresaSerie()" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
                 <div style="background:white; border-radius:16px; padding:2rem; max-width:400px; width:100%;" onclick="event.stopPropagation()">
                     <h3 style="margin:0 0 0.75rem; font-size:1.05rem; color:#333; display:flex; align-items:center; gap:0.5rem;">
-                        <i class="fas fa-eye-slash" style="color:#e50914;"></i> No me interesa
+                                                <i class="fas fa-minus-circle" style="color:#e50914;"></i> No me interesa
                     </h3>
                     <p id="modalNoInteresaSerieTexto" style="margin:0 0 1.5rem; font-size:0.9rem; color:#666; line-height:1.5;"></p>
                     <div style="display:flex; gap:0.75rem;">
@@ -364,8 +364,10 @@ function _abrirModalNoInteresaSerie(titulo, onConfirmar) {
         modal = document.getElementById('modalNoInteresaSerie');
     }
 
-    document.getElementById('modalNoInteresaSerieTexto').textContent =
-        `No vas a volver a ver "${titulo}" en tu feed. Esta acción no se puede deshacer.`;
+        document.body.style.overflow = 'hidden';
+
+        document.getElementById('modalNoInteresaSerieTexto').textContent =
+            `No vas a volver a ver "${titulo}" en tu feed. Esta acción no se puede deshacer.`;
 
         const btnViejo = document.getElementById('btnConfirmarNoInteresaSerie');
         btnViejo.disabled = false;
@@ -385,6 +387,7 @@ function _abrirModalNoInteresaSerie(titulo, onConfirmar) {
 window._cerrarModalNoInteresaSerie = function() {
     const modal = document.getElementById('modalNoInteresaSerie');
     if (modal) modal.style.display = 'none';
+    document.body.style.overflow = '';
 };
 
 function generarTarjetaSerieHTML(serie) {
@@ -412,9 +415,9 @@ function generarTarjetaSerieHTML(serie) {
                         <button class="btn-donde-verla-overlay" onclick="event.stopPropagation(); window.abrirElencoCardSerie(${serie.id}, event)" title="Elenco y dirección">
                             <i class="fas fa-users"></i>
                         </button>
-                        <button class="btn-donde-verla-overlay" onclick="event.stopPropagation(); window.marcarNoInteresaSerie(${serie.id}, event)" title="No me interesa">
-                            <i class="fas fa-eye-slash"></i>
-                        </button>
+                                                <button class="btn-donde-verla-overlay" onclick="event.stopPropagation(); window.marcarNoInteresaSerie(${serie.id}, event)" title="No me interesa">
+                                                    <i class="fas fa-minus-circle"></i>
+                                                </button>
                     </div>
                     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
                         <span class="año">${year}</span>

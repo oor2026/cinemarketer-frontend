@@ -122,7 +122,7 @@ function _abrirModalNoInteresa(titulo, onConfirmar) {
             <div id="modalNoInteresaPelicula" onclick="window._cerrarModalNoInteresaPelicula()" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
                 <div style="background:white; border-radius:16px; padding:2rem; max-width:400px; width:100%;" onclick="event.stopPropagation()">
                     <h3 style="margin:0 0 0.75rem; font-size:1.05rem; color:#333; display:flex; align-items:center; gap:0.5rem;">
-                        <i class="fas fa-eye-slash" style="color:#e50914;"></i> No me interesa
+                                                <i class="fas fa-minus-circle" style="color:#e50914;"></i> No me interesa
                     </h3>
                     <p id="modalNoInteresaPeliculaTexto" style="margin:0 0 1.5rem; font-size:0.9rem; color:#666; line-height:1.5;"></p>
                     <div style="display:flex; gap:0.75rem;">
@@ -134,8 +134,10 @@ function _abrirModalNoInteresa(titulo, onConfirmar) {
         modal = document.getElementById('modalNoInteresaPelicula');
     }
 
-    document.getElementById('modalNoInteresaPeliculaTexto').textContent =
-        `No vas a volver a ver "${titulo}" en tu feed. Esta acción no se puede deshacer.`;
+        document.body.style.overflow = 'hidden';
+
+        document.getElementById('modalNoInteresaPeliculaTexto').textContent =
+            `No vas a volver a ver "${titulo}" en tu feed. Esta acción no se puede deshacer.`;
 
         // Reemplaza el botón para limpiar el listener de una tarjeta anterior
         // (si se abrió este modal antes para otra película), Y lo resetea a
@@ -160,6 +162,7 @@ function _abrirModalNoInteresa(titulo, onConfirmar) {
 window._cerrarModalNoInteresaPelicula = function() {
     const modal = document.getElementById('modalNoInteresaPelicula');
     if (modal) modal.style.display = 'none';
+    document.body.style.overflow = '';
 };
 
 // Se carga una sola vez (no por cada fila/carrusel) y se cachea en
