@@ -6,6 +6,10 @@
     <div id="cineModoFlash" style="display:none; position:fixed; inset:0; z-index:99998; pointer-events:none;"></div>
     <div id="cineModoToast" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:99999; background:#1a1a1a; color:#fff; font-size:1.15rem; font-weight:700; padding:1.1rem 1.8rem; border-radius:30px; box-shadow:0 8px 24px rgba(0,0,0,0.3); white-space:nowrap;"></div>
 
+    <button id="btnFabPrivacidad" class="cine-fab-privacidad" style="display:none;" onclick="window._abrirModalPrivacidad()" title="Privacidad del perfil">
+        <i class="fas fa-lock-open" id="btnFabPrivacidadIcono"></i>
+    </button>
+
     <button id="btnFabModo" class="cine-fab-modo" onclick="window._toggleFabModo()" title="Cambiar a Series">
         <i class="fas fa-film"></i>
     </button>
@@ -357,7 +361,7 @@
         #perfilPublicacionesSeccion .perfil-seccion-titulo i { color: var(--cine-section-accent); }
         #perfilPublicacionesSeccion > *:not(.perfil-seccion-titulo) { padding: 0; }
 
-                                .cine-fab-tema, .cine-fab-modo { display: none; }
+                        .cine-fab-tema, .cine-fab-modo, .cine-fab-privacidad { display: none; }
 
                         .cine-eyebrow-mobile { display: none; }
                         .perfil-banner { display: none; }
@@ -414,6 +418,9 @@
             <div class="cine-eyebrow">
                 <span id="perfilAdnEyebrow">Mi Sala Cinéfila</span>
                 <div style="display:flex; align-items:center; gap:0.8rem;">
+                    <button type="button" class="cine-tema-toggle" id="btnCandadoPrivacidad" style="display:none;" onclick="window._abrirModalPrivacidad()" title="Privacidad del perfil">
+                        <i class="fas fa-lock-open" id="btnCandadoPrivacidadIcono"></i>
+                    </button>
                     <button type="button" class="cine-tema-toggle" id="btnTemaToggle" onclick="window._toggleModoOscuro()" title="Modo oscuro">
                         <i class="fas fa-moon"></i>
                     </button>
@@ -869,9 +876,38 @@
                 </button>
             </div>
         </div>
-    </div>
+</div>
 
-    <!-- MODAL SEGUIDORES / SEGUIDOS -->
+<!-- MODAL PRIVACIDAD DEL PERFIL -->
+<div id="modalPrivacidadPerfil" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
+    <div style="background:white; border-radius:16px; padding:2rem; max-width:400px; width:100%;" onclick="event.stopPropagation()">
+        <h3 style="margin:0 0 0.5rem; font-size:1rem; color:#333;">
+            <i class="fas fa-lock" style="color:#324C89;"></i> Privacidad del perfil
+        </h3>
+        <p id="modalPrivacidadDesc" style="margin:0 0 1.5rem; font-size:0.85rem; color:#888; line-height:1.5;">
+            Tu perfil es público. Cualquier usuario puede ver tu contenido.
+        </p>
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:0.9rem 1rem; background:#f8f9fa; border-radius:10px; margin-bottom:1.5rem;">
+            <span id="modalPrivacidadLabel" style="font-size:0.85rem; color:#555; font-weight:600;">Público</span>
+            <div id="modalPrivacidadToggle" onclick="window._togglePrivacidadDesdeModal()"
+                 style="width:44px; height:24px; border-radius:12px; background:#ddd; position:relative; cursor:pointer; transition:background 0.2s;">
+                <div id="modalPrivacidadDot" style="width:20px; height:20px; border-radius:50%; background:white; position:absolute; top:2px; left:2px; transition:left 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
+            </div>
+        </div>
+        <div style="display:flex; gap:0.75rem;">
+            <button onclick="window._cerrarModalPrivacidad()"
+                    style="flex:1; padding:0.7rem; border:1.5px solid #ddd; background:none; border-radius:8px; color:#666; cursor:pointer; font-size:0.9rem;">
+                Cancelar
+            </button>
+            <button id="btnConfirmarPrivacidad" onclick="window._confirmarCambioPrivacidad()"
+                    style="flex:2; padding:0.7rem; background:#324C89; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer; font-size:0.9rem;">
+                Confirmar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL SEGUIDORES / SEGUIDOS -->
 <div id="modalSeguidores" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
     <div style="background:white; border-radius:16px; padding:1.5rem; max-width:420px; width:100%; max-height:80vh; display:flex; flex-direction:column;" onclick="event.stopPropagation()">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">

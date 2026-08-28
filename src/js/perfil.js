@@ -210,12 +210,16 @@ function renderIdentidad(perfil) {
         const btnEditFavorita = document.getElementById('btnEditarFavorita');
         const btnCambiarAvatar = document.getElementById('btnCambiarAvatar');
 
-                if (miId && String(miId) !== String(perfil.id)) {
-                    if (btnBanner) btnBanner.style.display = 'none';
-                    if (btnEditBio) btnEditBio.style.display = 'none';
-                    if (btnEditFavorita) btnEditFavorita.style.display = 'none';
-                    if (btnCambiarAvatar) btnCambiarAvatar.style.display = 'none';
-            if (btnBloquearPerfil && !perfil.bloqueado) btnBloquearPerfil.style.display = 'flex';
+                    if (miId && String(miId) !== String(perfil.id)) {
+                        // El botón de privacidad (candado) no se pinta acá — el
+                        // FAB "Cambiar a Series" baja a ocupar su lugar en vez
+                        // de dejar un hueco vacío entre los otros dos.
+                        document.querySelector('.perfil-card')?.classList.add('perfil-visitante');
+                        if (btnBanner) btnBanner.style.display = 'none';
+                        if (btnEditBio) btnEditBio.style.display = 'none';
+                        if (btnEditFavorita) btnEditFavorita.style.display = 'none';
+                        if (btnCambiarAvatar) btnCambiarAvatar.style.display = 'none';
+                if (btnBloquearPerfil && !perfil.bloqueado) btnBloquearPerfil.style.display = 'flex';
 
                 if (perfil.bloqueado) {
                     if (btnSeguir) btnSeguir.style.display = 'none';
@@ -229,11 +233,14 @@ function renderIdentidad(perfil) {
                     actualizarBtnSeguir(perfil.followStatus);
                 }
                         } else {
+                        document.querySelector('.perfil-card')?.classList.remove('perfil-visitante');
                         if (btnSeguir) btnSeguir.style.display = 'none';
                         if (btnBanner) btnBanner.style.display = 'block';
                         const btnEliminarBanner = document.getElementById('btnEliminarBanner');
                         if (btnEliminarBanner) btnEliminarBanner.style.display = perfil.bannerUrl ? 'flex' : 'none';
                         if (btnEditBio) btnEditBio.style.display = 'inline-flex';
+                        const btnCandado = document.getElementById('btnCandadoPrivacidad');
+                        if (btnCandado) { btnCandado.style.display = 'flex'; window._inicializarCandadoPrivacidad(); }
                         if (btnEditFavorita) btnEditFavorita.style.display = 'inline-flex';
                         if (btnCambiarAvatar) btnCambiarAvatar.style.display = 'flex';
                         const btnEditVistaCine = document.getElementById('btnEditarVistaCine');
@@ -763,14 +770,144 @@ window.subirBanner = async function(input) {
                                         const btnEliminarBanner = document.getElementById('btnEliminarBanner');
                                         if (btnEliminarBanner) btnEliminarBanner.style.display = 'none';
 
-                                    } catch (e) {
-                                        alert('Error al quitar el banner. Intentá de nuevo.');
-                                    }
-                                };
+                                                } catch (e) {
+                                                    alert('Error al quitar el banner. Intentá de nuevo.');
+                                                }
+                                            };
 
-                                // ==============================================
-                                // BIO — MODAL EDITAR
-                                // ==============================================
+                                            // ==============================================
+                                            // CANDADO DE PRIVACIDAD DEL PERFIL
+                                            // ==============================================
+                                            let _miSalaEsPrivado = false;
+
+                                            window._inicializarCandadoPrivacidad = async function() {
+                                                const token = localStorage.getItem('token');
+
+                                                const btnFab = document.getElementById('btnFabPrivacidad');
+                                                if (btnFab) btnFab.style.display = 'flex';
+
+                                                try {
+                                                    const res = await fetch(`${CONFIG.API_URL}/users/me`, {
+                                                        headers: { 'Authorization': `Bearer ${token}` }
+                                                    });
+                                                    if (!res.ok) return;
+                                                    const data = await res.json();
+                                                    _miSalaEsPrivado = data.profileVisibility === 'PRIVATE';
+                                                    _actualizarIconoCandado();
+                                                } catch (e) {}
+                                            };
+
+                                            function _actualizarIconoCandado() {
+                                                const claseIcono = _miSalaEsPrivado ? 'fas fa-lock' : 'fas fa-lock-open';
+                                                const icono = document.getElementById('btnCandadoPrivacidadIcono');
+                                                if (icono) icono.className = claseIcono;
+                                                const iconoFab = document.getElementById('btnFabPrivacidadIcono');
+                                                if (iconoFab) iconoFab.className = claseIcono;
+                                            }
+
+                                            window._abrirModalPrivacidad = function() {
+                                                _actualizarTextosModalPrivacidad(_miSalaEsPrivado);
+                                                document.getElementById('modalPrivacidadPerfil').style.display = 'flex';
+                                            };
+
+                                            window._cerrarModalPrivacidad = function() {
+                                                document.getElementById('modalPrivacidadPerfil').style.display = 'none';
+                                            };
+
+                                            // El switch dentro del modal solo cambia la vista previa —
+                                            // todavía no pega al backend. Recién pega cuando se toca
+                                            // "Confirmar", como pidió el flujo (candado se cierra SI
+                                            // llega a confirmar, no apenas se abre el modal).
+                                            window._togglePrivacidadDesdeModal = function() {
+                                                _actualizarTextosModalPrivacidad(!_miSalaEsPrivado);
+                                            };
+
+                                            function _actualizarTextosModalPrivacidad(previewPrivado) {
+                                                const toggle = document.getElementById('modalPrivacidadToggle');
+                                                const dot    = document.getElementById('modalPrivacidadDot');
+                                                const label  = document.getElementById('modalPrivacidadLabel');
+                                                const desc   = document.getElementById('modalPrivacidadDesc');
+
+                                                toggle.dataset.preview = previewPrivado ? 'PRIVATE' : 'PUBLIC';
+
+                                                if (previewPrivado) {
+                                                    toggle.style.background = '#324C89';
+                                                    dot.style.left = '22px';
+                                                    label.textContent = 'Privado';
+                                                    desc.textContent = 'Tu perfil es privado. Solo usuarios aprobados pueden ver tu contenido.';
+                                                } else {
+                                                    toggle.style.background = '#ddd';
+                                                    dot.style.left = '2px';
+                                                    label.textContent = 'Público';
+                                                    desc.textContent = 'Tu perfil es público. Cualquier usuario puede ver tu contenido.';
+                                                }
+                                            }
+
+                                            window._confirmarCambioPrivacidad = async function() {
+                                                const toggle = document.getElementById('modalPrivacidadToggle');
+                                                const nuevaVisibilidad = toggle.dataset.preview || (_miSalaEsPrivado ? 'PUBLIC' : 'PRIVATE');
+                                                const token = localStorage.getItem('token');
+
+                                                const btn = document.getElementById('btnConfirmarPrivacidad');
+                                                btn.disabled = true;
+                                                btn.textContent = 'Guardando...';
+
+                                                try {
+                                                    const res = await fetch(`${CONFIG.API_URL}/follows/privacy`, {
+                                                        method: 'PATCH',
+                                                        headers: {
+                                                            'Content-Type': 'application/json',
+                                                            'Authorization': `Bearer ${token}`
+                                                        },
+                                                        body: JSON.stringify({ visibility: nuevaVisibilidad })
+                                                    });
+                                                    if (!res.ok) throw new Error();
+
+                                                        _miSalaEsPrivado = nuevaVisibilidad === 'PRIVATE';
+                                                        _actualizarIconoCandado();
+                                                        window._cerrarModalPrivacidad();
+                                                        _toastPrivacidad(_miSalaEsPrivado
+                                                            ? 'Tu perfil ahora es privado'
+                                                            : 'Tu perfil ahora es público');
+                                                    } catch (e) {
+                                                        alert('Error al actualizar la privacidad. Intentá de nuevo.');
+                                                    } finally {
+                                                        btn.disabled = false;
+                                                        btn.textContent = 'Confirmar';
+                                                    }
+                                                };
+
+                                                // Reusa el toast que ya existe para el cambio Películas/Series
+                                                // (mismo elemento, mismo fundido) pero sin el flash de color de
+                                                // pantalla completa — ese efecto es propio de ese otro cambio,
+                                                // acá alcanza con el aviso breve.
+                                                function _toastPrivacidad(mensaje) {
+                                                    const toast = document.getElementById('cineModoToast');
+                                                    if (!toast) return;
+
+                                                    toast.textContent = mensaje;
+                                                    toast.style.background = '#1a1a1a';
+                                                    toast.style.top = 'auto';
+                                                    toast.style.bottom = '2rem';
+                                                    toast.style.left = '50%';
+                                                    toast.style.transform = 'translateX(-50%)';
+                                                    toast.style.opacity = '0';
+                                                    toast.style.transition = 'none';
+                                                    toast.style.display = 'block';
+                                                    requestAnimationFrame(() => {
+                                                        toast.style.transition = 'opacity 0.3s ease';
+                                                        toast.style.opacity = '1';
+                                                    });
+                                                    clearTimeout(window._cineModoToastTimeout);
+                                                    window._cineModoToastTimeout = setTimeout(() => {
+                                                        toast.style.opacity = '0';
+                                                        setTimeout(() => { toast.style.display = 'none'; }, 300);
+                                                    }, 2000);
+                                                }
+
+                                            // ==============================================
+                                            // BIO — MODAL EDITAR
+                                            // ==============================================
         window.abrirModalBio = function() {
             const titulo = document.getElementById('perfilBioTitulo')?.textContent || '';
             const texto  = document.getElementById('perfilBioTexto')?.textContent || '';
@@ -1398,11 +1535,15 @@ window.subirBanner = async function(input) {
                                                    });
                                                    setTimeout(() => { flash.style.display = 'none'; }, 550);
 
-                                                   toast.textContent = mensaje;
-                                                   toast.style.background = color;
-                                                   toast.style.opacity = '0';
-                                                   toast.style.transition = 'none';
-                                                   toast.style.display = 'block';
+                                                  toast.textContent = mensaje;
+                                                  toast.style.background = color;
+                                                  toast.style.top = '50%';
+                                                  toast.style.bottom = 'auto';
+                                                  toast.style.left = '50%';
+                                                  toast.style.transform = 'translate(-50%, -50%)';
+                                                  toast.style.opacity = '0';
+                                                  toast.style.transition = 'none';
+                                                  toast.style.display = 'block';
                                                    requestAnimationFrame(() => {
                                                        toast.style.transition = 'opacity 0.3s ease';
                                                        toast.style.opacity = '1';
