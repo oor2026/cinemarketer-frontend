@@ -393,3 +393,18 @@
 .perfil-card.modo-oscuro .cine-ver-todas-pub { color: #8fb4ff !important; }
 
 .perfil-card .cine-ranking-trivia { cursor: pointer; }
+
+/* Mismo tamaño que el mazo de Mi Lista en mobile (240×360 la
+   tarjeta, 400px de alto el área) — antes heredaba el tamaño de
+   desktop (170×255) sin ningún ajuste propio acá. Cubre los 4 mazos
+   (votaciones/comentarios × películas/series), que comparten las
+   mismas clases. Solo mobile — desktop sigue con su 170×255 de
+   siempre, sin tocar. */
+.perfil-card .cine-stack-area {
+    width: 240px;
+    height: 400px;
+}
+.perfil-card .cine-stack-card {
+    width: 240px;
+    height: 360px;
+}
