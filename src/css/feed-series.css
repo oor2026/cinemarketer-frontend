@@ -1522,10 +1522,11 @@
         display: flex !important;
     }
 
-    #modalSerie #btnDondeVerlaModalSerie      { order: 1; }
-    #modalSerie #btnCompartirModalSerie       { order: 2; }
-    #modalSerie #btnRecomendarModalHeaderSerie { order: 3; }
-    #modalSerie #btnWatchlistModalSerie       { order: 4; }
+        #modalSerie #btnDondeVerlaModalSerie      { order: 1; }
+        #modalSerie #btnNoInteresaModalSerie      { order: 2; }
+        #modalSerie #btnCompartirModalSerie       { order: 3; }
+        #modalSerie #btnRecomendarModalHeaderSerie { order: 4; }
+        #modalSerie #btnWatchlistModalSerie       { order: 5; }
 
     #modalSerie .modal-cerrar {
         position: absolute !important;
