@@ -103,7 +103,7 @@
        las flechas, que fuera de este media query siguen intactas
        en desktop. !important porque el JS (_actualizarChevronsClub)
        les pisa un style inline según la posición del scroll. */
-        .club-premios-grid > .premio-card { flex: 0 0 100% !important; }
+        .club-premios-grid > .premio-card { flex: 0 0 100% !important; scroll-snap-stop: always; }
         .club-carrusel-nav { display: none !important; }
         .club-carrusel-dots { display: flex; justify-content: center; gap: 7px; margin-top: 10px; }
         .club-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; cursor: pointer; transition: background 0.2s, transform 0.2s; }
@@ -422,8 +422,23 @@
             /* La descripción se muestra DENTRO del pill "Descripción" (junto a
                los datos de información), no flotando arriba de los tabs como
                en desktop. */
-            .modal-premio-descripcion { display: none; }
-            .modal-premio-descripcion-tab { display: block; }
+                .modal-premio-descripcion { display: none; }
+                .modal-premio-descripcion-tab { display: block; }
+
+                /* Los pills quedan fuera de la caja de scroll interno: el scroll
+                   ahora vive en .modal-premio-tabs-scroll (que solo contiene los
+                   5 paneles), no en .modal-premio-info (que los envolvía junto
+                   con los pills). Así los pills se quedan fijos debajo de la
+                   imagen y arriba de la caja que sí scrollea. */
+                    #modalPremioClub .modal-premio-info { overflow: visible; }
+                    #modalPremioClub .modal-tabs { flex-shrink: 0; }
+                    #modalPremioClub .modal-premio-tabs-scroll {
+                        overflow-y: scroll; flex: 1; min-height: 0; padding-right: 0.5rem;
+                        scrollbar-width: thin; scrollbar-color: #ccc transparent;
+                    }
+                    #modalPremioClub .modal-premio-tabs-scroll::-webkit-scrollbar { width: 6px; }
+                    #modalPremioClub .modal-premio-tabs-scroll::-webkit-scrollbar-track { background: transparent; }
+                    #modalPremioClub .modal-premio-tabs-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
 
             /* Renombra el pill 1 de "Información" a "Descripción" solo acá —
                el texto real del botón no se toca (sigue siendo "Información"
