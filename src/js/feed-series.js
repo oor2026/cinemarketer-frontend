@@ -2244,10 +2244,13 @@ window.renderVotacionesSeries = function(votaciones) {
         return;
     }
 
-    _votacionesSeriesPage    = 0;
-    _votacionesSeriesHayMas  = votaciones.length === 8;
-    _stackVotacionesSeries   = votaciones;
-    _stackIndiceSeries       = 0;
+        _votacionesSeriesPage    = 0;
+        // Mismo bug que en películas: el lote inicial viene de
+        // perfil.ultimasVotacionesSeries (fijo en 6), comparar contra 8
+        // siempre daba false. Se usa el contador real del título del mazo.
+        _votacionesSeriesHayMas  = (window._perfilCounts?.votacionesSeries || 0) > votaciones.length;
+        _stackVotacionesSeries   = votaciones;
+        _stackIndiceSeries       = 0;
 
         wrapper.innerHTML = `
                    <p class="cine-stack-eyebrow">VOTACIONES (${window._perfilCounts?.votacionesSeries || 0})</p>
@@ -2305,16 +2308,69 @@ window._renderStackPosicionesSeries = function() {
     }
 };
 
-window._moverStackSeries = function(dir) {
+window._moverStackSeries = async function(dir) {
     const N = _stackVotacionesSeries.length;
     if (N === 0) return;
-    _stackIndiceSeries = (_stackIndiceSeries + dir + N) % N;
-    window._renderStackPosicionesSeries();
 
-    if (dir > 0 && _stackIndiceSeries >= N - 2 && _votacionesSeriesHayMas && !_votacionesSeriesCargando) {
-        window.scrollCarruselSeries(1);
+    const proximoIndice = (_stackIndiceSeries + dir + N) % N;
+
+    // Mismo criterio que _moverStackComentarios/_moverStackVotos: si
+    // avanzamos y estamos por volver al principio del mazo, pedimos la
+    // próxima página ANTES de dar la vuelta. (Antes esto llamaba a
+    // window.scrollCarruselSeries(1), una función que apunta al
+    // carrusel horizontal VIEJO — #perfilCarruselSeriesTrack, que ya
+    // no existe desde que este mazo apilado lo reemplazó — por eso
+    // nunca cargaba nada nuevo y el mazo se quedaba repitiendo.)
+    if (dir > 0 && proximoIndice === 0 && _votacionesSeriesHayMas && !_votacionesSeriesCargando) {
+        _votacionesSeriesCargando = true;
+        try {
+            const token = localStorage.getItem('token');
+                        // size=6, mismo motivo que en películas — el lote inicial
+                        // ya vino en tandas de 6.
+                        const res = await fetch(
+                            `${CONFIG.API_URL}/users/${window.perfilUsuarioId || sessionStorage.getItem('perfilUsuarioId')}/votaciones-series?page=${_votacionesSeriesPage + 1}&size=6`,
+                            { headers: { 'Authorization': `Bearer ${token}` } }
+                        );
+                        if (res.ok) {
+                            const data = await res.json();
+                            if (data.votaciones && data.votaciones.length > 0) {
+                                _votacionesSeriesPage++;
+                                _votacionesSeriesHayMas = data.hayMas;
+                                _agregarVotacionesSeriesAlStack(data.votaciones);
+                            } else {
+                                _votacionesSeriesHayMas = false;
+                            }
+                        } else {
+                            console.error('[_moverStackSeries] respuesta no-ok al pedir más votaciones de series:', res.status, await res.text().catch(() => ''));
+                        }
+                    } catch (e) {
+                        console.error('[_moverStackSeries] error al pedir más votaciones de series:', e);
+                    }
+                    _votacionesSeriesCargando = false;
     }
+
+    const NFinal = _stackVotacionesSeries.length;
+    _stackIndiceSeries = (_stackIndiceSeries + dir + NFinal) % NFinal;
+    window._renderStackPosicionesSeries();
 };
+
+function _agregarVotacionesSeriesAlStack(nuevas) {
+    _stackVotacionesSeries = _stackVotacionesSeries.concat(nuevas);
+    const cont = document.getElementById('cineStackSeriesContainer');
+    const nuevoHtml = nuevas.map(v => {
+        const poster = v.posterPath
+            ? `<img src="https://image.tmdb.org/t/p/w185${v.posterPath}" alt="${v.seriesTitle || ''}">`
+            : `<div class="placeholder"><i class="fas fa-tv"></i></div>`;
+        const badgeClass = v.voto === 'LIKE' ? 'like' : 'dislike';
+        const badgeIcon  = v.voto === 'LIKE' ? 'fa-thumbs-up' : 'fa-thumbs-down';
+        return `
+        <div class="cine-stack-card" onclick="window._abrirSerieDesdePerfil(${v.seriesId})">
+            ${poster}
+            <div class="cine-stack-badge ${badgeClass}"><i class="fas ${badgeIcon}" style="font-size:0.6rem;color:white;"></i></div>
+        </div>`;
+    }).join('');
+    cont.insertAdjacentHTML('beforeend', nuevoHtml);
+}
 
 window.scrollCarruselSeries = async function(dir) {
     const track = document.getElementById('perfilCarruselSeriesTrack');
