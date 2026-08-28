@@ -704,7 +704,12 @@ window._abrirModalPremioClub = function(id, origen) {
         p.rewardType === 'DESCUENTO' ? '🏷️ Descuento' :
         p.rewardType === 'EXPERIENCIA' ? '🎟️ Experiencia' :
         p.type === 'SORTEO' ? '🎲 Sorteo' : '🎁 Merchandising';
-    document.getElementById('clubModalPremioDescripcion').textContent = p.description || '';
+        document.getElementById('clubModalPremioDescripcion').textContent = p.description || '';
+        // Copia para mobile — en mobile la descripción va DENTRO del pill
+        // "Descripción" junto con los datos de información, no flotando
+        // arriba de los tabs como en desktop.
+        const descTab = document.getElementById('clubModalPremioDescripcionTab');
+        if (descTab) descTab.textContent = p.description || '';
 
     // Carrusel real — mismo criterio que mis-premios.js: soporta
     // múltiples imágenes (p.images) o una sola (p.imageUrl).
@@ -840,9 +845,10 @@ window._abrirModalPremioClub = function(id, origen) {
         });
     };
 
-    window._renderCarruselClub = function(imagenes) {
-        window._clubCarruselState = { imagenes, actual: 0 };
-        const img = document.getElementById('clubModalPremioImg');
+        window._renderCarruselClub = function(imagenes) {
+            window._clubCarruselState = { imagenes, actual: 0 };
+            window._inicializarSwipeCarruselClub();
+            const img = document.getElementById('clubModalPremioImg');
         const placeholder = document.getElementById('clubModalPremioImgPlaceholder');
         const btnPrev = document.getElementById('clubPremioBtnPrev');
         const btnNext = document.getElementById('clubPremioBtnNext');
@@ -885,11 +891,46 @@ window._abrirModalPremioClub = function(id, origen) {
         window._actualizarCarruselClub();
     };
 
-    window._actualizarCarruselClub = function() {
-        const state = window._clubCarruselState;
-        document.getElementById('clubModalPremioImg').src = state.imagenes[state.actual];
-        document.getElementById('clubPremioDots').querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('activo', i === state.actual));
-    };
+        window._actualizarCarruselClub = function() {
+            const state = window._clubCarruselState;
+            document.getElementById('clubModalPremioImg').src = state.imagenes[state.actual];
+            document.getElementById('clubPremioDots').querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('activo', i === state.actual));
+        };
+
+        // Swipe táctil para el carrusel del modal de premio — en mobile las
+        // flechas están ocultas por CSS y hasta ahora solo se podía cambiar
+        // de imagen tocando los dots. El listener se ata una sola vez
+        // (dataset.swipeInit como guarda) porque el contenedor persiste en
+        // el DOM entre una apertura del modal y la siguiente.
+        window._inicializarSwipeCarruselClub = function() {
+            const carrusel = document.getElementById('clubPremioCarrusel');
+            if (!carrusel || carrusel.dataset.swipeInit) return;
+            carrusel.dataset.swipeInit = '1';
+
+            let startX = 0, startY = 0, arrastrando = false;
+
+            carrusel.addEventListener('touchstart', (e) => {
+                if (!window._clubCarruselState || window._clubCarruselState.imagenes.length <= 1) return;
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                arrastrando = true;
+            }, { passive: true });
+
+            carrusel.addEventListener('touchend', (e) => {
+                if (!arrastrando) return;
+                arrastrando = false;
+
+                const deltaX = e.changedTouches[0].clientX - startX;
+                const deltaY = e.changedTouches[0].clientY - startY;
+
+                // Umbral de 40px y que el gesto sea más horizontal que
+                // vertical, para no competir con el scroll normal de la
+                // página cuando el dedo se mueve más para arriba/abajo.
+                if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY)) {
+                    window._cambiarImagenPremioClub(deltaX < 0 ? 1 : -1);
+                }
+            });
+        };
 
     window._irASuscripcionClub = function() {
         if (typeof window.abrirDetallePlan === 'function') {

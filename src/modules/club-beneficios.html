@@ -188,15 +188,17 @@
                     <p class="modal-premio-descripcion" id="clubModalPremioDescripcion"></p>
 
                     <div class="modal-tabs">
-                        <button class="modal-tab active" id="clubTabPremio1" onclick="window._switchModalTabClub(1)">Información</button>
+                        <button class="modal-tab active" id="clubTabPremio1" data-label-mobile="Descripción" onclick="window._switchModalTabClub(1)">Información</button>
                         <button class="modal-tab" id="clubTabPremio2" onclick="window._switchModalTabClub(2)" style="display:none;">Detalles</button>
                         <button class="modal-tab" id="clubTabPremio3" onclick="window._switchModalTabClub(3)" style="display:none;">Términos</button>
                         <button class="modal-tab" id="clubTabPremio4" onclick="window._switchModalTabClub(4)" style="display:none;">Resultados</button>
                         <button class="modal-tab" id="clubTabPremio5" onclick="window._switchModalTabClub(5)" style="display:none;">Detalles del premio</button>
                     </div>
 
-                    <div id="clubPanelPremio1" class="modal-tab-panel">
-                        <div class="modal-premio-detalles">
+                    <div class="modal-premio-tabs-scroll" id="clubPremioTabsScroll">
+                        <div id="clubPanelPremio1" class="modal-tab-panel">
+                            <p class="modal-premio-descripcion-tab" id="clubModalPremioDescripcionTab"></p>
+                            <div class="modal-premio-detalles">
                             <div class="modal-premio-detalle-item">
                                 <span class="detalle-label"><i class="fas fa-coins"></i> Puntos requeridos</span>
                                 <span class="detalle-value puntos-requeridos" id="clubModalPremioPuntos">0</span>
@@ -268,8 +270,9 @@
                         </div>
                     </div>
 
-                    <div id="clubPanelPremio5" class="modal-tab-panel" style="display:none;">
-                        <div style="padding:0.5rem 0; font-size:0.9rem; color:#444; line-height:1.7;" id="clubModalPremioDetallesPremio"></div>
+                        <div id="clubPanelPremio5" class="modal-tab-panel" style="display:none;">
+                            <div style="padding:0.5rem 0; font-size:0.9rem; color:#444; line-height:1.7;" id="clubModalPremioDetallesPremio"></div>
+                        </div>
                     </div>
 
                 </div>
