@@ -3707,11 +3707,19 @@ window._actualizarVisibilidadRankingTrivia = function() {
 // showToast(tipo, msg) en vez de mostrarToast(msg, tipo) — perfil.js
 // ya usa esa firma en otro lado de este mismo archivo).
 // ==============================================
-let avatarSeleccionado = null;
+// Nombre con sufijo "Perfil" — mi-cuenta.js declara su propia
+// "avatarSeleccionado" a nivel superior, y como los dos se cargan
+// como <script> normales (no módulos), esa declaración queda en el
+// scope global compartido de la página. Sacar el <script> viejo del
+// DOM al cambiar de módulo NO deshace un let/const ya ejecutado —
+// por eso, si se visitaban los dos módulos en la misma sesión, el
+// segundo en cargar crasheaba entero con "Identifier ya declarado"
+// y ni una línea de ese archivo llegaba a ejecutarse.
+let avatarSeleccionadoPerfil = null;
 let avatarCategoriaActual = 'predefinidos';
 
 window.abrirSelectorAvatar = function() {
-    avatarSeleccionado = null;
+    avatarSeleccionadoPerfil = null;
     document.getElementById('avatarError').style.display = 'none';
 
     document.querySelectorAll('.avatar-tab').forEach(t => t.classList.remove('active'));
@@ -3790,7 +3798,7 @@ async function _cargarAvataresPredefinidosPerfil() {
 window.seleccionarAvatar = function(avatarId, elemento) {
     document.querySelectorAll('.avatar-item').forEach(item => item.classList.remove('selected'));
     elemento.classList.add('selected');
-    avatarSeleccionado = avatarId;
+    avatarSeleccionadoPerfil = avatarId;
 };
 
 function _inicializarFileInputAvatarPerfil() {
@@ -3846,12 +3854,12 @@ window.guardarAvatar = async function() {
         const token = localStorage.getItem('token');
         let response;
 
-        if (avatarCategoriaActual === 'predefinidos') {
-            if (!avatarSeleccionado) throw new Error('Seleccioná un avatar');
-            response = await fetch(`${CONFIG.API_URL}/users/me/avatar/${avatarSeleccionado}`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+                if (avatarCategoriaActual === 'predefinidos') {
+                    if (!avatarSeleccionadoPerfil) throw new Error('Seleccioná un avatar');
+                    response = await fetch(`${CONFIG.API_URL}/users/me/avatar/${avatarSeleccionadoPerfil}`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
         } else {
             const fileInput = document.getElementById('avatarFileInput');
             const file = fileInput.files[0];
