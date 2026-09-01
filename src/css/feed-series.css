@@ -1558,6 +1558,154 @@
 
     #modalSerie .modal-acciones .btn-like .btn-label-modal,
     #modalSerie .modal-acciones .btn-dislike .btn-label-modal {
-        display: inline !important;
-    }
-}
+                display: inline !important;
+            }
+        }
+
+        /* ==================================================================
+           HERO HORIZONTAL DE ANCHO COMPLETO + CRUZ EXTERNA — #modalSerie
+           Mismo patrón exacto ya armado para #modalPelicula en feed-films.css:
+           video (YouTube) → backdrop → fondo oscuro liso, póster flotando
+           sobre el hero, y la cruz de cerrar reubicada afuera del modal.
+           Todo esto es SOLO DESKTOP — mobile sigue con su carrusel swipeable
+           y su cruz de siempre, sin ningún cambio.
+           ================================================================== */
+        @media (min-width: 769px) {
+            #modalSerie .modal-carrusel {
+                display: block !important;
+                grid-column: 1 / -1 !important;
+                position: relative !important;
+                margin: -1.25rem -1.25rem 0 !important;
+            }
+
+            #modalSerie .carrusel-dots { display: none !important; }
+
+            #modalSerie .carrusel-slide:first-child {
+                position: absolute !important;
+                top: 1.5rem !important;
+                left: 1.5rem !important;
+                z-index: 3 !important;
+                width: 250px !important;
+                height: auto !important;
+                padding: 0 !important;
+            }
+            #modalSerie .carrusel-slide:first-child .modal-poster {
+                width: 250px !important;
+                height: 380px !important;
+                max-width: none !important;
+                box-shadow: 0 12px 30px rgba(0,0,0,0.5) !important;
+                border: 2px solid rgba(255,255,255,0.15) !important;
+                border-radius: 10px !important;
+            }
+            #modalSerie .carrusel-slide:first-child .modal-poster img {
+                width: 100% !important;
+                height: 100% !important;
+                object-fit: cover !important;
+            }
+
+            #modalSerie .carrusel-slide:last-child {
+                width: 100% !important;
+                padding: 0 !important;
+            }
+            #modalSerie .carrusel-slide:last-child .modal-columna-derecha {
+                width: 100% !important;
+            }
+            #modalSerie .carrusel-slide:last-child .modal-info {
+                display: block !important;
+            }
+
+            #modalSerie .modal-hero-fondo {
+                position: relative !important;
+                border-radius: 0 !important;
+                overflow: hidden !important;
+                min-height: 380px !important;
+                padding: 1.5rem 1.5rem 1.5rem calc(250px + 3rem) !important;
+                margin: 0 !important;
+                background: #14161f !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                justify-content: flex-end !important;
+                gap: 0.6rem !important;
+            }
+
+            #modalSerie .modal-hero-media {
+                position: absolute; inset: 0;
+                width: 100%; height: 100%;
+                object-fit: cover;
+                z-index: 0;
+                animation: modalHeroDriftSerie 22s ease-in-out infinite alternate;
+            }
+            @keyframes modalHeroDriftSerie {
+                0%   { transform: scale(1.08) translateX(0); }
+                100% { transform: scale(1.14) translateX(-4%); }
+            }
+
+            #modalSerie .modal-hero-video-wrap {
+                position: absolute; inset: 0;
+                overflow: hidden;
+                z-index: 0;
+            }
+            #modalSerie .modal-hero-video-wrap iframe {
+                position: absolute;
+                top: 50%; left: 50%;
+                width: 300%; height: 300%;
+                transform: translate(-50%, -50%);
+                pointer-events: none;
+                border: none;
+            }
+
+            #modalSerie .modal-hero-overlay {
+                position: absolute; inset: 0;
+                background:
+                    linear-gradient(90deg, rgba(10,10,20,0.75) 0%, rgba(10,10,20,0.25) 45%, rgba(10,10,20,0.5) 100%),
+                    linear-gradient(0deg, rgba(10,10,20,0.5) 0%, transparent 45%);
+                z-index: 1;
+            }
+
+            #modalSerie .modal-hero-fondo > .modal-chips-grid,
+            #modalSerie .modal-hero-fondo > .modal-generos {
+                position: relative;
+                z-index: 2;
+            }
+            #modalSerie .modal-hero-fondo > .modal-stat-bar {
+                position: absolute !important;
+                top: 1.5rem !important;
+                left: calc(250px + 3rem) !important;
+                z-index: 2;
+            }
+
+            #modalSerie .modal-hero-fondo .modal-stat-bar { padding: 0.45rem 0.9rem !important; }
+            #modalSerie .modal-hero-fondo .modal-stat-item { font-size: 0.8rem !important; }
+            #modalSerie .modal-hero-fondo .modal-chips-grid { gap: 0.5rem !important; }
+            #modalSerie .modal-hero-fondo .modal-chip { padding: 0.45rem 0.7rem !important; }
+            #modalSerie .modal-hero-fondo .modal-chip-icon { width: 24px !important; height: 24px !important; font-size: 0.7rem !important; }
+            #modalSerie .modal-hero-fondo .modal-chip-label { font-size: 0.62rem !important; }
+            #modalSerie .modal-hero-fondo .modal-chip-valor { font-size: 0.78rem !important; }
+        }
+
+        /* Wrapper de la cruz externa — mismo criterio que película: en
+           mobile display:contents (desaparece, cero cambio), en desktop toma
+           el tamaño real del modal para poder sacar la cruz afuera del
+           overflow:hidden de .modal-contenido. */
+        #modalSerie .modal-contenido-wrapper {
+            display: contents;
+        }
+        @media (min-width: 769px) {
+            #modalSerie .modal-contenido-wrapper {
+                position: relative !important;
+                width: 90% !important;
+                max-width: 1000px !important;
+                max-height: 90vh !important;
+                display: flex !important;
+            }
+            #modalSerie .modal-contenido {
+                width: 100% !important;
+                max-width: none !important;
+                max-height: none !important;
+            }
+
+            #modalSerie .modal-header > .modal-header-right > .modal-cerrar {
+                display: none !important;
+            }
+        }

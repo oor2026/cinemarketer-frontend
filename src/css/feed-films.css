@@ -829,6 +829,62 @@
     flex-direction: column !important;
 }
 
+/* Wrapper nuevo — en mobile es display:contents (desaparece del
+   layout, no afecta nada), .modal-contenido sigue siendo hijo directo
+   de #modalPelicula exactamente como antes de este cambio. Solo en
+   desktop pasa a tener tamaño real, para poder posicionar la cruz
+   externa afuera de .modal-contenido (que tiene overflow:hidden). El
+   modal de serie ni se entera, sigue usando .modal-contenido tal cual. */
+#modalPelicula .modal-contenido-wrapper {
+    display: contents;
+}
+
+@media (min-width: 769px) {
+    #modalPelicula .modal-contenido-wrapper {
+        position: relative !important;
+        width: 90% !important;
+        max-width: 1000px !important;
+        max-height: 90vh !important;
+        display: flex !important;
+    }
+    #modalPelicula .modal-contenido {
+        width: 100% !important;
+        max-width: none !important;
+        max-height: none !important;
+    }
+}
+
+.modal-cerrar-externa { display: none; }
+
+@media (min-width: 769px) {
+    /* La de adentro del header se oculta acá — solo en desktop, mobile
+       sigue viendo la de siempre, sin ningún cambio. */
+    #modalPelicula .modal-header > .modal-header-right > .modal-cerrar {
+        display: none !important;
+    }
+
+    .modal-cerrar-externa {
+        display: flex !important;
+        position: absolute !important;
+        top: -14px !important;
+        right: -14px !important;
+        z-index: 10 !important;
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 50% !important;
+        background: #fff !important;
+        color: #333 !important;
+        border: 1px solid #eee !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.25) !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 1.3rem !important;
+        cursor: pointer !important;
+        line-height: 1 !important;
+    }
+    .modal-cerrar-externa:hover { background: #f5f5f5 !important; }
+}
+
 /* ========== HEADER DEL MODAL ========== */
 #modalPelicula .modal-header {
     background: linear-gradient(135deg, #e50914, #b2070f) !important;
@@ -3971,6 +4027,142 @@ window.abrirElencoCard = async function(movieId, event) {
             }
         }
 
+
+/* ===== HERO HORIZONTAL DE ANCHO COMPLETO — reemplaza el grid de 2
+   columnas (300px póster / 1fr datos) por un banner único: video o
+   backdrop de fondo con deriva lenta, póster flotando arriba a la
+   izquierda por encima, chips/géneros a la derecha, todo en el mismo
+   bloque. Solo desktop — mobile sigue con su carrusel swipeable de
+   siempre, sin ningún cambio. ===== */
+@media (min-width: 769px) {
+    /* .modal-carrusel deja de ser display:contents (que hacía que sus
+       2 hijos cayeran cada uno en una columna del grid de modal-body)
+       — ahora es un solo bloque que ocupa las 2 columnas y arma su
+       propio layout interno. */
+    #modalPelicula .modal-carrusel {
+        display: block !important;
+        grid-column: 1 / -1 !important;
+        position: relative !important;
+        margin: -1.25rem -1.25rem 0 !important;
+    }
+
+    #modalPelicula .carrusel-dots { display: none !important; }
+
+    /* Slide 1 (póster) — flota posicionado absoluto, por encima de todo */
+            #modalPelicula .carrusel-slide:first-child {
+                position: absolute !important;
+                top: 1.5rem !important;
+                left: 1.5rem !important;
+                z-index: 3 !important;
+                width: 250px !important;
+                height: auto !important;
+                padding: 0 !important;
+            }
+            #modalPelicula .carrusel-slide:first-child .modal-poster {
+                width: 250px !important;
+                height: 380px !important;
+                max-width: none !important;
+                box-shadow: 0 12px 30px rgba(0,0,0,0.5) !important;
+                border: 2px solid rgba(255,255,255,0.15) !important;
+                border-radius: 10px !important;
+            }
+    #modalPelicula .carrusel-slide:first-child .modal-poster img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+    }
+
+    /* Slide 2 (datos) — ocupa el ancho completo; el póster flota
+       encima gracias al position:absolute de arriba */
+    #modalPelicula .carrusel-slide:last-child {
+        width: 100% !important;
+        padding: 0 !important;
+    }
+    #modalPelicula .carrusel-slide:last-child .modal-columna-derecha {
+        width: 100% !important;
+    }
+    #modalPelicula .carrusel-slide:last-child .modal-info {
+        display: block !important;
+    }
+
+    /* Hero de fondo — banner completo, con el póster flotando encima.
+       Prioridad: video (YouTube) → backdrop → fondo oscuro liso. */
+    #modalPelicula .modal-hero-fondo {
+        position: relative !important;
+        border-radius: 0 !important;
+        overflow: hidden !important;
+        min-height: 380px !important;
+        padding: 1.5rem 1.5rem 1.5rem calc(250px + 3rem) !important;
+        margin: 0 !important;
+        background: #14161f !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        justify-content: flex-end !important;
+        gap: 0.6rem !important;
+    }
+
+    /* Deriva lenta del backdrop — reemplaza al video en movimiento
+       real por un zoom/pan sutil en loop. */
+    #modalPelicula .modal-hero-media {
+        position: absolute; inset: 0;
+        width: 100%; height: 100%;
+        object-fit: cover;
+        z-index: 0;
+        animation: modalHeroDrift 22s ease-in-out infinite alternate;
+    }
+    @keyframes modalHeroDrift {
+        0%   { transform: scale(1.08) translateX(0); }
+        100% { transform: scale(1.14) translateX(-4%); }
+    }
+
+    #modalPelicula .modal-hero-video-wrap {
+        position: absolute; inset: 0;
+        overflow: hidden;
+        z-index: 0;
+    }
+    #modalPelicula .modal-hero-video-wrap iframe {
+        position: absolute;
+        top: 50%; left: 50%;
+        width: 300%; height: 300%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        border: none;
+    }
+
+    #modalPelicula .modal-hero-overlay {
+        position: absolute; inset: 0;
+        background:
+            linear-gradient(90deg, rgba(10,10,20,0.75) 0%, rgba(10,10,20,0.25) 45%, rgba(10,10,20,0.5) 100%),
+            linear-gradient(0deg, rgba(10,10,20,0.5) 0%, transparent 45%);
+        z-index: 1;
+    }
+
+        #modalPelicula .modal-hero-fondo > .modal-chips-grid,
+        #modalPelicula .modal-hero-fondo > .modal-generos {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Votos/popularidad separado del resto — arriba del backdrop, no
+           abajo pegado a los chips. */
+        #modalPelicula .modal-hero-fondo > .modal-stat-bar {
+            position: absolute !important;
+            top: 1.5rem !important;
+            left: calc(250px + 3rem) !important;
+            z-index: 2;
+        }
+
+    /* Pills más chicas — la versión normal tapaba casi todo el fondo.
+       Mismo fondo pastel de siempre, no se fuerza ningún color nuevo. */
+    #modalPelicula .modal-hero-fondo .modal-stat-bar { padding: 0.45rem 0.9rem !important; }
+    #modalPelicula .modal-hero-fondo .modal-stat-item { font-size: 0.8rem !important; }
+    #modalPelicula .modal-hero-fondo .modal-chips-grid { gap: 0.5rem !important; }
+    #modalPelicula .modal-hero-fondo .modal-chip { padding: 0.45rem 0.7rem !important; }
+    #modalPelicula .modal-hero-fondo .modal-chip-icon { width: 24px !important; height: 24px !important; font-size: 0.7rem !important; }
+    #modalPelicula .modal-hero-fondo .modal-chip-label { font-size: 0.62rem !important; }
+    #modalPelicula .modal-hero-fondo .modal-chip-valor { font-size: 0.78rem !important; }
+}
 
 /* ===== FICHA DE DATOS — versión color, desktop ===== */
 @media (min-width: 769px) {

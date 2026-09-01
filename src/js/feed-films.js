@@ -2815,9 +2815,9 @@ window.cargarDatosPelicula = async function(id) {
                 if (stats.userVoteType === 'DISLIKE') btnDislike?.classList.add('votado');
             }
         }
-        if (typeof window.cargarTrailerPelicula === 'function') {
-                            window.cargarTrailerPelicula(id);
-                        }
+                if (typeof window.cargarTrailerPelicula === 'function') {
+                                    window.cargarTrailerPelicula(id, pelicula.backdrop_path);
+                                }
                 window.cargarPeliculasSimilares(id);
                     window.cargarElenco(id);
                 } catch (error) {
@@ -2885,7 +2885,7 @@ window.cargarDatosPelicula = async function(id) {
 // ==============================================
 // CARGAR TRÁILER DE LA PELÍCULA
 // ==============================================
-window.cargarTrailerPelicula = async function(movieId) {
+window.cargarTrailerPelicula = async function(movieId, backdropPath) {
     const container = document.getElementById('modalTrailerContainer');
     if (!container) return;
 
@@ -2922,29 +2922,67 @@ window.cargarTrailerPelicula = async function(movieId) {
         }
     }
 
-    if (videoToUse?.key) {
-        container.innerHTML = `
-            <div class="trailer-embed">
-                <iframe
-                    width="100%"
-                    height="100%"
-                    src="https://www.youtube.com/embed/${videoToUse.key}"
-                    title="Tráiler"
-                    frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen>
-                </iframe>
-            </div>
-        `;
-    } else {
-        container.innerHTML = `
-            <div class="sin-trailer">
-                <i class="fas fa-video-slash"></i>
-                <p>Tráiler no disponible</p>
-            </div>
-        `;
-    }
-};
+        if (videoToUse?.key) {
+            container.innerHTML = `
+                <div class="trailer-embed">
+                    <iframe
+                        width="100%"
+                        height="100%"
+                        src="https://www.youtube.com/embed/${videoToUse.key}"
+                        title="Tráiler"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            `;
+        } else {
+            container.innerHTML = `
+                <div class="sin-trailer">
+                    <i class="fas fa-video-slash"></i>
+                    <p>Tráiler no disponible</p>
+                </div>
+            `;
+        }
+
+        // Hero de fondo detrás de la ficha de datos — solo desktop. Reusa
+        // el mismo video que ya se buscó acá arriba, sin pedirlo dos veces.
+        if (window.innerWidth > 768 && typeof window._aplicarHeroModalPelicula === 'function') {
+            window._aplicarHeroModalPelicula(videoToUse?.key || null, backdropPath);
+        }
+    };
+
+    window._aplicarHeroModalPelicula = function(videoKey, backdropPath) {
+        const hero = document.getElementById('modalHeroFondo');
+        if (!hero) return;
+
+        // Saca el video/imagen/overlay de una película anterior antes de
+        // poner el nuevo — si no, se queda pegado el de la vez pasada.
+        hero.querySelectorAll('.modal-hero-media, .modal-hero-video-wrap, .modal-hero-overlay').forEach(el => el.remove());
+
+        const frag = document.createDocumentFragment();
+
+        if (backdropPath) {
+            const img = document.createElement('img');
+            img.className = 'modal-hero-media';
+            img.src = `https://image.tmdb.org/t/p/original${backdropPath}`;
+            img.alt = '';
+            frag.appendChild(img);
+        } else if (videoKey) {
+            const wrap = document.createElement('div');
+            wrap.className = 'modal-hero-video-wrap';
+            wrap.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoKey}?autoplay=1&mute=1&loop=1&playlist=${videoKey}&controls=0&modestbranding=1&showinfo=0&rel=0&playsinline=1" allow="autoplay; encrypted-media" frameborder="0"></iframe>`;
+            frag.appendChild(wrap);
+        }
+        // Si no hay ninguno de los dos, el fondo oscuro liso del CSS
+        // (#14161f) ya cubre ese caso — no hace falta agregar nada más.
+
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-hero-overlay';
+        frag.appendChild(overlay);
+
+        hero.insertBefore(frag, hero.firstChild);
+    };
 
 // ==============================================
 // CARGAR COMENTARIOS — con botón reportar
