@@ -3,6 +3,19 @@
 // Calcado del motor de feed-films.js, endpoints propios de /api/series
 // ==============================================
 
+// Faltaba por completo — el botón de flecha del carrusel de series
+// (onclick="window.moverFilaGeneroSerie(...)" en el HTML) llamaba a
+// una función que nunca se definió en ningún lado. Por eso en
+// desktop la flecha no hacía nada (ni siquiera el scroll básico,
+// sin hablar de la paginación), mientras que en mobile el swipe
+// funcionaba porque no depende de esta función — mueve el scroll
+// directo con el dedo. Calcado de window.moverFilaGenero (películas).
+window.moverFilaGeneroSerie = function(key, direccion) {
+    const track = document.getElementById(`filaSerieTrack-${key}`);
+    if (!track) return;
+    track.scrollBy({ left: direccion * track.clientWidth * 0.9, behavior: 'smooth' });
+};
+
 window._filasSeries = [];
 window._filasSeriesCargadas = false;
 
@@ -95,13 +108,13 @@ window.cargarFilasSeries = async function() {
         }
         renderFilasSeries();
 
-        const cont = document.getElementById('filasSeriesContainer');
-        if (cont) {
-            const header = document.querySelector('header');
-            const offset = (header ? header.offsetHeight : 70) + 16;
-            const top = cont.getBoundingClientRect().top + window.scrollY - offset;
-            window.scrollTo({ top, behavior: 'auto' });
-        }
+                const cont = document.getElementById('filasSeriesContainer');
+                if (cont) {
+                    const header = document.querySelector('header');
+                    const offset = (header ? header.offsetHeight : 70) + 16;
+                    const top = cont.getBoundingClientRect().top + window.scrollY - offset;
+                    window.scrollTo({ top, behavior: 'smooth' });
+                }
     };
 
 function renderFilasSeries() {

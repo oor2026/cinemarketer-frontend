@@ -152,3 +152,503 @@
         </button>
     </div>
 </div>
+
+<!-- ============================================== -->
+<!-- BUSCADOR ASISTIDO — reemplaza al filtro tradicional de arriba.
+     Nivel 1: "¿Qué querés buscar hoy?". Reusa las mismas clases
+     .filtros-modal-* (overlay/sheet/header/body) para quedar visual-
+     mente consistente sin CSS nuevo. -->
+<!-- ============================================== -->
+<div class="filtros-modal-overlay" id="buscadorModalOverlay" onclick="window.cerrarBuscadorAsistido()"></div>
+<div class="filtros-modal-sheet buscador-sheet" id="buscadorModalSheet">
+    <div class="buscador-header-asistente">
+        <i class="fas fa-clapperboard buscador-header-decor"></i>
+        <button class="buscador-header-cerrar" onclick="window.cerrarBuscadorAsistido()"><i class="fas fa-times"></i></button>
+        <div class="buscador-bubble-row">
+            <div class="buscador-avatar"><img src="assets/images/icon-512.png" alt="Cinemarketer"></div>
+            <div class="buscador-bubble" id="buscadorBubbleTexto">¿Qué querés buscar hoy?</div>
+        </div>
+    </div>
+    <div class="filtros-modal-body" id="buscadorModalBody">
+        <div class="buscador-nivel1-grid" id="buscadorNivel1">
+            <button class="buscador-opcion" onclick="window._buscadorIrANivel2('pelicula_serie')">
+                <i class="fas fa-film"></i>
+                <span>Película o serie</span>
+            </button>
+            <button class="buscador-opcion" onclick="window._buscadorIrANivel2('persona')">
+                <i class="fas fa-user"></i>
+                <span>Actor/actriz/director</span>
+            </button>
+            <button class="buscador-opcion" onclick="window._buscadorIrANivel2('donde_ver')">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>Dónde/cuándo verla</span>
+            </button>
+            <button class="buscador-opcion" onclick="window._buscadorIrANivel2('mi_actividad')">
+                <i class="fas fa-user-circle"></i>
+                <span>Sobre mi actividad cinéfila</span>
+            </button>
+            <button class="buscador-opcion" onclick="window._buscadorIrANivel2('plataforma')">
+                <i class="fas fa-star"></i>
+                <span>Sobre la plataforma Cinemarketer</span>
+            </button>
+        </div>
+
+        <!-- NIVEL 2 — Película o serie: paso 1, elegir tipo (pastillas
+     grandes en vez de switch chico) -->
+        <div class="buscador-nivel2" id="buscadorTipoEleccion" style="display:none;">
+            <button class="buscador-volver" onclick="window._buscadorVolverNivel1()">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <p class="buscador-subtitulo">¿Es una película o una serie?</p>
+            <div class="buscador-pastillas-grandes">
+                <button class="buscador-pastilla-grande" onclick="window._buscadorSetTipoYAvanzar('pelicula')">
+                    <i class="fas fa-film"></i>
+                    <span>Película</span>
+                </button>
+                <button class="buscador-pastilla-grande" onclick="window._buscadorSetTipoYAvanzar('serie')">
+                    <i class="fas fa-tv"></i>
+                    <span>Serie</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- NIVEL 2 — Película o serie: paso 2, los criterios (los
+             mismos 4, sea cual sea el tipo elegido en el paso 1) -->
+        <div class="buscador-nivel2" id="buscadorNivel2PeliculaSerie" style="display:none;">
+            <button class="buscador-volver" onclick="window._buscadorVolverATipoEleccion()">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <p class="buscador-subtitulo" id="buscadorNivel2PeliculaSerieTitulo"></p>
+
+            <div class="buscador-nivel2-lista">
+                <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('titulo')">
+                    <i class="fas fa-font"></i>
+                    <div>
+                        <strong>Por título</strong>
+                        <span>Escribís el nombre y te lo encontramos</span>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('genero')">
+                    <i class="fas fa-theater-masks"></i>
+                    <div>
+                        <strong>Por género</strong>
+                        <span>Terror, comedia, drama, acción...</span>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('epoca')">
+                    <i class="fas fa-calendar-alt"></i>
+                    <div>
+                        <strong>Por año o década</strong>
+                        <span>Qué salió en tal año o en los 90s, 2000s...</span>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('caracteristica')">
+                    <i class="fas fa-tags"></i>
+                    <div>
+                        <strong>Por característica</strong>
+                        <span>Basada en hechos reales, remake, saga...</span>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- NIVEL 3 — Por título (predictor en vivo) -->
+        <div class="buscador-nivel2" id="buscadorNivel3Titulo" style="display:none;">
+            <button class="buscador-volver" onclick="window._buscadorVolverACriteriosPeliculaSerie()">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <p class="buscador-subtitulo" id="buscadorNivel3TituloSubtitulo">Escribí el título</p>
+            <div class="buscador-predictor-wrap">
+                <input type="text" id="buscadorInputTitulo" class="filtro-input"
+                       placeholder="Ej: Jurassic Park" autocomplete="off">
+                <div id="buscadorResultadosTitulo" class="buscador-predictor-resultados" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- NIVEL 3 — Por género -->
+        <div class="buscador-nivel2" id="buscadorNivel3Genero" style="display:none;">
+            <button class="buscador-volver" onclick="window._buscadorVolverACriteriosPeliculaSerie()">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <p class="buscador-subtitulo" id="buscadorNivel3GeneroSubtitulo">Elegí un género</p>
+            <div class="buscador-generos-grid" id="buscadorGenerosGrid">
+                <div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Cargando géneros...</div>
+            </div>
+        </div>
+
+        <!-- NIVEL 3 — Por año o década: bifurcación -->
+        <div class="buscador-nivel2" id="buscadorNivel3EpocaTipo" style="display:none;">
+            <button class="buscador-volver" onclick="window._buscadorVolverACriteriosPeliculaSerie()">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <p class="buscador-subtitulo">¿Año específico o década?</p>
+            <div class="buscador-pastillas-grandes">
+                <button class="buscador-pastilla-grande" onclick="window._buscadorAbrirAnioEspecifico()">
+                    <i class="fas fa-calendar-day"></i>
+                    <span>Año específico</span>
+                </button>
+                <button class="buscador-pastilla-grande" onclick="window._buscadorAbrirDecadas()">
+                    <i class="fas fa-calendar-week"></i>
+                    <span>Década</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- NIVEL 3 — Año específico: select nativo, sin validación
+             a mano — dispara la misma búsqueda de siempre. -->
+        <div class="buscador-nivel2" id="buscadorNivel3AnioEspecifico" style="display:none;">
+            <button class="buscador-volver" onclick="window._buscadorVolverAEpocaTipo()">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <p class="buscador-subtitulo">Elegí el año</p>
+            <select id="buscadorSelectAnio" class="filtro-select" onchange="window._buscadorBuscarPorAnio(parseInt(this.value))">
+                <option value="" selected disabled>Seleccioná un año...</option>
+            </select>
+        </div>
+
+        <!-- NIVEL 3 — Década: pills, ahora dispara un rango real -->
+        <div class="buscador-nivel2" id="buscadorNivel3Decada" style="display:none;">
+            <button class="buscador-volver" onclick="window._buscadorVolverAEpocaTipo()">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <p class="buscador-subtitulo">Elegí una década</p>
+            <div class="buscador-generos-grid" id="buscadorDecadasGrid"></div>
+        </div>
+
+        <!-- NIVEL 3 — Por característica -->
+        <div class="buscador-nivel2" id="buscadorNivel3Caracteristica" style="display:none;">
+            <button class="buscador-volver" onclick="window._buscadorVolverACriteriosPeliculaSerie()">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <p class="buscador-subtitulo">Elegí una característica</p>
+            <div class="buscador-generos-grid" id="buscadorCaracteristicasGrid"></div>
+        </div>
+
+        <!-- NIVEL 2 — Actor/actriz/director -->
+        <div class="buscador-nivel2" id="buscadorNivel2Persona" style="display:none;">
+            <button class="buscador-volver" onclick="window._buscadorVolverNivel1()">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <div class="buscador-nivel2-lista">
+                <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('persona_nombre')">
+                    <i class="fas fa-id-badge"></i>
+                    <div>
+                        <strong>Buscar por nombre</strong>
+                        <span>Ver su filmografía completa</span>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('persona_premios')">
+                    <i class="fas fa-award"></i>
+                    <div>
+                        <strong>Premios y nominaciones</strong>
+                        <span>Qué ganó o estuvo nominada esa persona</span>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('persona_cruce')">
+                    <i class="fas fa-people-arrows"></i>
+                    <div>
+                        <strong>Trabajaron juntos</strong>
+                        <span>Películas donde aparecen dos personas a la vez</span>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- NIVEL 3 — Buscar por nombre (predictor en vivo) -->
+        <div class="buscador-nivel2" id="buscadorNivel3Persona" style="display:none;">
+            <button class="buscador-volver" onclick="window._buscadorVolverANivel2Persona()">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <p class="buscador-subtitulo">Escribí el nombre</p>
+            <div class="buscador-predictor-wrap">
+                <input type="text" id="buscadorInputPersona" class="filtro-input"
+                       placeholder="Ej: Christopher Nolan" autocomplete="off">
+                <div id="buscadorResultadosPersona" class="buscador-predictor-resultados" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- NIVEL 3 — Trabajaron juntos: paso 1, primera persona -->
+        <div class="buscador-nivel2" id="buscadorNivel3Cruce1" style="display:none;">
+            <button class="buscador-volver" onclick="window._buscadorVolverANivel2Persona()">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <p class="buscador-subtitulo">Elegí la primera persona</p>
+            <div class="buscador-predictor-wrap">
+                <input type="text" id="buscadorInputCruce1" class="filtro-input"
+                       placeholder="Ej: Leonardo DiCaprio" autocomplete="off">
+                <div id="buscadorResultadosCruce1" class="buscador-predictor-resultados" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- NIVEL 3 — Trabajaron juntos: paso 2, segunda persona -->
+        <div class="buscador-nivel2" id="buscadorNivel3Cruce2" style="display:none;">
+            <button class="buscador-volver" onclick="window._buscadorVolverACruce1()">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <p class="buscador-subtitulo" id="buscadorNivel3Cruce2Subtitulo">Ahora elegí la segunda</p>
+            <div class="buscador-predictor-wrap">
+                <input type="text" id="buscadorInputCruce2" class="filtro-input"
+                       placeholder="Ej: Martin Scorsese" autocomplete="off">
+                <div id="buscadorResultadosCruce2" class="buscador-predictor-resultados" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- NIVEL 2 — Dónde/cuándo verla -->
+        <div class="buscador-nivel2" id="buscadorNivel2DondeVer" style="display:none;">
+            <button class="buscador-volver" onclick="window._buscadorVolverNivel1()">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <div class="buscador-nivel2-lista">
+                <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('donde_ver_titulo')">
+                    <i class="fas fa-tv"></i>
+                    <div>
+                        <strong>Buscar por título</strong>
+                        <span>Te decimos en qué plataformas está esa película o serie</span>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('donde_ver_plataforma')">
+                    <i class="fas fa-play-circle"></i>
+                    <div>
+                        <strong>Por plataforma</strong>
+                        <span>Qué hay en Netflix, Disney+, etc.</span>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('donde_ver_cartelera')">
+                    <i class="fas fa-ticket-alt"></i>
+                    <div>
+                        <strong>Cartelera y funciones</strong>
+                        <span>Cines cerca tuyo, horarios de hoy o mañana</span>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('donde_ver_estrenos')">
+                    <i class="fas fa-calendar-plus"></i>
+                    <div>
+                        <strong>Próximos estrenos</strong>
+                        <span>Qué se viene en cines o streaming</span>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- NIVEL 3 — Dónde ver: elegir tipo primero (comparten los mismos
+     2 pasos siguientes, tanto para "por título" como "por
+     plataforma") -->
+        <div class="buscador-nivel2" id="buscadorDondeVerTipo" style="display:none;">
+            <button class="buscador-volver" onclick="window._buscadorVolverANivel2DondeVer()">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <p class="buscador-subtitulo">¿Película o serie?</p>
+            <div class="buscador-pastillas-grandes">
+                <button class="buscador-pastilla-grande" onclick="window._buscadorDondeVerSetTipo('pelicula')">
+                    <i class="fas fa-film"></i>
+                    <span>Película</span>
+                </button>
+                <button class="buscador-pastilla-grande" onclick="window._buscadorDondeVerSetTipo('serie')">
+                    <i class="fas fa-tv"></i>
+                    <span>Serie</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- NIVEL 3 — Dónde ver: opción A, predictor de título -->
+        <div class="buscador-nivel2" id="buscadorDondeVerTitulo" style="display:none;">
+            <button class="buscador-volver" onclick="window._buscadorAbrirDondeVerTipo('donde_ver_titulo')">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <p class="buscador-subtitulo" id="buscadorDondeVerTituloSubtitulo">Escribí el título</p>
+            <div class="buscador-predictor-wrap">
+                <input type="text" id="buscadorInputDondeVer" class="filtro-input"
+                       placeholder="Ej: Stranger Things" autocomplete="off">
+                <div id="buscadorResultadosDondeVer" class="buscador-predictor-resultados" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- NIVEL 3 — Dónde ver: opción B, elegir plataforma -->
+        <div class="buscador-nivel2" id="buscadorDondeVerPlataforma" style="display:none;">
+            <button class="buscador-volver" onclick="window._buscadorVolverANivel2DondeVer()">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <p class="buscador-subtitulo">Elegí una plataforma</p>
+            <div class="buscador-generos-grid" id="buscadorPlataformasGrid"></div>
+            <div class="buscador-plataformas-dots" id="buscadorPlataformasDots"></div>
+        </div>
+
+        <div class="buscador-nivel2" id="buscadorNivel2MiActividad" style="display:none;">
+            <button class="buscador-volver" onclick="window._buscadorVolverNivel1()">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <div class="buscador-nivel2-lista">
+                <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('actividad_aprovechar')">
+                    <i class="fas fa-gift"></i>
+                    <div>
+                        <strong>¿Cómo estoy este mes?</strong>
+                        <span>Tu resumen de puntos, acumulados y cupos</span>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('actividad_proximo_premio')">
+                    <i class="fas fa-trophy"></i>
+                    <div>
+                        <strong>¿Qué puedo aprovechar este mes?</strong>
+                        <span>Premios a tu alcance y cuánto te falta</span>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="buscador-criterio" id="buscadorBtnPremiumDinamico" onclick="window._buscadorCriterioSeleccionado('actividad_vale_premium')">
+                    <i class="fas fa-star" id="buscadorBtnPremiumIcono"></i>
+                    <div>
+                        <strong id="buscadorBtnPremiumTitulo">¿Vale la pena pasarme a Premium?</strong>
+                        <span id="buscadorBtnPremiumSubtitulo">Según cómo usaste la plataforma este mes</span>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('actividad_insignias')">
+                    <i class="fas fa-fingerprint"></i>
+                    <div>
+                        <strong>¿Qué son las insignias? ¿Cuál es la mía?</strong>
+                        <span>Tu nivel actual y qué te falta para el próximo</span>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- NIVEL 3 — ¿Qué puedo aprovechar este mes? -->
+        <div class="buscador-nivel2" id="buscadorNivel3Aprovechar" style="display:none;">
+            <button class="buscador-volver" onclick="window._buscadorVolverNivel2MiActividad()">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <p class="buscador-subtitulo">Esto es lo que podés aprovechar este mes</p>
+            <div id="buscadorAprovecharContenido">
+                <div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Calculando...</div>
+            </div>
+        </div>
+
+        <!-- NIVEL 3 — ¿Cuánto me falta para el próximo premio? -->
+        <div class="buscador-nivel2" id="buscadorNivel3ProximoPremio" style="display:none;">
+            <button class="buscador-volver" onclick="window._buscadorVolverNivel2MiActividad()">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <p class="buscador-subtitulo">Cuánto te falta para cada premio</p>
+            <div id="buscadorProximoPremioContenido">
+                <div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Calculando...</div>
+            </div>
+        </div>
+
+        <!-- NIVEL 3 — ¿Vale la pena pasarme a Premium? (solo FREE) -->
+        <div class="buscador-nivel2" id="buscadorNivel3ValePremium" style="display:none;">
+            <button class="buscador-volver" onclick="window._buscadorVolverNivel2MiActividad()">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <p class="buscador-subtitulo">Según cómo usaste la plataforma este mes</p>
+            <div id="buscadorValePremioContenido">
+                <div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Calculando...</div>
+            </div>
+        </div>
+
+        <!-- NIVEL 3 — ¿Cuánto estoy ganando por ser Premium? (solo Premium) -->
+        <div class="buscador-nivel2" id="buscadorNivel3ReforzarPremium" style="display:none;">
+            <button class="buscador-volver" onclick="window._buscadorVolverNivel2MiActividad()">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <p class="buscador-subtitulo">Lo que Premium te dio este mes</p>
+            <div id="buscadorReforzarPremioContenido">
+                <div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Calculando...</div>
+            </div>
+        </div>
+
+        <!-- NIVEL 3 — ¿Qué son las insignias? ¿Cuál es la mía? -->
+        <div class="buscador-nivel2" id="buscadorNivel3Insignias" style="display:none;">
+            <button class="buscador-volver" onclick="window._buscadorVolverNivel2MiActividad()">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <p class="buscador-subtitulo">Tu nivel y qué te falta para el próximo</p>
+            <div id="buscadorInsigniasContenido">
+                <div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Calculando...</div>
+            </div>
+        </div>
+
+        <!-- NIVEL 2 — Sobre la plataforma Cinemarketer -->
+        <div class="buscador-nivel2" id="buscadorNivel2Plataforma" style="display:none;">
+            <button class="buscador-volver" onclick="window._buscadorVolverNivel1()">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <div class="buscador-nivel2-lista">
+                <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('plataforma_que_es')">
+                    <i class="fas fa-glasses"></i>
+                    <div>
+                        <strong>¿Qué es Cinemarketer?</strong>
+                        <span>Tu identidad cinéfila, en el centro de todo</span>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('plataforma_como_funciona')">
+                    <i class="fas fa-cogs"></i>
+                    <div>
+                        <strong>¿Cómo funciona?</strong>
+                        <span>De Mi Sala al Club de Beneficios, en un solo paso</span>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('plataforma_comunidad')">
+                    <i class="fas fa-shield-alt"></i>
+                    <div>
+                        <strong>¿Cómo se cuida la comunidad?</strong>
+                        <span>Moderación y convivencia</span>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('plataforma_eliminar_cuenta')">
+                    <i class="fas fa-user-slash"></i>
+                    <div>
+                        <strong>¿Qué pasa si elimino mi cuenta?</strong>
+                        <span>Lo importante que hay que saber antes</span>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('plataforma_premium_vs_creador')">
+                    <i class="fas fa-code-branch"></i>
+                    <div>
+                        <strong>Premium vs Creador, ¿en qué se diferencian?</strong>
+                        <span>Dos planes independientes, cada uno con lo suyo</span>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- NIVEL 3 — Próximamente (compartida por los criterios que
+     todavía no están desarrollados) -->
+        <div class="buscador-nivel2" id="buscadorNivel3Proximamente" style="display:none;">
+            <button class="buscador-volver" id="buscadorProximamenteVolverBtn">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <div class="buscador-proximamente-card">
+                <div class="buscador-proximamente-icono"><i class="fas fa-rocket"></i></div>
+                <p class="buscador-subtitulo" id="buscadorProximamenteTitulo">Próximamente</p>
+                <p class="buscador-proximamente-texto" id="buscadorProximamenteTexto"></p>
+            </div>
+        </div>
+
+        <!-- NIVEL 3 — Sobre la plataforma: las 6 son texto fijo, sin
+             personalización — comparten la misma pantalla con
+             contenido dinámico en vez de una por cada una. -->
+        <div class="buscador-nivel2" id="buscadorNivel3Plataforma" style="display:none;">
+            <button class="buscador-volver" onclick="window._buscadorVolverNivel2Plataforma()">
+                <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <div id="buscadorPlataformaContenido"></div>
+        </div>
+    </div>
+</div>
