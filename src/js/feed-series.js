@@ -2614,7 +2614,7 @@ window.cargarDatosSerie = async function(id) {
             }
         }
 
-        window.cargarTrailerSerie(id);
+        window.cargarTrailerSerie(id, serie.backdrop_path);
         window.cargarSeriesSimilares(id);
         window.cargarElencoSerieModal(id);
         window.cargarComentariosSerie(id);
@@ -2685,7 +2685,7 @@ window.scrollSimilaresSerie = function(direccion) {
 // ==============================================
 // TRÁILER
 // ==============================================
-window.cargarTrailerSerie = async function(seriesId) {
+window.cargarTrailerSerie = async function(seriesId, backdropPath) {
     const container = document.getElementById('modalTrailerContainerSerie');
     if (!container) return;
 
@@ -2720,29 +2720,63 @@ window.cargarTrailerSerie = async function(seriesId) {
         }
     }
 
-    if (videoToUse?.key) {
-        container.innerHTML = `
-            <div class="trailer-embed">
-                <iframe
-                    width="100%"
-                    height="100%"
-                    src="https://www.youtube.com/embed/${videoToUse.key}"
-                    title="Tráiler"
-                    frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen>
-                </iframe>
-            </div>
-        `;
-    } else {
-        container.innerHTML = `
-            <div class="sin-trailer">
-                <i class="fas fa-video-slash"></i>
-                <p>Tráiler no disponible</p>
-            </div>
-        `;
-    }
-};
+        if (videoToUse?.key) {
+            container.innerHTML = `
+                <div class="trailer-embed">
+                    <iframe
+                        width="100%"
+                        height="100%"
+                        src="https://www.youtube.com/embed/${videoToUse.key}"
+                        title="Tráiler"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            `;
+        } else {
+            container.innerHTML = `
+                <div class="sin-trailer">
+                    <i class="fas fa-video-slash"></i>
+                    <p>Tráiler no disponible</p>
+                </div>
+            `;
+        }
+
+        // Hero de fondo detrás de la ficha de datos — solo desktop.
+        // Prioridad: backdrop → video (solo si no hay backdrop) → oscuro.
+        if (window.innerWidth > 768 && typeof window._aplicarHeroModalSerie === 'function') {
+            window._aplicarHeroModalSerie(videoToUse?.key || null, backdropPath);
+        }
+    };
+
+    window._aplicarHeroModalSerie = function(videoKey, backdropPath) {
+        const hero = document.getElementById('modalHeroFondoSerie');
+        if (!hero) return;
+
+        hero.querySelectorAll('.modal-hero-media, .modal-hero-video-wrap, .modal-hero-overlay').forEach(el => el.remove());
+
+        const frag = document.createDocumentFragment();
+
+        if (backdropPath) {
+            const img = document.createElement('img');
+            img.className = 'modal-hero-media';
+            img.src = `https://image.tmdb.org/t/p/original${backdropPath}`;
+            img.alt = '';
+            frag.appendChild(img);
+        } else if (videoKey) {
+            const wrap = document.createElement('div');
+            wrap.className = 'modal-hero-video-wrap';
+            wrap.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoKey}?autoplay=1&mute=1&loop=1&playlist=${videoKey}&controls=0&modestbranding=1&showinfo=0&rel=0&playsinline=1" allow="autoplay; encrypted-media" frameborder="0"></iframe>`;
+            frag.appendChild(wrap);
+        }
+
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-hero-overlay';
+        frag.appendChild(overlay);
+
+        hero.insertBefore(frag, hero.firstChild);
+    };
 
 // ==============================================
 // ELENCO — dentro del modal (distinto del popup de la tarjeta)

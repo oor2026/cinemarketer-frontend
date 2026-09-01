@@ -238,7 +238,9 @@
     <!-- MODAL DE DETALLE -->
     <div id="modalPelicula" class="modal" style="display: none;">
         <div class="modal-overlay" onclick="window.cerrarModal()"></div>
-        <div class="modal-contenido">
+        <div class="modal-contenido-wrapper">
+            <button class="modal-cerrar-externa" onclick="window.cerrarModal()">×</button>
+            <div class="modal-contenido">
 
             <!-- HEADER: título + rating + cerrar -->
             <div class="modal-header">
@@ -286,8 +288,8 @@
                 </div>
             </div>
 
-            <!-- BODY SCROLLABLE -->
-            <div class="modal-body">
+                <!-- BODY SCROLLABLE -->
+                <div class="modal-body">
 
                 <!-- FILA SUPERIOR: carrusel en móvil, lado a lado en desktop -->
                 <div class="modal-fila-superior">
@@ -307,43 +309,45 @@
                             <div class="modal-columna-derecha">
                                 <div class="modal-info" id="modalInfo">
 
-                                    <div class="modal-stat-bar">
-                                        <div class="modal-stat-item">
-                                            <i class="fas fa-star"></i>
-                                            <span><span id="modalVotos">-</span> votos TMDB</span>
+                                    <div class="modal-hero-fondo" id="modalHeroFondo">
+                                        <div class="modal-stat-bar">
+                                            <div class="modal-stat-item">
+                                                <i class="fas fa-star"></i>
+                                                <span><span id="modalVotos">-</span> votos TMDB</span>
+                                            </div>
+                                            <div class="modal-stat-divider"></div>
+                                            <div class="modal-stat-item">
+                                                <i class="fas fa-fire"></i>
+                                                <span><span id="modalPopularidad">-</span> popularidad</span>
+                                            </div>
                                         </div>
-                                        <div class="modal-stat-divider"></div>
-                                        <div class="modal-stat-item">
-                                            <i class="fas fa-fire"></i>
-                                            <span><span id="modalPopularidad">-</span> popularidad</span>
-                                        </div>
-                                    </div>
 
-                                    <div class="modal-chips-grid">
-                                        <div class="modal-chip modal-chip-red">
-                                            <div class="modal-chip-icon"><i class="fas fa-calendar-alt"></i></div>
-                                            <div class="modal-chip-texto">
-                                                <span class="modal-chip-label">Estreno</span>
-                                                <span class="modal-chip-valor" id="modalFecha">-</span>
+                                        <div class="modal-chips-grid">
+                                            <div class="modal-chip modal-chip-red">
+                                                <div class="modal-chip-icon"><i class="fas fa-calendar-alt"></i></div>
+                                                <div class="modal-chip-texto">
+                                                    <span class="modal-chip-label">Estreno</span>
+                                                    <span class="modal-chip-valor" id="modalFecha">-</span>
+                                                </div>
+                                            </div>
+                                            <div class="modal-chip modal-chip-red">
+                                                <div class="modal-chip-icon"><i class="fas fa-clock"></i></div>
+                                                <div class="modal-chip-texto">
+                                                    <span class="modal-chip-label">Duración</span>
+                                                    <span class="modal-chip-valor"><span id="modalDuracion">-</span> min</span>
+                                                </div>
+                                            </div>
+                                            <div class="modal-chip modal-chip-red modal-chip-full">
+                                                <div class="modal-chip-icon"><i class="fas fa-globe"></i></div>
+                                                <div class="modal-chip-texto">
+                                                    <span class="modal-chip-label">Idioma</span>
+                                                    <span class="modal-chip-valor" id="modalIdioma">-</span>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="modal-chip modal-chip-red">
-                                            <div class="modal-chip-icon"><i class="fas fa-clock"></i></div>
-                                            <div class="modal-chip-texto">
-                                                <span class="modal-chip-label">Duración</span>
-                                                <span class="modal-chip-valor"><span id="modalDuracion">-</span> min</span>
-                                            </div>
-                                        </div>
-                                        <div class="modal-chip modal-chip-red modal-chip-full">
-                                            <div class="modal-chip-icon"><i class="fas fa-globe"></i></div>
-                                            <div class="modal-chip-texto">
-                                                <span class="modal-chip-label">Idioma</span>
-                                                <span class="modal-chip-valor" id="modalIdioma">-</span>
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    <div class="modal-generos" id="modalGeneros"></div>
+                                        <div class="modal-generos" id="modalGeneros"></div>
+                                    </div>
 
                                     <div class="modal-sinopsis">
                                         <div class="modal-sinopsis-titulo"><i class="fas fa-align-left"></i> Sinopsis</div>
@@ -502,7 +506,8 @@
                 </div>
 
             </div><!-- /modal-body -->
-        </div><!-- /modal-contenido -->
+            </div><!-- /modal-contenido -->
+        </div><!-- /modal-contenido-wrapper -->
     </div>
 
     <!-- ============================================== -->
@@ -510,7 +515,9 @@
     <!-- ============================================== -->
     <div id="modalSerie" class="modal" style="display: none;">
         <div class="modal-overlay" onclick="window.cerrarModalSerie()"></div>
-        <div class="modal-contenido">
+        <div class="modal-contenido-wrapper">
+            <button class="modal-cerrar-externa" onclick="window.cerrarModalSerie()">×</button>
+            <div class="modal-contenido">
 
             <!-- HEADER: título + rating + cerrar -->
             <div class="modal-header">
@@ -572,43 +579,45 @@
                             <div class="modal-columna-derecha">
                                 <div class="modal-info" id="modalInfoSerie">
 
-                                    <div class="modal-stat-bar">
-                                        <div class="modal-stat-item">
-                                            <i class="fas fa-star"></i>
-                                            <span><span id="modalVotosSerie">-</span> votos TMDB</span>
+                                    <div class="modal-hero-fondo" id="modalHeroFondoSerie">
+                                        <div class="modal-stat-bar">
+                                            <div class="modal-stat-item">
+                                                <i class="fas fa-star"></i>
+                                                <span><span id="modalVotosSerie">-</span> votos TMDB</span>
+                                            </div>
+                                            <div class="modal-stat-divider"></div>
+                                            <div class="modal-stat-item">
+                                                <i class="fas fa-fire"></i>
+                                                <span><span id="modalPopularidadSerie">-</span> popularidad</span>
+                                            </div>
                                         </div>
-                                        <div class="modal-stat-divider"></div>
-                                        <div class="modal-stat-item">
-                                            <i class="fas fa-fire"></i>
-                                            <span><span id="modalPopularidadSerie">-</span> popularidad</span>
-                                        </div>
-                                    </div>
 
-                                    <div class="modal-chips-grid">
-                                        <div class="modal-chip modal-chip-red">
-                                            <div class="modal-chip-icon"><i class="fas fa-calendar-alt"></i></div>
-                                            <div class="modal-chip-texto">
-                                                <span class="modal-chip-label">Estreno</span>
-                                                <span class="modal-chip-valor" id="modalFechaSerie">-</span>
+                                        <div class="modal-chips-grid">
+                                            <div class="modal-chip modal-chip-red">
+                                                <div class="modal-chip-icon"><i class="fas fa-calendar-alt"></i></div>
+                                                <div class="modal-chip-texto">
+                                                    <span class="modal-chip-label">Estreno</span>
+                                                    <span class="modal-chip-valor" id="modalFechaSerie">-</span>
+                                                </div>
+                                            </div>
+                                            <div class="modal-chip modal-chip-red">
+                                                <div class="modal-chip-icon"><i class="fas fa-layer-group"></i></div>
+                                                <div class="modal-chip-texto">
+                                                    <span class="modal-chip-label">Temporadas</span>
+                                                    <span class="modal-chip-valor" id="modalTemporadasSerie">-</span>
+                                                </div>
+                                            </div>
+                                            <div class="modal-chip modal-chip-red modal-chip-full">
+                                                <div class="modal-chip-icon"><i class="fas fa-globe"></i></div>
+                                                <div class="modal-chip-texto">
+                                                    <span class="modal-chip-label">Idioma</span>
+                                                    <span class="modal-chip-valor" id="modalIdiomaSerie">-</span>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="modal-chip modal-chip-red">
-                                            <div class="modal-chip-icon"><i class="fas fa-layer-group"></i></div>
-                                            <div class="modal-chip-texto">
-                                                <span class="modal-chip-label">Temporadas</span>
-                                                <span class="modal-chip-valor" id="modalTemporadasSerie">-</span>
-                                            </div>
-                                        </div>
-                                        <div class="modal-chip modal-chip-red modal-chip-full">
-                                            <div class="modal-chip-icon"><i class="fas fa-globe"></i></div>
-                                            <div class="modal-chip-texto">
-                                                <span class="modal-chip-label">Idioma</span>
-                                                <span class="modal-chip-valor" id="modalIdiomaSerie">-</span>
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    <div class="modal-generos" id="modalGenerosSerie"></div>
+                                        <div class="modal-generos" id="modalGenerosSerie"></div>
+                                    </div>
 
                                     <div class="modal-sinopsis">
                                         <div class="modal-sinopsis-titulo"><i class="fas fa-align-left"></i> Sinopsis</div>
@@ -782,7 +791,8 @@
                 </div>
 
             </div><!-- /modal-body -->
-        </div><!-- /modal-contenido -->
+            </div><!-- /modal-contenido -->
+        </div><!-- /modal-contenido-wrapper -->
     </div>
 
     <!-- ============================================== -->
