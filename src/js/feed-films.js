@@ -5199,6 +5199,7 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                         window._buscadorOcultarNivel3MiActividad();
                                         document.getElementById('buscadorNivel2MiActividad').style.display = 'none';
                                         document.getElementById('buscadorNivel3ValePremium').style.display = 'block';
+                                        document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-alto');
 
                                         const cont = document.getElementById('buscadorValePremioContenido');
                                         cont.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Calculando...</div>';
