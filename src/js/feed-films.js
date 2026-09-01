@@ -555,13 +555,13 @@ window.priorizarFilaGenero = function(key, btn) {
     }
     renderFilasGenero();
 
-    const cont = document.getElementById('filasGeneroContainer');
-        if (cont) {
-            const header = document.querySelector('header');
-            const offset = (header ? header.offsetHeight : 70) + 16; // altura del header + un respiro
-            const top = cont.getBoundingClientRect().top + window.scrollY - offset;
-            window.scrollTo({ top, behavior: 'auto' });
-        }
+        const cont = document.getElementById('filasGeneroContainer');
+            if (cont) {
+                const header = document.querySelector('header');
+                const offset = (header ? header.offsetHeight : 70) + 16; // altura del header + un respiro
+                const top = cont.getBoundingClientRect().top + window.scrollY - offset;
+                window.scrollTo({ top, behavior: 'smooth' });
+            }
 };
 
 // ==============================================
@@ -2217,16 +2217,21 @@ function inicializarFilaBusquedaSerie() {
     configurarScrollFilaSerie(window._filaBusquedaSerie, track);
     track.addEventListener('click', () => fijarPosicionActualSerie(track), true);
 
-    track.addEventListener('scroll', () => {
-        if (window.estadoPaginacionSerie.cargando) return;
-        const hayMas = window.estadoPaginacionSerie.paginaActual < window.estadoPaginacionSerie.totalPaginas;
-        if (!hayMas) return;
-        const restante = track.scrollWidth - (track.scrollLeft + track.clientWidth);
-        if (restante < track.clientWidth * 2) {
-            window.aplicarFiltros(window.estadoPaginacionSerie.paginaActual + 1, true);
-        }
-    });
-}
+        track.addEventListener('scroll', () => {
+            if (window.estadoPaginacionSerie.cargando) return;
+            const hayMas = window.estadoPaginacionSerie.paginaActual < window.estadoPaginacionSerie.totalPaginas;
+            if (!hayMas) return;
+            const restante = track.scrollWidth - (track.scrollLeft + track.clientWidth);
+            if (restante < track.clientWidth * 2) {
+                const siguiente = window.estadoPaginacionSerie.paginaActual + 1;
+                if (typeof window._buscadorPaginaSiguienteFn === 'function') {
+                    window._buscadorPaginaSiguienteFn(siguiente);
+                } else {
+                    window.aplicarFiltros(siguiente, true);
+                }
+            }
+        });
+    }
 
 async function appendCardsFilaSerie(fila, nuevasSeries) {
     const track = document.getElementById(`filaSerieTrack-${fila.key}`);
@@ -2259,18 +2264,26 @@ function inicializarFilaBusqueda() {
     // Scroll infinito: al acercarse al final del carrusel, si hay más
     // páginas de resultados, las va pidiendo solas — así el carrusel
     // se comporta igual que cualquier otro, sin botón de "cargar más".
-    track.addEventListener('scroll', () => {
-        if (window.estadoPaginacion.cargando) return;
-        const hayMas = window.estadoPaginacion.paginaActual < window.estadoPaginacion.totalPaginas;
-        if (!hayMas) return;
-        const restante = track.scrollWidth - (track.scrollLeft + track.clientWidth);
-        if (restante < track.clientWidth * 2) {
-            window.aplicarFiltros(window.estadoPaginacion.paginaActual + 1, true);
-        }
-    });
-}
+        track.addEventListener('scroll', () => {
+            if (window.estadoPaginacion.cargando) return;
+            const hayMas = window.estadoPaginacion.paginaActual < window.estadoPaginacion.totalPaginas;
+            if (!hayMas) return;
+            const restante = track.scrollWidth - (track.scrollLeft + track.clientWidth);
+            if (restante < track.clientWidth * 2) {
+                const siguiente = window.estadoPaginacion.paginaActual + 1;
+                // Si el buscador asistido dejó registrada su propia función de
+                // "página siguiente" (año, característica), se usa esa — si no,
+                // cae al comportamiento viejo (filtro tradicional).
+                if (typeof window._buscadorPaginaSiguienteFn === 'function') {
+                    window._buscadorPaginaSiguienteFn(siguiente);
+                } else {
+                    window.aplicarFiltros(siguiente, true);
+                }
+            }
+        });
+    }
 
-async function appendCardsFila(fila, nuevasPeliculas) {
+    async function appendCardsFila(fila, nuevasPeliculas) {
     const track = document.getElementById(`filaTrack-${fila.key}`);
     if (!track || nuevasPeliculas.length === 0) return;
 
@@ -4476,6 +4489,11 @@ window.inicializarCarrusel = inicializarCarrusel;
 window._tabActivo = 'peliculas';
 
 window.seleccionarTabFeed = function(tab, el) {
+    // Cualquier búsqueda del buscador asistido (o del filtro viejo) se
+    // limpia siempre al cambiar de tab, sin excepción — nunca debe
+    // persistir de un tab a otro.
+    if (typeof window.ocultarVistaResultados === 'function') window.ocultarVistaResultados();
+    if (typeof window.ocultarVistaResultadosSerie === 'function') window.ocultarVistaResultadosSerie();
     const mismoTab = window._tabActivo === tab;
     window._tabActivo = tab;
     localStorage.setItem('feedTabActivo', tab);
@@ -4619,11 +4637,18 @@ window.seleccionarTabFeed = function(tab, el) {
                 if (filasGenero) filasGenero.style.display = 'none';
                 if (comunidadContainer) comunidadContainer.style.display = 'none';
 
-                if (filasSeries) filasSeries.style.display = 'block';
-                if (pillsSerie && window._filasSeriesCargadas) pillsSerie.style.display = '';
-                if (typeof window.cargarFilasSeries === 'function') {
-                    window.cargarFilasSeries();
-                }
+                                if (filasSeries) filasSeries.style.display = 'block';
+                                // Se muestran siempre al entrar a Series, sin depender de si los
+                                // datos ya estaban cacheados en ese instante exacto — antes, si
+                                // no estaban cacheados todavía, esta línea no hacía nada y
+                                // quedaba en manos de renderPillsFilasSerie() (adentro de la
+                                // carga async) volver a mostrarlos por su cuenta más tarde; si
+                                // esa segunda verificación fallaba por cualquier timing, los
+                                // pills quedaban ocultos hasta recargar la página.
+                                if (pillsSerie) pillsSerie.style.display = '';
+                                if (typeof window.cargarFilasSeries === 'function') {
+                                    window.cargarFilasSeries();
+                                }
             }
         };
 
@@ -4657,7 +4682,2080 @@ window.cargarModuloComunidad = function() {
 };
 
 window.abrirFiltrosMobile = function() {
-    abrirFiltrosModal();
+    window.abrirBuscadorAsistido();
+};
+
+window._buscadorNombreUsuario = null;
+
+window._buscadorSetBurbuja = function(texto) {
+    const bubble = document.getElementById('buscadorBubbleTexto');
+    if (bubble) bubble.textContent = texto;
+};
+
+// Primer nombre nomás (no el apellido completo) — más natural en una
+// frase corta tipo "¡Hola, Ana!" que el nombre completo.
+function _buscadorPrimerNombre() {
+    if (!window._buscadorNombreUsuario) return '';
+    return window._buscadorNombreUsuario.split(' ')[0];
+}
+
+// Titileo al tocar cualquier opción del buscador, solo en mobile —
+// listener único y delegado, no hace falta tocar cada onclick del
+// HTML uno por uno. Intercepta el click, hace titilar, y recién
+// después ejecuta el onclick real que cada botón ya tenía puesto.
+document.addEventListener('click', function(event) {
+    if (window.innerWidth > 768) return;
+
+    const el = event.target.closest('.buscador-opcion, .buscador-criterio, .buscador-pastilla-grande, .buscador-genero-chip, .buscador-plataforma-btn');
+    if (!el) return;
+    if (!el.closest('#buscadorModalSheet')) return;
+    if (el.classList.contains('buscador-titilando')) return;
+    if (typeof el.onclick !== 'function') return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    el.classList.add('buscador-titilando');
+    setTimeout(() => {
+        el.classList.remove('buscador-titilando');
+        el.onclick.call(el, event);
+    }, 500);
+}, true);
+
+window.abrirBuscadorAsistido = async function() {
+    const overlay = document.getElementById('buscadorModalOverlay');
+    const sheet = document.getElementById('buscadorModalSheet');
+    if (overlay) overlay.classList.add('active');
+    if (sheet) sheet.classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    // Frase neutra mientras carga el nombre (por si tarda), no bloquea
+    // la apertura del modal.
+    window._buscadorSetBurbuja('¿Qué querés buscar hoy?');
+
+    if (window._buscadorNombreUsuario === null) {
+        try {
+            const profile = await API.getProfile();
+            window._buscadorNombreUsuario = profile.name || '';
+        } catch (e) {
+            window._buscadorNombreUsuario = '';
+        }
+    }
+
+    const nombre = _buscadorPrimerNombre();
+    window._buscadorSetBurbuja(nombre ? `¡Hola, ${nombre}! ¿Qué buscamos hoy?` : '¿Qué buscamos hoy?');
+};
+
+window.cerrarBuscadorAsistido = function() {
+    const overlay = document.getElementById('buscadorModalOverlay');
+    const sheet = document.getElementById('buscadorModalSheet');
+    if (overlay) overlay.classList.remove('active');
+    if (sheet) sheet.classList.remove('active');
+    document.body.style.overflow = '';
+    window._buscadorResetear();
+};
+
+// Vuelve todo a cero: Nivel 1 visible, cualquier paso interno oculto,
+// campo de título y resultados vacíos. Se llama siempre que se
+// cierra el buscador (elegiste algo, tocaste la X, o el overlay) —
+// así la próxima vez que se abra arranca desde el principio, nunca
+// donde quedó la vez anterior.
+const BUSCADOR_PROXIMAMENTE = {
+    persona_premios: {
+        titulo: 'Próximamente Premios y nominaciones',
+        texto: '',
+        volverA: 'buscadorNivel2Persona',
+    },
+    donde_ver_cartelera: {
+        titulo: 'Próximamente Cartelera y funciones',
+        texto: '',
+        volverA: 'buscadorNivel2DondeVer',
+    },
+};
+
+window._buscadorAbrirProximamente = function(criterio) {
+    const info = BUSCADOR_PROXIMAMENTE[criterio];
+    if (!info) return;
+
+    // Oculta cualquier pantalla de Nivel 2 que esté abierta (puede venir
+    // de más de una rama distinta) antes de mostrar esta.
+    document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
+    document.getElementById('buscadorNivel3Proximamente').style.display = 'block';
+
+    document.getElementById('buscadorProximamenteTitulo').textContent = info.titulo;
+    const textoEl = document.getElementById('buscadorProximamenteTexto');
+    textoEl.textContent = info.texto;
+    textoEl.style.display = info.texto ? 'block' : 'none';
+
+    const volverBtn = document.getElementById('buscadorProximamenteVolverBtn');
+    volverBtn.onclick = () => {
+        document.getElementById('buscadorNivel3Proximamente').style.display = 'none';
+        document.getElementById(info.volverA).style.display = 'block';
+    };
+};
+
+window._buscadorResetear = function() {
+    window._buscadorVolverNivel1(); // ya resetea la burbuja a la frase de bienvenida
+    document.getElementById('buscadorModalSheet').classList.remove('buscador-sheet-ancho');
+
+    const input = document.getElementById('buscadorInputTitulo');
+    if (input) input.value = '';
+    const resultados = document.getElementById('buscadorResultadosTitulo');
+    if (resultados) {
+        resultados.innerHTML = '';
+        resultados.style.display = 'none';
+    }
+
+    const inputPersona = document.getElementById('buscadorInputPersona');
+    if (inputPersona) inputPersona.value = '';
+    const resultadosPersona = document.getElementById('buscadorResultadosPersona');
+    if (resultadosPersona) {
+        resultadosPersona.innerHTML = '';
+        resultadosPersona.style.display = 'none';
+    }
+};
+
+window._buscadorTipoContenido = 'pelicula'; // default al abrir cada Nivel 2
+
+const BUSCADOR_NIVEL2_IDS = {
+    pelicula_serie: 'buscadorTipoEleccion', // acá entra primero por el paso de elegir tipo
+    persona:        'buscadorNivel2Persona',
+    donde_ver:      'buscadorNivel2DondeVer',
+    mi_actividad:   'buscadorNivel2MiActividad',
+    plataforma:     'buscadorNivel2Plataforma',
+};
+
+// Todas las pantallas que puede haber "adentro" de una rama — se usa
+// para ocultar todo de un saque al volver al menú principal, sin
+// importar en qué paso interno estabas parado.
+const BUSCADOR_TODAS_LAS_PANTALLAS = [
+    ...Object.values(BUSCADOR_NIVEL2_IDS),
+    'buscadorNivel2PeliculaSerie', // paso 2 de esta rama, no está en el mapa de arriba
+    'buscadorNivel3Titulo',        // Nivel 3 de "Por título"
+    'buscadorNivel3Genero',        // Nivel 3 de "Por género"
+    'buscadorNivel3EpocaTipo',       // Nivel 3 de "Por año o década" — bifurcación
+    'buscadorNivel3AnioEspecifico',  // Nivel 3 de "Por año o década" — año específico
+    'buscadorNivel3Decada',          // Nivel 3 de "Por año o década" — década
+    'buscadorNivel3Caracteristica', // Nivel 3 de "Por característica"
+    'buscadorNivel3Persona',       // Nivel 3 de "Actor/actriz/director" — buscar por nombre
+    'buscadorNivel3Cruce1',        // Nivel 3 de "Trabajaron juntos" — paso 1
+    'buscadorNivel3Cruce2',        // Nivel 3 de "Trabajaron juntos" — paso 2
+    'buscadorDondeVerTipo',        // Dónde ver — paso de elegir tipo
+    'buscadorDondeVerTitulo',      // Dónde ver — opción A
+    'buscadorDondeVerPlataforma',  // Dónde ver — opción B
+    'buscadorNivel3Aprovechar',    // Mi actividad — ¿Qué puedo aprovechar este mes?
+    'buscadorNivel3ProximoPremio', // Mi actividad — ¿Cuánto me falta para el próximo premio?
+    'buscadorNivel3ReforzarPremium', // Mi actividad — ¿Cuánto estoy ganando por ser Premium? (solo Premium)
+    'buscadorNivel3ValePremium',     // Mi actividad — ¿Vale la pena pasarme a Premium? (solo FREE)
+    'buscadorNivel3Insignias',       // Mi actividad — ¿Qué son las insignias? ¿Cuál es la mía?
+    'buscadorNivel3Plataforma',      // Sobre la plataforma — pantalla compartida de texto fijo
+    'buscadorNivel3Proximamente',    // Pantalla compartida para criterios todavía no desarrollados
+];
+const BUSCADOR_FRASES_NIVEL2 = {
+    pelicula_serie: (n) => n ? `¿Buscás algo para ver, ${n}? Contame si es película o serie y seguimos.` : '¿Es película o serie? Seguimos por ahí.',
+    persona:        (n) => n ? `¿A quién buscamos, ${n}? Un actor, una actriz, un director...` : '¿A quién buscamos? Un actor, una actriz, un director...',
+    donde_ver:      (n) => n ? `Decime qué querés ver, ${n}, y te digo dónde encontrarlo.` : 'Decime qué querés ver y te digo dónde encontrarlo.',
+    mi_actividad:   (n) => n ? `Vamos a ver cómo venís este mes, ${n} — tus puntos, tus premios, todo.` : 'Vamos a ver cómo venís este mes — tus puntos, tus premios, todo.',
+    plataforma:     (n) => n ? `¿Querés saber más de cómo funciona todo esto, ${n}? Te cuento.` : '¿Querés saber más de cómo funciona todo esto? Te cuento.',
+};
+
+window._buscadorIrANivel2 = function(rama) {
+    const idNivel2 = BUSCADOR_NIVEL2_IDS[rama];
+    if (!idNivel2) return;
+    document.getElementById('buscadorNivel1').style.display = 'none';
+    document.getElementById(idNivel2).style.display = 'block';
+
+    const generarFrase = BUSCADOR_FRASES_NIVEL2[rama];
+    if (generarFrase) window._buscadorSetBurbuja(generarFrase(_buscadorPrimerNombre()));
+
+    if (rama === 'mi_actividad') {
+        window._buscadorConfigurarBotonPremium();
+    }
+};
+
+// El botón "¿Vale la pena pasarme a Premium?" solo tiene sentido para
+// usuarios FREE — si ya sos Premium, se reemplaza por una pregunta que
+// refuerza el valor de la suscripción en vez de venderte algo que ya
+// tenés. Se consulta fresco cada vez (no se cachea) para reflejar
+// cambios de plan sin recargar la página.
+window._buscadorConfigurarBotonPremium = async function() {
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${CONFIG.API_URL}/users/me/points/resumen`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const resumen = await res.json();
+
+        const btn = document.getElementById('buscadorBtnPremiumDinamico');
+        const icono = document.getElementById('buscadorBtnPremiumIcono');
+        const titulo = document.getElementById('buscadorBtnPremiumTitulo');
+        const subtitulo = document.getElementById('buscadorBtnPremiumSubtitulo');
+        if (!btn) return;
+
+        if (resumen.premium) {
+            icono.className = 'fas fa-crown';
+            titulo.textContent = '¿Cuánto estoy ganando por ser Premium?';
+            subtitulo.textContent = 'Lo que tu suscripción te dio este mes';
+            btn.onclick = () => window._buscadorCriterioSeleccionado('actividad_reforzar_premium');
+        } else {
+            icono.className = 'fas fa-star';
+            titulo.textContent = '¿Vale la pena pasarme a Premium?';
+            subtitulo.textContent = 'Según cómo usaste la plataforma este mes';
+            btn.onclick = () => window._buscadorCriterioSeleccionado('actividad_vale_premium');
+        }
+    } catch (e) {}
+};
+
+window._buscadorVolverNivel1 = function() {
+    BUSCADOR_TODAS_LAS_PANTALLAS.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+    // Sin valor fijo acá — se limpia el inline style para que decida
+    // el CSS solo (grid en desktop, flex en mobile, cada uno con su
+    // propia regla). Fijar 'grid' a mano rompía el layout de boleto
+    // en mobile cada vez que volvías a Nivel 1.
+    document.getElementById('buscadorNivel1').style.display = '';
+
+    const nombre = _buscadorPrimerNombre();
+    window._buscadorSetBurbuja(nombre ? `¡Hola, ${nombre}! ¿Qué buscamos hoy?` : '¿Qué buscamos hoy?');
+};
+
+// Paso 1 → paso 2 de "Película o serie": guarda el tipo elegido y
+// avanza directo a la lista de criterios (son los mismos 4 para
+// ambos casos, solo cambia el texto del subtítulo).
+window._buscadorSetTipoYAvanzar = function(tipo) {
+    window._buscadorTipoContenido = tipo;
+    document.getElementById('buscadorTipoEleccion').style.display = 'none';
+    document.getElementById('buscadorNivel2PeliculaSerie').style.display = 'block';
+    document.getElementById('buscadorNivel2PeliculaSerieTitulo').textContent =
+        tipo === 'pelicula' ? 'Buscando una película' : 'Buscando una serie';
+};
+
+// Volver desde la lista de criterios va un paso atrás (a elegir
+// tipo de nuevo), no directo al menú principal.
+window._buscadorVolverATipoEleccion = function() {
+    document.getElementById('buscadorNivel2PeliculaSerie').style.display = 'none';
+    document.getElementById('buscadorTipoEleccion').style.display = 'block';
+};
+
+window._buscadorSetTipo = function(tipo, btn) {
+    window._buscadorTipoContenido = tipo;
+    document.querySelectorAll('#buscadorNivel2PeliculaSerie .filtro-switch-btn').forEach(b => b.classList.remove('activo'));
+    btn.classList.add('activo');
+};
+
+// Nivel 3 del resto de los criterios (género/época/característica y
+// las demás ramas) se arma en los próximos pasos — placeholder.
+window._buscadorCriterioSeleccionado = function(criterio) {
+    if (criterio === 'titulo') {
+        window._buscadorAbrirNivel3Titulo();
+        return;
+    }
+        if (criterio === 'genero') {
+            window._buscadorAbrirNivel3Genero();
+            return;
+        }
+            if (criterio === 'epoca') {
+                window._buscadorAbrirNivel3EpocaTipo();
+                return;
+            }
+                if (criterio === 'caracteristica') {
+                    window._buscadorAbrirNivel3Caracteristica();
+                    return;
+                }
+                    if (criterio === 'persona_nombre') {
+                        window._buscadorAbrirNivel3Persona();
+                        return;
+                    }
+                        if (criterio === 'persona_cruce') {
+                            window._buscadorAbrirNivel3Cruce1();
+                            return;
+                        }
+                        if (criterio === 'donde_ver_titulo' || criterio === 'donde_ver_plataforma') {
+                            window._buscadorAbrirDondeVerTipo(criterio);
+                            return;
+                        }
+                            if (criterio === 'donde_ver_estrenos') {
+                                window._buscadorProximosEstrenos();
+                                return;
+                            }
+                                if (criterio === 'actividad_aprovechar') {
+                                    window._buscadorAbrirAprovechar();
+                                    return;
+                                }
+                                    if (criterio === 'actividad_proximo_premio') {
+                                        window._buscadorAbrirProximoPremio();
+                                        return;
+                                    }
+                                        if (criterio === 'actividad_reforzar_premium') {
+                                            window._buscadorAbrirReforzarPremium();
+                                            return;
+                                        }
+                                            if (criterio === 'actividad_vale_premium') {
+                                                window._buscadorAbrirValePremium();
+                                                return;
+                                            }
+                                            if (criterio === 'actividad_insignias') {
+                                                window._buscadorAbrirInsignias();
+                                                return;
+                                            }
+                                            if (BUSCADOR_TEXTOS_PLATAFORMA[criterio]) {
+                                                window._buscadorAbrirTextoPlataforma(criterio);
+                                                return;
+                                            }
+                                            if (BUSCADOR_PROXIMAMENTE[criterio]) {
+                                                window._buscadorAbrirProximamente(criterio);
+                                                return;
+                                            }
+                                            alert('Nivel 3 de "' + criterio + '" (' + window._buscadorTipoContenido + ') — próximo paso.');
+                                            };
+
+                                            // ==============================================
+                                            // NIVEL 3 — Sobre la plataforma Cinemarketer.
+                                            // Texto fijo, sin personalización — una sola pantalla compartida,
+                                            // el contenido cambia según qué criterio se haya tocado.
+                                            // ==============================================
+                                            const BUSCADOR_TEXTOS_PLATAFORMA = {
+                                                plataforma_que_es: {
+                                                    titulo: '¿Qué es Cinemarketer?',
+                                                    texto: 'Cinemarketer es la primera y única red social de cine dedicada por completo a construir tu identidad cinéfila — tu tótem, el símbolo que te representa como cinéfilo, armado a partir de lo que votás, comentás y recomendás. No es una lista de películas vistas: es un perfil vivo que refleja quién sos como amante del cine. Y por el simple hecho de ir construyendo ese perfil, también sos parte del Club de Beneficios: cada interacción tuya suma puntos que después canjeás por premios reales.'
+                                                },
+                                                plataforma_como_funciona: {
+                                                    titulo: '¿Cómo funciona?',
+                                                    texto: 'A medida que vayas construyendo tu perfil cinéfilo (votando, comentando, recomendando, publicando) y que podés visualizar en Mi Sala, automáticamente vas sumando puntos en el Club de Beneficios. Esos puntos se acumulan durante el mes y el 1° de cada mes se liberan como disponibles, listos para canjear por premios reales. Todo lo que hacés como cinéfilo tiene su recompensa: ya sos parte de él por elegirnos.'
+                                                },
+                                                plataforma_comunidad: {
+                                                    titulo: '¿Cómo se cuida la comunidad?',
+                                                    texto: 'Cinemarketer es un espacio de respeto entre gente que ama el cine — la diversidad de opiniones suma, la agresión y la discriminación no tienen lugar. Hay moderación automática que actúa en tiempo real, y un equipo humano atento a lo que se reporta. Si algo te molesta, podés bloquear o reportar a un usuario, o un comentario puntual, en dos clics.'
+                                                },
+                                                plataforma_eliminar_cuenta: {
+                                                    titulo: '¿Qué pasa si elimino mi cuenta?',
+                                                    texto: 'Podés hacerlo cuando quieras desde Configuración, pero es importante que lo sepas antes: perdés todos tus puntos (acumulados y disponibles), los códigos de canje sin usar quedan sin efecto, tus publicaciones en Comunidad se eliminan, y si tenés Premium y/o Creador activos, se cancelan al instante sin reembolso. Es una acción irreversible — no hay vuelta atrás.'
+                                                },
+                                                    plataforma_premium_vs_creador: {
+                                                        titulo: 'Premium vs Creador, ¿en qué se diferencian?',
+                                                        texto: 'Son dos suscripciones totalmente independientes, y podés tener las dos, una sola, o ninguna. Premium es sobre puntos: te los duplica, sin tope mensual, nunca vencen, sin límite diario, y te da acceso a premios y sorteos exclusivos. Creador es sobre herramientas de publicación: hasta 10 imágenes o video en tus publicaciones de Comunidad, más bloques interactivos (votaciones, trivias, countdowns). Uno no reemplaza al otro — se complementan.'
+                                                    },
+                                                };
+
+                                            window._buscadorAbrirTextoPlataforma = function(criterio) {
+                                                document.getElementById('buscadorNivel2Plataforma').style.display = 'none';
+                                                document.getElementById('buscadorNivel3Plataforma').style.display = 'block';
+
+                                                const info = BUSCADOR_TEXTOS_PLATAFORMA[criterio];
+                                                document.getElementById('buscadorPlataformaContenido').innerHTML = `
+                                                    <p class="buscador-subtitulo">${info.titulo}</p>
+                                                    <div class="buscador-resumen-card"><p style="display:block;">${info.texto}</p></div>
+                                                `;
+                                            };
+
+                                            window._buscadorVolverNivel2Plataforma = function() {
+                                                document.getElementById('buscadorNivel3Plataforma').style.display = 'none';
+                                                document.getElementById('buscadorNivel2Plataforma').style.display = 'block';
+                                            };
+
+                                        // ==============================================
+                                        // NIVEL 3 — ¿Qué son las insignias? ¿Cuál es la mía?
+                                        // Reusa la base real de mi-cuenta.js (mismos criterios/umbrales por
+                                        // nivel que ya usa "Ver progreso" en Configuración), pero en vez de
+                                        // la lista cruda de checks, la sintetiza: cuántos te faltan en total
+                                        // y cuál es el más cerca de cumplirse.
+                                        // ==============================================
+                                        const BUSCADOR_NIVELES_INFO = {
+                                            AMATEUR:         { nombre: 'Amateur',         emoji: '🟢', siguiente: 'COLABORADOR' },
+                                            COLABORADOR:     { nombre: 'Colaborador',     emoji: '🔵', siguiente: 'CRITICO' },
+                                            CRITICO:         { nombre: 'Crítico',         emoji: '🟣', siguiente: 'JURADO_EXPERTO' },
+                                            JURADO_EXPERTO:  { nombre: 'Jurado Experto',  emoji: '🏆', siguiente: null },
+                                        };
+
+                                        // Mismos criterios/umbrales exactos que _renderProgresoBody en
+                                        // mi-cuenta.js — cada uno devuelve { cumple, texto, actual, meta }.
+                                        function _buscadorCriteriosProximoNivel(nivel, p) {
+                                            if (nivel === 'AMATEUR') {
+                                                return [
+                                                    { cumple: p.emailVerified || !!p.googleId, texto: 'Email verificado' },
+                                                    { cumple: !!(p.name && p.dni && p.phone && p.avatarUrl && p.provincia && p.localidad), texto: 'Perfil completo al 100%' },
+                                                    { cumple: (p.reviewsCount || 0) >= 100, texto: '100 películas únicas votadas', actual: p.reviewsCount || 0, meta: 100 },
+                                                    { cumple: (p.commentsUniqueMoviesCount || 0) >= 50, texto: '50 comentarios en películas distintas', actual: p.commentsUniqueMoviesCount || 0, meta: 50 },
+                                                    { cumple: !!(p.bioTitulo && p.bioTexto), texto: 'Bio completada en Mi Sala' },
+                                                ];
+                                            }
+                                            if (nivel === 'COLABORADOR') {
+                                                return [
+                                                    { cumple: (p.reviewsCount || 0) >= 200, texto: '200 películas únicas votadas', actual: p.reviewsCount || 0, meta: 200 },
+                                                    { cumple: (p.commentsUniqueMoviesCount || 0) >= 100, texto: '100 comentarios en películas distintas', actual: p.commentsUniqueMoviesCount || 0, meta: 100 },
+                                                    { cumple: (p.publicationsCount || 0) >= 50, texto: '50 publicaciones en Comunidad', actual: p.publicationsCount || 0, meta: 50 },
+                                                    { cumple: (p.usuariosSeguidosCount || 0) >= 25, texto: '25 usuarios seguidos', actual: p.usuariosSeguidosCount || 0, meta: 25 },
+                                                    { cumple: (p.diasActivos || 0) >= 60, texto: '60 días activos en la plataforma', actual: p.diasActivos || 0, meta: 60 },
+                                                    { cumple: (p.recommendationsCount || 0) >= 30, texto: '30 recomendaciones enviadas', actual: p.recommendationsCount || 0, meta: 30 },
+                                                    { cumple: (p.teBancoRecibidosCount || 0) >= 20, texto: '20 "Te banco" de usuarios distintos', actual: p.teBancoRecibidosCount || 0, meta: 20 },
+                                                    { cumple: (p.totalRedeemedPoints || 0) >= 4000, texto: '4.000 puntos canjeados', actual: p.totalRedeemedPoints || 0, meta: 4000 },
+                                                ];
+                                            }
+                                            if (nivel === 'CRITICO') {
+                                                return [
+                                                    { cumple: !!p.isPremium, texto: 'Suscripción Premium activa' },
+                                                    { cumple: (p.reviewsCount || 0) >= 500, texto: '500 películas únicas votadas', actual: p.reviewsCount || 0, meta: 500 },
+                                                    { cumple: (p.commentsUniqueMoviesCount || 0) >= 300, texto: '300 comentarios en películas distintas', actual: p.commentsUniqueMoviesCount || 0, meta: 300 },
+                                                    { cumple: (p.publicationsCount || 0) >= 200, texto: '200 publicaciones en Comunidad', actual: p.publicationsCount || 0, meta: 200 },
+                                                    { cumple: (p.usuariosSeguidosCount || 0) >= 100, texto: '100 usuarios seguidos', actual: p.usuariosSeguidosCount || 0, meta: 100 },
+                                                    { cumple: (p.diasActivos || 0) >= 120, texto: '120 días activos en la plataforma', actual: p.diasActivos || 0, meta: 120 },
+                                                    { cumple: (p.recommendationsCount || 0) >= 200, texto: '200 recomendaciones enviadas', actual: p.recommendationsCount || 0, meta: 200 },
+                                                    { cumple: (p.teBancoRecibidosCount || 0) >= 100, texto: '100 "Te banco" de usuarios distintos', actual: p.teBancoRecibidosCount || 0, meta: 100 },
+                                                    { cumple: (p.merecePuntosCount || 0) >= 100, texto: '100 "Merecés un punto" recibidos', actual: p.merecePuntosCount || 0, meta: 100 },
+                                                    { cumple: (p.seguidoresGanadosCount || 0) >= 100, texto: '100 seguidores ganados', actual: p.seguidoresGanadosCount || 0, meta: 100 },
+                                                    { cumple: (p.totalRedeemedPoints || 0) >= 20000, texto: '20.000 puntos canjeados', actual: p.totalRedeemedPoints || 0, meta: 20000 },
+                                                ];
+                                            }
+                                            return [];
+                                        }
+
+                                        window._buscadorAbrirInsignias = async function() {
+                                            window._buscadorOcultarNivel3MiActividad();
+                                            document.getElementById('buscadorNivel2MiActividad').style.display = 'none';
+                                            document.getElementById('buscadorNivel3Insignias').style.display = 'block';
+
+                                            const cont = document.getElementById('buscadorInsigniasContenido');
+                                            cont.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Calculando...</div>';
+
+                                                try {
+                                                    const profile = await API.getProfile();
+                                                    const nivelActual = profile.level || 'AMATEUR';
+                                                    const info = BUSCADOR_NIVELES_INFO[nivelActual] || BUSCADOR_NIVELES_INFO.AMATEUR;
+
+                                                    let html = '';
+
+                                                    if (!info.siguiente) {
+                                                        html = `
+                                                            <div class="buscador-stat-hero">
+                                                                <div class="num">${info.emoji}</div>
+                                                                <div class="lbl">Sos ${info.nombre} — nivel máximo</div>
+                                                            </div>
+                                                            <div class="buscador-tarjetas">
+                                                                <div class="buscador-tarjeta"><div class="buscador-tarjeta-icono oro"><i class="fas fa-trophy"></i></div><p>Llegaste al nivel más alto — no hay más para subir, ¡disfrutalo!</p></div>
+                                                            </div>`;
+                                                    } else {
+                                                        const criterios = _buscadorCriteriosProximoNivel(nivelActual, profile);
+                                                        const faltantes = criterios.filter(c => !c.cumple);
+                                                        const siguienteInfo = BUSCADOR_NIVELES_INFO[info.siguiente];
+
+                                                        if (faltantes.length === 0) {
+                                                            html = `
+                                                                <div class="buscador-stat-hero">
+                                                                    <div class="num verde">¡Listo!</div>
+                                                                    <div class="lbl">Cumplís todo para ${siguienteInfo.nombre} ${siguienteInfo.emoji}</div>
+                                                                </div>
+                                                                <div class="buscador-tarjetas">
+                                                                    <div class="buscador-tarjeta"><div class="buscador-tarjeta-icono verde"><i class="fas fa-check"></i></div><p>Se actualiza automáticamente en la próxima verificación nocturna.</p></div>
+                                                                </div>`;
+                                                        } else {
+                                                            const listaFaltantes = faltantes
+                                                                .map(c => `<li>${c.texto}${c.meta != null ? ` (vos llevás ${c.actual})` : ''}</li>`)
+                                                                .join('');
+
+                                                            html = `
+                                                                <div class="buscador-stat-hero">
+                                                                    <div class="num rojo">${faltantes.length}</div>
+                                                                    <div class="lbl">Requisitos te faltan para ${siguienteInfo.nombre} ${siguienteInfo.emoji}</div>
+                                                                </div>
+                                                                <div class="buscador-tarjetas">
+                                                                    <div class="buscador-tarjeta"><div class="buscador-tarjeta-icono gris"><i class="fas fa-id-badge"></i></div><p>Hoy sos ${info.emoji} <strong>${info.nombre}</strong>.</p></div>
+                                                                </div>
+                                                                <details style="font-size:0.85rem;color:#666;margin-top:0.8rem;"><summary style="cursor:pointer;font-weight:600;color:#333;">Ver los ${faltantes.length} requisitos faltantes</summary><ul style="margin:0.5rem 0 0 1.2rem;">${listaFaltantes}</ul></details>`;
+                                                        }
+                                                    }
+
+                                                    cont.innerHTML = html;
+                                            } catch (e) {
+                                                cont.innerHTML = '<div class="buscador-predictor-vacio">No pudimos calcular esto. Intentá de nuevo.</div>';
+                                            }
+                                        };
+
+                                    // ==============================================
+                                    // NIVEL 3 — ¿Vale la pena pasarme a Premium? (solo FREE)
+                                    // Comparación con datos reales del usuario, no un genérico de venta.
+                                    // ==============================================
+                                    window._buscadorAbrirValePremium = async function() {
+                                        window._buscadorOcultarNivel3MiActividad();
+                                        document.getElementById('buscadorNivel2MiActividad').style.display = 'none';
+                                        document.getElementById('buscadorNivel3ValePremium').style.display = 'block';
+
+                                        const cont = document.getElementById('buscadorValePremioContenido');
+                                        cont.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Calculando...</div>';
+
+                                        try {
+                                            const token = localStorage.getItem('token');
+                                            const res = await fetch(`${CONFIG.API_URL}/users/me/points/resumen`, {
+                                                headers: { 'Authorization': `Bearer ${token}` }
+                                            });
+                                            if (!res.ok) throw new Error();
+                                            const resumen = await res.json();
+
+                                            const comoPremiumHubieraSido = resumen.earnedThisMonth * 2;
+                                            const diferencia = comoPremiumHubieraSido - resumen.earnedThisMonth;
+
+                                            const tocóTopeComentarios = resumen.dailyCommentsUsed >= resumen.dailyCommentsLimit;
+                                            const tocóTopeRecomendaciones = resumen.dailyRecommendationsUsed >= resumen.dailyRecommendationsLimit;
+
+                                            let html = `
+                                                <div class="buscador-stat-hero">
+                                                    <div class="num rojo">+${diferencia}</div>
+                                                    <div class="lbl">Pts que te perdiste este mes por no ser Premium</div>
+                                                </div>
+                                                <div class="buscador-tarjetas">
+                                                    <div class="buscador-tarjeta"><div class="buscador-tarjeta-icono gris"><i class="fas fa-chart-line"></i></div><p>Generaste <strong>${resumen.earnedThisMonth} pts</strong> — como Premium hubieran sido <strong>${comoPremiumHubieraSido} pts</strong>.</p></div>`;
+
+                                            if (resumen.accumulatedPoints > (resumen.monthlyCap || 5000)) {
+                                                html += `<div class="buscador-tarjeta"><div class="buscador-tarjeta-icono gris"><i class="fas fa-exclamation-triangle"></i></div><p>Ya superaste el tope mensual de <strong>${resumen.monthlyCap || 5000} pts</strong> — el excedente recién se libera el próximo ciclo. Premium no tiene tope.</p></div>`;
+                                            }
+
+                                            if (tocóTopeComentarios || tocóTopeRecomendaciones) {
+                                                html += `<div class="buscador-tarjeta"><div class="buscador-tarjeta-icono gris"><i class="fas fa-comment-slash"></i></div><p>Hoy ya llegaste al límite diario de ${tocóTopeComentarios ? 'comentarios' : ''}${tocóTopeComentarios && tocóTopeRecomendaciones ? ' y ' : ''}${tocóTopeRecomendaciones ? 'recomendaciones' : ''} con puntos — Premium no tiene ese límite.</p></div>`;
+                                            }
+
+                                            html += `<div class="buscador-tarjeta"><div class="buscador-tarjeta-icono azul"><i class="fas fa-infinity"></i></div><p>Tus puntos hoy vencen a los 6 meses — con <a href="#" class="buscador-premio-link" onclick="event.preventDefault(); window.cerrarBuscadorAsistido(); window.location.hash='mi-cuenta'; setTimeout(() => { if (typeof window.abrirDetallePlan === 'function') window.abrirDetallePlan(); }, 400);">Premium</a>, <strong>nunca vencen</strong>.</p></div>
+                                            </div>`;
+
+                                                                                        cont.innerHTML = html;
+                                        } catch (e) {
+                                            cont.innerHTML = '<div class="buscador-predictor-vacio">No pudimos calcular esto. Intentá de nuevo.</div>';
+                                        }
+                                    };
+
+                                // ==============================================
+                                // NIVEL 3 — ¿Cuánto estoy ganando por ser Premium? (solo Premium)
+                                // Refuerzo con números reales del mes: el x2 de puntos, comparado
+                                // contra lo que hubiera sido como FREE.
+                                // ==============================================
+                                window._buscadorAbrirReforzarPremium = async function() {
+                                    window._buscadorOcultarNivel3MiActividad();
+                                    document.getElementById('buscadorNivel2MiActividad').style.display = 'none';
+                                    document.getElementById('buscadorNivel3ReforzarPremium').style.display = 'block';
+
+                                    const cont = document.getElementById('buscadorReforzarPremioContenido');
+                                    cont.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Calculando...</div>';
+
+                                    try {
+                                        const token = localStorage.getItem('token');
+                                        const [resResumen, resPremium] = await Promise.all([
+                                            fetch(`${CONFIG.API_URL}/users/me/points/resumen`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                                            fetch(`${CONFIG.API_URL}/premium/rewards`, { headers: { 'Authorization': `Bearer ${token}` } })
+                                        ]);
+                                        if (!resResumen.ok) throw new Error();
+                                        const resumen = await resResumen.json();
+                                        const premiosPremium = resPremium.ok ? await resPremium.json() : [];
+
+                                        // El x2 ya está adentro de earnedThisMonth (Premium gana el
+                                        // doble por cada acción) — la mitad es lo que hubieras generado
+                                        // como FREE con las mismas acciones.
+                                        const comoFreeHubieraSido = Math.round(resumen.earnedThisMonth / 2);
+                                        const diferencia = resumen.earnedThisMonth - comoFreeHubieraSido;
+
+                                                const sorteosActivos = premiosPremium.filter(p => p.type === 'SORTEO' && p.drawExecuted !== true);
+
+                                                let html = `
+                                                    <div class="buscador-stat-hero">
+                                                        <div class="num">+${diferencia}</div>
+                                                        <div class="lbl">Pts de más este mes, por ser Premium</div>
+                                                    </div>
+                                                    <div class="buscador-tarjetas">
+                                                        <div class="buscador-tarjeta"><div class="buscador-tarjeta-icono azul"><i class="fas fa-infinity"></i></div><p>Tus puntos <strong>nunca vencen</strong> y no tenés límite diario de comentarios ni recomendaciones.</p></div>`;
+
+                                                if (sorteosActivos.length === 1) {
+                                                    const s = sorteosActivos[0];
+                                                    html += `<div class="buscador-tarjeta"><div class="buscador-tarjeta-icono rojo"><i class="fas fa-ticket-alt"></i></div><p>Tenés acceso a <a href="#" class="buscador-premio-link" onclick="event.preventDefault(); window._buscadorAbrirPremioDesdeResumen(${s.id}, 'premium');">${s.name || 'un sorteo exclusivo'}</a>, que un usuario FREE no puede acceder.</p></div>`;
+                                                } else if (sorteosActivos.length > 1) {
+                                                    const links = sorteosActivos
+                                                        .map(s => `<a href="#" class="buscador-premio-link" onclick="event.preventDefault(); window._buscadorAbrirPremioDesdeResumen(${s.id}, 'premium');">${s.name || 'un sorteo'}</a>`)
+                                                        .join(', ');
+                                                    html += `<div class="buscador-tarjeta"><div class="buscador-tarjeta-icono rojo"><i class="fas fa-ticket-alt"></i></div><p>Tenés acceso a ${sorteosActivos.length} sorteos exclusivos que un usuario FREE no puede ver: ${links}.</p></div>`;
+                                                }
+
+                                                html += `</div>`;
+                                                cont.innerHTML = html;
+                                    } catch (e) {
+                                        cont.innerHTML = '<div class="buscador-predictor-vacio">No pudimos calcular esto. Intentá de nuevo.</div>';
+                                    }
+                                };
+
+                            // ==============================================
+                            // NIVEL 3 — ¿Cuánto me falta para el próximo premio?
+                            // Lista completa (no solo el más barato) de todo lo que todavía no
+                            // alcanzás, ordenado del más cerca al más lejos, cada uno linkeado
+                            // a su modal real.
+                            // ==============================================
+                            window._buscadorAbrirProximoPremio = async function() {
+                                window._buscadorOcultarNivel3MiActividad();
+                                document.getElementById('buscadorNivel2MiActividad').style.display = 'none';
+                                document.getElementById('buscadorNivel3ProximoPremio').style.display = 'block';
+
+                                const cont = document.getElementById('buscadorProximoPremioContenido');
+                                cont.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Calculando...</div>';
+
+                                try {
+                                    const token = localStorage.getItem('token');
+                                    const [resResumen, resFree] = await Promise.all([
+                                        fetch(`${CONFIG.API_URL}/users/me/points/resumen`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                                        fetch(`${CONFIG.API_URL}/rewards/all`, { headers: { 'Authorization': `Bearer ${token}` } })
+                                    ]);
+                                    if (!resResumen.ok) throw new Error();
+                                    const resumen = await resResumen.json();
+                                    const premiosFree = (resFree.ok ? await resFree.json() : []).map(p => ({ ...p, _origen: 'free' }));
+
+                                    let premiosPremium = [];
+                                    if (resumen.premium) {
+                                        const resPremium = await fetch(`${CONFIG.API_URL}/premium/rewards`, { headers: { 'Authorization': `Bearer ${token}` } });
+                                        if (resPremium.ok) premiosPremium = (await resPremium.json()).map(p => ({ ...p, _origen: 'premium' }));
+                                    }
+
+                                    const todosLosPremios = [...premiosFree, ...premiosPremium];
+
+                                    // Solo vigentes (con stock, sin vencer — y si es sorteo, todavía
+                                    // no ejecutado) y que todavía NO alcanzás.
+                                    const pendientes = todosLosPremios
+                                        .filter(p => {
+                                            const vigente = p.hasStock && !p.isExpired && (p.type !== 'SORTEO' || p.drawExecuted !== true);
+                                            return vigente && !p.canRedeem;
+                                        })
+                                        .sort((a, b) => a.pointsRequired - b.pointsRequired);
+
+                                    if (pendientes.length === 0) {
+                                        cont.innerHTML = `<div class="buscador-resumen-card">
+                                            <p><i class="fas fa-party-horn" style="color:#2e7d32;"></i> ¡Ya te alcanzan los puntos para todos los premios vigentes! Andá a Club de Beneficios y elegí el tuyo.</p>
+                                        </div>`;
+                                        return;
+                                    }
+
+                                        const nombrePremio = (p) => p.name || 'un premio';
+
+                                        // El más cercano (el primero, ya viene ordenado ascendente) es el
+                                        // stat protagonista — el resto queda como tarjetas debajo.
+                                        const [masCercano, ...resto] = pendientes;
+                                        const faltanCercano = masCercano.pointsRequired - resumen.availablePoints;
+
+                                                                                let html = `
+                                                                                    <div class="buscador-stat-hero">
+                                                                                        <div class="num rojo">${faltanCercano}</div>
+                                                                                        <div class="lbl">Pts para <a href="#" class="buscador-premio-link" style="text-transform:none;font-size:0.85rem;font-weight:600;" onclick="event.preventDefault(); window._buscadorAbrirPremioDesdeResumen(${masCercano.id}, '${masCercano._origen}');">${nombrePremio(masCercano)}</a></div>
+                                                                                    </div>`;
+
+                                                                                if (resto.length > 0) {
+                                                                                    html += `<div class="buscador-tarjetas">`;
+                                                                                    html += resto.map(p => {
+                                                                                        const faltan = p.pointsRequired - resumen.availablePoints;
+                                                                                        return `<div class="buscador-tarjeta"><div class="buscador-tarjeta-icono rojo"><i class="fas fa-hourglass-half"></i></div><p>Te faltan <strong>${faltan} pts</strong> para <a href="#" class="buscador-premio-link" onclick="event.preventDefault(); window._buscadorAbrirPremioDesdeResumen(${p.id}, '${p._origen}');">${nombrePremio(p)}</a>.</p></div>`;
+                                                                                    }).join('');
+                                                                                    html += `</div>`;
+                                                                                }
+
+                                                                                if (!resumen.premium) {
+                                                                                    html += `<div class="buscador-cta-premium">
+                                                                                        <i class="fas fa-star"></i> Con Premium tus puntos valen el doble y no tenés límite diario.
+                                                                                        <button class="buscador-cta-btn" onclick="window.cerrarBuscadorAsistido(); window.location.hash='club-beneficios';">Ver Club de Beneficios</button>
+                                                                                    </div>`;
+                                                                                }
+
+                                                                                cont.innerHTML = html;
+                                } catch (e) {
+                                    cont.innerHTML = '<div class="buscador-predictor-vacio">No pudimos calcular esto. Intentá de nuevo.</div>';
+                                }
+                            };
+
+                        window._buscadorVolverNivel2MiActividad = function() {
+                            window._buscadorOcultarNivel3MiActividad();
+                            document.getElementById('buscadorNivel2MiActividad').style.display = 'block';
+                        };
+
+                        // Las 4 pantallas de Nivel 3 de "Mi actividad" no se ocultaban entre
+                        // sí al abrir una nueva — solo escondían el menú de Nivel 2. Si
+                        // navegabas de una a otra, quedaban todas visibles apiladas.
+                        window._buscadorOcultarNivel3MiActividad = function() {
+                            ['buscadorNivel3Aprovechar', 'buscadorNivel3ProximoPremio', 'buscadorNivel3ValePremium', 'buscadorNivel3ReforzarPremium', 'buscadorNivel3Insignias'].forEach(id => {
+                                const el = document.getElementById(id);
+                                if (el) el.style.display = 'none';
+                            });
+                        };
+
+                        // ==============================================
+                        // NIVEL 3 — ¿Qué puedo aprovechar este mes?
+                        // Cruza el resumen de puntos (endpoint nuevo) con el catálogo de
+                        // premios — no es un carrusel de resultados, es una respuesta
+                        // textual que combina varios datos que hoy nadie arma junta.
+                        // ==============================================
+                        // Mismo mecanismo que abrirPremioDesdeCarrusel (novedades.js): el
+                        // modal de premio depende de window._clubFreeCache/_clubPremiumCache,
+                        // que solo existen una vez que el módulo Club de Beneficios cargó su
+                        // catálogo real — acá se navega ahí primero y se espera.
+                        window._buscadorAbrirPremioDesdeResumen = function(rewardId, origen) {
+                            window.cerrarBuscadorAsistido();
+                            window.location.hash = 'club-beneficios';
+                            const esPremium = origen === 'premium';
+
+                            let tabPremiumForzada = false;
+                            let intentos = 0;
+                            const esperar = setInterval(() => {
+                                intentos++;
+
+                                if (esPremium && !tabPremiumForzada && typeof window.cambiarTabClubBeneficios === 'function') {
+                                    const btnPremium = document.getElementById('clubTabPremium');
+                                    if (btnPremium) {
+                                        tabPremiumForzada = true;
+                                        window.cambiarTabClubBeneficios('premium', btnPremium);
+                                    }
+                                }
+
+                                const cache = esPremium ? window._clubPremiumCache : window._clubFreeCache;
+                                const listo = typeof window._abrirModalPremioClub === 'function' && Array.isArray(cache) && cache.length > 0;
+
+                                if (listo) {
+                                    clearInterval(esperar);
+                                    const p = cache.find(x => x.id === rewardId);
+                                    if (p) window._abrirModalPremioClub(rewardId, origen);
+                                } else if (intentos > 25) {
+                                    clearInterval(esperar);
+                                }
+                            }, 200);
+                        };
+
+                        window._buscadorAbrirAprovechar = async function() {
+                            window._buscadorOcultarNivel3MiActividad();
+                            document.getElementById('buscadorNivel2MiActividad').style.display = 'none';
+                            document.getElementById('buscadorNivel3Aprovechar').style.display = 'block';
+
+                            const cont = document.getElementById('buscadorAprovecharContenido');
+                            cont.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Calculando...</div>';
+
+                            try {
+                                const token = localStorage.getItem('token');
+                                const [resResumen, resFree] = await Promise.all([
+                                    fetch(`${CONFIG.API_URL}/users/me/points/resumen`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                                    fetch(`${CONFIG.API_URL}/rewards/all`, { headers: { 'Authorization': `Bearer ${token}` } })
+                                ]);
+                                if (!resResumen.ok) throw new Error();
+                                const resumen = await resResumen.json();
+                                const premiosFree = resFree.ok ? await resFree.json() : [];
+
+                                let premiosPremium = [];
+                                if (resumen.premium) {
+                                    const resPremium = await fetch(`${CONFIG.API_URL}/premium/rewards`, { headers: { 'Authorization': `Bearer ${token}` } });
+                                    if (resPremium.ok) premiosPremium = await resPremium.json();
+                                }
+
+                                        // Solo premios vigentes (con stock y sin vencer) — canRedeem ya
+                                        // viene calculado por el backend (RewardDto), no hace falta
+                                        // rearmar esa lógica acá.
+                                        const disponibles = premiosFree.filter(p => p.hasStock && !p.isExpired);
+
+                                        // El más caro que YA podés pagar — canRedeem ya contempla
+                                        // disponibilidad + si te alcanzan los puntos.
+                                        const alAlcance = disponibles
+                                            .filter(p => p.canRedeem)
+                                            .sort((a, b) => b.pointsRequired - a.pointsRequired)[0];
+
+                                        // El más barato que todavía NO alcanza — "te falta poco para este".
+                                        const masCercano = disponibles
+                                            .filter(p => !p.canRedeem)
+                                            .sort((a, b) => a.pointsRequired - b.pointsRequired)[0];
+
+                                                // Mismo criterio que usa Club de Beneficios (_clubEstaResueltoEspecial):
+                                                // un sorteo está resuelto cuando drawExecuted es true, no por stock.
+                                                const sorteosActivos = premiosPremium.filter(p => p.type === 'SORTEO' && p.drawExecuted !== true).length;
+
+                                        const nombrePremio = (p) => p.name || 'un premio';
+
+                                        // Fecha del próximo 1° del mes, en formato dd/mm/aaaa.
+                                        const hoy = new Date();
+                                        const proximoPrimero = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 1);
+                                        const fechaLiberacion = proximoPrimero.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+                                        let html = `
+                                            <div class="buscador-stat-hero">
+                                                <div class="num">${resumen.availablePoints}</div>
+                                                <div class="lbl">Puntos disponibles hoy</div>
+                                            </div>
+                                            <div class="buscador-tarjetas">`;
+                                        if (resumen.accumulatedPoints > 0) {
+                                            // El tope mensual FREE limita cuánto se libera realmente —
+                                            // mostrar accumulatedPoints "a secas" acá mentía cuando ya
+                                            // superaste el tope (mismo dato que ya calcula bien la
+                                            // pantalla de "¿Vale la pena Premium?").
+                                            const superoTope = resumen.monthlyCap != null && resumen.accumulatedPoints > resumen.monthlyCap;
+                                            const aLiberar = superoTope ? resumen.monthlyCap : resumen.accumulatedPoints;
+
+                                            html += `<div class="buscador-tarjeta"><div class="buscador-tarjeta-icono gris"><i class="fas fa-calendar-check"></i></div><p>El <strong>${fechaLiberacion}</strong> vas a cobrar los <strong>${aLiberar} pts</strong> acumulados${superoTope ? ` (tocaste el tope mensual de ${resumen.monthlyCap})` : ''}.${superoTope ? ` Con <a href="#" class="buscador-premio-link" onclick="event.preventDefault(); window.cerrarBuscadorAsistido(); window.location.hash='mi-cuenta'; setTimeout(() => { if (typeof window.abrirDetallePlan === 'function') window.abrirDetallePlan(); }, 400);">Premium</a> hubieras cobrado los ${resumen.accumulatedPoints} pts completos.` : ''}</p></div>`;
+                                        }
+
+                                      if (alAlcance) {
+                                          html += `<div class="buscador-tarjeta"><div class="buscador-tarjeta-icono verde"><i class="fas fa-check"></i></div><p>Ya podés canjear <a href="#" class="buscador-premio-link" onclick="event.preventDefault(); window._buscadorAbrirPremioDesdeResumen(${alAlcance.id}, 'free');">${nombrePremio(alAlcance)}</a> (${alAlcance.pointsRequired} pts).</p></div>`;
+                                      }
+                                       if (!alAlcance && !masCercano) {
+                                           html += `<div class="buscador-tarjeta"><div class="buscador-tarjeta-icono gris"><i class="fas fa-info-circle"></i></div><p>No hay premios activos con costo en puntos ahora mismo.</p></div>`;
+                                       }
+
+                                if (!resumen.premium) {
+                                    const comentariosRestantes = resumen.dailyCommentsLimit - resumen.dailyCommentsUsed;
+                                    const recomendacionesRestantes = resumen.dailyRecommendationsLimit - resumen.dailyRecommendationsUsed;
+
+                                    let mensajeCupo = null;
+                                    if (resumen.dailyCommentsUsed === 0 && resumen.dailyRecommendationsUsed === 0) {
+                                        // Sin actividad hoy — no se muestra ninguna tarjeta acá, para no
+                                        // sobrecargar la pantalla con un aviso de "no hiciste nada".
+                                    } else if (comentariosRestantes <= 0 && recomendacionesRestantes <= 0) {
+                                        mensajeCupo = 'Ya usaste todos tus comentarios y recomendaciones con puntos de hoy — mañana se renueva el cupo.';
+                                    } else {
+                                        const partes = [];
+                                        if (comentariosRestantes > 0) partes.push(`${comentariosRestantes} comentario${comentariosRestantes > 1 ? 's' : ''} con puntos`);
+                                        if (recomendacionesRestantes > 0) partes.push(`${recomendacionesRestantes} recomendación${recomendacionesRestantes > 1 ? 'es' : ''} con puntos`);
+                                        mensajeCupo = `Todavía te quedan ${partes.join(' y ')} para hoy — aprovechalos.`;
+                                    }
+
+                                    if (mensajeCupo) {
+                                        html += `<div class="buscador-tarjeta"><div class="buscador-tarjeta-icono gris"><i class="fas fa-comment"></i></div><p>${mensajeCupo}</p></div>`;
+                                    }
+                                    }
+                                    if (resumen.premium && sorteosActivos > 0) {
+                                        html += `<div class="buscador-tarjeta"><div class="buscador-tarjeta-icono rojo"><i class="fas fa-ticket-alt"></i></div><p>Tenés <strong>${sorteosActivos} sorteo${sorteosActivos > 1 ? 's' : ''} exclusivo${sorteosActivos > 1 ? 's' : ''}</strong> activo${sorteosActivos > 1 ? 's' : ''} para vos.</p></div>`;
+                                    }
+
+                                                                       html += `</div>`;
+
+                                                                   cont.innerHTML = html;
+                            } catch (e) {
+                                cont.innerHTML = '<div class="buscador-predictor-vacio">No pudimos calcular tu resumen. Intentá de nuevo.</div>';
+                            }
+                        };
+
+                    // ==============================================
+                    // NIVEL 3 — Dónde/cuándo verla
+                    // ==============================================
+                    // La lista fija de 4 plataformas se reemplazó por la dinámica
+                    // completa (ver _buscadorMostrarPlataformas) — ya no hace falta
+                    // mantener IDs a mano acá.
+
+                    window._buscadorDondeVerCriterio = null; // 'donde_ver_titulo' | 'donde_ver_plataforma'
+                    window._buscadorDondeVerPlataformaElegida = null; // { id, nombre }
+
+                    window._buscadorAbrirDondeVerTipo = function(criterio) {
+                        window._buscadorDondeVerCriterio = criterio;
+                        document.getElementById('buscadorNivel2DondeVer').style.display = 'none';
+                        document.getElementById('buscadorDondeVerPlataforma').style.display = 'none';
+                        document.getElementById('buscadorDondeVerTitulo').style.display = 'none';
+                        document.getElementById('buscadorDondeVerTipo').style.display = 'block';
+                    };
+
+                        window._buscadorVolverANivel2DondeVer = function() {
+                            ['buscadorDondeVerTipo', 'buscadorDondeVerTitulo', 'buscadorDondeVerPlataforma'].forEach(id => {
+                                document.getElementById(id).style.display = 'none';
+                            });
+                            document.getElementById('buscadorNivel2DondeVer').style.display = 'block';
+                            document.getElementById('buscadorModalSheet').classList.remove('buscador-sheet-ancho');
+                        };
+
+                    window._buscadorDondeVerSetTipo = function(tipo) {
+                        window._buscadorTipoContenido = tipo;
+                        document.getElementById('buscadorDondeVerTipo').style.display = 'none';
+
+                        if (window._buscadorDondeVerCriterio === 'donde_ver_titulo') {
+                            document.getElementById('buscadorDondeVerTitulo').style.display = 'block';
+                            document.getElementById('buscadorDondeVerTituloSubtitulo').textContent =
+                                tipo === 'pelicula' ? 'Escribí el título de la película' : 'Escribí el título de la serie';
+                            const input = document.getElementById('buscadorInputDondeVer');
+                            input.value = '';
+                            document.getElementById('buscadorResultadosDondeVer').style.display = 'none';
+                            window._buscadorInicializarPredictorDondeVer();
+                            input.focus();
+                        } else {
+                            window._buscadorMostrarPlataformas();
+                        }
+                    };
+
+                    // Opción A: predictor de título → abre el panel de disponibilidad
+                    // directo (abrirDondeVerla / abrirDondeVerlaSerie ya existen y ya
+                    // contemplan abrirse sin evento de click — centran el panel solo).
+                    window._buscadorInicializarPredictorDondeVer = function() {
+                        const input = document.getElementById('buscadorInputDondeVer');
+                        const resultados = document.getElementById('buscadorResultadosDondeVer');
+                        if (!input || input.dataset.predictorInit) return;
+                        input.dataset.predictorInit = '1';
+
+                        let timeoutId = null;
+
+                        input.addEventListener('input', function() {
+                            clearTimeout(timeoutId);
+                            const query = this.value.trim();
+
+                            if (query.length < 2) {
+                                resultados.style.display = 'none';
+                                return;
+                            }
+
+                            timeoutId = setTimeout(async () => {
+                                try {
+                                    const token = localStorage.getItem('token');
+                                    const base = window._buscadorTipoContenido === 'serie' ? 'series' : 'movies';
+                                    const res = await fetch(`${CONFIG.API_URL}/${base}/search?query=${encodeURIComponent(query)}`, {
+                                        headers: { 'Authorization': `Bearer ${token}` }
+                                    });
+                                    if (!res.ok) return;
+                                    const data = await res.json();
+                                    const items = (data.results || []).slice(0, 6);
+
+                                    if (items.length === 0) {
+                                        resultados.innerHTML = '<div class="buscador-predictor-vacio">No encontramos nada con ese título</div>';
+                                        resultados.style.display = 'block';
+                                        return;
+                                    }
+
+                                    resultados.innerHTML = items.map(item => {
+                                        const titulo = item.title || item.name || 'Sin título';
+                                        const fecha = item.release_date || item.first_air_date || '';
+                                        const anio = fecha ? fecha.substring(0, 4) : '';
+                                        const poster = item.poster_path
+                                            ? `<img src="https://image.tmdb.org/t/p/w92${item.poster_path}" alt="${titulo}">`
+                                            : `<div class="buscador-predictor-poster-vacio"><i class="fas fa-film"></i></div>`;
+                                        return `
+                                        <div class="buscador-predictor-item" data-id="${item.id}">
+                                            ${poster}
+                                            <div>
+                                                <strong>${titulo}</strong>
+                                                ${anio ? `<span>${anio}</span>` : ''}
+                                            </div>
+                                        </div>`;
+                                    }).join('');
+
+                                    resultados.style.display = 'block';
+
+                                    resultados.querySelectorAll('.buscador-predictor-item').forEach(el => {
+                                        el.addEventListener('click', function() {
+                                            const id = this.dataset.id;
+                                            window.cerrarBuscadorAsistido();
+                                            if (window._buscadorTipoContenido === 'serie') {
+                                                window.abrirDondeVerlaSerie(id);
+                                            } else {
+                                                window.abrirDondeVerla(id);
+                                            }
+                                        });
+                                    });
+
+                                } catch (e) {}
+                            }, 400);
+                        });
+                    };
+
+                    // Opción B: elegir plataforma
+                    // Lista dinámica completa — nada hardcodeado. Se pide la
+                    // lista real de TMDb (películas o series, según lo que se
+                    // esté buscando), se sacan los "canales" (Amazon Channel,
+                    // Apple TV Channel — son add-ons, no plataformas en sí) y
+                    // se ordena por display_priority (relevancia real de TMDb).
+                    window._buscadorMostrarPlataformas = async function() {
+                        document.getElementById('buscadorDondeVerPlataforma').style.display = 'block';
+                        document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-ancho');
+                        const grid = document.getElementById('buscadorPlataformasGrid');
+                        grid.className = 'buscador-plataformas-grid';
+                        grid.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>';
+
+                        try {
+                            const token = localStorage.getItem('token');
+                            const base = window._buscadorTipoContenido === 'serie' ? 'series' : 'movies';
+                            const res = await fetch(`${CONFIG.API_URL}/${base}/watch-providers/list`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (!res.ok) throw new Error();
+                            const data = await res.json();
+
+                            const plataformas = (data.results || [])
+                                .filter(p => !/channel/i.test(p.provider_name || ''))
+                                .sort((a, b) => (a.display_priority ?? 999) - (b.display_priority ?? 999));
+
+                            if (plataformas.length === 0) {
+                                grid.innerHTML = '<div class="buscador-predictor-vacio">No pudimos cargar las plataformas.</div>';
+                                return;
+                            }
+
+                                                        grid.innerHTML = plataformas.map(p => `
+                                                            <button class="buscador-plataforma-btn" onclick="window._buscadorBuscarPorPlataforma(${p.provider_id}, '${(p.provider_name || '').replace(/'/g, "\\'")}')" title="${p.provider_name}">
+                                                                ${p.logo_path
+                                                                    ? `<img src="https://image.tmdb.org/t/p/original${p.logo_path}" alt="${p.provider_name}">`
+                                                                    : `<div class="buscador-plataforma-sinlogo"><i class="fas fa-tv"></i></div>`}
+                                                            </button>
+                                                        `).join('');
+
+                                                        window._buscadorInicializarDotsPlataformas();
+                                                    } catch (e) {
+                                                        grid.innerHTML = '<div class="buscador-predictor-vacio">No pudimos cargar las plataformas. Intentá de nuevo.</div>';
+                                                    }
+                                                };
+
+                                                // Dots del carrusel de plataformas — solo tienen sentido en
+                                                // mobile (donde el grid pagina por tandas con scroll-snap);
+                                                // en desktop el grid usa flex-wrap normal, sin páginas.
+                                                window._buscadorInicializarDotsPlataformas = function() {
+                                                    const dotsCont = document.getElementById('buscadorPlataformasDots');
+                                                    const grid = document.getElementById('buscadorPlataformasGrid');
+                                                    dotsCont.innerHTML = '';
+
+                                                    if (window.innerWidth > 768) return;
+
+                                                    requestAnimationFrame(() => {
+                                                        const totalPaginas = Math.round(grid.scrollWidth / grid.clientWidth);
+                                                        if (totalPaginas <= 1) return;
+
+                                                        dotsCont.innerHTML = Array.from({ length: totalPaginas }, (_, i) =>
+                                                            `<span class="buscador-dot${i === 0 ? ' activo' : ''}" data-pagina="${i}"></span>`
+                                                        ).join('');
+
+                                                        dotsCont.querySelectorAll('.buscador-dot').forEach(dot => {
+                                                            dot.addEventListener('click', () => {
+                                                                grid.scrollTo({ left: Number(dot.dataset.pagina) * grid.clientWidth, behavior: 'smooth' });
+                                                            });
+                                                        });
+
+                                                        grid.addEventListener('scroll', () => {
+                                                            const paginaActual = Math.round(grid.scrollLeft / grid.clientWidth);
+                                                            dotsCont.querySelectorAll('.buscador-dot').forEach((dot, i) => {
+                                                                dot.classList.toggle('activo', i === paginaActual);
+                                                            });
+                                                        }, { passive: true });
+                                                    });
+                                                };
+
+                    window._buscadorBuscarPorPlataforma = function(plataformaId, nombre) {
+                        window.cerrarBuscadorAsistido();
+                        if (window._buscadorTipoContenido === 'serie') {
+                            if (window._tabActivo !== 'series') {
+                                window.seleccionarTabFeed('series', document.getElementById('tabSeries'));
+                            }
+                            window._buscadorEjecutarPlataformaSerie(plataformaId, nombre);
+                        } else {
+                            if (window._tabActivo !== 'peliculas') {
+                                window.seleccionarTabFeed('peliculas', document.getElementById('tabPeliculas'));
+                            }
+                            window._buscadorEjecutarPlataformaPelicula(plataformaId, nombre);
+                        }
+                    };
+
+                    window._buscadorEjecutarPlataformaPelicula = async function(plataformaId, nombre, pagina = 1, append = false) {
+                        if (window.estadoPaginacion.cargando) return;
+                        window.estadoPaginacion.cargando = true;
+                        window._buscadorPaginaSiguienteFn = (p) => window._buscadorEjecutarPlataformaPelicula(plataformaId, nombre, p, true);
+
+                        const track = document.getElementById('filaTrack-busqueda');
+                        if (!append) {
+                            window._buscadorMostrarFilaResultadosDebajo('fila-busqueda', `En ${nombre}`);
+                            window._filaBusqueda.peliculas = [];
+                            if (track) track.innerHTML = '<div class="fila-genero-loading"><i class="fas fa-spinner fa-spin"></i></div>';
+                        }
+
+                        try {
+                            const token = localStorage.getItem('token');
+                            const res = await fetch(`${CONFIG.API_URL}/movies/search?withWatchProviders=${plataformaId}&page=${pagina}`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (!res.ok) throw new Error(`Error ${res.status}`);
+                            const data = await res.json();
+
+                            window.estadoPaginacion.paginaActual = pagina;
+                            window.estadoPaginacion.totalPaginas = data.total_pages;
+                            window.estadoPaginacion.totalResultados = data.total_results;
+
+                            if (!data.results || data.results.length === 0) {
+                                if (!append) window._buscadorMostrarToast(`No encontramos películas en ${nombre}.`);
+                            } else if (append) {
+                                window._filaBusqueda.peliculas = window._filaBusqueda.peliculas.concat(data.results);
+                                await appendCardsFila(window._filaBusqueda, data.results);
+                                if (typeof window.cargarEstadisticasVotacion === 'function') window.cargarEstadisticasVotacion();
+                            } else {
+                                window._filaBusqueda.peliculas = data.results;
+                                await renderCardsFila(window._filaBusqueda);
+                                limpiarModalesDuplicados();
+                                if (typeof window.cargarEstadisticasVotacion === 'function') window.cargarEstadisticasVotacion();
+                            }
+                            if (!append) window._buscadorScrollearAResultados('fila-busqueda');
+                        } catch (error) {
+                            if (!append) window._buscadorMostrarToast('Error al buscar. Intentá de nuevo.');
+                        } finally {
+                            window.estadoPaginacion.cargando = false;
+                        }
+                    };
+
+                    window._buscadorEjecutarPlataformaSerie = async function(plataformaId, nombre, pagina = 1, append = false) {
+                        if (window.estadoPaginacionSerie.cargando) return;
+                        window.estadoPaginacionSerie.cargando = true;
+                        window._buscadorPaginaSiguienteFn = (p) => window._buscadorEjecutarPlataformaSerie(plataformaId, nombre, p, true);
+
+                        const track = document.getElementById('filaSerieTrack-busqueda-serie');
+                        if (!append) {
+                            window._buscadorMostrarFilaResultadosDebajo('fila-busqueda-serie', `En ${nombre}`);
+                            window._filaBusquedaSerie.series = [];
+                            if (track) track.innerHTML = '<div class="fila-genero-loading"><i class="fas fa-spinner fa-spin"></i></div>';
+                        }
+
+                        try {
+                            const token = localStorage.getItem('token');
+                            const res = await fetch(`${CONFIG.API_URL}/series/search?withWatchProviders=${plataformaId}&page=${pagina}`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (!res.ok) throw new Error(`Error ${res.status}`);
+                            const data = await res.json();
+
+                            window.estadoPaginacionSerie.paginaActual = pagina;
+                            window.estadoPaginacionSerie.totalPaginas = data.total_pages;
+                            window.estadoPaginacionSerie.totalResultados = data.total_results;
+
+                            if (!data.results || data.results.length === 0) {
+                                if (!append) window._buscadorMostrarToast(`No encontramos series en ${nombre}.`);
+                            } else if (append) {
+                                window._filaBusquedaSerie.series = window._filaBusquedaSerie.series.concat(data.results);
+                                await appendCardsFilaSerie(window._filaBusquedaSerie, data.results);
+                                if (typeof window.cargarEstadisticasVotacionSeries === 'function') window.cargarEstadisticasVotacionSeries();
+                            } else {
+                                window._filaBusquedaSerie.series = data.results;
+                                await renderCardsFilaSerie(window._filaBusquedaSerie);
+                                if (typeof window.cargarEstadisticasVotacionSeries === 'function') window.cargarEstadisticasVotacionSeries();
+                            }
+                            if (!append) window._buscadorScrollearAResultados('fila-busqueda-serie');
+                        } catch (error) {
+                            if (!append) window._buscadorMostrarToast('Error al buscar. Intentá de nuevo.');
+                        } finally {
+                            window.estadoPaginacionSerie.cargando = false;
+                        }
+                    };
+
+                    // "Próximos estrenos" — ya existe como fila fija del feed, mismo
+                    // mecanismo que género (no arma ningún fetch propio).
+                    window._buscadorProximosEstrenos = function() {
+                        window.cerrarBuscadorAsistido();
+                        if (window._tabActivo !== 'peliculas') {
+                            window.seleccionarTabFeed('peliculas', document.getElementById('tabPeliculas'));
+                        }
+                        const btn = document.querySelector(`#ordenarPills .pill-orden[data-key="proximamente"]`);
+                        window.priorizarFilaGenero('proximamente', btn);
+                    };
+
+                // ==============================================
+                // NIVEL 3 — Trabajaron juntos (cruce de dos filmografías).
+                // No necesita ningún endpoint nuevo: reusa el mismo predictor de
+                // personas y /movies/person/{id}/credits que ya usa abrirActorModal
+                // — el cruce se hace en el frontend, comparando los dos listados de
+                // películas por id.
+                // ==============================================
+                window._buscadorCrucePersona1 = null; // { id, nombre }
+
+                window._buscadorAbrirNivel3Cruce1 = function() {
+                    document.getElementById('buscadorNivel2Persona').style.display = 'none';
+                    document.getElementById('buscadorNivel3Cruce1').style.display = 'block';
+                    window._buscadorCrucePersona1 = null;
+
+                    const input = document.getElementById('buscadorInputCruce1');
+                    input.value = '';
+                    document.getElementById('buscadorResultadosCruce1').style.display = 'none';
+                    window._buscadorInicializarPredictorPersonaGenerico('buscadorInputCruce1', 'buscadorResultadosCruce1',
+                        (id, nombre) => {
+                            window._buscadorCrucePersona1 = { id, nombre };
+                            window._buscadorAbrirNivel3Cruce2();
+                        });
+                    input.focus();
+                };
+
+                window._buscadorAbrirNivel3Cruce2 = function() {
+                    document.getElementById('buscadorNivel3Cruce1').style.display = 'none';
+                    document.getElementById('buscadorNivel3Cruce2').style.display = 'block';
+                    document.getElementById('buscadorNivel3Cruce2Subtitulo').textContent =
+                        `${window._buscadorCrucePersona1.nombre} trabajó con...`;
+
+                    const input = document.getElementById('buscadorInputCruce2');
+                    input.value = '';
+                    document.getElementById('buscadorResultadosCruce2').style.display = 'none';
+                    window._buscadorInicializarPredictorPersonaGenerico('buscadorInputCruce2', 'buscadorResultadosCruce2',
+                        (id, nombre) => {
+                            window._buscadorBuscarPeliculasEnComun(
+                                window._buscadorCrucePersona1.id, window._buscadorCrucePersona1.nombre,
+                                id, nombre
+                            );
+                        });
+                    input.focus();
+                };
+
+                window._buscadorVolverACruce1 = function() {
+                    document.getElementById('buscadorNivel3Cruce2').style.display = 'none';
+                    document.getElementById('buscadorNivel3Cruce1').style.display = 'block';
+                };
+
+                // Predictor de personas genérico y reusable — recibe los IDs de los
+                // elementos y un callback(id, nombre) al elegir, en vez de tener el
+                // destino fijo como window._buscadorInicializarPredictorPersona (que
+                // siempre abre abrirActorModal). Esta versión es la que debería haber
+                // usado esa también, pero se deja aparte para no arriesgar romperla.
+                window._buscadorInicializarPredictorPersonaGenerico = function(inputId, resultadosId, onSeleccionar) {
+                    const input = document.getElementById(inputId);
+                    const resultados = document.getElementById(resultadosId);
+                    if (!input || input.dataset.predictorInit) return;
+                    input.dataset.predictorInit = '1';
+
+                    let timeoutId = null;
+
+                    input.addEventListener('input', function() {
+                        clearTimeout(timeoutId);
+                        const query = this.value.trim();
+
+                        if (query.length < 2) {
+                            resultados.style.display = 'none';
+                            return;
+                        }
+
+                        timeoutId = setTimeout(async () => {
+                            try {
+                                const token = localStorage.getItem('token');
+                                const res = await fetch(`${CONFIG.API_URL}/movies/people/search?query=${encodeURIComponent(query)}`, {
+                                    headers: { 'Authorization': `Bearer ${token}` }
+                                });
+                                if (!res.ok) return;
+                                const data = await res.json();
+                                const items = (data.results || []).slice(0, 6);
+
+                                if (items.length === 0) {
+                                    resultados.innerHTML = '<div class="buscador-predictor-vacio">No encontramos a nadie con ese nombre</div>';
+                                    resultados.style.display = 'block';
+                                    return;
+                                }
+
+                                resultados.innerHTML = items.map(item => {
+                                    const foto = item.profile_path
+                                        ? `<img src="https://image.tmdb.org/t/p/w92${item.profile_path}" alt="${item.name}">`
+                                        : `<div class="buscador-predictor-poster-vacio"><i class="fas fa-user"></i></div>`;
+                                    const conocidoPor = (item.known_for || [])
+                                        .map(k => k.title || k.name)
+                                        .filter(Boolean)
+                                        .slice(0, 2)
+                                        .join(', ');
+                                    return `
+                                    <div class="buscador-predictor-item" data-id="${item.id}" data-nombre="${item.name.replace(/"/g, '&quot;')}">
+                                        ${foto}
+                                        <div>
+                                            <strong>${item.name}</strong>
+                                            ${conocidoPor ? `<span>${conocidoPor}</span>` : ''}
+                                        </div>
+                                    </div>`;
+                                }).join('');
+
+                                resultados.style.display = 'block';
+
+                                resultados.querySelectorAll('.buscador-predictor-item').forEach(el => {
+                                    el.addEventListener('click', function() {
+                                        onSeleccionar(this.dataset.id, this.dataset.nombre);
+                                    });
+                                });
+
+                            } catch (e) {}
+                        }, 400);
+                    });
+                };
+
+                window._buscadorBuscarPeliculasEnComun = async function(id1, nombre1, id2, nombre2) {
+                    window.cerrarBuscadorAsistido();
+                    if (window._tabActivo !== 'peliculas') {
+                        window.seleccionarTabFeed('peliculas', document.getElementById('tabPeliculas'));
+                    }
+
+                    try {
+                        const token = localStorage.getItem('token');
+                        const [res1, res2] = await Promise.all([
+                            fetch(`${CONFIG.API_URL}/movies/person/${id1}/credits`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                            fetch(`${CONFIG.API_URL}/movies/person/${id2}/credits`, { headers: { 'Authorization': `Bearer ${token}` } })
+                        ]);
+                        const cred1 = res1.ok ? await res1.json() : {};
+                        const cred2 = res2.ok ? await res2.json() : {};
+
+                        const cast1 = cred1.cast || [];
+                        const cast2 = cred2.cast || [];
+                        const idsEnCast2 = new Set(cast2.map(p => p.id));
+
+                        const enComun = cast1
+                            .filter(p => idsEnCast2.has(p.id) && p.poster_path)
+                            .sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+
+                                if (enComun.length === 0) {
+                                    // Sin resultados: NO se activa mostrarVistaResultados() — el
+                                    // feed normal (destacadas, trivia, filas de género) se queda
+                                    // exactamente como estaba. Solo un aviso breve, sin tapar nada.
+                                    // Si la fila estaba visible de una búsqueda anterior exitosa,
+                                    // se oculta acá también — si no, queda colgado el título y
+                                    // las tarjetas de esa búsqueda previa, dando la sensación de
+                                    // que "algo se insertó" para esta búsqueda vacía.
+                                    const filaPrevia = document.getElementById('fila-busqueda');
+                                    if (filaPrevia) filaPrevia.style.display = 'none';
+
+                                    window._buscadorMostrarToast(
+                                        `<i class="fas fa-user-friends" style="margin-right:0.5rem;"></i>${nombre1} y ${nombre2} todavía no compartieron ninguna película.`
+                                    );
+                                    return;
+                                }
+
+                                // A diferencia de año/característica, acá NO se oculta nada del
+                                // feed (destacadas, trivia, voto relámpago, filas de género
+                                // siguen visibles) — mismo espíritu que género, que tampoco tapa
+                                // nada. La fila de resultados se reposiciona como lo último de
+                                // la página y se muestra ahí debajo, en vez de reemplazar todo.
+                                // /movies/person/{id}/credits devuelve una versión liviana de
+                                // cada película (sin "overview") — generarTarjetasHTML descarta
+                                // en silencio cualquier película sin sinopsis, así que sin esto
+                                // la fila queda vacía aunque enComun sí tenga coincidencias reales.
+                                const enComunConSinopsis = enComun.map(p => ({
+                                    ...p,
+                                    overview: p.overview && p.overview.trim() !== '' ? p.overview : 'Sin sinopsis disponible.'
+                                }));
+
+                                window._buscadorMostrarFilaResultadosDebajo('fila-busqueda', `${nombre1} + ${nombre2}`);
+                                window._filaBusqueda.peliculas = enComunConSinopsis;
+                                const track = document.getElementById('filaTrack-busqueda');
+                                if (track) track.innerHTML = '<div class="fila-genero-loading"><i class="fas fa-spinner fa-spin"></i></div>';
+                                await renderCardsFila(window._filaBusqueda);
+                                limpiarModalesDuplicados();
+                                if (typeof window.cargarEstadisticasVotacion === 'function') window.cargarEstadisticasVotacion();
+                                window._buscadorScrollearAResultados('fila-busqueda');
+                    } catch (error) {
+                        window._buscadorMostrarToast('Error al buscar las películas en común. Intentá de nuevo.');
+                    }
+                };
+
+                // Toast genérico y liviano para avisos breves del buscador — se
+                // inyecta una sola vez y se reusa, no tapa ni reemplaza nada de la
+                // pantalla (a diferencia de mostrarVistaResultados).
+                window._buscadorMostrarToast = function(mensajeHtml) {
+                    let toast = document.getElementById('buscadorToast');
+                    if (!toast) {
+                        document.body.insertAdjacentHTML('beforeend', `
+                            <div id="buscadorToast" style="display:none; position:fixed; bottom:2rem; left:50%; transform:translateX(-50%); background:#1a1a1a; color:white; padding:0.9rem 1.5rem; border-radius:30px; font-size:0.88rem; box-shadow:0 8px 24px rgba(0,0,0,0.25); z-index:999999; max-width:90vw; text-align:center;"></div>`);
+                        toast = document.getElementById('buscadorToast');
+                    }
+                    toast.innerHTML = mensajeHtml;
+                    toast.style.display = 'block';
+                    toast.style.opacity = '0';
+                    toast.style.transition = 'none';
+                    requestAnimationFrame(() => {
+                        toast.style.transition = 'opacity 0.3s ease';
+                        toast.style.opacity = '1';
+                    });
+                    clearTimeout(window._buscadorToastTimeout);
+                    window._buscadorToastTimeout = setTimeout(() => {
+                        toast.style.opacity = '0';
+                        setTimeout(() => { toast.style.display = 'none'; }, 300);
+                    }, 3500);
+                };
+
+            // ==============================================
+            // NIVEL 3 — Actor/actriz/director: buscar por nombre.
+            // Reusa abrirActorModal (ya existe, y ya está pensada para funcionar
+            // sin película de contexto — sin movieId no muestra "Volver").
+            // ==============================================
+            window._buscadorAbrirNivel3Persona = function() {
+                document.getElementById('buscadorNivel2Persona').style.display = 'none';
+                document.getElementById('buscadorNivel3Persona').style.display = 'block';
+
+                const input = document.getElementById('buscadorInputPersona');
+                input.value = '';
+                document.getElementById('buscadorResultadosPersona').style.display = 'none';
+                window._buscadorInicializarPredictorPersona();
+                input.focus();
+            };
+
+                window._buscadorVolverANivel2Persona = function() {
+                    ['buscadorNivel3Persona', 'buscadorNivel3Cruce1', 'buscadorNivel3Cruce2'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.style.display = 'none';
+                    });
+                    document.getElementById('buscadorNivel2Persona').style.display = 'block';
+                };
+
+            window._buscadorInicializarPredictorPersona = function() {
+                const input = document.getElementById('buscadorInputPersona');
+                const resultados = document.getElementById('buscadorResultadosPersona');
+                if (!input || input.dataset.predictorInit) return;
+                input.dataset.predictorInit = '1';
+
+                let timeoutId = null;
+
+                input.addEventListener('input', function() {
+                    clearTimeout(timeoutId);
+                    const query = this.value.trim();
+
+                    if (query.length < 2) {
+                        resultados.style.display = 'none';
+                        return;
+                    }
+
+                    timeoutId = setTimeout(async () => {
+                        try {
+                            const token = localStorage.getItem('token');
+                            const res = await fetch(`${CONFIG.API_URL}/movies/people/search?query=${encodeURIComponent(query)}`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (!res.ok) return;
+                            const data = await res.json();
+                            const items = (data.results || []).slice(0, 6);
+
+                            if (items.length === 0) {
+                                resultados.innerHTML = '<div class="buscador-predictor-vacio">No encontramos a nadie con ese nombre</div>';
+                                resultados.style.display = 'block';
+                                return;
+                            }
+
+                            resultados.innerHTML = items.map(item => {
+                                const foto = item.profile_path
+                                    ? `<img src="https://image.tmdb.org/t/p/w92${item.profile_path}" alt="${item.name}">`
+                                    : `<div class="buscador-predictor-poster-vacio"><i class="fas fa-user"></i></div>`;
+                                const conocidoPor = (item.known_for || [])
+                                    .map(k => k.title || k.name)
+                                    .filter(Boolean)
+                                    .slice(0, 2)
+                                    .join(', ');
+                                return `
+                                <div class="buscador-predictor-item" data-id="${item.id}" data-nombre="${item.name.replace(/"/g, '&quot;')}">
+                                    ${foto}
+                                    <div>
+                                        <strong>${item.name}</strong>
+                                        ${conocidoPor ? `<span>${conocidoPor}</span>` : ''}
+                                    </div>
+                                </div>`;
+                            }).join('');
+
+                            resultados.style.display = 'block';
+
+                            resultados.querySelectorAll('.buscador-predictor-item').forEach(el => {
+                                el.addEventListener('click', function() {
+                                    const id = this.dataset.id;
+                                    const nombre = this.dataset.nombre;
+                                    window.cerrarBuscadorAsistido();
+                                    // Sin movieId — abrirActorModal ya contempla este caso
+                                    // y no muestra el botón "Volver".
+                                    window.abrirActorModal(id, nombre);
+                                });
+                            });
+
+                        } catch (e) {}
+                    }, 400);
+                });
+            };
+
+        // ==============================================
+        // NIVEL 3 — Por característica (keywords de TMDb).
+        // IDs confirmados contra la documentación de TMDb — no se resuelven
+        // por texto libre, son fijos: "basada en hechos reales" = 9672,
+        // "remake" = 325286. Por ahora solo para película; serie y "saga"
+        // (que se resuelve distinto, por colección, no por keyword) quedan
+        // para una próxima pasada.
+        // ==============================================
+        const BUSCADOR_CARACTERISTICAS_PELICULA = [
+            { id: 9672, nombre: 'Basada en hechos reales' },
+            { id: 325286, nombre: 'Remake' },
+        ];
+
+        // "Reboot" en vez de "Remake" — esa keyword de películas (325286,
+        // "film remake") no tiene equivalente confirmado del lado series.
+        // "Reboot" (161184) sí tiene su propia página de TMDb específica
+        // para TV, con series reales etiquetadas.
+        const BUSCADOR_CARACTERISTICAS_SERIE = [
+            { id: 9672, nombre: 'Basada en hechos reales' },
+            { id: 161184, nombre: 'Reboot' },
+        ];
+
+        window._buscadorAbrirNivel3Caracteristica = function() {
+            document.getElementById('buscadorNivel2PeliculaSerie').style.display = 'none';
+            document.getElementById('buscadorNivel3Caracteristica').style.display = 'block';
+
+            const lista = window._buscadorTipoContenido === 'serie'
+                ? BUSCADOR_CARACTERISTICAS_SERIE
+                : BUSCADOR_CARACTERISTICAS_PELICULA;
+
+            const grid = document.getElementById('buscadorCaracteristicasGrid');
+            grid.innerHTML = lista.map(c =>
+                `<button class="buscador-genero-chip" onclick="window._buscadorBuscarPorCaracteristica(${c.id}, '${c.nombre}')">${c.nombre}</button>`
+            ).join('');
+        };
+
+        // Mismo pipeline que "Por año" (no hay fila pre-armada para esto en
+        // el feed, a diferencia de género) — reusa mostrarVistaResultados/
+        // _filaBusqueda/renderCardsFila, ahora con withKeywords en vez de year.
+        window._buscadorBuscarPorCaracteristica = function(keywordId, nombre) {
+            window.cerrarBuscadorAsistido();
+
+            if (window._buscadorTipoContenido === 'serie') {
+                if (window._tabActivo !== 'series') {
+                    window.seleccionarTabFeed('series', document.getElementById('tabSeries'));
+                }
+                window._buscadorEjecutarCaracteristicaSerie(keywordId, nombre);
+            } else {
+                if (window._tabActivo !== 'peliculas') {
+                    window.seleccionarTabFeed('peliculas', document.getElementById('tabPeliculas'));
+                }
+                window._buscadorEjecutarCaracteristicaPelicula(keywordId, nombre);
+            }
+        };
+
+                window._buscadorEjecutarCaracteristicaPelicula = async function(keywordId, nombre, pagina = 1, append = false) {
+                    if (window.estadoPaginacion.cargando) return;
+                    window.estadoPaginacion.cargando = true;
+                    window._buscadorPaginaSiguienteFn = (p) => window._buscadorEjecutarCaracteristicaPelicula(keywordId, nombre, p, true);
+
+                    const track = document.getElementById('filaTrack-busqueda');
+                    if (!append) {
+                                        window._buscadorMostrarFilaResultadosDebajo('fila-busqueda', nombre);
+                                        window._filaBusqueda.peliculas = [];
+                                        if (track) track.innerHTML = '<div class="fila-genero-loading"><i class="fas fa-spinner fa-spin"></i></div>';
+                                    }
+
+                                    try {
+                                        const token = localStorage.getItem('token');
+                                        const res = await fetch(`${CONFIG.API_URL}/movies/search?withKeywords=${keywordId}&page=${pagina}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (!res.ok) throw new Error(`Error ${res.status}`);
+                        const data = await res.json();
+
+                        window.estadoPaginacion.paginaActual = pagina;
+                        window.estadoPaginacion.totalPaginas = data.total_pages;
+                        window.estadoPaginacion.totalResultados = data.total_results;
+
+                        const countEl = document.getElementById('resultadosCount');
+                        if (countEl) countEl.textContent = data.total_results || 0;
+
+                        if (!data.results || data.results.length === 0) {
+                            if (!append) window._buscadorMostrarToast(`No encontramos películas "${nombre}".`);
+                        } else if (append) {
+                            window._filaBusqueda.peliculas = window._filaBusqueda.peliculas.concat(data.results);
+                            await appendCardsFila(window._filaBusqueda, data.results);
+                            if (typeof window.cargarEstadisticasVotacion === 'function') window.cargarEstadisticasVotacion();
+                        } else {
+                            window._filaBusqueda.peliculas = data.results;
+                            await renderCardsFila(window._filaBusqueda);
+                            limpiarModalesDuplicados();
+                            if (typeof window.cargarEstadisticasVotacion === 'function') window.cargarEstadisticasVotacion();
+                        }
+                        if (!append) window._buscadorScrollearAResultados('fila-busqueda');
+                    } catch (error) {
+                        if (!append) window._buscadorMostrarToast('Error al buscar. Intentá de nuevo.');
+                    } finally {
+                        window.estadoPaginacion.cargando = false;
+                    }
+                };
+
+                window._buscadorEjecutarCaracteristicaSerie = async function(keywordId, nombre, pagina = 1, append = false) {
+                    if (window.estadoPaginacionSerie.cargando) return;
+                    window.estadoPaginacionSerie.cargando = true;
+                    window._buscadorPaginaSiguienteFn = (p) => window._buscadorEjecutarCaracteristicaSerie(keywordId, nombre, p, true);
+
+                    const track = document.getElementById('filaSerieTrack-busqueda-serie');
+                    if (!append) {
+                        window._buscadorMostrarFilaResultadosDebajo('fila-busqueda-serie', nombre);
+                        window._filaBusquedaSerie.series = [];
+                        if (track) track.innerHTML = '<div class="fila-genero-loading"><i class="fas fa-spinner fa-spin"></i></div>';
+                    }
+
+                    try {
+                        const token = localStorage.getItem('token');
+                        const res = await fetch(`${CONFIG.API_URL}/series/search?withKeywords=${keywordId}&page=${pagina}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (!res.ok) throw new Error(`Error ${res.status}`);
+                        const data = await res.json();
+
+                        window.estadoPaginacionSerie.paginaActual = pagina;
+                        window.estadoPaginacionSerie.totalPaginas = data.total_pages;
+                        window.estadoPaginacionSerie.totalResultados = data.total_results;
+
+                        const countEl = document.getElementById('resultadosCountSerie');
+                        if (countEl) countEl.textContent = data.total_results || 0;
+
+                        if (!data.results || data.results.length === 0) {
+                            if (!append) window._buscadorMostrarToast(`No encontramos series "${nombre}".`);
+                        } else if (append) {
+                            window._filaBusquedaSerie.series = window._filaBusquedaSerie.series.concat(data.results);
+                            await appendCardsFilaSerie(window._filaBusquedaSerie, data.results);
+                            if (typeof window.cargarEstadisticasVotacionSeries === 'function') window.cargarEstadisticasVotacionSeries();
+                        } else {
+                            window._filaBusquedaSerie.series = data.results;
+                            await renderCardsFilaSerie(window._filaBusquedaSerie);
+                            if (typeof window.cargarEstadisticasVotacionSeries === 'function') window.cargarEstadisticasVotacionSeries();
+                        }
+                        if (!append) window._buscadorScrollearAResultados('fila-busqueda-serie');
+                    } catch (error) {
+                        if (!append) window._buscadorMostrarToast('Error al buscar. Intentá de nuevo.');
+                    } finally {
+                        window.estadoPaginacionSerie.cargando = false;
+                    }
+                };
+
+        // ==============================================
+        // NIVEL 3 — Por año o década: bifurcación real.
+        // "Año específico" = select nativo, misma búsqueda de siempre.
+        // "Década" = ahora es un RANGO real (primary_release_date.gte/lte
+        // en una sola consulta a /discover), no un paso intermedio hacia
+        // un año puntual como antes.
+        // ==============================================
+        window._buscadorAbrirNivel3EpocaTipo = function() {
+            document.getElementById('buscadorNivel2PeliculaSerie').style.display = 'none';
+            document.getElementById('buscadorNivel3EpocaTipo').style.display = 'block';
+        };
+
+        window._buscadorVolverAEpocaTipo = function() {
+            document.getElementById('buscadorNivel3AnioEspecifico').style.display = 'none';
+            document.getElementById('buscadorNivel3Decada').style.display = 'none';
+            document.getElementById('buscadorNivel3EpocaTipo').style.display = 'block';
+        };
+
+        window._buscadorAbrirAnioEspecifico = function() {
+            document.getElementById('buscadorNivel3EpocaTipo').style.display = 'none';
+            document.getElementById('buscadorNivel3AnioEspecifico').style.display = 'block';
+
+            const select = document.getElementById('buscadorSelectAnio');
+            if (select.dataset.poblado !== '1') {
+                const anioActual = new Date().getFullYear();
+                let opciones = '<option value="" selected disabled>Seleccioná un año...</option>';
+                for (let anio = anioActual; anio >= 1920; anio--) {
+                    opciones += `<option value="${anio}">${anio}</option>`;
+                }
+                select.innerHTML = opciones;
+                select.dataset.poblado = '1';
+            } else {
+                select.value = '';
+            }
+        };
+
+        window._buscadorAbrirDecadas = function() {
+            document.getElementById('buscadorNivel3EpocaTipo').style.display = 'none';
+            document.getElementById('buscadorNivel3Decada').style.display = 'block';
+
+            const grid = document.getElementById('buscadorDecadasGrid');
+            if (grid.dataset.poblado === '1') return;
+
+            const anioActual = new Date().getFullYear();
+            const decadaActual = Math.floor(anioActual / 10) * 10;
+
+            let html = '';
+            for (let decada = decadaActual; decada >= 1920; decada -= 10) {
+                html += `<button class="buscador-genero-chip" onclick="window._buscadorBuscarPorDecada(${decada})">${decada}s</button>`;
+            }
+            grid.innerHTML = html;
+            grid.dataset.poblado = '1';
+        };
+
+            // Rango real de la década, en una sola consulta — no arma un
+            // año puntual como antes.
+            window._buscadorBuscarPorDecada = function(decada) {
+                const anioActual = new Date().getFullYear();
+                const decadaFin = Math.min(decada + 9, anioActual);
+                window._buscadorEjecutarRangoAnios(decada, decadaFin, `${decada}s`);
+            };
+
+            window._buscadorEjecutarRangoAnios = function(anioDesde, anioHasta, etiqueta) {
+                window.cerrarBuscadorAsistido();
+
+                if (window._buscadorTipoContenido === 'serie') {
+                    if (window._tabActivo !== 'series') {
+                        window.seleccionarTabFeed('series', document.getElementById('tabSeries'));
+                    }
+                    window._buscadorEjecutarRangoAniosSerie(anioDesde, anioHasta, etiqueta);
+                } else {
+                    if (window._tabActivo !== 'peliculas') {
+                        window.seleccionarTabFeed('peliculas', document.getElementById('tabPeliculas'));
+                    }
+                    window._buscadorEjecutarRangoAniosPelicula(anioDesde, anioHasta, etiqueta);
+                }
+            };
+
+            window._buscadorEjecutarRangoAniosPelicula = async function(anioDesde, anioHasta, etiqueta, pagina = 1, append = false) {
+                if (window.estadoPaginacion.cargando) return;
+                window.estadoPaginacion.cargando = true;
+                window._buscadorPaginaSiguienteFn = (p) => window._buscadorEjecutarRangoAniosPelicula(anioDesde, anioHasta, etiqueta, p, true);
+
+                const track = document.getElementById('filaTrack-busqueda');
+                if (!append) {
+                    window._buscadorMostrarFilaResultadosDebajo('fila-busqueda', `Películas de los ${etiqueta}`);
+                    window._filaBusqueda.peliculas = [];
+                    if (track) track.innerHTML = '<div class="fila-genero-loading"><i class="fas fa-spinner fa-spin"></i></div>';
+                }
+
+                try {
+                    const token = localStorage.getItem('token');
+                    const res = await fetch(`${CONFIG.API_URL}/movies/search?releaseDateGte=${anioDesde}&releaseDateLte=${anioHasta}&page=${pagina}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) throw new Error(`Error ${res.status}`);
+                    const data = await res.json();
+
+                    window.estadoPaginacion.paginaActual = pagina;
+                    window.estadoPaginacion.totalPaginas = data.total_pages;
+                    window.estadoPaginacion.totalResultados = data.total_results;
+
+                    if (!data.results || data.results.length === 0) {
+                        if (!append) window._buscadorMostrarToast(`No encontramos películas de los ${etiqueta}.`);
+                    } else if (append) {
+                        window._filaBusqueda.peliculas = window._filaBusqueda.peliculas.concat(data.results);
+                        await appendCardsFila(window._filaBusqueda, data.results);
+                        if (typeof window.cargarEstadisticasVotacion === 'function') window.cargarEstadisticasVotacion();
+                    } else {
+                        window._filaBusqueda.peliculas = data.results;
+                        await renderCardsFila(window._filaBusqueda);
+                        limpiarModalesDuplicados();
+                        if (typeof window.cargarEstadisticasVotacion === 'function') window.cargarEstadisticasVotacion();
+                    }
+                    if (!append) window._buscadorScrollearAResultados('fila-busqueda');
+                } catch (error) {
+                    if (!append) window._buscadorMostrarToast('Error al buscar. Intentá de nuevo.');
+                } finally {
+                    window.estadoPaginacion.cargando = false;
+                }
+            };
+
+            window._buscadorEjecutarRangoAniosSerie = async function(anioDesde, anioHasta, etiqueta, pagina = 1, append = false) {
+                if (window.estadoPaginacionSerie.cargando) return;
+                window.estadoPaginacionSerie.cargando = true;
+                window._buscadorPaginaSiguienteFn = (p) => window._buscadorEjecutarRangoAniosSerie(anioDesde, anioHasta, etiqueta, p, true);
+
+                const track = document.getElementById('filaSerieTrack-busqueda-serie');
+                if (!append) {
+                    window._buscadorMostrarFilaResultadosDebajo('fila-busqueda-serie', `Series de los ${etiqueta}`);
+                    window._filaBusquedaSerie.series = [];
+                    if (track) track.innerHTML = '<div class="fila-genero-loading"><i class="fas fa-spinner fa-spin"></i></div>';
+                }
+
+                try {
+                    const token = localStorage.getItem('token');
+                    const res = await fetch(`${CONFIG.API_URL}/series/search?firstAirDateGte=${anioDesde}&firstAirDateLte=${anioHasta}&page=${pagina}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) throw new Error(`Error ${res.status}`);
+                    const data = await res.json();
+
+                    window.estadoPaginacionSerie.paginaActual = pagina;
+                    window.estadoPaginacionSerie.totalPaginas = data.total_pages;
+                    window.estadoPaginacionSerie.totalResultados = data.total_results;
+
+                    if (!data.results || data.results.length === 0) {
+                        if (!append) window._buscadorMostrarToast(`No encontramos series de los ${etiqueta}.`);
+                    } else if (append) {
+                        window._filaBusquedaSerie.series = window._filaBusquedaSerie.series.concat(data.results);
+                        await appendCardsFilaSerie(window._filaBusquedaSerie, data.results);
+                        if (typeof window.cargarEstadisticasVotacionSeries === 'function') window.cargarEstadisticasVotacionSeries();
+                    } else {
+                        window._filaBusquedaSerie.series = data.results;
+                        await renderCardsFilaSerie(window._filaBusquedaSerie);
+                        if (typeof window.cargarEstadisticasVotacionSeries === 'function') window.cargarEstadisticasVotacionSeries();
+                    }
+                    if (!append) window._buscadorScrollearAResultados('fila-busqueda-serie');
+                } catch (error) {
+                    if (!append) window._buscadorMostrarToast('Error al buscar. Intentá de nuevo.');
+                } finally {
+                    window.estadoPaginacionSerie.cargando = false;
+                }
+            };
+
+    // No hay una fila pre-armada por año en el feed (a diferencia de
+    // género) — acá sí reusamos el carrusel de "resultados de búsqueda"
+    // que ya usaba el filtro viejo (mismo mostrarVistaResultados /
+    // _filaBusqueda / renderCardsFila que aplicarFiltros).
+                // Mismo criterio que priorizarFilaGenero: no oculta nada ni mueve
+                // ningún nodo del DOM — solo muestra la fila donde ya vive en el
+                // HTML. El scroll suave es lo que la lleva a la vista, nada más.
+                window._buscadorMostrarFilaResultadosDebajo = function(idFila, tituloTexto) {
+                    const fila = document.getElementById(idFila);
+                    if (!fila) return;
+                    fila.style.display = 'block';
+                    if (tituloTexto) {
+                        const idTitulo = idFila === 'fila-busqueda-serie' ? 'filaBusquedaSerieTitulo' : 'filaBusquedaTitulo';
+                        const tituloEl = document.getElementById(idTitulo);
+                        if (tituloEl) tituloEl.textContent = tituloTexto;
+                    }
+                    inicializarFilaBusqueda(); // ya tiene su propia guarda, no se duplica
+                };
+
+        window._buscadorScrollearAResultados = function(idFila) {
+        // Mismo criterio de offset que priorizarFilaGenero/Serie — se llama
+        // justo después de mostrarVistaResultados(os), así que el elemento
+        // ya está visible cuando se mide su posición.
+        setTimeout(() => {
+            const el = document.getElementById(idFila);
+            if (!el) return;
+            const header = document.querySelector('header');
+            const offset = (header ? header.offsetHeight : 70) + 16;
+            const top = el.getBoundingClientRect().top + window.scrollY - offset;
+            window.scrollTo({ top, behavior: 'smooth' });
+        }, 50);
+    };
+
+    window._buscadorBuscarPorAnio = function(anio) {
+        window.cerrarBuscadorAsistido();
+
+        if (window._buscadorTipoContenido === 'serie') {
+            if (window._tabActivo !== 'series') {
+                window.seleccionarTabFeed('series', document.getElementById('tabSeries'));
+            }
+            window._buscadorEjecutarBusquedaAnioSerie(anio);
+        } else {
+            if (window._tabActivo !== 'peliculas') {
+                window.seleccionarTabFeed('peliculas', document.getElementById('tabPeliculas'));
+            }
+            window._buscadorEjecutarBusquedaAnioPelicula(anio);
+        }
+    };
+
+        window._buscadorEjecutarBusquedaAnioPelicula = async function(anio, pagina = 1, append = false) {
+            if (window.estadoPaginacion.cargando) return;
+            window.estadoPaginacion.cargando = true;
+            window._buscadorPaginaSiguienteFn = (p) => window._buscadorEjecutarBusquedaAnioPelicula(anio, p, true);
+
+                        const track = document.getElementById('filaTrack-busqueda');
+                                    if (!append) {
+                                        window._buscadorMostrarFilaResultadosDebajo('fila-busqueda', `Películas de ${anio}`);
+                                        window._filaBusqueda.peliculas = [];
+                                        if (track) track.innerHTML = '<div class="fila-genero-loading"><i class="fas fa-spinner fa-spin"></i></div>';
+                                    }
+
+                                    try {
+                                        const token = localStorage.getItem('token');
+                                        const res = await fetch(`${CONFIG.API_URL}/movies/search?year=${anio}&page=${pagina}`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (!res.ok) throw new Error(`Error ${res.status}`);
+                            const data = await res.json();
+
+                            window.estadoPaginacion.paginaActual = pagina;
+                            window.estadoPaginacion.totalPaginas = data.total_pages;
+                            window.estadoPaginacion.totalResultados = data.total_results;
+
+                            const countEl = document.getElementById('resultadosCount');
+                            if (countEl) countEl.textContent = data.total_results || 0;
+
+                            if (!data.results || data.results.length === 0) {
+                                if (!append) window._buscadorMostrarToast(`No encontramos películas de ${anio}.`);
+                            } else if (append) {
+                                window._filaBusqueda.peliculas = window._filaBusqueda.peliculas.concat(data.results);
+                                await appendCardsFila(window._filaBusqueda, data.results);
+                                if (typeof window.cargarEstadisticasVotacion === 'function') window.cargarEstadisticasVotacion();
+                            } else {
+                                window._filaBusqueda.peliculas = data.results;
+                                await renderCardsFila(window._filaBusqueda);
+                                limpiarModalesDuplicados();
+                                if (typeof window.cargarEstadisticasVotacion === 'function') window.cargarEstadisticasVotacion();
+                            }
+                            if (!append) window._buscadorScrollearAResultados('fila-busqueda');
+                        } catch (error) {
+                            if (!append) window._buscadorMostrarToast('Error al buscar. Intentá de nuevo.');
+                        } finally {
+                            window.estadoPaginacion.cargando = false;
+                        }
+                    };
+
+        window._buscadorEjecutarBusquedaAnioSerie = async function(anio, pagina = 1, append = false) {
+            if (window.estadoPaginacionSerie.cargando) return;
+            window.estadoPaginacionSerie.cargando = true;
+            window._buscadorPaginaSiguienteFn = (p) => window._buscadorEjecutarBusquedaAnioSerie(anio, p, true);
+
+            const track = document.getElementById('filaSerieTrack-busqueda-serie');
+                    if (!append) {
+                        window._buscadorMostrarFilaResultadosDebajo('fila-busqueda-serie', `Series de ${anio}`);
+                        window._filaBusquedaSerie.series = [];
+                        if (track) track.innerHTML = '<div class="fila-genero-loading"><i class="fas fa-spinner fa-spin"></i></div>';
+                    }
+
+                    try {
+                        const token = localStorage.getItem('token');
+                        const res = await fetch(`${CONFIG.API_URL}/series/search?year=${anio}&page=${pagina}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error(`Error ${res.status}`);
+                const data = await res.json();
+
+                window.estadoPaginacionSerie.paginaActual = pagina;
+                window.estadoPaginacionSerie.totalPaginas = data.total_pages;
+                window.estadoPaginacionSerie.totalResultados = data.total_results;
+
+                const countEl = document.getElementById('resultadosCountSerie');
+                if (countEl) countEl.textContent = data.total_results || 0;
+
+                if (!data.results || data.results.length === 0) {
+                    if (!append) window._buscadorMostrarToast(`No encontramos series de ${anio}.`);
+                } else if (append) {
+                    window._filaBusquedaSerie.series = window._filaBusquedaSerie.series.concat(data.results);
+                    await appendCardsFilaSerie(window._filaBusquedaSerie, data.results);
+                    if (typeof window.cargarEstadisticasVotacionSeries === 'function') window.cargarEstadisticasVotacionSeries();
+                } else {
+                    window._filaBusquedaSerie.series = data.results;
+                    await renderCardsFilaSerie(window._filaBusquedaSerie);
+                    if (typeof window.cargarEstadisticasVotacionSeries === 'function') window.cargarEstadisticasVotacionSeries();
+                }
+                if (!append) window._buscadorScrollearAResultados('fila-busqueda-serie');
+            } catch (error) {
+                if (!append) window._buscadorMostrarToast('Error al buscar. Intentá de nuevo.');
+            } finally {
+                window.estadoPaginacionSerie.cargando = false;
+            }
+        };
+
+// ==============================================
+// NIVEL 3 — Por género
+// ==============================================
+window._buscadorAbrirNivel3Genero = async function() {
+    document.getElementById('buscadorNivel2PeliculaSerie').style.display = 'none';
+    document.getElementById('buscadorNivel3Genero').style.display = 'block';
+    document.getElementById('buscadorNivel3GeneroSubtitulo').textContent =
+        window._buscadorTipoContenido === 'pelicula' ? 'Elegí un género de película' : 'Elegí un género de serie';
+
+    const grid = document.getElementById('buscadorGenerosGrid');
+    grid.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Cargando géneros...</div>';
+
+    try {
+        const token = localStorage.getItem('token');
+        const base = window._buscadorTipoContenido === 'serie' ? 'series' : 'movies';
+        const res = await fetch(`${CONFIG.API_URL}/${base}/genres`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        const generos = data.genres || [];
+
+        if (generos.length === 0) {
+            grid.innerHTML = '<div class="buscador-predictor-vacio">No pudimos cargar los géneros.</div>';
+            return;
+        }
+
+        grid.innerHTML = generos.map(g =>
+            `<button class="buscador-genero-chip" onclick="window._buscadorBuscarPorGenero(${g.id}, '${g.name.replace(/'/g, "\\'")}')">${g.name}</button>`
+        ).join('');
+
+    } catch (e) {
+        grid.innerHTML = '<div class="buscador-predictor-vacio">Error al cargar los géneros. Intentá de nuevo.</div>';
+    }
+};
+
+// No arma ningún resultado propio — el feed YA tiene una fila por
+// cada género (.fila-genero, con su pill correspondiente en
+// #ordenarPills). Elegir un género acá simplemente prioriza esa fila
+// existente al frente y scrollea hasta ella, vía la misma función que
+// ya usa el pill cuando lo tocás a mano en el feed.
+window._buscadorBuscarPorGenero = function(generoId, generoNombre) {
+    window.cerrarBuscadorAsistido();
+    const key = `genero-${generoId}`;
+
+    if (window._buscadorTipoContenido === 'serie') {
+        if (window._tabActivo !== 'series') {
+            window.seleccionarTabFeed('series', document.getElementById('tabSeries'));
+        }
+        // Si quedó una vista de "resultados de búsqueda" abierta de una
+        // búsqueda anterior por año/título, hay que cerrarla primero —
+        // si no, se queda tapando todo mientras priorizarFilaGeneroSerie
+        // reordena las filas normales, que están escondidas debajo.
+        if (typeof window.ocultarVistaResultadosSerie === 'function') window.ocultarVistaResultadosSerie();
+        const btn = document.querySelector(`#ordenarPillsSerie .pill-orden[data-key="${key}"]`);
+        window.priorizarFilaGeneroSerie(key, btn);
+    } else {
+        if (window._tabActivo !== 'peliculas') {
+            window.seleccionarTabFeed('peliculas', document.getElementById('tabPeliculas'));
+        }
+        if (typeof window.ocultarVistaResultados === 'function') window.ocultarVistaResultados();
+        const btn = document.querySelector(`#ordenarPills .pill-orden[data-key="${key}"]`);
+        window.priorizarFilaGenero(key, btn);
+    }
+};
+
+// ==============================================
+// NIVEL 3 — Por título (predictor en vivo)
+// ==============================================
+window._buscadorAbrirNivel3Titulo = function() {
+    document.getElementById('buscadorNivel2PeliculaSerie').style.display = 'none';
+    document.getElementById('buscadorNivel3Titulo').style.display = 'block';
+    document.getElementById('buscadorNivel3TituloSubtitulo').textContent =
+        window._buscadorTipoContenido === 'pelicula' ? 'Escribí el título de la película' : 'Escribí el título de la serie';
+
+    const input = document.getElementById('buscadorInputTitulo');
+    input.value = '';
+    document.getElementById('buscadorResultadosTitulo').style.display = 'none';
+    window._buscadorInicializarPredictorTitulo();
+    input.focus();
+};
+
+// Compartida por los 3 criterios de "Película o serie" que ya tienen
+// Nivel 3 propio (título, género, año/década) — oculta cualquiera de
+// los tres que esté visible, no solo el de título.
+window._buscadorVolverACriteriosPeliculaSerie = function() {
+    ['buscadorNivel3Titulo', 'buscadorNivel3Genero', 'buscadorNivel3EpocaTipo', 'buscadorNivel3AnioEspecifico', 'buscadorNivel3Decada', 'buscadorNivel3Caracteristica'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+    document.getElementById('buscadorNivel2PeliculaSerie').style.display = 'block';
+};
+
+window._buscadorInicializarPredictorTitulo = function() {
+    const input = document.getElementById('buscadorInputTitulo');
+    const resultados = document.getElementById('buscadorResultadosTitulo');
+    if (!input || input.dataset.predictorInit) return; // no duplicar el listener entre aperturas
+    input.dataset.predictorInit = '1';
+
+    let timeoutId = null;
+
+    input.addEventListener('input', function() {
+        clearTimeout(timeoutId);
+        const query = this.value.trim();
+
+        if (query.length < 2) {
+            resultados.style.display = 'none';
+            return;
+        }
+
+        timeoutId = setTimeout(async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const base = window._buscadorTipoContenido === 'serie' ? 'series' : 'movies';
+                const res = await fetch(`${CONFIG.API_URL}/${base}/search?query=${encodeURIComponent(query)}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                const items = (data.results || []).slice(0, 6);
+
+                if (items.length === 0) {
+                    resultados.innerHTML = '<div class="buscador-predictor-vacio">No encontramos nada con ese título</div>';
+                    resultados.style.display = 'block';
+                    return;
+                }
+
+                resultados.innerHTML = items.map(item => {
+                    const titulo = item.title || item.name || 'Sin título';
+                    const fecha = item.release_date || item.first_air_date || '';
+                    const anio = fecha ? fecha.substring(0, 4) : '';
+                    const poster = item.poster_path
+                        ? `<img src="https://image.tmdb.org/t/p/w92${item.poster_path}" alt="${titulo}">`
+                        : `<div class="buscador-predictor-poster-vacio"><i class="fas fa-film"></i></div>`;
+                    return `
+                    <div class="buscador-predictor-item" data-id="${item.id}">
+                        ${poster}
+                        <div>
+                            <strong>${titulo}</strong>
+                            ${anio ? `<span>${anio}</span>` : ''}
+                        </div>
+                    </div>`;
+                }).join('');
+
+                resultados.style.display = 'block';
+
+                resultados.querySelectorAll('.buscador-predictor-item').forEach(el => {
+                    el.addEventListener('click', function() {
+                        const id = this.dataset.id;
+                        window.cerrarBuscadorAsistido();
+                        if (window._buscadorTipoContenido === 'serie') {
+                            window.abrirDetalleSerie(id);
+                        } else {
+                            window.abrirDetallePelicula(id);
+                        }
+                    });
+                });
+
+            } catch (e) {}
+        }, 400);
+    });
 };
 
 // ── Mensaje límite diario de comentarios ────────────────────────────────
