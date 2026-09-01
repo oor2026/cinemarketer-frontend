@@ -234,22 +234,15 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
             return;
         }
 
-        // Abrir modal premium al clickear notif de puntos liberados con techo superado
-            if (type === 'POINTS_RELEASED') {
-                        const token = localStorage.getItem('token');
-                        try {
-                            const res = await fetch(`${CONFIG.API_URL}/subscriptions/me`, {
-                                headers: { 'Authorization': `Bearer ${token}` }
-                            });
-                            const data = await res.json();
-                            if (!data.active && typeof abrirDetallePlan === 'function') {
-                                abrirDetallePlan();
+                // Notif de puntos liberados mensualmente — sin importar el tipo
+                // de usuario (Free o Premium), siempre va a Club de Beneficios
+                // a que pueda canjearlos.
+                    if (type === 'POINTS_RELEASED') {
+                                if (typeof window.loadModule === 'function') {
+                                    loadModule('club-beneficios');
+                                }
+                                return;
                             }
-                        } catch (e) {
-                            // si falla la consulta, no mostramos el modal comercial por las dudas
-                        }
-                        return;
-                    }
 
             if (type === 'ADMIN_GRANT_POINTS') {
                 if (typeof loadModule === 'function') loadModule('mis-puntos');
