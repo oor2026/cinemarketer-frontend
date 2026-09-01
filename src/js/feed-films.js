@@ -557,8 +557,18 @@ window.priorizarFilaGenero = function(key, btn) {
 
         const cont = document.getElementById('filasGeneroContainer');
             if (cont) {
-                const header = document.querySelector('header');
-                const offset = (header ? header.offsetHeight : 70) + 16; // altura del header + un respiro
+                // En mobile el header se auto-oculta al bajar (ver main.js,
+                // "navbar-hidden") — el offset fijo de desktop dejaba
+                // demasiado aire arriba, frenando en los pills en vez del
+                // título de la fila.
+                const esMobile = window.innerWidth <= 768;
+                let offset;
+                if (esMobile) {
+                    offset = 12;
+                } else {
+                    const header = document.querySelector('header');
+                    offset = (header ? header.offsetHeight : 70) + 16;
+                }
                 const top = cont.getBoundingClientRect().top + window.scrollY - offset;
                 window.scrollTo({ top, behavior: 'smooth' });
             }
@@ -6472,19 +6482,32 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                     inicializarFilaBusqueda(); // ya tiene su propia guarda, no se duplica
                 };
 
-        window._buscadorScrollearAResultados = function(idFila) {
-        // Mismo criterio de offset que priorizarFilaGenero/Serie — se llama
-        // justo después de mostrarVistaResultados(os), así que el elemento
-        // ya está visible cuando se mide su posición.
-        setTimeout(() => {
-            const el = document.getElementById(idFila);
-            if (!el) return;
-            const header = document.querySelector('header');
-            const offset = (header ? header.offsetHeight : 70) + 16;
-            const top = el.getBoundingClientRect().top + window.scrollY - offset;
-            window.scrollTo({ top, behavior: 'smooth' });
-        }, 50);
-    };
+                window._buscadorScrollearAResultados = function(idFila) {
+                // Mismo criterio de offset que priorizarFilaGenero/Serie — se llama
+                // justo después de mostrarVistaResultados(os), así que el elemento
+                // ya está visible cuando se mide su posición.
+                setTimeout(() => {
+                    const el = document.getElementById(idFila);
+                    if (!el) return;
+
+                    const esMobile = window.innerWidth <= 768;
+                    let offset;
+                    if (esMobile) {
+                        // En mobile el header se auto-oculta al bajar (ver main.js,
+                        // "navbar-hidden") — el offset fijo pensado para desktop
+                        // (header siempre visible) dejaba demasiado aire arriba,
+                        // mostrando los pills por encima del título del resultado
+                        // en vez de aterrizar justo ahí.
+                        offset = 12;
+                    } else {
+                        const header = document.querySelector('header');
+                        offset = (header ? header.offsetHeight : 70) + 16;
+                    }
+
+                    const top = el.getBoundingClientRect().top + window.scrollY - offset;
+                    window.scrollTo({ top, behavior: 'smooth' });
+                }, 50);
+            };
 
     window._buscadorBuscarPorAnio = function(anio) {
         window.cerrarBuscadorAsistido();
