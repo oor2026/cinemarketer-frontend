@@ -4093,6 +4093,13 @@ window.abrirElencoCard = async function(movieId, event) {
     .buscador-sheet.buscador-sheet-ancho { width: 640px !important; }
 }
 
+/* Alto extra en mobile — para "Sobre la plataforma Cinemarketer" (la
+   lista de 6 preguntas y sus respuestas), que necesita más aire que
+   el resto. Solo mobile. */
+@media (max-width: 768px) {
+    .buscador-sheet.buscador-sheet-alto { max-height: 96vh; }
+}
+
 /* Sin scroll interno acá — se resolvió mejor limitando la CANTIDAD de
    premios pendientes que se muestran (ver _buscadorAbrirProximoPremio
    en feed-films.js): a partir del 4° se reemplaza por una leyenda en
