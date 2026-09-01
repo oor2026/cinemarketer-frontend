@@ -5338,27 +5338,35 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                         return;
                                     }
 
-                                        const nombrePremio = (p) => p.name || 'un premio';
+                                   const nombrePremio = (p) => p.name || 'un premio';
 
-                                        // El más cercano (el primero, ya viene ordenado ascendente) es el
-                                        // stat protagonista — el resto queda como tarjetas debajo.
-                                        const [masCercano, ...resto] = pendientes;
-                                        const faltanCercano = masCercano.pointsRequired - resumen.availablePoints;
+                                   // El más cercano (el primero, ya viene ordenado ascendente) es el
+                                   // stat protagonista (cuenta como el 1er ítem) — hasta 2 tarjetas
+                                   // más debajo (2do y 3er ítem). Si sobran más, en vez de seguir
+                                   // agregando tarjetas (y desbordar el modal en mobile), el lugar
+                                   // del 4to ítem lo ocupa una leyenda invitando a Club de Beneficios.
+                                   const [masCercano, ...resto] = pendientes;
+                                   const faltanCercano = masCercano.pointsRequired - resumen.availablePoints;
+                                   const restoVisible = resto.slice(0, 2);
+                                   const hayMasPremios = resto.length > 2;
 
-                                                                                let html = `
-                                                                                    <div class="buscador-stat-hero">
-                                                                                        <div class="num rojo">${faltanCercano}</div>
-                                                                                        <div class="lbl">Pts para <a href="#" class="buscador-premio-link" style="text-transform:none;font-size:0.85rem;font-weight:600;" onclick="event.preventDefault(); window._buscadorAbrirPremioDesdeResumen(${masCercano.id}, '${masCercano._origen}');">${nombrePremio(masCercano)}</a></div>
-                                                                                    </div>`;
+                                                                           let html = `
+                                                                               <div class="buscador-stat-hero">
+                                                                                   <div class="num rojo">${faltanCercano}</div>
+                                                                                   <div class="lbl">Pts para <a href="#" class="buscador-premio-link" style="text-transform:none;font-size:0.85rem;font-weight:600;" onclick="event.preventDefault(); window._buscadorAbrirPremioDesdeResumen(${masCercano.id}, '${masCercano._origen}');">${nombrePremio(masCercano)}</a></div>
+                                                                               </div>`;
 
-                                                                                if (resto.length > 0) {
-                                                                                    html += `<div class="buscador-tarjetas">`;
-                                                                                    html += resto.map(p => {
-                                                                                        const faltan = p.pointsRequired - resumen.availablePoints;
-                                                                                        return `<div class="buscador-tarjeta"><div class="buscador-tarjeta-icono rojo"><i class="fas fa-hourglass-half"></i></div><p>Te faltan <strong>${faltan} pts</strong> para <a href="#" class="buscador-premio-link" onclick="event.preventDefault(); window._buscadorAbrirPremioDesdeResumen(${p.id}, '${p._origen}');">${nombrePremio(p)}</a>.</p></div>`;
-                                                                                    }).join('');
-                                                                                    html += `</div>`;
-                                                                                }
+                                                                           if (restoVisible.length > 0 || hayMasPremios) {
+                                                                               html += `<div class="buscador-tarjetas">`;
+                                                                               html += restoVisible.map(p => {
+                                                                                   const faltan = p.pointsRequired - resumen.availablePoints;
+                                                                                   return `<div class="buscador-tarjeta"><div class="buscador-tarjeta-icono rojo"><i class="fas fa-hourglass-half"></i></div><p>Te faltan <strong>${faltan} pts</strong> para <a href="#" class="buscador-premio-link" onclick="event.preventDefault(); window._buscadorAbrirPremioDesdeResumen(${p.id}, '${p._origen}');">${nombrePremio(p)}</a>.</p></div>`;
+                                                                               }).join('');
+                                                                               if (hayMasPremios) {
+                                                                                   html += `<div class="buscador-tarjeta"><div class="buscador-tarjeta-icono rojo"><i class="fas fa-gift"></i></div><p>Mirá en <a href="#" class="buscador-premio-link" onclick="event.preventDefault(); window.cerrarBuscadorAsistido(); window.location.hash='club-beneficios';">Club de Beneficios</a> todo lo que te podés llevar.</p></div>`;
+                                                                               }
+                                                                               html += `</div>`;
+                                                                           }
 
                                                                                 if (!resumen.premium) {
                                                                                     html += `<div class="buscador-cta-premium">
