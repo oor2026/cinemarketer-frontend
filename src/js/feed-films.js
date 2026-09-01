@@ -4881,6 +4881,9 @@ window._buscadorIrANivel2 = function(rama) {
     if (rama === 'mi_actividad') {
         window._buscadorConfigurarBotonPremium();
     }
+    if (rama === 'plataforma') {
+        document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-alto');
+    }
 };
 
 // El botón "¿Vale la pena pasarme a Premium?" solo tiene sentido para
@@ -4927,6 +4930,7 @@ window._buscadorVolverNivel1 = function() {
     // propia regla). Fijar 'grid' a mano rompía el layout de boleto
     // en mobile cada vez que volvías a Nivel 1.
     document.getElementById('buscadorNivel1').style.display = '';
+    document.getElementById('buscadorModalSheet').classList.remove('buscador-sheet-alto');
 
     const nombre = _buscadorPrimerNombre();
     window._buscadorSetBurbuja(nombre ? `¡Hola, ${nombre}! ¿Qué buscamos hoy?` : '¿Qué buscamos hoy?');
