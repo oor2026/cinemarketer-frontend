@@ -4097,7 +4097,7 @@ window.abrirElencoCard = async function(movieId, event) {
    y "¿Qué puedo aprovechar este mes?" (la respuesta con stat +
    tarjetas), que necesitan más aire que el resto. Solo mobile. */
 @media (max-width: 768px) {
-    .buscador-sheet.buscador-sheet-alto { max-height: 96vh; }
+    .buscador-sheet.buscador-sheet-alto { max-height: 110vh; }
 }
 .buscador-header-asistente {
     position: relative; overflow: hidden;
