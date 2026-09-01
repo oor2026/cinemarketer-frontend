@@ -97,25 +97,31 @@ window.cargarFilasSeries = async function() {
                 if (typeof activarDragScrollPills === 'function') activarDragScrollPills(pillsCont);
             }
 
-    window.priorizarFilaGeneroSerie = function(key, btn) {
-        document.querySelectorAll('#ordenarPillsSerie .pill-orden').forEach(p => p.classList.remove('active'));
-        if (btn) btn.classList.add('active');
+        window.priorizarFilaGeneroSerie = function(key, btn) {
+            document.querySelectorAll('#ordenarPillsSerie .pill-orden').forEach(p => p.classList.remove('active'));
+            if (btn) btn.classList.add('active');
 
-        const idx = window._filasSeries.findIndex(f => f.key === key);
-        if (idx > 0) {
-            const [fila] = window._filasSeries.splice(idx, 1);
-            window._filasSeries.unshift(fila);
-        }
-        renderFilasSeries();
+            const idx = window._filasSeries.findIndex(f => f.key === key);
+            if (idx > 0) {
+                const [fila] = window._filasSeries.splice(idx, 1);
+                window._filasSeries.unshift(fila);
+            }
+            renderFilasSeries();
 
-                const cont = document.getElementById('filasSeriesContainer');
-                if (cont) {
-                    const header = document.querySelector('header');
-                    const offset = (header ? header.offsetHeight : 70) + 16;
-                    const top = cont.getBoundingClientRect().top + window.scrollY - offset;
-                    window.scrollTo({ top, behavior: 'smooth' });
-                }
-    };
+                    const cont = document.getElementById('filasSeriesContainer');
+                    if (cont) {
+                        const esMobile = window.innerWidth <= 768;
+                        let offset;
+                        if (esMobile) {
+                            offset = 12;
+                        } else {
+                            const header = document.querySelector('header');
+                            offset = (header ? header.offsetHeight : 70) + 16;
+                        }
+                        const top = cont.getBoundingClientRect().top + window.scrollY - offset;
+                        window.scrollTo({ top, behavior: 'smooth' });
+                    }
+        };
 
 function renderFilasSeries() {
     const cont = document.getElementById('filasSeriesContainer');
