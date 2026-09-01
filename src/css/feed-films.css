@@ -1617,7 +1617,9 @@
                             width: calc(100% + 2rem) !important;
             }
 
-            .filas-genero-container {
+            .filas-genero-container,
+            #fila-busqueda,
+            #fila-busqueda-serie {
                 margin-left: -1rem !important;
                 margin-right: -1rem !important;
                 width: calc(100% + 2rem) !important;
