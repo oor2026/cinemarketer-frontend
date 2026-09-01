@@ -139,42 +139,63 @@ if (dashToggle && dashMenu) {
         return btnArriba;
     }
 
-    function crearBotonNuevaPub() {
-        if (btnNuevaPub) return btnNuevaPub;
-        btnNuevaPub = document.createElement('button');
-        btnNuevaPub.id = 'btnNuevaPubFlotante';
-        btnNuevaPub.setAttribute('aria-label', 'Crear publicación');
-        btnNuevaPub.innerHTML = '<i class="fas fa-plus"></i>';
-        btnNuevaPub.onclick = function() {
-            if (typeof window.abrirWorkflowPublicacion === 'function') {
-                window.abrirWorkflowPublicacion();
+        function crearBotonNuevaPub() {
+            if (btnNuevaPub) return btnNuevaPub;
+            btnNuevaPub = document.createElement('button');
+            btnNuevaPub.id = 'btnNuevaPubFlotante';
+            btnNuevaPub.setAttribute('aria-label', 'Crear publicación');
+            btnNuevaPub.innerHTML = '<i class="fas fa-plus"></i>';
+            btnNuevaPub.onclick = function() {
+                if (typeof window.abrirWorkflowPublicacion === 'function') {
+                    window.abrirWorkflowPublicacion();
+                }
+            };
+            document.body.appendChild(btnNuevaPub);
+            return btnNuevaPub;
+        }
+
+        let btnBuscar = null;
+        function crearBotonBuscar() {
+            if (btnBuscar) return btnBuscar;
+            btnBuscar = document.createElement('button');
+            btnBuscar.id = 'btnBuscarFlotante';
+            btnBuscar.setAttribute('aria-label', 'Buscar');
+            btnBuscar.innerHTML = '<i class="fas fa-search"></i>';
+            btnBuscar.onclick = function() {
+                if (typeof window.abrirBuscadorAsistido === 'function') {
+                    window.abrirBuscadorAsistido();
+                }
+            };
+            document.body.appendChild(btnBuscar);
+            return btnBuscar;
+        }
+
+        window.addEventListener('scroll', function() {
+            if (window.innerWidth > 768) {
+                if (btnArriba) btnArriba.classList.remove('visible');
+                if (btnNuevaPub) btnNuevaPub.classList.remove('visible');
+                if (btnBuscar) btnBuscar.classList.remove('visible');
+                return;
             }
-        };
-        document.body.appendChild(btnNuevaPub);
-        return btnNuevaPub;
-    }
 
-    window.addEventListener('scroll', function() {
-        if (window.innerWidth > 768) {
-            if (btnArriba) btnArriba.classList.remove('visible');
-            if (btnNuevaPub) btnNuevaPub.classList.remove('visible');
-            return;
-        }
+            const hash = window.location.hash.replace('#', '') || 'feed-films';
+            if (hash !== 'feed-films') {
+                if (btnArriba) btnArriba.classList.remove('visible');
+                if (btnNuevaPub) btnNuevaPub.classList.remove('visible');
+                if (btnBuscar) btnBuscar.classList.remove('visible');
+                return;
+            }
 
-        const hash = window.location.hash.replace('#', '') || 'feed-films';
-        if (hash !== 'feed-films') {
-            if (btnArriba) btnArriba.classList.remove('visible');
-            if (btnNuevaPub) btnNuevaPub.classList.remove('visible');
-            return;
-        }
+            const enComunidad = window._tabActivo === 'comunidad';
+            const scrolleado = window.scrollY > 400;
 
-        const enComunidad = window._tabActivo === 'comunidad';
-        const scrolleado = window.scrollY > 400;
+            const a = crearBotonArriba();
+            if (scrolleado) { a.classList.add('visible'); } else { a.classList.remove('visible'); }
 
-        const a = crearBotonArriba();
-        if (scrolleado) { a.classList.add('visible'); } else { a.classList.remove('visible'); }
+            const p = crearBotonNuevaPub();
+            if (scrolleado && enComunidad) { p.classList.add('visible'); } else { p.classList.remove('visible'); }
 
-        const p = crearBotonNuevaPub();
-        if (scrolleado && enComunidad) { p.classList.add('visible'); } else { p.classList.remove('visible'); }
-    }, { passive: true });
-})();
+                    const b = crearBotonBuscar();
+                    if (scrolleado && !enComunidad) { b.classList.add('visible'); } else { b.classList.remove('visible'); }
+                }, { passive: true });
+            })();

@@ -679,6 +679,40 @@ body.menu-open {
     }
 }
 
+/* ── Botón flotante "Buscar" (asistente) — mismo slot que "Nueva
+   publicación", apilado sobre el de "Volver arriba". Si coinciden los
+   dos a la vez (estás en Comunidad con scroll), la lupa se corre un
+   piso más arriba vía la clase .con-nueva-pub, para no superponerse. ── */
+#btnBuscarFlotante {
+    position: fixed;
+    bottom: 5.25rem;
+    right: 1.25rem;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: #001D7D;
+    color: white;
+    border: none;
+    font-size: 1.05rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    cursor: pointer;
+    z-index: 900;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s, bottom 0.2s ease;
+}
+#btnBuscarFlotante.con-nueva-pub { bottom: 9.25rem; }
+
+#btnBuscarFlotante.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
 /* ── Botón flotante "Nueva publicación" (apilado sobre el de Volver arriba) ── */
 #btnNuevaPubFlotante {
     position: fixed;
