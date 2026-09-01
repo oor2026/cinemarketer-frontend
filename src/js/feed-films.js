@@ -5343,7 +5343,7 @@ window._buscadorCriterioSeleccionado = function(criterio) {
 
                                     if (pendientes.length === 0) {
                                         cont.innerHTML = `<div class="buscador-resumen-card">
-                                            <p><i class="fas fa-party-horn" style="color:#2e7d32;"></i> ¡Ya te alcanzan los puntos para todos los premios vigentes! Andá a Club de Beneficios y elegí el tuyo.</p>
+                                                                                        <p><i class="fas fa-party-horn" style="color:#2e7d32;"></i> ¡Ya te alcanzan los puntos para todos los premios vigentes! Andá a <a href="#" class="buscador-premio-link" onclick="event.preventDefault(); window.cerrarBuscadorAsistido(); window.location.hash='club-beneficios';">Club de Beneficios</a> y elegí el tuyo.</p>
                                         </div>`;
                                         return;
                                     }
