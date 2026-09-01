@@ -5050,21 +5050,23 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                                     },
                                                 };
 
-                                            window._buscadorAbrirTextoPlataforma = function(criterio) {
-                                                document.getElementById('buscadorNivel2Plataforma').style.display = 'none';
-                                                document.getElementById('buscadorNivel3Plataforma').style.display = 'block';
+                                                window._buscadorAbrirTextoPlataforma = function(criterio) {
+                                                    document.getElementById('buscadorNivel2Plataforma').style.display = 'none';
+                                                    document.getElementById('buscadorNivel3Plataforma').style.display = 'block';
+                                                    document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-alto');
 
-                                                const info = BUSCADOR_TEXTOS_PLATAFORMA[criterio];
-                                                document.getElementById('buscadorPlataformaContenido').innerHTML = `
-                                                    <p class="buscador-subtitulo">${info.titulo}</p>
-                                                    <div class="buscador-resumen-card"><p style="display:block;">${info.texto}</p></div>
-                                                `;
-                                            };
+                                                    const info = BUSCADOR_TEXTOS_PLATAFORMA[criterio];
+                                                    document.getElementById('buscadorPlataformaContenido').innerHTML = `
+                                                        <p class="buscador-subtitulo">${info.titulo}</p>
+                                                        <div class="buscador-resumen-card"><p style="display:block;">${info.texto}</p></div>
+                                                    `;
+                                                };
 
-                                            window._buscadorVolverNivel2Plataforma = function() {
-                                                document.getElementById('buscadorNivel3Plataforma').style.display = 'none';
-                                                document.getElementById('buscadorNivel2Plataforma').style.display = 'block';
-                                            };
+                                                window._buscadorVolverNivel2Plataforma = function() {
+                                                    document.getElementById('buscadorNivel3Plataforma').style.display = 'none';
+                                                    document.getElementById('buscadorNivel2Plataforma').style.display = 'block';
+                                                    document.getElementById('buscadorModalSheet').classList.remove('buscador-sheet-alto');
+                                                };
 
                                         // ==============================================
                                         // NIVEL 3 — ¿Qué son las insignias? ¿Cuál es la mía?
