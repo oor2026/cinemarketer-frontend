@@ -5390,10 +5390,11 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                 }
                             };
 
-                        window._buscadorVolverNivel2MiActividad = function() {
-                            window._buscadorOcultarNivel3MiActividad();
-                            document.getElementById('buscadorNivel2MiActividad').style.display = 'block';
-                        };
+                            window._buscadorVolverNivel2MiActividad = function() {
+                                window._buscadorOcultarNivel3MiActividad();
+                                document.getElementById('buscadorNivel2MiActividad').style.display = 'block';
+                                document.getElementById('buscadorModalSheet').classList.remove('buscador-sheet-alto');
+                            };
 
                         // Las 4 pantallas de Nivel 3 de "Mi actividad" no se ocultaban entre
                         // sí al abrir una nueva — solo escondían el menú de Nivel 2. Si
