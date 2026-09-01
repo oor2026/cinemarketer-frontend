@@ -5069,7 +5069,9 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                                 window._buscadorVolverNivel2Plataforma = function() {
                                                     document.getElementById('buscadorNivel3Plataforma').style.display = 'none';
                                                     document.getElementById('buscadorNivel2Plataforma').style.display = 'block';
-                                                    document.getElementById('buscadorModalSheet').classList.remove('buscador-sheet-alto');
+                                                    // Sin sacar la clase acá — la lista de 6 preguntas (a la que
+                                                    // volvés) también la necesita. Solo se saca al volver del
+                                                    // todo a Nivel 1 (ver _buscadorVolverNivel1).
                                                 };
 
                                         // ==============================================
