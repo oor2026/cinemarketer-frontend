@@ -4093,22 +4093,11 @@ window.abrirElencoCard = async function(movieId, event) {
     .buscador-sheet.buscador-sheet-ancho { width: 640px !important; }
 }
 
-/* Alto extra en mobile — para "Mi actividad cinéfila" (los 4 ítems)
-   y "¿Qué puedo aprovechar este mes?" (la respuesta con stat +
-   tarjetas), que necesitan más aire que el resto. Solo mobile. */
-@media (max-width: 768px) {
-    /* Scroll interno en la lista de tarjetas a partir de cierta
-       cantidad — así el medallón/stat de arriba queda siempre fijo y
-       visible, y la lista (que puede tener un ítem más para Premium,
-       o crecer con más premios pendientes) no empuja el modal entero
-       a desbordar la pantalla. ~260px alcanza para 3 tarjetas
-       completas antes de necesitar scrollear. */
-    .buscador-tarjetas {
-        max-height: 260px;
-        overflow-y: auto;
-        padding-right: 2px; /* aire para que la scrollbar no tape el borde de la tarjeta */
-    }
-}
+/* Sin scroll interno acá — se resolvió mejor limitando la CANTIDAD de
+   premios pendientes que se muestran (ver _buscadorAbrirProximoPremio
+   en feed-films.js): a partir del 4° se reemplaza por una leyenda en
+   vez de seguir agregando tarjetas, así el modal nunca necesita
+   scrollear ni desbordar. */
 .buscador-header-asistente {
     position: relative; overflow: hidden;
     background: radial-gradient(circle at 15% 15%, #001D7D 0%, #000d3d 75%);
