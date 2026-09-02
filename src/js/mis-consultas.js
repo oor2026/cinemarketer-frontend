@@ -178,16 +178,24 @@ window._actualizarAvisoPendientesBandeja = function() {
     const aviso = document.getElementById('bandejaHiloAvisoPendientes');
     if (!grupo || !aviso) return;
 
-    const pendientes = grupo.recibidas.filter(it => !it.seenAt).length;
+    const esEnviadas = window._bandejaSubtabActual === 'enviadas';
+    const items = esEnviadas ? grupo.enviadas : grupo.recibidas;
+    const pendientes = items.filter(it => !it.seenAt).length;
 
     if (pendientes === 0) {
         aviso.style.display = 'none';
         return;
     }
 
-    aviso.textContent = pendientes === 1
-        ? 'Tenés 1 recomendación de película o serie que no marcaste como vista todavía.'
-        : `Tenés ${pendientes} recomendaciones de películas o series que no marcaste como vistas todavía.`;
+    if (esEnviadas) {
+        aviso.textContent = pendientes === 1
+            ? '1 de tus recomendaciones aún no fue marcada como vista.'
+            : `${pendientes} de tus recomendaciones aún no fueron marcadas como vistas.`;
+    } else {
+        aviso.textContent = pendientes === 1
+            ? 'Tenés 1 recomendación de película o serie que no marcaste como vista todavía.'
+            : `Tenés ${pendientes} recomendaciones de películas o series que no marcaste como vistas todavía.`;
+    }
     aviso.style.display = 'block';
 };
 
