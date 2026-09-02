@@ -163,6 +163,37 @@ body {
     font-size: 1.2rem;
 }
 
+/* Campanita mobile — vive en el header, extremo derecho. Solo mobile;
+   en desktop se oculta y la campanita real sigue siendo la de adentro
+   del menú (#dashNavMenu), sin cambios. */
+.dash-bell-mobile {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .dash-bell-mobile {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        font-size: 1.3rem;
+        color: var(--dark);
+        cursor: pointer;
+        padding: 0.5rem;
+    }
+
+    /* La campanita vieja de adentro del menú hamburguesa se oculta —
+       ya no hace falta en mobile, migró al header. */
+    .dash-bell-desktop-li {
+        display: none;
+    }
+}
+
 .bell-badge {
     position: absolute;
     top: -8px;
@@ -753,6 +784,65 @@ body.menu-open {
 .motivo-chip {
     background: #f5f5f5; border: 1px solid #eee; border-radius: 10px;
     padding: 0.6rem 0.8rem; font-size: 0.85rem; color: #333; cursor: pointer;
-    text-align: left; transition: background 0.15s;
-}
-.motivo-chip:hover { background: #eee; }
+        text-align: left; transition: background 0.15s;
+    }
+    .motivo-chip:hover { background: #eee; }
+
+    /* ========== MODAL FULL-SCREEN DE NOVEDADES — SOLO MOBILE ========== */
+    .novedades-modal-mobile {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        background: var(--white);
+        flex-direction: column;
+    }
+
+    .novedades-modal-mobile-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.2rem;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        font-weight: 700;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .novedades-modal-mobile-cerrar {
+        background: rgba(255,255,255,0.15);
+        border: 1.5px solid rgba(255,255,255,0.4);
+        color: white;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        font-size: 1.3rem;
+        line-height: 1;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .novedades-modal-mobile-acciones {
+        padding: 0.6rem 1.2rem;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: flex-end;
+        flex-shrink: 0;
+    }
+    .novedades-modal-mobile-acciones button {
+        background: none;
+        border: none;
+        color: #1a3a6b;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .novedades-modal-mobile-lista {
+        flex: 1;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
