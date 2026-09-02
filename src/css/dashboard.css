@@ -187,12 +187,27 @@ body {
         padding: 0.5rem;
     }
 
-    /* La campanita vieja de adentro del menú hamburguesa se oculta —
-       ya no hace falta en mobile, migró al header. */
-    .dash-bell-desktop-li {
-        display: none;
+        /* La campanita vieja de adentro del menú hamburguesa se oculta —
+           ya no hace falta en mobile, migró al header. */
+        .dash-bell-desktop-li {
+            display: none;
+        }
+
+        /* Animación sutil cuando hay novedades sin leer — el 8% inicial
+           de cada ciclo de 5s es el "sonido" (agita rápido y frena), el
+           92% restante se queda quieta. Anima el ícono de adentro, no el
+           botón (que ya usa transform para centrarse verticalmente). */
+        @keyframes dashBellPing {
+            0%, 8%, 100% { transform: rotate(0deg); }
+            2% { transform: rotate(-15deg); }
+            4% { transform: rotate(12deg); }
+            6% { transform: rotate(-8deg); }
+        }
+        .dash-bell-mobile.tiene-pendientes i {
+            animation: dashBellPing 5s ease-in-out infinite;
+            transform-origin: top center;
+        }
     }
-}
 
 .bell-badge {
     position: absolute;
