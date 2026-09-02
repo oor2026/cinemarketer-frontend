@@ -4,24 +4,32 @@
 
 window.toggleNovedades = function(e) {
     e.preventDefault();
-    const esMobile = window.innerWidth <= 768;
-
-    if (esMobile) {
-        const acordeon = document.getElementById('novedadesMobile');
-        const chevron = document.getElementById('novedadesChevron');
-        const abierto = acordeon.style.display === 'block';
-        acordeon.style.display = abierto ? 'none' : 'block';
-        if (chevron) chevron.style.transform = abierto ? 'rotate(0deg)' : 'rotate(180deg)';
-        if (!abierto) window.cargarNovedadesMobile();
+    // Mobile ya no pasa por acá — el botón nuevo del header llama
+    // directo a abrirNovedadesMobileFullscreen(). Esto queda solo
+    // para el dropdown de desktop.
+    const dropdown = document.getElementById('novedadesDropdown');
+    if (dropdown.style.display === 'none') {
+        dropdown.style.display = 'block';
+        window.cargarNovedades();
     } else {
-        const dropdown = document.getElementById('novedadesDropdown');
-        if (dropdown.style.display === 'none') {
-            dropdown.style.display = 'block';
-            window.cargarNovedades();
-        } else {
-            dropdown.style.display = 'none';
-        }
+        dropdown.style.display = 'none';
     }
+};
+
+// Modal full-screen de novedades — solo mobile.
+window.abrirNovedadesMobileFullscreen = function(event) {
+    if (event) event.preventDefault();
+    const modal = document.getElementById('novedadesModalMobile');
+    if (!modal) return;
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    window.cargarNovedadesMobile();
+};
+
+window.cerrarNovedadesMobileFullscreen = function() {
+    const modal = document.getElementById('novedadesModalMobile');
+    if (modal) modal.style.display = 'none';
+    document.body.style.overflow = '';
 };
 
 // Cerrar al click fuera
@@ -51,6 +59,12 @@ function cerrarTodosLosMenus() {
     if (menuToggleIcon) {
         menuToggleIcon.classList.add('fa-bars');
         menuToggleIcon.classList.remove('fa-times');
+    }
+
+    // Modal full-screen de novedades (mobile) — si quedó abierto y la
+    // notificación redirige a otra vista, tapaba el destino entero.
+    if (typeof window.cerrarNovedadesMobileFullscreen === 'function') {
+        window.cerrarNovedadesMobileFullscreen();
     }
 }
 
@@ -102,13 +116,18 @@ window.cargarNovedades = async function() {
         if (!res.ok) throw new Error();
         const novedades = await res.json();
 
-        // Actualizar badge
-        const noLeidas = novedades.filter(n => !n.read).length;
-        const badge = document.getElementById('novedadesBadge');
-        if (badge) {
-            badge.textContent = noLeidas;
-            badge.style.display = noLeidas > 0 ? 'inline-block' : 'none';
-        }
+                // Actualizar badge
+                const noLeidas = novedades.filter(n => !n.read).length;
+                const badge = document.getElementById('novedadesBadge');
+                if (badge) {
+                    badge.textContent = noLeidas;
+                    badge.style.display = noLeidas > 0 ? 'inline-block' : 'none';
+                }
+                const badgeMobile = document.getElementById('novedadesBadgeMobile');
+                if (badgeMobile) {
+                    badgeMobile.textContent = noLeidas;
+                    badgeMobile.style.display = noLeidas > 0 ? 'inline-block' : 'none';
+                }
 
         if (novedades.length === 0) {
             lista.innerHTML = '<div style="padding:1rem;text-align:center;color:#999;font-size:0.85rem;">Sin novedades por ahora</div>';
@@ -174,14 +193,16 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
             });
         } catch(e) {}
 
-        // Actualizar badge inmediatamente
-        const badge = document.getElementById('novedadesBadge');
-        if (badge) {
-            const actual = parseInt(badge.textContent) || 0;
-            const nuevo = Math.max(0, actual - 1);
-            badge.textContent = nuevo;
-            badge.style.display = nuevo > 0 ? 'inline-block' : 'none';
-        }
+                // Actualizar badge inmediatamente
+                const badge = document.getElementById('novedadesBadge');
+                const badgeMobile = document.getElementById('novedadesBadgeMobile');
+                [badge, badgeMobile].forEach(b => {
+                    if (!b) return;
+                    const actual = parseInt(b.textContent) || 0;
+                    const nuevo = Math.max(0, actual - 1);
+                    b.textContent = nuevo;
+                    b.style.display = nuevo > 0 ? 'inline-block' : 'none';
+                });
 
         // Recargar lista para actualizar visual
         window.cargarNovedades();
@@ -527,7 +548,12 @@ window.marcarTodasLeidas = async function() {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        window.cargarNovedades();
+        const modalMobile = document.getElementById('novedadesModalMobile');
+        if (modalMobile && modalMobile.style.display !== 'none') {
+            window.cargarNovedadesMobile();
+        } else {
+            window.cargarNovedades();
+        }
     } catch(e) {}
 };
 
@@ -541,16 +567,21 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
         if (!res.ok) return;
         const data = await res.json();
-        const badge = document.getElementById('novedadesBadge');
-        if (badge && data.count > 0) {
-            badge.textContent = data.count;
-            badge.style.display = 'inline-block';
-        }
-    } catch(e) {}
-});
+                const badge = document.getElementById('novedadesBadge');
+                if (badge && data.count > 0) {
+                    badge.textContent = data.count;
+                    badge.style.display = 'inline-block';
+                }
+                const badgeMobile = document.getElementById('novedadesBadgeMobile');
+                if (badgeMobile && data.count > 0) {
+                    badgeMobile.textContent = data.count;
+                    badgeMobile.style.display = 'inline-block';
+                }
+            } catch(e) {}
+        });
 
 window.cargarNovedadesMobile = async function() {
-    const lista = document.getElementById('novedadesListaMobile');
+    const lista = document.getElementById('novedadesListaMobileFull');
     const token = localStorage.getItem('token');
     try {
         const res = await fetch(`${CONFIG.API_URL}/notifications`, {

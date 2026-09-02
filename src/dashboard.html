@@ -76,6 +76,14 @@
                 <img src="assets/images/isologotipo.webp" alt="Cinemarketer" class="logo-img">
             </a>
             <button class="dash-menu-toggle" id="dashMenuToggle"><i class="fas fa-bars"></i></button>
+            <!-- Campanita mobile — vive en el header, fuera del menú
+                 hamburguesa. Solo visible en mobile (CSS); en desktop
+                 la campanita real sigue siendo la de adentro de
+                 #dashNavMenu, sin ningún cambio. -->
+            <button class="dash-bell-mobile" id="dashBellMobile" onclick="window.abrirNovedadesMobileFullscreen(event)" title="Novedades">
+                <i class="fas fa-bell"></i>
+                <span class="bell-badge" id="novedadesBadgeMobile" style="display:none;">0</span>
+            </button>
             <ul class="nav-menu" id="dashNavMenu">
                 <li><a class="nav-link" href="#feed-films" title="Ver películas"><i class="fas fa-home"></i></a></li>
                 <li class="nav-user-profile">
@@ -85,7 +93,7 @@
                         <div class="user-level-mini" id="headerLevel"><span class="level-badge">🟢 Amateur</span></div>
                     </div>
                 </li>
-                <li style="position:relative;">
+                <li style="position:relative;" class="dash-bell-desktop-li">
                     <a class="nav-link" href="#" onclick="window.toggleNovedades(event)" title="Novedades">
                         <div class="bell-wrapper">
                             <i class="fas fa-bell"></i>
@@ -125,6 +133,20 @@
             </ul>
         </div>
     </nav>
+
+    <!-- Modal full-screen de novedades — solo mobile -->
+    <div class="novedades-modal-mobile" id="novedadesModalMobile" style="display:none;">
+        <div class="novedades-modal-mobile-header">
+            <span>Novedades</span>
+            <button class="novedades-modal-mobile-cerrar" onclick="window.cerrarNovedadesMobileFullscreen()">×</button>
+        </div>
+        <div class="novedades-modal-mobile-acciones">
+            <button onclick="window.marcarTodasLeidas()">Marcar todas como leídas</button>
+        </div>
+        <div id="novedadesListaMobileFull" class="novedades-modal-mobile-lista">
+            <div style="padding:1rem;text-align:center;color:#999;font-size:0.85rem;">Cargando...</div>
+        </div>
+    </div>
 
     <!-- =====================================================
          LAYOUT PRINCIPAL: columna central + sidebar de ads
