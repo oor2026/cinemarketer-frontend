@@ -232,12 +232,13 @@ window.generarTarjetasHTML = async function(peliculas) {
                         const accionesVotacion = esProximoEstreno ? `
                             <div class="card-expectativa" id="expectativa-${pelicula.id}">
                                 <p class="card-expectativa-titulo">¿La estás esperando?</p>
-                                <div class="card-expectativa-estrellas">
-                                                                        <i class="fas fa-star" data-valor="1" onclick="event.stopPropagation(); window.calificarExpectativaCard(${pelicula.id}, 1, '${pelicula.title.replace(/'/g, "\\'")}')"></i>
-                                                                        <i class="fas fa-star" data-valor="2" onclick="event.stopPropagation(); window.calificarExpectativaCard(${pelicula.id}, 2, '${pelicula.title.replace(/'/g, "\\'")}')"></i>
-                                                                        <i class="fas fa-star" data-valor="3" onclick="event.stopPropagation(); window.calificarExpectativaCard(${pelicula.id}, 3, '${pelicula.title.replace(/'/g, "\\'")}')"></i>
-                                                                        <i class="fas fa-star" data-valor="4" onclick="event.stopPropagation(); window.calificarExpectativaCard(${pelicula.id}, 4, '${pelicula.title.replace(/'/g, "\\'")}')"></i>
-                                                                        <i class="fas fa-star" data-valor="5" onclick="event.stopPropagation(); window.calificarExpectativaCard(${pelicula.id}, 5, '${pelicula.title.replace(/'/g, "\\'")}')"></i>
+                                <div class="card-expectativa-botones">
+                                    <button type="button" class="expectativa-btn expectativa-btn-si" data-valor="true" onclick="event.stopPropagation(); window.calificarExpectativaCard(${pelicula.id}, true, '${pelicula.title.replace(/'/g, "\\'")}')">
+                                        <i class="fas fa-check"></i> Sí
+                                    </button>
+                                    <button type="button" class="expectativa-btn expectativa-btn-no" data-valor="false" onclick="event.stopPropagation(); window.calificarExpectativaCard(${pelicula.id}, false, '${pelicula.title.replace(/'/g, "\\'")}')">
+                                        <i class="fas fa-times"></i> No
+                                    </button>
                                 </div>
                                 <p class="card-expectativa-resumen" id="expectativa-resumen-${pelicula.id}"></p>
                             </div>` : `
@@ -907,16 +908,16 @@ window.calificarExpectativaCard = async function(id, valor, titulo) {
         const res = await fetch(`${CONFIG.API_URL}/movies/${id}/expectation`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ rating: valor })
+            body: JSON.stringify({ expecting: valor })
         });
         if (!res.ok) throw new Error();
         const data = await res.json();
         window._pintarExpectativaCard(id, data);
 
-        // Mismo aviso de estreno que en el modal — acá no hay
-        // #modalTitulo en pantalla, por eso el título viaja como
-        // parámetro desde la tarjeta en vez de leerse del DOM.
-        if (valor >= 4 && !data.notifyOnRelease) {
+        // Ahora que es Sí/No en vez de estrellas, "Sí" siempre dispara
+        // el aviso de estreno — no hace falta filtrar por un valor alto,
+        // decir que sí YA ES la señal fuerte.
+        if (valor === true && !data.notifyOnRelease) {
             window._abrirModalAvisoEstreno(id, titulo);
         }
     } catch (e) {}
@@ -925,15 +926,15 @@ window.calificarExpectativaCard = async function(id, valor, titulo) {
 window._pintarExpectativaCard = function(id, data) {
     const cont = document.getElementById(`expectativa-${id}`);
     if (!cont) return;
-    cont.querySelectorAll('.card-expectativa-estrellas i').forEach(star => {
-        const v = parseInt(star.dataset.valor, 10);
-        star.classList.toggle('activa', v <= (data.userRating || 0));
+    cont.querySelectorAll('.expectativa-btn').forEach(btn => {
+        const esEsteBoton = btn.dataset.valor === String(data.userExpecting);
+        btn.classList.toggle('activo', data.userExpecting !== null && data.userExpecting !== undefined && esEsteBoton);
     });
 
     const resumen = document.getElementById(`expectativa-resumen-${id}`);
     if (!resumen) return;
     resumen.textContent = data.count > 0
-        ? `${data.average.toFixed(1)} — ${data.count.toLocaleString('es-AR')} persona${data.count === 1 ? '' : 's'} la ${data.count === 1 ? 'está' : 'están'} esperando`
+        ? `${data.count.toLocaleString('es-AR')} persona${data.count === 1 ? '' : 's'} la ${data.count === 1 ? 'está' : 'están'} esperando`
         : '';
 };
 
@@ -2836,20 +2837,17 @@ window.cargarExpectativaPelicula = async function(id) {
 };
 
 window._pintarExpectativa = function(data) {
-    const estrellas = document.querySelectorAll('#modalExpectativaEstrellas i');
-    const valorActual = data.userRating || 0;
-    estrellas.forEach(star => {
-        const v = parseInt(star.dataset.valor, 10);
-        star.classList.toggle('activa', v <= valorActual);
+    const botones = document.querySelectorAll('#modalExpectativaBotones .expectativa-btn');
+    botones.forEach(btn => {
+        const esEsteBoton = btn.dataset.valor === String(data.userExpecting);
+        btn.classList.toggle('activo', data.userExpecting !== null && data.userExpecting !== undefined && esEsteBoton);
     });
 
     const resumen = document.getElementById('modalExpectativaResumen');
     if (!resumen) return;
-    if (data.count > 0) {
-        resumen.textContent = `Nivel de expectativa: ${data.average.toFixed(1)} — ${data.count.toLocaleString('es-AR')} persona${data.count === 1 ? '' : 's'} la ${data.count === 1 ? 'está' : 'están'} esperando`;
-    } else {
-        resumen.textContent = '';
-    }
+    resumen.textContent = data.count > 0
+        ? `${data.count.toLocaleString('es-AR')} persona${data.count === 1 ? '' : 's'} la ${data.count === 1 ? 'está' : 'están'} esperando`
+        : '';
 };
 
 window.calificarExpectativa = async function(id, valor) {
@@ -2858,7 +2856,7 @@ window.calificarExpectativa = async function(id, valor) {
         const res = await fetch(`${CONFIG.API_URL}/movies/${id}/expectation`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ rating: valor })
+            body: JSON.stringify({ expecting: valor })
         });
                 if (!res.ok) throw new Error();
                 const data = await res.json();
@@ -2869,10 +2867,9 @@ window.calificarExpectativa = async function(id, valor) {
                     window._pintarExpectativaCard(id, data);
                 }
 
-                // Aviso de estreno — solo si calificó 4 o 5, y todavía no
-                // activó el aviso para esta película (evita re-preguntar
-                // cada vez que toca una estrella distinta ya con 4-5).
-                if (valor >= 4 && !data.notifyOnRelease) {
+                // Aviso de estreno — "Sí" siempre lo dispara ahora, ya no
+                // hace falta filtrar por un puntaje alto.
+                if (valor === true && !data.notifyOnRelease) {
                     window._abrirModalAvisoEstreno(id);
                 }
             } catch (e) {}
