@@ -64,11 +64,51 @@ window.cargarTriviaSeriesBadge = async function() {
         if (window._tabActivo === 'series') {
             contenedor.style.display = 'block';
         }
-        actualizarBadgeSubSeries(estado);
-    } catch (e) {
-        if (miToken === window._triviaSeriesBadgeToken) contenedor.style.display = 'none';
-    }
-};
+                actualizarBadgeSubSeries(estado);
+
+                // Viñeta que aparece sola, solo mobile — mismo criterio que
+                // película (ver trivia.js), con sus propios ids.
+                window._triviaSeriesEstadoParaVineta = estado;
+                if (!window._triviaSeriesVinetaInterval) {
+                    triviaSeriesIniciarVinetaPeriodica();
+                }
+            } catch (e) {
+                if (miToken === window._triviaSeriesBadgeToken) contenedor.style.display = 'none';
+            }
+        };
+
+        function triviaSeriesMensajeVineta(estado) {
+            if (estado.estado === 'GANADA' || estado.estado === 'PERDIDA') {
+                return '¡Te espero mañana!';
+            }
+            if (estado.nuncaJugo) {
+                return '¡Qué aburrimiento!... ¿Jugamos?';
+            }
+            if (estado.jugoAyer) {
+                return '¿Echamos otra ronda como ayer?';
+            }
+            return '¿Volvemos a jugar?';
+        }
+
+        function triviaSeriesMostrarVineta() {
+            if (window.innerWidth > 768) return;
+            const modal = document.getElementById('triviaSeriesModal');
+            if (modal && modal.style.display === 'flex') return;
+
+            const cont = document.getElementById('triviaSeriesBadgeContainer');
+            const vineta = document.getElementById('triviaVinetaSeriesMobile');
+            if (!cont || !vineta || cont.style.display === 'none') return;
+            if (!window._triviaSeriesEstadoParaVineta) return;
+
+                document.getElementById('triviaVinetaSeriesTexto').textContent = triviaSeriesMensajeVineta(window._triviaSeriesEstadoParaVineta);
+                vineta.classList.add('visible');
+                setTimeout(() => vineta.classList.remove('visible'), 3000);
+            }
+
+            function triviaSeriesIniciarVinetaPeriodica() {
+                triviaSeriesMostrarVineta();
+                window._triviaSeriesVinetaInterval = setInterval(triviaSeriesMostrarVineta, 5000);
+            }
 
 function actualizarBadgeSubSeries(estado) {
     const sub = document.getElementById('triviaSeriesBadgeSub');

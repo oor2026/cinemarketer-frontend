@@ -72,6 +72,12 @@
 
     <!-- ADIVINA ADIVINADOR (trivia diaria) -->
     <div id="triviaBadgeContainer" style="display:none;" onclick="window.abrirTrivia()">
+        <!-- Viñeta que aparece sola, sin necesitar click — solo mobile. -->
+        <div class="trivia-vineta-mobile" id="triviaVinetaMobile">
+            <div class="trivia-vineta-mobile-inner">
+                <p id="triviaVinetaTexto"></p>
+            </div>
+        </div>
         <div class="trivia-badge trivia-badge-peliculas">
             <i class="fas fa-clapperboard trivia-bg-icon" style="top:-10px; left:8%; font-size:34px; transform:rotate(-18deg);"></i>
             <i class="fas fa-film trivia-bg-icon" style="bottom:-12px; left:32%; font-size:26px; transform:rotate(12deg);"></i>
@@ -108,6 +114,12 @@
 
     <!-- TRIVIA DE SERIES (badge y modales — misma estructura que la de Películas) -->
     <div id="triviaSeriesBadgeContainer" style="display:none;" onclick="window.abrirTriviaSeries()">
+        <!-- Viñeta que aparece sola, sin necesitar click — solo mobile. -->
+        <div class="trivia-vineta-mobile" id="triviaVinetaSeriesMobile">
+            <div class="trivia-vineta-mobile-inner">
+                <p id="triviaVinetaSeriesTexto"></p>
+            </div>
+        </div>
         <div class="trivia-badge trivia-badge-series">
             <i class="fas fa-tv trivia-bg-icon" style="top:-10px; left:8%; font-size:34px; transform:rotate(-18deg);"></i>
             <i class="fas fa-satellite-dish trivia-bg-icon" style="bottom:-12px; left:32%; font-size:26px; transform:rotate(12deg);"></i>
