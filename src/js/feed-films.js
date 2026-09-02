@@ -189,20 +189,24 @@ window.generarTarjetasHTML = async function(peliculas) {
          const criterio = window._criterioOrden || 'fecha';
          const excluidas = await _cargarPeliculasNoInteresaIds();
 
-         const peliculasFiltradas = peliculas.filter(p => {
-             if (excluidas.includes(p.id)) return false;
-             if (!p.poster_path) return false;
-             if (!p.overview || p.overview.trim() === '') return false;
-             if (!p.title || !soloLatinos.test(p.title.trim())) return false;
+          const peliculasFiltradas = peliculas.filter(p => {
+              if (excluidas.includes(p.id)) return false;
+              if (!p.poster_path) return false;
+              if (!p.overview || p.overview.trim() === '') return false;
+              if (!p.title || !soloLatinos.test(p.title.trim())) return false;
 
-             const anio = p.release_date ? new Date(p.release_date).getFullYear() : null;
+              // "Lo que se viene": fecha de estreno posterior a HOY —
+              // sin importar si es este año o el que viene. Antes solo
+              // contaba "año que viene", dejando afuera estrenos
+              // legítimos de acá a fin de este año.
+              if (criterio === 'proximamente') {
+                  return !!p.release_date && new Date(p.release_date) > new Date();
+              }
 
-             // "Lo que se viene": solo películas de años futuros
-             if (criterio === 'proximamente') return anio > anioActual;
-
-             // Feed normal: excluir películas de años futuros
-             return !anio || anio <= anioActual;
-         });
+              // Feed normal: excluir películas de años futuros
+              const anio = p.release_date ? new Date(p.release_date).getFullYear() : null;
+              return !anio || anio <= anioActual;
+          });
 
         const response = await fetch('modules/feed-tarjeta.html');
         let plantilla = await response.text();
@@ -216,20 +220,50 @@ window.generarTarjetasHTML = async function(peliculas) {
                 ? new Date(pelicula.release_date).getFullYear()
                 : 'Próximamente';
 
-            const overview = pelicula.overview
-                ? pelicula.overview.substring(0, 110) + '...'
-                : 'Sinopsis no disponible';
+                        const overview = pelicula.overview
+                            ? pelicula.overview.substring(0, 110) + '...'
+                            : 'Sinopsis no disponible';
 
-            return plantilla
-                .replace(/{id}/g, pelicula.id)
-                .replace(/{posterUrl}/g, posterUrl)
-                .replace(/{title}/g, pelicula.title)
-                .replace(/{vote_average}/g, pelicula.vote_average.toFixed(1))
-                .replace(/{year}/g, year)
-                .replace(/{overview}/g, overview)
-                .replace(/{popularity}/g, Math.round(pelicula.popularity))
-                .replace(/{vote_count}/g, pelicula.vote_count);
-        }).join('');
+                        // Fase "Lo que se viene" — si el estreno todavía no pasó,
+                        // el bloque de acciones es expectativa (estrellas), no
+                        // voto/comentario (mismo criterio que ya usa el modal).
+                        const esProximoEstreno = !!pelicula.release_date && new Date(pelicula.release_date) > new Date();
+
+                        const accionesVotacion = esProximoEstreno ? `
+                            <div class="card-expectativa" id="expectativa-${pelicula.id}">
+                                <p class="card-expectativa-titulo">¿La estás esperando?</p>
+                                <div class="card-expectativa-estrellas">
+                                    <i class="fas fa-star" data-valor="1" onclick="event.stopPropagation(); window.calificarExpectativaCard(${pelicula.id}, 1)"></i>
+                                    <i class="fas fa-star" data-valor="2" onclick="event.stopPropagation(); window.calificarExpectativaCard(${pelicula.id}, 2)"></i>
+                                    <i class="fas fa-star" data-valor="3" onclick="event.stopPropagation(); window.calificarExpectativaCard(${pelicula.id}, 3)"></i>
+                                    <i class="fas fa-star" data-valor="4" onclick="event.stopPropagation(); window.calificarExpectativaCard(${pelicula.id}, 4)"></i>
+                                    <i class="fas fa-star" data-valor="5" onclick="event.stopPropagation(); window.calificarExpectativaCard(${pelicula.id}, 5)"></i>
+                                </div>
+                                <p class="card-expectativa-resumen" id="expectativa-resumen-${pelicula.id}"></p>
+                            </div>` : `
+                            <div class="votacion-buttons">
+                                <button class="btn-like" onclick="event.stopPropagation(); window.votarPelicula(${pelicula.id}, 'like', event)" title="Me gusta">
+                                    <i class="fas fa-thumbs-up"></i> <span id="likes-${pelicula.id}">0</span>
+                                </button>
+                                <button class="btn-dislike" onclick="event.stopPropagation(); window.votarPelicula(${pelicula.id}, 'dislike', event)" title="No me gusta">
+                                    <i class="fas fa-thumbs-down"></i> <span id="dislikes-${pelicula.id}">0</span>
+                                </button>
+                                <button class="btn-comentarios-card" onclick="event.stopPropagation(); window.abrirDetallePelicula(${pelicula.id})" title="Comentarios">
+                                    <i class="fas fa-comment"></i> <span id="comentarios-card-${pelicula.id}" class="comentarios-count">0</span>
+                                </button>
+                            </div>`;
+
+                        return plantilla
+                            .replace(/{id}/g, pelicula.id)
+                            .replace(/{posterUrl}/g, posterUrl)
+                            .replace(/{title}/g, pelicula.title)
+                            .replace(/{vote_average}/g, pelicula.vote_average.toFixed(1))
+                            .replace(/{year}/g, year)
+                            .replace(/{overview}/g, overview)
+                            .replace(/{popularity}/g, Math.round(pelicula.popularity))
+                            .replace(/{vote_count}/g, pelicula.vote_count)
+                            .replace(/{accionesVotacion}/g, accionesVotacion);
+                    }).join('');
 
     } catch (error) {
         return generarTarjetasFallback(peliculas);
@@ -314,7 +348,7 @@ window.cargarPeliculasPopulares = async function(pagina = 1) {
         const criterioOrden = window._criterioOrden || 'fecha';
                 let sortParam = '';
                 if (criterioOrden === 'fecha') sortParam = '&sortBy=primary_release_date.desc';
-                if (criterioOrden === 'proximamente') sortParam = '&sortBy=primary_release_date.asc&releaseDateGte=' + (new Date().getFullYear() + 1);
+                                if (criterioOrden === 'proximamente') sortParam = '&sortBy=primary_release_date.asc&releaseDateGteExact=' + new Date().toISOString().split('T')[0];
                 const response = await fetch(`${CONFIG.API_URL}/movies/popular?page=${pagina}${sortParam}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -339,8 +373,10 @@ window.cargarPeliculasPopulares = async function(pagina = 1) {
                     if (!p.poster_path) return false;
                     if (!p.overview || p.overview.trim() === '') return false;
                     if (!p.title || !soloLatinos.test(p.title.trim())) return false;
+                    if (criterio === 'proximamente') {
+                        return !!p.release_date && new Date(p.release_date) > new Date();
+                    }
                     const anio = p.release_date ? new Date(p.release_date).getFullYear() : null;
-                    if (criterio === 'proximamente') return anio > anioActual;
                     return !anio || anio <= anioActual;
                 };
 
@@ -355,7 +391,7 @@ window.cargarPeliculasPopulares = async function(pagina = 1) {
                                         const criterioOrden2 = window._criterioOrden || 'fecha';
                                         let sortParam2 = '';
                                         if (criterioOrden2 === 'fecha') sortParam2 = '&sortBy=primary_release_date.desc';
-                                        if (criterioOrden2 === 'proximamente') sortParam2 = '&sortBy=primary_release_date.asc&releaseDateGte=' + (anioActual + 1);
+                                                                                if (criterioOrden2 === 'proximamente') sortParam2 = '&sortBy=primary_release_date.asc&releaseDateGteExact=' + new Date().toISOString().split('T')[0];
                                         const resExtra = await fetch(`${CONFIG.API_URL}/movies/popular?page=${paginaExtra}${sortParam2}`, {
                                             headers: { 'Authorization': `Bearer ${token2}` }
                                         });
@@ -716,31 +752,49 @@ async function cargarPeliculasFila(fila) {
     const anioActual = new Date().getFullYear();
     const soloLatinos = /^[a-zA-ZÀ-ÿ0-9\s\-:,.!?'"()\u00C0-\u024F\u1E00-\u1EFF]+$/;
 
-    const esValida = (p, esProximamente) => {
-        if (!p.poster_path || !p.overview || p.overview.trim() === '') return false;
-        if (!p.title || !soloLatinos.test(p.title.trim())) return false;
-        const anio = p.release_date ? new Date(p.release_date).getFullYear() : null;
-        return esProximamente ? anio > anioActual : (!anio || anio <= anioActual);
-    };
+            const esValida = (p, esProximamente) => {
+                if (!p.poster_path || !p.overview || p.overview.trim() === '') return false;
+                if (!p.title || !soloLatinos.test(p.title.trim())) return false;
+                if (esProximamente) {
+                    return !!p.release_date && new Date(p.release_date) > new Date();
+                }
+                const anio = p.release_date ? new Date(p.release_date).getFullYear() : null;
+                return !anio || anio <= anioActual;
+            };
 
-    try {
-        let resultados = [];
+            try {
+                let resultados = [];
 
-        if (fila.key === 'fecha') {
-            const res = await fetch(`${CONFIG.API_URL}/movies/popular?page=1&sortBy=primary_release_date.desc`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await res.json();
-            resultados = (data.results || []).filter(p => esValida(p, false));
+                if (fila.key === 'fecha') {
+                    const res = await fetch(`${CONFIG.API_URL}/movies/popular?page=1&sortBy=primary_release_date.desc`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+                    resultados = (data.results || []).filter(p => esValida(p, false));
 
-        } else if (fila.key === 'proximamente') {
-            const res = await fetch(`${CONFIG.API_URL}/movies/popular?page=1&sortBy=primary_release_date.asc&releaseDateGte=${anioActual + 1}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await res.json();
-            resultados = (data.results || []).filter(p => esValida(p, true));
+                } else if (fila.key === 'proximamente') {
+                    // A diferencia de las otras filas, acá suele hacer falta más
+                    // de 1 página para juntar suficientes tarjetas — las películas
+                    // de próximo estreno suelen tener menos datos completos en
+                    // TMDb todavía (sinopsis/poster vacíos hasta acercarse la
+                    // fecha), así que el filtro descarta más de lo normal.
+                    const hoy = new Date().toISOString().split('T')[0];
+                    let pagina = 1;
+                    const maxPaginas = 5; // resguardo — no pedir de más si genuinamente hay poco contenido
+                    let totalPaginasTmdb = 1;
+                    while (resultados.length < 15 && pagina <= maxPaginas && pagina <= totalPaginasTmdb) {
+                        const res = await fetch(`${CONFIG.API_URL}/movies/popular?page=${pagina}&sortBy=primary_release_date.asc&releaseDateGteExact=${hoy}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        const data = await res.json();
+                        totalPaginasTmdb = data.total_pages || 1;
+                        const nuevos = (data.results || []).filter(p => esValida(p, true) && !resultados.some(r => r.id === p.id));
+                        resultados = resultados.concat(nuevos);
+                        pagina++;
+                    }
+                    fila.pagina = pagina - 1; // así la paginación por scroll sigue desde acá, sin repetir páginas ya consumidas
 
-                } else if (fila.key === 'votos') {
+                        } else if (fila.key === 'votos') {
                     const res = await fetch(`${CONFIG.API_URL}/movies/popular?page=1`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
@@ -837,12 +891,59 @@ async function renderCardsFila(fila) {
             track.appendChild(slide);
         });
 
-                renderDotsFila(fila);
+                                renderDotsFila(fila);
 
-                    if (typeof window.cargarEstadisticasVotacion === 'function') {
-                        window.cargarEstadisticasVotacion();
-                    }
-}
+                                    if (typeof window.cargarEstadisticasVotacion === 'function') {
+                                        window.cargarEstadisticasVotacion();
+                                    }
+                                    if (typeof window.cargarEstadisticasExpectativa === 'function') {
+                                        window.cargarEstadisticasExpectativa();
+                                    }
+                }
+
+window.calificarExpectativaCard = async function(id, valor) {
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/movies/${id}/expectation`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rating: valor })
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        window._pintarExpectativaCard(id, data);
+    } catch (e) {}
+};
+
+window._pintarExpectativaCard = function(id, data) {
+    const cont = document.getElementById(`expectativa-${id}`);
+    if (!cont) return;
+    cont.querySelectorAll('.card-expectativa-estrellas i').forEach(star => {
+        const v = parseInt(star.dataset.valor, 10);
+        star.classList.toggle('activa', v <= (data.userRating || 0));
+    });
+
+    const resumen = document.getElementById(`expectativa-resumen-${id}`);
+    if (!resumen) return;
+    resumen.textContent = data.count > 0
+        ? `${data.average.toFixed(1)} — ${data.count.toLocaleString('es-AR')} persona${data.count === 1 ? '' : 's'} la ${data.count === 1 ? 'está' : 'están'} esperando`
+        : '';
+};
+
+window.cargarEstadisticasExpectativa = async function() {
+    const token = localStorage.getItem('token');
+    const cards = document.querySelectorAll('.card-expectativa[id^="expectativa-"]');
+    for (const card of cards) {
+        const id = card.id.replace('expectativa-', '');
+        try {
+            const res = await fetch(`${CONFIG.API_URL}/movies/${id}/expectation`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) continue;
+            window._pintarExpectativaCard(id, await res.json());
+        } catch (e) {}
+    }
+};
 
 function reiniciarGuinoTimer(fila, track) {
     if (fila.guinoTimeout) clearTimeout(fila.guinoTimeout);
@@ -985,7 +1086,7 @@ async function cargarMasPeliculasFila(fila, track) {
             totalPaginas = data.total_pages || 1;
 
         } else if (fila.key === 'proximamente') {
-            const res = await fetch(`${CONFIG.API_URL}/movies/popular?page=${fila.pagina}&sortBy=primary_release_date.asc&releaseDateGte=${anioActual + 1}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                        const res = await fetch(`${CONFIG.API_URL}/movies/popular?page=${fila.pagina}&sortBy=primary_release_date.asc&releaseDateGteExact=${new Date().toISOString().split('T')[0]}`, { headers: { 'Authorization': `Bearer ${token}` } });
             const data = await res.json();
             nuevos = (data.results || []).filter(p => esValida(p, true));
             totalPaginas = data.total_pages || 1;
@@ -1678,7 +1779,7 @@ window.cargarMas = async function() {
                 const criterioOrden = window._criterioOrden || 'fecha';
                 let sortParam = '';
                 if (criterioOrden === 'fecha') sortParam = '&sortBy=primary_release_date.desc';
-                if (criterioOrden === 'proximamente') sortParam = '&sortBy=primary_release_date.asc&releaseDateGte=' + (new Date().getFullYear() + 1);
+                                if (criterioOrden === 'proximamente') sortParam = '&sortBy=primary_release_date.asc&releaseDateGteExact=' + new Date().toISOString().split('T')[0];
 
                 const cursorTmdb = criterioOrden === 'proximamente'
                     ? (window.estadoPaginacion._ultimaPaginaTmdb || 1) + 1
@@ -1697,8 +1798,7 @@ window.cargarMas = async function() {
                         if (!p.overview || p.overview.trim() === '') return false;
                         const soloLatinos = /^[a-zA-ZÀ-ÿ0-9\s\-:,.!?'"()\u00C0-\u024F\u1E00-\u1EFF]+$/;
                         if (!p.title || !soloLatinos.test(p.title.trim())) return false;
-                        const anio = p.release_date ? new Date(p.release_date).getFullYear() : null;
-                        return anio > anioActual;
+                        return !!p.release_date && new Date(p.release_date) > new Date();
                     };
 
                     let acumulados = [...data.results];
@@ -2716,7 +2816,55 @@ window.abrirWorkflowDesdeModal = function() {
     }
 };
 
-window.cargarDatosPelicula = async function(id) {
+window.cargarExpectativaPelicula = async function(id) {
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/movies/${id}/expectation`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        window._pintarExpectativa(data);
+    } catch (e) {}
+};
+
+window._pintarExpectativa = function(data) {
+    const estrellas = document.querySelectorAll('#modalExpectativaEstrellas i');
+    const valorActual = data.userRating || 0;
+    estrellas.forEach(star => {
+        const v = parseInt(star.dataset.valor, 10);
+        star.classList.toggle('activa', v <= valorActual);
+    });
+
+    const resumen = document.getElementById('modalExpectativaResumen');
+    if (!resumen) return;
+    if (data.count > 0) {
+        resumen.textContent = `Nivel de expectativa: ${data.average.toFixed(1)} — ${data.count.toLocaleString('es-AR')} persona${data.count === 1 ? '' : 's'} la ${data.count === 1 ? 'está' : 'están'} esperando`;
+    } else {
+        resumen.textContent = '';
+    }
+};
+
+window.calificarExpectativa = async function(id, valor) {
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/movies/${id}/expectation`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rating: valor })
+        });
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                window._pintarExpectativa(data);
+                // Sincroniza también la tarjeta del carrusel de atrás — si no,
+                // se ve como si nunca hubieras calificado hasta refrescar.
+                if (typeof window._pintarExpectativaCard === 'function') {
+                    window._pintarExpectativaCard(id, data);
+                }
+            } catch (e) {}
+        };
+
+        window.cargarDatosPelicula = async function(id) {
     const token = localStorage.getItem('token');
 
     document.getElementById('modalTitulo').textContent = 'Cargando...';
@@ -2749,8 +2897,36 @@ window.cargarDatosPelicula = async function(id) {
         const votos       = document.getElementById('modalVotos');
         const generos     = document.getElementById('modalGeneros');
 
-        if (fecha)       fecha.textContent       = pelicula.release_date ? new Date(pelicula.release_date).toLocaleDateString('es-ES') : 'N/A';
-        if (duracion)    duracion.textContent    = pelicula.runtime || 'N/A';
+                if (fecha)       fecha.textContent       = pelicula.release_date ? new Date(pelicula.release_date).toLocaleDateString('es-ES') : 'N/A';
+                if (duracion)    duracion.textContent    = pelicula.runtime || 'N/A';
+
+                // Fase "Lo que se viene" — si el estreno todavía no pasó, se
+                // reemplaza Te banco/No te banco + comentarios por el widget
+                // de expectativa. Recomendar se mantiene en ambos casos.
+                const esProximoEstreno = !!pelicula.release_date && new Date(pelicula.release_date) > new Date();
+                const elExpectativa  = document.getElementById('modalExpectativa');
+                const elBtnLike      = document.querySelector('#modalPelicula .btn-like');
+                const elBtnDislike   = document.querySelector('#modalPelicula .btn-dislike');
+                const elComentarios  = document.querySelector('#modalPelicula .modal-fila-comentarios');
+
+                if (elExpectativa) elExpectativa.style.display = esProximoEstreno ? 'block' : 'none';
+                                // .btn-like/.btn-dislike tienen "display: flex !important"
+                                // en el CSS — un !important de hoja de estilos le gana a un
+                                // estilo inline normal, así que hay que setearlo también
+                                // como !important desde acá (setProperty es la única forma).
+                                if (elBtnLike) {
+                                    if (esProximoEstreno) elBtnLike.style.setProperty('display', 'none', 'important');
+                                    else elBtnLike.style.removeProperty('display');
+                                }
+                                if (elBtnDislike) {
+                                    if (esProximoEstreno) elBtnDislike.style.setProperty('display', 'none', 'important');
+                                    else elBtnDislike.style.removeProperty('display');
+                                }
+                if (elComentarios) elComentarios.style.display = esProximoEstreno ? 'none'  : '';
+
+                if (esProximoEstreno) {
+                    window.cargarExpectativaPelicula(id);
+                }
         const TMDB_IDIOMAS = {
             'af': 'Afrikáans', 'ar': 'Árabe', 'bg': 'Búlgaro', 'bn': 'Bengalí',
             'ca': 'Catalán', 'cs': 'Checo', 'da': 'Danés', 'de': 'Alemán',

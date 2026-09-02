@@ -267,9 +267,10 @@
                         <i class="fas fa-share-alt" style="font-size:0.85rem;"></i>
                     </button>
                     <button id="btnRecomendarModalHeader"
+                            class="btn-recomendar-header"
                             onclick="window.abrirPanelRecomendar(window.peliculaActualId, event)"
                             title="Recomendar"
-                            style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:none;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+                            style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
                         <i class="fas fa-envelope" style="font-size:0.85rem;"></i>
                     </button>
                     <button id="btnPublicarModal"
@@ -400,18 +401,34 @@
                 <!-- LEYENDA DE PORCENTAJE -->
                 <div id="modalLeyendaPorcentaje" style="text-align:center;font-size:0.95rem;font-weight:600;color:#333;margin:0rem 0 0.25rem;white-space:nowrap;grid-column:1/-1;width:100%;display:block;"></div>
 
-                <!-- BOTONES VOTAR - DEBAJO DEL TRÁILER -->
-                <div class="modal-acciones">
-                    <button class="btn-like" onclick="window.votarPelicula(window.peliculaActualId, 'like', event)" title="Me gusta">
-                        <i class="fas fa-thumbs-up"></i> <span class="btn-label-modal">Te banco</span> <span id="modalLikes">0</span>
-                    </button>
-                    <button class="btn-dislike" onclick="window.votarPelicula(window.peliculaActualId, 'dislike', event)" title="No me gusta">
-                        <i class="fas fa-thumbs-down"></i> <span class="btn-label-modal">No te banco</span> <span id="modalDislikes">0</span>
-                    </button>
-                    <button class="btn-recomendar" onclick="window.abrirPanelRecomendar(window.peliculaActualId, event)" title="Recomendar">
-                        <i class="fas fa-envelope"></i> <span class="btn-label-modal">Recomendar</span>
-                    </button>
-                </div>
+                    <!-- EXPECTATIVA — solo para películas que todavía no se
+         estrenaron (fase "Lo que se viene"). No tiene sentido
+         Te banco/comentarios sobre algo que nadie vio todavía;
+         acá se mide expectativa en vez de opinión. -->
+                    <div class="modal-expectativa" id="modalExpectativa" style="display:none;">
+                        <p class="modal-expectativa-titulo">¿Cuánto la estás esperando?</p>
+                        <div class="modal-expectativa-estrellas" id="modalExpectativaEstrellas">
+                            <i class="fas fa-star" data-valor="1" onclick="window.calificarExpectativa(window.peliculaActualId, 1)"></i>
+                            <i class="fas fa-star" data-valor="2" onclick="window.calificarExpectativa(window.peliculaActualId, 2)"></i>
+                            <i class="fas fa-star" data-valor="3" onclick="window.calificarExpectativa(window.peliculaActualId, 3)"></i>
+                            <i class="fas fa-star" data-valor="4" onclick="window.calificarExpectativa(window.peliculaActualId, 4)"></i>
+                            <i class="fas fa-star" data-valor="5" onclick="window.calificarExpectativa(window.peliculaActualId, 5)"></i>
+                        </div>
+                        <p class="modal-expectativa-resumen" id="modalExpectativaResumen"></p>
+                    </div>
+
+                    <!-- BOTONES VOTAR - DEBAJO DEL TRÁILER -->
+                    <div class="modal-acciones">
+                        <button class="btn-like" onclick="window.votarPelicula(window.peliculaActualId, 'like', event)" title="Me gusta">
+                            <i class="fas fa-thumbs-up"></i> <span class="btn-label-modal">Te banco</span> <span id="modalLikes">0</span>
+                        </button>
+                        <button class="btn-dislike" onclick="window.votarPelicula(window.peliculaActualId, 'dislike', event)" title="No me gusta">
+                            <i class="fas fa-thumbs-down"></i> <span class="btn-label-modal">No te banco</span> <span id="modalDislikes">0</span>
+                        </button>
+                        <button class="btn-recomendar" onclick="window.abrirPanelRecomendar(window.peliculaActualId, event)" title="Recomendar">
+                            <i class="fas fa-envelope"></i> <span class="btn-label-modal">Recomendar</span>
+                        </button>
+                    </div>
 
                 <!-- PELÍCULAS SIMILARES -->
                 <div class="similares-seccion similares-seccion-inline" style="display:none;">
@@ -544,9 +561,10 @@
                         <i class="fas fa-share-alt" style="font-size:0.85rem;"></i>
                     </button>
                     <button id="btnRecomendarModalHeaderSerie"
+                            class="btn-recomendar-header"
                             onclick="window.abrirPanelRecomendarSerie(window.serieActualId, event)"
                             title="Recomendar"
-                            style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:none;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+                            style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
                         <i class="fas fa-envelope" style="font-size:0.85rem;"></i>
                     </button>
                     <button class="btn-watchlist-serie" id="btnWatchlistModalSerie"
