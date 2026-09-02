@@ -406,13 +406,14 @@
          Te banco/comentarios sobre algo que nadie vio todavía;
          acá se mide expectativa en vez de opinión. -->
                     <div class="modal-expectativa" id="modalExpectativa" style="display:none;">
-                        <p class="modal-expectativa-titulo">¿Cuánto la estás esperando?</p>
-                        <div class="modal-expectativa-estrellas" id="modalExpectativaEstrellas">
-                            <i class="fas fa-star" data-valor="1" onclick="window.calificarExpectativa(window.peliculaActualId, 1)"></i>
-                            <i class="fas fa-star" data-valor="2" onclick="window.calificarExpectativa(window.peliculaActualId, 2)"></i>
-                            <i class="fas fa-star" data-valor="3" onclick="window.calificarExpectativa(window.peliculaActualId, 3)"></i>
-                            <i class="fas fa-star" data-valor="4" onclick="window.calificarExpectativa(window.peliculaActualId, 4)"></i>
-                            <i class="fas fa-star" data-valor="5" onclick="window.calificarExpectativa(window.peliculaActualId, 5)"></i>
+                        <p class="modal-expectativa-titulo">¿La estás esperando?</p>
+                        <div class="modal-expectativa-botones" id="modalExpectativaBotones">
+                            <button type="button" class="expectativa-btn expectativa-btn-si" data-valor="true" onclick="window.calificarExpectativa(window.peliculaActualId, true)">
+                                <i class="fas fa-check"></i> Sí
+                            </button>
+                            <button type="button" class="expectativa-btn expectativa-btn-no" data-valor="false" onclick="window.calificarExpectativa(window.peliculaActualId, false)">
+                                <i class="fas fa-times"></i> No
+                            </button>
                         </div>
                         <p class="modal-expectativa-resumen" id="modalExpectativaResumen"></p>
                     </div>
