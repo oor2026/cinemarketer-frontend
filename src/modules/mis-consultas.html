@@ -75,6 +75,12 @@
                 </button>
             </div>
 
+            <!-- Aviso: aclara que "pendiente" depende de ver la
+     película/serie y tocar "Marcar como vista" — no de
+     haber abierto este hilo. Se arma dinámicamente en
+     _pintarHiloUsuario / abrirHiloUsuario. -->
+            <p id="bandejaHiloAvisoPendientes" class="bandeja-hilo-aviso-pendientes" style="display:none;"></p>
+
             <!-- Dos compartimentos, no un timeline mezclado — esto no
                  es una conversación, es una bandeja de entrada/salida. -->
             <div class="bandeja-hilo-subtabs">
@@ -213,11 +219,11 @@
      del confirm() nativo del navegador. -->
     <div id="bandejaConfirmGenerico" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
         <div style="background:#fff; border-radius:16px; max-width:320px; width:100%; padding:1.5rem; text-align:center;">
-            <i class="fas fa-trash-alt" style="font-size:1.6rem; color:#e50914; margin-bottom:0.8rem; display:block;"></i>
+            <i class="fas fa-trash-alt" id="bandejaConfirmGenericoIcono" style="font-size:1.6rem; color:#e50914; margin-bottom:0.8rem; display:block;"></i>
             <p id="bandejaConfirmGenericoTexto" style="font-size:0.9rem; color:#333; margin:0 0 1.2rem; line-height:1.5;"></p>
             <div style="display:flex; gap:0.6rem;">
                 <button onclick="window._cerrarConfirmGenericoBandeja()" style="flex:1; padding:0.6rem; border-radius:8px; border:1px solid #ddd; background:#fff; color:#555; cursor:pointer; font-weight:600;">Cancelar</button>
-                <button onclick="window._ejecutarConfirmGenericoBandeja()" style="flex:1; padding:0.6rem; border-radius:8px; border:none; background:#e50914; color:#fff; cursor:pointer; font-weight:600;">Eliminar</button>
+                <button id="bandejaConfirmGenericoBtnOk" onclick="window._ejecutarConfirmGenericoBandeja()" style="flex:1; padding:0.6rem; border-radius:8px; border:none; background:#e50914; color:#fff; cursor:pointer; font-weight:600;">Eliminar</button>
             </div>
         </div>
     </div>

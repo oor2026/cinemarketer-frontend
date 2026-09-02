@@ -173,7 +173,27 @@ window.volverAListaUsuarios = function() {
 window._bandejaModoSeleccion = false;
 window._bandejaSeleccionados = new Set(); // guarda "tipo-id", ej "pelicula-42"
 
+window._actualizarAvisoPendientesBandeja = function() {
+    const grupo = window._bandejaHiloActual;
+    const aviso = document.getElementById('bandejaHiloAvisoPendientes');
+    if (!grupo || !aviso) return;
+
+    const pendientes = grupo.recibidas.filter(it => !it.seenAt).length;
+
+    if (pendientes === 0) {
+        aviso.style.display = 'none';
+        return;
+    }
+
+    aviso.textContent = pendientes === 1
+        ? 'Tenés 1 recomendación de película o serie que no marcaste como vista todavía.'
+        : `Tenés ${pendientes} recomendaciones de películas o series que no marcaste como vistas todavía.`;
+    aviso.style.display = 'block';
+};
+
 window._pintarHiloUsuario = function() {
+    window._actualizarAvisoPendientesBandeja();
+
     const grupo = window._bandejaHiloActual;
     const cont = document.getElementById('bandejaHiloItems');
     const esEnviadas = window._bandejaSubtabActual === 'enviadas';
@@ -325,13 +345,14 @@ window._marcarVistaBandeja = function(id, tipo) {
             try {
                 const token = localStorage.getItem('token');
                 await fetch(url, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
-                                const item = window._bandejaHiloActual.recibidas.find(it => it.id === id && it.tipo === tipo);
-                                if (item) item.seenAt = new Date().toISOString();
-                                window._pintarHiloUsuario();
-                            } catch (e) {}
-                        }
-                    );
-                };
+                const item = window._bandejaHiloActual.recibidas.find(it => it.id === id && it.tipo === tipo);
+                if (item) item.seenAt = new Date().toISOString();
+                window._pintarHiloUsuario();
+            } catch (e) {}
+        },
+        'Sí, ya la vi'
+    );
+};
 
 window._calificarBandeja = async function(id, tipo, rating) {
     const url = tipo === 'serie'
@@ -426,8 +447,9 @@ window._clickFilaUsuarioBandeja = function(idx) {
 // ejecutar si se confirma. Reusado por las 3 vías de borrado.
 window._bandejaConfirmCallback = null;
 
-window._abrirConfirmGenericoBandeja = function(mensaje, callback) {
+window._abrirConfirmGenericoBandeja = function(mensaje, callback, textoBoton) {
     document.getElementById('bandejaConfirmGenericoTexto').textContent = mensaje;
+    document.getElementById('bandejaConfirmGenericoBtnOk').textContent = textoBoton || 'Eliminar';
     window._bandejaConfirmCallback = callback;
     document.getElementById('bandejaConfirmGenerico').style.display = 'flex';
 };

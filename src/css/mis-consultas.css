@@ -646,6 +646,17 @@
     position: absolute; top: 0.7rem; left: 0.7rem; width: 20px; height: 20px; z-index: 2;
 }
 
+.bandeja-hilo-aviso-pendientes {
+    background: #fdf0ef;
+    border: 1px solid #f5d5d3;
+    color: #b2070f;
+    font-size: 0.82rem;
+    line-height: 1.4;
+    padding: 0.65rem 0.9rem;
+    border-radius: 8px;
+    margin-bottom: 0.85rem;
+}
+
 .bandeja-hilo-subtabs { display: flex; gap: 0.4rem; margin-bottom: 1rem; }
 .bandeja-hilo-subtab {
     flex: 1; background: #f5f5f5; border: none; padding: 0.55rem; border-radius: 8px;
