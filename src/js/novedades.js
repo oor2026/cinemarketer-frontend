@@ -217,15 +217,24 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
         }
 
     // Abrir película al clickear recomendación nueva
-        if (type === 'NEW_RECOMMENDATION') {
-                    if (movieId) {
-                        await _asegurarModalPeliculaEnDOM();
-                        if (typeof window.abrirDetallePelicula === 'function') {
-                            window.abrirDetallePelicula(movieId);
+                if (type === 'NEW_RECOMMENDATION') {
+                            if (movieId) {
+                                await _asegurarModalPeliculaEnDOM();
+                                if (typeof window.abrirDetallePelicula === 'function') {
+                                    window.abrirDetallePelicula(movieId);
+                                }
+                            }
+                            return;
                         }
-                    }
-                    return;
-                }
+                if (type === 'MOVIE_RELEASED_EXPECTED') {
+                            if (movieId) {
+                                await _asegurarModalPeliculaEnDOM();
+                                if (typeof window.abrirDetallePelicula === 'function') {
+                                    window.abrirDetallePelicula(movieId);
+                                }
+                            }
+                            return;
+                        }
     // Abrir serie al clickear recomendación nueva de serie, o al clickear
         // el aviso de "calificaron tu recomendación" cuando es de una serie
         // (RECOMMENDATION_RATED lo comparten película y serie — se distingue

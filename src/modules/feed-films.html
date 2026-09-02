@@ -1463,3 +1463,16 @@
         <div style="text-align:center;padding:1rem;color:#ccc;"><i class="fas fa-spinner fa-spin"></i></div>
     </div>
 </div>
+
+<!-- AVISO DE ESTRENO — aparece solo al calificar 4-5 de expectativa,
+     y solo si todavía no activaste el aviso para esa película. -->
+<div id="modalAvisoEstreno" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1000000; align-items:center; justify-content:center; padding:1rem;">
+    <div style="background:#fff; border-radius:16px; max-width:320px; width:100%; padding:1.5rem; text-align:center;">
+        <i class="fas fa-bell" style="font-size:1.6rem; color:#e50914; margin-bottom:0.8rem; display:block;"></i>
+        <p style="font-size:0.9rem; color:#333; margin:0 0 1.2rem; line-height:1.5;">¿Querés que te avisemos apenas se estrene <strong id="modalAvisoEstrenoTitulo"></strong>?</p>
+        <div style="display:flex; gap:0.6rem;">
+            <button onclick="window._cerrarModalAvisoEstreno()" style="flex:1; padding:0.6rem; border-radius:8px; border:1px solid #ddd; background:#fff; color:#555; cursor:pointer; font-weight:600;">Ahora no</button>
+            <button onclick="window._confirmarAvisoEstreno()" style="flex:1; padding:0.6rem; border-radius:8px; border:none; background:#e50914; color:#fff; cursor:pointer; font-weight:600;">Sí, avisame</button>
+        </div>
+    </div>
+</div>
