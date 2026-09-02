@@ -117,17 +117,18 @@ window.cargarNovedades = async function() {
         const novedades = await res.json();
 
                 // Actualizar badge
-                const noLeidas = novedades.filter(n => !n.read).length;
-                const badge = document.getElementById('novedadesBadge');
-                if (badge) {
-                    badge.textContent = noLeidas;
-                    badge.style.display = noLeidas > 0 ? 'inline-block' : 'none';
-                }
-                const badgeMobile = document.getElementById('novedadesBadgeMobile');
-                if (badgeMobile) {
-                    badgeMobile.textContent = noLeidas;
-                    badgeMobile.style.display = noLeidas > 0 ? 'inline-block' : 'none';
-                }
+                                const noLeidas = novedades.filter(n => !n.read).length;
+                                const badge = document.getElementById('novedadesBadge');
+                                if (badge) {
+                                    badge.textContent = noLeidas;
+                                    badge.style.display = noLeidas > 0 ? 'inline-block' : 'none';
+                                }
+                                const badgeMobile = document.getElementById('novedadesBadgeMobile');
+                                if (badgeMobile) {
+                                    badgeMobile.textContent = noLeidas;
+                                    badgeMobile.style.display = noLeidas > 0 ? 'inline-block' : 'none';
+                                }
+                                window._actualizarAnimacionCampanaMobile(noLeidas);
 
         if (novedades.length === 0) {
             lista.innerHTML = '<div style="padding:1rem;text-align:center;color:#999;font-size:0.85rem;">Sin novedades por ahora</div>';
@@ -193,16 +194,19 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
             });
         } catch(e) {}
 
-                // Actualizar badge inmediatamente
-                const badge = document.getElementById('novedadesBadge');
-                const badgeMobile = document.getElementById('novedadesBadgeMobile');
-                [badge, badgeMobile].forEach(b => {
-                    if (!b) return;
-                    const actual = parseInt(b.textContent) || 0;
-                    const nuevo = Math.max(0, actual - 1);
-                    b.textContent = nuevo;
-                    b.style.display = nuevo > 0 ? 'inline-block' : 'none';
-                });
+                                // Actualizar badge inmediatamente
+                                const badge = document.getElementById('novedadesBadge');
+                                const badgeMobile = document.getElementById('novedadesBadgeMobile');
+                                let noLeidasRestantes = 0;
+                                [badge, badgeMobile].forEach(b => {
+                                    if (!b) return;
+                                    const actual = parseInt(b.textContent) || 0;
+                                    const nuevo = Math.max(0, actual - 1);
+                                    b.textContent = nuevo;
+                                    b.style.display = nuevo > 0 ? 'inline-block' : 'none';
+                                    noLeidasRestantes = nuevo;
+                                });
+                                window._actualizarAnimacionCampanaMobile(noLeidasRestantes);
 
         // Recargar lista para actualizar visual
         window.cargarNovedades();
@@ -576,18 +580,28 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
         if (!res.ok) return;
         const data = await res.json();
-                const badge = document.getElementById('novedadesBadge');
-                if (badge && data.count > 0) {
-                    badge.textContent = data.count;
-                    badge.style.display = 'inline-block';
-                }
-                const badgeMobile = document.getElementById('novedadesBadgeMobile');
-                if (badgeMobile && data.count > 0) {
-                    badgeMobile.textContent = data.count;
-                    badgeMobile.style.display = 'inline-block';
-                }
-            } catch(e) {}
-        });
+                                const badge = document.getElementById('novedadesBadge');
+                                if (badge && data.count > 0) {
+                                    badge.textContent = data.count;
+                                    badge.style.display = 'inline-block';
+                                }
+                                const badgeMobile = document.getElementById('novedadesBadgeMobile');
+                                if (badgeMobile && data.count > 0) {
+                                    badgeMobile.textContent = data.count;
+                                    badgeMobile.style.display = 'inline-block';
+                                }
+                                window._actualizarAnimacionCampanaMobile(data.count || 0);
+                            } catch(e) {}
+                        });
+
+                // Prende/apaga la animación sutil de la campanita mobile según si hay
+                // novedades sin leer. Se llama desde los 3 puntos donde ya se
+                // sincroniza el badge (carga inicial, listado, marcar como leída).
+                window._actualizarAnimacionCampanaMobile = function(count) {
+                    const bell = document.getElementById('dashBellMobile');
+                    if (!bell) return;
+                    bell.classList.toggle('tiene-pendientes', count > 0);
+                };
 
 window.cargarNovedadesMobile = async function() {
     const lista = document.getElementById('novedadesListaMobileFull');
