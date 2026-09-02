@@ -394,6 +394,43 @@
     align-items: center;
 }
 
+/* ===== EXPECTATIVA en tarjeta — fase "Lo que se viene" ===== */
+.card-expectativa {
+    text-align: center;
+}
+.card-expectativa-titulo {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #666;
+    margin: 0 0 0.4rem;
+}
+.card-expectativa-estrellas {
+    display: flex;
+    justify-content: center;
+    gap: 0.3rem;
+    margin-bottom: 0.35rem;
+}
+.card-expectativa-estrellas i {
+    font-size: 1.15rem;
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.15s, transform 0.1s;
+}
+.card-expectativa-estrellas i:hover {
+    color: #f5a623;
+    transform: scale(1.15);
+}
+.card-expectativa-estrellas i.activa {
+    color: #f5a623;
+}
+.card-expectativa-resumen {
+    font-size: 0.72rem;
+    color: #999;
+    margin: 0;
+    min-height: 1.1em;
+    line-height: 1.3;
+}
+
 /* ========== BOTONES DE VOTACIÓN — solo íconos, sin píldora ========== */
 .btn-like, .btn-dislike, .btn-comentarios-card {
     flex: 1;
@@ -1345,6 +1382,53 @@
     grid-template-columns: 1fr 1fr !important;
     gap: 1rem !important;
     margin: 1rem 0 !important;
+}
+
+/* ===== EXPECTATIVA — fase "Lo que se viene" ===== */
+.btn-recomendar-header { display: none; }
+@media (min-width: 769px) {
+    .btn-recomendar-header { display: flex !important; }
+}
+
+.modal-expectativa {
+    text-align: center;
+    padding: 1rem 0;
+    border-top: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
+    margin: 1rem 0;
+    grid-column: 1 / -1;
+    width: 100%;
+}
+.modal-expectativa-titulo {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 0.6rem;
+}
+.modal-expectativa-estrellas {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
+}
+.modal-expectativa-estrellas i {
+    font-size: 1.7rem;
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.15s, transform 0.1s;
+}
+.modal-expectativa-estrellas i:hover {
+    color: #f5a623;
+    transform: scale(1.15);
+}
+.modal-expectativa-estrellas i.activa {
+    color: #f5a623;
+}
+.modal-expectativa-resumen {
+    font-size: 0.85rem;
+    color: #666;
+    min-height: 1.2em;
+    margin: 0;
 }
 
 #modalPelicula .btn-like,
@@ -3070,6 +3154,16 @@
 
 #modalPelicula .modal-acciones .btn-recomendar:hover {
     opacity: 0.8 !important;
+}
+
+/* El ícono de Recomendar migró al header en desktop — el botón de
+   acá abajo queda solo para mobile. Va después de la regla de arriba
+   (misma especificidad) para ganarle por orden en la cascada. */
+@media (min-width: 769px) {
+    #modalPelicula .modal-acciones .btn-recomendar,
+    #modalSerie .modal-acciones .btn-recomendar {
+        display: none !important;
+    }
 }
 
 @media (max-width: 480px) {

@@ -44,24 +44,16 @@
             {overview} <span class="ver-mas" onclick="event.stopPropagation(); window.abrirDetallePelicula({id})">Ver más</span>
         </p>
 
-        <!-- VOTACIÓN PROPIA DE CINEMARKETER -->
+        <!-- VOTACIÓN PROPIA DE CINEMARKETER — o expectativa, si es un
+     próximo estreno. {accionesVotacion} lo decide el JS por
+     cada película, según su release_date. -->
         <div class="votacion-container" id="votacion-{id}">
             <div class="porcentaje-container" id="porcentaje-{id}" style="display: none;">
                 <div class="porcentaje-bar" style="width: 0%;"></div>
                 <span class="porcentaje-texto">0%</span>
             </div>
 
-            <div class="votacion-buttons">
-                <button class="btn-like" onclick="event.stopPropagation(); window.votarPelicula({id}, 'like', event)" title="Me gusta">
-                    <i class="fas fa-thumbs-up"></i> <span id="likes-{id}">0</span>
-                </button>
-                <button class="btn-dislike" onclick="event.stopPropagation(); window.votarPelicula({id}, 'dislike', event)" title="No me gusta">
-                    <i class="fas fa-thumbs-down"></i> <span id="dislikes-{id}">0</span>
-                </button>
-                <button class="btn-comentarios-card" onclick="event.stopPropagation(); window.abrirDetallePelicula({id})" title="Comentarios">
-                    <i class="fas fa-comment"></i> <span id="comentarios-card-{id}" class="comentarios-count">0</span>
-                </button>
-            </div>
+            {accionesVotacion}
         </div>
     </div>
 </div>
