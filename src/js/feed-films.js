@@ -233,11 +233,11 @@ window.generarTarjetasHTML = async function(peliculas) {
                             <div class="card-expectativa" id="expectativa-${pelicula.id}">
                                 <p class="card-expectativa-titulo">¿La estás esperando?</p>
                                 <div class="card-expectativa-estrellas">
-                                    <i class="fas fa-star" data-valor="1" onclick="event.stopPropagation(); window.calificarExpectativaCard(${pelicula.id}, 1)"></i>
-                                    <i class="fas fa-star" data-valor="2" onclick="event.stopPropagation(); window.calificarExpectativaCard(${pelicula.id}, 2)"></i>
-                                    <i class="fas fa-star" data-valor="3" onclick="event.stopPropagation(); window.calificarExpectativaCard(${pelicula.id}, 3)"></i>
-                                    <i class="fas fa-star" data-valor="4" onclick="event.stopPropagation(); window.calificarExpectativaCard(${pelicula.id}, 4)"></i>
-                                    <i class="fas fa-star" data-valor="5" onclick="event.stopPropagation(); window.calificarExpectativaCard(${pelicula.id}, 5)"></i>
+                                                                        <i class="fas fa-star" data-valor="1" onclick="event.stopPropagation(); window.calificarExpectativaCard(${pelicula.id}, 1, '${pelicula.title.replace(/'/g, "\\'")}')"></i>
+                                                                        <i class="fas fa-star" data-valor="2" onclick="event.stopPropagation(); window.calificarExpectativaCard(${pelicula.id}, 2, '${pelicula.title.replace(/'/g, "\\'")}')"></i>
+                                                                        <i class="fas fa-star" data-valor="3" onclick="event.stopPropagation(); window.calificarExpectativaCard(${pelicula.id}, 3, '${pelicula.title.replace(/'/g, "\\'")}')"></i>
+                                                                        <i class="fas fa-star" data-valor="4" onclick="event.stopPropagation(); window.calificarExpectativaCard(${pelicula.id}, 4, '${pelicula.title.replace(/'/g, "\\'")}')"></i>
+                                                                        <i class="fas fa-star" data-valor="5" onclick="event.stopPropagation(); window.calificarExpectativaCard(${pelicula.id}, 5, '${pelicula.title.replace(/'/g, "\\'")}')"></i>
                                 </div>
                                 <p class="card-expectativa-resumen" id="expectativa-resumen-${pelicula.id}"></p>
                             </div>` : `
@@ -901,7 +901,7 @@ async function renderCardsFila(fila) {
                                     }
                 }
 
-window.calificarExpectativaCard = async function(id, valor) {
+window.calificarExpectativaCard = async function(id, valor, titulo) {
     const token = localStorage.getItem('token');
     try {
         const res = await fetch(`${CONFIG.API_URL}/movies/${id}/expectation`, {
@@ -912,6 +912,13 @@ window.calificarExpectativaCard = async function(id, valor) {
         if (!res.ok) throw new Error();
         const data = await res.json();
         window._pintarExpectativaCard(id, data);
+
+        // Mismo aviso de estreno que en el modal — acá no hay
+        // #modalTitulo en pantalla, por eso el título viaja como
+        // parámetro desde la tarjeta en vez de leerse del DOM.
+        if (valor >= 4 && !data.notifyOnRelease) {
+            window._abrirModalAvisoEstreno(id, titulo);
+        }
     } catch (e) {}
 };
 
@@ -2861,8 +2868,44 @@ window.calificarExpectativa = async function(id, valor) {
                 if (typeof window._pintarExpectativaCard === 'function') {
                     window._pintarExpectativaCard(id, data);
                 }
+
+                // Aviso de estreno — solo si calificó 4 o 5, y todavía no
+                // activó el aviso para esta película (evita re-preguntar
+                // cada vez que toca una estrella distinta ya con 4-5).
+                if (valor >= 4 && !data.notifyOnRelease) {
+                    window._abrirModalAvisoEstreno(id);
+                }
             } catch (e) {}
         };
+
+window._abrirModalAvisoEstreno = function(movieId, tituloParam) {
+    window._avisoEstrenoMovieId = movieId;
+    let titulo = tituloParam;
+    if (!titulo) {
+        const tituloEl = document.getElementById('modalTitulo');
+        titulo = tituloEl ? tituloEl.textContent : 'esta película';
+    }
+    document.getElementById('modalAvisoEstrenoTitulo').textContent = titulo;
+    document.getElementById('modalAvisoEstreno').style.display = 'flex';
+};
+
+window._cerrarModalAvisoEstreno = function() {
+    document.getElementById('modalAvisoEstreno').style.display = 'none';
+};
+
+window._confirmarAvisoEstreno = async function() {
+    const id = window._avisoEstrenoMovieId;
+    window._cerrarModalAvisoEstreno();
+    if (!id) return;
+
+    const token = localStorage.getItem('token');
+    try {
+        await fetch(`${CONFIG.API_URL}/movies/${id}/expectation/notify`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+    } catch (e) {}
+};
 
         window.cargarDatosPelicula = async function(id) {
     const token = localStorage.getItem('token');
