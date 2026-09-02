@@ -58,11 +58,56 @@ window.cargarTriviaBadge = async function() {
                 if (window._tabActivo === 'peliculas' || !window._tabActivo) {
                     contenedor.style.display = 'block';
                 }
-                actualizarBadgeSub(estado);
-    } catch (e) {
-        contenedor.style.display = 'none';
-    }
-};
+                                actualizarBadgeSub(estado);
+
+                                // Viñeta que aparece sola, solo mobile — se actualiza el
+                                // estado siempre, pero el intervalo de 60s arranca una
+                                // sola vez (cargarTriviaBadge se llama varias veces por
+                                // sesión: al cambiar de tab, prefetch, etc.)
+                                window._triviaEstadoParaVineta = estado;
+                                if (!window._triviaVinetaInterval) {
+                                    triviaIniciarVinetaPeriodica();
+                                }
+                    } catch (e) {
+                        contenedor.style.display = 'none';
+                    }
+                };
+
+                function triviaMensajeVineta(estado) {
+                    if (estado.estado === 'GANADA' || estado.estado === 'PERDIDA') {
+                        return '¡Te espero mañana!';
+                    }
+                    if (estado.nuncaJugo) {
+                        return '¡Qué aburrimiento!... ¿Jugamos?';
+                    }
+                    if (estado.jugoAyer) {
+                        return '¿Echamos otra ronda como ayer?';
+                    }
+                    // Caso no cubierto explícitamente (jugó antes, pero ni ayer ni hoy) —
+                    // agregado por consistencia, no era uno de los 3 pedidos.
+                    return '¿Volvemos a jugar?';
+                }
+
+                function triviaMostrarVineta() {
+                    if (window.innerWidth > 768) return;
+                    // No molestar si ya está jugando en este momento.
+                    const modal = document.getElementById('triviaModal');
+                    if (modal && modal.style.display === 'flex') return;
+
+                    const cont = document.getElementById('triviaBadgeContainer');
+                    const vineta = document.getElementById('triviaVinetaMobile');
+                    if (!cont || !vineta || cont.style.display === 'none') return;
+                    if (!window._triviaEstadoParaVineta) return;
+
+                        document.getElementById('triviaVinetaTexto').textContent = triviaMensajeVineta(window._triviaEstadoParaVineta);
+                        vineta.classList.add('visible');
+                        setTimeout(() => vineta.classList.remove('visible'), 3000);
+                    }
+
+                    function triviaIniciarVinetaPeriodica() {
+                        triviaMostrarVineta(); // primera aparición, sin esperar
+                        window._triviaVinetaInterval = setInterval(triviaMostrarVineta, 5000);
+                    }
 
 function actualizarBadgeSub(estado) {
     const sub = document.getElementById('triviaBadgeSub');

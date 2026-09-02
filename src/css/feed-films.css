@@ -1179,19 +1179,81 @@
             text-shadow: 0 4px 14px rgba(0,0,0,0.35);
         }
 
-        .trivia-badge {
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                    margin: 0 6px 6px;
-                    padding: 12px 22px;
-                    background: white;
-                    border: 1.5px solid #ded8fb;
-                    border-radius: 16px;
-                    cursor: pointer;
-                    position: relative;
-                    overflow: hidden;
-                }
+                #triviaBadgeContainer,
+                #triviaSeriesBadgeContainer { position: relative; }
+
+                                                @media (max-width: 768px) {
+                                                                .trivia-vineta-mobile {
+                                                                    position: absolute;
+                                                                    top: -40px;
+                                                                    left: 160px;
+                                                        z-index: 20;
+                                                        padding: 0;
+                                                        max-width: 220px;
+                                                        opacity: 0;
+                                                        transform: translateY(8px) scale(0.9);
+                                                        pointer-events: none;
+                                                        transition: opacity 0.25s ease, transform 0.25s ease;
+                                                    }
+                                                    .trivia-vineta-mobile.visible {
+                                                        opacity: 1;
+                                                        transform: translateY(0) scale(1);
+                                                    }
+                                                    /* Wrapper interno con overflow:hidden — contiene el brillo
+                                                       sin recortar la colita, que vive afuera de este. */
+                                                    .trivia-vineta-mobile-inner {
+                                                        position: relative;
+                                                        background: #fff;
+                                                        color: #1a1a1a;
+                                                        padding: 0.65rem 1rem;
+                                                        border-radius: 18px 18px 18px 4px;
+                                                        font-size: 0.82rem;
+                                                        font-weight: 700;
+                                                        box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+                                                        overflow: hidden;
+                                                    }
+                                                    /* Brillo tipo vidrio, esquina superior izquierda */
+                                                    .trivia-vineta-mobile-inner::before {
+                                                        content: '';
+                                                        position: absolute;
+                                                        top: -28px; left: -28px;
+                                                        width: 95px; height: 95px;
+                                                        border-radius: 50%;
+                                                        background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,0.5) 40%, rgba(255,255,255,0) 72%);
+                                                        pointer-events: none;
+                                                    }
+                                                    .trivia-vineta-mobile p {
+                                                        margin: 0;
+                                                        position: relative;
+                                                        z-index: 1;
+                                                    }
+                                                    /* Colita — afuera del wrapper con overflow:hidden, así no
+                                                       se recorta junto con el brillo. */
+                                                    .trivia-vineta-mobile::after {
+                                                        content: '';
+                                                        position: absolute;
+                                                        bottom: -12px;
+                                                        left: 22px;
+                                                        width: 26px; height: 26px;
+                                                        background: #fff;
+                                                        clip-path: polygon(0 0, 100% 0, 0 100%);
+                                                        box-shadow: -4px 4px 6px rgba(0,0,0,0.09);
+                                                    }
+                                                }
+
+                .trivia-badge {
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                            margin: 0 6px 6px;
+                            padding: 12px 22px;
+                            background: white;
+                            border: 1.5px solid #ded8fb;
+                            border-radius: 16px;
+                            cursor: pointer;
+                            position: relative;
+                            overflow: hidden;
+                        }
                 .trivia-bg-icon {
                     position: absolute;
                     color: #7c3aed;
