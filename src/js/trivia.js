@@ -80,9 +80,9 @@ window.cargarTriviaBadge = async function() {
                     if (estado.nuncaJugo) {
                         return '¡Qué aburrimiento!... ¿Jugamos?';
                     }
-                    if (estado.jugoAyer) {
-                        return '¿Echamos otra ronda como ayer?';
-                    }
+                        if (estado.jugoAyer) {
+                            return '¿Echamos otra ronda de preguntas?';
+                        }
                     // Caso no cubierto explícitamente (jugó antes, pero ni ayer ni hoy) —
                     // agregado por consistencia, no era uno de los 3 pedidos.
                     return '¿Volvemos a jugar?';

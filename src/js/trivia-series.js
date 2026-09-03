@@ -84,9 +84,9 @@ window.cargarTriviaSeriesBadge = async function() {
             if (estado.nuncaJugo) {
                 return '¡Qué aburrimiento!... ¿Jugamos?';
             }
-            if (estado.jugoAyer) {
-                return '¿Echamos otra ronda como ayer?';
-            }
+                if (estado.jugoAyer) {
+                    return '¿Echamos otra ronda de preguntas?';
+                }
             return '¿Volvemos a jugar?';
         }
 
