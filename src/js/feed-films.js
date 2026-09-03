@@ -2884,10 +2884,12 @@ window._abrirModalAvisoEstreno = function(movieId, tituloParam) {
     }
     document.getElementById('modalAvisoEstrenoTitulo').textContent = titulo;
     document.getElementById('modalAvisoEstreno').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
 };
 
 window._cerrarModalAvisoEstreno = function() {
     document.getElementById('modalAvisoEstreno').style.display = 'none';
+    document.body.style.overflow = '';
 };
 
 window._confirmarAvisoEstreno = async function() {
