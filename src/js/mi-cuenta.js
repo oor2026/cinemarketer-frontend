@@ -698,8 +698,16 @@ window.guardarEdicion = async function() {
             if (campoActual === 'sexo') {
                 valorDisplay = valor === 'M' ? 'Masculino' : valor === 'F' ? 'Femenino' : 'Otro';
             }
-                        document.getElementById(config.spanId).textContent = valorDisplay;
-            // Si cambió la provincia, blanquear localidad
+                                                document.getElementById(config.spanId).textContent = valorDisplay;
+
+                                    // El nombre también se ve en el header/menú hamburguesa —
+                                    // esa vista nunca se enteraba del cambio hasta recargar.
+                                    if (campoActual === 'name') {
+                                        const nombreHeader = document.querySelector('#headerUserName .user-name-text');
+                                        if (nombreHeader) nombreHeader.textContent = valorDisplay;
+                                    }
+
+                                    // Si cambió la provincia, blanquear localidad
             if (campoActual === 'provincia') {
                 document.getElementById('userLocalidad').textContent = '—';
                 // Blanquear también en el backend
