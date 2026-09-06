@@ -154,48 +154,100 @@ if (dashToggle && dashMenu) {
             return btnNuevaPub;
         }
 
-        let btnBuscar = null;
-        function crearBotonBuscar() {
-            if (btnBuscar) return btnBuscar;
-            btnBuscar = document.createElement('button');
-            btnBuscar.id = 'btnBuscarFlotante';
-            btnBuscar.setAttribute('aria-label', 'Buscar');
-            btnBuscar.innerHTML = '<i class="fas fa-search"></i>';
-            btnBuscar.onclick = function() {
-                if (typeof window.abrirBuscadorAsistido === 'function') {
-                    window.abrirBuscadorAsistido();
+                let btnBuscar = null;
+                function crearBotonBuscar() {
+                    if (btnBuscar) return btnBuscar;
+                    btnBuscar = document.createElement('button');
+                    btnBuscar.id = 'btnBuscarFlotante';
+                    btnBuscar.setAttribute('aria-label', 'Buscar');
+                    btnBuscar.innerHTML = `
+                        <i class="fas fa-search"></i>
+                        <span class="buscador-vineta-mobile" id="buscadorVinetaMobile">
+                            <span class="buscador-vineta-mobile-inner"><p>¿Necesitás de mi ayuda?</p></span>
+                        </span>
+                    `;
+                    btnBuscar.onclick = function() {
+                        if (typeof window.abrirBuscadorAsistido === 'function') {
+                            window.abrirBuscadorAsistido();
+                        }
+                    };
+                    document.body.appendChild(btnBuscar);
+                    return btnBuscar;
                 }
-            };
-            document.body.appendChild(btnBuscar);
-            return btnBuscar;
-        }
 
-        window.addEventListener('scroll', function() {
-            if (window.innerWidth > 768) {
-                if (btnArriba) btnArriba.classList.remove('visible');
-                if (btnNuevaPub) btnNuevaPub.classList.remove('visible');
-                if (btnBuscar) btnBuscar.classList.remove('visible');
-                return;
-            }
+                // Viñeta del botón de buscar — mismo patrón que la de trivia,
+                // solo mobile. Valores de partida (5s visible / cada 60s),
+                // a afinar después.
+                let buscadorVinetaInterval = null;
+                function buscadorMostrarVineta() {
+                    console.log('[vineta-buscador] tick', { innerWidth: window.innerWidth, btnBuscarExiste: !!btnBuscar, esVisible: btnBuscar && btnBuscar.classList.contains('visible') });
+                    if (window.innerWidth > 768) return;
+                    if (!btnBuscar || !btnBuscar.classList.contains('visible')) return;
+                    const vineta = document.getElementById('buscadorVinetaMobile');
+                    if (!vineta) { console.log('[vineta-buscador] no se encontró #buscadorVinetaMobile en el DOM'); return; }
+                    vineta.classList.add('visible');
+                    console.log('[vineta-buscador] mostrada');
+                    setTimeout(() => vineta.classList.remove('visible'), 3000);
+                }
+                function buscadorIniciarVinetaPeriodica() {
+                    console.log('[vineta-buscador] iniciarPeriodica llamado, interval actual:', buscadorVinetaInterval);
+                    if (buscadorVinetaInterval) return;
+                    buscadorMostrarVineta();
+                    buscadorVinetaInterval = setInterval(buscadorMostrarVineta, 9000);
+                    console.log('[vineta-buscador] interval arrancado:', buscadorVinetaInterval);
+                }
+                function buscadorDetenerVinetaPeriodica() {
+                    if (buscadorVinetaInterval) {
+                        clearInterval(buscadorVinetaInterval);
+                        buscadorVinetaInterval = null;
+                    }
+                    const vineta = document.getElementById('buscadorVinetaMobile');
+                    if (vineta) vineta.classList.remove('visible');
+                }
 
-            const hash = window.location.hash.replace('#', '') || 'feed-films';
-            if (hash !== 'feed-films') {
-                if (btnArriba) btnArriba.classList.remove('visible');
-                if (btnNuevaPub) btnNuevaPub.classList.remove('visible');
-                if (btnBuscar) btnBuscar.classList.remove('visible');
-                return;
-            }
+                window.addEventListener('scroll', function() {
+                    if (window.innerWidth > 768) {
+                        if (btnArriba) btnArriba.classList.remove('visible');
+                        if (btnNuevaPub) btnNuevaPub.classList.remove('visible');
+                        if (btnBuscar) btnBuscar.classList.remove('visible');
+                        buscadorDetenerVinetaPeriodica();
+                        return;
+                    }
 
-            const enComunidad = window._tabActivo === 'comunidad';
-            const scrolleado = window.scrollY > 400;
+                    const hash = window.location.hash.replace('#', '') || 'feed-films';
+                    if (hash !== 'feed-films') {
+                        if (btnArriba) btnArriba.classList.remove('visible');
+                        if (btnNuevaPub) btnNuevaPub.classList.remove('visible');
+                        if (btnBuscar) btnBuscar.classList.remove('visible');
+                        buscadorDetenerVinetaPeriodica();
+                        return;
+                    }
 
-            const a = crearBotonArriba();
-            if (scrolleado) { a.classList.add('visible'); } else { a.classList.remove('visible'); }
+                    const enComunidad = window._tabActivo === 'comunidad';
+                    const scrolleado = window.scrollY > 400;
 
-            const p = crearBotonNuevaPub();
-            if (scrolleado && enComunidad) { p.classList.add('visible'); } else { p.classList.remove('visible'); }
+                    const a = crearBotonArriba();
+                    if (scrolleado) { a.classList.add('visible'); } else { a.classList.remove('visible'); }
+
+                    const p = crearBotonNuevaPub();
+                    if (scrolleado && enComunidad) { p.classList.add('visible'); } else { p.classList.remove('visible'); }
 
                     const b = crearBotonBuscar();
-                    if (scrolleado && !enComunidad) { b.classList.add('visible'); } else { b.classList.remove('visible'); }
+                    if (scrolleado && !enComunidad) {
+                        b.classList.add('visible');
+                        buscadorIniciarVinetaPeriodica();
+                    } else {
+                        b.classList.remove('visible');
+                        // Ojo: acá NO se corta el intervalo. En mobile el
+                        // scroll a veces "rebota" y hace que scrollY baje
+                        // de 400 por un instante — si cortábamos el
+                        // intervalo ahí, dependía de que sigas generando
+                        // eventos de scroll para que se vuelva a armar, y
+                        // si te quedabas quieto después de ese rebote, la
+                        // viñeta no volvía a aparecer nunca más. El propio
+                        // buscadorMostrarVineta() ya chequea si el botón
+                        // está visible antes de mostrar nada, así que ese
+                        // chequeo alcanza como resguardo.
+                    }
                 }, { passive: true });
             })();

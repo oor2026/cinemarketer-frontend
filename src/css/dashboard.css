@@ -766,6 +766,64 @@ body.menu-open {
     transform: translateY(0);
 }
 
+@media (max-width: 768px) {
+        #btnBuscarFlotante .buscador-vineta-mobile {
+            position: absolute;
+            bottom: calc(100% + 14px);
+            right: 0;
+            width: max-content;
+            max-width: none;
+            opacity: 0;
+            transform: translateY(8px) scale(0.9);
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+    #btnBuscarFlotante .buscador-vineta-mobile.visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+        #btnBuscarFlotante .buscador-vineta-mobile-inner {
+            position: relative;
+            display: block;
+            background: #fff;
+            color: #1a1a1a;
+            padding: 0.65rem 1rem;
+            border-radius: 18px 18px 4px 18px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+            overflow: hidden;
+            white-space: nowrap;
+            text-align: left;
+        }
+    #btnBuscarFlotante .buscador-vineta-mobile-inner::before {
+        content: '';
+        position: absolute;
+        top: -28px; right: -28px;
+        width: 95px; height: 95px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,0.5) 40%, rgba(255,255,255,0) 72%);
+        pointer-events: none;
+    }
+    #btnBuscarFlotante .buscador-vineta-mobile p {
+        margin: 0;
+        position: relative;
+        z-index: 1;
+    }
+        /* Colita apuntando derecho hacia abajo, hacia el botón */
+        #btnBuscarFlotante .buscador-vineta-mobile::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            right: 18px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 12px solid #fff;
+        }
+}
+
 /* ── Botón flotante "Nueva publicación" (apilado sobre el de Volver arriba) ── */
 #btnNuevaPubFlotante {
     position: fixed;
