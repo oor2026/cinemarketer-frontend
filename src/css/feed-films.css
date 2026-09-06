@@ -2798,9 +2798,17 @@
 
 
     .pelicula-poster {
-            aspect-ratio: 0.79;
+            aspect-ratio: 2 / 3;
         }
 
+    /* La imagen pasa a "cover" solo acá — ahora que el contenedor
+       respeta la proporción real de un poster (2:3), "cover" casi no
+       tiene nada que recortar; antes, con 0.79, el contenedor era más
+       ancho que la imagen real y terminaba recortando título/parte de
+       arriba para poder cubrir el ancho. */
+    .pelicula-poster img {
+        object-fit: cover;
+    }
     .modal-trailer-container {
         min-height: 200px;
     }
