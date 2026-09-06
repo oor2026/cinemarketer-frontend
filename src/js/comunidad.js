@@ -1118,7 +1118,7 @@
                             <i class="fas fa-reply"></i> Responder
                         </button>
                         ${(c.replyCount || 0) > 0 ? `
-                        <button onclick="window.verRespuestasPub(${c.id}, ${pubId}, this)"
+                        <button onclick="window.verRespuestasPub(${c.id}, ${pubId}, this, ${c.replyCount})"
                                 style="background:none;border:none;cursor:pointer;font-size:0.75rem;color:#324C89;padding:0;">
                             — Ver respuestas (${c.replyCount})
                         </button>` : ''}
@@ -1236,22 +1236,28 @@
                 }
             };
 
-        window.verRespuestasPub = async function(comentId, pubId, btn) {
-            const container = document.getElementById(`pubReplies-${comentId}`);
-            if (!container) return;
+            window.verRespuestasPub = async function(comentId, pubId, btn, replyCount) {
+                const container = document.getElementById(`pubReplies-${comentId}`);
+                if (!container) return;
 
-            if (container.style.display !== 'none') {
-                container.style.display = 'none';
-                if (btn) btn.textContent = `— Ver respuestas`;
-                return;
-            }
+                if (container.style.display !== 'none') {
+                    container.style.display = 'none';
+                    // El número es el conteo real del comentario — solo cambia
+                    // si se suman o borran respuestas, nunca por colapsar el hilo.
+                    if (btn) btn.textContent = `— Ver respuestas (${replyCount})`;
+                    return;
+                }
 
-            container.style.display = 'block';
-            container._page = 0;
-            container.innerHTML = '<div style="color:#ccc;font-size:0.8rem;padding:4px 0;"><i class="fas fa-spinner fa-spin"></i></div>';
+                container.style.display = 'block';
+                container._page = 0;
+                container.innerHTML = '<div style="color:#ccc;font-size:0.8rem;padding:4px 0;"><i class="fas fa-spinner fa-spin"></i></div>';
 
-            await cargarRespuestasPub(comentId, pubId, container, 0);
-        };
+                await cargarRespuestasPub(comentId, pubId, container, 0);
+
+                // Lleva la vista directo a las respuestas recién cargadas —
+                // antes había que buscarlas scrolleando a mano.
+                container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            };
 
         async function cargarRespuestasPub(comentId, pubId, container, page) {
             try {
@@ -1381,21 +1387,44 @@
             }
         };
 
-        window.bancarComentarioPub = async function(comentId, btn) {
-            try {
-                const token = localStorage.getItem('token');
-                const res = await fetch(`${window._comunidadApiUrl}/publications/comments/${comentId}/banco`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    const data = await res.json();
+                window.bancarComentarioPub = async function(comentId, btn) {
+                    // Actualización optimista — pinta al toque, sin esperar la
+                    // respuesta del servidor. Antes el color solo cambiaba
+                    // después del fetch, y eso se sentía como 1-2 segundos de
+                    // demora en cada click.
                     const countEl = document.getElementById(`bancoComentCount-${comentId}`);
-                    if (countEl) countEl.textContent = data.count;
-                    if (btn) btn.style.color = data.added ? '#324C89' : '#999';
-                }
-            } catch(e) {}
-        };
+                    const estabaActivo = btn && btn.style.color === 'rgb(50, 76, 137)';
+                    const colorAnterior = btn ? btn.style.color : null;
+                    const countAnterior = countEl ? countEl.textContent : null;
+
+                    if (btn) btn.style.color = estabaActivo ? '#999' : '#324C89';
+                    if (countEl) {
+                        const actual = parseInt(countEl.textContent) || 0;
+                        countEl.textContent = estabaActivo ? Math.max(actual - 1, 0) : actual + 1;
+                    }
+
+                    try {
+                        const token = localStorage.getItem('token');
+                        const res = await fetch(`${window._comunidadApiUrl}/publications/comments/${comentId}/banco`, {
+                            method: 'POST',
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (res.ok) {
+                            // Corrige contra el dato real, por si el optimista
+                            // no coincidió exacto (ej. otra pestaña ya lo había tocado).
+                            const data = await res.json();
+                            if (countEl) countEl.textContent = data.count;
+                            if (btn) btn.style.color = data.added ? '#324C89' : '#999';
+                        } else {
+                            // Falló — revierte al estado de antes del click.
+                            if (btn) btn.style.color = colorAnterior;
+                            if (countEl) countEl.textContent = countAnterior;
+                        }
+                    } catch(e) {
+                        if (btn) btn.style.color = colorAnterior;
+                        if (countEl) countEl.textContent = countAnterior;
+                    }
+                };
 
                 window.ocultarComentarioPub = function(comentId, pubId) {
                     if (!confirm('¿Querés ocultar este comentario? Es irreversible.')) return;
