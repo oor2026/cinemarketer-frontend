@@ -267,6 +267,7 @@ function renderIdentidad(perfil) {
                                 window._renderUltimaMaratonVista(perfil.ultimaMaratonId, { titulo: perfil.ultimaMaratonTitulo, poster: perfil.ultimaMaratonPoster });
                                 window._renderNoMeCansoSerieVista(perfil.noMeCansoDeVerSerieId, { titulo: perfil.noMeCansoDeVerSerieTitulo, poster: perfil.noMeCansoDeVerSeriePoster });
                                 window._renderNoLaBancoSerieVista(perfil.noLaBancoSerieId, { titulo: perfil.noLaBancoSerieTitulo, poster: perfil.noLaBancoSeriePoster });
+                                window._adnSexoActual = perfil.sexo;
                                 window._adnSeries = perfil.adnCinefiloSeries || [];
                                 window._renderAdnCinefilo(perfil.adnCinefilo);
                                 window._renderRankingTrivia(perfil.rankingTriviaPeliculas, perfil.rankingTriviaSeries);
@@ -840,7 +841,7 @@ window.subirBanner = async function(input) {
                                                 const token = localStorage.getItem('token');
 
                                                 const btnFab = document.getElementById('btnFabPrivacidad');
-                                                if (btnFab) btnFab.style.display = 'flex';
+                                                if (btnFab) btnFab.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
 
                                                 try {
                                                     const res = await fetch(`${CONFIG.API_URL}/users/me`, {
@@ -1068,27 +1069,74 @@ window.subirBanner = async function(input) {
         // ADN CINÉFILO — balde 3D
         // ==============================================
         const EMOJI_POR_GENERO = {
-            'Acción': '💥', 'Aventura': '🗺️', 'Animación': '🎨', 'Comedia': '😂',
-            'Crimen': '🔪', 'Documental': '🎥', 'Drama': '🎭', 'Familia': '👨‍👩‍👧',
-            'Fantasía': '🧙', 'Historia': '📜', 'Terror': '👻', 'Música': '🎵',
-            'Misterio': '🔎', 'Romance': '💕', 'Ciencia ficción': '🚀',
-            'Película de TV': '📺', 'Suspense': '😰', 'Bélica': '⚔️', 'Western': '🤠',
-            'Action & Adventure': '🏹', 'Sci-Fi & Fantasy': '🛸', 'War & Politics': '🎖️',
-            'Soap': '💔', 'Kids': '🧸', 'News': '📰', 'Reality': '🎪', 'Talk': '🎙️'
+            'Acción': '💥', 'Animación': '🎨', 'Comedia': '😂',
+            'Crimen': '🔪', 'Documental': '🎥', 'Drama': '🎭',
+            'Historia': '📜', 'Terror': '👻', 'Música': '🎵',
+            'Misterio': '🔎', 'Ciencia ficción': '🚀',
+            'Película de TV': '📺', 'Suspense': '😰', 'Bélica': '⚔️',
+            'Sci-Fi & Fantasy': '🛸', 'War & Politics': '🎖️',
+            'News': '📰', 'Reality': '🎪', 'Talk': '🎙️'
+            // Aventura, Familia, Romance, Western, Fantasía, Action &
+            // Adventure, Kids y Soap ahora viven en
+            // NOMBRE_TOTEM_GENERO_SEXO/EMOJI_GENERO_SEXO más abajo —
+            // tienen variante según el sexo del usuario.
         };
+
+        // Géneros con tótem distinto según sexo — el resto usa los
+        // mapas unisex de siempre. Default masculino si sexo es
+        // null/vacío/cualquier otra cosa que no sea exactamente "F".
+        const NOMBRE_TOTEM_GENERO_SEXO = {
+            'Aventura': { M: 'Explorador', F: 'Exploradora' },
+            'Familia': { M: 'Familiero', F: 'Familiera' },
+            'Romance': { M: 'Cupido', F: 'Venus' },
+            'Western': { M: 'Cowboy', F: 'Vaquera' },
+            'Fantasía': { M: 'Mago', F: 'Hechicera' },
+            'Action & Adventure': { M: 'Aventurón', F: 'Aventurera' },
+            'Kids': { M: 'Osito', F: 'Osita' },
+            'Soap': { M: 'Novelero', F: 'Novelera' }
+        };
+        const EMOJI_GENERO_SEXO = {
+            'Romance': { M: '💘', F: '🌹' },
+            'Fantasía': { M: '🧙', F: '🔮' }
+            // Aventura/Familia/Western/Action & Adventure/Kids/Soap
+            // comparten el mismo emoji para los dos sexos — solo
+            // cambia el nombre del tótem, no el ícono.
+            ,'Aventura': { M: '🗺️', F: '🗺️' }
+            ,'Familia': { M: '👨‍👩‍👧', F: '👨‍👩‍👧' }
+            ,'Western': { M: '🤠', F: '🤠' }
+            ,'Action & Adventure': { M: '🏹', F: '🏹' }
+            ,'Kids': { M: '🧸', F: '🧸' }
+            ,'Soap': { M: '💔', F: '💔' }
+        };
+
+        function _esFemenino(sexo) {
+            return sexo === 'F';
+        }
+        function _totemEmoji(genero, sexo) {
+            const variante = EMOJI_GENERO_SEXO[genero];
+            if (variante) return _esFemenino(sexo) ? variante.F : variante.M;
+            return EMOJI_POR_GENERO[genero] || '🎞️';
+        }
+        function _totemNombre(genero, sexo) {
+            const variante = NOMBRE_TOTEM_GENERO_SEXO[genero];
+            if (variante) return _esFemenino(sexo) ? variante.F : variante.M;
+            return NOMBRE_TOTEM_POR_GENERO[genero] || genero;
+        }
         const ADN_COLORES = [
             0x2a78d6, 0xeb6834, 0x1baf7a, 0xeda100, 0xe87ba4, 0x4a3aa7, 0xe34948, 0x008300,
             0x9c27b0, 0x00bcd4, 0x795548, 0xff5722, 0x607d8b, 0xcddc39, 0x3f51b5, 0xff9800,
             0x009688, 0xc2185b, 0x8bc34a
         ];
         const NOMBRE_TOTEM_POR_GENERO = {
-            'Acción': 'Bang', 'Aventura': 'Explorador', 'Animación': 'Garabato', 'Comedia': 'Risitas',
-            'Crimen': 'Fisgón', 'Documental': 'Bitácora', 'Drama': 'Lágrima', 'Familia': 'Familiero',
+            'Acción': 'Bang', 'Animación': 'Garabato', 'Comedia': 'Risitas',
+            'Crimen': 'Fisgón', 'Documental': 'Bitácora', 'Drama': 'Lágrima',
             'Fantasía': 'Duende', 'Historia': 'Retro', 'Terror': 'Boo', 'Música': 'Compás',
-            'Misterio': 'Enigma', 'Romance': 'Cupido', 'Ciencia ficción': 'Astro',
-            'Película de TV': 'Maratón', 'Suspense': 'Escalofrío', 'Bélica': 'Trinchera', 'Western': 'Cowboy',
-            'Action & Adventure': 'Aventurón', 'Sci-Fi & Fantasy': 'Portal', 'War & Politics': 'Debate',
-            'Soap': 'Culebrón', 'Kids': 'Osito', 'News': 'Flash', 'Reality': 'Chisme', 'Talk': 'Charla'
+            'Misterio': 'Enigma', 'Ciencia ficción': 'Astro',
+            'Película de TV': 'Maratón', 'Suspense': 'Escalofrío', 'Bélica': 'Trinchera',
+            'Sci-Fi & Fantasy': 'Portal', 'War & Politics': 'Debate',
+            'News': 'Flash', 'Reality': 'Chisme', 'Talk': 'Charla'
+            // Aventura, Familia, Romance, Western, Action & Adventure,
+            // Kids y Soap: ver NOMBRE_TOTEM_GENERO_SEXO más arriba.
         };
 
         const TOTEM_FRASE = {
@@ -1190,14 +1238,14 @@ window.subirBanner = async function(input) {
                                                         document.getElementById('perfilAdnTitular').textContent = datos.length > 0
                                                             ? _adnGenerarTitular(datos)
                                                             : 'Aún tengo pendiente revelar mi verdadero yo...';
-                                                                            const totemEl = document.getElementById('perfilAdnTotemNombre');
-                                                                                        if (totemEl) {
-                                                                                            totemEl.textContent = datos.length > 0
-                                                                                                ? (NOMBRE_TOTEM_POR_GENERO[datos[0].genero] || datos[0].genero)
-                                                                                                : '';
-                                                                                        }
-                                                                            window._adnGeneroActual = datos.length > 0 ? datos[0].genero : null;
-                                                                            emojiEl.textContent = datos.length > 0 ? (EMOJI_POR_GENERO[datos[0].genero] || '🎞️') : '🎞️';
+                                                                           const totemEl = document.getElementById('perfilAdnTotemNombre');
+                                                                                       if (totemEl) {
+                                                                                           totemEl.textContent = datos.length > 0
+                                                                                               ? _totemNombre(datos[0].genero, window._adnSexoActual)
+                                                                                               : '';
+                                                                                       }
+                                                                           window._adnGeneroActual = datos.length > 0 ? datos[0].genero : null;
+                                                                           emojiEl.textContent = datos.length > 0 ? _totemEmoji(datos[0].genero, window._adnSexoActual) : '🎞️';
                                                                             emojiEl.style.cursor = 'pointer';
                                                                             emojiEl.onclick = window._abrirTotemVineta;
 
@@ -1224,7 +1272,7 @@ window.subirBanner = async function(input) {
                                                                         };
                                                                         datos.forEach((g, i) => {
                                 const hex = '#' + ADN_COLORES[i % ADN_COLORES.length].toString(16).padStart(6, '0');
-                                const emoji = EMOJI_POR_GENERO[g.genero] || '🎞️';
+                                const emoji = _totemEmoji(g.genero, window._adnSexoActual);
                                 const nombreMostrado = TRADUCCIONES_GENERO_SERIE[g.genero] || g.genero;
                                 const modoSeries = document.getElementById('perfilContenido')?.classList.contains('modo-series');
                                 const pill = document.createElement('span');
