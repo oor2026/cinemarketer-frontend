@@ -227,33 +227,101 @@ const adminUsuarios = {
         document.getElementById('inputUsuarioLocalidad').value = '';
         document.getElementById('inputUsuarioRol').value = 'USER';
         document.getElementById('inputUsuarioActivo').value = 'true';
+        document.getElementById('inputUsuarioEsDemo').checked = false;
+        document.getElementById('inputDemoMarca').value = '';
+        document.getElementById('inputDemoNivel').value = 'AMATEUR';
+        document.getElementById('inputDemoVotaciones').value = 0;
+        document.getElementById('inputDemoComentarios').value = 0;
+        document.getElementById('inputDemoPublicaciones').value = 0;
+        document.getElementById('inputDemoSeguidores').value = 0;
+        document.getElementById('inputDemoSeguidos').value = 0;
+        document.getElementById('inputDemoAvatarUrl').value = '';
+        document.getElementById('inputDemoBannerUrl').value = '';
+        this.toggleCamposDemo();
 
-        if (id) {
-            try {
-                const response = await fetch(`${CONFIG.API_URL}/admin/users/${id}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const user = await response.json();
+                if (id) {
+                    try {
+                        const response = await fetch(`${CONFIG.API_URL}/admin/users/${id}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        const user = await response.json();
 
-                document.getElementById('inputUsuarioNombre').value = user.name || '';
-                document.getElementById('inputUsuarioEmail').value = user.email || '';
-                document.getElementById('inputUsuarioDni').value = user.dni || '';
-                document.getElementById('inputUsuarioTelefono').value = user.phone || '';
-                document.getElementById('inputUsuarioFechaNacimiento').value = user.birthDate || '';
-                document.getElementById('inputUsuarioSexo').value = user.sexo || '';
-                document.getElementById('inputUsuarioProvincia').value = user.provincia || '';
-                document.getElementById('inputUsuarioLocalidad').value = user.localidad || '';
-                document.getElementById('inputUsuarioRol').value = user.role || 'USER';
-                document.getElementById('inputUsuarioActivo').value = String(user.active);
-            } catch (error) {
-                toast('Error al cargar datos del usuario', 'error');
-                return;
-            }
-        }
+                        document.getElementById('inputUsuarioNombre').value = user.name || '';
+                        document.getElementById('inputUsuarioEmail').value = user.email || '';
+                        document.getElementById('inputUsuarioDni').value = user.dni || '';
+                        document.getElementById('inputUsuarioTelefono').value = user.phone || '';
+                        document.getElementById('inputUsuarioFechaNacimiento').value = user.birthDate || '';
+                        document.getElementById('inputUsuarioSexo').value = user.sexo || '';
+                        document.getElementById('inputUsuarioProvincia').value = user.provincia || '';
+                        document.getElementById('inputUsuarioLocalidad').value = user.localidad || '';
+                        document.getElementById('inputUsuarioRol').value = user.role || 'USER';
+                        document.getElementById('inputUsuarioActivo').value = String(user.active);
 
-        document.getElementById('modalUsuarioOverlay').classList.add('open');
-        document.getElementById('modalUsuario').classList.add('open');
-    },
+                        document.getElementById('inputUsuarioEsDemo').checked = !!user.isDemo;
+                        if (user.demoStats) {
+                            document.getElementById('inputDemoMarca').value = user.demoStats.marca || '';
+                            document.getElementById('inputDemoNivel').value = user.demoStats.nivel || 'AMATEUR';
+                            document.getElementById('inputDemoVotaciones').value = user.demoStats.votaciones || 0;
+                            document.getElementById('inputDemoComentarios').value = user.demoStats.comentarios || 0;
+                            document.getElementById('inputDemoPublicaciones').value = user.demoStats.publicaciones || 0;
+                            document.getElementById('inputDemoSeguidores').value = user.demoStats.seguidores || 0;
+                            document.getElementById('inputDemoSeguidos').value = user.demoStats.seguidos || 0;
+                            document.getElementById('inputDemoAvatarUrl').value = user.demoStats.avatarUrl || '';
+                            document.getElementById('inputDemoBannerUrl').value = user.demoStats.bannerUrl || '';
+                            if (user.demoStats.avatarUrl) {
+                                const pa = document.getElementById('previewDemoAvatar');
+                                pa.src = user.demoStats.avatarUrl;
+                                pa.style.display = 'block';
+                            }
+                            if (user.demoStats.bannerUrl) {
+                                const pb = document.getElementById('previewDemoBanner');
+                                pb.src = user.demoStats.bannerUrl;
+                                pb.style.display = 'block';
+                            }
+                        }
+                        this.toggleCamposDemo();
+                    } catch (error) {
+                        toast('Error al cargar datos del usuario', 'error');
+                        return;
+                    }
+                }
+
+                document.getElementById('modalUsuarioOverlay').classList.add('open');
+                document.getElementById('modalUsuario').classList.add('open');
+            },
+
+                toggleCamposDemo: function() {
+                    const marcado = document.getElementById('inputUsuarioEsDemo').checked;
+                    document.getElementById('seccionCamposDemo').style.display = marcado ? 'block' : 'none';
+                },
+
+                subirImagenDemo: async function(inputEl, tipo) {
+                    const file = inputEl.files[0];
+                    if (!file) return;
+
+                    const token = localStorage.getItem('token');
+                    const formData = new FormData();
+                    formData.append('file', file);
+
+                    try {
+                        const res = await fetch(`${CONFIG.API_URL}/admin/users/demo-image-upload`, {
+                            method: 'POST',
+                            headers: { 'Authorization': `Bearer ${token}` },
+                            body: formData
+                        });
+                        if (!res.ok) throw new Error('Error al subir imagen');
+                        const data = await res.json();
+
+                        const idUrl = tipo === 'avatar' ? 'inputDemoAvatarUrl' : 'inputDemoBannerUrl';
+                        const idPreview = tipo === 'avatar' ? 'previewDemoAvatar' : 'previewDemoBanner';
+                        document.getElementById(idUrl).value = data.url;
+                        const preview = document.getElementById(idPreview);
+                        preview.src = data.url;
+                        preview.style.display = 'block';
+                    } catch (e) {
+                        toast('Error al subir la imagen', 'error');
+                    }
+                },
 
     cerrarFormulario: function() {
         document.getElementById('modalUsuarioOverlay').classList.remove('open');
@@ -275,18 +343,33 @@ const adminUsuarios = {
             return;
         }
 
-        const payload = {
-            name: nombre,
-            email: email,
-            dni: dni,
-            phone: telefono,
-            birthDate: document.getElementById('inputUsuarioFechaNacimiento').value || null,
-            sexo: document.getElementById('inputUsuarioSexo').value || null,
-            provincia: document.getElementById('inputUsuarioProvincia').value.trim() || null,
-            localidad: document.getElementById('inputUsuarioLocalidad').value.trim() || null,
-            role: rol,
-            active: activo
-        };
+                const esDemo = document.getElementById('inputUsuarioEsDemo').checked;
+
+                const payload = {
+                    name: nombre,
+                    email: email,
+                    dni: dni,
+                    phone: telefono,
+                    birthDate: document.getElementById('inputUsuarioFechaNacimiento').value || null,
+                    sexo: document.getElementById('inputUsuarioSexo').value || null,
+                    provincia: document.getElementById('inputUsuarioProvincia').value.trim() || null,
+                    localidad: document.getElementById('inputUsuarioLocalidad').value.trim() || null,
+                    role: rol,
+                    active: activo,
+                    isDemo: esDemo
+                };
+
+                if (esDemo) {
+                    payload.demoMarca = document.getElementById('inputDemoMarca').value.trim() || null;
+                    payload.demoNivel = document.getElementById('inputDemoNivel').value;
+                    payload.demoVotaciones = parseInt(document.getElementById('inputDemoVotaciones').value) || 0;
+                    payload.demoComentarios = parseInt(document.getElementById('inputDemoComentarios').value) || 0;
+                    payload.demoPublicaciones = parseInt(document.getElementById('inputDemoPublicaciones').value) || 0;
+                    payload.demoSeguidores = parseInt(document.getElementById('inputDemoSeguidores').value) || 0;
+                    payload.demoSeguidos = parseInt(document.getElementById('inputDemoSeguidos').value) || 0;
+                    payload.demoAvatarUrl = document.getElementById('inputDemoAvatarUrl').value.trim() || null;
+                    payload.demoBannerUrl = document.getElementById('inputDemoBannerUrl').value.trim() || null;
+                }
 
         const btnGuardar = document.querySelector('#modalUsuario .btn-guardar');
         btnGuardar.disabled = true;

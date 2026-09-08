@@ -1,3 +1,45 @@
+// ========== BLOQUEO DE CUENTAS DEMO — toast global ==========
+// Envuelve fetch UNA sola vez acá, para que cualquier 403 tipo
+// DEMO_ACCOUNT (lo tira DemoAccountWriteBlockFilter del backend)
+// dispare el aviso sin importar desde qué botón se originó — así no
+// hay que agregar este manejo en cada fetch suelto repartido por
+// toda la app.
+(function() {
+    const fetchOriginal = window.fetch;
+    window.fetch = async function(...args) {
+        const response = await fetchOriginal.apply(this, args);
+        if (response.status === 403) {
+            try {
+                const data = await response.clone().json();
+                if (data && data.error === 'DEMO_ACCOUNT') {
+                    mostrarToastDemo(data.message || 'Esta es una cuenta de demostración — no podés interactuar.');
+                }
+            } catch (e) {}
+        }
+        return response;
+    };
+
+    function mostrarToastDemo(mensaje) {
+        let toastEl = document.getElementById('toastDemoAccount');
+        if (!toastEl) {
+            toastEl = document.createElement('div');
+            toastEl.id = 'toastDemoAccount';
+            toastEl.style.cssText = 'position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%) translateY(20px); background:#1a1a1a; color:#fff; padding:0.9rem 1.4rem; border-radius:10px; font-size:0.88rem; font-weight:600; box-shadow:0 8px 24px rgba(0,0,0,0.3); z-index:999999; opacity:0; transition:opacity 0.25s ease, transform 0.25s ease; max-width:90vw; text-align:center;';
+            document.body.appendChild(toastEl);
+        }
+        toastEl.innerHTML = `<i class="fas fa-flask" style="margin-right:0.5rem;"></i>${mensaje}`;
+        requestAnimationFrame(() => {
+            toastEl.style.opacity = '1';
+            toastEl.style.transform = 'translateX(-50%) translateY(0)';
+        });
+        clearTimeout(toastEl._timeout);
+        toastEl._timeout = setTimeout(() => {
+            toastEl.style.opacity = '0';
+            toastEl.style.transform = 'translateX(-50%) translateY(20px)';
+        }, 3500);
+    }
+})();
+
 // ========== MENÚ HAMBURGUESA ==========
 const menuToggle = document.getElementById('menuToggle');
 const navMenu = document.getElementById('navMenu');

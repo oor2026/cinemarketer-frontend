@@ -916,6 +916,24 @@ body.menu-open {
 
     .novedades-modal-mobile-lista {
         flex: 1;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-    }
+                    overflow-y: auto;
+                    -webkit-overflow-scrolling: touch;
+                }
+
+            /* Banner de "modo demo" — fijo arriba de todo, siempre visible
+               mientras la sesión sea de una cuenta demo. */
+            #bannerModoDemo {
+            position: sticky;
+            top: 0;
+            z-index: 10001;
+            background: #1a1a1a;
+            color: #fff;
+            text-align: center;
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+        }
+        #bannerModoDemo i {
+            color: #ffcf4d;
+            margin-right: 0.4rem;
+        }
