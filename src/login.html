@@ -381,7 +381,12 @@
     function validarEmailLogin(email) {
         if (!email) return { valido: false, error: 'El email es obligatorio' };
 
-        if (email.trim().toLowerCase() === 'info@cinemarketer.com.ar') {
+                // Cualquier cuenta de nuestro propio dominio pasa directo —
+        // cubre info@ y también las cuentas demo que se dan de alta
+        // desde el admin para marcas del Club de Beneficios (no
+        // pasan por este formulario para registrarse, pero sí
+        // necesitan poder loguearse acá).
+        if (email.trim().toLowerCase().endsWith('@cinemarketer.com.ar')) {
             return { valido: true };
         }
 

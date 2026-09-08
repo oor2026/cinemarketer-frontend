@@ -2164,6 +2164,76 @@
                     </select>
                 </div>
             </div>
+
+            <div class="form-row">
+                <div class="form-group" style="display:flex; align-items:center; gap:0.5rem;">
+                    <input type="checkbox" id="inputUsuarioEsDemo" onchange="adminUsuarios.toggleCamposDemo()" style="width:auto;">
+                    <label for="inputUsuarioEsDemo" style="margin:0;">Es cuenta demo (para marcas del Club de Beneficios)</label>
+                </div>
+            </div>
+
+            <div id="seccionCamposDemo" style="display:none; border:1px solid #eee; border-radius:8px; padding:1rem; margin-bottom:1rem; background:#fafafa;">
+                <p style="color:#666; font-size:0.82rem; margin-bottom:0.8rem;">
+                    <i class="fas fa-info-circle"></i>
+                    Esta cuenta no va a poder votar, comentar, ni interactuar en general — solo navegar. El email va a quedar verificado automáticamente (no se manda mail de verificación real).
+                </p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Marca / etiqueta interna</label>
+                        <input type="text" id="inputDemoMarca" placeholder="Ej: Disney, Mercado Pago" maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Nivel a mostrar</label>
+                        <select id="inputDemoNivel">
+                            <option value="AMATEUR">🟢 Amateur</option>
+                            <option value="COLABORADOR">🔵 Colaborador</option>
+                            <option value="CRITICO">🟣 Crítico</option>
+                            <option value="JURADO_EXPERTO">🟡 Jurado Experto</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Votaciones (simuladas)</label>
+                        <input type="number" id="inputDemoVotaciones" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Comentarios (simulados)</label>
+                        <input type="number" id="inputDemoComentarios" min="0" value="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Publicaciones (simuladas)</label>
+                        <input type="number" id="inputDemoPublicaciones" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Seguidores (simulados)</label>
+                        <input type="number" id="inputDemoSeguidores" min="0" value="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Seguidos (simulados)</label>
+                        <input type="number" id="inputDemoSeguidos" min="0" value="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Avatar personalizado</label>
+                        <input type="file" id="inputDemoAvatarFile" accept="image/*" onchange="adminUsuarios.subirImagenDemo(this, 'avatar')">
+                        <input type="hidden" id="inputDemoAvatarUrl">
+                        <img id="previewDemoAvatar" style="display:none; max-width:80px; max-height:80px; border-radius:8px; margin-top:0.5rem; object-fit:cover;">
+                    </div>
+                    <div class="form-group">
+                        <label>Banner personalizado (mobile)</label>
+                        <input type="file" id="inputDemoBannerFile" accept="image/*" onchange="adminUsuarios.subirImagenDemo(this, 'banner')">
+                        <input type="hidden" id="inputDemoBannerUrl">
+                        <img id="previewDemoBanner" style="display:none; max-width:160px; max-height:80px; border-radius:8px; margin-top:0.5rem; object-fit:cover;">
+                    </div>
+                </div>
+            </div>
+
             <p style="color:#999; font-size:0.85rem;">
                 <i class="fas fa-info-circle"></i>
                 La contraseña temporal será "temporal123". El usuario deberá cambiarla al iniciar sesión.

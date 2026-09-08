@@ -69,7 +69,10 @@
     </head>
     <body>
 
-    <!-- HEADER / NAVBAR -->
+    <div id="bannerModoDemo" style="display:none;">
+        <i class="fas fa-flask"></i> Estás viendo una cuenta de demostración — podés navegar todo, pero no interactuar (votar, comentar, etc.)
+    </div>
+
     <nav class="navbar">
         <div class="nav-container">
             <a href="#feed-films" class="logo" onclick="if(window.location.hash==='#feed-films'){event.preventDefault();if(typeof loadModule==='function')loadModule('feed-films');}">
@@ -378,6 +381,15 @@
     <script src="js/watchlist.js"></script>
     <script src="js/feed-series.js"></script>
     <script src="js/main.js"></script>
+    <script>
+        // Banner de "modo demo" — visible durante toda la sesión si
+        // el usuario logueado es una cuenta demo (isDemo, seteado en
+        // localStorage al loguearse).
+        if (localStorage.getItem('isDemo') === '1') {
+            const banner = document.getElementById('bannerModoDemo');
+            if (banner) banner.style.display = 'block';
+        }
+    </script>
     <script src="js/notificaciones.js"></script>
     <script src="js/recomendaciones.js?v=1"></script>
     <script src="js/trivia.js"></script>

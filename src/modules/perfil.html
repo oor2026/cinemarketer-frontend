@@ -361,10 +361,17 @@
         #perfilPublicacionesSeccion .perfil-seccion-titulo i { color: var(--cine-section-accent); }
         #perfilPublicacionesSeccion > *:not(.perfil-seccion-titulo) { padding: 0; }
 
-                        .cine-fab-tema, .cine-fab-modo, .cine-fab-privacidad { display: none; }
+                                                .cine-fab-tema, .cine-fab-modo, .cine-fab-privacidad { display: none; }
 
                         .cine-eyebrow-mobile { display: none; }
                         .perfil-banner { display: none; }
+
+                        /* El banner es específicamente para mobile — nada en el
+                           JS lo volvía a mostrar nunca, quedaba oculto para
+                           siempre sin importar el ancho de pantalla. */
+                        @media (max-width: 768px) {
+                            .perfil-banner { display: block; }
+                        }
     </style>
 
     <div class="perfil-banner perfil-header" id="perfilBannerHeader">

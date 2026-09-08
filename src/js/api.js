@@ -39,11 +39,12 @@ async request(endpoint, method = 'GET', data = null) {
         const data = await response.json();
 
         if (response.ok) {
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('userEmail', data.email);
-            localStorage.setItem('userRole', data.role);
-            localStorage.setItem('userPoints', data.totalPoints);
-            if (data.id) localStorage.setItem('userId', data.id);
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('userEmail', data.email);
+                        localStorage.setItem('userRole', data.role);
+                        localStorage.setItem('userPoints', data.totalPoints);
+                        if (data.id) localStorage.setItem('userId', data.id);
+                        localStorage.setItem('isDemo', data.isDemo ? '1' : '0');
         }
 
         return { ok: response.ok, data };
