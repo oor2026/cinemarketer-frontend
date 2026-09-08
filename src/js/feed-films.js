@@ -7012,7 +7012,7 @@ window._buscadorInicializarPredictorTitulo = function() {
                 });
                 if (!res.ok) return;
                 const data = await res.json();
-                const items = (data.results || []).slice(0, 6);
+                const items = (data.results || []).slice(0, 15);
 
                 if (items.length === 0) {
                     resultados.innerHTML = '<div class="buscador-predictor-vacio">No encontramos nada con ese título</div>';
