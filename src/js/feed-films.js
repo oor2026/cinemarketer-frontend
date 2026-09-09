@@ -5137,7 +5137,7 @@ window._buscadorIrANivel2 = function(rama) {
     if (rama === 'mi_actividad') {
         window._buscadorConfigurarBotonPremium();
     }
-    if (rama === 'plataforma') {
+    if (rama === 'plataforma' || rama === 'mi_actividad') {
         document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-alto');
     }
 };
