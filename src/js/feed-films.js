@@ -5622,26 +5622,24 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                                                                    <div class="lbl">Pts para <a href="#" class="buscador-premio-link" style="text-transform:none;font-size:0.85rem;font-weight:600;" onclick="event.preventDefault(); window._buscadorAbrirPremioDesdeResumen(${masCercano.id}, '${masCercano._origen}');">${nombrePremio(masCercano)}</a></div>
                                                                                </div>`;
 
-                                                                           if (restoVisible.length > 0 || hayMasPremios) {
-                                                                               html += `<div class="buscador-tarjetas">`;
-                                                                               html += restoVisible.map(p => {
-                                                                                   const faltan = p.pointsRequired - resumen.availablePoints;
-                                                                                   return `<div class="buscador-tarjeta"><div class="buscador-tarjeta-icono rojo"><i class="fas fa-hourglass-half"></i></div><p>Te faltan <strong>${faltan} pts</strong> para <a href="#" class="buscador-premio-link" onclick="event.preventDefault(); window._buscadorAbrirPremioDesdeResumen(${p.id}, '${p._origen}');">${nombrePremio(p)}</a>.</p></div>`;
-                                                                               }).join('');
-                                                                               if (hayMasPremios) {
-                                                                                   html += `<div class="buscador-tarjeta"><div class="buscador-tarjeta-icono rojo"><i class="fas fa-gift"></i></div><p>Mirá en <a href="#" class="buscador-premio-link" onclick="event.preventDefault(); window.cerrarBuscadorAsistido(); window.location.hash='club-beneficios';">Club de Beneficios</a> todo lo que te podés llevar.</p></div>`;
-                                                                               }
-                                                                               html += `</div>`;
-                                                                           }
+                                                                              if (restoVisible.length > 0 || hayMasPremios || !resumen.premium) {
+                                                                                  html += `<div class="buscador-tarjetas">`;
+                                                                                  html += restoVisible.map(p => {
+                                                                                      const faltan = p.pointsRequired - resumen.availablePoints;
+                                                                                      return `<div class="buscador-tarjeta"><div class="buscador-tarjeta-icono rojo"><i class="fas fa-hourglass-half"></i></div><p>Te faltan <strong>${faltan} pts</strong> para <a href="#" class="buscador-premio-link" onclick="event.preventDefault(); window._buscadorAbrirPremioDesdeResumen(${p.id}, '${p._origen}');">${nombrePremio(p)}</a>.</p></div>`;
+                                                                                  }).join('');
+                                                                                  if (hayMasPremios) {
+                                                                                      html += `<div class="buscador-tarjeta"><div class="buscador-tarjeta-icono rojo"><i class="fas fa-gift"></i></div><p>Mirá en <a href="#" class="buscador-premio-link" onclick="event.preventDefault(); window.cerrarBuscadorAsistido(); window.location.hash='club-beneficios';">Club de Beneficios</a> todo lo que te podés llevar.</p></div>`;
+                                                                                  }
+                                                                                  // Mismo formato que las tarjetas de arriba — ya no es un
+                                                                                  // banner aparte, es un ítem más de la lista.
+                                                                                  if (!resumen.premium) {
+                                                                                      html += `<div class="buscador-tarjeta"><div class="buscador-tarjeta-icono rojo"><i class="fas fa-star"></i></div><p>Con Premium tus puntos valen el doble y no tenés límite diario. <a href="#" class="buscador-premio-link" onclick="event.preventDefault(); window.cerrarBuscadorAsistido(); window.location.hash='club-beneficios';">Ver Club de Beneficios</a>.</p></div>`;
+                                                                                  }
+                                                                                  html += `</div>`;
+                                                                              }
 
-                                                                                if (!resumen.premium) {
-                                                                                    html += `<div class="buscador-cta-premium">
-                                                                                        <i class="fas fa-star"></i> Con Premium tus puntos valen el doble y no tenés límite diario.
-                                                                                        <button class="buscador-cta-btn" onclick="window.cerrarBuscadorAsistido(); window.location.hash='club-beneficios';">Ver Club de Beneficios</button>
-                                                                                    </div>`;
-                                                                                }
-
-                                                                                cont.innerHTML = html;
+                                                                                   cont.innerHTML = html;
                                 } catch (e) {
                                     cont.innerHTML = '<div class="buscador-predictor-vacio">No pudimos calcular esto. Intentá de nuevo.</div>';
                                 }
