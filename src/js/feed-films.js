@@ -5633,9 +5633,9 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                                                                   }
                                                                                   // Mismo formato que las tarjetas de arriba — ya no es un
                                                                                   // banner aparte, es un ítem más de la lista.
-                                                                                  if (!resumen.premium) {
-                                                                                      html += `<div class="buscador-tarjeta"><div class="buscador-tarjeta-icono rojo"><i class="fas fa-star"></i></div><p>Con Premium tus puntos valen el doble y no tenés límite diario. <a href="#" class="buscador-premio-link" onclick="event.preventDefault(); window.cerrarBuscadorAsistido(); window.location.hash='club-beneficios';">Ver Club de Beneficios</a>.</p></div>`;
-                                                                                  }
+                                                                                 if (!resumen.premium) {
+                                                                                     html += `<div class="buscador-tarjeta"><div class="buscador-tarjeta-icono rojo"><i class="fas fa-star"></i></div><p>Con <a href="#" class="buscador-premio-link" onclick="event.preventDefault(); window.cerrarBuscadorAsistido(); window.location.hash='mi-cuenta'; setTimeout(() => { if (typeof window.abrirDetallePlan === 'function') window.abrirDetallePlan(); }, 400);">Premium</a> tus puntos valen el doble y no tenés límite diario.</p></div>`;
+                                                                                 }
                                                                                   html += `</div>`;
                                                                               }
 
