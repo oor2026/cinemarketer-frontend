@@ -197,7 +197,17 @@ function getLevelEmoji(level) {
 // SELECTOR DE AVATAR
 // ==============================================
 
-let avatarSeleccionado = null;
+// Nombre con sufijo "Cuenta" — otros archivos (perfil.js, y
+// evidentemente algún otro más) declaran su propia
+// "avatarSeleccionado" a nivel superior, y como todos se cargan como
+// <script> normales (no módulos), quedan en el scope global
+// compartido de la página. Sacar el <script> viejo del DOM al
+// cambiar de módulo NO deshace un let/const ya ejecutado — por eso,
+// si se visitaban dos módulos con este mismo nombre de variable en
+// la misma sesión, el segundo en cargar crasheaba entero con
+// "Identifier ya declarado" y ni una línea de ese archivo llegaba a
+// ejecutarse.
+let avatarSeleccionadoCuenta = null;
 let avatarCategoriaActual = 'predefinidos';
 
 // ==============================================
@@ -241,7 +251,7 @@ function inicializarFileInput() {
 }
 
 window.abrirSelectorAvatar = function() {
-    avatarSeleccionado = null;
+    avatarSeleccionadoCuenta = null;
     document.getElementById('avatarError').style.display = 'none';
 
     // Resetear tabs visualmente ANTES de abrir
@@ -329,7 +339,7 @@ async function cargarAvataresPredefinidos() {
 window.seleccionarAvatar = function(avatarId, elemento) {
     document.querySelectorAll('.avatar-item').forEach(item => item.classList.remove('selected'));
     elemento.classList.add('selected');
-    avatarSeleccionado = avatarId;
+    avatarSeleccionadoCuenta = avatarId;
 };
 
 function mostrarErrorAvatar(mensaje) {
@@ -354,13 +364,13 @@ window.guardarAvatar = async function() {
         const token = localStorage.getItem('token');
         let response;
 
-        if (avatarCategoriaActual === 'predefinidos') {
-            if (!avatarSeleccionado) throw new Error('Seleccioná un avatar');
+                if (avatarCategoriaActual === 'predefinidos') {
+                    if (!avatarSeleccionadoCuenta) throw new Error('Seleccioná un avatar');
 
-            response = await fetch(`${CONFIG.API_URL}/users/me/avatar/${avatarSeleccionado}`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+                    response = await fetch(`${CONFIG.API_URL}/users/me/avatar/${avatarSeleccionadoCuenta}`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
 
         } else {
             const fileInput = document.getElementById('avatarFileInput');
@@ -391,8 +401,8 @@ window.guardarAvatar = async function() {
             }
 
             // 3. Capturar nombre del avatar ANTES de cerrar el modal
-            let nuevoNombre = null;
-            if (avatarCategoriaActual === 'predefinidos' && avatarSeleccionado) {
+                let nuevoNombre = null;
+                if (avatarCategoriaActual === 'predefinidos' && avatarSeleccionadoCuenta) {
                 const itemSeleccionado = document.querySelector('.avatar-item.selected .avatar-item-name');
                 if (itemSeleccionado) nuevoNombre = itemSeleccionado.textContent.trim();
             }
