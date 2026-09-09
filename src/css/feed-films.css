@@ -4465,6 +4465,16 @@ window.abrirElencoCard = async function(movieId, event) {
    el resto. Solo mobile. */
 @media (max-width: 768px) {
     .buscador-sheet.buscador-sheet-alto { max-height: 96vh; }
+
+    /* El cuerpo interno (.filtros-modal-body) tiene un tope de 60vh
+       compartido con el filtro viejo — acá lo levantamos para que el
+       contenido de las pantallas "altas" (Mi Actividad, Plataforma)
+       tenga espacio real para no necesitar scroll. Dejamos el
+       overflow-y:auto de la regla base intacto como resguardo, por
+       si algún contenido puntual igual no llega a entrar del todo. */
+    .buscador-sheet.buscador-sheet-alto .filtros-modal-body {
+        max-height: 80vh;
+    }
 }
 
 /* Sin scroll interno acá — se resolvió mejor limitando la CANTIDAD de
