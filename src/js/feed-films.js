@@ -6046,27 +6046,34 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                             window.estadoPaginacion.totalPaginas = data.total_pages;
                             window.estadoPaginacion.totalResultados = data.total_results;
 
-                            if (!data.results || data.results.length === 0) {
-                                if (!append) window._buscadorMostrarToast(`No encontramos películas en ${nombre}.`);
-                            } else if (append) {
-                                window._filaBusqueda.peliculas = window._filaBusqueda.peliculas.concat(data.results);
-                                await appendCardsFila(window._filaBusqueda, data.results);
-                                if (typeof window.cargarEstadisticasVotacion === 'function') window.cargarEstadisticasVotacion();
-                            } else {
-                                window._filaBusqueda.peliculas = data.results;
-                                await renderCardsFila(window._filaBusqueda);
-                                limpiarModalesDuplicados();
-                                if (typeof window.cargarEstadisticasVotacion === 'function') window.cargarEstadisticasVotacion();
-                            }
-                            if (!append) window._buscadorScrollearAResultados('fila-busqueda');
-                        } catch (error) {
-                            if (!append) window._buscadorMostrarToast('Error al buscar. Intentá de nuevo.');
-                        } finally {
-                            window.estadoPaginacion.cargando = false;
-                        }
-                    };
+                           if (!data.results || data.results.length === 0) {
+                               if (!append) window._buscadorMostrarToast(`No encontramos películas en ${nombre}.`);
+                           } else if (append) {
+                               window._filaBusqueda.peliculas = window._filaBusqueda.peliculas.concat(data.results);
+                               await appendCardsFila(window._filaBusqueda, data.results);
+                               if (typeof window.cargarEstadisticasVotacion === 'function') window.cargarEstadisticasVotacion();
+                           } else {
+                               window._filaBusqueda.peliculas = data.results;
+                               await renderCardsFila(window._filaBusqueda);
+                               limpiarModalesDuplicados();
+                               if (typeof window.cargarEstadisticasVotacion === 'function') window.cargarEstadisticasVotacion();
+                           }
+                           if (!append) window._buscadorScrollearAResultados('fila-busqueda');
 
-                    window._buscadorEjecutarPlataformaSerie = async function(plataformaId, nombre, pagina = 1, append = false) {
+                           window.estadoPaginacion.cargando = false;
+                           const cantidadEnPantalla = track ? track.children.length : 0;
+                           const hayMasPaginas = window.estadoPaginacion.paginaActual < window.estadoPaginacion.totalPaginas;
+                           if (cantidadEnPantalla < 10 && hayMasPaginas && pagina < 5) {
+                               await window._buscadorEjecutarPlataformaPelicula(plataformaId, nombre, pagina + 1, true);
+                           }
+                       } catch (error) {
+                           if (!append) window._buscadorMostrarToast('Error al buscar. Intentá de nuevo.');
+                       } finally {
+                           window.estadoPaginacion.cargando = false;
+                       }
+                   };
+
+                   window._buscadorEjecutarPlataformaSerie = async function(plataformaId, nombre, pagina = 1, append = false) {
                         if (window.estadoPaginacionSerie.cargando) return;
                         window.estadoPaginacionSerie.cargando = true;
                         window._buscadorPaginaSiguienteFn = (p) => window._buscadorEjecutarPlataformaSerie(plataformaId, nombre, p, true);
@@ -6102,6 +6109,13 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                 if (typeof window.cargarEstadisticasVotacionSeries === 'function') window.cargarEstadisticasVotacionSeries();
                             }
                             if (!append) window._buscadorScrollearAResultados('fila-busqueda-serie');
+
+                            window.estadoPaginacionSerie.cargando = false;
+                            const cantidadEnPantalla = track ? track.children.length : 0;
+                            const hayMasPaginas = window.estadoPaginacionSerie.paginaActual < window.estadoPaginacionSerie.totalPaginas;
+                            if (cantidadEnPantalla < 10 && hayMasPaginas && pagina < 5) {
+                                await window._buscadorEjecutarPlataformaSerie(plataformaId, nombre, pagina + 1, true);
+                            }
                         } catch (error) {
                             if (!append) window._buscadorMostrarToast('Error al buscar. Intentá de nuevo.');
                         } finally {
@@ -6520,6 +6534,13 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                             if (typeof window.cargarEstadisticasVotacion === 'function') window.cargarEstadisticasVotacion();
                         }
                         if (!append) window._buscadorScrollearAResultados('fila-busqueda');
+
+                        window.estadoPaginacion.cargando = false;
+                        const cantidadEnPantalla = track ? track.children.length : 0;
+                        const hayMasPaginas = window.estadoPaginacion.paginaActual < window.estadoPaginacion.totalPaginas;
+                        if (cantidadEnPantalla < 10 && hayMasPaginas && pagina < 5) {
+                            await window._buscadorEjecutarCaracteristicaPelicula(keywordId, nombre, pagina + 1, true);
+                        }
                     } catch (error) {
                         if (!append) window._buscadorMostrarToast('Error al buscar. Intentá de nuevo.');
                     } finally {
@@ -6566,6 +6587,13 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                             if (typeof window.cargarEstadisticasVotacionSeries === 'function') window.cargarEstadisticasVotacionSeries();
                         }
                         if (!append) window._buscadorScrollearAResultados('fila-busqueda-serie');
+
+                        window.estadoPaginacionSerie.cargando = false;
+                        const cantidadEnPantalla = track ? track.children.length : 0;
+                        const hayMasPaginas = window.estadoPaginacionSerie.paginaActual < window.estadoPaginacionSerie.totalPaginas;
+                        if (cantidadEnPantalla < 10 && hayMasPaginas && pagina < 5) {
+                            await window._buscadorEjecutarCaracteristicaSerie(keywordId, nombre, pagina + 1, true);
+                        }
                     } catch (error) {
                         if (!append) window._buscadorMostrarToast('Error al buscar. Intentá de nuevo.');
                     } finally {
@@ -6688,6 +6716,19 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                         if (typeof window.cargarEstadisticasVotacion === 'function') window.cargarEstadisticasVotacion();
                     }
                     if (!append) window._buscadorScrollearAResultados('fila-busqueda');
+
+                    // El filtro del lado del cliente (poster/sinopsis/título)
+                    // puede descartar buena parte de cada página — si lo que
+                    // sobrevivió es poco, puede que ni alcance para generar
+                    // scroll real, y entonces el scroll infinito de arriba
+                    // nunca llega a dispararse solo. Por eso, si quedó corto
+                    // y todavía hay más páginas, sigue pidiendo automático.
+                    window.estadoPaginacion.cargando = false;
+                    const cantidadEnPantalla = track ? track.children.length : 0;
+                    const hayMasPaginas = window.estadoPaginacion.paginaActual < window.estadoPaginacion.totalPaginas;
+                    if (cantidadEnPantalla < 10 && hayMasPaginas && pagina < 5) {
+                        await window._buscadorEjecutarRangoAniosPelicula(anioDesde, anioHasta, etiqueta, pagina + 1, true);
+                    }
                 } catch (error) {
                     if (!append) window._buscadorMostrarToast('Error al buscar. Intentá de nuevo.');
                 } finally {
@@ -6731,6 +6772,13 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                         if (typeof window.cargarEstadisticasVotacionSeries === 'function') window.cargarEstadisticasVotacionSeries();
                     }
                     if (!append) window._buscadorScrollearAResultados('fila-busqueda-serie');
+
+                    window.estadoPaginacionSerie.cargando = false;
+                    const cantidadEnPantalla = track ? track.children.length : 0;
+                    const hayMasPaginas = window.estadoPaginacionSerie.paginaActual < window.estadoPaginacionSerie.totalPaginas;
+                    if (cantidadEnPantalla < 10 && hayMasPaginas && pagina < 5) {
+                        await window._buscadorEjecutarRangoAniosSerie(anioDesde, anioHasta, etiqueta, pagina + 1, true);
+                    }
                 } catch (error) {
                     if (!append) window._buscadorMostrarToast('Error al buscar. Intentá de nuevo.');
                 } finally {
@@ -6840,6 +6888,13 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                 if (typeof window.cargarEstadisticasVotacion === 'function') window.cargarEstadisticasVotacion();
                             }
                             if (!append) window._buscadorScrollearAResultados('fila-busqueda');
+
+                            window.estadoPaginacion.cargando = false;
+                            const cantidadEnPantalla = track ? track.children.length : 0;
+                            const hayMasPaginas = window.estadoPaginacion.paginaActual < window.estadoPaginacion.totalPaginas;
+                            if (cantidadEnPantalla < 10 && hayMasPaginas && pagina < 5) {
+                                await window._buscadorEjecutarBusquedaAnioPelicula(anio, pagina + 1, true);
+                            }
                         } catch (error) {
                             if (!append) window._buscadorMostrarToast('Error al buscar. Intentá de nuevo.');
                         } finally {
@@ -6874,28 +6929,35 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                 const countEl = document.getElementById('resultadosCountSerie');
                 if (countEl) countEl.textContent = data.total_results || 0;
 
-                if (!data.results || data.results.length === 0) {
-                    if (!append) window._buscadorMostrarToast(`No encontramos series de ${anio}.`);
-                } else if (append) {
-                    window._filaBusquedaSerie.series = window._filaBusquedaSerie.series.concat(data.results);
-                    await appendCardsFilaSerie(window._filaBusquedaSerie, data.results);
-                    if (typeof window.cargarEstadisticasVotacionSeries === 'function') window.cargarEstadisticasVotacionSeries();
-                } else {
-                    window._filaBusquedaSerie.series = data.results;
-                    await renderCardsFilaSerie(window._filaBusquedaSerie);
-                    if (typeof window.cargarEstadisticasVotacionSeries === 'function') window.cargarEstadisticasVotacionSeries();
-                }
-                if (!append) window._buscadorScrollearAResultados('fila-busqueda-serie');
-            } catch (error) {
-                if (!append) window._buscadorMostrarToast('Error al buscar. Intentá de nuevo.');
-            } finally {
-                window.estadoPaginacionSerie.cargando = false;
-            }
-        };
+                                if (!data.results || data.results.length === 0) {
+                                    if (!append) window._buscadorMostrarToast(`No encontramos series de ${anio}.`);
+                                } else if (append) {
+                                    window._filaBusquedaSerie.series = window._filaBusquedaSerie.series.concat(data.results);
+                                    await appendCardsFilaSerie(window._filaBusquedaSerie, data.results);
+                                    if (typeof window.cargarEstadisticasVotacionSeries === 'function') window.cargarEstadisticasVotacionSeries();
+                                } else {
+                                    window._filaBusquedaSerie.series = data.results;
+                                    await renderCardsFilaSerie(window._filaBusquedaSerie);
+                                    if (typeof window.cargarEstadisticasVotacionSeries === 'function') window.cargarEstadisticasVotacionSeries();
+                                }
+                                if (!append) window._buscadorScrollearAResultados('fila-busqueda-serie');
 
-// ==============================================
-// NIVEL 3 — Por género
-// ==============================================
+                                window.estadoPaginacionSerie.cargando = false;
+                                const cantidadEnPantalla = track ? track.children.length : 0;
+                                const hayMasPaginas = window.estadoPaginacionSerie.paginaActual < window.estadoPaginacionSerie.totalPaginas;
+                                if (cantidadEnPantalla < 10 && hayMasPaginas && pagina < 5) {
+                                    await window._buscadorEjecutarBusquedaAnioSerie(anio, pagina + 1, true);
+                                }
+                            } catch (error) {
+                                if (!append) window._buscadorMostrarToast('Error al buscar. Intentá de nuevo.');
+                            } finally {
+                                window.estadoPaginacionSerie.cargando = false;
+                            }
+                        };
+
+                // ==============================================
+                // NIVEL 3 — Por género
+                // ==============================================
 window._buscadorAbrirNivel3Genero = async function() {
     document.getElementById('buscadorNivel2PeliculaSerie').style.display = 'none';
     document.getElementById('buscadorNivel3Genero').style.display = 'block';
