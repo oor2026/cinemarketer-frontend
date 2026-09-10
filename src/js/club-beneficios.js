@@ -1112,9 +1112,13 @@ window._abrirModalPremioClub = function(id, origen) {
 
         // ========== COMPARTIR PREMIO ==========
         window._abrirCompartirPremio = function(id, nombre, tipo) {
-            // premio-publico.html espera ?tipo=especial|comun, no free/premium.
-            const tipoUrl = tipo === 'premium' ? 'especial' : 'comun';
-            const url = `${window.location.origin}/premio-publico.html?id=${id}&tipo=${tipoUrl}`;
+            // Mismo patrón que película/publicación — el link apunta al
+            // backend (que arma los meta-tags Open Graph para que se vea
+            // bien en WhatsApp/Facebook) y de ahí redirige solo a la vista
+            // pública. No enlazamos directo a premio-publico.html.
+            const url = tipo === 'premium'
+                ? `${CONFIG.API_URL}/premium/rewards/og/${id}`
+                : `${CONFIG.API_URL}/rewards/og/${id}`;
             const texto = `Mirá este premio en Cinemarketer: ${nombre}`;
             const opciones = document.getElementById('compartirPremioOpciones');
             opciones.innerHTML = `
