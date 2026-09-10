@@ -158,7 +158,7 @@ function renderFilasSeries() {
     }
 }
 
-let _observerFilasSeries = null;
+var _observerFilasSeries = null;
 function configurarLazyLoadFilasSeries() {
     if (_observerFilasSeries) _observerFilasSeries.disconnect();
     _observerFilasSeries = new IntersectionObserver((entries) => {
@@ -2247,12 +2247,12 @@ window.abrirModalEliminarRecSerie = function(recId) {
 // ==============================================
 // "MI SALA" — CARRUSEL DE VOTACIONES DE SERIES
 // ==============================================
-let _votacionesSeriesPage = 0;
-let _votacionesSeriesHayMas = false;
-let _votacionesSeriesCargando = false;
+var _votacionesSeriesPage = 0;
+var _votacionesSeriesHayMas = false;
+var _votacionesSeriesCargando = false;
 
-let _stackVotacionesSeries = [];
-let _stackIndiceSeries = 0;
+var _stackVotacionesSeries = [];
+var _stackIndiceSeries = 0;
 
 window.renderVotacionesSeries = function(votaciones) {
     const wrapper = document.getElementById('perfilVotacionesSeriesWrapper');
@@ -2515,7 +2515,7 @@ window.cerrarModalSerie = function() {
     }
 };
 
-const TMDB_GENEROS_TV = {
+var TMDB_GENEROS_TV = {
     10759: 'Acción y Aventura', 16: 'Animación', 35: 'Comedia', 80: 'Crimen',
     99: 'Documental', 18: 'Drama', 10751: 'Familia', 10762: 'Infantil',
     9648: 'Misterio', 10763: 'Noticias', 10764: 'Reality',
@@ -2523,7 +2523,7 @@ const TMDB_GENEROS_TV = {
     10768: 'Guerra y Política', 37: 'Western'
 };
 
-const TMDB_IDIOMAS_SERIE = {
+var TMDB_IDIOMAS_SERIE = {
     'af': 'Afrikáans', 'ar': 'Árabe', 'bg': 'Búlgaro', 'bn': 'Bengalí',
     'ca': 'Catalán', 'cs': 'Checo', 'da': 'Danés', 'de': 'Alemán',
     'el': 'Griego', 'en': 'Inglés', 'es': 'Español', 'et': 'Estonio',

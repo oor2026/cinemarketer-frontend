@@ -187,11 +187,39 @@ body {
         padding: 0.5rem;
     }
 
-        /* La campanita vieja de adentro del menú hamburguesa se oculta —
-           ya no hace falta en mobile, migró al header. */
-        .dash-bell-desktop-li {
-            display: none;
-        }
+                        /* La campanita vieja de adentro del menú hamburguesa se oculta —
+                           ya no hace falta en mobile, migró al header. */
+                        .dash-bell-desktop-li {
+                            display: none;
+                        }
+                        /* Mismo criterio para el ícono de progreso — ya está en el
+                           header, no hace falta duplicado adentro del hamburguesa. */
+                        .dash-progreso-desktop-li {
+                            display: none;
+                        }
+            }
+
+            /* Ícono de progreso — mismo criterio que la campanita, a su
+               izquierda. */
+            .dash-progreso-mobile {
+                display: none;
+            }
+            @media (max-width: 768px) {
+                .dash-progreso-mobile {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    position: absolute;
+                    right: 3.6rem;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    background: none;
+                    border: none;
+                    font-size: 1.2rem;
+                    color: var(--dark);
+                    cursor: pointer;
+                    padding: 0.5rem;
+                }
 
         /* Animación sutil cuando hay novedades sin leer — el 8% inicial
            de cada ciclo de 5s es el "sonido" (agita rápido y frena), el

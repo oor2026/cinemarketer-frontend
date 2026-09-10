@@ -288,8 +288,153 @@ if (dashToggle && dashMenu) {
                         // si te quedabas quieto después de ese rebote, la
                         // viñeta no volvía a aparecer nunca más. El propio
                         // buscadorMostrarVineta() ya chequea si el botón
-                        // está visible antes de mostrar nada, así que ese
-                        // chequeo alcanza como resguardo.
-                    }
-                }, { passive: true });
-            })();
+                                                // está visible antes de mostrar nada, así que ese
+                                                // chequeo alcanza como resguardo.
+                                            }
+                                        }, { passive: true });
+                                    })();
+
+                        // ========== MODAL DE PROGRESO — ícono nuevo del header ==========
+                        // Copia del modal que hoy vive en Configuración (mi-cuenta.js/html),
+                        // pero acá global — funciona desde cualquier módulo. Nombres propios
+                        // para no chocar con la copia vieja mientras conviven las dos; esa
+                        // copia se saca de Configuración en un paso aparte, después de
+                        // confirmar que esta funciona bien.
+                        window.abrirModalProgresoHeader = function() {
+                            const modal = document.getElementById('modalProgresoHeader');
+                            const body  = document.getElementById('modalProgresoHeaderBody');
+                            if (!modal || !body) return;
+
+                            const nivel = window._perfilNivel || 'AMATEUR';
+                            const profile = window._perfilData || {};
+
+                            body.innerHTML = _renderProgresoBodyHeader(nivel, profile);
+                            modal.style.display = 'flex';
+                            document.body.classList.add('modal-open');
+                        };
+
+                        window.cerrarModalProgresoHeader = function() {
+                            const modal = document.getElementById('modalProgresoHeader');
+                            if (modal) modal.style.display = 'none';
+                            document.body.classList.remove('modal-open');
+                        };
+
+                        function _checkProgresoHeader(cumple) {
+                            return cumple
+                                ? `<i class="fas fa-check-circle" style="color:#2e7d32;font-size:17px;flex-shrink:0;"></i>`
+                                : `<i class="far fa-circle" style="color:#ccc;font-size:17px;flex-shrink:0;"></i>`;
+                        }
+
+                        function _itemProgresoHeader(cumple, texto) {
+                            const color = cumple ? 'color:#333;' : 'color:#999;';
+                            return `<div style="display:flex;align-items:center;gap:10px;font-size:13px;margin-bottom:8px;">
+                                ${_checkProgresoHeader(cumple)}
+                                <span style="${color}">${texto}</span>
+                            </div>`;
+                        }
+
+                        const _NIVELES_INFO_HEADER = {
+                            AMATEUR:        { nombre: 'Amateur',        emoji: '🟢' },
+                            COLABORADOR:    { nombre: 'Colaborador',    emoji: '🔵' },
+                            CRITICO:        { nombre: 'Crítico',        emoji: '🟣' },
+                            JURADO_EXPERTO: { nombre: 'Jurado Experto', emoji: '🏆' },
+                        };
+
+                        function _renderProgresoBodyHeader(nivel, p) {
+                            const btnAceptar = `<button onclick="window.cerrarModalProgresoHeader()"
+                                style="width:100%;background:#324C89;border:none;color:white;padding:0.65rem;border-radius:8px;font-size:14px;cursor:pointer;margin-top:1.25rem;">
+                                Aceptar
+                            </button>`;
+
+                            if (nivel === 'JURADO_EXPERTO') {
+                                return `
+                                    <div style="text-align:center;padding:0.5rem 0;">
+                                        <div style="font-size:36px;margin-bottom:0.75rem;">🏆</div>
+                                        <div style="font-size:17px;font-weight:600;color:#333;margin-bottom:0.5rem;">¡Sos Jurado Experto!</div>
+                                        <div style="font-size:13px;color:#888;line-height:1.6;margin-bottom:0.5rem;">
+                                            Alcanzaste el nivel más alto de Cinemarketer. Tu dedicación y pasión por el cine te llevaron hasta acá. ¡Seguí siendo parte de nuestra comunidad!
+                                        </div>
+                                    </div>
+                                    ${btnAceptar}`;
+                            }
+
+                            const infoActual = _NIVELES_INFO_HEADER[nivel] || _NIVELES_INFO_HEADER.AMATEUR;
+                            const encabezado = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid #eee;">
+                                <span style="font-size:20px;">${infoActual.emoji}</span>
+                                <span style="font-size:15px;color:#333;">Hoy sos <strong>${infoActual.nombre}</strong></span>
+                            </div>`;
+
+                            let titulo = '';
+                            let emoji  = '';
+                            let items  = '';
+
+                            if (nivel === 'AMATEUR') {
+                                titulo = 'Colaborador'; emoji = '🔵';
+                                const emailOk     = p.emailVerified || !!p.googleId;
+                                const perfilOk    = !!(p.name && p.dni && p.phone && p.avatarUrl && p.provincia && p.localidad);
+                                const peliculasOk = (p.reviewsCount || 0) >= 100;
+                                const comentOk    = (p.commentsUniqueMoviesCount || 0) >= 50;
+                                const bioOk       = !!(p.bioTitulo && p.bioTexto);
+                                items = _itemProgresoHeader(emailOk,     'Email verificado') +
+                                        _itemProgresoHeader(perfilOk,    'Perfil completo al 100%') +
+                                        _itemProgresoHeader(peliculasOk, '100 películas únicas votadas') +
+                                        _itemProgresoHeader(comentOk,    '50 comentarios en películas distintas') +
+                                        _itemProgresoHeader(bioOk,       'Bio completada en Mi Sala');
+                            }
+
+                            if (nivel === 'COLABORADOR') {
+                                titulo = 'Crítico'; emoji = '🟣';
+                                const peliculasOk     = (p.reviewsCount || 0) >= 200;
+                                const comentOk        = (p.commentsUniqueMoviesCount || 0) >= 100;
+                                const publicacionesOk = (p.publicationsCount || 0) >= 50;
+                                const seguidosOk      = (p.usuariosSeguidosCount || 0) >= 25;
+                                const diasOk          = (p.diasActivos || 0) >= 60;
+                                const recomendOk      = (p.recommendationsCount || 0) >= 30;
+                                const teBancoOk       = (p.teBancoRecibidosCount || 0) >= 20;
+                                const puntosOk        = (p.totalRedeemedPoints || 0) >= 4000;
+                                items = _itemProgresoHeader(peliculasOk,     '200 películas únicas votadas') +
+                                        _itemProgresoHeader(comentOk,        '100 comentarios en películas distintas') +
+                                        _itemProgresoHeader(publicacionesOk, '50 publicaciones en Comunidad') +
+                                        _itemProgresoHeader(seguidosOk,      '25 usuarios seguidos') +
+                                        _itemProgresoHeader(diasOk,          '60 días activos en la plataforma') +
+                                        _itemProgresoHeader(recomendOk,      '30 recomendaciones enviadas') +
+                                        _itemProgresoHeader(teBancoOk,       '20 "Te banco" de usuarios distintos') +
+                                        _itemProgresoHeader(puntosOk,        '4.000 puntos canjeados');
+                            }
+
+                            if (nivel === 'CRITICO') {
+                                titulo = 'Jurado Experto'; emoji = '🏆';
+                                const premiumOk       = !!p.isPremium;
+                                const peliculasOk     = (p.reviewsCount || 0) >= 500;
+                                const comentOk        = (p.commentsUniqueMoviesCount || 0) >= 300;
+                                const publicacionesOk = (p.publicationsCount || 0) >= 200;
+                                const seguidosOk      = (p.usuariosSeguidosCount || 0) >= 100;
+                                const diasOk          = (p.diasActivos || 0) >= 120;
+                                const recomendOk      = (p.recommendationsCount || 0) >= 200;
+                                const teBancoOk       = (p.teBancoRecibidosCount || 0) >= 100;
+                                const merecePuntoOk   = (p.merecePuntosCount || 0) >= 100;
+                                const seguidoresOk    = (p.seguidoresGanadosCount || 0) >= 100;
+                                const puntosOk        = (p.totalRedeemedPoints || 0) >= 20000;
+                                items = _itemProgresoHeader(premiumOk,       'Suscripción Premium activa') +
+                                        _itemProgresoHeader(peliculasOk,     '500 películas únicas votadas') +
+                                        _itemProgresoHeader(comentOk,        '300 comentarios en películas distintas') +
+                                        _itemProgresoHeader(publicacionesOk, '200 publicaciones en Comunidad') +
+                                        _itemProgresoHeader(seguidosOk,      '100 usuarios seguidos') +
+                                        _itemProgresoHeader(diasOk,          '120 días activos en la plataforma') +
+                                        _itemProgresoHeader(recomendOk,      '200 recomendaciones enviadas') +
+                                        _itemProgresoHeader(teBancoOk,       '100 "Te banco" de usuarios distintos') +
+                                        _itemProgresoHeader(merecePuntoOk,   '100 "Merecés un punto" recibidos') +
+                                        _itemProgresoHeader(seguidoresOk,    '100 seguidores ganados') +
+                                        _itemProgresoHeader(puntosOk,        '20.000 puntos canjeados');
+                            }
+
+                                return `
+                                    ${encabezado}
+                                    <div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Próximo objetivo</div>
+                                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:1.25rem;">
+                                        <span style="font-size:20px;">${emoji}</span>
+                                        <span style="font-size:17px;font-weight:600;color:#333;">${titulo}</span>
+                                    </div>
+                                    ${items}
+                                    ${btnAceptar}`;
+                            }

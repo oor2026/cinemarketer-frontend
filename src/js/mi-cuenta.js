@@ -34,12 +34,12 @@ window.loadProfile = async function() {
 
         document.getElementById('emailVerified').innerHTML = profile.emailVerified ? '✅ Sí' : '❌ No';
 
-        if (profile.createdAt) {
-            const joinDate = new Date(profile.createdAt);
-            document.getElementById('memberSince').textContent =
-                `Miembro desde ${joinDate.toLocaleDateString('es-ES', {
-                    year: 'numeric', month: 'long', day: 'numeric',
-                    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                if (profile.createdAt && document.getElementById('memberSince')) {
+                    const joinDate = new Date(profile.createdAt);
+                    document.getElementById('memberSince').textContent =
+                        `Miembro desde ${joinDate.toLocaleDateString('es-ES', {
+                            year: 'numeric', month: 'long', day: 'numeric',
+                            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
                 })}`;
         }
 
@@ -53,9 +53,8 @@ window.loadProfile = async function() {
             document.getElementById('lastLogin').textContent = 'Primer inicio de sesión';
         }
 
-        window._perfilNivel = profile.level || 'AMATEUR';
-        window._perfilData  = profile;
-        cargarAvatarYNivel(profile);
+                window._perfilNivel = profile.level || 'AMATEUR';
+                window._perfilData  = profile;
 
                 // Guardar ID para perfil público
                 if (profile.id) localStorage.setItem('userId', profile.id);
@@ -91,350 +90,24 @@ window.loadProfile = async function() {
         window.initSuscripcion();
     }
 
-    } catch (error) {
-        const card = document.querySelector('.profile-card');
-        if (card) card.innerHTML = `
-            <div style="text-align: center; color: #e50914; padding: 2rem;">
-                <i class="fas fa-exclamation-circle" style="font-size: 3rem;"></i>
-                <h3>Error al cargar el perfil</h3>
-                <p>Por favor, intenta nuevamente más tarde.</p>
-            </div>
-        `;
-    }
-};
-
-// ==============================================
-// CARGAR AVATAR Y NIVEL EN EL PERFIL
-// ==============================================
-function cargarAvatarYNivel(profile) {
-    // Avatar
-    const avatarContainer = document.getElementById('profileAvatar');
-    if (profile.avatarUrl) {
-        avatarContainer.innerHTML = `<img src="${profile.avatarUrl}" alt="Avatar" class="avatar-img">`;
-    } else {
-        avatarContainer.innerHTML = `<i class="fas fa-user-circle"></i>`;
-    }
-
-    // Nivel + nombre del avatar (viene del perfil al cargar)
-    const levelBadge = document.getElementById('profileLevelBadge');
-    if (profile.level && levelBadge) {
-        const levelEmoji = profile.levelEmoji || getLevelEmoji(profile.level);
-        const levelName  = profile.levelDisplayName || profile.level;
-        levelBadge.innerHTML = `
-            <span class="level-label">NIVEL:</span>
-            <span class="level-icon">${levelEmoji}</span>
-            <span class="level-name">${levelName}</span>
-            ${profile.avatarName ? `<span class="avatar-name">· ${profile.avatarName}</span>` : ''}
-        `;
-    }
-
-    // Progreso
-    if (profile.levelProgress !== undefined) {
-        const progressFill = document.querySelector('#profileLevelProgress .progress-fill');
-        const progressText = document.querySelector('#profileLevelProgress .progress-text');
-        if (profile.levelProgress !== null && profile.levelProgress !== undefined) {
-            if (progressFill) progressFill.style.width = `${profile.levelProgress}%`;
-            if (progressText) progressText.textContent = `${profile.levelProgress.toFixed(1)}% al siguiente nivel`;
-        } else {
-            if (progressFill) progressFill.style.width = `100%`;
-            if (progressText) progressText.textContent = `Nivel máximo alcanzado`;
+        } catch (error) {
+            console.error('[loadProfile] Error real:', error); // TEMPORAL — para diagnosticar, sacar después
+            const card = document.querySelector('.profile-card');
+            if (card) card.innerHTML = `
+                <div style="text-align: center; color: #e50914; padding: 2rem;">
+                    <i class="fas fa-exclamation-circle" style="font-size: 3rem;"></i>
+                    <h3>Error al cargar el perfil</h3>
+                    <p>Por favor, intenta nuevamente más tarde.</p>
+                </div>
+            `;
         }
-    }
-
-    // Siguiente nivel
-    const nextLevelDiv = document.getElementById('profileNextLevel');
-    if (profile.nextLevel) {
-        nextLevelDiv.innerHTML = `
-            <span class="next-level-label">Próximo nivel:</span>
-            <span class="next-level-name">${profile.nextLevelDisplayName || profile.nextLevel}</span>
-            <span class="next-level-points">(faltan ${profile.pointsToNextLevel || 0} pts)</span>
-        `;
-    } else {
-        nextLevelDiv.innerHTML = `
-            <span class="next-level-label" style="display:flex; align-items:center; gap:6px;">
-                🏆 <strong>¡Sos Jurado Experto!</strong>
-            </span>
-            <span class="next-level-points" style="margin-top:4px; line-height:1.5;">
-                El nivel más alto de Cinemarketer. Tu pasión y dedicación al cine te trajeron hasta acá. ¡Seguí disfrutando de los beneficios exclusivos!
-            </span>
-        `;
-    }
-    }
-
-// ==============================================
-// ACTUALIZAR NOMBRE DEL AVATAR EN EL BADGE
-// (llamado desde guardarAvatar, ANTES de cerrar el modal)
-// ==============================================
-function actualizarNombreAvatarEnBadge(nuevoNombre) {
-    const levelBadge = document.getElementById('profileLevelBadge');
-    if (!levelBadge) return;
-
-    const avatarNameSpan = levelBadge.querySelector('.avatar-name');
-    if (nuevoNombre) {
-        if (avatarNameSpan) {
-            avatarNameSpan.textContent = `· ${nuevoNombre}`;
-        } else {
-            levelBadge.insertAdjacentHTML('beforeend',
-                `<span class="avatar-name">· ${nuevoNombre}</span>`);
-        }
-    } else {
-        // Avatar personalizado — sin nombre
-        if (avatarNameSpan) avatarNameSpan.remove();
-    }
-}
-
-function getLevelEmoji(level) {
-    const emojis = {
-        'AMATEUR': '🟢',
-        'COLABORADOR': '🔵',
-        'CRITICO': '🟣',
-        'JURADO_EXPERTO': '🏆'
     };
-    return emojis[level] || '🟢';
-}
-
-// ==============================================
-// SELECTOR DE AVATAR
-// ==============================================
-
-// Nombre con sufijo "Cuenta" — otros archivos (perfil.js, y
-// evidentemente algún otro más) declaran su propia
-// "avatarSeleccionado" a nivel superior, y como todos se cargan como
-// <script> normales (no módulos), quedan en el scope global
-// compartido de la página. Sacar el <script> viejo del DOM al
-// cambiar de módulo NO deshace un let/const ya ejecutado — por eso,
-// si se visitaban dos módulos con este mismo nombre de variable en
-// la misma sesión, el segundo en cargar crasheaba entero con
-// "Identifier ya declarado" y ni una línea de ese archivo llegaba a
-// ejecutarse.
-let avatarSeleccionadoCuenta = null;
-let avatarCategoriaActual = 'predefinidos';
-
-// ==============================================
-// FILE INPUT - PREVIEW DE IMAGEN
-// ==============================================
-function inicializarFileInput() {
-    const fileInput = document.getElementById('avatarFileInput');
-    if (!fileInput || fileInput._listenerAttached) return;
-    fileInput._listenerAttached = true;
-
-    fileInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const errorEl = document.getElementById('avatarError');
-
-        if (!file.type.startsWith('image/')) {
-            errorEl.textContent = 'Solo se permiten archivos de imagen (JPG, PNG, WEBP)';
-            errorEl.style.display = 'block';
-            this.value = '';
-            return;
-        }
-        if (file.size > 5 * 1024 * 1024) {
-            errorEl.textContent = 'La imagen no puede superar los 5MB';
-            errorEl.style.display = 'block';
-            this.value = '';
-            return;
-        }
-
-        errorEl.style.display = 'none';
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const preview = document.getElementById('avatarPreview');
-            const img = document.getElementById('avatarPreviewImg');
-            img.src = e.target.result;
-            preview.style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-    });
-}
-
-window.abrirSelectorAvatar = function() {
-    avatarSeleccionadoCuenta = null;
-    document.getElementById('avatarError').style.display = 'none';
-
-    // Resetear tabs visualmente ANTES de abrir
-    document.querySelectorAll('.avatar-tab').forEach(t => t.classList.remove('active'));
-    document.querySelector('.avatar-tab:first-child').classList.add('active');
-
-    // Resetear vista de personalizado
-    document.getElementById('avatarFileInput').value = '';
-    document.getElementById('avatarPreview').style.display = 'none';
-
-    document.getElementById('modalSelectorAvatar').style.display = 'flex';
-
-    // Cargar predefinidos pasando el tab ya activo
-    const tabPredefinidos = document.querySelector('.avatar-tab:first-child');
-    window.cambiarCategoriaAvatar('predefinidos', tabPredefinidos);
-};
-
-window.cerrarSelectorAvatar = function() {
-    document.getElementById('modalSelectorAvatar').style.display = 'none';
-};
-
-window.cambiarCategoriaAvatar = function(categoria, btn) {
-    document.querySelectorAll('.avatar-tab').forEach(tab => tab.classList.remove('active'));
-    btn.classList.add('active');
-
-    avatarCategoriaActual = categoria;
-
-    if (categoria === 'predefinidos') {
-        document.getElementById('avatarPredefinidos').style.display = 'grid';
-        document.getElementById('avatarPersonalizado').style.display = 'none';
-        cargarAvataresPredefinidos();
-    } else {
-        document.getElementById('avatarPredefinidos').style.display = 'none';
-        document.getElementById('avatarPersonalizado').style.display = 'block';
-
-        // Inicializar listener (por si el input fue reemplazado)
-        inicializarFileInput();
-
-        // Restaurar preview si ya había una imagen seleccionada
-        const fileInput = document.getElementById('avatarFileInput');
-        const preview = document.getElementById('avatarPreview');
-        const previewImg = document.getElementById('avatarPreviewImg');
-        if (fileInput?.files[0] && preview && previewImg) {
-            const reader = new FileReader();
-            reader.onload = e => {
-                previewImg.src = e.target.result;
-                preview.style.display = 'block';
-            };
-            reader.readAsDataURL(fileInput.files[0]);
-        }
-    }
-};
-
-async function cargarAvataresPredefinidos() {
-    const grid = document.getElementById('avatarPredefinidos');
-    grid.innerHTML = '<div class="avatar-loading"><i class="fas fa-spinner fa-spin"></i> Cargando avatares...</div>';
-
-    try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${CONFIG.API_URL}/avatars/available`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        if (!response.ok) throw new Error('Error al cargar avatares');
-
-        const avatares = await response.json();
-
-        if (avatares.length === 0) {
-            grid.innerHTML = '<div class="avatar-loading">No hay avatares disponibles</div>';
-            return;
-        }
-
-        grid.innerHTML = avatares.map(avatar => `
-            <div class="avatar-item" onclick="window.seleccionarAvatar(${avatar.id}, this)">
-                <img src="${avatar.imageUrl}" alt="${avatar.name}">
-                <span class="avatar-item-name">${avatar.name}</span>
-            </div>
-        `).join('');
-
-    } catch (error) {
-        grid.innerHTML = '<div class="avatar-loading">Error al cargar avatares</div>';
-    }
-}
-
-window.seleccionarAvatar = function(avatarId, elemento) {
-    document.querySelectorAll('.avatar-item').forEach(item => item.classList.remove('selected'));
-    elemento.classList.add('selected');
-    avatarSeleccionadoCuenta = avatarId;
-};
-
-function mostrarErrorAvatar(mensaje) {
-    const errorEl = document.getElementById('avatarError');
-    errorEl.textContent = mensaje;
-    errorEl.style.display = 'block';
-}
-
-window.guardarAvatar = async function() {
-    const errorEl = document.getElementById('avatarError');
-    errorEl.style.display = 'none';
-
-    const btn    = document.getElementById('btnGuardarAvatar');
-    const texto  = document.getElementById('btnGuardarAvatarTexto');
-    const loader = document.getElementById('btnGuardarAvatarLoader');
-
-    btn.disabled = true;
-    texto.style.display  = 'none';
-    loader.style.display = 'inline-block';
-
-    try {
-        const token = localStorage.getItem('token');
-        let response;
-
-                if (avatarCategoriaActual === 'predefinidos') {
-                    if (!avatarSeleccionadoCuenta) throw new Error('Seleccioná un avatar');
-
-                    response = await fetch(`${CONFIG.API_URL}/users/me/avatar/${avatarSeleccionadoCuenta}`, {
-                        method: 'POST',
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-
-        } else {
-            const fileInput = document.getElementById('avatarFileInput');
-            const file = fileInput.files[0];
-            if (!file) throw new Error('Seleccioná una imagen');
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            response = await fetch(`${CONFIG.API_URL}/users/me/avatar/upload`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` },
-                body: formData
-            });
-        }
-
-        const data = await response.json();
-
-        if (response.ok) {
-            // 1. Actualizar imagen en el perfil
-            const avatarContainer = document.getElementById('profileAvatar');
-            avatarContainer.innerHTML = `<img src="${data.avatarUrl}" alt="Avatar" class="avatar-img">`;
-
-            // 2. Actualizar avatar en el header del dashboard
-            const headerAvatar = document.getElementById('headerAvatar');
-            if (headerAvatar) {
-                headerAvatar.innerHTML = `<img src="${data.avatarUrl}" alt="Avatar" class="avatar-img">`;
-            }
-
-            // 3. Capturar nombre del avatar ANTES de cerrar el modal
-                let nuevoNombre = null;
-                if (avatarCategoriaActual === 'predefinidos' && avatarSeleccionadoCuenta) {
-                const itemSeleccionado = document.querySelector('.avatar-item.selected .avatar-item-name');
-                if (itemSeleccionado) nuevoNombre = itemSeleccionado.textContent.trim();
-            }
-
-            // 4. Cerrar modal
-            window.cerrarSelectorAvatar();
-
-            // 5. Actualizar nombre en el badge (después de cerrar está bien porque el badge está fuera del modal)
-            actualizarNombreAvatarEnBadge(nuevoNombre);
-
-            // 6. Toast
-            mostrarToast(data.message || 'Avatar actualizado', 'success');
-
-        } else {
-            throw new Error(data.message || 'Error al guardar avatar');
-        }
-
-    } catch (error) {
-        errorEl.textContent = error.message;
-        errorEl.style.display = 'block';
-    } finally {
-        btn.disabled = false;
-        texto.style.display  = 'inline';
-        loader.style.display = 'none';
-    }
-};
 
 // ==============================================
 // EDICIÓN DE PERFIL
 // ==============================================
 
-const CAMPOS_EDICION = {
+var CAMPOS_EDICION = {
     name:      { titulo: 'Editar nombre completo',     label: 'Nombre completo',    tipo: 'text',     spanId: 'userFullName'  },
     email:     { titulo: 'Editar email',               label: 'Correo electrónico', tipo: 'email',    spanId: 'userEmail'     },
     phone:     { titulo: 'Editar teléfono',            label: 'Teléfono',           tipo: 'tel',      spanId: 'userPhone'     },
@@ -444,7 +117,7 @@ const CAMPOS_EDICION = {
     localidad: { titulo: 'Editar localidad',           label: 'Localidad',          tipo: 'localidad',spanId: 'userLocalidad' }
 };
 
-const PHONE_PREFIXES_CUENTA = [
+var PHONE_PREFIXES_CUENTA = [
     { code: '+54',  flag: '🇦🇷', name: 'Argentina',      max: 10 },
     { code: '+591', flag: '🇧🇴', name: 'Bolivia',         max: 8  },
     { code: '+55',  flag: '🇧🇷', name: 'Brasil',          max: 11 },
@@ -475,8 +148,8 @@ const PHONE_PREFIXES_CUENTA = [
     { code: '+61',  flag: '🇦🇺', name: 'Australia',       max: 9  },
 ];
 
-let selectedPrefixCuenta = PHONE_PREFIXES_CUENTA[0];
-let campoActual = null;
+var selectedPrefixCuenta = PHONE_PREFIXES_CUENTA[0];
+var campoActual = null;
 
 function parsearTelefono(valorCompleto) {
     const sorted = [...PHONE_PREFIXES_CUENTA].sort((a, b) => b.code.length - a.code.length);
@@ -514,9 +187,9 @@ function renderPrefixListCuenta(filter = '') {
     });
 }
 
-const _PROVINCIAS = ['Buenos Aires','Catamarca','Chaco','Chubut','Córdoba','Corrientes','Entre Ríos','Formosa','Jujuy','La Pampa','La Rioja','Mendoza','Misiones','Neuquén','Río Negro','Salta','San Juan','San Luis','Santa Cruz','Santa Fe','Santiago del Estero','Tierra del Fuego','Tucumán','Ciudad Autónoma de Buenos Aires'];
+var _PROVINCIAS = ['Buenos Aires','Catamarca','Chaco','Chubut','Córdoba','Corrientes','Entre Ríos','Formosa','Jujuy','La Pampa','La Rioja','Mendoza','Misiones','Neuquén','Río Negro','Salta','San Juan','San Luis','Santa Cruz','Santa Fe','Santiago del Estero','Tierra del Fuego','Tucumán','Ciudad Autónoma de Buenos Aires'];
 
-const _LOCALIDADES = {
+var _LOCALIDADES = {
     'Buenos Aires': ['La Plata','Mar del Plata','Bahía Blanca','Quilmes','Lanús','Lomas de Zamora','Almirante Brown','Berazategui','Florencio Varela','Tigre','San Isidro','Vicente López','General San Martín','Tres de Febrero','Morón','Hurlingham','Ituzaingó','Merlo','Moreno','General Rodríguez','Luján','Campana','Zárate','San Nicolás','Tandil','Azul','Olavarría','Necochea','Junín','Pergamino','Pehuajó','Trenque Lauquen','Chivilcoy','Mercedes','Lobos','Chascomús','Dolores','Pinamar','Villa Gesell','Miramar'],
     'Córdoba': ['Córdoba','Villa Carlos Paz','Río Cuarto','San Francisco','Villa María','Alta Gracia','Jesús María','Bell Ville','Río Tercero','Cosquín','La Falda','Cruz del Eje','Laboulaye','Marcos Juárez','Villa Dolores'],
     'Santa Fe': ['Rosario','Santa Fe','Rafaela','Venado Tuerto','Santo Tomé','Reconquista','Villa Constitución','Casilda','Cañada de Gómez','Esperanza','Las Rosas','Firmat'],
@@ -1325,8 +998,8 @@ window.togglePushNotificaciones = async function() {
 // ==============================================
 // BLOQUEAR USUARIO
 // ==============================================
-let _bloquearUserId = null;
-let _bloquearNombre = null;
+var _bloquearUserId = null;
+var _bloquearNombre = null;
 
 window.abrirModalBloquear = function(userId, nombre) {
     _bloquearUserId = userId;
@@ -1391,7 +1064,7 @@ function inicializarPremiumCarrusel() {
 // Premium y Creator son slides del mismo carrusel — colapsar/desplegar uno
 // tiene que reflejarse en el otro, para que al deslizar entre ambos el
 // estado (ocupa espacio / no ocupa espacio) sea consistente.
-const BANNERS_COLAPSABLES = [
+var BANNERS_COLAPSABLES = [
     { colapsable: 'premiumBannerColapsable', chevron: 'premiumBannerChevron', banner: 'premiumBanner' },
     { colapsable: 'creatorBannerColapsable', chevron: 'creatorBannerChevron', banner: 'creatorBanner' }
 ];
@@ -1434,130 +1107,8 @@ window.toggleCreatorBanner = function() {
     aplicarEstadoColapsoBanners(!estaColapsado);
 };
 
-// ── Modal progreso de insignia ──────────────────────────────────
-window.abrirModalProgreso = function() {
-    const modal = document.getElementById('modalProgreso');
-    const body  = document.getElementById('modalProgresoBody');
-    if (!modal || !body) return;
-
-    const nivel = window._perfilNivel || 'AMATEUR';
-    const profile = window._perfilData || {};
-
-    body.innerHTML = _renderProgresoBody(nivel, profile);
-    modal.style.display = 'flex';
-    document.body.classList.add('modal-open');
-};
-
-window.cerrarModalProgreso = function() {
-    const modal = document.getElementById('modalProgreso');
-    if (modal) modal.style.display = 'none';
-    document.body.classList.remove('modal-open');
-};
-
-function _check(cumple) {
-    return cumple
-        ? `<i class="fas fa-check-circle" style="color:#2e7d32;font-size:17px;flex-shrink:0;"></i>`
-        : `<i class="far fa-circle" style="color:#ccc;font-size:17px;flex-shrink:0;"></i>`;
-}
-
-function _item(cumple, texto) {
-    const color = cumple ? 'color:#333;' : 'color:#999;';
-    return `<div style="display:flex;align-items:center;gap:10px;font-size:13px;margin-bottom:8px;">
-        ${_check(cumple)}
-        <span style="${color}">${texto}</span>
-    </div>`;
-}
-
-function _renderProgresoBody(nivel, p) {
-    const btnAceptar = `<button onclick="window.cerrarModalProgreso()"
-        style="width:100%;background:#324C89;border:none;color:white;padding:0.65rem;border-radius:8px;font-size:14px;cursor:pointer;margin-top:1.25rem;">
-        Aceptar
-    </button>`;
-
-    if (nivel === 'JURADO_EXPERTO') {
-        return `
-            <div style="text-align:center;padding:0.5rem 0;">
-                <div style="font-size:36px;margin-bottom:0.75rem;">🏆</div>
-                <div style="font-size:17px;font-weight:600;color:#333;margin-bottom:0.5rem;">¡Sos Jurado Experto!</div>
-                <div style="font-size:13px;color:#888;line-height:1.6;margin-bottom:0.5rem;">
-                    Alcanzaste el nivel más alto de Cinemarketer. Tu dedicación y pasión por el cine te llevaron hasta acá. ¡Seguí siendo parte de nuestra comunidad!
-                </div>
-            </div>
-            ${btnAceptar}`;
-    }
-
-    let titulo = '';
-    let emoji  = '';
-    let items  = '';
-
-        if (nivel === 'AMATEUR') {
-            titulo = 'Colaborador'; emoji = '🔵';
-            const emailOk     = p.emailVerified || !!p.googleId;
-            const perfilOk    = !!(p.name && p.dni && p.phone && p.avatarUrl && p.provincia && p.localidad);
-            const peliculasOk = (p.reviewsCount || 0) >= 100;
-            const comentOk    = (p.commentsUniqueMoviesCount || 0) >= 50;
-            const bioOk       = !!(p.bioTitulo && p.bioTexto);
-            items = _item(emailOk,     'Email verificado') +
-                    _item(perfilOk,    'Perfil completo al 100%') +
-                    _item(peliculasOk, '100 películas únicas votadas') +
-                    _item(comentOk,    '50 comentarios en películas distintas') +
-                    _item(bioOk,       'Bio completada en Mi Sala');
-        }
-
-    if (nivel === 'COLABORADOR') {
-                titulo = 'Crítico'; emoji = '🟣';
-                const peliculasOk     = (p.reviewsCount || 0) >= 200;
-                const comentOk        = (p.commentsUniqueMoviesCount || 0) >= 100;
-                const publicacionesOk = (p.publicationsCount || 0) >= 50;
-                const seguidosOk      = (p.usuariosSeguidosCount || 0) >= 25;
-                const diasOk          = (p.diasActivos || 0) >= 60;
-                const recomendOk      = (p.recommendationsCount || 0) >= 30;
-                const teBancoOk       = (p.teBancoRecibidosCount || 0) >= 20;
-                const puntosOk        = (p.totalRedeemedPoints || 0) >= 4000;
-                items = _item(peliculasOk,     '200 películas únicas votadas') +
-                        _item(comentOk,        '100 comentarios en películas distintas') +
-                        _item(publicacionesOk, '50 publicaciones en Comunidad') +
-                        _item(seguidosOk,      '25 usuarios seguidos') +
-                        _item(diasOk,          '60 días activos en la plataforma') +
-                        _item(recomendOk,      '30 recomendaciones enviadas') +
-                        _item(teBancoOk,       '20 "Te banco" de usuarios distintos') +
-                        _item(puntosOk,        '4.000 puntos canjeados');
-            }
-
-            if (nivel === 'CRITICO') {
-                titulo = 'Jurado Experto'; emoji = '🏆';
-                const premiumOk       = !!p.isPremium;
-                const peliculasOk     = (p.reviewsCount || 0) >= 500;
-                const comentOk        = (p.commentsUniqueMoviesCount || 0) >= 300;
-                const publicacionesOk = (p.publicationsCount || 0) >= 200;
-                const seguidosOk      = (p.usuariosSeguidosCount || 0) >= 100;
-                const diasOk          = (p.diasActivos || 0) >= 120;
-                const recomendOk      = (p.recommendationsCount || 0) >= 200;
-                const teBancoOk       = (p.teBancoRecibidosCount || 0) >= 100;
-                const merecePuntoOk   = (p.merecePuntosCount || 0) >= 100;
-                const seguidoresOk    = (p.seguidoresGanadosCount || 0) >= 100;
-                const puntosOk        = (p.totalRedeemedPoints || 0) >= 20000;
-                items = _item(premiumOk,       'Suscripción Premium activa') +
-                        _item(peliculasOk,     '500 películas únicas votadas') +
-                        _item(comentOk,        '300 comentarios en películas distintas') +
-                        _item(publicacionesOk, '200 publicaciones en Comunidad') +
-                        _item(seguidosOk,      '100 usuarios seguidos') +
-                        _item(diasOk,          '120 días activos en la plataforma') +
-                        _item(recomendOk,      '200 recomendaciones enviadas') +
-                        _item(teBancoOk,       '100 "Te banco" de usuarios distintos') +
-                        _item(merecePuntoOk,   '100 "Merecés un punto" recibidos') +
-                        _item(seguidoresOk,    '100 seguidores ganados') +
-                        _item(puntosOk,        '20.000 puntos canjeados');
-            }
-
-    return `
-        <div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Próximo objetivo</div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:1.25rem;">
-            <span style="font-size:20px;">${emoji}</span>
-            <span style="font-size:17px;font-weight:600;color:#333;">${titulo}</span>
-        </div>
-        ${items}
-        ${btnAceptar}`;
-}
+// Modal de progreso de insignia — migró al header (ícono global,
+// funciona desde cualquier módulo). Ver main.js: abrirModalProgresoHeader,
+// cerrarModalProgresoHeader, _renderProgresoBodyHeader y compañía.
 
 document.body.classList.remove('modal-open');
