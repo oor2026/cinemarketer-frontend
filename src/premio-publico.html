@@ -131,9 +131,11 @@
                 ? `<img src="${p.imageUrl}" alt="${p.name}">`
                 : `<i>🎁</i>`;
 
-                        const cerrado = p.isExpired === true;
-            const botonHtml = cerrado
-                ? `<span class="btn-login" style="background:#999; cursor:default; pointer-events:none;">Sorteo finalizado</span>`
+                                    const cerrado = p.isExpired === true;
+            const agotado = p.hasStock === false;
+            const noDisponible = cerrado || agotado;
+            const botonHtml = noDisponible
+                ? `<span class="btn-login" style="background:#999; cursor:default; pointer-events:none;">${cerrado ? 'Sorteo finalizado' : 'Sin stock'}</span>`
                 : `<a class="btn-login" href="https://cinemarketer.com.ar/login">${p.sorteo ? 'Quiero anotarme' : 'Iniciar sesión para canjear'}</a>`;
 
             contenido.innerHTML = `
@@ -147,6 +149,7 @@
                         <strong>${p.pointsRequired ?? '—'} pts</strong>
                     </div>
                     ${cerrado ? '<p style="color:#c0392b; font-weight:600; margin-bottom:0.5rem;">⏰ Este sorteo ya cerró</p>' : ''}
+                    ${!cerrado && agotado ? '<p style="color:#c0392b; font-weight:600; margin-bottom:0.5rem;">📦 Este premio se agotó</p>' : ''}
                     ${botonHtml}
                 </div>`;
         } catch (e) {
