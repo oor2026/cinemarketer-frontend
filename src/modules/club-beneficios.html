@@ -161,6 +161,9 @@
             <h2 id="clubModalPremioTitulo">Nombre del premio</h2>
             <div class="modal-premio-header-right">
                 <span class="modal-premio-badge" id="clubModalPremioBadge">🎁 Merchandising</span>
+                <button class="modal-premio-compartir" onclick="window._abrirCompartirPremioDesdeModal()" title="Compartir">
+                    <i class="fas fa-share-alt"></i>
+                </button>
                 <button class="modal-premio-cerrar" onclick="window._cerrarModalPremioClub()">×</button>
             </div>
         </div>
@@ -324,5 +327,16 @@
             <p id="clubAvisoTexto" class="club-modal-confirmar-texto"></p>
             <button class="club-btn-confirmar" style="width:100%;" onclick="window._cerrarAvisoClub()">Entendido</button>
         </div>
+    </div>
+</div>
+
+<!-- Panel de compartir premio -->
+<div id="modalCompartirPremio" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;" onclick="window._cerrarCompartirPremio(event)">
+    <div style="background:white; border-radius:16px; max-width:340px; width:100%; overflow:hidden;" onclick="event.stopPropagation()">
+        <div style="background:radial-gradient(circle at 15% 20%, #001D7D 0%, #000d3d 70%); padding:1rem 1.25rem; display:flex; align-items:center; justify-content:space-between;">
+            <span style="color:white; font-size:15px; font-weight:600;"><i class="fas fa-share-alt" style="color:#e50914; margin-right:8px;"></i>Compartir premio</span>
+            <button onclick="window._cerrarCompartirPremio()" style="background:none; border:none; color:white; font-size:1.1rem; cursor:pointer;">×</button>
+        </div>
+        <div style="padding:1.25rem; display:flex; flex-direction:column; gap:0.6rem;" id="compartirPremioOpciones"></div>
     </div>
 </div>

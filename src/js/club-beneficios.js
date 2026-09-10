@@ -134,8 +134,13 @@ window._pintarFreeClubFiltrado = function() {
                 else { btnLabel = '¡Quiero canjearlo!'; btnDisabled = false; }
 
                 return `
-                    <div class="premio-card ${!p.hasStock || p.isExpired ? 'agotado' : ''}" onclick="window._abrirModalPremioClub(${p.id}, 'free')" style="cursor:pointer;">
-                        <div class="premio-imagen">${imagen}${badgeTipo}</div>
+                        <div class="premio-card ${!p.hasStock || p.isExpired ? 'agotado' : ''}" onclick="window._abrirModalPremioClub(${p.id}, 'free')" style="cursor:pointer;">
+                            <div class="premio-imagen">
+                                <button class="premio-compartir-btn" onclick="event.stopPropagation(); window._abrirCompartirPremio(${p.id}, '${p.name.replace(/'/g, "\\'")}', 'free')" title="Compartir">
+                                    <i class="fas fa-share-alt"></i>
+                                </button>
+                                ${imagen}${badgeTipo}
+                            </div>
                             <div class="premio-info">
                                 <h4 class="premio-titulo">${p.name}</h4>
                                 <p class="premio-descripcion">${p.description || ''}</p>
@@ -524,7 +529,12 @@ window._renderCardPremiumClub = function(p, isPremium) {
 
             return `
                 <div class="premio-card" onclick="window._abrirModalPremioClub(${p.id}, 'premium')" style="cursor:pointer;">
-                    <div class="premio-imagen">${imagen}${badgeTipo}</div>
+                    <div class="premio-imagen">
+                        <button class="premio-compartir-btn" onclick="event.stopPropagation(); window._abrirCompartirPremio(${p.id}, '${p.name.replace(/'/g, "\\'")}', 'premium')" title="Compartir">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                        ${imagen}${badgeTipo}
+                    </div>
                 <div class="premio-info">
                     <h4 class="premio-titulo">${p.name}</h4>
                     <p class="premio-descripcion">${p.description || ''}</p>
@@ -1096,6 +1106,54 @@ window._abrirModalPremioClub = function(id, origen) {
 
     window._cerrarAvisoClub = function(e) {
         if (e && e.target !== e.currentTarget) return;
-        document.getElementById('clubModalAviso').style.display = 'none';
-        document.body.style.overflow = '';
-    };
+                document.getElementById('clubModalAviso').style.display = 'none';
+                document.body.style.overflow = '';
+            };
+
+        // ========== COMPARTIR PREMIO ==========
+        window._abrirCompartirPremio = function(id, nombre, tipo) {
+            // premio-publico.html espera ?tipo=especial|comun, no free/premium.
+            const tipoUrl = tipo === 'premium' ? 'especial' : 'comun';
+            const url = `${window.location.origin}/premio-publico.html?id=${id}&tipo=${tipoUrl}`;
+            const texto = `Mirá este premio en Cinemarketer: ${nombre}`;
+            const opciones = document.getElementById('compartirPremioOpciones');
+            opciones.innerHTML = `
+                <a href="https://wa.me/?text=${encodeURIComponent(texto + ' ' + url)}" target="_blank" class="compartir-premio-opcion">
+                    <i class="fab fa-whatsapp" style="color:#25D366;"></i> WhatsApp
+                </a>
+                <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}" target="_blank" class="compartir-premio-opcion">
+                    <i class="fab fa-facebook" style="color:#1877F2;"></i> Facebook
+                </a>
+                <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(url)}" target="_blank" class="compartir-premio-opcion">
+                    <i class="fab fa-x-twitter" style="color:#000;"></i> X (Twitter)
+                </a>
+                <a href="mailto:?subject=${encodeURIComponent('Mirá este premio en Cinemarketer')}&body=${encodeURIComponent(texto + '\n\n' + url)}" class="compartir-premio-opcion">
+                    <i class="fas fa-envelope" style="color:#666;"></i> Email
+                </a>
+                <button class="compartir-premio-opcion" onclick="window._copiarLinkPremio('${url.replace(/'/g, "\\'")}')">
+                    <i class="fas fa-link" style="color:#666;"></i> Copiar enlace
+                </button>
+            `;
+                document.getElementById('modalCompartirPremio').style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            };
+
+        // Desde el modal de detalle — usa el premio que ya está abierto
+        // (window._clubPremioActual, seteado por _abrirModalPremioClub).
+        window._abrirCompartirPremioDesdeModal = function() {
+            const actual = window._clubPremioActual;
+            if (!actual) return;
+            window._abrirCompartirPremio(actual.p.id, actual.p.name, actual.origen);
+        };
+
+        window._cerrarCompartirPremio = function(event) {
+            if (event && event.target !== event.currentTarget) return; // solo si clickeó el overlay, no el contenido
+            document.getElementById('modalCompartirPremio').style.display = 'none';
+            document.body.style.overflow = '';
+        };
+
+        window._copiarLinkPremio = function(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                alert('¡Enlace copiado!');
+            });
+        };
