@@ -349,6 +349,19 @@
                 <div class="buscador-generos-grid" id="buscadorCaracteristicasGrid"></div>
             </div>
 
+            <!-- NIVEL 3 (sub-nivel de Característica) — Sagas. Exclusivo de
+                 películas, TMDb no tiene colecciones para series. -->
+            <div class="buscador-nivel2" id="buscadorNivel3Saga" style="display:none;">
+                <button class="buscador-volver" onclick="window._buscadorVolverNivel3Caracteristica()">
+                    <i class="fas fa-chevron-left"></i> Volver
+                </button>
+                <p class="buscador-subtitulo">Elegí una saga</p>
+                <input type="text" id="buscadorSagaFiltro" class="filtro-input"
+                       placeholder="Buscar saga..." oninput="window._buscadorFiltrarSagas(this.value)"
+                       style="margin-bottom:0.8rem;">
+                <div class="buscador-sagas-grid" id="buscadorSagaGrid"></div>
+            </div>
+
             <!-- NIVEL 2 — Actor/actriz/director -->
             <div class="buscador-nivel2" id="buscadorNivel2Persona" style="display:none;">
                 <button class="buscador-volver" onclick="window._buscadorVolverNivel1()">

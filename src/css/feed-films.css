@@ -4744,6 +4744,60 @@ window.abrirElencoCard = async function(movieId, event) {
     .buscador-genero-chip:active { background: #fff5f5; color: #e50914; }
 }
 
+/* Grilla de posters de sagas — "Por características → Saga" */
+.buscador-sagas-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8rem;
+}
+.buscador-saga-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+.buscador-saga-item img {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1.5px solid #eee;
+    transition: border-color 0.15s, transform 0.15s;
+}
+.buscador-saga-item:hover img {
+    border-color: #e50914;
+    transform: scale(1.03);
+}
+.buscador-saga-sin-poster {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    border-radius: 10px;
+    border: 1.5px solid #eee;
+    background: #f8f8f8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ccc;
+    font-size: 1.6rem;
+}
+.buscador-saga-item span {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+    line-height: 1.25;
+}
+
+@media (max-width: 768px) {
+    .buscador-sagas-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 .buscador-proximamente-card { text-align: center; padding: 1rem 0.5rem; }
 .buscador-proximamente-icono {
     width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 1rem;
