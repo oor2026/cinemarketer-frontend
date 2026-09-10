@@ -492,9 +492,9 @@ window._confirmarEliminarChatBandeja = function(idx) {
 
 // ========== MIS CONSULTAS ==========
 
-let consultasTicketActualId = null;
-let consultasPaginaActual = 0;
-let consultasTotalPaginas = 1;
+var consultasTicketActualId = null;
+var consultasPaginaActual = 0;
+var consultasTotalPaginas = 1;
 
 // ========== SANITIZACIÓN UNIVERSAL (para input del usuario) ==========
 function sanitizeUserInput(input) {

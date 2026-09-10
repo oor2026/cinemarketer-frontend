@@ -379,6 +379,12 @@ async function cargarPerfilHeader() {
             levelEl.innerHTML = `<span class="level-badge level-${data.level}">${data.levelEmoji} ${data.levelDisplayName}</span>`;
         }
 
+        // Disponible siempre, no solo cuando Configuración está
+        // cargada — lo necesita el ícono nuevo del header, que abre
+        // el modal de progreso desde cualquier módulo.
+        window._perfilNivel = data.level || 'AMATEUR';
+        window._perfilData  = data;
+
     } catch (e) {}
 }
 

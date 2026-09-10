@@ -2,7 +2,7 @@
 // perfil.js — Perfil público de usuario
 // ==============================================
 
-let perfilUsuarioId = null;
+var perfilUsuarioId = null;
 
 // ==============================================
 // INICIALIZACIÓN
@@ -296,12 +296,12 @@ function renderStats(perfil) {
 // ==============================================
 // RENDER VOTACIONES — CARRUSEL CON LAZY POR FLECHA
 // ==============================================
-let _votacionesPage     = 0;
-let _votacionesHayMas   = false;
-let _votacionesCargando = false;
+var _votacionesPage     = 0;
+var _votacionesHayMas   = false;
+var _votacionesCargando = false;
 
-let _stackVotaciones = [];
-let _stackIndice = 0;
+var _stackVotaciones = [];
+var _stackIndice = 0;
 
 function renderVotaciones(votaciones) {
     const wrapper = document.getElementById('perfilVotacionesWrapper');
@@ -504,8 +504,8 @@ function mostrarFinVotaciones(track) {
 // ==============================================
 // RENDER COMENTARIOS CON PAGINACIÓN
 // ==============================================
-let _stackComentarios = [];
-let _stackIndiceComentarios = 0;
+var _stackComentarios = [];
+var _stackIndiceComentarios = 0;
 
 function renderComentarios(comentarios) {
     const wrapper = document.getElementById('perfilComentariosList');
@@ -1068,7 +1068,7 @@ window.subirBanner = async function(input) {
         // ==============================================
         // ADN CINÉFILO — balde 3D
         // ==============================================
-        const EMOJI_POR_GENERO = {
+        var EMOJI_POR_GENERO = {
             'Acción': '💥', 'Animación': '🎨', 'Comedia': '😂',
             'Crimen': '🔪', 'Documental': '🎥', 'Drama': '🎭',
             'Historia': '📜', 'Terror': '👻', 'Música': '🎵',
@@ -1085,7 +1085,7 @@ window.subirBanner = async function(input) {
         // Géneros con tótem distinto según sexo — el resto usa los
         // mapas unisex de siempre. Default masculino si sexo es
         // null/vacío/cualquier otra cosa que no sea exactamente "F".
-        const NOMBRE_TOTEM_GENERO_SEXO = {
+        var NOMBRE_TOTEM_GENERO_SEXO = {
             'Aventura': { M: 'Explorador', F: 'Exploradora' },
             'Familia': { M: 'Familiero', F: 'Familiera' },
             'Romance': { M: 'Cupido', F: 'Venus' },
@@ -1095,7 +1095,7 @@ window.subirBanner = async function(input) {
             'Kids': { M: 'Osito', F: 'Osita' },
             'Soap': { M: 'Novelero', F: 'Novelera' }
         };
-        const EMOJI_GENERO_SEXO = {
+        var EMOJI_GENERO_SEXO = {
             'Romance': { M: '💘', F: '🌹' },
             'Fantasía': { M: '🧙', F: '🔮' }
             // Aventura/Familia/Western/Action & Adventure/Kids/Soap
@@ -1122,12 +1122,12 @@ window.subirBanner = async function(input) {
             if (variante) return _esFemenino(sexo) ? variante.F : variante.M;
             return NOMBRE_TOTEM_POR_GENERO[genero] || genero;
         }
-        const ADN_COLORES = [
+        var ADN_COLORES = [
             0x2a78d6, 0xeb6834, 0x1baf7a, 0xeda100, 0xe87ba4, 0x4a3aa7, 0xe34948, 0x008300,
             0x9c27b0, 0x00bcd4, 0x795548, 0xff5722, 0x607d8b, 0xcddc39, 0x3f51b5, 0xff9800,
             0x009688, 0xc2185b, 0x8bc34a
         ];
-        const NOMBRE_TOTEM_POR_GENERO = {
+        var NOMBRE_TOTEM_POR_GENERO = {
             'Acción': 'Bang', 'Animación': 'Garabato', 'Comedia': 'Risitas',
             'Crimen': 'Fisgón', 'Documental': 'Bitácora', 'Drama': 'Lágrima',
             'Fantasía': 'Duende', 'Historia': 'Retro', 'Terror': 'Boo', 'Música': 'Compás',
@@ -1139,7 +1139,7 @@ window.subirBanner = async function(input) {
             // Kids y Soap: ver NOMBRE_TOTEM_GENERO_SEXO más arriba.
         };
 
-        const TOTEM_FRASE = {
+        var TOTEM_FRASE = {
             'Acción': '¡Bang! ¿Viste esa explosión?',
             'Aventura': '¿Nos vamos de aventura?',
             'Animación': '¡Dibujame una sonrisa!',
@@ -1169,7 +1169,7 @@ window.subirBanner = async function(input) {
             'Talk': 'Hablemos, tengo mucho para decir'
         };
 
-                const GENERO_RASGO = {
+                var GENERO_RASGO = {
                     'Acción': { adj: 'audaz', sust: 'acción' },
                     'Aventura': { adj: 'aventurero', sust: 'aventura' },
                     'Animación': { adj: 'animado', sust: 'animación' },
@@ -1262,7 +1262,7 @@ window.subirBanner = async function(input) {
                                                                         // acá también, solo para mostrar (el dato crudo en la base no
                                                                         // se toca). Emoji, tótem y la frase de arriba ya funcionan bien
                                                                         // con el nombre crudo — solo el texto del pill lo necesitaba.
-                                                                        const TRADUCCIONES_GENERO_SERIE = {
+                                                                        var TRADUCCIONES_GENERO_SERIE = {
                                                                             'Kids': 'Infantil',
                                                                             'Action & Adventure': 'Acción y Aventura',
                                                                             'Sci-Fi & Fantasy': 'Ciencia Ficción',
@@ -2921,8 +2921,8 @@ window._actualizarColorStatsSeguir = function() {
 // ÚLTIMOS COMENTARIOS DE SERIES — toggle en el mismo header
 // ==============================================
 window._perfilComentariosTipo = 'pelicula';
-let _stackComentariosSeries = [];
-let _stackIndiceComentariosSeries = 0;
+var _stackComentariosSeries = [];
+var _stackIndiceComentariosSeries = 0;
 
 function renderComentariosSerie(comentarios) {
     const wrapper = document.getElementById('perfilComentariosSeriesList');
@@ -3204,7 +3204,7 @@ window.cancelarEdicionSerieFavorita = function() {
     document.getElementById('btnEditarSerieFavorita').style.display = 'inline-flex';
 };
 
-let _serieFavoritaTimeout = null;
+var _serieFavoritaTimeout = null;
 window._buscarSerieFavorita = function(query) {
     clearTimeout(_serieFavoritaTimeout);
     const resultados = document.getElementById('serieFavoritaResultados');
@@ -3309,7 +3309,7 @@ window.cancelarEdicionUltimaMaraton = function() {
     document.getElementById('btnEditarUltimaMaraton').style.display = 'inline-flex';
 };
 
-let _ultimaMaratonTimeout = null;
+var _ultimaMaratonTimeout = null;
 window._buscarUltimaMaraton = function(query) {
     clearTimeout(_ultimaMaratonTimeout);
     const resultados = document.getElementById('ultimaMaratonResultados');
@@ -3414,7 +3414,7 @@ window.cancelarEdicionNoMeCansoSerie = function() {
     document.getElementById('btnEditarNoMeCansoSerie').style.display = 'inline-flex';
 };
 
-let _noMeCansoSerieTimeout = null;
+var _noMeCansoSerieTimeout = null;
 window._buscarNoMeCansoSerie = function(query) {
     clearTimeout(_noMeCansoSerieTimeout);
     const resultados = document.getElementById('noMeCansoSerieResultados');
@@ -3519,7 +3519,7 @@ window.cancelarEdicionNoLaBancoSerie = function() {
     document.getElementById('btnEditarNoLaBancoSerie').style.display = 'inline-flex';
 };
 
-let _noLaBancoSerieTimeout = null;
+var _noLaBancoSerieTimeout = null;
 window._buscarNoLaBancoSerie = function(query) {
     clearTimeout(_noLaBancoSerieTimeout);
     const resultados = document.getElementById('noLaBancoSerieResultados');
@@ -3763,8 +3763,8 @@ window._actualizarVisibilidadRankingTrivia = function() {
 // por eso, si se visitaban los dos módulos en la misma sesión, el
 // segundo en cargar crasheaba entero con "Identifier ya declarado"
 // y ni una línea de ese archivo llegaba a ejecutarse.
-let avatarSeleccionadoPerfil = null;
-let avatarCategoriaActual = 'predefinidos';
+var avatarSeleccionadoPerfil = null;
+var avatarCategoriaActual = 'predefinidos';
 
 window.abrirSelectorAvatar = function() {
     avatarSeleccionadoPerfil = null;

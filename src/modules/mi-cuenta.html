@@ -14,37 +14,11 @@
         </div>
     </div>
 
-    <div class="profile-header">
-
-        <!-- PANEL ROJO -->
-        <div class="profile-avatar-section">
-            <div class="profile-avatar-container">
-                <div class="profile-avatar" id="profileAvatar">
-                    <i class="fas fa-user-circle"></i>
-                </div>
-                <button class="btn-change-avatar" onclick="window.abrirSelectorAvatar()" title="Cambiar avatar">
-                    <i class="fas fa-camera"></i>
-                </button>
-            </div>
-
-            <div class="profile-level-info" style="flex:1;min-width:0;">
-                <div class="profile-level-badge" id="profileLevelBadge">
-                    <span class="level-label">NIVEL:</span>
-                    <span class="level-icon">🟢</span>
-                    <span class="level-name">Amateur</span>
-                </div>
-                <button onclick="window.abrirModalProgreso()" class="btn-ver-progreso"
-                        onmouseover="this.style.background='rgba(255,255,255,0.25)'"
-                        onmouseout="this.style.background='rgba(255,255,255,0.15)'">
-                    <i class="fas fa-award"></i> Ver progreso
-                </button>
-                <span id="memberSince" style="font-size:0.78rem;color:rgba(255,255,255,0.75);"></span>
-            </div>
-        </div>
-
-        <div class="profile-level-progress" id="profileLevelProgress" style="display:none;"></div>
-        <div class="profile-next-level" id="profileNextLevel" style="display:none;"></div>
-    </div>
+    <!-- El panel rojo de avatar/nivel/"miembro desde" se sacó de acá —
+     Mi Sala (perfil.js) ya cumple esa función contra el mismo
+     backend (mismo campo avatarUrl, mismos endpoints), así que no
+     hacía falta duplicado. "Ver progreso" migró al ícono del
+     header hace unos pasos. -->
 
     <!-- PANEL PREMIUM -->
     <div class="cuenta-premium-panel" id="cuentaPremiumPanel">
@@ -683,17 +657,6 @@
                 <button onclick="window.cerrarModalBloquear()" style="flex:1; padding:0.7rem; border:1.5px solid #ddd; background:none; border-radius:8px; color:#666; cursor:pointer;">Cancelar</button>
                 <button id="btnConfirmarBloquear" onclick="window.confirmarBloquear()" style="flex:1; padding:0.7rem; background:#e50914; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer;">Sí, bloquear</button>
             </div>
-        </div>
-    </div>
-
-    <!-- MODAL PROGRESO DE INSIGNIA -->
-    <div id="modalProgreso" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;">
-        <div style="background:white; border-radius:16px; max-width:440px; width:100%; overflow:hidden;" onclick="event.stopPropagation()">
-            <div style="background:#324C89; padding:1rem 1.25rem; display:flex; align-items:center; gap:10px;">
-                <i class="fas fa-award" style="color:#e50914; font-size:18px;"></i>
-                <span style="color:white; font-size:15px; font-weight:600;">Mi progreso</span>
-            </div>
-            <div style="padding:1.25rem;" id="modalProgresoBody"></div>
         </div>
     </div>
 

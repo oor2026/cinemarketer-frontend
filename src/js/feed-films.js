@@ -621,7 +621,7 @@ window.priorizarFilaGenero = function(key, btn) {
 // ==============================================
 window._filaCargaEnCurso = window._filaCargaEnCurso || 0;
 window._filaCargaCola = window._filaCargaCola || [];
-const FILA_CARGA_MAX_CONCURRENTE = 2;
+var FILA_CARGA_MAX_CONCURRENTE = 2;
 
 function procesarColaFilas() {
     while (window._filaCargaEnCurso < FILA_CARGA_MAX_CONCURRENTE && window._filaCargaCola.length > 0) {
@@ -694,7 +694,7 @@ function renderFilasGenero() {
         }
 }
 
-let _observerFilas = null;
+var _observerFilas = null;
 function configurarLazyLoadFilas() {
     if (_observerFilas) _observerFilas.disconnect();
     _observerFilas = new IntersectionObserver((entries) => {
@@ -2969,7 +2969,7 @@ window._confirmarAvisoEstreno = async function() {
                 if (esProximoEstreno) {
                     window.cargarExpectativaPelicula(id);
                 }
-        const TMDB_IDIOMAS = {
+        var TMDB_IDIOMAS = {
             'af': 'Afrikáans', 'ar': 'Árabe', 'bg': 'Búlgaro', 'bn': 'Bengalí',
             'ca': 'Catalán', 'cs': 'Checo', 'da': 'Danés', 'de': 'Alemán',
             'el': 'Griego', 'en': 'Inglés', 'es': 'Español', 'et': 'Estonio',
@@ -2987,7 +2987,7 @@ window._confirmarAvisoEstreno = async function() {
         if (idioma) idioma.textContent = TMDB_IDIOMAS[pelicula.original_language] || (pelicula.original_language || 'N/A').toUpperCase();
         if (popularidad) popularidad.textContent = Math.round(pelicula.popularity || 0);
         if (votos)       votos.textContent       = pelicula.vote_count || 0;
-        const TMDB_GENEROS = {
+        var TMDB_GENEROS = {
             28: 'Acción', 12: 'Aventura', 16: 'Animación', 35: 'Comedia',
             80: 'Crimen', 99: 'Documental', 18: 'Drama', 10751: 'Familia',
             14: 'Fantasía', 36: 'Historia', 27: 'Terror', 10402: 'Música',
@@ -4045,7 +4045,7 @@ window.abrirFormRespuesta = function(commentId, btn, replyId = null) {
 };
 
 // ── Modo Spoiler ──────────────────────────────────────────────
-let modoSpoilerActivo = false;
+var modoSpoilerActivo = false;
 
 async function spoilerYaAceptado(movieId) {
     try {
@@ -4524,10 +4524,11 @@ window['init_feed-films'] = async function() {
         // arranque en vez de una atrás de la otra.
         const tabGuardada = localStorage.getItem('feedTabActivo');
 
-        if (tabGuardada && tabGuardada !== 'peliculas') {
-            const idsPorTab = { series: 'tabSeries', comunidad: 'tabComunidad' };
-            const btnGuardado = document.getElementById(idsPorTab[tabGuardada]);
-            if (btnGuardado) {
+                if (tabGuardada && tabGuardada !== 'peliculas') {
+                    const idsPorTab = { series: 'tabSeries', comunidad: 'tabComunidad' };
+                    const btnGuardado = document.getElementById(idsPorTab[tabGuardada]);
+                    console.log('[diag-tab] tabGuardada:', tabGuardada, '| btnGuardado encontrado:', !!btnGuardado, '| _tabActivo antes:', window._tabActivo); // TEMPORAL
+                    if (btnGuardado) {
                 // Fija window._tabActivo antes de que cargarFilasGenero corra,
                 // así el guard de arriba ya sabe que no debe mostrarse.
                 window.seleccionarTabFeed(tabGuardada, btnGuardado);
@@ -4991,6 +4992,7 @@ document.addEventListener('click', function(event) {
 window.abrirBuscadorAsistido = async function() {
     const overlay = document.getElementById('buscadorModalOverlay');
     const sheet = document.getElementById('buscadorModalSheet');
+    console.log('[diag-buscador] función llamada. overlay existe:', !!overlay, '| sheet existe:', !!sheet); // TEMPORAL
     if (overlay) overlay.classList.add('active');
     if (sheet) sheet.classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -5026,7 +5028,7 @@ window.cerrarBuscadorAsistido = function() {
 // cierra el buscador (elegiste algo, tocaste la X, o el overlay) —
 // así la próxima vez que se abra arranca desde el principio, nunca
 // donde quedó la vez anterior.
-const BUSCADOR_PROXIMAMENTE = {
+var BUSCADOR_PROXIMAMENTE = {
     persona_premios: {
         titulo: 'Próximamente Premios y nominaciones',
         texto: '',
@@ -5083,7 +5085,7 @@ window._buscadorResetear = function() {
 
 window._buscadorTipoContenido = 'pelicula'; // default al abrir cada Nivel 2
 
-const BUSCADOR_NIVEL2_IDS = {
+var BUSCADOR_NIVEL2_IDS = {
     pelicula_serie: 'buscadorTipoEleccion', // acá entra primero por el paso de elegir tipo
     persona:        'buscadorNivel2Persona',
     donde_ver:      'buscadorNivel2DondeVer',
@@ -5094,7 +5096,7 @@ const BUSCADOR_NIVEL2_IDS = {
 // Todas las pantallas que puede haber "adentro" de una rama — se usa
 // para ocultar todo de un saque al volver al menú principal, sin
 // importar en qué paso interno estabas parado.
-const BUSCADOR_TODAS_LAS_PANTALLAS = [
+var BUSCADOR_TODAS_LAS_PANTALLAS = [
     ...Object.values(BUSCADOR_NIVEL2_IDS),
     'buscadorNivel2PeliculaSerie', // paso 2 de esta rama, no está en el mapa de arriba
     'buscadorNivel3Titulo',        // Nivel 3 de "Por título"
@@ -5117,7 +5119,7 @@ const BUSCADOR_TODAS_LAS_PANTALLAS = [
     'buscadorNivel3Plataforma',      // Sobre la plataforma — pantalla compartida de texto fijo
     'buscadorNivel3Proximamente',    // Pantalla compartida para criterios todavía no desarrollados
 ];
-const BUSCADOR_FRASES_NIVEL2 = {
+var BUSCADOR_FRASES_NIVEL2 = {
     pelicula_serie: (n) => n ? `¿Buscás algo para ver, ${n}? Contame si es película o serie y seguimos.` : '¿Es película o serie? Seguimos por ahí.',
     persona:        (n) => n ? `¿A quién buscamos, ${n}? Un actor, una actriz, un director...` : '¿A quién buscamos? Un actor, una actriz, un director...',
     donde_ver:      (n) => n ? `Decime qué querés ver, ${n}, y te digo dónde encontrarlo.` : 'Decime qué querés ver y te digo dónde encontrarlo.',
@@ -5287,7 +5289,7 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                             // Texto fijo, sin personalización — una sola pantalla compartida,
                                             // el contenido cambia según qué criterio se haya tocado.
                                             // ==============================================
-                                            const BUSCADOR_TEXTOS_PLATAFORMA = {
+                                            var BUSCADOR_TEXTOS_PLATAFORMA = {
                                                 plataforma_que_es: {
                                                     titulo: '¿Qué es Cinemarketer?',
                                                     texto: 'Cinemarketer es la primera y única red social de cine dedicada por completo a construir tu identidad cinéfila — tu tótem, el símbolo que te representa como cinéfilo, armado a partir de lo que votás, comentás y recomendás. No es una lista de películas vistas: es un perfil vivo que refleja quién sos como amante del cine. Y por el simple hecho de ir construyendo ese perfil, también sos parte del Club de Beneficios: cada interacción tuya suma puntos que después canjeás por premios reales.'
@@ -5337,7 +5339,7 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                         // la lista cruda de checks, la sintetiza: cuántos te faltan en total
                                         // y cuál es el más cerca de cumplirse.
                                         // ==============================================
-                                        const BUSCADOR_NIVELES_INFO = {
+                                        var BUSCADOR_NIVELES_INFO = {
                                             AMATEUR:         { nombre: 'Amateur',         emoji: '🟢', siguiente: 'COLABORADOR' },
                                             COLABORADOR:     { nombre: 'Colaborador',     emoji: '🔵', siguiente: 'CRITICO' },
                                             CRITICO:         { nombre: 'Crítico',         emoji: '🟣', siguiente: 'JURADO_EXPERTO' },
@@ -6445,7 +6447,7 @@ window._buscadorCriterioSeleccionado = function(criterio) {
         // (que se resuelve distinto, por colección, no por keyword) quedan
         // para una próxima pasada.
         // ==============================================
-        const BUSCADOR_CARACTERISTICAS_PELICULA = [
+        var BUSCADOR_CARACTERISTICAS_PELICULA = [
             { id: 9672, nombre: 'Basada en hechos reales' },
             { id: 325286, nombre: 'Remake' },
         ];
@@ -6454,7 +6456,7 @@ window._buscadorCriterioSeleccionado = function(criterio) {
         // "film remake") no tiene equivalente confirmado del lado series.
         // "Reboot" (161184) sí tiene su propia página de TMDb específica
         // para TV, con series reales etiquetadas.
-        const BUSCADOR_CARACTERISTICAS_SERIE = [
+        var BUSCADOR_CARACTERISTICAS_SERIE = [
             { id: 9672, nombre: 'Basada en hechos reales' },
             { id: 161184, nombre: 'Reboot' },
         ];
