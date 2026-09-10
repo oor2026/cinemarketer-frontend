@@ -131,6 +131,39 @@
 }
 .premio-imagen i { font-size: 4rem; color: white; }
 
+/* Ícono de compartir — tarjeta, parte superior izquierda */
+.premio-compartir-btn {
+    position: absolute;
+    top: 0.6rem;
+    left: 0.6rem;
+    z-index: 3;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #e50914;
+    border: none;
+    color: white;
+    font-size: 0.65rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+.premio-compartir-btn:hover { background: #b0060f; }
+/* .premio-imagen i tiene font-size:4rem (para el ícono grande de
+   "sin imagen") — sin este empate de especificidad, se lo pisaba. */
+.premio-imagen .premio-compartir-btn i {
+    font-size: 0.65rem;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .premio-imagen .premio-compartir-btn i {
+        font-size: 0.85rem;
+    }
+}
+
 .premio-info { padding: 1.5rem; display: flex; flex-direction: column; flex: 1; }
 .premio-titulo {
     font-size: 1.2rem; font-weight: 600; color: #333; margin-bottom: 0.5rem;
@@ -306,6 +339,34 @@
     justify-content: center; transition: background 0.2s; line-height: 1;
 }
 .modal-premio-cerrar:hover { background: rgba(255,255,255,0.35); }
+
+/* Ícono de compartir — header del modal de detalle, mismo tamaño
+   que el botón de cerrar, con fuente normal en vez de "×" gigante */
+.modal-premio-compartir {
+    background: rgba(255,255,255,0.2); border: none; color: white; width: 36px; height: 36px;
+    border-radius: 50%; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center;
+    justify-content: center; transition: background 0.2s;
+}
+.modal-premio-compartir:hover { background: rgba(255,255,255,0.35); }
+
+/* Panel de opciones de compartir */
+.compartir-premio-opcion {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.7rem 0.9rem;
+    border-radius: 10px;
+    border: 1px solid #eee;
+    background: #fff;
+    color: #333;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+.compartir-premio-opcion:hover { background: #fafafa; border-color: #ddd; }
+.compartir-premio-opcion i { font-size: 1.1rem; width: 20px; text-align: center; }
 
 .modal-premio-body { display: grid; grid-template-columns: 420px 1fr; gap: 2rem; padding: 2rem; flex: 1; min-height: 0; overflow: hidden; }
 .modal-premio-imagen {
