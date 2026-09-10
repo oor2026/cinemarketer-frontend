@@ -131,6 +131,11 @@
                 ? `<img src="${p.imageUrl}" alt="${p.name}">`
                 : `<i>🎁</i>`;
 
+                        const cerrado = p.isExpired === true;
+            const botonHtml = cerrado
+                ? `<span class="btn-login" style="background:#999; cursor:default; pointer-events:none;">Sorteo finalizado</span>`
+                : `<a class="btn-login" href="https://cinemarketer.com.ar/login">${p.sorteo ? 'Quiero anotarme' : 'Iniciar sesión para canjear'}</a>`;
+
             contenido.innerHTML = `
                 <div class="imagen-wrap">${imagenHtml}</div>
                 <div class="contenido">
@@ -141,7 +146,8 @@
                         <span>Puntos requeridos</span>
                         <strong>${p.pointsRequired ?? '—'} pts</strong>
                     </div>
-                    <a class="btn-login" href="https://cinemarketer.com.ar/login">${p.sorteo ? 'Quiero anotarme' : 'Iniciar sesión para canjear'}</a>
+                    ${cerrado ? '<p style="color:#c0392b; font-weight:600; margin-bottom:0.5rem;">⏰ Este sorteo ya cerró</p>' : ''}
+                    ${botonHtml}
                 </div>`;
         } catch (e) {
             contenido.innerHTML = '<div class="estado">Este premio ya no está disponible</div>';
