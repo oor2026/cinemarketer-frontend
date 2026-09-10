@@ -5105,6 +5105,7 @@ var BUSCADOR_TODAS_LAS_PANTALLAS = [
     'buscadorNivel3AnioEspecifico',  // Nivel 3 de "Por año o década" — año específico
     'buscadorNivel3Decada',          // Nivel 3 de "Por año o década" — década
     'buscadorNivel3Caracteristica', // Nivel 3 de "Por característica"
+    'buscadorNivel3Saga',          // Sub-nivel de "Por característica" — grilla de sagas
     'buscadorNivel3Persona',       // Nivel 3 de "Actor/actriz/director" — buscar por nombre
     'buscadorNivel3Cruce1',        // Nivel 3 de "Trabajaron juntos" — paso 1
     'buscadorNivel3Cruce2',        // Nivel 3 de "Trabajaron juntos" — paso 2
@@ -5649,7 +5650,7 @@ window._buscadorCriterioSeleccionado = function(criterio) {
 
                             window._buscadorVolverNivel2MiActividad = function() {
                                 window._buscadorOcultarNivel3MiActividad();
-                                document.getElementById('buscadorNivel2MiActividad').style.display = 'block';
+                                document.getElementById('b  uscadorNivel2MiActividad').style.display = 'block';
                                 // La lista de 4 opciones también necesita el modal alto
                                 // (se sumó hace poco), así que ya no hay que sacarle la
                                 // clase acá — solo se saca al volver del todo a Nivel 1.
@@ -6463,19 +6464,191 @@ window._buscadorCriterioSeleccionado = function(criterio) {
             { id: 161184, nombre: 'Reboot' },
         ];
 
-        window._buscadorAbrirNivel3Caracteristica = function() {
-            document.getElementById('buscadorNivel2PeliculaSerie').style.display = 'none';
-            document.getElementById('buscadorNivel3Caracteristica').style.display = 'block';
+        // Sagas confirmadas contra TMDb — exclusivo de películas, no
+        // existe el concepto de "colección" del lado de series.
+                var BUSCADOR_SAGAS = [
+                    { id: 10, nombre: 'Star Wars' },
+                    { id: 84, nombre: 'Indiana Jones' },
+                    { id: 119, nombre: 'El Señor de los Anillos' },
+                    { id: 151, nombre: 'Star Trek' },
+                    { id: 528, nombre: 'Terminator' },
+                    { id: 656, nombre: 'Saw' },
+                    { id: 748, nombre: 'X-Men' },
+                    { id: 230, nombre: 'El Padrino' },
+                    { id: 263, nombre: 'Batman - El Caballero de la Noche' },
+                    { id: 264, nombre: 'Volver al Futuro' },
+                    { id: 295, nombre: 'Piratas del Caribe' },
+                    { id: 304, nombre: "Ocean's" },
+                    { id: 328, nombre: 'Jurassic Park' },
+                    { id: 1575, nombre: 'Rocky' },
+                    { id: 2150, nombre: 'Shrek' },
+                    { id: 2344, nombre: 'Matrix' },
+                    { id: 8650, nombre: 'Transformers' },
+                    { id: 9485, nombre: 'Rápidos y Furiosos' },
+                    { id: 9735, nombre: 'Viernes 13' },
+                    { id: 10194, nombre: 'Toy Story' },
+                    { id: 12263, nombre: 'El Exorcista' },
+                    { id: 1241, nombre: 'Harry Potter' },
+                    { id: 87359, nombre: 'Misión Imposible' },
+                    { id: 404609, nombre: 'John Wick' },
+                    { id: 8091, nombre: 'Alien' },
+                    { id: 91361, nombre: 'Halloween' },
+                    { id: 2602, nombre: 'Scream' },
+                    { id: 313086, nombre: 'El Conjuro' },
+                    { id: 17255, nombre: 'Resident Evil' },
+                    { id: 8945, nombre: 'Mad Max' },
+                    { id: 1570, nombre: 'Duro de Matar' },
+                    { id: 8580, nombre: 'Karate Kid' },
+                    { id: 8581, nombre: 'Pesadilla en la Calle Elm' },
+                    { id: 228446, nombre: 'Insidious' },
+                    { id: 2980, nombre: 'Cazafantasmas' },
+                    { id: 495527, nombre: 'Jumanji' },
+                    { id: 131635, nombre: 'Los Juegos del Hambre' },
+                    { id: 8354, nombre: 'La Era de Hielo' },
+                    { id: 86066, nombre: 'Mi Villano Favorito' },
+                    { id: 14740, nombre: 'Madagascar' },
+                    { id: 8864, nombre: 'Destino Final' },
+                    { id: 33514, nombre: 'Crepúsculo' },
+                    { id: 52984, nombre: 'La Búsqueda' },
+                    { id: 391860, nombre: 'Kingsman' }
+                ];
 
-            const lista = window._buscadorTipoContenido === 'serie'
-                ? BUSCADOR_CARACTERISTICAS_SERIE
-                : BUSCADOR_CARACTERISTICAS_PELICULA;
+                window._buscadorAbrirNivel3Caracteristica = function() {
+                    document.getElementById('buscadorNivel2PeliculaSerie').style.display = 'none';
+                    document.getElementById('buscadorNivel3Caracteristica').style.display = 'block';
 
-            const grid = document.getElementById('buscadorCaracteristicasGrid');
-            grid.innerHTML = lista.map(c =>
-                `<button class="buscador-genero-chip" onclick="window._buscadorBuscarPorCaracteristica(${c.id}, '${c.nombre}')">${c.nombre}</button>`
-            ).join('');
-        };
+                    const esSerie = window._buscadorTipoContenido === 'serie';
+                    const lista = esSerie ? BUSCADOR_CARACTERISTICAS_SERIE : BUSCADOR_CARACTERISTICAS_PELICULA;
+
+                    const grid = document.getElementById('buscadorCaracteristicasGrid');
+                    let html = lista.map(c =>
+                        `<button class="buscador-genero-chip" onclick="window._buscadorBuscarPorCaracteristica(${c.id}, '${c.nombre}')">${c.nombre}</button>`
+                    ).join('');
+
+                    // "Saga" es un chip especial — en vez de buscar directo por
+                    // keyword, abre una pantalla nueva con la grilla de sagas.
+                    if (!esSerie) {
+                        html += `<button class="buscador-genero-chip" onclick="window._buscadorAbrirNivel3Saga()">Saga</button>`;
+                    }
+
+                    grid.innerHTML = html;
+                };
+
+                window._buscadorVolverNivel3Caracteristica = function() {
+                    document.getElementById('buscadorNivel3Saga').style.display = 'none';
+                    document.getElementById('buscadorNivel3Caracteristica').style.display = 'block';
+                };
+
+                    // Caché en memoria del HTML ya armado — evita repetir 44
+                    // pedidos en paralelo cada vez que se vuelve a abrir esta
+                    // pantalla en la misma sesión. Se pierde solo al recargar
+                    // la página entera.
+                    window._buscadorSagasHtmlCache = null;
+
+                    window._buscadorAbrirNivel3Saga = async function() {
+                        document.getElementById('buscadorNivel3Caracteristica').style.display = 'none';
+                        document.getElementById('buscadorNivel3Saga').style.display = 'block';
+
+                        const filtroInput = document.getElementById('buscadorSagaFiltro');
+                        if (filtroInput) filtroInput.value = '';
+
+                        const grid = document.getElementById('buscadorSagaGrid');
+
+                        if (window._buscadorSagasHtmlCache) {
+                            grid.innerHTML = window._buscadorSagasHtmlCache;
+                            return;
+                        }
+
+                        grid.innerHTML = '<div class="fila-genero-loading"><i class="fas fa-spinner fa-spin"></i></div>';
+
+                        const token = localStorage.getItem('token');
+                        try {
+                            const resultados = await Promise.all(BUSCADOR_SAGAS.map(async (s) => {
+                                try {
+                                    const res = await fetch(`${CONFIG.API_URL}/movies/collection/${s.id}`, {
+                                        headers: { 'Authorization': `Bearer ${token}` }
+                                    });
+                                    const data = await res.json();
+                                    return { ...s, poster_path: data.poster_path };
+                                } catch (e) {
+                                    return { ...s, poster_path: null };
+                                }
+                            }));
+
+                            const html = resultados.map(s => {
+                                const posterUrl = s.poster_path
+                                    ? `https://image.tmdb.org/t/p/w300${s.poster_path}`
+                                    : '';
+                                const nombreEscapado = s.nombre.replace(/'/g, "\\'");
+                                return `
+                                    <button class="buscador-saga-item" data-nombre="${s.nombre.toLowerCase()}" onclick="window._buscadorBuscarPorSaga(${s.id}, '${nombreEscapado}')">
+                                        ${posterUrl ? `<img src="${posterUrl}" alt="${s.nombre}">` : `<div class="buscador-saga-sin-poster"><i class="fas fa-film"></i></div>`}
+                                        <span>${s.nombre}</span>
+                                    </button>
+                                `;
+                            }).join('');
+
+                            // Solo se guarda en caché si salió bien.
+                            window._buscadorSagasHtmlCache = html;
+                            grid.innerHTML = html;
+                        } catch (e) {
+                            grid.innerHTML = '<div class="buscador-predictor-vacio">No pudimos cargar las sagas. Intentá de nuevo.</div>';
+                        }
+                    };
+
+                    // Filtro en vivo — sin acentos, para que "juegos hambre"
+                    // también encuentre "Los Juegos del Hambre" sin tener que
+                    // tipearlo exacto.
+                    window._buscadorFiltrarSagas = function(texto) {
+                        const normalizar = (s) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                        const query = normalizar(texto.trim());
+                        document.querySelectorAll('#buscadorSagaGrid .buscador-saga-item').forEach(item => {
+                            const nombre = normalizar(item.dataset.nombre || '');
+                            item.style.display = nombre.includes(query) ? '' : 'none';
+                        });
+                    };
+
+                    window._buscadorBuscarPorSaga = function(collectionId, nombre) {
+                    window.cerrarBuscadorAsistido();
+                    if (window._tabActivo !== 'peliculas') {
+                        window.seleccionarTabFeed('peliculas', document.getElementById('tabPeliculas'));
+                    }
+                    window._buscadorEjecutarSaga(collectionId, nombre);
+                };
+
+                window._buscadorEjecutarSaga = async function(collectionId, nombre) {
+                    if (window.estadoPaginacion.cargando) return;
+                    window.estadoPaginacion.cargando = true;
+                    const track = document.getElementById('filaTrack-busqueda');
+
+                    window._buscadorMostrarFilaResultadosDebajo('fila-busqueda', nombre);
+                    window._filaBusqueda.peliculas = [];
+                    if (track) track.innerHTML = '<div class="fila-genero-loading"><i class="fas fa-spinner fa-spin"></i></div>';
+
+                    try {
+                        const token = localStorage.getItem('token');
+                        const res = await fetch(`${CONFIG.API_URL}/movies/collection/${collectionId}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (!res.ok) throw new Error(`Error ${res.status}`);
+                        const data = await res.json();
+
+                        // Solo con poster y fecha real, ordenadas cronológicamente
+                        // (TMDb no las devuelve necesariamente en ese orden).
+                        const resultados = (data.parts || []).filter(p => p.poster_path && p.release_date);
+                        resultados.sort((a, b) => new Date(a.release_date) - new Date(b.release_date));
+
+                        window._filaBusqueda.peliculas = resultados;
+                        await renderCardsFila(window._filaBusqueda);
+                        limpiarModalesDuplicados();
+                        if (typeof window.cargarEstadisticasVotacion === 'function') window.cargarEstadisticasVotacion();
+                        window._buscadorScrollearAResultados('fila-busqueda');
+                    } catch (error) {
+                        window._buscadorMostrarToast('Error al buscar la saga. Intentá de nuevo.');
+                    } finally {
+                        window.estadoPaginacion.cargando = false;
+                    }
+                };
 
         // Mismo pipeline que "Por año" (no hay fila pre-armada para esto en
         // el feed, a diferencia de género) — reusa mostrarVistaResultados/
