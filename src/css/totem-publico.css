@@ -22,25 +22,31 @@
             color: var(--tm-text);
         }
 
-        .pub-main {
-            display:flex; align-items:flex-start; justify-content:center;
-            padding: 0.5rem 1.5rem 1.5rem;
-        }
+                .pub-layout {
+                    max-width: none !important;
+                    width: 100% !important;
+                }
+                .pub-main {
+                    display:flex; align-items:flex-start; justify-content:center;
+                    padding: 0.5rem 1.5rem 1.5rem;
+                    max-width: none !important;
+                    width: 100% !important;
+                }
 
         /* Título, progreso y reveal se agrandan de forma fluida más abajo
            con clamp(), sin depender de un breakpoint fijo. */
 
         /* ===== La tarjeta = entrada de cine (ticket), no un rectángulo de SaaS ===== */
-        .totem-pub-card {
-            position: relative;
-            background: linear-gradient(165deg, var(--tm-card-2), var(--tm-card));
-            border-radius: 20px;
-            max-width: clamp(440px, 68vw, 1180px);
-            width: 100%;
-            margin: 1rem auto 0;
-            padding: clamp(0.75rem, 1.2vw, 1.1rem) clamp(1.4rem, 2.2vw, 2.2rem) clamp(1.75rem, 3vw, 2.75rem);
-            box-shadow: 0 30px 60px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04) inset;
-        }
+                .totem-pub-card {
+                    position: relative;
+                    background: linear-gradient(165deg, var(--tm-card-2), var(--tm-card));
+                    border-radius: 20px;
+                                max-width: clamp(440px, 52vw, 880px);
+                    width: 100%;
+                    margin: 1rem auto 0;
+                    padding: clamp(0.75rem, 1.2vw, 1.1rem) clamp(1rem, 1.6vw, 1.6rem) clamp(1.75rem, 3vw, 2.75rem);
+                    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04) inset;
+                }
         /* Perforado tipo ticket arriba y abajo */
         .totem-pub-card::before,
         .totem-pub-card::after {
@@ -89,11 +95,11 @@
         }
 
         /* ===== Terna — cada posición "tironea" hacia un color de marca ===== */
-        .totem-pub-terna {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: clamp(0.5rem, 1vw, 0.8rem);
-        }
+                .totem-pub-terna {
+                    display: grid;
+                    grid-template-columns: repeat(4, 1fr);
+                    gap: clamp(0.7rem, 1.6vw, 1.4rem);
+                }
         .totem-pub-opcion {
             cursor: pointer;
             border-radius: 14px;
@@ -116,21 +122,12 @@
         .totem-pub-opcion[data-color="rojo"]:hover  { border-color: var(--tm-red);  transform: translateY(-4px); box-shadow: 0 10px 24px -6px var(--tm-red-glow); }
         .totem-pub-opcion:hover .nombre { color: var(--tm-text); }
 
-        .totem-pub-favorita-lista {
-            display: flex;
-            gap: 0.6rem;
-            margin: 0.25rem 0 1.4rem;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            padding-bottom: 0.3rem;
-            -webkit-overflow-scrolling: touch;
-        }
-        .totem-pub-favorita-lista::-webkit-scrollbar { height: 5px; }
-        .totem-pub-favorita-lista::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 99px; }
-        .totem-pub-favorita-lista .totem-pub-opcion {
-            flex: 0 0 clamp(96px, 13vw, 130px);
-            scroll-snap-align: start;
-        }
+                .totem-pub-favorita-lista {
+                    display: grid;
+                    grid-template-columns: repeat(6, minmax(0, 1fr));
+                    gap: 0.6rem;
+                    margin: 0.25rem 0 1.4rem;
+                }
         .totem-pub-favorita-lista .totem-pub-opcion.seleccionada {
             border-color: var(--tm-gold);
         }
