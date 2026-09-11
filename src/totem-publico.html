@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Descubrí tu Tótem Cinéfilo — Cinemarketer</title>
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Cinemarketer">
+    <meta property="og:title" content="🎬 Descubrí tu Tótem Cinéfilo — Cinemarketer">
+    <meta property="og:description" content="3 rondas, 9 películas. Elegí las que más te representan y descubrí tu tótem.">
+    <meta property="og:image" content="https://cinemarketer.com.ar/assets/images/og-default.png">
+    <meta id="ogUrl" property="og:url" content="https://cinemarketer.com.ar">
+
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/publicacion-publica.css">
+    <link rel="stylesheet" href="css/totem-publico.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
+</head>
+<body>
+
+<div class="totem-pub-decor" aria-hidden="true">
+    <i class="fas fa-clapperboard totem-pub-decor-icon azul"  style="top:8%; left:6%; font-size:2.4rem; transform:rotate(-18deg);"></i>
+    <i class="fas fa-film totem-pub-decor-icon rojo"          style="top:14%; right:9%; font-size:3.2rem; transform:rotate(14deg);"></i>
+    <i class="fas fa-star totem-pub-decor-icon dorado"        style="top:32%; left:3%; font-size:1.6rem; transform:rotate(-8deg);"></i>
+    <i class="fas fa-ticket-simple totem-pub-decor-icon azul" style="bottom:22%; right:5%; font-size:2.6rem; transform:rotate(-12deg);"></i>
+    <i class="fas fa-video totem-pub-decor-icon rojo"         style="bottom:10%; left:10%; font-size:2.1rem; transform:rotate(10deg);"></i>
+    <i class="fas fa-masks-theater totem-pub-decor-icon azul" style="top:55%; right:15%; font-size:1.9rem; transform:rotate(20deg);"></i>
+    <i class="fas fa-camera-retro totem-pub-decor-icon rojo"  style="top:70%; left:4%; font-size:1.8rem; transform:rotate(-16deg);"></i>
+    <i class="fas fa-star totem-pub-decor-icon dorado"        style="top:5%; right:30%; font-size:1.1rem; transform:rotate(6deg);"></i>
+    <span class="totem-pub-decor-texto rojo" style="bottom:4%; right:2%; transform:rotate(-6deg);">CINEMARKETER</span>
+    <span class="totem-pub-decor-texto azul" style="top:20%; left:1%; transform:rotate(9deg);">CINEMARKETER</span>
+    <span class="totem-pub-decor-texto rojo" style="top:62%; left:8%; transform:rotate(-11deg);">CINEMARKETER</span>
+    <span class="totem-pub-decor-texto azul" style="bottom:14%; right:20%; transform:rotate(15deg);">CINEMARKETER</span>
+</div>
+
+<header class="pub-header">
+    <a href="/" class="pub-logo">
+        <img src="assets/images/isologotipo.webp" alt="Cinemarketer">
+    </a>
+    <div class="pub-header-btns">
+        <a href="/login.html" class="btn-login">Iniciar sesión</a>
+        <a href="/register.html" class="btn-registro">Registrarme gratis</a>
+    </div>
+</header>
+
+<div class="pub-layout">
+    <main class="pub-main">
+
+        <div id="pubLoading" class="pub-loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            Armando tus rondas...
+        </div>
+
+        <div id="pubError" class="pub-error" style="display:none;">
+            <i class="fas fa-exclamation-circle"></i>
+            <p>No pudimos armar el juego ahora. Probá de nuevo en un rato.</p>
+            <a href="/">Volver al inicio</a>
+        </div>
+
+        <div id="pubContenido" style="display:none;">
+            <div class="totem-pub-card" id="totemPubCard"></div>
+        </div>
+
+    </main>
+</div>
+
+<script src="js/config.js"></script>
+<script>
+    (function() {
+
+        // ============================================================
+        // CONFIG — mismo patrón que trivia-publica.html (fetch directo a TMDb)
+        // ============================================================
+        const TMDB_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzZjFjNjgyZDZkNTMzNWIzMjQyNzc3MzQ2OWUxNmE1MSIsIm5iZiI6MTc3MTE3NzkxNy44ODEsInN1YiI6IjY5OTIwN2JkOTRjZDE0N2M5ZjFhZWY2OSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.8GieGBESmuWLnoD_IyFrBbXBCX40qUKE8vY6VBMj_DM';
+        const BASE_IMG = 'https://image.tmdb.org/t/p/w500';
+        const TOTAL_RONDAS = 3;
+        const PELIS_POR_RONDA = 4;
+
+        // Mapeo real, portado de perfil.js (EMOJI_POR_GENERO, NOMBRE_TOTEM_POR_GENERO,
+        // NOMBRE_TOTEM_GENERO_SEXO, EMOJI_GENERO_SEXO). Solo géneros de PELÍCULA
+        // (se excluyen los de TV: Película de TV, Sci-Fi & Fantasy, War & Politics,
+        // News, Reality, Talk, Soap, Kids, Action & Adventure).
+        // IDs = IDs oficiales de género de películas de TMDb.
+        const GENEROS = [
+            { id: 28,    nombre: 'Acción' },
+            { id: 12,    nombre: 'Aventura' },
+            { id: 16,    nombre: 'Animación' },
+            { id: 35,    nombre: 'Comedia' },
+            { id: 80,    nombre: 'Crimen' },
+            { id: 99,    nombre: 'Documental' },
+            { id: 18,    nombre: 'Drama' },
+            { id: 10751, nombre: 'Familia' },
+            { id: 14,    nombre: 'Fantasía' },
+            { id: 36,    nombre: 'Historia' },
+            { id: 27,    nombre: 'Terror' },
+            { id: 10402, nombre: 'Música' },
+            { id: 9648,  nombre: 'Misterio' },
+            { id: 10749, nombre: 'Romance' },
+            { id: 878,   nombre: 'Ciencia ficción' },
+            { id: 53,    nombre: 'Suspense' },
+            { id: 10752, nombre: 'Bélica' },
+            { id: 37,    nombre: 'Western' },
+        ];
+
+        // Sin sexo declarado (visitante anónimo) → default masculino,
+        // mismo criterio que ya usan en perfil.js cuando sexo es null/vacío.
+        const SEXO_ANONIMO = null;
+
+        const EMOJI_POR_GENERO = {
+            'Acción': '💥', 'Animación': '🎨', 'Comedia': '😂',
+            'Crimen': '🔪', 'Documental': '🎥', 'Drama': '🎭',
+            'Historia': '📜', 'Terror': '👻', 'Música': '🎵',
+            'Misterio': '🔎', 'Ciencia ficción': '🚀',
+            'Suspense': '😰', 'Bélica': '⚔️'
+        };
+        const NOMBRE_TOTEM_POR_GENERO = {
+            'Acción': 'Bang', 'Animación': 'Garabato', 'Comedia': 'Risitas',
+            'Crimen': 'Fisgón', 'Documental': 'Bitácora', 'Drama': 'Lágrima',
+            'Historia': 'Retro', 'Terror': 'Boo', 'Música': 'Compás',
+            'Misterio': 'Enigma', 'Ciencia ficción': 'Astro', 'Suspense': 'Escalofrío',
+            'Bélica': 'Trinchera'
+        };
+        const NOMBRE_TOTEM_GENERO_SEXO = {
+            'Aventura': { M: 'Explorador', F: 'Exploradora' },
+            'Familia': { M: 'Familiero', F: 'Familiera' },
+            'Romance': { M: 'Cupido', F: 'Venus' },
+            'Western': { M: 'Cowboy', F: 'Vaquera' },
+            'Fantasía': { M: 'Mago', F: 'Hechicera' }
+        };
+        const EMOJI_GENERO_SEXO = {
+            'Romance': { M: '💘', F: '🌹' },
+            'Fantasía': { M: '🧙', F: '🔮' },
+            'Aventura': { M: '🗺️', F: '🗺️' },
+            'Familia': { M: '👨‍👩‍👧', F: '👨‍👩‍👧' },
+            'Western': { M: '🤠', F: '🤠' }
+        };
+        const TOTEM_FRASE = {
+            'Acción': '¡Bang! ¿Viste esa explosión?',
+            'Aventura': '¿Nos vamos de aventura?',
+            'Animación': '¡Dibujame una sonrisa!',
+            'Comedia': 'Jajaja, ¿ya te reíste hoy?',
+            'Crimen': 'Shh... estoy investigando',
+            'Documental': 'Todo dato es un tesoro',
+            'Drama': 'Traeme un pañuelo, por favor',
+            'Familia': '¿Vemos algo todos juntos?',
+            'Fantasía': '¡Abracadabra, patas de...?!',
+            'Historia': 'Antes todo era mejor... ¿o no?',
+            'Terror': '¡Buu! ¿Te asusté?',
+            'Música': 'Subile el volumen a la vida',
+            'Misterio': '¿Quién lo hizo? Yo ya lo sé',
+            'Romance': 'Flechazo asegurado 💘',
+            'Ciencia ficción': 'Houston, tenemos una peli',
+            'Suspense': 'No mires atrás...',
+            'Bélica': 'A las trincheras, soldado',
+            'Western': 'En este pueblo mando yo 🤠'
+        };
+
+        function _esFemenino(sexo) { return sexo === 'F'; }
+        function totemEmoji(genero, sexo) {
+            const variante = EMOJI_GENERO_SEXO[genero];
+            if (variante) return _esFemenino(sexo) ? variante.F : variante.M;
+            return EMOJI_POR_GENERO[genero] || '🎞️';
+        }
+        function totemNombre(genero, sexo) {
+            const variante = NOMBRE_TOTEM_GENERO_SEXO[genero];
+            if (variante) return _esFemenino(sexo) ? variante.F : variante.M;
+            return NOMBRE_TOTEM_POR_GENERO[genero] || genero;
+        }
+
+        const contenido = document.getElementById('pubContenido');
+        const loading   = document.getElementById('pubLoading');
+        const error     = document.getElementById('pubError');
+        const card      = document.getElementById('totemPubCard');
+
+        // Estado del juego (todo en memoria, nada se persiste)
+        let rondas = [];          // [{ generos: [g1,g2,g3], peliculas: [p1,p2,p3] }, ...]
+        let rondaActual = 0;
+        let puntajeGeneros = {};  // { generoId: cantidadDeVotos }
+        let todasLasPeliculasVistas = []; // para el paso opcional de favorita
+        // Persiste durante TODO el test (armado inicial + cualquier recambio de
+        // tanda con "No vi ninguna de estas") — evita que una película repita.
+        let idsUsados = new Set();
+
+        // ============================================================
+        // TMDb helpers
+        // ============================================================
+        async function fetchPeliculasPorGenero(generoId, page = 1) {
+            try {
+                const res = await fetch(
+                    `https://api.themoviedb.org/3/discover/movie?with_genres=${generoId}&language=es-AR&region=AR&sort_by=popularity.desc&page=${page}`,
+                    { headers: { 'Authorization': `Bearer ${TMDB_TOKEN}`, 'accept': 'application/json' } }
+                );
+                const data = await res.json();
+                return (data.results || []).filter(m => m.poster_path);
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function elegirAlAzar(lista, cantidad) {
+            const copia = [...lista];
+            const elegidas = [];
+            while (elegidas.length < cantidad && copia.length > 0) {
+                const idx = Math.floor(Math.random() * copia.length);
+                elegidas.push(copia.splice(idx, 1)[0]);
+            }
+            return elegidas;
+        }
+
+        // Arma TOTAL_RONDAS tandas, cada una con PELIS_POR_RONDA géneros
+        // distintos entre sí (a propósito, para forzar el conflicto).
+        async function armarRondas() {
+            const generosBarajados = [...GENEROS].sort(() => Math.random() - 0.5);
+            const rondasArmadas = [];
+
+            for (let r = 0; r < TOTAL_RONDAS; r++) {
+                const generosDeEstaRonda = generosBarajados.slice(
+                    r * PELIS_POR_RONDA,
+                    r * PELIS_POR_RONDA + PELIS_POR_RONDA
+                );
+                if (generosDeEstaRonda.length < PELIS_POR_RONDA) break;
+
+                const peliculasDeEstaRonda = [];
+                for (const genero of generosDeEstaRonda) {
+                    const elegida = await elegirPeliculaInedita(genero, idsUsados);
+                    if (elegida) {
+                        idsUsados.add(elegida.id);
+                        peliculasDeEstaRonda.push({ ...elegida, _generoId: genero.id, _generoNombre: genero.nombre });
+                    }
+                }
+
+                if (peliculasDeEstaRonda.length === PELIS_POR_RONDA) {
+                    rondasArmadas.push({ generos: generosDeEstaRonda, peliculas: peliculasDeEstaRonda });
+                    todasLasPeliculasVistas.push(...peliculasDeEstaRonda);
+                }
+            }
+
+            return rondasArmadas;
+        }
+
+        // Busca una candidata del género dado que no haya salido antes en el
+        // test. Si la página 1 de discover no alcanza (todas ya usadas),
+        // prueba la página 2 antes de rendirse con esa terna incompleta.
+        async function elegirPeliculaInedita(genero, idsUsados) {
+            for (const page of [1, 2]) {
+                const candidatas = await fetchPeliculasPorGenero(genero.id, page);
+                const disponibles = candidatas.filter(p => !idsUsados.has(p.id));
+                if (disponibles.length > 0) {
+                    return elegirAlAzar(disponibles, 1)[0];
+                }
+            }
+            return null;
+        }
+
+        // ============================================================
+        // Render — rondas
+        // ============================================================
+        function renderProgreso(pasoActual, totalPasos) {
+            let html = '<div class="totem-pub-progreso">';
+            for (let i = 0; i < totalPasos; i++) {
+                const clase = i < pasoActual ? 'hecho' : (i === pasoActual ? 'activo' : '');
+                html += `<span class="${clase}"></span>`;
+            }
+            html += '</div>';
+            return html;
+        }
+
+        const COLORES_TERNA = ['azul', 'dorado', 'rojo'];
+
+        function renderRonda() {
+            document.body.classList.remove('totem-pub-vista-reveal');
+            const ronda = rondas[rondaActual];
+            const totalPasos = TOTAL_RONDAS + 1; // +1 = paso de favorita opcional
+
+            card.innerHTML = `
+                ${renderProgreso(rondaActual, totalPasos)}
+                <div class="totem-pub-titulo">¿Cuál de estas películas elegís?</div>
+                <div class="totem-pub-terna">
+                    ${ronda.peliculas.map((p, idx) => `
+                        <div class="totem-pub-opcion" data-idx="${idx}" data-color="${COLORES_TERNA[idx % 3]}">
+                            <img src="${BASE_IMG}${p.poster_path}" alt="${p.title || ''}" loading="lazy">
+                            <div class="nombre">${p.title || ''}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <span class="totem-pub-skip" id="totemPubSkipRonda">No vi ninguna de estas</span>
+            `;
+
+            card.querySelectorAll('.totem-pub-opcion').forEach(el => {
+                el.addEventListener('click', () => {
+                    const idx = parseInt(el.dataset.idx, 10);
+                    const elegida = ronda.peliculas[idx];
+                    puntajeGeneros[elegida._generoId] = (puntajeGeneros[elegida._generoId] || 0) + 1;
+
+                    rondaActual++;
+                    if (rondaActual < rondas.length) {
+                        renderRonda();
+                    } else {
+                        renderPasoFavorita();
+                    }
+                });
+            });
+
+            document.getElementById('totemPubSkipRonda').addEventListener('click', regenerarTandaActual);
+        }
+
+        // "No vi ninguna de estas" — reemplaza las 3 películas de la tanda
+        // ACTUAL por 3 nuevas de los mismos 3 géneros, sin avanzar de ronda ni
+        // tocar el puntaje. Las descartadas no vuelven a aparecer (quedan en
+        // idsUsados) y tampoco entran al pool de "cuál es tu favorita", porque
+        // nunca llegaron a formar parte de todasLasPeliculasVistas.
+        async function regenerarTandaActual() {
+            const skipEl = document.getElementById('totemPubSkipRonda');
+            skipEl.textContent = 'Buscando otras...';
+            skipEl.style.pointerEvents = 'none';
+
+            const ronda = rondas[rondaActual];
+            const nuevasPeliculas = [];
+            for (const genero of ronda.generos) {
+                const elegida = await elegirPeliculaInedita(genero, idsUsados);
+                if (elegida) {
+                    idsUsados.add(elegida.id);
+                    nuevasPeliculas.push({ ...elegida, _generoId: genero.id, _generoNombre: genero.nombre });
+                }
+            }
+
+            // Si por lo que sea no se consiguieron 3 nuevas (pool de TMDb
+            // agotado para esos géneros), dejamos la tanda como estaba en vez
+            // de mostrar una terna incompleta.
+            if (nuevasPeliculas.length === PELIS_POR_RONDA) {
+                rondas[rondaActual] = { generos: ronda.generos, peliculas: nuevasPeliculas };
+                todasLasPeliculasVistas.push(...nuevasPeliculas);
+            }
+
+            renderRonda();
+        }
+
+        // ============================================================
+        // Render — paso opcional de película favorita (al margen, al final)
+        // Usa implícitamente el mismo dato que alimenta Mi Sala (favorita),
+        // pero sin nombrarlo así frente al visitante anónimo.
+        // ============================================================
+        function renderPasoFavorita() {
+            document.body.classList.remove('totem-pub-vista-reveal');
+            // Pool de opciones: subset de las 9 ya vistas, para no pedir
+            // otra búsqueda — mantiene el paso liviano y opcional.
+            const opciones = elegirAlAzar(todasLasPeliculasVistas, 6);
+
+            card.innerHTML = `
+                ${renderProgreso(TOTAL_RONDAS, TOTAL_RONDAS + 1)}
+                <div class="totem-pub-titulo">Para terminar — ¿cuál de todas elegís como tu favorita? <span style="font-weight:400;color:#999;">(opcional)</span></div>
+                <div class="totem-pub-favorita-lista">
+                    ${opciones.map((p, idx) => `
+                        <div class="totem-pub-opcion" data-idx="${idx}" data-color="${COLORES_TERNA[idx % 3]}">
+                            <img src="${BASE_IMG}${p.poster_path}" alt="${p.title || ''}" loading="lazy">
+                            <div class="nombre">${p.title || ''}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <span class="totem-pub-skip" id="totemPubSkip">Prefiero no elegir</span>
+            `;
+
+            const avanzar = (favoritaGeneroId) => {
+                if (favoritaGeneroId) {
+                    // Peso extra: la favorita cuenta doble en el cálculo final
+                    puntajeGeneros[favoritaGeneroId] = (puntajeGeneros[favoritaGeneroId] || 0) + 2;
+                }
+                renderReveal();
+            };
+
+            card.querySelectorAll('.totem-pub-opcion').forEach(el => {
+                el.addEventListener('click', () => {
+                    const idx = parseInt(el.dataset.idx, 10);
+                    avanzar(opciones[idx]._generoId);
+                });
+            });
+
+            document.getElementById('totemPubSkip').addEventListener('click', () => avanzar(null));
+        }
+
+        // ============================================================
+        // Cálculo del tótem ganador + reveal
+        // ============================================================
+        function calcularGeneroGanador() {
+            let generoGanadorId = null;
+            let maxPuntaje = -1;
+            for (const [generoId, puntaje] of Object.entries(puntajeGeneros)) {
+                if (puntaje > maxPuntaje) {
+                    maxPuntaje = puntaje;
+                    generoGanadorId = parseInt(generoId, 10);
+                }
+            }
+            return GENEROS.find(g => g.id === generoGanadorId);
+        }
+
+        function renderReveal() {
+            document.body.classList.add('totem-pub-vista-reveal');
+            const generoGanador = calcularGeneroGanador();
+            const nombreGenero = generoGanador ? generoGanador.nombre : 'Drama';
+            const nombreTotem = totemNombre(nombreGenero, SEXO_ANONIMO);
+            const emoji = totemEmoji(nombreGenero, SEXO_ANONIMO);
+            const frase = TOTEM_FRASE[nombreGenero] || '';
+
+            card.innerHTML = `
+                <div class="totem-pub-reveal">
+                                    <span class="emoji-totem">${emoji}</span>
+                <p class="totem-pub-etiqueta">El tótem que te representa es:</p>
+                <h2><span class="nombre-totem">${nombreTotem}</span></h2>
+                    ${frase ? `<p class="frase">"${frase}"</p>` : ''}
+                    <p class="desc">Esto es solo un vistazo rápido — creá tu cuenta y descubrí tu verdadero espíritu cinéfilo, el que construimos con cada película que vas viendo, votando, comentando y compartiendo.</p>
+                    <a class="totem-pub-cta" href="/register.html">Quiero descubrir mi espíritu cinéfilo</a>
+                    <div class="totem-pub-acciones-secundarias">
+                        <button type="button" class="totem-pub-btn-secundario" id="totemPubRepetir">
+                            <i class="fas fa-rotate-right"></i> <span class="totem-pub-btn-texto">Realizar de nuevo el test</span>
+                        </button>
+                        <button type="button" class="totem-pub-btn-secundario" id="totemPubCompartir">
+                            <i class="fas fa-share-nodes"></i> <span class="totem-pub-btn-texto">Compartir mi tótem</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('totemPubRepetir').addEventListener('click', reiniciarTest);
+            document.getElementById('totemPubCompartir').addEventListener('click', () => compartirTotem(nombreTotem, emoji));
+        }
+
+        // Arma el link dinámico de preview (backend calcula el og:title al
+        // vuelo a partir de nombre+emoji, sin guardar nada) y lo comparte con
+        // el share sheet nativo del dispositivo, o lo copia al portapapeles
+        // como fallback en desktop/navegadores sin soporte.
+        async function compartirTotem(nombreTotem, emoji) {
+            const url = `${CONFIG.API_URL}/totem/og?nombre=${encodeURIComponent(nombreTotem)}&emoji=${encodeURIComponent(emoji)}`;
+            const texto = `Mi espíritu cinéfilo es ${nombreTotem} ${emoji} — ¿y el tuyo?`;
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: texto, url });
+                } catch (e) {
+                    // El usuario canceló el share sheet — no hacemos nada.
+                }
+            } else {
+                try {
+                    await navigator.clipboard.writeText(url);
+                    const btn = document.getElementById('totemPubCompartir');
+                    const textoOriginal = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-check"></i> <span class="totem-pub-btn-texto">¡Link copiado!</span>';
+                    setTimeout(() => { btn.innerHTML = textoOriginal; }, 2000);
+                } catch (e) {
+                    alert(`Copiá este link para compartir: ${url}`);
+                }
+            }
+        }
+
+        // Repite el test desde cero: nuevas rondas con películas distintas,
+        // puntaje y estado completamente reseteados.
+        async function reiniciarTest() {
+            rondas = [];
+            rondaActual = 0;
+            puntajeGeneros = {};
+            todasLasPeliculasVistas = [];
+            idsUsados = new Set();
+
+            loading.style.display = 'block';
+            contenido.style.display = 'none';
+            await iniciar();
+        }
+
+        // ============================================================
+        // Init
+        // ============================================================
+        async function iniciar() {
+            try {
+                rondas = await armarRondas();
+                if (rondas.length === 0) throw new Error('sin rondas');
+
+                document.getElementById('ogUrl').content = window.location.href;
+                loading.style.display = 'none';
+                contenido.style.display = 'block';
+                renderRonda();
+            } catch (e) {
+                loading.style.display = 'none';
+                error.style.display = 'flex';
+            }
+        }
+
+        iniciar();
+    })();
+</script>
+</body>
+</html>
