@@ -5650,7 +5650,7 @@ window._buscadorCriterioSeleccionado = function(criterio) {
 
                             window._buscadorVolverNivel2MiActividad = function() {
                                 window._buscadorOcultarNivel3MiActividad();
-                                document.getElementById('b  uscadorNivel2MiActividad').style.display = 'block';
+                                document.getElementById('buscadorNivel2MiActividad').style.display = 'block';
                                 // La lista de 4 opciones también necesita el modal alto
                                 // (se sumó hace poco), así que ya no hay que sacarle la
                                 // clase acá — solo se saca al volver del todo a Nivel 1.
