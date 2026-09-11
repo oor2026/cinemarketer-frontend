@@ -1,0 +1,312 @@
+:root {
+            --tm-bg: #0d0e1a;
+            --tm-card: #16182b;
+            --tm-card-2: #1d2038;
+            --tm-blue: #324c89;
+            --tm-blue-glow: rgba(74, 108, 200, 0.45);
+            --tm-red: #e50914;
+            --tm-red-glow: rgba(229, 9, 20, 0.4);
+            --tm-gold: #f4b400;
+            --tm-gold-glow: rgba(244, 180, 0, 0.45);
+            --tm-text: #f2f1ed;
+            --tm-text-dim: #8b8fa3;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background:
+                radial-gradient(ellipse 900px 500px at 50% -10%, rgba(50,76,137,0.35), transparent 60%),
+                radial-gradient(ellipse 700px 500px at 90% 110%, rgba(229,9,20,0.18), transparent 55%),
+                var(--tm-bg);
+            min-height:100vh;
+            color: var(--tm-text);
+        }
+
+        .pub-main {
+            display:flex; align-items:flex-start; justify-content:center;
+            padding: 0.5rem 1.5rem 1.5rem;
+        }
+
+        /* Título, progreso y reveal se agrandan de forma fluida más abajo
+           con clamp(), sin depender de un breakpoint fijo. */
+
+        /* ===== La tarjeta = entrada de cine (ticket), no un rectángulo de SaaS ===== */
+        .totem-pub-card {
+            position: relative;
+            background: linear-gradient(165deg, var(--tm-card-2), var(--tm-card));
+            border-radius: 20px;
+            max-width: clamp(440px, 68vw, 1180px);
+            width: 100%;
+            margin: 1rem auto 0;
+            padding: clamp(0.75rem, 1.2vw, 1.1rem) clamp(1.4rem, 2.2vw, 2.2rem) clamp(1.75rem, 3vw, 2.75rem);
+            box-shadow: 0 30px 60px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04) inset;
+        }
+        /* Perforado tipo ticket arriba y abajo */
+        .totem-pub-card::before,
+        .totem-pub-card::after {
+            content: '';
+            position: absolute;
+            left: 0; right: 0;
+            height: 14px;
+            background-image: radial-gradient(circle, var(--tm-bg) 5px, transparent 5.5px);
+            background-size: 24px 14px;
+            background-repeat: repeat-x;
+        }
+        .totem-pub-card::before { top: -1px; }
+        .totem-pub-card::after  { bottom: -1px; }
+
+        /* ===== Progreso = agujeros de rollo de película, no puntitos genéricos ===== */
+        .totem-pub-progreso {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: clamp(1.75rem, 2.5vw, 2.25rem);
+        }
+        .totem-pub-progreso span {
+            width: clamp(11px, 1vw, 13px); height: clamp(11px, 1vw, 13px); border-radius: 50%;
+            background: transparent;
+            border: 2px solid rgba(255,255,255,0.18);
+            transition: all .25s ease;
+        }
+        .totem-pub-progreso span.activo {
+            border-color: var(--tm-gold);
+            background: var(--tm-gold);
+            box-shadow: 0 0 12px 2px var(--tm-gold-glow);
+        }
+        .totem-pub-progreso span.hecho {
+            border-color: var(--tm-blue);
+            background: var(--tm-blue);
+        }
+
+        .totem-pub-titulo {
+            font-family: 'Space Grotesk', -apple-system, sans-serif;
+            text-align: center;
+            font-size: clamp(1.15rem, 1.6vw, 1.45rem);
+            font-weight: 700;
+            color: var(--tm-text);
+            margin-bottom: clamp(1.4rem, 2vw, 1.9rem);
+            letter-spacing: -0.01em;
+        }
+
+        /* ===== Terna — cada posición "tironea" hacia un color de marca ===== */
+        .totem-pub-terna {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: clamp(0.5rem, 1vw, 0.8rem);
+        }
+        .totem-pub-opcion {
+            cursor: pointer;
+            border-radius: 14px;
+            overflow: hidden;
+            background: #0a0b14;
+            border: 2px solid transparent;
+            transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+            position: relative;
+        }
+        .totem-pub-opcion img { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; opacity: .92; }
+        .totem-pub-opcion .nombre {
+            font-size: clamp(0.7rem, 0.9vw, 0.85rem);
+            text-align: center;
+            padding: clamp(0.45rem, 0.8vw, 0.6rem) 0.35rem;
+            color: var(--tm-text-dim);
+            line-height: 1.25;
+        }
+        .totem-pub-opcion[data-color="azul"]:hover  { border-color: var(--tm-blue); transform: translateY(-4px); box-shadow: 0 10px 24px -6px var(--tm-blue-glow); }
+        .totem-pub-opcion[data-color="dorado"]:hover { border-color: var(--tm-gold); transform: translateY(-4px); box-shadow: 0 10px 24px -6px var(--tm-gold-glow); }
+        .totem-pub-opcion[data-color="rojo"]:hover  { border-color: var(--tm-red);  transform: translateY(-4px); box-shadow: 0 10px 24px -6px var(--tm-red-glow); }
+        .totem-pub-opcion:hover .nombre { color: var(--tm-text); }
+
+        .totem-pub-favorita-lista {
+            display: flex;
+            gap: 0.6rem;
+            margin: 0.25rem 0 1.4rem;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding-bottom: 0.3rem;
+            -webkit-overflow-scrolling: touch;
+        }
+        .totem-pub-favorita-lista::-webkit-scrollbar { height: 5px; }
+        .totem-pub-favorita-lista::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 99px; }
+        .totem-pub-favorita-lista .totem-pub-opcion {
+            flex: 0 0 clamp(96px, 13vw, 130px);
+            scroll-snap-align: start;
+        }
+        .totem-pub-favorita-lista .totem-pub-opcion.seleccionada {
+            border-color: var(--tm-gold);
+        }
+
+        .totem-pub-skip {
+            display: block;
+            text-align: center;
+            color: var(--tm-text-dim);
+            font-size: 0.85rem;
+            margin-top: 0.85rem;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .totem-pub-skip:hover { color: var(--tm-text); }
+
+        /* ===== Reveal — el único momento donde nos permitimos brillar ===== */
+        .totem-pub-reveal { text-align: center; }
+        .totem-pub-reveal .emoji-totem {
+            font-size: clamp(3.25rem, 5vh, 6rem);
+            display: inline-block;
+            margin-bottom: 0.5rem;
+            filter: drop-shadow(0 0 26px var(--tm-gold-glow));
+        }
+        .totem-pub-reveal h2 {
+            font-family: 'Space Grotesk', -apple-system, sans-serif;
+            font-size: clamp(1.6rem, 4.2vh, 2.6rem);
+            font-weight: 700;
+            color: var(--tm-text);
+            margin-bottom: 0.4rem;
+            letter-spacing: -0.01em;
+        }
+        .totem-pub-reveal h2 .nombre-totem { color: var(--tm-gold); }
+        .totem-pub-reveal p.frase {
+            color: #c7ccf0;
+            font-weight: 600;
+            font-size: clamp(0.95rem, 1.1vw, 1.1rem);
+            margin-bottom: 0.6rem;
+        }
+        .totem-pub-reveal p.desc {
+            color: var(--tm-text-dim);
+            font-size: clamp(0.9rem, 1vw, 1rem);
+            line-height: 1.5;
+            margin-bottom: 1.1rem;
+            max-width: 480px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .totem-pub-cta {
+            display: block;
+            width: 100%;
+            max-width: 420px;
+            margin-left: auto;
+            margin-right: auto;
+            background: linear-gradient(135deg, var(--tm-red), #b8070f);
+            color: #fff;
+            text-align: center;
+            text-decoration: none;
+            padding: clamp(0.95rem, 1.2vw, 1.1rem);
+            border-radius: 99px;
+            font-weight: 700;
+            font-size: clamp(0.95rem, 1.1vw, 1.05rem);
+            margin-bottom: 0.7rem;
+            box-shadow: 0 12px 24px -8px var(--tm-red-glow);
+        }
+
+        .totem-pub-acciones-secundarias {
+            display: flex;
+            gap: 0.6rem;
+            margin-top: 0.5rem;
+            max-width: 420px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .totem-pub-btn-secundario {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            padding: 0.7rem 0.5rem;
+            border-radius: 99px;
+            border: 1.5px solid rgba(255,255,255,0.14);
+            background: transparent;
+            color: var(--tm-text-dim);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .totem-pub-btn-secundario:hover {
+            border-color: var(--tm-blue);
+            color: var(--tm-text);
+        }
+
+        .pub-loading, .pub-error { text-align: center; padding: 3rem 1rem; color: var(--tm-text-dim); }
+        .pub-loading i, .pub-error i { font-size: 2rem; margin-bottom: 1rem; display: block; color: var(--tm-gold); }
+
+/* ===== Ambientación de fondo — íconos de cine dispersos, azul/rojo/dorado de marca ===== */
+.totem-pub-decor {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+.totem-pub-decor-icon {
+    position: absolute;
+    opacity: 0.4;
+}
+.totem-pub-decor-icon.azul   { color: var(--tm-blue);  filter: drop-shadow(0 0 20px var(--tm-blue-glow)); }
+.totem-pub-decor-icon.rojo   { color: var(--tm-red);   filter: drop-shadow(0 0 20px var(--tm-red-glow)); }
+.totem-pub-decor-icon.dorado { color: var(--tm-gold);  opacity: 0.48; filter: drop-shadow(0 0 22px var(--tm-gold-glow)); }
+
+.totem-pub-decor-texto {
+    position: absolute;
+    font-family: 'Space Grotesk', -apple-system, sans-serif;
+    font-weight: 700;
+    font-size: 2.2rem;
+    letter-spacing: 0.02em;
+    opacity: 0.4;
+    filter: drop-shadow(0 0 24px currentColor);
+    white-space: nowrap;
+    pointer-events: none;
+}
+.totem-pub-decor-texto.rojo { color: var(--tm-red); }
+.totem-pub-decor-texto.azul { color: var(--tm-blue); }
+
+.pub-header, .pub-main { position: relative; z-index: 1; }
+
+/* ===== Mobile únicamente — la terna pasa de 3 columnas apretadas a un
+   carrusel horizontal con snap, así cada póster se ve mucho más grande.
+   No afecta desktop en absoluto (media query acotada). ===== */
+@media (max-width: 640px) {
+    .totem-pub-terna {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.9rem;
+    }
+    .totem-pub-terna .totem-pub-opcion .nombre {
+        font-size: 0.95rem;
+        padding: 0.65rem 0.5rem;
+    }
+
+    /* Favorita: en vez de carrusel horizontal, dos tandas de 3 (grid 3x2) */
+    .totem-pub-favorita-lista {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        overflow-x: visible;
+        scroll-snap-type: none;
+        padding-bottom: 0;
+    }
+    .totem-pub-favorita-lista .totem-pub-opcion {
+        flex: initial;
+        scroll-snap-align: none;
+    }
+
+    /* Botones secundarios del reveal: solo ícono, sin texto */
+    .totem-pub-btn-secundario .totem-pub-btn-texto {
+        display: none;
+    }
+    .totem-pub-btn-secundario {
+        gap: 0;
+        font-size: 1.3rem;
+        padding: 0.85rem;
+    }
+
+    /* Reveal: centrar el ticket verticalmente en pantalla (solo esta vista).
+       Se centra con position:fixed para no depender del contenedor padre
+       (.pub-main/.pub-layout vienen de otro CSS que no controlamos acá). */
+    body.totem-pub-vista-reveal .totem-pub-card {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        margin: 0;
+        width: calc(100% - 3rem);
+        max-height: calc(100dvh - 2rem);
+        overflow-y: auto;
+    }
+}
