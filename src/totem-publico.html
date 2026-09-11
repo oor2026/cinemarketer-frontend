@@ -434,7 +434,7 @@
         // el share sheet nativo del dispositivo, o lo copia al portapapeles
         // como fallback en desktop/navegadores sin soporte.
         async function compartirTotem(nombreTotem, emoji) {
-            const url = `${CONFIG.API_URL}/totem/og?nombre=${encodeURIComponent(nombreTotem)}&emoji=${encodeURIComponent(emoji)}`;
+                    const url = `${CONFIG.API_URL}/totem/og/${encodeURIComponent(nombreTotem)}`;
                     const texto = 'Descubrí tu espíritu cinéfilo 🎬';
 
             if (navigator.share) {
