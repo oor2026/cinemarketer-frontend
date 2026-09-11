@@ -468,9 +468,19 @@ function generarTarjetaSerieHTML(serie) {
         </div>`;
 }
 
+// _cargarSeriesNoInteresaIds ya existe más arriba en este mismo
+// archivo (junto a esValidaSerie/cargarSeriesFila) — se reusa esa,
+// sin duplicarla acá.
+
 async function renderCardsFilaSerie(fila) {
     const track = document.getElementById(`filaSerieTrack-${fila.key}`);
     if (!track) return;
+
+    // Mismo criterio que películas: nunca mostrar una serie que el
+    // usuario ya marcó como "no me interesa" — sea de dónde sea que
+    // venga la fila (feed normal o resultados del buscador).
+    const excluidas = await _cargarSeriesNoInteresaIds();
+    fila.series = fila.series.filter(s => !excluidas.includes(s.id));
 
     if (fila.series.length === 0) {
         track.innerHTML = '<div class="fila-genero-vacia">No encontramos series acá todavía.</div>';

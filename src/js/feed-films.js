@@ -2353,7 +2353,17 @@ function inicializarFilaBusquedaSerie() {
 
 async function appendCardsFilaSerie(fila, nuevasSeries) {
     const track = document.getElementById(`filaSerieTrack-${fila.key}`);
-    if (!track || nuevasSeries.length === 0) return;
+    if (!track) return;
+
+    // Mismo filtro que renderCardsFilaSerie — esta función arma
+    // tarjetas de forma independiente (scroll infinito), así que
+    // necesita su propia exclusión, no la hereda de la otra.
+    if (typeof _cargarSeriesNoInteresaIds === 'function') {
+        const excluidas = await _cargarSeriesNoInteresaIds();
+        nuevasSeries = nuevasSeries.filter(s => !excluidas.includes(s.id));
+    }
+
+    if (nuevasSeries.length === 0) return;
 
     nuevasSeries.forEach(serie => {
         const slide = document.createElement('div');
