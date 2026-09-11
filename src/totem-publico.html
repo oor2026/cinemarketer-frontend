@@ -435,7 +435,7 @@
         // como fallback en desktop/navegadores sin soporte.
         async function compartirTotem(nombreTotem, emoji) {
             const url = `${CONFIG.API_URL}/totem/og?nombre=${encodeURIComponent(nombreTotem)}&emoji=${encodeURIComponent(emoji)}`;
-            const texto = `Mi espíritu cinéfilo es ${nombreTotem} ${emoji} — ¿y el tuyo?`;
+                    const texto = 'Descubrí tu espíritu cinéfilo 🎬';
 
             if (navigator.share) {
                 try {
