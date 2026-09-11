@@ -116,8 +116,21 @@ window.cargarNovedades = async function() {
         if (!res.ok) throw new Error();
         const novedades = await res.json();
 
-                // Actualizar badge
-                                const noLeidas = novedades.filter(n => !n.read).length;
+                // El badge usa el conteo real del servidor (/unread-count),
+                // no el de esta lista — la lista solo trae las últimas 30,
+                // así que contar "no leídas" acá adentro da un número más
+                // chico que el real si hay más de 30 sin leer en total.
+                let noLeidas = 0;
+                try {
+                    const resCount = await fetch(`${CONFIG.API_URL}/notifications/unread-count`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (resCount.ok) {
+                        const dataCount = await resCount.json();
+                        noLeidas = dataCount.count || 0;
+                    }
+                } catch (e) {}
+
                                 const badge = document.getElementById('novedadesBadge');
                                 if (badge) {
                                     badge.textContent = noLeidas;
