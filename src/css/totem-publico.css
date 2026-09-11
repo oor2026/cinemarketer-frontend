@@ -261,14 +261,34 @@
    carrusel horizontal con snap, así cada póster se ve mucho más grande.
    No afecta desktop en absoluto (media query acotada). ===== */
 @media (max-width: 640px) {
+    .totem-pub-card {
+        margin-top: 0.4rem !important;
+    }
+    .totem-pub-progreso {
+        margin-bottom: 1rem !important;
+    }
     .totem-pub-terna {
         grid-template-columns: repeat(2, 1fr);
-        gap: 0.9rem;
+        gap: 0.6rem;
     }
-    .totem-pub-terna .totem-pub-opcion .nombre {
-        font-size: 0.95rem;
-        padding: 0.65rem 0.5rem;
-    }
+        .totem-pub-terna .totem-pub-opcion .nombre {
+            font-size: 0.85rem;
+            padding: 0.45rem 0.4rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .totem-pub-titulo {
+            font-size: 1.05rem !important;
+            margin-bottom: 0.9rem !important;
+        }
+        .totem-pub-card {
+            padding-top: 0.5rem !important;
+            padding-bottom: 1.1rem !important;
+        }
+        .totem-pub-skip {
+            margin-top: 0.5rem !important;
+        }
 
     /* Favorita: en vez de carrusel horizontal, dos tandas de 3 (grid 3x2) */
     .totem-pub-favorita-lista {
