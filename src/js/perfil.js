@@ -376,51 +376,54 @@ window._renderStackPosiciones = function() {
     }
 };
 
-window._moverStackVotos = async function(dir) {
+window._moverStackVotos = function(dir) {
     const N = _stackVotaciones.length;
     if (N === 0) return;
 
-    const proximoIndice = (_stackIndice + dir + N) % N;
-
-    // Mismo criterio que _moverStackComentarios: si avanzamos y
-    // estamos por volver al principio del mazo, pedimos la próxima
-    // página ANTES de dar la vuelta — así el mazo sigue creciendo en
-    // vez de repetir en loop siempre los mismos primeros posters.
-    // (Antes esto llamaba a window._cargarMasVotaciones(), una función
-    // que nunca llegó a definirse en ningún lado — por eso nunca
-    // cargaba más de la primera tanda.)
-    if (dir > 0 && proximoIndice === 0 && _votacionesHayMas && !_votacionesCargando) {
-        _votacionesCargando = true;
-        try {
-            const token = localStorage.getItem('token');
-                        // size=6, no 8 — el lote inicial (perfil.ultimasVotaciones)
-                        // ya vino en tandas de 6, así que la paginación siguiente
-                        // tiene que calzar con eso para no saltear ni duplicar.
-                        const res = await fetch(`${CONFIG.API_URL}/users/${perfilUsuarioId}/votaciones?page=${_votacionesPage + 1}&size=6`, {
-                            headers: { 'Authorization': `Bearer ${token}` }
-                        });
-                        if (res.ok) {
-                            const data = await res.json();
-                            if (data.votaciones && data.votaciones.length > 0) {
-                                _votacionesPage++;
-                                _votacionesHayMas = data.hayMas;
-                                _agregarVotacionesAlStack(data.votaciones);
-                            } else {
-                                _votacionesHayMas = false;
-                            }
-                        } else {
-                            console.error('[_moverStackVotos] respuesta no-ok al pedir más votaciones:', res.status, await res.text().catch(() => ''));
-                        }
-                    } catch (e) {
-                        console.error('[_moverStackVotos] error al pedir más votaciones:', e);
-                    }
-                    _votacionesCargando = false;
+    // Precarga en SEGUNDO PLANO, un par de posters antes de llegar al
+    // final — no bloquea nunca el avance. Antes se pedía la próxima
+    // tanda recién AL LLEGAR justo a la vuelta, con un await que
+    // frenaba la navegación 1-2 segundos reales de red; si seguías
+    // avanzando rápido durante esa espera, cada click de más volvía a
+    // calcular el módulo contra el largo VIEJO del mazo (todavía no
+    // había crecido), dando la sensación de "bucle" repitiendo los
+    // mismos posters antes de que apareciera la tanda siguiente.
+    if (dir > 0 && _stackIndice >= N - 2 && _votacionesHayMas && !_votacionesCargando) {
+        _precargarMasVotaciones();
     }
 
-    const NFinal = _stackVotaciones.length;
-    _stackIndice = (_stackIndice + dir + NFinal) % NFinal;
+    _stackIndice = (_stackIndice + dir + _stackVotaciones.length) % _stackVotaciones.length;
     window._renderStackPosiciones();
 };
+
+async function _precargarMasVotaciones() {
+    _votacionesCargando = true;
+    try {
+        const token = localStorage.getItem('token');
+        // size=6, no 8 — el lote inicial (perfil.ultimasVotaciones) ya
+        // vino en tandas de 6, así que la paginación siguiente tiene
+        // que calzar con eso para no saltear ni duplicar.
+        const res = await fetch(`${CONFIG.API_URL}/users/${perfilUsuarioId}/votaciones?page=${_votacionesPage + 1}&size=6`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            if (data.votaciones && data.votaciones.length > 0) {
+                _votacionesPage++;
+                _votacionesHayMas = data.hayMas;
+                _agregarVotacionesAlStack(data.votaciones);
+            } else {
+                _votacionesHayMas = false;
+            }
+        } else {
+            console.error('[_precargarMasVotaciones] respuesta no-ok:', res.status, await res.text().catch(() => ''));
+        }
+    } catch (e) {
+        console.error('[_precargarMasVotaciones] error:', e);
+    } finally {
+        _votacionesCargando = false;
+    }
+}
 
 function _agregarVotacionesAlStack(nuevas) {
     _stackVotaciones = _stackVotaciones.concat(nuevas);
