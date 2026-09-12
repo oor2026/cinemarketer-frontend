@@ -2337,51 +2337,55 @@ window._renderStackPosicionesSeries = function() {
     }
 };
 
-window._moverStackSeries = async function(dir) {
+window._moverStackSeries = function(dir) {
     const N = _stackVotacionesSeries.length;
     if (N === 0) return;
 
-    const proximoIndice = (_stackIndiceSeries + dir + N) % N;
-
-    // Mismo criterio que _moverStackComentarios/_moverStackVotos: si
-    // avanzamos y estamos por volver al principio del mazo, pedimos la
-    // próxima página ANTES de dar la vuelta. (Antes esto llamaba a
-    // window.scrollCarruselSeries(1), una función que apunta al
-    // carrusel horizontal VIEJO — #perfilCarruselSeriesTrack, que ya
-    // no existe desde que este mazo apilado lo reemplazó — por eso
-    // nunca cargaba nada nuevo y el mazo se quedaba repitiendo.)
-    if (dir > 0 && proximoIndice === 0 && _votacionesSeriesHayMas && !_votacionesSeriesCargando) {
-        _votacionesSeriesCargando = true;
-        try {
-            const token = localStorage.getItem('token');
-                        // size=6, mismo motivo que en películas — el lote inicial
-                        // ya vino en tandas de 6.
-                        const res = await fetch(
-                            `${CONFIG.API_URL}/users/${window.perfilUsuarioId || sessionStorage.getItem('perfilUsuarioId')}/votaciones-series?page=${_votacionesSeriesPage + 1}&size=6`,
-                            { headers: { 'Authorization': `Bearer ${token}` } }
-                        );
-                        if (res.ok) {
-                            const data = await res.json();
-                            if (data.votaciones && data.votaciones.length > 0) {
-                                _votacionesSeriesPage++;
-                                _votacionesSeriesHayMas = data.hayMas;
-                                _agregarVotacionesSeriesAlStack(data.votaciones);
-                            } else {
-                                _votacionesSeriesHayMas = false;
-                            }
-                        } else {
-                            console.error('[_moverStackSeries] respuesta no-ok al pedir más votaciones de series:', res.status, await res.text().catch(() => ''));
-                        }
-                    } catch (e) {
-                        console.error('[_moverStackSeries] error al pedir más votaciones de series:', e);
-                    }
-                    _votacionesSeriesCargando = false;
+    // Precarga en SEGUNDO PLANO, un par de posters antes de llegar al
+    // final — no bloquea nunca el avance. Mismo criterio que
+    // _moverStackVotos en perfil.js: antes se pedía la próxima tanda
+    // recién AL LLEGAR a la vuelta, con un await que frenaba la
+    // navegación 1-2 segundos reales de red; si seguías avanzando
+    // rápido durante esa espera, cada click de más volvía a calcular
+    // el módulo contra el largo VIEJO del mazo (todavía no había
+    // crecido), dando la sensación de "bucle" repitiendo los mismos
+    // posters antes de que apareciera la tanda siguiente.
+    if (dir > 0 && _stackIndiceSeries >= N - 2 && _votacionesSeriesHayMas && !_votacionesSeriesCargando) {
+        _precargarMasVotacionesSeries();
     }
 
-    const NFinal = _stackVotacionesSeries.length;
-    _stackIndiceSeries = (_stackIndiceSeries + dir + NFinal) % NFinal;
+    _stackIndiceSeries = (_stackIndiceSeries + dir + _stackVotacionesSeries.length) % _stackVotacionesSeries.length;
     window._renderStackPosicionesSeries();
 };
+
+async function _precargarMasVotacionesSeries() {
+    _votacionesSeriesCargando = true;
+    try {
+        const token = localStorage.getItem('token');
+        // size=6, mismo motivo que en películas — el lote inicial
+        // ya vino en tandas de 6.
+        const res = await fetch(
+            `${CONFIG.API_URL}/users/${window.perfilUsuarioId || sessionStorage.getItem('perfilUsuarioId')}/votaciones-series?page=${_votacionesSeriesPage + 1}&size=6`,
+            { headers: { 'Authorization': `Bearer ${token}` } }
+        );
+        if (res.ok) {
+            const data = await res.json();
+            if (data.votaciones && data.votaciones.length > 0) {
+                _votacionesSeriesPage++;
+                _votacionesSeriesHayMas = data.hayMas;
+                _agregarVotacionesSeriesAlStack(data.votaciones);
+            } else {
+                _votacionesSeriesHayMas = false;
+            }
+        } else {
+            console.error('[_precargarMasVotacionesSeries] respuesta no-ok:', res.status, await res.text().catch(() => ''));
+        }
+    } catch (e) {
+        console.error('[_precargarMasVotacionesSeries] error:', e);
+    } finally {
+        _votacionesSeriesCargando = false;
+    }
+}
 
 function _agregarVotacionesSeriesAlStack(nuevas) {
     _stackVotacionesSeries = _stackVotacionesSeries.concat(nuevas);
