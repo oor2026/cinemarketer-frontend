@@ -85,8 +85,36 @@ async function cargarPerfil(userId) {
     document.querySelectorAll('.perfil-seccion').forEach(s => s.style.display = '');
     document.getElementById('perfilBloqueadoMsg')?.remove();
     document.getElementById('perfilPrivadoMsg')?.remove();
-    const btnDes = document.getElementById('btnDesbloquear');
-        if (btnDes) btnDes.style.display = 'none';
+        const btnDes = document.getElementById('btnDesbloquear');
+            if (btnDes) btnDes.style.display = 'none';
+        const btnBloquearReset = document.getElementById('btnBloquearPerfil');
+            if (btnBloquearReset) btnBloquearReset.style.display = 'none';
+
+        // Reset de los contadores que _mostrarPerfilBloqueado oculta a mano —
+        // si no se restauran acá, quedan escondidos aunque el perfil ya no
+        // esté bloqueado, porque renderStats() solo actualiza el texto, nunca
+        // el display.
+        const segElReset = document.getElementById('perfilSeguidores')?.closest('.perfil-stat-inline');
+        const sigElReset = document.getElementById('perfilSiguiendo')?.closest('.perfil-stat-inline');
+        const votElReset = document.getElementById('perfilVotaciones')?.closest('.perfil-stat-inline');
+        const comElReset = document.getElementById('perfilComentarios')?.closest('.perfil-stat-inline');
+        const pubElReset = document.getElementById('perfilPublicaciones')?.closest('.perfil-stat-inline');
+        [segElReset, sigElReset, votElReset, comElReset, pubElReset].forEach(el => { if (el) el.style.display = ''; });
+
+        // Reset de las secciones que _mostrarPerfilBloqueado oculta a mano
+        // (mismo criterio que los contadores de arriba).
+        [
+            'perfilEspirituTitulo', 'perfilAdnTitular', 'perfilEspirituRow',
+            'perfilGustosTitulo', 'cineSpreadPeliculas', 'cineSpreadSeries',
+            'cineActividadTitulo', 'cineActividadWrap'
+        ].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = '';
+        });
+        const switchElReset = document.querySelector('.cine-switch');
+        if (switchElReset) switchElReset.style.display = '';
+        const fabModoElReset = document.getElementById('btnFabModo');
+        if (fabModoElReset) fabModoElReset.style.display = '';
     const bannerReset = document.querySelector('.perfil-banner');
     if (bannerReset) { bannerReset.style.background = ''; bannerReset.style.backgroundImage = ''; }
     const avatarReset = document.getElementById('perfilAvatar');
@@ -106,7 +134,11 @@ async function cargarPerfil(userId) {
             ]);
 
             if (!response.ok) throw new Error(`Error ${response.status}`);
-            const perfil = await response.json();
+                const perfil = await response.json();
+                // Bandera simple para que setAdnTipo sepa si tiene que abstenerse
+                // de togglear nada — el switch Películas/Series sigue siendo
+                // clickeable visualmente aunque el perfil esté bloqueado.
+                window._perfilBloqueado = !!perfil.bloqueado;
 
             if (adnResponse.ok) {
                 const adn = await adnResponse.json();
@@ -275,7 +307,13 @@ function renderIdentidad(perfil) {
                                 // Fuerza el estado inicial a Películas — sin esto, los 4 bloques de
                                 // Series (Votadas/Comentadas) quedan con su display default (visible)
                                 // hasta el primer click en el switch, mostrándose junto con Películas.
-                                window.setAdnTipo('peliculas');
+                                // Si el perfil está bloqueado, nos lo saltamos a propósito: setAdnTipo
+                                // vuelve a poner en 'flex'/'block' varias secciones que
+                                // _mostrarPerfilBloqueado() ya apagó más arriba — llamarlo acá las
+                                // volvía a mostrar.
+                                if (!perfil.bloqueado) {
+                                    window.setAdnTipo('peliculas');
+                                }
                 }
 
 
@@ -709,15 +747,52 @@ function actualizarBtnSeguir(followStatus) {
     if (!btn) return;
     if (followStatus === 'ACCEPTED') {
         btn.className = 'btn-seguir';
-        btn.innerHTML = '<i class="fas fa-user-check" style="color:#1a3a6b;"></i> <span style="color:#1a3a6b;">Siguiendo</span>';
+        btn.innerHTML = '<i class="fas fa-user-check"></i> <span>Siguiendo</span>';
+        window._actualizarColorBtnSeguir();
     } else if (followStatus === 'PENDING') {
+        // Estado neutro (invitación enviada) — se deja en gris a propósito,
+        // no sigue el color de marca porque no es un estado "activo" del
+        // switch películas/series, es un estado de espera.
         btn.className = 'btn-seguir';
         btn.innerHTML = '<i class="fas fa-clock" style="color:#888;"></i> <span style="color:#888;">Invitación enviada</span>';
     } else {
         btn.className = 'btn-seguir';
         btn.innerHTML = '<i class="fas fa-user-plus"></i> Seguir';
+        window._actualizarColorBtnSeguir();
     }
 }
+
+// Rojo en modo Películas, azul en modo Series — mismo criterio que
+// _actualizarColorStatsSeguir. Se re-llama desde setAdnTipo cada vez
+// que cambia el switch, y desde actualizarBtnSeguir cada vez que
+// cambia el estado de follow (para no perder el color al re-renderizar
+// el botón). No toca el estado "Invitación enviada", que queda gris.
+window._actualizarColorBtnSeguir = function() {
+    const tipo = document.querySelector('.cine-switch-option.active')?.dataset.tipo || 'peliculas';
+    const color = tipo === 'series' ? 'var(--cine-accent-series)' : 'var(--cine-accent)';
+
+    const btn = document.getElementById('btnSeguir');
+    if (btn) {
+        btn.style.color = color;
+        const icono = btn.querySelector('i');
+        const span = btn.querySelector('span');
+        if (icono) icono.style.color = color;
+        if (span) span.style.color = color;
+    }
+
+    const btnDesbloquear = document.getElementById('btnDesbloquear');
+    if (btnDesbloquear) {
+        btnDesbloquear.style.color = color;
+        const icono = btnDesbloquear.querySelector('i');
+        if (icono) icono.style.color = color;
+    }
+
+    const btnBloquear = document.getElementById('btnBloquearPerfil');
+    if (btnBloquear) {
+        btnBloquear.style.background = color;
+        btnBloquear.style.border = `2px solid ${color}`;
+    }
+};
 
 window.toggleSeguir = async function() {
     const token = localStorage.getItem('token');
@@ -1531,10 +1606,15 @@ window.subirBanner = async function(input) {
                                     window.scrollTo({ top: y, behavior: 'smooth' });
                                 };
 
-                                                window.setAdnTipo = function(tipo) {
-                            document.querySelectorAll('.cine-switch-option').forEach(btn => {
-                                btn.classList.toggle('active', btn.dataset.tipo === tipo);
-                            });
+                                    window.setAdnTipo = function(tipo) {
+                                // Perfil bloqueado: no togglear nada — más abajo el switch
+                                // ya queda oculto, pero esto es un segundo freno por si
+                                // alguien dispara setAdnTipo desde otro lado.
+                                if (window._perfilBloqueado) return;
+
+                                document.querySelectorAll('.cine-switch-option').forEach(btn => {
+                                    btn.classList.toggle('active', btn.dataset.tipo === tipo);
+                                });
 
                             document.getElementById('perfilContenido')?.classList.toggle('modo-series', tipo === 'series');
 
@@ -1599,14 +1679,18 @@ window.subirBanner = async function(input) {
                                 if (guardadasPeliculas) guardadasPeliculas.style.display = 'block';
                             }
 
-                        window._actualizarVisibilidadRankingTrivia();
-                        window._actualizarColorStatsSeguir();
-                        window._seleccionarCriterioActividad(window._actividadCriterioActual);
-                    };
+                            window._actualizarVisibilidadRankingTrivia();
+                            window._actualizarColorStatsSeguir();
+                            window._actualizarColorBtnSeguir();
+                            window._seleccionarCriterioActividad(window._actividadCriterioActual);
+                        };
 
                         // FAB mobile — un solo botón que alterna Películas/Series
                         // (en desktop el switch de 2 opciones sigue intacto y visible).
                                                window._toggleFabModo = function() {
+                                                   // Perfil bloqueado: mismo freno que setAdnTipo — el FAB ya
+                                                   // queda oculto más abajo, esto es el segundo freno.
+                                                   if (window._perfilBloqueado) return;
                                                    const activoBtn = document.querySelector('.cine-switch-option.active');
                                                    const actual = activoBtn ? activoBtn.dataset.tipo : 'peliculas';
                                                    const nuevo = actual === 'peliculas' ? 'series' : 'peliculas';
@@ -2298,14 +2382,34 @@ window.subirBanner = async function(input) {
                 } catch(e) {}
             };
 
-        function _mostrarPerfilBloqueado(bloqueadoPorMi) {
-            // Ocultar secciones
-            document.querySelectorAll('.perfil-seccion').forEach(s => s.style.display = 'none');
+                function _mostrarPerfilBloqueado(bloqueadoPorMi) {
+                    // Ocultar secciones
+                    document.querySelectorAll('.perfil-seccion').forEach(s => s.style.display = 'none');
 
-            // Ocultar bio, stats clickeables
-            const bioEl = document.getElementById('perfilBio');
-            if (bioEl) bioEl.style.display = 'none';
+                    // Ocultar bio, stats clickeables
+                    const bioEl = document.getElementById('perfilBio');
+                    if (bioEl) bioEl.style.display = 'none';
 
+                    // Ocultar "Mi espíritu", "Mis gustos o preferencias" y
+                    // "Actividad" — antes solo se tapaban las publicaciones, el
+                    // resto seguía visible aunque el perfil estuviera bloqueado.
+                        [
+                            'perfilEspirituTitulo', 'perfilAdnTitular', 'perfilEspirituRow',
+                            'perfilGustosTitulo', 'cineSpreadPeliculas', 'cineSpreadSeries',
+                            'cineActividadTitulo', 'cineActividadWrap'
+                        ].forEach(id => {
+                            const el = document.getElementById(id);
+                            if (el) el.style.display = 'none';
+                        });
+
+                        // El switch Películas/Series también se apaga — no tiene sentido
+                        // dejarlo interactivo si no hay nada que vaya a cambiar.
+                        const switchEl = document.querySelector('.cine-switch');
+                        if (switchEl) switchEl.style.display = 'none';
+
+                        // Mismo criterio en mobile: el FAB flotante que alterna modo.
+                        const fabModoEl = document.getElementById('btnFabModo');
+                        if (fabModoEl) fabModoEl.style.display = 'none';
             const statsClickables = document.querySelectorAll('.perfil-stat-clickable');
             statsClickables.forEach(s => {
                 s.onclick = null;
@@ -2318,11 +2422,13 @@ window.subirBanner = async function(input) {
             if (segEl) segEl.style.display = 'none';
             if (sigEl) sigEl.style.display = 'none';
 
-            // Ocultar votaciones y comentarios stats
+            // Ocultar votaciones, comentarios y publicaciones stats
             const votEl = document.getElementById('perfilVotaciones')?.closest('.perfil-stat-inline');
             const comEl = document.getElementById('perfilComentarios')?.closest('.perfil-stat-inline');
+            const pubEl = document.getElementById('perfilPublicaciones')?.closest('.perfil-stat-inline');
             if (votEl) votEl.style.display = 'none';
             if (comEl) comEl.style.display = 'none';
+            if (pubEl) pubEl.style.display = 'none';
 
             // Ocultar banner y avatar
             const banner = document.querySelector('.perfil-banner');

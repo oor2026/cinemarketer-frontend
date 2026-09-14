@@ -98,7 +98,7 @@
     border-radius: 10px;
     border: 2px solid white;
     background: white;
-    color: #e50914;
+    color: var(--cine-accent);
     font-size: 0.85rem;
     font-weight: 700;
     cursor: pointer;
