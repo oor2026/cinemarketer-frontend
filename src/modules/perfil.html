@@ -459,7 +459,7 @@
                             <button class="btn-seguir" id="btnDesbloquear" onclick="window.desbloquearUsuario()" style="display:none;">
                                 <i class="fas fa-unlock"></i> Desbloquear
                             </button>
-                            <button id="btnBloquearPerfil" onclick="window.abrirModalBloquearPerfil()" style="display:none; background:#e50914; border:2px solid #e50914; border-radius:8px; padding:0.4rem 0.6rem; cursor:pointer; color:white; font-size:0.85rem;" title="Bloquear usuario">
+                            <button id="btnBloquearPerfil" onclick="window.abrirModalBloquearPerfil()" style="display:none; border-radius:8px; padding:0.4rem 0.6rem; cursor:pointer; color:white; font-size:0.85rem;" title="Bloquear usuario">
                                 <i class="fas fa-ban"></i>
                             </button>
                         </div>
@@ -477,10 +477,10 @@
                 </div>
             </div>
 
-            <p class="cine-section-title">Mi espíritu</p>
+            <p class="cine-section-title" id="perfilEspirituTitulo">Mi espíritu</p>
             <p class="cine-bio-title" id="perfilAdnTitular"></p>
 
-            <div class="cine-espiritu-row">
+            <div class="cine-espiritu-row" id="perfilEspirituRow">
                 <div class="cine-totem-slot">
                     <div class="cine-totem-wrap">
                         <div class="cine-totem-glow"></div>
@@ -493,7 +493,7 @@
                 <div class="cine-adn-dots" id="perfilAdnDots"></div>
             </div>
 
-            <p class="cine-section-title">Mis gustos o preferencias</p>
+            <p class="cine-section-title" id="perfilGustosTitulo">Mis gustos o preferencias</p>
             <div class="cine-spread" id="cineSpreadPeliculas">
                 <div class="cine-snapshot" style="position:relative;">
                     <button id="btnEditarFavorita" onclick="window.abrirEdicionFavorita()" class="cine-edit-btn" style="display:none;">
@@ -677,7 +677,7 @@
             </div>
 
             <p class="cine-section-title" id="cineActividadTitulo">Mi actividad cinéfila</p>
-            <div class="cine-actividad-wrap">
+            <div class="cine-actividad-wrap" id="cineActividadWrap">
                 <div class="cine-actividad-menu" id="cineActividadMenu">
                     <button class="cine-actividad-menu-item active" data-criterio="votaciones" onclick="window._seleccionarCriterioActividad('votaciones')">
                         <span class="cine-actividad-menu-lbl">Votaciones</span>
