@@ -590,23 +590,16 @@ window._cargarCanjeadosClubBeneficios = async function() {
     // window._clubEsPremium se setea al cargar el catálogo Premium; si
     // esta función corre antes de que eso pase, se asume false (más
     // seguro pedir de menos que pegarle a un endpoint sin permiso).
-    const esPremium = window._clubEsPremium === true;
-
-    try {
-        const promesas = [
-            fetch(`${CONFIG.API_URL}/redemptions/me`, { headers: { 'Authorization': `Bearer ${token}` } })
-        ];
-        if (esPremium) {
-            promesas.push(
+        try {
+            const [resComunes, resPremium, resSorteos] = await Promise.all([
+                fetch(`${CONFIG.API_URL}/redemptions/me`, { headers: { 'Authorization': `Bearer ${token}` } }),
                 fetch(`${CONFIG.API_URL}/premium/rewards/redemptions/me`, { headers: { 'Authorization': `Bearer ${token}` } }),
                 fetch(`${CONFIG.API_URL}/premium/rewards/draws/me`, { headers: { 'Authorization': `Bearer ${token}` } })
-            );
-        }
-        const [resComunes, resPremium, resSorteos] = await Promise.all(promesas);
+            ]);
 
-        const comunes = resComunes.ok ? await resComunes.json() : [];
-        const premium = (esPremium && resPremium?.ok) ? await resPremium.json() : [];
-        const sorteos = (esPremium && resSorteos?.ok) ? await resSorteos.json() : [];
+            const comunes = resComunes.ok ? await resComunes.json() : [];
+            const premium = resPremium.ok ? await resPremium.json() : [];
+            const sorteos = resSorteos.ok ? await resSorteos.json() : [];
 
         const premiumNorm = premium.map(p => ({
             rewardName: p.rewardName, rewardImageUrl: p.rewardImageUrl || null,
