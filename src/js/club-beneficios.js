@@ -598,7 +598,7 @@ window._cargarCanjeadosClubBeneficios = async function() {
         ];
         if (esPremium) {
             promesas.push(
-                fetch(`${CONFIG.API_URL}/premium/redemptions/me`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`${CONFIG.API_URL}/premium/rewards/redemptions/me`, { headers: { 'Authorization': `Bearer ${token}` } }),
                 fetch(`${CONFIG.API_URL}/premium/rewards/draws/me`, { headers: { 'Authorization': `Bearer ${token}` } })
             );
         }
