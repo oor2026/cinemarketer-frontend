@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club de Beneficios — Cinemarketer</title>
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Cinemarketer">
+    <meta property="og:title" content="🎁 Club de Beneficios — Cinemarketer">
+    <meta property="og:description" content="Descubrí todos los premios y experiencias que podés ganar canjeando tus puntos en Cinemarketer.">
+    <meta property="og:image" content="https://cinemarketer.com.ar/assets/images/isologotipo.webp">
+    <meta id="ogUrl" property="og:url" content="https://cinemarketer.com.ar">
+
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/publicacion-publica.css">
+    <link rel="stylesheet" href="css/feed-films.css">
+    <link rel="stylesheet" href="css/club-beneficios-publica.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<header class="pub-header">
+    <a href="index.html" class="pub-logo">
+        <img src="assets/images/isologotipo.webp" alt="Cinemarketer">
+    </a>
+    <div class="pub-header-btns">
+        <a href="login.html" class="btn-login">Iniciar sesión</a>
+        <a href="register.html" class="btn-registro">Registrarme gratis</a>
+    </div>
+</header>
+
+<main style="padding-top:1.5rem;">
+
+<div class="club-beneficios-container">
+    <!-- BANNER — mismo estilo v2 del header logueado. En vez del badge de
+     puntos disponibles (no hay usuario), va un CTA fijo a registro. -->
+    <div class="club-header-v2">
+        <i class="fas fa-gift club-header-v2-decor"></i>
+        <i class="fas fa-sparkles club-header-v2-sparkle"></i>
+        <div class="club-header-v2-texto">
+            <div class="club-header-v2-titulo-row">
+                <div class="club-header-v2-icono"><i class="fas fa-gift"></i></div>
+                <h2><span class="club-header-v2-fino">Club de</span> Beneficios</h2>
+            </div>
+            <p>Descubrí todos los premios y experiencias que podés ganar en Cinemarketer.</p>
+        </div>
+        <div class="club-header-v2-badge">
+            <span class="club-header-v2-badge-label">¿Todavía no tenés cuenta?</span>
+            <button class="club-cta-btn-header" onclick="window._clubPubAbrirCTA('general')">
+                Sumate gratis <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- TABS Free / Premium + filtros — idéntico al logueado. -->
+    <div class="club-tabs-y-filtros">
+        <div class="club-tabs-y-filtros-izq">
+            <div class="club-tabs">
+                <button class="club-tab active" id="clubPubTabFree" onclick="window.cambiarTabClubBeneficiosPub('free', this)">Free</button>
+                <button class="club-tab" id="clubPubTabPremium" onclick="window.cambiarTabClubBeneficiosPub('premium', this)">★ Premium</button>
+            </div>
+        </div>
+        <div class="filtros-premios" id="clubPubFiltrosFree">
+            <select class="filtro-select" onchange="window._filtrarClubTipoPub('free', this.value)">
+                <option value="todos">Todos</option>
+                <option value="entradas">Entradas</option>
+                <option value="merchandising">Merchandising</option>
+                <option value="descuento">Descuentos</option>
+                <option value="experiencia">Experiencias</option>
+            </select>
+            <select class="filtro-select" onchange="window._ordenarClubPub('free', this.value)">
+                <option value="puntos-menor">Menor puntos</option>
+                <option value="puntos-mayor">Mayor puntos</option>
+                <option value="nombre">Nombre A-Z</option>
+            </select>
+        </div>
+        <div class="filtros-premios" id="clubPubFiltrosPremium" style="display:none;">
+            <select class="filtro-select" onchange="window._filtrarClubTipoPub('premium', this.value)">
+                <option value="todos">Todos</option>
+                <option value="entradas">Entradas</option>
+                <option value="merchandising">Merchandising</option>
+                <option value="descuento">Descuentos</option>
+                <option value="experiencia">Experiencias</option>
+                <option value="sorteos">Sorteos</option>
+            </select>
+            <select class="filtro-select" onchange="window._ordenarClubPub('premium', this.value)">
+                <option value="puntos-menor">Menor puntos</option>
+                <option value="puntos-mayor">Mayor puntos</option>
+                <option value="nombre">Nombre A-Z</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="clubPubPanelFree" class="club-tab-panel active">
+        <div class="club-carrusel-wrap">
+            <button class="club-carrusel-nav club-carrusel-nav-prev" onclick="window._moverCarruselClubPub('clubPubGridFree', -1)" style="display:none;"><i class="fas fa-chevron-left"></i></button>
+            <div id="clubPubGridFree" class="club-premios-grid">
+                <div class="loading"><i class="fas fa-spinner fa-spin"></i></div>
+            </div>
+            <button class="club-carrusel-nav club-carrusel-nav-next" onclick="window._moverCarruselClubPub('clubPubGridFree', 1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div id="clubPubDotsFree" class="club-carrusel-dots"></div>
+    </div>
+
+    <div id="clubPubPanelPremium" class="club-tab-panel">
+        <!-- Público siempre ve este banner — a diferencia del logueado no
+         hay forma de "ya sos Premium" sin cuenta, así que no existe la
+         variante club-banner-si-premium acá. -->
+        <div class="club-banner-no-premium">
+            <i class="fas fa-star"></i>
+            <p>Estos premios son exclusivos para usuarios <strong>Premium</strong>. <a href="#" onclick="event.preventDefault(); window._clubPubAbrirCTA('premium');">Creá tu cuenta y enterate cómo sumarte →</a></p>
+        </div>
+        <div class="club-carrusel-wrap">
+            <button class="club-carrusel-nav club-carrusel-nav-prev" onclick="window._moverCarruselClubPub('clubPubGridPremium', -1)" style="display:none;"><i class="fas fa-chevron-left"></i></button>
+            <div id="clubPubGridPremium" class="club-premios-grid">
+                <div class="loading"><i class="fas fa-spinner fa-spin"></i></div>
+            </div>
+            <button class="club-carrusel-nav club-carrusel-nav-next" onclick="window._moverCarruselClubPub('clubPubGridPremium', 1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div id="clubPubDotsPremium" class="club-carrusel-dots"></div>
+    </div>
+</div>
+
+<!-- Modal de detalle de premio — misma estructura que el logueado, sin
+ los bloques "Tus puntos actuales" (mid-body y fijo de footer), que no
+ aplican sin sesión. -->
+<div id="clubPubModalPremio" class="modal-premio" style="display:none;">
+    <div class="modal-premio-overlay" onclick="window._cerrarModalPremioClubPub()"></div>
+    <div class="modal-premio-contenido" onclick="event.stopPropagation()">
+
+        <div class="modal-premio-header">
+            <h2 id="clubPubModalPremioTitulo">Nombre del premio</h2>
+            <div class="modal-premio-header-right">
+                <span class="modal-premio-badge" id="clubPubModalPremioBadge">🎁 Merchandising</span>
+                <button class="modal-premio-cerrar" onclick="window._cerrarModalPremioClubPub()">×</button>
+            </div>
+        </div>
+
+        <div class="modal-premio-body">
+
+            <div class="modal-premio-imagen">
+                <div class="premio-carrusel" id="clubPubPremioCarrusel">
+                    <img id="clubPubModalPremioImg" src="" alt="Premio" style="display:none;">
+                    <div class="modal-premio-img-placeholder" id="clubPubModalPremioImgPlaceholder">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <button class="carrusel-btn carrusel-prev" id="clubPubPremioBtnPrev" onclick="window._cambiarImagenPremioClubPub(-1)" style="display:none;">&#8249;</button>
+                    <button class="carrusel-btn carrusel-next" id="clubPubPremioBtnNext" onclick="window._cambiarImagenPremioClubPub(1)" style="display:none;">&#8250;</button>
+                </div>
+                <div class="carrusel-dots" id="clubPubPremioDots"></div>
+            </div>
+
+            <div class="modal-premio-columna-derecha">
+                <div class="modal-premio-info">
+
+                    <p class="modal-premio-descripcion" id="clubPubModalPremioDescripcion"></p>
+
+                    <div class="modal-tabs">
+                        <button class="modal-tab" id="clubPubTabPremio0" onclick="window._switchModalTabClubPub(0)">Imágenes</button>
+                        <button class="modal-tab active" id="clubPubTabPremio1" data-label-mobile="Descripción" onclick="window._switchModalTabClubPub(1)">Información</button>
+                        <button class="modal-tab" id="clubPubTabPremio2" onclick="window._switchModalTabClubPub(2)" style="display:none;">Detalles</button>
+                        <button class="modal-tab" id="clubPubTabPremio3" onclick="window._switchModalTabClubPub(3)" style="display:none;">Términos</button>
+                        <button class="modal-tab" id="clubPubTabPremio4" onclick="window._switchModalTabClubPub(4)" style="display:none;">Resultado</button>
+                        <button class="modal-tab" id="clubPubTabPremio5" onclick="window._switchModalTabClubPub(5)" style="display:none;">Detalles</button>
+                    </div>
+
+                    <div class="modal-premio-tabs-scroll" id="clubPubPremioTabsScroll">
+                        <div id="clubPubPanelPremio1" class="modal-tab-panel">
+                            <p class="modal-premio-descripcion-tab" id="clubPubModalPremioDescripcionTab"></p>
+                            <div class="modal-premio-detalles">
+                                <div class="modal-premio-detalle-item">
+                                    <span class="detalle-label"><i class="fas fa-coins"></i> Puntos requeridos</span>
+                                    <span class="detalle-value puntos-requeridos" id="clubPubModalPremioPuntos">0</span>
+                                </div>
+                                <div class="modal-premio-detalle-item" id="clubPubModalPremioStockRow">
+                                    <span class="detalle-label"><i class="fas fa-boxes"></i> Stock disponible</span>
+                                    <span class="detalle-value" id="clubPubModalPremioStock">0</span>
+                                </div>
+                                <div class="modal-premio-detalle-item" id="clubPubModalPremioVencimientoRow" style="display:none;">
+                                    <span class="detalle-label"><i class="fas fa-calendar-alt"></i> Vence el</span>
+                                    <span class="detalle-value" id="clubPubModalPremioVencimiento">-</span>
+                                </div>
+                                <div class="modal-premio-detalle-item" id="clubPubModalPremioPartnerRow" style="display:none;">
+                                    <span class="detalle-label"><i class="fas fa-handshake"></i> Proveedor</span>
+                                    <span class="detalle-value" id="clubPubModalPremioPartner">-</span>
+                                </div>
+                                <div class="modal-premio-detalle-item" id="clubPubModalPremioWebsiteRow" style="display:none;">
+                                    <span class="detalle-label"><i class="fas fa-globe"></i> Sitio web</span>
+                                    <span class="detalle-value">
+                                        <a href="#" target="_blank" id="clubPubModalPremioWebsiteLink" style="color:#e50914;text-decoration:none;">-</a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="clubPubPanelPremio2" class="modal-tab-panel" style="display:none;">
+                            <div class="modal-premio-detalles" id="clubPubModalPremioDetallesExtra"></div>
+                        </div>
+
+                        <div id="clubPubPanelPremio3" class="modal-tab-panel" style="display:none;">
+                            <div class="modal-premio-terminos-panel">
+                                <p id="clubPubModalPremioTerminos" style="max-height:180px; overflow-y:auto; padding-right:0.5rem; font-size:0.85rem; color:#555; line-height:1.6;"></p>
+                            </div>
+                        </div>
+
+                        <div id="clubPubPanelPremio4" class="modal-tab-panel" style="display:none;">
+                            <div id="clubPubModalPremioResultados" style="padding:0.5rem 0;">
+                                <div id="clubPubResultadosPendiente" style="text-align:center; padding:1.5rem; color:#999;">
+                                    <div style="font-size:2rem; margin-bottom:0.5rem;">🎲</div>
+                                    <p style="margin:0; font-size:0.9rem;">El sorteo aún no fue realizado.</p>
+                                </div>
+                                <div id="clubPubResultadosEjecutado" style="display:none;">
+                                    <div id="clubPubResultadoGanador" style="display:flex; align-items:center; gap:0.75rem; padding:0.75rem; background:#fff8e1; border-radius:10px; margin-bottom:0.5rem;">
+                                        <span style="font-size:1.5rem;">🏆</span>
+                                        <div>
+                                            <div style="font-size:0.75rem; color:#999; font-weight:600; text-transform:uppercase;">Ganador/a</div>
+                                            <div id="clubPubResultadoGanadorNombre" style="font-size:0.95rem; font-weight:700; color:#e50914;"></div>
+                                        </div>
+                                    </div>
+                                    <div id="clubPubResultadoSuplente1" style="display:flex; align-items:center; gap:0.75rem; padding:0.75rem; background:#f5f5f5; border-radius:10px; margin-bottom:0.5rem;">
+                                        <span style="font-size:1.2rem;">🥈</span>
+                                        <div>
+                                            <div style="font-size:0.75rem; color:#999; font-weight:600; text-transform:uppercase;">Suplente 1</div>
+                                            <div id="clubPubResultadoSuplente1Nombre" style="font-size:0.9rem; font-weight:600; color:#555;"></div>
+                                        </div>
+                                    </div>
+                                    <div id="clubPubResultadoSuplente2" style="display:flex; align-items:center; gap:0.75rem; padding:0.75rem; background:#f5f5f5; border-radius:10px;">
+                                        <span style="font-size:1.2rem;">🥉</span>
+                                        <div>
+                                            <div style="font-size:0.75rem; color:#999; font-weight:600; text-transform:uppercase;">Suplente 2</div>
+                                            <div id="clubPubResultadoSuplente2Nombre" style="font-size:0.9rem; font-weight:600; color:#555;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="clubPubPanelPremio5" class="modal-tab-panel" style="display:none;">
+                            <div style="padding:0.5rem 0; font-size:0.9rem; color:#444; line-height:1.7;" id="clubPubModalPremioDetallesPremio"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-premio-acciones">
+                    <button class="btn-canjear-modal" id="clubPubModalPremioBtnAccion"></button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Modal CTA — reemplaza al flujo real de canje/participación. Mismo
+ look que club-modal-confirmar del logueado, pero en vez de confirmar
+ una acción, lleva a crear cuenta. -->
+<div id="clubPubModalCTA" class="club-modal-overlay" style="display:none;" onclick="window._cerrarCTAClubPub(event)">
+    <div class="club-modal-caja club-modal-confirmar" onclick="event.stopPropagation()">
+        <div class="club-modal-confirmar-header">
+            <i class="fas fa-gift club-modal-confirmar-decor"></i>
+            <div class="club-modal-confirmar-header-fila">
+                <div class="club-modal-confirmar-icono"><i class="fas fa-gift"></i></div>
+                <p class="club-modal-confirmar-titulo">Creá tu cuenta gratis</p>
+            </div>
+        </div>
+        <div class="club-modal-confirmar-body">
+            <p id="clubPubCTATexto" class="club-modal-confirmar-texto"></p>
+            <div class="club-modal-confirmar-botones">
+                <button class="club-btn-cancelar" onclick="window._cerrarCTAClubPub()">Seguir mirando</button>
+                <button class="club-btn-confirmar" onclick="window._irARegistroClubPub()">Crear cuenta</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/club-beneficios-publica.js"></script>
+<script>
+    document.getElementById('ogUrl').content = window.location.href;
+    window['init_club-beneficios-publica']();
+</script>
+</body>
+</html>
