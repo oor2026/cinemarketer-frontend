@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro de Autogestión de Premios — Cinemarketer</title>
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Cinemarketer">
+    <meta property="og:title" content="🎁 Centro de Autogestión de Premios — Cinemarketer">
+    <meta property="og:description" content="Coordiná la entrega de tu premio de forma simple y segura.">
+    <meta property="og:image" content="https://cinemarketer.com.ar/assets/images/isologotipo.webp">
+
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/publicacion-publica.css">
+    <link rel="stylesheet" href="css/centro-autogestion.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<header class="pub-header">
+    <a href="index.html" class="pub-logo">
+        <img src="assets/images/isologotipo.webp" alt="Cinemarketer">
+    </a>
+    <div class="pub-header-btns">
+        <a href="login.html" class="btn-login">Iniciar sesión</a>
+        <a href="register.html" class="btn-registro">Registrarme gratis</a>
+    </div>
+</header>
+
+<main class="ss-main">
+    <div class="ss-card-wrap">
+
+        <div class="ss-intro">
+            <i class="fas fa-gift"></i>
+            <h1>Centro de Autogestión de Premios</h1>
+            <p>Coordiná la entrega de tu premio en un par de pasos, sin tener que darnos tus datos por otro canal.</p>
+        </div>
+
+        <!-- PASO: pedir el link -->
+        <div id="ssStepEmail" class="ss-step">
+            <label for="ssEmailInput">Tu email de Cinemarketer</label>
+            <input type="email" id="ssEmailInput" placeholder="tu@email.com" autocomplete="email">
+            <button id="ssBtnPedirLink" onclick="ssPedirLink()">Enviarme el enlace de acceso</button>
+            <p id="ssEmailMensaje" class="ss-mensaje" style="display:none;"></p>
+            <p class="ss-registro-fijo">¿Todavía no tenés cuenta? <a href="register.html">Registrate gratis</a></p>
+        </div>
+
+        <!-- PASO: validando el link -->
+        <div id="ssStepChecking" class="ss-step" style="display:none;">
+            <div class="ss-loading"><i class="fas fa-spinner fa-spin"></i></div>
+            <p>Validando tu acceso…</p>
+        </div>
+
+        <!-- PASO: error de link -->
+        <div id="ssStepError" class="ss-step" style="display:none;">
+            <i class="fas fa-exclamation-circle ss-error-icon"></i>
+            <p id="ssErrorTexto">El enlace no es válido.</p>
+            <button onclick="ssVolverAEmail()">Pedir un nuevo enlace</button>
+        </div>
+
+        <!-- PASO: completar perfil -->
+        <div id="ssStepPerfil" class="ss-step" style="display:none;">
+            <h2>Antes de seguir, completá tu perfil</h2>
+            <p class="ss-perfil-copy">Nos falta esta info para poder coordinar tu entrega correctamente.</p>
+            <div id="ssPerfilCampos" class="ss-perfil-campos"></div>
+            <button id="ssBtnGuardarPerfil" onclick="ssGuardarPerfil()">Guardar y continuar</button>
+        </div>
+
+        <!-- PASO: listado de canjes -->
+        <div id="ssStepCanjes" class="ss-step" style="display:none;">
+            <h2>Tus premios</h2>
+            <div id="ssCanjesLista"></div>
+        </div>
+
+    </div>
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/centro-autogestion.js"></script>
+</body>
+</html>
