@@ -189,18 +189,22 @@ const adminCanjes = {
             const fecha = new Date(c.redeemedAt).toLocaleDateString('es-ES');
 
             const estadoClass = {
-                'PENDING':   'badge-pendiente',
-                'COMPLETED': 'badge-completado',
-                'CANCELLED': 'badge-cancelado'
+                'PENDING':     'badge-pendiente',
+                'COORDINATED': 'badge-coordinado',
+                'COMPLETED':   'badge-completado',
+                'EXPIRED':     'badge-expirado',
+                'CANCELLED':   'badge-cancelado'
             }[c.status] || '';
 
             const estadoText = {
-                'PENDING':   'Pendiente',
-                'COMPLETED': 'Completado',
-                'CANCELLED': 'Cancelado'
+                'PENDING':     'Pendiente',
+                'COORDINATED': 'Coordinado',
+                'COMPLETED':   'Completado',
+                'EXPIRED':     'Expirado',
+                'CANCELLED':   'Cancelado'
             }[c.status] || c.status;
 
-            const acciones = c.status === 'PENDING' ? `
+            const acciones = (c.status === 'PENDING' || c.status === 'COORDINATED') ? `
                 <button class="btn-accion btn-completar" title="Marcar como usado"
                         onclick="adminCanjes.marcarPremiumComoUsado(${c.id})">
                     <i class="fas fa-check"></i>
@@ -232,6 +236,10 @@ const adminCanjes = {
                     <td>
                         <div class="tabla-acciones">
                             ${acciones}
+                            <button class="btn-accion btn-ver" title="Ver detalles"
+                                    onclick="adminCanjes.verDetallesPremium(${c.id})">
+                                <i class="fas fa-eye"></i>
+                            </button>
                             <button class="btn-accion btn-eliminar" title="Eliminar"
                                     onclick="adminCanjes.eliminarCanjePremium(${c.id})"
                                     style="background:#fff0f0;color:#c0392b;border:1px solid #f5c6c6;">
@@ -355,20 +363,22 @@ const adminCanjes = {
             const vence = c.expiresAt ? new Date(c.expiresAt).toLocaleDateString('es-ES') : '-';
 
             const estadoClass = {
-                'PENDING':   'badge-pendiente',
-                'COMPLETED': 'badge-completado',
-                'EXPIRED':   'badge-expirado',
-                'CANCELLED': 'badge-cancelado'
+                'PENDING':     'badge-pendiente',
+                'COORDINATED': 'badge-coordinado',
+                'COMPLETED':   'badge-completado',
+                'EXPIRED':     'badge-expirado',
+                'CANCELLED':   'badge-cancelado'
             }[c.status] || '';
 
             const estadoText = {
-                'PENDING':   'Pendiente',
-                'COMPLETED': 'Completado',
-                'EXPIRED':   'Expirado',
-                'CANCELLED': 'Cancelado'
+                'PENDING':     'Pendiente',
+                'COORDINATED': 'Coordinado',
+                'COMPLETED':   'Completado',
+                'EXPIRED':     'Expirado',
+                'CANCELLED':   'Cancelado'
             }[c.status] || c.status;
 
-            const acciones = c.status === 'PENDING' ? `
+            const acciones = (c.status === 'PENDING' || c.status === 'COORDINATED') ? `
                 <button class="btn-accion btn-completar" title="Marcar como usado"
                         onclick="adminCanjes.marcarComoUsado(${c.id})">
                     <i class="fas fa-check"></i>
@@ -540,14 +550,188 @@ const adminCanjes = {
                 terminosBox.style.display = 'none';
             }
 
-            const modal = document.getElementById('modalDetalleCanje');
-            modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('open'), 10);
+                await this._cargarSeccionPuntosEntrega(canje, 'free', id);
 
-        } catch (error) {
-            toast('Error al cargar los detalles del canje', 'error');
-        }
-    },
+                const modal = document.getElementById('modalDetalleCanje');
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('open'), 10);
+
+            } catch (error) {
+                toast('Error al cargar los detalles del canje', 'error');
+            }
+        },
+
+        // ==============================================
+        // VER DETALLES DEL CANJE PREMIUM (mismo modal que Free)
+        // ==============================================
+        verDetallesPremium: async function(id) {
+            try {
+                const response = await fetch(`${CONFIG.API_URL}/admin/premium/redemptions/${id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error('Error al obtener detalles');
+                const canje = await response.json();
+
+                document.getElementById('detalle-user-id').textContent       = '-';
+                document.getElementById('detalle-user-nombre').textContent   = canje.userName || '-';
+                document.getElementById('detalle-user-email').textContent    = canje.userEmail || '-';
+                document.getElementById('detalle-user-dni').textContent      = '-';
+                document.getElementById('detalle-user-telefono').textContent = '-';
+                document.getElementById('detalle-premio-id').textContent     = canje.rewardId || '-';
+                document.getElementById('detalle-premio-nombre').textContent = canje.rewardName || '-';
+                document.getElementById('detalle-premio-puntos').textContent = canje.rewardPointsRequired ? canje.rewardPointsRequired + ' pts' : '-';
+                document.getElementById('detalle-premio-partner').textContent = canje.rewardPartner || '-';
+
+                const websiteSpan = document.getElementById('detalle-premio-website');
+                if (canje.rewardWebsite) {
+                    websiteSpan.innerHTML = `<a href="${canje.rewardWebsite}" target="_blank" rel="noopener noreferrer">${canje.rewardWebsite}</a>`;
+                } else {
+                    websiteSpan.textContent = '-';
+                }
+
+                const imagenDiv = document.getElementById('detalle-premio-imagen');
+                imagenDiv.innerHTML = canje.rewardImageUrl
+                    ? `<img src="${canje.rewardImageUrl}" alt="${canje.rewardName}">`
+                    : '<i class="fas fa-star"></i>';
+
+                document.getElementById('detalle-fecha').textContent  = canje.redeemedAt ? new Date(canje.redeemedAt).toLocaleDateString('es-ES') : '-';
+                document.getElementById('detalle-codigo').textContent = canje.redemptionCode || '-';
+
+                const estadoSpan = document.getElementById('detalle-estado');
+                estadoSpan.textContent = this.getEstadoTexto(canje.status);
+                estadoSpan.className   = `value badge ${this.getEstadoClass(canje.status)}`;
+
+                document.getElementById('detalle-puntos').textContent = canje.pointsSpent ? canje.pointsSpent + ' pts' : '-';
+                document.getElementById('detalle-vence').textContent  = '-';
+                document.getElementById('detalle-usado').textContent  = canje.status === 'COMPLETED' ? 'Sí' : 'No usado';
+
+                const terminosBox = document.getElementById('detalle-terminos-box');
+                const terminosP   = document.getElementById('detalle-terminos');
+                if (canje.rewardTermsConditions) {
+                    terminosBox.style.display = 'block';
+                    terminosP.textContent = canje.rewardTermsConditions;
+                } else {
+                    terminosBox.style.display = 'none';
+                }
+
+                await this._cargarSeccionPuntosEntrega(canje, 'premium', id);
+
+                const modal = document.getElementById('modalDetalleCanje');
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('open'), 10);
+
+            } catch (error) {
+                toast('Error al cargar los detalles del canje premium', 'error');
+            }
+        },
+
+        // ==============================================
+        // PUNTOS DE ENTREGA — centro de autogestión
+        // ==============================================
+        _cargarSeccionPuntosEntrega: async function(canje, tipo, id) {
+            this._modalTipo = tipo;   // 'free' | 'premium' — lo usan agregarPuntoEntrega/eliminarPuntoEntrega
+            this._modalId   = id;
+
+            let box = document.getElementById('detalle-puntos-entrega-box');
+            if (!box) {
+                box = document.createElement('div');
+                box.id = 'detalle-puntos-entrega-box';
+                box.style.cssText = 'margin-top:1rem; padding-top:1rem; border-top:1px solid #eee;';
+                const referencia = document.getElementById('detalle-terminos-box');
+                if (referencia && referencia.parentElement) {
+                    referencia.insertAdjacentElement('afterend', box);
+                }
+            }
+            if (!box.isConnected) return; // no se encontró dónde insertarlo — no rompemos el resto del modal
+
+            const deliveryMethod = canje.reward?.deliveryMethod || canje.rewardDeliveryMethod || null;
+
+            if (deliveryMethod === 'ENVIO_DOMICILIO') {
+                box.innerHTML = `
+                    <h4 style="margin:0 0 0.5rem;">📦 Envío a domicilio</h4>
+                    <p style="font-size:0.85rem; color:#666;">
+                        ${canje.deliveryAddress
+                            ? `El usuario declaró esta dirección: <strong>${canje.deliveryAddress}</strong>`
+                            : 'El usuario todavía no declaró la dirección de envío desde el centro de autogestión.'}
+                    </p>`;
+                return;
+            }
+
+            box.innerHTML = `<h4 style="margin:0 0 0.5rem;">📍 Puntos de entrega</h4><p class="loading-row" style="padding:0.5rem 0;"><i class="fas fa-spinner fa-spin"></i></p>`;
+
+            const prefijo = tipo === 'premium' ? 'admin/premium/redemptions' : 'admin/redemptions';
+            try {
+                const res = await fetch(`${CONFIG.API_URL}/${prefijo}/${id}/delivery-points`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const puntos = res.ok ? await res.json() : [];
+                this._renderPuntosEntrega(box, puntos, canje.chosenDeliveryPointId);
+            } catch (e) {
+                box.innerHTML += `<p style="color:#e50914;font-size:0.85rem;">Error al cargar los puntos de entrega.</p>`;
+            }
+        },
+
+        _renderPuntosEntrega: function(box, puntos, elegidoId) {
+            const listaHtml = puntos.length === 0
+                ? `<p style="font-size:0.85rem; color:#999;">Todavía no cargaste ningún punto de entrega para este canje.</p>`
+                : puntos.map(p => `
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem; padding:0.5rem 0; border-bottom:1px solid #f2f2f2;">
+                        <div>
+                            <strong>${p.locationReference}</strong>${p.id === elegidoId ? ' <span class="badge badge-completado" style="font-size:0.7rem;">Elegido por el usuario</span>' : ''}
+                            <div style="font-size:0.8rem; color:#666;">${p.scheduleInfo}</div>
+                        </div>
+                        <button class="btn-accion btn-eliminar" title="Eliminar" onclick="adminCanjes.eliminarPuntoEntrega(${p.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>`).join('');
+
+            box.innerHTML = `
+                <h4 style="margin:0 0 0.5rem;">📍 Puntos de entrega</h4>
+                <div id="detalle-puntos-lista">${listaHtml}</div>
+                <div style="display:flex; flex-direction:column; gap:0.4rem; margin-top:0.75rem;">
+                    <input type="text" id="nuevoPuntoReferencia" placeholder="Referencia aproximada (ej: Palermo, CABA)" style="padding:0.4rem; border:1px solid #ddd; border-radius:6px;">
+                    <textarea id="nuevoPuntoHorario" placeholder="Día y horario (ej: Martes y Jueves de 14 a 18hs)" rows="2" style="padding:0.4rem; border:1px solid #ddd; border-radius:6px;"></textarea>
+                    <button class="btn-accion" style="align-self:flex-start; background:#e50914; color:white; padding:0.4rem 1rem;" onclick="adminCanjes.agregarPuntoEntrega()">
+                        <i class="fas fa-plus"></i> Agregar punto
+                    </button>
+                </div>`;
+        },
+
+        agregarPuntoEntrega: async function() {
+            const referencia = document.getElementById('nuevoPuntoReferencia').value.trim();
+            const horario     = document.getElementById('nuevoPuntoHorario').value.trim();
+            if (!referencia || !horario) {
+                toast('Completá referencia y horario', 'error');
+                return;
+            }
+            const prefijo = this._modalTipo === 'premium' ? 'admin/premium/redemptions' : 'admin/redemptions';
+            try {
+                const res = await fetch(`${CONFIG.API_URL}/${prefijo}/${this._modalId}/delivery-points`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ locationReference: referencia, scheduleInfo: horario })
+                });
+                if (!res.ok) throw new Error();
+                toast('Punto de entrega agregado', 'success');
+                this._modalTipo === 'premium' ? this.verDetallesPremium(this._modalId) : this.verDetalles(this._modalId);
+            } catch (e) {
+                toast('Error al agregar el punto de entrega', 'error');
+            }
+        },
+
+        eliminarPuntoEntrega: async function(pointId) {
+            if (!confirm('¿Eliminar este punto de entrega?')) return;
+            const prefijo = this._modalTipo === 'premium' ? 'admin/premium/redemptions' : 'admin/redemptions';
+            try {
+                const res = await fetch(`${CONFIG.API_URL}/${prefijo}/delivery-points/${pointId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error();
+                toast('Punto eliminado', 'success');
+                this._modalTipo === 'premium' ? this.verDetallesPremium(this._modalId) : this.verDetalles(this._modalId);
+            } catch (e) {
+                toast('Error al eliminar el punto', 'error');
+            }
+        },
 
     cerrarModalDetalles: function() {
         const modal = document.getElementById('modalDetalleCanje');
@@ -558,11 +742,11 @@ const adminCanjes = {
     },
 
     getEstadoTexto: function(status) {
-        return { 'PENDING': 'Pendiente', 'COMPLETED': 'Completado', 'EXPIRED': 'Expirado', 'CANCELLED': 'Cancelado' }[status] || status;
+        return { 'PENDING': 'Pendiente', 'COORDINATED': 'Coordinado', 'COMPLETED': 'Completado', 'EXPIRED': 'Expirado', 'CANCELLED': 'Cancelado' }[status] || status;
     },
 
     getEstadoClass: function(status) {
-        return { 'PENDING': 'badge-pendiente', 'COMPLETED': 'badge-completado', 'EXPIRED': 'badge-expirado', 'CANCELLED': 'badge-cancelado' }[status] || '';
+        return { 'PENDING': 'badge-pendiente', 'COORDINATED': 'badge-coordinado', 'COMPLETED': 'badge-completado', 'EXPIRED': 'badge-expirado', 'CANCELLED': 'badge-cancelado' }[status] || '';
     },
 
     buscar: function(query) {

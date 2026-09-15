@@ -1,0 +1,204 @@
+.ss-main {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 2rem 1rem 4rem;
+}
+
+.ss-card-wrap {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    padding: 2rem 1.75rem;
+}
+
+.ss-intro {
+    text-align: center;
+    margin-bottom: 1.75rem;
+}
+.ss-intro i {
+    font-size: 2rem;
+    color: #e50914;
+    margin-bottom: 0.5rem;
+}
+.ss-intro h1 {
+    font-size: 1.4rem;
+    margin: 0.25rem 0 0.5rem;
+    color: #1a1a1a;
+}
+.ss-intro p {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.ss-step label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.35rem;
+}
+
+.ss-step input[type="email"],
+.ss-step input[type="text"],
+.ss-step input[type="date"],
+.ss-step select,
+.ss-step textarea {
+    width: 100%;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    margin-bottom: 0.9rem;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.ss-step button {
+    width: 100%;
+    background: #e50914;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.ss-step button:hover { background: #c40810; }
+.ss-step button:disabled { background: #ccc; cursor: not-allowed; }
+
+.ss-mensaje {
+    background: #f4f8ff;
+    border: 1px solid #d8e6ff;
+    color: #1a3a6b;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin-top: 0.9rem;
+}
+
+.ss-registro-fijo {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 1.25rem;
+}
+.ss-registro-fijo a { color: #e50914; font-weight: 600; text-decoration: none; }
+
+.ss-loading {
+    text-align: center;
+    font-size: 1.8rem;
+    color: #e50914;
+    padding: 1.5rem 0;
+}
+
+.ss-step#ssStepError,
+.ss-step#ssStepChecking {
+    text-align: center;
+}
+.ss-error-icon {
+    font-size: 2rem;
+    color: #e50914;
+    display: block;
+    margin-bottom: 0.75rem;
+}
+#ssStepError p { color: #444; margin-bottom: 1.25rem; }
+
+.ss-perfil-copy {
+    color: #666;
+    font-size: 0.85rem;
+    margin: 0 0 1.25rem;
+}
+
+/* ---- Listado de canjes ---- */
+.ss-canje-card {
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+.ss-canje-card.ss-coordinado {
+    background: #f6fbf6;
+    border-color: #d5ead5;
+}
+
+.ss-canje-header {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 0.9rem;
+}
+.ss-canje-header img {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: #f5f5f5;
+    flex-shrink: 0;
+}
+.ss-canje-header h3 {
+    margin: 0.15rem 0 0;
+    font-size: 1.05rem;
+    color: #1a1a1a;
+}
+.ss-canje-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #e50914;
+    background: #fff0f0;
+    padding: 0.15rem 0.55rem;
+    border-radius: 20px;
+}
+
+.ss-canje-estado {
+    font-weight: 700;
+    color: #2e7d32;
+    margin: 0 0 0.5rem;
+    font-size: 0.9rem;
+}
+
+.ss-esperando {
+    color: #999;
+    font-size: 0.85rem;
+    font-style: italic;
+    margin: 0;
+}
+
+.ss-puntos-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin: 0.75rem 0 1rem;
+}
+.ss-punto-opcion {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 0.65rem 0.8rem;
+    cursor: pointer;
+    font-size: 0.88rem;
+}
+.ss-punto-opcion input { margin-top: 0.2rem; }
+
+.ss-whatsapp {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed #ddd;
+}
+.ss-whatsapp a { color: #25D366; font-weight: 700; text-decoration: none; }
+
+.ss-vacio {
+    text-align: center;
+    padding: 2rem 0;
+    color: #999;
+}
+.ss-vacio i { font-size: 2rem; margin-bottom: 0.5rem; display: block; }
+
+.ss-error { color: #e50914; text-align: center; font-size: 0.9rem; }
