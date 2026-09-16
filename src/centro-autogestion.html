@@ -48,10 +48,11 @@
             <p class="ss-registro-fijo">¿Todavía no tenés cuenta? <a href="register.html">Registrate gratis</a></p>
         </div>
 
-        <!-- PASO: validando el link -->
-        <div id="ssStepChecking" class="ss-step" style="display:none;">
-            <div class="ss-loading"><i class="fas fa-spinner fa-spin"></i></div>
-            <p>Validando tu acceso…</p>
+        <!-- PASO: confirmar acceso (requiere un click real — ver por qué en el JS) -->
+        <div id="ssStepChecking" class="ss-step" style="display:none; text-align:center;">
+            <i class="fas fa-shield-alt" style="font-size:1.8rem;color:#e50914;margin-bottom:0.5rem;display:block;"></i>
+            <p>Encontramos tu acceso al Centro de Autogestión.</p>
+            <button id="ssBtnConfirmarAcceso" onclick="ssConfirmarAcceso()">Continuar</button>
         </div>
 
         <!-- PASO: error de link -->
