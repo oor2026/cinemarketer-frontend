@@ -245,6 +245,7 @@
 .canjeado-estado.estado-completed { background: #d1e7dd; color: #146c43; }
 .canjeado-estado.estado-expired { background: #f0f0f0; color: #888; }
 .canjeado-estado.estado-cancelled { background: #f8d7da; color: #b02a37; }
+.canjeado-estado.estado-coordinated { background: #d0e3fb; color: #1a5fb4; }
 
 @media (max-width: 768px) {
     .canjeado-item { gap: 0.7rem; padding: 0.7rem 0; }
