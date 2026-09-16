@@ -198,6 +198,20 @@
         grid-template-rows: auto auto;
         grid-template-areas: "texto texto" ".     badge";
     }
+    .club-header-v2 {
+        padding: 1.5rem; text-align: left;
+        grid-template-columns: 1fr auto !important;
+        grid-template-rows: auto auto;
+        grid-template-areas: "texto texto" "badge badge";
+    }
+    .club-header-v2-texto { grid-area: texto; }
+    .club-header-v2-badge {
+        grid-area: badge; justify-self: center;
+        display: flex; align-items: center; gap: 0.7rem; text-align: left;
+    }
+    .club-header-v2-badge-label { margin-bottom: 0; white-space: nowrap; }
+    .club-header-v2-badge button.club-cta-btn-header { width: auto; margin-top: 0; }
+    .club-header-v2 { padding: 1.1rem 1.2rem; gap: 0.7rem; text-align: left; }
     .club-header-v2 { padding: 1.1rem 1.2rem; gap: 0.7rem; text-align: left; }
         .club-header-v2-texto h2 { font-size: 1.3rem; }
         .club-header-v2-fino { font-size: 0.95rem; }
