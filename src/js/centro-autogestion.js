@@ -9,6 +9,33 @@
 
 const SS_TOKEN_KEY = 'ss_token';
 
+const SS_COOLDOWN_KEY = 'ss_last_request_ts';
+const SS_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutos — mismo valor que el backend
+
+function ssIniciarCooldown() {
+    sessionStorage.setItem(SS_COOLDOWN_KEY, Date.now().toString());
+    ssActualizarCooldown();
+}
+
+function ssActualizarCooldown() {
+    const btn = document.getElementById('ssBtnPedirLink');
+    const ultimoPedido = parseInt(sessionStorage.getItem(SS_COOLDOWN_KEY) || '0', 10);
+    const restante = SS_COOLDOWN_MS - (Date.now() - ultimoPedido);
+
+    if (restante <= 0) {
+        btn.disabled = false;
+        btn.textContent = 'Enviarme el enlace de acceso';
+        return;
+    }
+
+    btn.disabled = true;
+    const minutos = Math.floor(restante / 60000);
+    const segundos = Math.floor((restante % 60000) / 1000).toString().padStart(2, '0');
+    btn.textContent = `Podés pedir otro enlace en ${minutos}:${segundos}`;
+
+    setTimeout(ssActualizarCooldown, 1000);
+}
+
 // Misma fuente exacta que mi-cuenta.js (_PROVINCIAS / _LOCALIDADES) —
 // no inventar una lista propia que pueda desalinearse de la real.
 const SS_PROVINCIAS = ['Buenos Aires','Catamarca','Chaco','Chubut','Córdoba','Corrientes','Entre Ríos','Formosa','Jujuy','La Pampa','La Rioja','Mendoza','Misiones','Neuquén','Río Negro','Salta','San Juan','San Luis','Santa Cruz','Santa Fe','Santiago del Estero','Tierra del Fuego','Tucumán','Ciudad Autónoma de Buenos Aires'];
@@ -189,25 +216,25 @@ document.getElementById('ssEmailForm').addEventListener('submit', async function
         return;
     }
 
-    btn.disabled = true;
-    try {
-        const res = await fetch(`${CONFIG.API_URL}/self-service/request-link`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email })
-        });
-        const data = await res.json();
-        msg.textContent = data.message || 'Si el email está registrado, recibirás el enlace en breve.';
-        msg.className = 'ss-mensaje';
-        msg.style.display = 'block';
-    } catch (e) {
-        msg.textContent = 'Ocurrió un error. Probá de nuevo en un momento.';
-        msg.className = 'ss-mensaje ss-mensaje-error';
-        msg.style.display = 'block';
-    } finally {
-        btn.disabled = false;
-    }
-});
+        btn.disabled = true;
+        try {
+            const res = await fetch(`${CONFIG.API_URL}/self-service/request-link`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            const data = await res.json();
+            msg.textContent = data.message || 'Si el email está registrado, recibirás el enlace en breve.';
+            msg.className = 'ss-mensaje';
+            msg.style.display = 'block';
+            ssIniciarCooldown();
+        } catch (e) {
+            msg.textContent = 'Ocurrió un error. Probá de nuevo en un momento.';
+            msg.className = 'ss-mensaje ss-mensaje-error';
+            msg.style.display = 'block';
+            btn.disabled = false;
+        }
+    });
 
 // ==========================================================
 // PASO 2 — perfil pendiente
@@ -442,4 +469,5 @@ async function ssElegirDireccion(id, tipo) {
     }
 }
 
+ssActualizarCooldown();
 iniciarCentroAutogestion();
