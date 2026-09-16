@@ -9,6 +9,34 @@
 
 const SS_TOKEN_KEY = 'ss_token';
 
+let ssTokenPendiente = null;
+
+async function ssConfirmarAcceso() {
+    if (!ssTokenPendiente) return;
+    const btn = document.getElementById('ssBtnConfirmarAcceso');
+    btn.disabled = true;
+
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/self-service/exchange`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: ssTokenPendiente })
+        });
+        if (!res.ok) {
+            ssMostrarError('El enlace es inválido o ya fue utilizado. Pedí uno nuevo.');
+            return;
+        }
+        const data = await res.json();
+        sessionStorage.setItem(SS_TOKEN_KEY, data.token);
+        window.history.replaceState({}, '', window.location.pathname);
+        await ssContinuarLogueado();
+    } catch (e) {
+        ssMostrarError('No pudimos validar el enlace. Probá de nuevo en un momento.');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
 const SS_COOLDOWN_KEY = 'ss_last_request_ts';
 const SS_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutos — mismo valor que el backend
 
@@ -97,30 +125,19 @@ async function iniciarCentroAutogestion() {
     const tokenUrl = params.get('token');
     const error = params.get('error');
 
-    // Viene de clickear el link del mail — intercambiar el token de
-    // un solo uso por el JWT real. Nunca dejamos el JWT en la URL.
-    if (tokenUrl) {
-        ssMostrarPaso('ssStepChecking');
-        try {
-            const res = await fetch(`${CONFIG.API_URL}/self-service/exchange`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token: tokenUrl })
-            });
-            if (!res.ok) {
-                ssMostrarError('El enlace es inválido o ya fue utilizado. Pedí uno nuevo.');
-                return;
-            }
-            const data = await res.json();
-            sessionStorage.setItem(SS_TOKEN_KEY, data.token);
-            // Sacamos el token de la URL así no queda en el historial del navegador.
-            window.history.replaceState({}, '', window.location.pathname);
-            await ssContinuarLogueado();
-        } catch (e) {
-            ssMostrarError('No pudimos validar el enlace. Probá de nuevo en un momento.');
+        // Viene de clickear el link del mail. OJO: acá NO se intercambia el
+        // token todavía — clientes de mail (Gmail, Outlook Safe Links) y el
+        // propio Instagram suelen visitar automáticamente los links para
+        // escanearlos antes de que el usuario haga clic. Si consumiéramos
+        // el token acá (carga automática de la página), ese escaneo se lo
+        // comería antes de que llegue la persona real. Por eso solo lo
+        // guardamos y esperamos un click explícito (ssConfirmarAcceso) —
+        // un bot no aprieta botones.
+        if (tokenUrl) {
+            ssTokenPendiente = tokenUrl;
+            ssMostrarPaso('ssStepChecking');
+            return;
         }
-        return;
-    }
 
     if (error === 'invalid') { ssMostrarError('El enlace no es válido.'); return; }
     if (error === 'expired') { ssMostrarError('El enlace venció (son válidos por 15 minutos). Pedí uno nuevo.'); return; }
