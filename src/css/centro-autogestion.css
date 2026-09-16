@@ -79,6 +79,12 @@
     margin-top: 0.9rem;
 }
 
+.ss-mensaje.ss-mensaje-error {
+    background: #fff0f0;
+    border-color: #f5c6c6;
+    color: #c0392b;
+}
+
 .ss-registro-fijo {
     text-align: center;
     font-size: 0.85rem;

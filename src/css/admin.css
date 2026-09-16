@@ -632,7 +632,7 @@ body {
     position: fixed;
     bottom: 2rem;
     right: 2rem;
-    z-index: 999;
+    z-index: 9999999;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;

@@ -168,10 +168,11 @@ window._canjearClubBeneficios = function(rewardId, rewardName, pointsRequired) {
                 headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ rewardId })
             });
-            if (!res.ok) { alert('No se pudo canjear. Probá de nuevo.'); return; }
-            window._abrirAvisoClub('¡Listo! 🎉', `Canjeaste "${rewardName}". Revisá tu historial de canjes.`);
-            window._cargarPuntosClubBeneficios();
-            window._cargarFreeClubBeneficios();
+                if (!res.ok) { alert('No se pudo canjear. Probá de nuevo.'); return; }
+                window._abrirAvisoClub('¡Listo! 🎉', `Canjeaste "${rewardName}". Revisá tu historial de canjes.`);
+                window._cargarPuntosClubBeneficios();
+                window._cargarFreeClubBeneficios();
+                window._cargarCanjeadosClubBeneficios();
         } catch (e) {
             alert('Error al canjear. Probá de nuevo.');
         }
@@ -572,6 +573,7 @@ window._canjearPremiumClub = function(rewardId, rewardName, pointsRequired) {
             window._abrirAvisoClub('¡Listo! 🎉', `Canjeaste "${rewardName}". Código: ${result.redemptionCode}`);
             window._cargarPuntosClubBeneficios();
             window._cargarPremiumClubBeneficios();
+            window._cargarCanjeadosClubBeneficios();
         } catch (e) {
             alert('Error al canjear el premio. Intentá de nuevo.');
         }
@@ -645,7 +647,7 @@ window._cargarCanjeadosClubBeneficios = async function() {
             const inicio = (pagina - 1) * porPagina;
             const slice = todos.slice(inicio, inicio + porPagina);
 
-            const ETIQUETAS = { PENDING: 'Pendiente', COMPLETED: 'Retirado', EXPIRED: 'Expirado', CANCELLED: 'Cancelado' };
+                        const ETIQUETAS = { PENDING: 'Pendiente', COORDINATED: 'Coordinado', COMPLETED: 'Retirado', EXPIRED: 'Expirado', CANCELLED: 'Cancelado' };
 
             lista.innerHTML = slice.map(c => {
             const estado = c.status.toLowerCase();
