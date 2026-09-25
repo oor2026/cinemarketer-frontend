@@ -4473,7 +4473,20 @@ window.abrirElencoCard = async function(movieId, event) {
        overflow-y:auto de la regla base intacto como resguardo, por
        si algún contenido puntual igual no llega a entrar del todo. */
     .buscador-sheet.buscador-sheet-alto .filtros-modal-body {
-        max-height: 80vh;
+        max-height: 75vh;
+    }
+
+    /* Empujón chico, solo para "Organizar una salida" — apenas lo
+       necesario para que se vea el arranque de la tabla de funciones
+       justo después de los dots del carrusel, sin ir a los 96vh de
+       buscador-sheet-alto (eso sería demasiado acá). */
+    .buscador-sheet.buscador-sheet-salida {
+        height: 70vh;
+        max-height: 70vh;
+    }
+    .buscador-sheet.buscador-sheet-salida .filtros-modal-body {
+        max-height: 55vh;
+        overflow-y: auto;
     }
 }
 
@@ -4715,6 +4728,29 @@ window.abrirElencoCard = async function(movieId, event) {
         .buscador-plataforma-btn { scroll-snap-align: start; }
     }
 
+/* Cadenas de cine — mismo espíritu que plataformas, pero con lugar para
+   el nombre debajo del ícono (las cadenas no se reconocen solo con un
+   logo genérico como sí pasa con Netflix/Disney+). */
+.buscador-cadena-btn {
+    width: 92px; min-height: 92px; border-radius: 18px;
+    border: none; background: #f5f5f5; padding: 0.6rem 0.4rem;
+    cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.4rem;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.buscador-cadena-btn:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 8px 18px rgba(0,0,0,0.15); }
+.buscador-cadena-btn img { width: 40px; height: 40px; object-fit: contain; border-radius: 8px; }
+.buscador-cadena-sinlogo { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #ccc; font-size: 1.3rem; background: #eee; border-radius: 8px; }
+.buscador-cadena-btn span { font-size: 0.72rem; font-weight: 600; color: #444; text-align: center; line-height: 1.2; }
+
+@media (max-width: 768px) {
+    .buscador-plataformas-grid:has(.buscador-cadena-btn) {
+        grid-auto-columns: 92px;
+    }
+    .buscador-cadena-btn { scroll-snap-align: start; }
+}
+
     .buscador-plataformas-dots { display: flex; justify-content: center; gap: 0.4rem; margin-top: 0.4rem; }
     .buscador-dot {
         width: 7px; height: 7px; border-radius: 50%;
@@ -4796,6 +4832,445 @@ window.abrirElencoCard = async function(movieId, event) {
     .buscador-sagas-grid {
         grid-template-columns: repeat(2, 1fr);
     }
+}
+
+/* ============================================================
+   Carrusel horizontal auto-scroll — una sola fila que se desliza
+   sola; el usuario puede arrastrarla/scrollearla, lo que la pausa
+   unos segundos antes de retomar. Reusa el look de tarjeta que ya
+   tiene .buscador-saga-item; .buscador-cine-item es su equivalente
+   para logos de cine (mismo lenguaje visual, distinta proporción).
+   ============================================================ */
+.buscador-carrusel {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 0.8rem;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    padding-bottom: 0.3rem;
+}
+.buscador-carrusel::-webkit-scrollbar { display: none; }
+.buscador-carrusel .buscador-saga-item { flex: 0 0 130px; }
+.buscador-carrusel .buscador-cine-item { flex: 0 0 100px; }
+
+.buscador-cine-item {
+    display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+    background: none; border: none; cursor: pointer; padding: 0;
+}
+.buscador-cine-logo-wrap {
+    width: 100%; aspect-ratio: 1 / 1; border-radius: 10px;
+    border: 1.5px solid #eee; background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0.6rem;
+    transition: border-color 0.15s, transform 0.15s;
+}
+.buscador-cine-item:hover .buscador-cine-logo-wrap {
+    border-color: #e50914; transform: scale(1.03);
+}
+.buscador-cine-logo-wrap img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.buscador-cine-sinlogo { color: #ccc; font-size: 1.6rem; }
+.buscador-cine-item span {
+    font-size: 0.78rem; font-weight: 600; color: #333; text-align: center; line-height: 1.25;
+}
+
+/* Estado de carga tipo "pensando" — ícono de Cinemarketer latiendo. */
+.buscador-pensando {
+    display: flex; flex-direction: column; align-items: center; gap: 1rem;
+    padding: 2.5rem 1rem; text-align: center;
+}
+.buscador-pensando img {
+    width: 56px; height: 56px; border-radius: 50%;
+    animation: buscadorLatido 1.1s ease-in-out infinite;
+}
+.buscador-pensando span { color: #666; font-size: 0.9rem; font-weight: 600; }
+@keyframes buscadorLatido {
+    0%, 100% { transform: scale(1); opacity: 0.85; }
+    50% { transform: scale(1.12); opacity: 1; }
+}
+
+/* Versión chica — para tiras/carruseles angostos donde el bloque
+   grande (ícono 56px + texto) no entra. Sin texto, solo el ícono. */
+/* Modal más ancho solo en el paso de recomendación — en desktop no hay
+   motivo para limitarse al ancho estándar de las demás pantallas de
+   Cartelera, que están pensadas para grillas de posters chicos. */
+@media (min-width: 769px) {
+    .buscador-sheet-recomendacion {
+        max-width: 780px !important;
+        width: 90vw !important;
+    }
+}
+
+.buscador-recomendacion-cta {
+    background: #fff6f6;
+    border: 1px solid #ffd9d9;
+    border-radius: 12px;
+    padding: 1.4rem;
+    font-size: 0.95rem;
+    color: #444;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.buscador-recomendacion-frase {
+    font-size: 0.95rem;
+    color: #555;
+    font-style: italic;
+    margin: 0.6rem 0 0;
+}
+
+.buscador-recomendacion-dots {
+    display: none;
+}
+
+/* Por defecto (desktop): sin carrusel, sin póster — se ve exactamente
+   como antes, solo la tabla de funciones. */
+.buscador-salida-slide-poster,
+.buscador-salida-dots {
+    display: none;
+}
+.buscador-salida-pelicula-carrusel {
+    display: block;
+}
+.buscador-salida-slide-funciones {
+    display: block;
+}
+
+/* Logo del cine en la pantalla de funciones — mismo tamaño en desktop y
+   mobile. Tamaño exagerado a propósito para confirmar el impacto visual;
+   si queda demasiado grande, avisar para ajustar. */
+.buscador-cine-funciones-logo {
+    width: 100px !important;
+    height: 100px !important;
+}
+.buscador-cine-funciones-logo img,
+.buscador-cine-funciones-logo i {
+    width: 100%;
+    height: 100%;
+    font-size: 3.2rem;
+}
+/* Carrusel horizontal con dots — SOLO mobile. En desktop
+   (min-width: 769px, mismo breakpoint que el resto del archivo) esto no
+   aplica y las 3 tarjetas se ven exactamente igual que antes: apiladas
+   verticalmente, sin scroll horizontal ni dots. */
+@media (max-width: 768px) {
+    .buscador-recomendacion-carrusel {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .buscador-recomendacion-carrusel::-webkit-scrollbar {
+        display: none;
+    }
+
+    .buscador-recomendacion-slide {
+        flex: 0 0 100%;
+        width: 100%;
+        scroll-snap-align: center;
+    }
+
+    .buscador-recomendacion-card {
+        margin-bottom: 0;
+    }
+
+    .buscador-recomendacion-dots {
+        display: flex;
+        justify-content: center;
+        gap: 0.4rem;
+        margin-top: 0.9rem;
+    }
+
+    .buscador-recomendacion-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #ddd;
+        transition: background 0.2s ease, transform 0.2s ease;
+        cursor: pointer;
+    }
+
+    .buscador-recomendacion-dot.activo {
+        background: var(--cine-accent, #e50914);
+        transform: scale(1.3);
+    }
+
+    /* Filtro de días — chips horizontales con scroll, en mobile. */
+    .buscador-funciones-dia-filtro {
+        display: flex;
+        gap: 0.5rem;
+        overflow-x: auto;
+        padding-bottom: 0.6rem;
+        margin-bottom: 0.8rem;
+        scrollbar-width: none;
+    }
+    .buscador-funciones-dia-filtro::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Mini-carrusel de 2 slides por película: póster / funciones — solo
+       mobile. Drag/swipe nativo del navegador, mismo criterio que el
+       carrusel de recomendaciones. */
+    .buscador-salida-pelicula-wrap {
+        margin-bottom: 1.4rem;
+    }
+    /* Alto FIJO para las 2 slides, no atado al contenido de ninguna de
+       las dos — evita que una tabla de funciones larga (muchos cines)
+       estire el slide del póster junto con ella, que es lo que pasaba
+       antes con el stretch por defecto de flex. */
+    .buscador-salida-pelicula-carrusel {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        border-radius: 12px;
+        height: 420px;
+    }
+    .buscador-salida-pelicula-carrusel::-webkit-scrollbar {
+        display: none;
+    }
+    .buscador-salida-slide {
+        flex: 0 0 100%;
+        width: 100%;
+        height: 100%;
+        scroll-snap-align: center;
+        overflow-y: auto;
+    }
+    .buscador-salida-slide-poster {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #eee;
+    }
+    .buscador-salida-slide-poster img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .buscador-salida-slide-funciones {
+        padding: 0.2rem;
+        overflow-x: auto;
+    }
+    .buscador-salida-slide-funciones .buscador-cine-funciones-grupo {
+        margin: 0;
+    }
+    /* Esta tabla tiene 4 columnas (Cine/Horario/Formato/Precio ref.) — una
+       más que las demás pantallas de funciones — y en mobile no entra
+       sin recortarse. Ancho mínimo fuerza el scroll horizontal PROPIO de
+       esta tabla puntual en vez de achicar/cortar el texto. */
+    .buscador-salida-slide-funciones .buscador-funciones-tabla {
+        min-width: 480px;
+    }
+    .buscador-salida-dots {
+        display: flex;
+        justify-content: center;
+        gap: 0.4rem;
+        margin-top: 0.6rem;
+    }
+    .buscador-salida-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #ddd;
+        transition: background 0.2s ease, transform 0.2s ease;
+        cursor: pointer;
+    }
+    .buscador-salida-dot.activo {
+        background: var(--cine-accent, #e50914);
+        transform: scale(1.3);
+    }
+}
+
+/* Chip base — comparte forma y color entre mobile y desktop; el layout
+   del contenedor (scroll vs. wrap) se define en cada media query. */
+.buscador-dia-chip {
+    flex: 0 0 auto;
+    padding: 0.45rem 1rem;
+    border-radius: 20px;
+    border: 1px solid #ddd;
+    background: #fff;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #555;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+.buscador-dia-chip:hover {
+    border-color: var(--cine-accent, #e50914);
+    color: var(--cine-accent, #e50914);
+}
+.buscador-dia-chip.activo {
+    background: var(--cine-accent, #e50914);
+    border-color: var(--cine-accent, #e50914);
+    color: #fff;
+}
+
+/* Desktop: en vez de una fila con scroll (pensada para dedo en mobile),
+   los chips se acomodan en varias líneas si no entran todos, con más
+   aire y un hover visible ya que acá sí hay mouse. */
+@media (min-width: 769px) {
+    .buscador-funciones-dia-filtro {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        margin-bottom: 1.2rem;
+        padding-bottom: 0;
+    }
+    .buscador-dia-chip {
+        padding: 0.55rem 1.3rem;
+        font-size: 0.88rem;
+    }
+    .buscador-dia-chip.activo {
+        transform: scale(1.05);
+    }
+}
+
+.buscador-recomendacion-totem-titulo {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #1a1a2e;
+    margin: 0.6rem 0 0.2rem;
+}
+
+.buscador-recomendacion-totem-generos {
+    font-size: 0.85rem;
+    color: #888;
+    margin: 0 0 1.2rem;
+}
+
+.buscador-recomendacion-numero {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--cine-accent, #e50914);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin: 0 0 0.4rem;
+}
+
+.buscador-recomendacion-card {
+    display: flex;
+    align-items: stretch;
+    height: 200px;
+    margin-bottom: 1.6rem;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f7f7f7;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.buscador-recomendacion-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+}
+
+.buscador-recomendacion-poster {
+    flex: 0 0 140px;
+    height: 100%;
+}
+
+.buscador-recomendacion-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.buscador-recomendacion-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0.9rem 1.1rem;
+}
+
+.buscador-recomendacion-info h4 {
+    margin: 0 0 0.35rem;
+    font-size: 1.05rem;
+    color: #1a1a2e;
+    line-height: 1.2;
+}
+
+.buscador-recomendacion-generos {
+    font-size: 0.78rem;
+    color: #999;
+    margin-bottom: 0.6rem;
+}
+
+.buscador-recomendacion-mensaje {
+    font-size: 0.85rem;
+    color: #444;
+    line-height: 1.35;
+    margin: 0;
+}
+
+.buscador-pensando-mini {
+    display: flex; align-items: center; justify-content: center;
+    padding: 0.8rem;
+}
+.buscador-pensando-mini img {
+    width: 28px; height: 28px; border-radius: 50%;
+    animation: buscadorLatido 1.1s ease-in-out infinite;
+}
+
+/* Funciones agrupadas por cine — ícono + nombre arriba, tabla debajo. */
+.buscador-cine-funciones-grupo { margin-bottom: 1.4rem; }
+.buscador-cine-funciones-header {
+    display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem;
+}
+.buscador-cine-funciones-logo {
+    width: 34px; height: 34px; border-radius: 8px; border: 1px solid #eee;
+    background: #fff; display: flex; align-items: center; justify-content: center;
+    padding: 0.25rem; flex-shrink: 0;
+}
+.buscador-cine-funciones-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.buscador-cine-funciones-logo .buscador-cine-sinlogo { color: #ccc; font-size: 1rem; }
+.buscador-cine-funciones-header span { font-weight: 700; color: #222; font-size: 0.95rem; }
+
+.buscador-funciones-tabla { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.buscador-funciones-tabla th {
+    text-align: left; padding: 0.4rem 0.6rem; color: #888; font-weight: 600;
+    border-bottom: 2px solid #eee; font-size: 0.72rem; text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+.buscador-funciones-tabla td {
+    padding: 0.45rem 0.6rem; border-bottom: 1px solid #f2f2f2; color: #333;
+}
+.buscador-funciones-tabla tr:last-child td { border-bottom: none; }
+.buscador-funciones-hoy {
+    background: #e50914; color: #fff; font-size: 0.62rem; font-weight: 700;
+    padding: 0.08rem 0.4rem; border-radius: 6px; margin-left: 0.35rem;
+    display: inline-block;
+}
+.buscador-pelicula-funciones-header {
+    font-weight: 700; color: #222; font-size: 0.95rem; margin-bottom: 0.5rem;
+}
+
+/* Wrapper + flechas de navegación manual — solo desktop, en mobile ya
+   se navega con el dedo (swipe nativo del scroll horizontal). */
+.buscador-carrusel-wrap { position: relative; }
+.buscador-carrusel-flecha {
+    display: none;
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 34px; height: 34px; border-radius: 50%;
+    background: rgba(255,255,255,0.92); border: 1px solid #eee;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    align-items: center; justify-content: center;
+    cursor: pointer; z-index: 2; color: #333; font-size: 0.85rem;
+    transition: background 0.15s, transform 0.15s;
+}
+.buscador-carrusel-flecha:hover { background: #fff; transform: translateY(-50%) scale(1.08); }
+.buscador-carrusel-flecha-izq { left: -6px; }
+.buscador-carrusel-flecha-der { right: -6px; }
+
+@media (min-width: 769px) {
+    .buscador-carrusel-flecha { display: flex; }
 }
 
 .buscador-proximamente-card { text-align: center; padding: 1rem 0.5rem; }
