@@ -5034,7 +5034,7 @@ window.abrirBuscadorAsistido = async function() {
     }
 
     const nombre = _buscadorPrimerNombre();
-    window._buscadorSetBurbuja(nombre ? `¡Hola, ${nombre}! ¿Qué buscamos hoy?` : '¿Qué buscamos hoy?');
+    window._buscadorSetBurbuja(nombre ? `¡Hola, ${nombre}! ¿Qué hacemos hoy?` : '¿Qué hacemos hoy?');
 };
 
 window.cerrarBuscadorAsistido = function() {
@@ -5072,6 +5072,13 @@ var BUSCADOR_PROXIMAMENTE = {
 window._buscadorAbrirProximamente = function(criterio) {
     const info = BUSCADOR_PROXIMAMENTE[criterio];
     if (!info) return;
+
+    if (criterio === 'persona_premios') {
+        const nombrePremios = _buscadorPrimerNombre();
+        window._buscadorSetBurbuja(nombrePremios
+            ? `Todavía estamos armando esta parte, ${nombrePremios} — pronto vas a poder ver qué ganó o estuvo nominada cada persona.`
+            : 'Todavía estamos armando esta parte — pronto vas a poder ver qué ganó o estuvo nominada cada persona.');
+    }
 
     // Oculta cualquier pantalla de Nivel 2 que esté abierta (puede venir
     // de más de una rama distinta) antes de mostrar esta.
@@ -5276,7 +5283,7 @@ window._buscadorVolverNivel1 = function() {
     document.getElementById('buscadorModalSheet').classList.remove('buscador-sheet-alto');
 
     const nombre = _buscadorPrimerNombre();
-    window._buscadorSetBurbuja(nombre ? `¡Hola, ${nombre}! ¿Qué buscamos hoy?` : '¿Qué buscamos hoy?');
+    window._buscadorSetBurbuja(nombre ? `¡Hola, ${nombre}! ¿Qué hacemos hoy?` : '¿Qué hacemos hoy?');
 };
 
 // Paso 1 → paso 2 de "Película o serie": guarda el tipo elegido y
@@ -5288,6 +5295,11 @@ window._buscadorSetTipoYAvanzar = function(tipo) {
     document.getElementById('buscadorNivel2PeliculaSerie').style.display = 'block';
     document.getElementById('buscadorNivel2PeliculaSerieTitulo').textContent =
         tipo === 'pelicula' ? 'Buscando una película' : 'Buscando una serie';
+
+    const nombre = _buscadorPrimerNombre();
+    window._buscadorSetBurbuja(nombre
+        ? `Elegí el criterio de búsqueda que más te parezca, ${nombre}, y continuamos.`
+        : 'Elegí el criterio de búsqueda que más te parezca y continuamos.');
 };
 
 // Volver desde la lista de criterios va un paso atrás (a elegir
@@ -5413,9 +5425,32 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                                     },
                                                 };
 
+                                                // Mensaje del header para cada una de las 5 — con nombre y sin
+                                                // nombre, mismo criterio del resto del Buscador.
+                                                var BUSCADOR_BURBUJA_PLATAFORMA = {
+                                                    plataforma_que_es: (n) => n
+                                                        ? `Te cuento qué es Cinemarketer, ${n}, en pocas palabras.`
+                                                        : 'Te cuento qué es Cinemarketer en pocas palabras.',
+                                                    plataforma_como_funciona: (n) => n
+                                                        ? `Te explico cómo funciona todo, de punta a punta, ${n}.`
+                                                        : 'Te explico cómo funciona todo, de punta a punta.',
+                                                    plataforma_comunidad: (n) => n
+                                                        ? `Te cuento cómo cuidamos la convivencia acá adentro, ${n}.`
+                                                        : 'Te cuento cómo cuidamos la convivencia acá adentro.',
+                                                    plataforma_eliminar_cuenta: (n) => n
+                                                        ? `Antes de que decidas, te cuento bien qué pasa si eliminás tu cuenta, ${n}.`
+                                                        : 'Antes de que decidas, te cuento bien qué pasa si eliminás tu cuenta.',
+                                                    plataforma_premium_vs_creador: (n) => n
+                                                        ? `Te muestro en qué se diferencian Premium y Creador, ${n}, para que elijas mejor.`
+                                                        : 'Te muestro en qué se diferencian Premium y Creador, para que elijas mejor.',
+                                                };
+
                                                 window._buscadorAbrirTextoPlataforma = function(criterio) {
                                                     document.getElementById('buscadorNivel2Plataforma').style.display = 'none';
                                                     document.getElementById('buscadorNivel3Plataforma').style.display = 'block';
+
+                                                    const generarFrasePlataforma = BUSCADOR_BURBUJA_PLATAFORMA[criterio];
+                                                    if (generarFrasePlataforma) window._buscadorSetBurbuja(generarFrasePlataforma(_buscadorPrimerNombre()));
 
                                                     const info = BUSCADOR_TEXTOS_PLATAFORMA[criterio];
                                                     document.getElementById('buscadorPlataformaContenido').innerHTML = `
@@ -5493,6 +5528,11 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                             document.getElementById('buscadorNivel2MiActividad').style.display = 'none';
                                             document.getElementById('buscadorNivel3Insignias').style.display = 'block';
 
+                                            const nombreInsignias = _buscadorPrimerNombre();
+                                            window._buscadorSetBurbuja(nombreInsignias
+                                                ? `Te muestro tu nivel actual, ${nombreInsignias}, y qué te falta para el próximo.`
+                                                : 'Te muestro tu nivel actual y qué te falta para el próximo.');
+
                                             const cont = document.getElementById('buscadorInsigniasContenido');
                                             cont.innerHTML = `
                                                 <div class="buscador-pensando">
@@ -5564,6 +5604,11 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                         document.getElementById('buscadorNivel3ValePremium').style.display = 'block';
                                         document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-salida');
 
+                                        const nombreValePremium = _buscadorPrimerNombre();
+                                        window._buscadorSetBurbuja(nombreValePremium
+                                            ? `Te cuento si vale la pena pasarte a Premium, ${nombreValePremium}, según cómo usaste la plataforma este mes.`
+                                            : 'Te cuento si vale la pena pasarte a Premium según cómo usaste la plataforma este mes.');
+
                                         const cont = document.getElementById('buscadorValePremioContenido');
                                         cont.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Calculando...</div>';
 
@@ -5615,6 +5660,11 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                     window._buscadorOcultarNivel3MiActividad();
                                     document.getElementById('buscadorNivel2MiActividad').style.display = 'none';
                                     document.getElementById('buscadorNivel3ReforzarPremium').style.display = 'block';
+
+                                    const nombreReforzar = _buscadorPrimerNombre();
+                                    window._buscadorSetBurbuja(nombreReforzar
+                                        ? `Te muestro cuánto te está dando Premium este mes, ${nombreReforzar}.`
+                                        : 'Te muestro cuánto te está dando Premium este mes.');
 
                                     const cont = document.getElementById('buscadorReforzarPremioContenido');
                                     cont.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Calculando...</div>';
@@ -5673,6 +5723,11 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                 document.getElementById('buscadorNivel2MiActividad').style.display = 'none';
                                 document.getElementById('buscadorNivel3ProximoPremio').style.display = 'block';
                                 document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-alto');
+
+                                const nombreProximoPremio = _buscadorPrimerNombre();
+                                window._buscadorSetBurbuja(nombreProximoPremio
+                                    ? `Te cuento qué premios tenés a tu alcance este mes, ${nombreProximoPremio}, y cuánto te falta para cada uno.`
+                                    : 'Te cuento qué premios tenés a tu alcance este mes y cuánto te falta para cada uno.');
 
                                 const cont = document.getElementById('buscadorProximoPremioContenido');
                                 cont.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Calculando...</div>';
@@ -5816,6 +5871,11 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                 document.getElementById('buscadorNivel2MiActividad').style.display = 'none';
                                 document.getElementById('buscadorNivel3Aprovechar').style.display = 'block';
 
+                            const nombreAprovechar = _buscadorPrimerNombre();
+                            window._buscadorSetBurbuja(nombreAprovechar
+                                ? `Te muestro tu resumen del mes, ${nombreAprovechar}: puntos, acumulados y cupos.`
+                                : 'Te muestro tu resumen del mes: puntos, acumulados y cupos.');
+
                             const cont = document.getElementById('buscadorAprovecharContenido');
                             cont.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Calculando...</div>';
 
@@ -5935,6 +5995,12 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                         document.getElementById('buscadorDondeVerPlataforma').style.display = 'none';
                         document.getElementById('buscadorDondeVerTitulo').style.display = 'none';
                         document.getElementById('buscadorDondeVerTipo').style.display = 'block';
+
+                        const nombreDondeVer = _buscadorPrimerNombre();
+                        const mensaje = criterio === 'donde_ver_titulo'
+                            ? (nombreDondeVer ? `Decime si es película o serie, ${nombreDondeVer}, y te muestro en qué plataformas está.` : 'Decime si es película o serie y te muestro en qué plataformas está.')
+                            : (nombreDondeVer ? `Decime si es película o serie, ${nombreDondeVer}, y vemos qué hay en cada plataforma.` : 'Decime si es película o serie y vemos qué hay en cada plataforma.');
+                        window._buscadorSetBurbuja(mensaje);
                     };
 
                         window._buscadorVolverANivel2DondeVer = function() {
@@ -5953,6 +6019,13 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                             document.getElementById('buscadorDondeVerTitulo').style.display = 'block';
                             document.getElementById('buscadorDondeVerTituloSubtitulo').textContent =
                                 tipo === 'pelicula' ? 'Escribí el título de la película' : 'Escribí el título de la serie';
+
+                            const nombreDondeVerTitulo = _buscadorPrimerNombre();
+                            const loQueEs = tipo === 'pelicula' ? 'esa película' : 'esa serie';
+                            window._buscadorSetBurbuja(nombreDondeVerTitulo
+                                ? `Escribí el título, ${nombreDondeVerTitulo}, y te muestro en qué plataformas está ${loQueEs}.`
+                                : `Escribí el título y te muestro en qué plataformas está ${loQueEs}.`);
+
                             const input = document.getElementById('buscadorInputDondeVer');
                             input.value = '';
                             document.getElementById('buscadorResultadosDondeVer').style.display = 'none';
@@ -6045,6 +6118,13 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                     window._buscadorMostrarPlataformas = async function() {
                         document.getElementById('buscadorDondeVerPlataforma').style.display = 'block';
                         document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-ancho');
+
+                        const nombrePlataformas = _buscadorPrimerNombre();
+                        const queTiene = window._buscadorTipoContenido === 'serie' ? 'series' : 'películas';
+                        window._buscadorSetBurbuja(nombrePlataformas
+                            ? `Elegí la plataforma, ${nombrePlataformas}, y te muestro qué ${queTiene} tiene.`
+                            : `Elegí la plataforma y te muestro qué ${queTiene} tiene.`);
+
                         const grid = document.getElementById('buscadorPlataformasGrid');
                         grid.className = 'buscador-plataformas-grid';
                         grid.innerHTML = `
@@ -6260,6 +6340,11 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                     document.getElementById('buscadorNivel3Cruce1').style.display = 'block';
                     window._buscadorCrucePersona1 = null;
 
+                    const nombreCruce = _buscadorPrimerNombre();
+                    window._buscadorSetBurbuja(nombreCruce
+                        ? `Elegí la primera persona, ${nombreCruce}, y después buscamos con quién trabajó.`
+                        : 'Elegí la primera persona y después buscamos con quién trabajó.');
+
                     const input = document.getElementById('buscadorInputCruce1');
                     input.value = '';
                     document.getElementById('buscadorResultadosCruce1').style.display = 'none';
@@ -6466,6 +6551,11 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                 document.getElementById('buscadorNivel2Persona').style.display = 'none';
                 document.getElementById('buscadorNivel3Persona').style.display = 'block';
 
+                const nombrePersona = _buscadorPrimerNombre();
+                window._buscadorSetBurbuja(nombrePersona
+                    ? `Escribí el nombre, ${nombrePersona}, y te muestro toda su filmografía.`
+                    : 'Escribí el nombre y te muestro toda su filmografía.');
+
                 const input = document.getElementById('buscadorInputPersona');
                 input.value = '';
                 document.getElementById('buscadorResultadosPersona').style.display = 'none';
@@ -6625,6 +6715,11 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                 window._buscadorAbrirNivel3Caracteristica = function() {
                     document.getElementById('buscadorNivel2PeliculaSerie').style.display = 'none';
                     document.getElementById('buscadorNivel3Caracteristica').style.display = 'block';
+
+                    const nombreCaracteristica = _buscadorPrimerNombre();
+                    window._buscadorSetBurbuja(nombreCaracteristica
+                        ? `Elegí la característica que más se ajuste a lo que buscás, ${nombreCaracteristica}.`
+                        : 'Elegí la característica que más se ajuste a lo que buscás.');
 
                     const esSerie = window._buscadorTipoContenido === 'serie';
                     const lista = esSerie ? BUSCADOR_CARACTERISTICAS_SERIE : BUSCADOR_CARACTERISTICAS_PELICULA;
@@ -6786,6 +6881,11 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                         document.getElementById('buscadorNivel3CarteleraTitulo').style.display = 'block';
                         document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-ancho', 'buscador-sheet-alto');
                         document.getElementById('buscadorCarteleraTituloFiltro').value = '';
+
+                        const nombreCartelera = _buscadorPrimerNombre();
+                        window._buscadorSetBurbuja(nombreCartelera
+                            ? `Elegí la película, ${nombreCartelera}, y te digo dónde y cuándo verla.`
+                            : 'Elegí la película y te digo dónde y cuándo verla.');
 
                         const grid = document.getElementById('buscadorCarteleraTituloGrid');
                         grid.innerHTML = `
@@ -6997,6 +7097,11 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                             document.getElementById('buscadorNivel3CarteleraRecomendacion').style.display = 'block';
                             document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-recomendacion', 'buscador-sheet-alto');
 
+                            const nombreRecomendacion = _buscadorPrimerNombre();
+                            window._buscadorSetBurbuja(nombreRecomendacion
+                                ? `Estoy armando tu recomendación, ${nombreRecomendacion}, según tu espíritu cinéfilo.`
+                                : 'Estoy armando tu recomendación según tu espíritu cinéfilo.');
+
                             const totemEl = document.getElementById('buscadorCarteleraRecomendacionTotem');
                             totemEl.innerHTML = '';
                             const lista = document.getElementById('buscadorCarteleraRecomendacionLista');
@@ -7088,6 +7193,11 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                         window._buscadorCarteleraModoDonde = 'pelicula';
                         document.getElementById('buscadorCarteleraDondeSubtitulo').textContent = '¿Dónde te gustaría verla?';
 
+                        const nombreUsuarioDonde = _buscadorPrimerNombre();
+                        window._buscadorSetBurbuja(nombreUsuarioDonde
+                            ? `Decime dónde te gustaría ver "${nombre}", ${nombreUsuarioDonde}.`
+                            : `Decime dónde te gustaría ver "${nombre}".`);
+
                         document.getElementById('buscadorModalSheet').classList.remove('buscador-sheet-recomendacion');
                         document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
                         document.getElementById('buscadorNivel3CarteleraDonde').style.display = 'block';
@@ -7103,6 +7213,11 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                         document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
                         document.getElementById('buscadorNivel3CarteleraFunciones').style.display = 'block';
                         document.getElementById('buscadorCarteleraFuncionesTitulo').textContent = nombre;
+
+                        const nombreUsuarioFunciones = _buscadorPrimerNombre();
+                        window._buscadorSetBurbuja(nombreUsuarioFunciones
+                            ? `Acá tenés dónde y cuándo ver "${nombre}", ${nombreUsuarioFunciones}.`
+                            : `Acá tenés dónde y cuándo ver "${nombre}".`);
 
                         const lista = document.getElementById('buscadorCarteleraFuncionesLista');
                         lista.innerHTML = `
@@ -7678,6 +7793,12 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
                                document.getElementById('buscadorNivel3CarteleraCadena').style.display = 'block';
                                document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-ancho', 'buscador-sheet-alto');
+
+                               const nombreCadena = _buscadorPrimerNombre();
+                               window._buscadorSetBurbuja(nombreCadena
+                                   ? `Elegí una cadena, ${nombreCadena}, y te muestro sus sucursales.`
+                                   : 'Elegí una cadena y te muestro sus sucursales.');
+
                                const grid = document.getElementById('buscadorCadenasGrid');
                                grid.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Cargando cadenas...</div>';
 
@@ -7719,6 +7840,11 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                         document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
                         document.getElementById('buscadorNivel3CarteleraSucursales').style.display = 'block';
                         document.getElementById('buscadorCarteleraSucursalesTitulo').textContent = `Sucursales de ${cadena}`;
+
+                        const nombreSucursales = _buscadorPrimerNombre();
+                        window._buscadorSetBurbuja(nombreSucursales
+                            ? `Elegí la sucursal de ${cadena}, ${nombreSucursales}, y te muestro sus funciones.`
+                            : `Elegí la sucursal de ${cadena} y te muestro sus funciones.`);
 
                         const grid = document.getElementById('buscadorSucursalesGrid');
                         grid.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Cargando sucursales...</div>';
@@ -7767,6 +7893,11 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                         document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
                         document.getElementById('buscadorNivel3CarteleraCadenaFunciones').style.display = 'block';
                         document.getElementById('buscadorCarteleraCadenaFuncionesTitulo').textContent = nombreCine;
+
+                        const nombreCadenaFunciones = _buscadorPrimerNombre();
+                        window._buscadorSetBurbuja(nombreCadenaFunciones
+                            ? `Acá tenés las funciones de ${nombreCine}, ${nombreCadenaFunciones}.`
+                            : `Acá tenés las funciones de ${nombreCine}.`);
 
                         const lista = document.getElementById('buscadorCarteleraCadenaFuncionesLista');
                         lista.innerHTML = `
@@ -8036,6 +8167,11 @@ window._buscadorCriterioSeleccionado = function(criterio) {
         window._buscadorAbrirNivel3EpocaTipo = function() {
             document.getElementById('buscadorNivel2PeliculaSerie').style.display = 'none';
             document.getElementById('buscadorNivel3EpocaTipo').style.display = 'block';
+
+            const nombre = _buscadorPrimerNombre();
+            window._buscadorSetBurbuja(nombre
+                ? `¿Buscamos por un año puntual o por una década completa, ${nombre}?`
+                : '¿Buscamos por un año puntual o por una década completa?');
         };
 
         window._buscadorVolverAEpocaTipo = function() {
@@ -8047,6 +8183,11 @@ window._buscadorCriterioSeleccionado = function(criterio) {
         window._buscadorAbrirAnioEspecifico = function() {
             document.getElementById('buscadorNivel3EpocaTipo').style.display = 'none';
             document.getElementById('buscadorNivel3AnioEspecifico').style.display = 'block';
+
+            const nombreAnio = _buscadorPrimerNombre();
+            window._buscadorSetBurbuja(nombreAnio
+                ? `Elegí el año, ${nombreAnio}, y te muestro todo lo que salió ese año.`
+                : 'Elegí el año y te muestro todo lo que salió ese año.');
 
             const select = document.getElementById('buscadorSelectAnio');
             if (select.dataset.poblado !== '1') {
@@ -8065,6 +8206,11 @@ window._buscadorCriterioSeleccionado = function(criterio) {
         window._buscadorAbrirDecadas = function() {
             document.getElementById('buscadorNivel3EpocaTipo').style.display = 'none';
             document.getElementById('buscadorNivel3Decada').style.display = 'block';
+
+            const nombreDecada = _buscadorPrimerNombre();
+            window._buscadorSetBurbuja(nombreDecada
+                ? `¿Qué década elegís, ${nombreDecada}? Te muestro todo lo que salió ahí.`
+                : '¿Qué década elegís? Te muestro todo lo que salió ahí.');
 
             const grid = document.getElementById('buscadorDecadasGrid');
             if (grid.dataset.poblado === '1') return;
@@ -8389,6 +8535,11 @@ window._buscadorAbrirNivel3Genero = async function() {
     document.getElementById('buscadorNivel3GeneroSubtitulo').textContent =
         window._buscadorTipoContenido === 'pelicula' ? 'Elegí un género de película' : 'Elegí un género de serie';
 
+    const nombre = _buscadorPrimerNombre();
+    window._buscadorSetBurbuja(nombre
+        ? `¿Qué género tenés ganas de buscar hoy, ${nombre}?`
+        : '¿Qué género tenés ganas de buscar hoy?');
+
     const grid = document.getElementById('buscadorGenerosGrid');
     grid.innerHTML = `
         <div class="buscador-pensando">
@@ -8459,6 +8610,11 @@ window._buscadorAbrirNivel3Titulo = function() {
     document.getElementById('buscadorNivel3Titulo').style.display = 'block';
     document.getElementById('buscadorNivel3TituloSubtitulo').textContent =
         window._buscadorTipoContenido === 'pelicula' ? 'Escribí el título de la película' : 'Escribí el título de la serie';
+
+    const nombre = _buscadorPrimerNombre();
+    window._buscadorSetBurbuja(nombre
+        ? `Escribí el título y te lo encuentro al toque, ${nombre}.`
+        : 'Escribí el título y te lo encuentro al toque.');
 
     const input = document.getElementById('buscadorInputTitulo');
     input.value = '';
