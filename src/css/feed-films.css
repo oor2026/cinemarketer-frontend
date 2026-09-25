@@ -2427,7 +2427,7 @@
     flex-direction: column;
     gap: 0.3rem;
     overflow-y: auto;
-    max-height: 60vh;
+    max-height: 70vh;
 }
 
 /* Footer del modal */
@@ -4443,7 +4443,7 @@ window.abrirElencoCard = async function(movieId, event) {
         transform: translate(-50%, -50%);
         width: 92vw;
         max-width: 420px;
-        max-height: 85vh;
+        max-height: 90vh;
         border-radius: 20px;
         transition: none;
     }
