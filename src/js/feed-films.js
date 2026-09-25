@@ -337,7 +337,12 @@ window.cargarPeliculasPopulares = async function(pagina = 1) {
                 window.cargarTriviaBadge();
 
                 window.estadoPaginacion.cargando = true;
-    grid.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando películas...</div>';
+    grid.innerHTML = `
+        <div class="buscador-pensando">
+            <img src="assets/images/icon-512.png" alt="Cinemarketer pensando">
+            <span>Cargando películas...</span>
+        </div>
+    `;
 
     try {
         const token = localStorage.getItem('token');
@@ -2471,7 +2476,7 @@ window.aplicarFiltros = async function(pagina = 1, append = false) {
         window.mostrarVistaResultados();
         window._filaBusqueda.peliculas = [];
         const track = document.getElementById('filaTrack-busqueda');
-        if (track) track.innerHTML = '<div class="fila-genero-loading"><i class="fas fa-spinner fa-spin"></i></div>';
+if (track) track.innerHTML = '<div class="buscador-pensando-mini"><img src="assets/images/icon-512.png" alt="Cinemarketer pensando"></div>';
     }
 
     try {
@@ -3060,7 +3065,7 @@ window._confirmarAvisoEstreno = async function() {
             const contenedor = document.getElementById('similares-container');
             if (!contenedor) return;
 
-            contenedor.innerHTML = '<div class="similares-loading"><i class="fas fa-spinner fa-spin"></i></div>';
+    track.innerHTML = '<div class="buscador-pensando-mini"><img src="assets/images/icon-512.png" alt="Cinemarketer pensando"></div>';
 
             try {
                 const token = localStorage.getItem('token');
@@ -3118,8 +3123,8 @@ window.cargarTrailerPelicula = async function(movieId, backdropPath) {
     if (!container) return;
 
     container.innerHTML = `
-        <div class="trailer-loading">
-            <i class="fas fa-spinner fa-spin"></i>
+        <div class="buscador-pensando">
+            <img src="assets/images/icon-512.png" alt="Cinemarketer pensando">
             <span>Cargando tráiler...</span>
         </div>
     `;
@@ -5002,9 +5007,17 @@ document.addEventListener('click', function(event) {
 window.abrirBuscadorAsistido = async function() {
     const overlay = document.getElementById('buscadorModalOverlay');
     const sheet = document.getElementById('buscadorModalSheet');
-    console.log('[diag-buscador] función llamada. overlay existe:', !!overlay, '| sheet existe:', !!sheet); // TEMPORAL
     if (overlay) overlay.classList.add('active');
-    if (sheet) sheet.classList.add('active');
+    if (sheet) {
+        sheet.classList.add('active');
+        // Reset obligatorio al abrir desde cero — cualquiera de estos
+        // modificadores puede haber quedado pegado de la sesión anterior
+        // del modal si se salió por un camino que no pasaba por su
+        // "Volver" puntual (cerrando con la X, por ejemplo). Cada
+        // pantalla que necesite alguno lo vuelve a agregar por su cuenta
+        // al abrirse.
+        sheet.classList.remove('buscador-sheet-ancho', 'buscador-sheet-alto', 'buscador-sheet-recomendacion', 'buscador-sheet-salida');
+    }
     document.body.style.overflow = 'hidden';
 
     // Frase neutra mientras carga el nombre (por si tarda), no bloquea
@@ -5044,10 +5057,15 @@ var BUSCADOR_PROXIMAMENTE = {
         texto: '',
         volverA: 'buscadorNivel2Persona',
     },
-    donde_ver_cartelera: {
-        titulo: 'Próximamente Cartelera y funciones',
+        cartelera_que_hay: {
+            titulo: 'Próximamente ¿Qué hay para ver?',
+            texto: '',
+            volverA: 'buscadorNivel2Cartelera',
+        },
+    cartelera_cadena: {
+        titulo: 'Próximamente Por cadena de cine',
         texto: '',
-        volverA: 'buscadorNivel2DondeVer',
+        volverA: 'buscadorNivel2Cartelera',
     },
 };
 
@@ -5095,12 +5113,55 @@ window._buscadorResetear = function() {
 
 window._buscadorTipoContenido = 'pelicula'; // default al abrir cada Nivel 2
 
+// Rutas a los logos de cada cadena — poné el archivo en
+// assets/images/cadenas/{nombre}.png y sumalo acá. Las que no estén
+// mapeadas usan el ícono genérico de edificio como fallback.
+// Encuentra el logo para un cine puntual: primero intenta el nombre
+// exacto (independientes, ej. "Cinema Devoto"), y si no, busca si el
+// nombre del cine CONTIENE alguna cadena conocida (ej. "Cinemark
+// Palermo" contiene "Cinemark") — mismo criterio que ya usa el backend
+// para derivar la cadena.
+window._buscadorLogoParaCine = function(nombreCine) {
+    if (CADENA_LOGOS[nombreCine]) return CADENA_LOGOS[nombreCine];
+    const normalizar = (s) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const nombreNorm = normalizar(nombreCine);
+    for (const key in CADENA_LOGOS) {
+        if (nombreNorm.includes(normalizar(key))) return CADENA_LOGOS[key];
+    }
+    return null;
+};
+
+var CADENA_LOGOS = {
+    'Cinemark': 'assets/images/cadenas/cinemark.png',
+    'Hoyts': 'assets/images/cadenas/hoyts.png',
+    'Cinépolis': 'assets/images/cadenas/cinepolis.png',
+    'Atlas': 'assets/images/cadenas/atlas.png',
+    'Multiplex': 'assets/images/cadenas/multiplex.png',
+    'Showcase': 'assets/images/cadenas/showcase.png',
+    'Cinemacenter': 'assets/images/cadenas/cinemacenter.png',
+    'Dinosaurio': 'assets/images/cadenas/dinosaurio.png',
+    'Las Tipas': 'assets/images/cadenas/tipas.png',
+    'Cinema Devoto': 'assets/images/cadenas/devoto.png',
+    'Complejo Cinerama': 'assets/images/cadenas/cinerama.png',
+    'Tadicor': 'assets/images/cadenas/tadicor.png',
+    'Play Cinema': 'assets/images/cadenas/playcinema.png',
+    'Nuevo Monumental': 'assets/images/cadenas/monumental.png',
+    'Cine Gran Pampa': 'assets/images/cadenas/granpampa.png',
+    'Cines Pixel Adrogué': 'assets/images/cadenas/pixel.png',
+    'Santa Rosa': 'assets/images/cadenas/santarosa.png',
+    'Cines del Solar': 'assets/images/cadenas/solar.png',
+    'Cine Opera Salta': 'assets/images/cadenas/opera3d.png',
+    'Cine Gran Rex': 'assets/images/cadenas/granrex.png',
+    'IMAX del Conocimiento': 'assets/images/cadenas/imax.png',
+};
+
 var BUSCADOR_NIVEL2_IDS = {
     pelicula_serie: 'buscadorTipoEleccion', // acá entra primero por el paso de elegir tipo
     persona:        'buscadorNivel2Persona',
     donde_ver:      'buscadorNivel2DondeVer',
     mi_actividad:   'buscadorNivel2MiActividad',
     plataforma:     'buscadorNivel2Plataforma',
+    cartelera:      'buscadorNivel2Cartelera',
 };
 
 // Todas las pantallas que puede haber "adentro" de una rama — se usa
@@ -5119,6 +5180,18 @@ var BUSCADOR_TODAS_LAS_PANTALLAS = [
     'buscadorNivel3Persona',       // Nivel 3 de "Actor/actriz/director" — buscar por nombre
     'buscadorNivel3Cruce1',        // Nivel 3 de "Trabajaron juntos" — paso 1
     'buscadorNivel3Cruce2',        // Nivel 3 de "Trabajaron juntos" — paso 2
+    'buscadorNivel3CarteleraTitulo', // Cartelera — "Ya sé qué quiero ver"
+    'buscadorNivel3CarteleraFunciones', // Cartelera — funciones de la película elegida
+    'buscadorNivel3CarteleraRecomendacion', // Cartelera — "¿Alguna recomendación?"
+    'buscadorNivel3CarteleraDonde', // Cartelera — "¿Qué hay para ver?" Paso 1: ¿Dónde?
+    'buscadorNivel3CarteleraDondeResultado', // Cartelera — resultado de "¿Dónde estás?"
+    'buscadorNivel3CarteleraProvinciaLocalidad', // Organizar salida — Paso 1b: combos
+    'buscadorNivel3CarteleraCuando', // Organizar salida — Paso 2: ¿Cuándo?
+    'buscadorNivel3CarteleraPresupuesto', // Organizar salida — Paso 3: ¿Presupuesto?
+    'buscadorNivel3CarteleraResultadoSalida', // Organizar salida — Resultado final
+    'buscadorNivel3CarteleraCadena', // Cartelera — "Por cadena de cine"
+    'buscadorNivel3CarteleraSucursales', // Cartelera — sucursales de la cadena elegida
+    'buscadorNivel3CarteleraCadenaFunciones', // Cartelera — funciones de la sucursal elegida
     'buscadorDondeVerTipo',        // Dónde ver — paso de elegir tipo
     'buscadorDondeVerTitulo',      // Dónde ver — opción A
     'buscadorDondeVerPlataforma',  // Dónde ver — opción B
@@ -5136,6 +5209,7 @@ var BUSCADOR_FRASES_NIVEL2 = {
     donde_ver:      (n) => n ? `Decime qué querés ver, ${n}, y te digo dónde encontrarlo.` : 'Decime qué querés ver y te digo dónde encontrarlo.',
     mi_actividad:   (n) => n ? `Vamos a ver cómo venís este mes, ${n} — tus puntos, tus premios, todo.` : 'Vamos a ver cómo venís este mes — tus puntos, tus premios, todo.',
     plataforma:     (n) => n ? `¿Querés saber más de cómo funciona todo esto, ${n}? Te cuento.` : '¿Querés saber más de cómo funciona todo esto? Te cuento.',
+    cartelera:      (n) => n ? `Che ${n}, decime dónde estás y te muestro qué hay cerca.` : 'Decime dónde estás y te muestro qué hay cerca.',
 };
 
 window._buscadorIrANivel2 = function(rama) {
@@ -5260,6 +5334,22 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                             window._buscadorAbrirDondeVerTipo(criterio);
                             return;
                         }
+                        if (criterio === 'cartelera_ya_se_que_ver') {
+                            window._buscadorAbrirCarteleraTitulo();
+                            return;
+                        }
+                           if (criterio === 'cartelera_que_hay') {
+                               window._buscadorAbrirCarteleraDonde();
+                               return;
+                           }
+                           if (criterio === 'cartelera_cadena') {
+                               window._buscadorAbrirCarteleraCadena();
+                               return;
+                           }
+                           if (criterio === 'cartelera_recomendacion') {
+                               window._buscadorAbrirCarteleraRecomendacion();
+                               return;
+                           }
                             if (criterio === 'donde_ver_estrenos') {
                                 window._buscadorProximosEstrenos();
                                 return;
@@ -5326,7 +5416,6 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                                 window._buscadorAbrirTextoPlataforma = function(criterio) {
                                                     document.getElementById('buscadorNivel2Plataforma').style.display = 'none';
                                                     document.getElementById('buscadorNivel3Plataforma').style.display = 'block';
-                                                    document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-alto');
 
                                                     const info = BUSCADOR_TEXTOS_PLATAFORMA[criterio];
                                                     document.getElementById('buscadorPlataformaContenido').innerHTML = `
@@ -5405,7 +5494,12 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                             document.getElementById('buscadorNivel3Insignias').style.display = 'block';
 
                                             const cont = document.getElementById('buscadorInsigniasContenido');
-                                            cont.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Calculando...</div>';
+                                            cont.innerHTML = `
+                                                <div class="buscador-pensando">
+                                                    <img src="assets/images/icon-512.png" alt="Cinemarketer pensando">
+                                                    <span>Calculando...</span>
+                                                </div>
+                                            `;
 
                                                 try {
                                                     const profile = await API.getProfile();
@@ -5468,7 +5562,7 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                         window._buscadorOcultarNivel3MiActividad();
                                         document.getElementById('buscadorNivel2MiActividad').style.display = 'none';
                                         document.getElementById('buscadorNivel3ValePremium').style.display = 'block';
-                                        document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-alto');
+                                        document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-salida');
 
                                         const cont = document.getElementById('buscadorValePremioContenido');
                                         cont.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Calculando...</div>';
@@ -5953,7 +6047,12 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                         document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-ancho');
                         const grid = document.getElementById('buscadorPlataformasGrid');
                         grid.className = 'buscador-plataformas-grid';
-                        grid.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>';
+                        grid.innerHTML = `
+                            <div class="buscador-pensando">
+                                <img src="assets/images/icon-512.png" alt="Cinemarketer pensando">
+                                <span>Cargando...</span>
+                            </div>
+                        `;
 
                         try {
                             const token = localStorage.getItem('token');
@@ -6606,16 +6705,1157 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                         }
                     };
 
-                    // Filtro en vivo — sin acentos, para que "juegos hambre"
-                    // también encuentre "Los Juegos del Hambre" sin tener que
-                    // tipearlo exacto.
-                    window._buscadorFiltrarSagas = function(texto) {
-                        const normalizar = (s) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-                        const query = normalizar(texto.trim());
-                        document.querySelectorAll('#buscadorSagaGrid .buscador-saga-item').forEach(item => {
-                            const nombre = normalizar(item.dataset.nombre || '');
-                            item.style.display = nombre.includes(query) ? '' : 'none';
+                        // Filtro en vivo — sin acentos, para que "juegos hambre"
+                        // también encuentre "Los Juegos del Hambre" sin tener que
+                        // tipearlo exacto.
+                        window._buscadorFiltrarSagas = function(texto) {
+                            const normalizar = (s) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                            const query = normalizar(texto.trim());
+                            document.querySelectorAll('#buscadorSagaGrid .buscador-saga-item').forEach(item => {
+                                const nombre = normalizar(item.dataset.nombre || '');
+                                item.style.display = nombre.includes(query) ? '' : 'none';
+                            });
+                        };
+
+                    // Carrusel horizontal auto-scroll, reusable para cualquier
+                    // grilla con la clase .buscador-carrusel. Se mueve solo; al
+                    // llegar al final hace una "vuelta rápida" al principio (no
+                    // un salto instantáneo) y retoma el recorrido normal. Al
+                    // arrastrar/scrollear se pausa 2.5s; con las flechas
+                    // manuales, 7s — después retoma sola en los dos casos.
+                    window._buscadorActivarCarruselAuto = function(elementId, velocidad) {
+                        velocidad = velocidad || 0.6;
+                        const velocidadRetorno = 18; // bastante más rápido, para el efecto de "vuelta"
+                        const el = document.getElementById(elementId);
+                        if (!el || el._carruselActivo) return; // evita duplicar el loop si se re-abre la pantalla
+                        el._carruselActivo = true;
+
+                        let pausado = false;
+                        let pausaTimeout = null;
+                        let retornando = false;
+
+                        const pausar = (ms) => {
+                            pausado = true;
+                            clearTimeout(pausaTimeout);
+                            pausaTimeout = setTimeout(() => { pausado = false; }, ms || 2500);
+                        };
+                        ['pointerdown', 'touchstart', 'wheel'].forEach(ev => el.addEventListener(ev, () => pausar(2500), { passive: true }));
+
+                        // Expuesto para que las flechas manuales lo pausen con
+                        // su propio tiempo (7s) en vez del de arrastre (2.5s).
+                        el._buscadorPausarCarrusel = pausar;
+
+                        function tick() {
+                            if (!pausado && el.offsetParent !== null && el.scrollWidth > el.clientWidth) {
+                                if (retornando) {
+                                    el.scrollLeft -= velocidadRetorno;
+                                    if (el.scrollLeft <= 0) {
+                                        el.scrollLeft = 0;
+                                        retornando = false;
+                                    }
+                                } else {
+                                    el.scrollLeft += velocidad;
+                                    if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 1) {
+                                        retornando = true;
+                                    }
+                                }
+                            }
+                            requestAnimationFrame(tick);
+                        }
+                        requestAnimationFrame(tick);
+                    };
+
+                    // Flechas manuales — mueven una "página" del carrusel y
+                    // pausan el auto-scroll 7s antes de que retome.
+                    window._buscadorCarruselMover = function(elementId, direccion) {
+                        const el = document.getElementById(elementId);
+                        if (!el) return;
+                        if (el._buscadorPausarCarrusel) el._buscadorPausarCarrusel(7000);
+                        el.scrollBy({ left: direccion * el.clientWidth * 0.7, behavior: 'smooth' });
+                    };
+
+                    // ============================================================
+                    // Cartelera — "Ya sé qué quiero ver"
+                        // Datos reales, scrapeados en vivo (con cache de 30 min del
+                        // lado del backend). Alcance actual: 10 cines de Buenos
+                        // Aires — se amplía a  todo el país cuando el scraper
+                        // completo de cines esté listo, sin tocar nada de acá.
+                        // ============================================================
+                    window._buscadorAbrirCarteleraTitulo = async function() {
+                        document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
+                        document.getElementById('buscadorNivel3CarteleraTitulo').style.display = 'block';
+                        document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-ancho', 'buscador-sheet-alto');
+                        document.getElementById('buscadorCarteleraTituloFiltro').value = '';
+
+                        const grid = document.getElementById('buscadorCarteleraTituloGrid');
+                        grid.innerHTML = `
+                            <div class="buscador-pensando">
+                                <img src="assets/images/icon-512.png" alt="Cinemarketer pensando">
+                                <span>Cargando cartelera...</span>
+                            </div>
+                        `;
+
+                            try {
+                                const token = localStorage.getItem('token');
+                                const res = await fetch(`${CONFIG.API_URL}/cartelera/peliculas`, {
+                                    headers: { 'Authorization': `Bearer ${token}` }
+                                });
+                                if (!res.ok) throw new Error();
+                                const items = await res.json();
+
+                                if (!items.length) {
+                                    grid.innerHTML = '<div class="buscador-predictor-vacio">No encontramos películas en cartelera ahora mismo.</div>';
+                                    return;
+                                }
+
+                            grid.innerHTML = items.map(p => `
+                                <div class="buscador-saga-item" data-nombre="${p.titulo}"
+                                     onclick="window._buscadorCarteleraFuncionesOrigen='titulo'; window._buscadorSeleccionarCarteleraTitulo('${p.slug}', '${p.titulo.replace(/'/g, "\\'")}')">
+                                    <img src="${p.poster || ''}" alt="${p.titulo}" loading="lazy">
+                                    <span>${p.titulo}</span>
+                                </div>
+                            `).join('');
+                            window._buscadorActivarCarruselAuto('buscadorCarteleraTituloGrid');
+                        } catch (e) {
+                            grid.innerHTML = '<div class="buscador-predictor-vacio">No pudimos cargar la cartelera. Intentá de nuevo.</div>';
+                        }
+                    };
+
+                        // Mismo filtro en vivo que sagas, mismo criterio de
+                        // normalización sin acentos.
+                        window._buscadorFiltrarCarteleraTitulos = function(texto) {
+                            const normalizar = (s) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                            const query = normalizar(texto.trim());
+                            document.querySelectorAll('#buscadorCarteleraTituloGrid .buscador-saga-item').forEach(item => {
+                                const nombre = normalizar(item.dataset.nombre || '');
+                                item.style.display = nombre.includes(query) ? '' : 'none';
+                            });
+                        };
+
+                        window._buscadorVolverANivel2Cartelera = function() {
+                            // Oculta CUALQUIER pantalla de Cartelera que esté abierta
+                            // (Titulo, Donde, etc.) — antes solo apagaba una puntual
+                            // y las demás quedaban de fondo si se volvía desde ahí.
+                            document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
+                            document.getElementById('buscadorNivel2Cartelera').style.display = 'block';
+                            document.getElementById('buscadorModalSheet').classList.remove('buscador-sheet-ancho', 'buscador-sheet-alto', 'buscador-sheet-recomendacion');
+                        };
+
+                        // Mismos mapas que perfil.js — duplicados acá porque
+                        // dashboard.html no carga perfil.js, así que esos
+                        // globals no existen en este contexto.
+                        var EMOJI_POR_GENERO_RECOMENDACION = {
+                            'Acción': '💥', 'Animación': '🎨', 'Comedia': '😂',
+                            'Crimen': '🔪', 'Documental': '🎥', 'Drama': '🎭',
+                            'Historia': '📜', 'Terror': '👻', 'Música': '🎵',
+                            'Misterio': '🔎', 'Ciencia ficción': '🚀', 'Ciencia Ficción': '🚀',
+                            'Película de TV': '📺', 'Suspense': '😰', 'Bélica': '⚔️',
+                        };
+                        var NOMBRE_TOTEM_GENERO_SEXO_RECOMENDACION = {
+                            'Aventura': { M: 'Explorador', F: 'Exploradora' },
+                            'Familia': { M: 'Familiero', F: 'Familiera' },
+                            'Romance': { M: 'Cupido', F: 'Venus' },
+                            'Western': { M: 'Cowboy', F: 'Vaquera' },
+                            'Fantasía': { M: 'Mago', F: 'Hechicera' },
+                        };
+                        var EMOJI_GENERO_SEXO_RECOMENDACION = {
+                            'Romance': { M: '💘', F: '🌹' },
+                            'Fantasía': { M: '🧙', F: '🔮' },
+                            'Aventura': { M: '🗺️', F: '🗺️' },
+                            'Familia': { M: '👨‍👩‍👧', F: '👨‍👩‍👧' },
+                            'Western': { M: '🤠', F: '🤠' },
+                        };
+                        var NOMBRE_TOTEM_POR_GENERO_RECOMENDACION = {
+                            'Acción': 'Bang', 'Animación': 'Garabato', 'Comedia': 'Risitas',
+                            'Crimen': 'Fisgón', 'Documental': 'Bitácora', 'Drama': 'Lágrima',
+                            'Fantasía': 'Duende', 'Historia': 'Retro', 'Terror': 'Boo', 'Música': 'Compás',
+                            'Misterio': 'Enigma', 'Ciencia ficción': 'Astro', 'Ciencia Ficción': 'Astro',
+                            'Película de TV': 'Maratón', 'Suspense': 'Escalofrío', 'Bélica': 'Trinchera',
+                        };
+
+                        var GENERO_RASGO_RECOMENDACION = {
+                            'Acción': { adj: 'audaz', sust: 'acción' },
+                            'Aventura': { adj: 'aventurero', sust: 'aventura' },
+                            'Animación': { adj: 'animado', sust: 'animación' },
+                            'Comedia': { adj: 'divertido', sust: 'comedia' },
+                            'Crimen': { adj: 'intrigante', sust: 'crimen' },
+                            'Documental': { adj: 'curioso', sust: 'documentales' },
+                            'Drama': { adj: 'sensible', sust: 'drama' },
+                            'Familia': { adj: 'hogareño', sust: 'cine familiar' },
+                            'Fantasía': { adj: 'fantasioso', sust: 'fantasía' },
+                            'Historia': { adj: 'nostálgico', sust: 'cine histórico' },
+                            'Terror': { adj: 'tenebroso', sust: 'terror' },
+                            'Música': { adj: 'melómano', sust: 'música' },
+                            'Misterio': { adj: 'detectivesco', sust: 'misterio' },
+                            'Romance': { adj: 'romántico', sust: 'romance' },
+                            'Ciencia Ficción': { adj: 'futurista', sust: 'ciencia ficción' },
+                            'Ciencia ficción': { adj: 'futurista', sust: 'ciencia ficción' },
+                            'Película de TV': { adj: 'televisivo', sust: 'series' },
+                            'Suspenso': { adj: 'intrigante', sust: 'suspenso' },
+                            'Suspense': { adj: 'intrigante', sust: 'suspenso' },
+                            'Bélica': { adj: 'combativo', sust: 'cine bélico' },
+                            'Western': { adj: 'vaquero', sust: 'western' },
+                        };
+
+                        // Misma lógica que perfil.js (_adnGenerarTitular), con
+                        // "Tengo" cambiado a "Tenés" para esta pantalla — acá
+                        // el buscador le habla al usuario, no es el usuario
+                        // describiéndose a sí mismo.
+                        function _generarFraseEspirituRecomendacion(top3Generos) {
+                            if (!top3Generos || !top3Generos.length) return '';
+                            const top1 = top3Generos[0];
+                            const top2 = top3Generos[1];
+                            const top3 = top3Generos[2];
+
+                            const esDominante = top1.porcentaje >= 35 || (top2 && (top1.porcentaje - top2.porcentaje) >= 20);
+                            if (esDominante || !top2) {
+                                return `Sos especialista en ${top1.genero}.`;
+                            }
+
+                            const r1 = GENERO_RASGO_RECOMENDACION[top1.genero] || { adj: 'apasionado', sust: top1.genero.toLowerCase() };
+                            const r2 = GENERO_RASGO_RECOMENDACION[top2.genero] || { adj: 'apasionado', sust: top2.genero.toLowerCase() };
+
+                            let frase = `Tenés espíritu ${r1.adj}, con algo de ${r2.sust}`;
+
+                            if (top3) {
+                                const r3 = GENERO_RASGO_RECOMENDACION[top3.genero] || { adj: 'apasionado', sust: top3.genero.toLowerCase() };
+                                frase += ` y un toque de ${r3.sust}`;
+                            }
+
+                            return frase + '.';
+                        }
+
+                        function _totemEmojiRecomendacion(genero, sexo) {
+                            const variante = EMOJI_GENERO_SEXO_RECOMENDACION[genero];
+                            if (variante) return sexo === 'F' ? variante.F : variante.M;
+                            return EMOJI_POR_GENERO_RECOMENDACION[genero] || '🎞️';
+                        }
+                        function _totemNombreRecomendacion(genero, sexo) {
+                            const variante = NOMBRE_TOTEM_GENERO_SEXO_RECOMENDACION[genero];
+                            if (variante) return sexo === 'F' ? variante.F : variante.M;
+                            return NOMBRE_TOTEM_POR_GENERO_RECOMENDACION[genero] || genero;
+                        }
+
+                        // Dots del carrusel — solo tienen efecto visual en
+                        // mobile (ver CSS); en desktop quedan ocultos y el
+                        // scroll horizontal está desactivado, así que este
+                        // listener nunca dispara ahí.
+                        // Engancha dots + scroll-sync para cada mini-carrusel
+                        // de "Organizar una salida" (uno por película). Solo
+                        // tiene efecto visual en mobile — en desktop el
+                        // scroll horizontal está desactivado por CSS, así
+                        // que este listener nunca dispara ahí.
+                        window._buscadorSalidaInicializarCarruseles = function() {
+                            document.querySelectorAll('.buscador-salida-pelicula-carrusel').forEach(carrusel => {
+                                const dotsEl = document.querySelector(`.buscador-salida-dots[data-target="${carrusel.id}"]`);
+                                if (!dotsEl) return;
+
+                                dotsEl.querySelectorAll('.buscador-salida-dot').forEach(dot => {
+                                    dot.onclick = () => {
+                                        const i = parseInt(dot.dataset.i, 10);
+                                        const slide = carrusel.children[i];
+                                        if (slide) slide.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                                    };
+                                });
+
+                                carrusel.onscroll = () => {
+                                    const idx = Math.round(carrusel.scrollLeft / carrusel.clientWidth);
+                                    dotsEl.querySelectorAll('.buscador-salida-dot').forEach((dot, i) => {
+                                        dot.classList.toggle('activo', i === idx);
+                                    });
+                                };
+                            });
+                        };
+
+                        window._buscadorRecomendacionInicializarDots = function(cantidad) {
+                            const carrusel = document.getElementById('buscadorRecomendacionCarrusel');
+                            const dotsEl = document.getElementById('buscadorRecomendacionDots');
+                            if (!carrusel || !dotsEl || cantidad <= 1) { if (dotsEl) dotsEl.innerHTML = ''; return; }
+
+                            dotsEl.innerHTML = Array.from({ length: cantidad }).map((_, i) =>
+                                `<span class="buscador-recomendacion-dot${i === 0 ? ' activo' : ''}" data-i="${i}"></span>`
+                            ).join('');
+
+                            dotsEl.querySelectorAll('.buscador-recomendacion-dot').forEach(dot => {
+                                dot.onclick = () => {
+                                    const i = parseInt(dot.dataset.i, 10);
+                                    const slide = carrusel.children[i];
+                                    if (slide) slide.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                                };
+                            });
+
+                            carrusel.onscroll = () => {
+                                const idx = Math.round(carrusel.scrollLeft / carrusel.clientWidth);
+                                dotsEl.querySelectorAll('.buscador-recomendacion-dot').forEach((dot, i) => {
+                                    dot.classList.toggle('activo', i === idx);
+                                });
+                            };
+                        };
+
+                        window._buscadorAbrirCarteleraRecomendacion = async function() {
+                            document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
+                            document.getElementById('buscadorNivel3CarteleraRecomendacion').style.display = 'block';
+                            document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-recomendacion', 'buscador-sheet-alto');
+
+                            const totemEl = document.getElementById('buscadorCarteleraRecomendacionTotem');
+                            totemEl.innerHTML = '';
+                            const lista = document.getElementById('buscadorCarteleraRecomendacionLista');
+                            lista.innerHTML = `
+                                <div class="buscador-pensando">
+                                    <img src="assets/images/icon-512.png" alt="Cinemarketer pensando">
+                                    <span>Armando tu recomendación...</span>
+                                </div>
+                            `;
+
+                            try {
+                                const [res, profile] = await Promise.all([
+                                    fetch(`${CONFIG.API_URL}/cartelera/recomendacion-espiritu`, {
+                                        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                                    }),
+                                    API.getProfile().catch(() => null)
+                                ]);
+                                if (!res.ok) throw new Error();
+                                const data = await res.json();
+                                const sexo = profile ? profile.sexo : null;
+
+                                if (data.mensajeSinVotos) {
+                                    lista.innerHTML = `<div class="buscador-recomendacion-cta">${data.mensajeSinVotos}</div>`;
+                                    return;
+                                }
+
+                                if (data.top3GenerosUsuario && data.top3GenerosUsuario.length) {
+                                    const principal = data.top3GenerosUsuario[0];
+                                    const emoji = _totemEmojiRecomendacion(principal.genero, sexo);
+                                    const nombreTotem = _totemNombreRecomendacion(principal.genero, sexo);
+                                    const fraseEspiritu = _generarFraseEspirituRecomendacion(data.top3GenerosUsuario);
+                                    const generosTexto = 'Compuesto de ' + data.top3GenerosUsuario
+                                        .map(g => `${g.genero} ${g.porcentaje}%`)
+                                        .join(' · ');
+                                    totemEl.innerHTML = `
+                                        <p class="buscador-recomendacion-frase">${fraseEspiritu}</p>
+                                        <p class="buscador-recomendacion-totem-titulo">Tu Tótem es: ${emoji} ${nombreTotem}</p>
+                                        <p class="buscador-recomendacion-totem-generos">${generosTexto}</p>
+                                    `;
+                                }
+
+                                if (!data.recomendaciones.length) {
+                                    lista.innerHTML = '<div class="buscador-predictor-vacio">Todavía no tenemos suficientes votos tuyos para armar una recomendación — ¡votá algunas películas y volvé!</div>';
+                                    return;
+                                }
+
+                                const top3 = data.recomendaciones.slice(0, 3);
+
+                                // El wrapper "slide" solo importa en mobile
+                                // (ver CSS) — en desktop el carrusel queda
+                                // desactivado y esto se ve exactamente igual
+                                // que antes, apilado verticalmente.
+                                lista.innerHTML = `
+                                    <div class="buscador-recomendacion-carrusel" id="buscadorRecomendacionCarrusel">
+                                        ${top3.map((r, i) => `
+                                            <div class="buscador-recomendacion-slide">
+                                                <p class="buscador-recomendacion-numero">Recomendación N°${i + 1}</p>
+                                                <div class="buscador-recomendacion-card"
+                                                     onclick="window._buscadorCarteleraFuncionesOrigen='recomendacion'; window._buscadorSeleccionarCarteleraTitulo('${r.slug}', '${r.titulo.replace(/'/g, "\\'")}')">
+                                                    <div class="buscador-recomendacion-poster">
+                                                        <img src="${r.poster || ''}" alt="${r.titulo}" loading="lazy">
+                                                    </div>
+                                                    <div class="buscador-recomendacion-info">
+                                                        <h4>${r.titulo}</h4>
+                                                        <div class="buscador-recomendacion-generos">${(r.generos || []).join(' · ')}</div>
+                                                        <p class="buscador-recomendacion-mensaje">${r.mensaje}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                    <div class="buscador-recomendacion-dots" id="buscadorRecomendacionDots"></div>
+                                `;
+                                window._buscadorRecomendacionInicializarDots(top3.length);
+                            } catch (e) {
+                                lista.innerHTML = '<div class="buscador-predictor-vacio">No pudimos armar tu recomendación. Intentá de nuevo.</div>';
+                            }
+                        };
+
+                    // Ya no trae resultados directo — antes de mostrar
+                    // cartelera de la película elegida (venga de búsqueda
+                    // por título o de una recomendación), se pasa por
+                    // "¿Dónde estás?" para acotar la oferta a la zona del
+                    // usuario. El interés acá es la película, no la cadena
+                    // ni el precio — alcanza con filtrar por geografía.
+                    window._buscadorSeleccionarCarteleraTitulo = function(slug, nombre) {
+                        if (!window._buscadorCarteleraFuncionesOrigen) window._buscadorCarteleraFuncionesOrigen = 'titulo';
+                        window._buscadorPeliculaElegida = { slug, nombre };
+                        window._buscadorCarteleraModoDonde = 'pelicula';
+                        document.getElementById('buscadorCarteleraDondeSubtitulo').textContent = '¿Dónde te gustaría verla?';
+
+                        document.getElementById('buscadorModalSheet').classList.remove('buscador-sheet-recomendacion');
+                        document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
+                        document.getElementById('buscadorNivel3CarteleraDonde').style.display = 'block';
+                    };
+
+                    // Trae y muestra las funciones de la película elegida,
+                    // ya filtradas por la provincia/localidad que se eligió
+                    // en el paso anterior — agrupadas por cine, mismo
+                    // formato que "Organizar una salida".
+                    window._buscadorCarteleraMostrarFuncionesDePeliculaPorGeografia = async function(provincia, localidad) {
+                        const { slug, nombre } = window._buscadorPeliculaElegida;
+
+                        document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
+                        document.getElementById('buscadorNivel3CarteleraFunciones').style.display = 'block';
+                        document.getElementById('buscadorCarteleraFuncionesTitulo').textContent = nombre;
+
+                        const lista = document.getElementById('buscadorCarteleraFuncionesLista');
+                        lista.innerHTML = `
+                            <div class="buscador-pensando">
+                                <img src="assets/images/icon-512.png" alt="Cinemarketer pensando">
+                                <span>Cargando resultados...</span>
+                            </div>
+                        `;
+
+                        try {
+                            const token = localStorage.getItem('token');
+                            const params = new URLSearchParams({ provincia });
+                            if (localidad) params.set('localidad', localidad);
+                            const res = await fetch(`${CONFIG.API_URL}/cartelera/peliculas/${slug}/funciones-por-geografia?${params}`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (!res.ok) throw new Error();
+                            const funciones = await res.json();
+
+                            if (!funciones.length) {
+                                lista.innerHTML = '<div class="buscador-predictor-vacio">No encontramos funciones de esta película en la zona elegida — probá con otra localidad.</div>';
+                                return;
+                            }
+
+                            const porCine = {};
+                            funciones.forEach(f => {
+                                if (!porCine[f.cineNombre]) porCine[f.cineNombre] = [];
+                                porCine[f.cineNombre].push(f);
+                            });
+
+                            // Chips de día — SOLO tienen efecto visual en
+                            // mobile (ver CSS); en desktop quedan ocultos
+                            // y el filtro nunca se usa ahí, hay espacio de
+                            // sobra para ver todo junto.
+                            const diasUnicos = [...new Set(funciones.map(f => f.dia))].sort();
+                            const diasChips = diasUnicos.map(dia => {
+                                const funcionDelDia = funciones.find(f => f.dia === dia);
+                                const fecha = new Date(dia + 'T00:00:00');
+                                const nombreCorto = funcionDelDia.esHoy ? 'Hoy' :
+                                    fecha.toLocaleDateString('es-AR', { weekday: 'short' }).replace('.', '');
+                                const numero = fecha.getDate();
+                                return `<button class="buscador-dia-chip" data-dia="${dia}" onclick="window._buscadorFuncionesFiltrarDia('${dia}')">${nombreCorto} ${numero}</button>`;
+                            }).join('');
+                            const filtroHtml = `
+                                <div class="buscador-funciones-dia-filtro" id="buscadorCarteleraFuncionesDiaFiltro">
+                                    <button class="buscador-dia-chip activo" data-dia="todos" onclick="window._buscadorFuncionesFiltrarDia('todos')">Todos</button>
+                                    ${diasChips}
+                                </div>
+                            `;
+
+                            const gruposHtml = Object.keys(porCine).map(cine => {
+                                const logo = window._buscadorLogoParaCine(cine);
+                                const icono = logo
+                                    ? `<img src="${logo}" alt="${cine}">`
+                                    : `<i class="fas fa-building buscador-cine-sinlogo"></i>`;
+                                const filas = porCine[cine].map(f => `
+                                    <tr data-dia="${f.dia}">
+                                        <td>${f.dia}${f.esHoy ? '<span class="buscador-funciones-hoy">HOY</span>' : ''}</td>
+                                        <td>${f.horario}</td>
+                                        <td>${f.formato}${f.idioma ? ' ' + f.idioma : ''}</td>
+                                    </tr>
+                                `).join('');
+                                return `
+                                    <div class="buscador-cine-funciones-grupo">
+                                        <div class="buscador-cine-funciones-header">
+                                            <div class="buscador-cine-funciones-logo">${icono}</div>
+                                            <span>${cine}</span>
+                                        </div>
+                                        <table class="buscador-funciones-tabla">
+                                            <thead><tr><th>Día</th><th>Horario</th><th>Formato</th></tr></thead>
+                                            <tbody>${filas}</tbody>
+                                        </table>
+                                    </div>
+                                `;
+                            }).join('');
+
+                            lista.innerHTML = filtroHtml + gruposHtml;
+                        } catch (e) {
+                            lista.innerHTML = '<div class="buscador-predictor-vacio">No pudimos traer las funciones. Intentá de nuevo.</div>';
+                        }
+                    };
+
+                    // Filtra las filas de la tabla por día — el filtro en
+                    // sí solo se ve en mobile, pero la función queda
+                    // definida siempre por si en algún momento se decide
+                    // mostrarlo también en desktop.
+                    window._buscadorFuncionesFiltrarDia = function(dia) {
+                        // Sin id fijo — esta función ahora la comparten 2
+                        // pantallas ("Ya sé qué quiero ver" y "Por cadena de
+                        // cine"), cada una con su propio contenedor de lista.
+                        document.querySelectorAll('.buscador-nivel2[style*="block"] tr[data-dia]').forEach(fila => {
+                            fila.style.display = (dia === 'todos' || fila.dataset.dia === dia) ? '' : 'none';
                         });
+                        document.querySelectorAll('.buscador-nivel2[style*="block"] .buscador-cine-funciones-grupo').forEach(grupo => {
+                            const hayVisibles = Array.from(grupo.querySelectorAll('tr[data-dia]')).some(f => f.style.display !== 'none');
+                            grupo.style.display = hayVisibles ? '' : 'none';
+                        });
+                        const filtro = document.getElementById('buscadorCarteleraFuncionesDiaFiltro');
+                        if (filtro) {
+                            filtro.querySelectorAll('.buscador-dia-chip').forEach(chip => {
+                                chip.classList.toggle('activo', chip.dataset.dia === dia);
+                            });
+                        }
+                    };
+
+                          window._buscadorVolverANivel3CarteleraTitulo = function() {
+                               document.getElementById('buscadorNivel3CarteleraFunciones').style.display = 'none';
+                               if (window._buscadorCarteleraModoDonde === 'pelicula') {
+                                   document.getElementById('buscadorNivel3CarteleraProvinciaLocalidad').style.display = 'block';
+                                   return;
+                               }
+                               if (window._buscadorCarteleraFuncionesOrigen === 'recomendacion') {
+                                   window._buscadorCarteleraFuncionesOrigen = null;
+                                   document.getElementById('buscadorNivel3CarteleraRecomendacion').style.display = 'block';
+                                   return;
+                               }
+                               document.getElementById('buscadorNivel3CarteleraTitulo').style.display = 'block';
+                           };
+
+                           // ============================================================
+                           // Cartelera — "¿Qué hay para ver?" — Paso 1: ¿Dónde?
+                           // ============================================================
+                    window._buscadorAbrirCarteleraDonde = function() {
+                        window._buscadorCarteleraModoDonde = 'salida';
+                        document.getElementById('buscadorCarteleraDondeSubtitulo').textContent = '¿Dónde estás?';
+                        document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
+                        document.getElementById('buscadorNivel3CarteleraDonde').style.display = 'block';
+                    };
+
+                    // Vuelve desde "¿Dónde estás?" según el modo: si se
+                    // llegó eligiendo una película (búsqueda o
+                    // recomendación), vuelve a esa pantalla; si se llegó
+                    // desde "Organizar una salida", vuelve al menú
+                    // principal de Cartelera, como siempre.
+                    window._buscadorVolverDesdeDonde = function() {
+                        if (window._buscadorCarteleraModoDonde === 'pelicula') {
+                            document.getElementById('buscadorNivel3CarteleraDonde').style.display = 'none';
+                            if (window._buscadorCarteleraFuncionesOrigen === 'recomendacion') {
+                                document.getElementById('buscadorNivel3CarteleraRecomendacion').style.display = 'block';
+                                document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-recomendacion');
+                            } else {
+                                document.getElementById('buscadorNivel3CarteleraTitulo').style.display = 'block';
+                            }
+                            return;
+                        }
+                        window._buscadorVolverANivel2Cartelera();
+                    };
+
+                           // Muestra la pantalla de resultado con el estado de
+                           // "pensando" — se llama antes de cualquier fetch, para que
+                           // el usuario vea la transición de pantalla de inmediato.
+                           window._buscadorCarteleraMostrarPensando = function() {
+                               document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
+                               document.getElementById('buscadorNivel3CarteleraDondeResultado').style.display = 'block';
+                               document.getElementById('buscadorCarteleraDondeResultado').innerHTML = `
+                                   <div class="buscador-pensando">
+                                       <img src="assets/images/icon-512.png" alt="Cinemarketer pensando">
+                                       <span>Cargando resultados...</span>
+                                   </div>
+                               `;
+                           };
+
+                           window._buscadorVolverANivel3CarteleraDonde = function() {
+                               document.getElementById('buscadorNivel3CarteleraDondeResultado').style.display = 'none';
+                               document.getElementById('buscadorNivel3CarteleraDonde').style.display = 'block';
+                           };
+
+                           window._buscadorCarteleraUsarGeolocalizacion = function() {
+                               if (!navigator.geolocation) {
+                                   window._buscadorCarteleraMostrarPensando();
+                                   document.getElementById('buscadorCarteleraDondeResultado').innerHTML =
+                                       '<div class="buscador-predictor-vacio">Tu navegador no soporta geolocalización. Volvé y probá con una de las otras opciones.</div>';
+                                   return;
+                               }
+                               window._buscadorCarteleraMostrarPensando();
+                               navigator.geolocation.getCurrentPosition(
+                                   (pos) => window._buscadorCarteleraBuscarPorCoordenadas(pos.coords.latitude, pos.coords.longitude),
+                                   () => {
+                                       document.getElementById('buscadorCarteleraDondeResultado').innerHTML =
+                                           '<div class="buscador-predictor-vacio">No pudimos acceder a tu ubicación. Volvé y probá con una de las otras opciones.</div>';
+                                   }
+                               );
+                           };
+
+                           window._buscadorCarteleraBuscarPorCoordenadas = async function(lat, lng) {
+                               try {
+                                   const token = localStorage.getItem('token');
+                                   const res = await fetch(`${CONFIG.API_URL}/cartelera/cines-cercanos?lat=${lat}&lng=${lng}`, {
+                                       headers: { 'Authorization': `Bearer ${token}` }
+                                   });
+                                   if (!res.ok) throw new Error();
+                                   const cines = await res.json();
+                                   window._buscadorCarteleraRenderCines(cines, true);
+                               } catch (e) {
+                                   document.getElementById('buscadorCarteleraDondeResultado').innerHTML =
+                                       '<div class="buscador-predictor-vacio">No pudimos traer los cines. Volvé e intentá de nuevo.</div>';
+                               }
+                           };
+
+                    // Provincias que cubrimos hoy — mismas 15 que scrapea el
+                    // backend. Lista fija y chica, no hace falta pedirla al
+                    // servidor.
+                    // Las 24 provincias reales del país — mismo catálogo que
+                    // Mi Cuenta, completo, sin recortar a lo que hoy cubre el
+                    // scraper. Para las que todavía no scrapeamos (marcadas
+                    // abajo), elegirlas simplemente va a dar "no encontramos
+                    // cines ahí todavía" — es honesto, no las escondemos.
+                    var PROVINCIAS_CARTELERA = [
+                        ['caba', 'Ciudad Autónoma de Buenos Aires'], ['buenos-aires', 'Buenos Aires'],
+                        ['catamarca', 'Catamarca'], ['chaco', 'Chaco'], ['chubut', 'Chubut'],
+                        ['cordoba', 'Córdoba'], ['corrientes', 'Corrientes'], ['entre-rios', 'Entre Ríos'],
+                        ['formosa', 'Formosa'], ['jujuy', 'Jujuy'], ['la-pampa', 'La Pampa'],
+                        ['la-rioja', 'La Rioja'], ['mendoza', 'Mendoza'], ['misiones', 'Misiones'],
+                        ['neuquen', 'Neuquén'], ['rio-negro', 'Río Negro'], ['salta', 'Salta'],
+                        ['san-juan', 'San Juan'], ['san-luis', 'San Luis'], ['santa-cruz', 'Santa Cruz'],
+                        ['santa-fe', 'Santa Fe'], ['santiago-del-estero', 'Santiago del Estero'],
+                        ['tierra-del-fuego', 'Tierra del Fuego'], ['tucuman', 'Tucumán'],
+                    ];
+
+                    // Mismo catálogo que usa Configuración > Mi Cuenta.
+                    var LOCALIDADES_CARTELERA = {
+                        'buenos-aires': ['La Plata','Mar del Plata','Bahía Blanca','Quilmes','Lanús','Lomas de Zamora','Almirante Brown','Berazategui','Florencio Varela','Tigre','San Isidro','Vicente López','General San Martín','Tres de Febrero','Morón','Hurlingham','Ituzaingó','Merlo','Moreno','General Rodríguez','Luján','Campana','Zárate','San Nicolás','Tandil','Azul','Olavarría','Necochea','Junín','Pergamino','Pehuajó','Trenque Lauquen','Chivilcoy','Mercedes','Lobos','Chascomús','Dolores','Pinamar','Villa Gesell','Miramar'],
+                        'cordoba': ['Córdoba','Villa Carlos Paz','Río Cuarto','San Francisco','Villa María','Alta Gracia','Jesús María','Bell Ville','Río Tercero','Cosquín','La Falda','Cruz del Eje','Laboulaye','Marcos Juárez','Villa Dolores'],
+                        'santa-fe': ['Rosario','Santa Fe','Rafaela','Venado Tuerto','Santo Tomé','Reconquista','Villa Constitución','Casilda','Cañada de Gómez','Esperanza','Las Rosas','Firmat'],
+                        'mendoza': ['Mendoza','San Rafael','Godoy Cruz','Luján de Cuyo','Maipú','Guaymallén','Las Heras','Rivadavia','General Alvear','Malargüe','Tunuyán'],
+                        'tucuman': ['San Miguel de Tucumán','Yerba Buena','Tafí Viejo','Concepción','Aguilares','Banda del Río Salí','Famailla'],
+                        'salta': ['Salta','San Ramón de la Nueva Orán','Tartagal','Rosario de la Frontera','Metán','Cafayate'],
+                        'misiones': ['Posadas','Oberá','Eldorado','Puerto Iguazú','Apóstoles','Leandro N. Alem'],
+                        'chaco': ['Resistencia','Presidencia Roque Sáenz Peña','Villa Ángela','Charata','General San Martín'],
+                        'entre-rios': ['Paraná','Concordia','Gualeguaychú','Concepción del Uruguay','Colón','Victoria','La Paz'],
+                        'corrientes': ['Corrientes','Goya','Paso de los Libres','Mercedes','Curuzú Cuatiá'],
+                        'jujuy': ['San Salvador de Jujuy','Palpalá','San Pedro de Jujuy','Libertador General San Martín','Humahuaca'],
+                        'rio-negro': ['Viedma','San Carlos de Bariloche','Cipolletti','Allen','Roca','El Bolsón'],
+                        'neuquen': ['Neuquén','San Martín de los Andes','Zapala','Cutral Có','Centenario'],
+                        'formosa': ['Formosa','Clorinda','Pirané','El Colorado'],
+                        'la-pampa': ['Santa Rosa','General Pico','Realicó','Eduardo Castex'],
+                        'san-juan': ['San Juan','Rivadavia','Pocito','Chimbas','Rawson','Caucete'],
+                        'san-luis': ['San Luis','Villa Mercedes','Merlo','Quines'],
+                        'santiago-del-estero': ['Santiago del Estero','La Banda','Termas de Río Hondo','Añatuya','Frías'],
+                        'catamarca': ['San Fernando del Valle de Catamarca','Andalgalá','Belén','Tinogasta'],
+                        'la-rioja': ['La Rioja','Chilecito','Aimogasta','Chepes'],
+                        'chubut': ['Rawson','Comodoro Rivadavia','Puerto Madryn','Trelew','Esquel','Rada Tilly'],
+                        'santa-cruz': ['Río Gallegos','Caleta Olivia','El Calafate','Pico Truncado','Puerto Deseado'],
+                        'tierra-del-fuego': ['Ushuaia','Río Grande','Tolhuin'],
+                        'caba': ['Palermo','Belgrano','Caballito','Flores','San Telmo','La Boca','Recoleta','Almagro','Boedo','Villa Crespo','Núñez','Colegiales','Chacarita','Villa del Parque','Liniers','Mataderos','Parque Patricios','Barracas','San Cristóbal','Monserrat','Puerto Madero','Devoto','Villa Urquiza'],
+                    };
+
+                    window._buscadorCarteleraAbrirProvinciaLocalidad = function() {
+                        document.getElementById('buscadorCarteleraProvinciaLocalidadSubtitulo').textContent = '¿Dónde?';
+                        document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
+                        document.getElementById('buscadorNivel3CarteleraProvinciaLocalidad').style.display = 'block';
+
+                        const selectProv = document.getElementById('buscadorCarteleraProvinciaSelect');
+
+                        // Si ya se había elegido algo antes (el usuario avanzó
+                        // y volvió), no se resetea — se preserva la selección.
+                        if (selectProv.options.length > 1) return;
+
+                        selectProv.innerHTML = '<option value="">Elegí una provincia...</option>' +
+                            PROVINCIAS_CARTELERA.map(([slug, nombre]) => `<option value="${slug}">${nombre}</option>`).join('');
+                        selectProv.value = '';
+
+                        const selectLoc = document.getElementById('buscadorCarteleraLocalidadSelect');
+                        selectLoc.innerHTML = '<option value="">Elegí primero una provincia...</option>';
+                        selectLoc.disabled = true;
+
+                        window._buscadorCarteleraActualizarBotonContinuar();
+                    };
+
+                    // Busca, sin distinguir mayúsculas/acentos, cuál opción
+                    // de una lista [slug, nombre] coincide con un texto del
+                    // perfil — el perfil guarda texto libre, no el slug
+                    // exacto que usamos internamente.
+                    function _buscadorCarteleraBuscarCoincidencia(texto, opciones) {
+                        const normalizar = (s) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                        const query = normalizar(texto);
+                        const match = opciones.find(([slug, nombre]) => normalizar(nombre) === query || normalizar(slug) === query);
+                        return match ? match[0] : null;
+                    }
+
+                    window._buscadorCarteleraUsarMiUbicacionPerfil = async function() {
+                        let provinciaPerfil = '';
+                        let localidadPerfil = '';
+                        try {
+                            const profile = await API.getProfile();
+                            provinciaPerfil = profile.provincia || '';
+                            localidadPerfil = profile.localidad || '';
+                        } catch (e) {}
+
+                        window._buscadorCarteleraAbrirProvinciaLocalidad();
+                        document.getElementById('buscadorCarteleraProvinciaLocalidadSubtitulo').textContent = 'Confirmá tu ubicación';
+
+                        // Sin datos en el perfil: se abren igual los combos,
+                        // vacíos, para que el usuario elija a mano — no hay
+                        // nada más que hacer acá.
+                        if (!provinciaPerfil) return;
+
+                        const selectProv = document.getElementById('buscadorCarteleraProvinciaSelect');
+                        const slugProvincia = provinciaPerfil
+                            ? _buscadorCarteleraBuscarCoincidencia(provinciaPerfil, PROVINCIAS_CARTELERA)
+                            : null;
+
+                        if (!slugProvincia) {
+                            // No se pudo relacionar la provincia del perfil
+                            // con ninguna que cubrimos — se deja para que el
+                            // usuario elija a mano, sin trabar el flujo.
+                            return;
+                        }
+
+                        selectProv.value = slugProvincia;
+                        window._buscadorCarteleraProvinciaCambio();
+
+                        if (localidadPerfil) {
+                            const selectLoc = document.getElementById('buscadorCarteleraLocalidadSelect');
+                            const opcionesLoc = Array.from(selectLoc.options).map(o => [o.value, o.textContent]);
+                            const matchLocalidad = _buscadorCarteleraBuscarCoincidencia(localidadPerfil, opcionesLoc);
+                            if (matchLocalidad) {
+                                selectLoc.value = matchLocalidad;
+                                window._buscadorCarteleraActualizarBotonContinuar();
+                            }
+                        }
+                    };
+
+                    window._buscadorVolverANivel3CarteleraDondeDesdeCombos = function() {
+                        document.getElementById('buscadorNivel3CarteleraProvinciaLocalidad').style.display = 'none';
+                        document.getElementById('buscadorNivel3CarteleraDonde').style.display = 'block';
+                    };
+
+                    window._buscadorCarteleraProvinciaCambio = function() {
+                        const provincia = document.getElementById('buscadorCarteleraProvinciaSelect').value;
+                        const selectLoc = document.getElementById('buscadorCarteleraLocalidadSelect');
+                        window._buscadorCarteleraActualizarBotonContinuar();
+
+                        if (!provincia) {
+                            selectLoc.innerHTML = '<option value="">Elegí primero una provincia...</option>';
+                            selectLoc.disabled = true;
+                            return;
+                        }
+
+                        const localidades = LOCALIDADES_CARTELERA[provincia] || [];
+                        selectLoc.innerHTML = '<option value="">Elegí una localidad...</option>' +
+                            localidades.map(l => `<option value="${l}">${l}</option>`).join('');
+                        selectLoc.disabled = false;
+                    };
+
+                    window._buscadorCarteleraLocalidadCambio = function() {
+                        window._buscadorCarteleraActualizarBotonContinuar();
+                    };
+
+                    window._buscadorCarteleraActualizarBotonContinuar = function() {
+                        const provincia = document.getElementById('buscadorCarteleraProvinciaSelect').value;
+                        const localidad = document.getElementById('buscadorCarteleraLocalidadSelect').value;
+                        const btn = document.getElementById('buscadorCarteleraContinuarBtn');
+                        const habilitado = !!provincia && !!localidad;
+                        btn.disabled = !habilitado;
+                        btn.style.opacity = habilitado ? '1' : '0.4';
+                        btn.style.pointerEvents = habilitado ? 'auto' : 'none';
+                    };
+
+                    window._buscadorCarteleraAbrirCuando = function() {
+                        const provincia = document.getElementById('buscadorCarteleraProvinciaSelect').value;
+                        const localidad = document.getElementById('buscadorCarteleraLocalidadSelect').value;
+
+                        if (window._buscadorCarteleraModoDonde === 'pelicula') {
+                            window._buscadorCarteleraMostrarFuncionesDePeliculaPorGeografia(provincia, localidad);
+                            return;
+                        }
+
+                        window._buscadorCarteleraSalida = { provincia, localidad };
+
+                        document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
+                        document.getElementById('buscadorNivel3CarteleraCuando').style.display = 'block';
+
+                        const fechaInput = document.getElementById('buscadorCarteleraFechaInput');
+                        fechaInput.min = new Date().toISOString().split('T')[0]; // no se puede elegir una fecha pasada
+                        fechaInput.value = '';
+                        document.getElementById('buscadorCarteleraHorarioSelect').value = '';
+                        window._buscadorCarteleraActualizarBotonCuandoContinuar();
+                    };
+
+                    window._buscadorCarteleraActualizarBotonCuandoContinuar = function() {
+                        const fecha = document.getElementById('buscadorCarteleraFechaInput').value;
+                        const btn = document.getElementById('buscadorCarteleraCuandoContinuarBtn');
+                        btn.disabled = !fecha;
+                        btn.style.opacity = fecha ? '1' : '0.4';
+                        btn.style.pointerEvents = fecha ? 'auto' : 'none';
+                    };
+
+                    window._buscadorVolverANivel3ProvinciaLocalidad = function() {
+                        document.getElementById('buscadorNivel3CarteleraCuando').style.display = 'none';
+                        document.getElementById('buscadorNivel3CarteleraProvinciaLocalidad').style.display = 'block';
+                    };
+
+                    window._buscadorCarteleraConfirmarCuando = function() {
+                        window._buscadorCarteleraSalida.fecha = document.getElementById('buscadorCarteleraFechaInput').value;
+                        window._buscadorCarteleraSalida.horario = document.getElementById('buscadorCarteleraHorarioSelect').value;
+
+                        document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
+                        document.getElementById('buscadorNivel3CarteleraPresupuesto').style.display = 'block';
+                        document.getElementById('buscadorCarteleraPresupuestoSelect').value = '';
+                    };
+
+                    window._buscadorVolverANivel3CarteleraCuando = function() {
+                        document.getElementById('buscadorNivel3CarteleraPresupuesto').style.display = 'none';
+                        document.getElementById('buscadorNivel3CarteleraCuando').style.display = 'block';
+                    };
+
+                    window._buscadorCarteleraConfirmarPresupuesto = async function() {
+                        window._buscadorCarteleraSalida.presupuesto = document.getElementById('buscadorCarteleraPresupuestoSelect').value || null;
+
+                        document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
+                        document.getElementById('buscadorNivel3CarteleraResultadoSalida').style.display = 'block';
+                        document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-alto');
+
+                        const lista = document.getElementById('buscadorCarteleraResultadoSalidaLista');
+                        lista.innerHTML = `
+                            <div class="buscador-pensando">
+                                <img src="assets/images/icon-512.png" alt="Cinemarketer pensando">
+                                <span>Armando tu salida...</span>
+                            </div>
+                        `;
+
+                        const { provincia, localidad, fecha, horario } = window._buscadorCarteleraSalida;
+                        const params = new URLSearchParams({ provincia, fecha });
+                        if (localidad) params.set('localidad', localidad);
+                        if (horario) params.set('horario', horario);
+
+                        try {
+                            const token = localStorage.getItem('token');
+                            const res = await fetch(`${CONFIG.API_URL}/cartelera/organizar-salida?${params}`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (!res.ok) throw new Error();
+                            const funciones = await res.json();
+
+                            // Filtro de presupuesto:solo descarta funciones
+                            // con precio CONOCIDO por encima del tope — las
+                            // que no tienen precio de referencia se muestran
+                            // igual, porque no hay forma de saber si entran
+                            // o no dentro del presupuesto.
+                            let funcionesFiltradas = funciones;
+                            let ocultasPorPresupuesto = 0;
+                            const presupuesto = window._buscadorCarteleraSalida.presupuesto;
+                            if (presupuesto && presupuesto !== 'mas30000') {
+                                const tope = parseInt(presupuesto, 10);
+                                funcionesFiltradas = funciones.filter(f => {
+                                    const dentro = f.precioReferencia == null || f.precioReferencia <= tope;
+                                    if (!dentro) ocultasPorPresupuesto++;
+                                    return dentro;
+                                });
+                            }
+
+                            if (!funcionesFiltradas.length) {
+                                lista.innerHTML = ocultasPorPresupuesto > 0
+                                    ? '<div class="buscador-predictor-vacio">Todas las funciones que encontramos superan el presupuesto elegido. Probá con un rango más amplio.</div>'
+                                    : '<div class="buscador-predictor-vacio">No encontramos funciones para esa fecha/zona todavía — probá con otra fecha o ampliá la búsqueda.</div>';
+                                return;
+                            }
+
+                            const avisoPresupuesto = ocultasPorPresupuesto > 0
+                                ? `<p style="color:#999; font-size:0.78rem; margin-bottom:0.8rem;">Se ocultaron ${ocultasPorPresupuesto} función(es) por encima del presupuesto elegido.</p>`
+                                : '';
+
+                            // Agrupadas por película — puede haber varios
+                            // cines distintos, así que acá sí se muestra el
+                            // nombre del cine en cada fila.
+                            const porPelicula = {};
+                            funcionesFiltradas.forEach(f => {
+                                if (!porPelicula[f.peliculaTitulo]) porPelicula[f.peliculaTitulo] = [];
+                                porPelicula[f.peliculaTitulo].push(f);
+                            });
+
+                            // Mini-carrusel de 2 slides (póster / funciones)
+                            // por película — SOLO tiene efecto en mobile
+                            // (ver CSS). En desktop se ve tal cual antes:
+                            // solo la tabla de funciones, sin póster.
+                            lista.innerHTML = avisoPresupuesto + Object.keys(porPelicula).map((pelicula, idx) => {
+                                const funcs = porPelicula[pelicula];
+                                const poster = funcs[0].poster || '';
+                                const carruselId = `buscadorSalidaCarrusel${idx}`;
+                                const filas = funcs.map(f => `
+                                    <tr>
+                                        <td>${f.cineNombre}</td>
+                                        <td>${f.horario}</td>
+                                        <td>${f.formato}${f.idioma ? ' ' + f.idioma : ''}</td>
+                                        <td>${f.precioReferencia ? '$' + f.precioReferencia.toLocaleString('es-AR') : '—'}</td>
+                                    </tr>
+                                `).join('');
+                                return `
+                                    <div class="buscador-salida-pelicula-wrap">
+                                        <div class="buscador-salida-pelicula-carrusel" id="${carruselId}">
+                                            <div class="buscador-salida-slide buscador-salida-slide-poster">
+                                                <img src="${poster}" alt="${pelicula}" loading="lazy">
+                                            </div>
+                                            <div class="buscador-salida-slide buscador-salida-slide-funciones">
+                                                <div class="buscador-cine-funciones-grupo">
+                                                    <div class="buscador-pelicula-funciones-header">${pelicula}</div>
+                                                    <table class="buscador-funciones-tabla">
+                                                        <thead><tr><th>Cine</th><th>Horario</th><th>Formato</th><th>Precio ref.</th></tr></thead>
+                                                        <tbody>${filas}</tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="buscador-salida-dots" data-target="${carruselId}">
+                                            <span class="buscador-salida-dot activo" data-i="0"></span>
+                                            <span class="buscador-salida-dot" data-i="1"></span>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('');
+
+                            window._buscadorSalidaInicializarCarruseles();
+                        } catch (e) {
+                            lista.innerHTML = '<div class="buscador-predictor-vacio">No pudimos armar los resultados. Intentá de nuevo.</div>';
+                        }
+                    };
+
+                    window._buscadorVolverANivel3CarteleraPresupuesto = function() {
+                        document.getElementById('buscadorNivel3CarteleraResultadoSalida').style.display = 'none';
+                        document.getElementById('buscadorNivel3CarteleraPresupuesto').style.display = 'block';
+                        document.getElementById('buscadorModalSheet').classList.remove('buscador-sheet-salida');
+                    };
+
+                    window._buscadorCarteleraUsarZonaPerfil = function() {
+                               const zona = document.getElementById('buscadorCarteleraBtnPerfilZona').dataset.zona;
+                               window._buscadorCarteleraBuscarPorTexto(zona);
+                           };
+
+                           window._buscadorCarteleraUsarTextoManual = function() {
+                               const texto = document.getElementById('buscadorCarteleraCiudadInput').value.trim();
+                               if (!texto) return;
+                               window._buscadorCarteleraBuscarPorTexto(texto);
+                           };
+
+                           // Fallback sin coordenadas: filtra por el nombre del cine
+                           // (ej. "Palermo" encuentra "Cinemark Palermo") — no es
+                           // distancia real todavía, es un proxy simple hasta que
+                           // tengamos dirección/localidad estructurada de cada cine.
+                           window._buscadorCarteleraBuscarPorTexto = async function(texto) {
+                               window._buscadorCarteleraMostrarPensando();
+                               try {
+                                   const token = localStorage.getItem('token');
+                                   const res = await fetch(`${CONFIG.API_URL}/cartelera/cines-cercanos?texto=${encodeURIComponent(texto)}`, {
+                                       headers: { 'Authorization': `Bearer ${token}` }
+                                   });
+                                   if (!res.ok) throw new Error();
+                                   const cines = await res.json();
+                                   window._buscadorCarteleraRenderCines(cines, false);
+                               } catch (e) {
+                                   document.getElementById('buscadorCarteleraDondeResultado').innerHTML =
+                                       '<div class="buscador-predictor-vacio">No pudimos traer los cines. Volvé e intentá de nuevo.</div>';
+                               }
+                           };
+
+                           window._buscadorCarteleraRenderCines = function(cines, conDistancia) {
+                               const resultado = document.getElementById('buscadorCarteleraDondeResultado');
+                               if (!cines.length) {
+                                   resultado.innerHTML = '<div class="buscador-predictor-vacio">No encontramos cines con ese criterio (todavía solo cubrimos algunos cines de Buenos Aires).</div>';
+                                   return;
+                               }
+                               resultado.innerHTML = cines.map(c => `
+                                                       <p style="margin:0.4rem 0;">
+                                                           ${c.nombre} ${conDistancia ? `— ${c.distanciaKm} km` : ''}
+                                                       </p>
+                                                   `).join('');
+                                               };
+
+                           // ============================================================
+                           // Cartelera — "Por cadena de cine"
+                           // ============================================================
+                           window._buscadorAbrirCarteleraCadena = async function() {
+                               document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
+                               document.getElementById('buscadorNivel3CarteleraCadena').style.display = 'block';
+                               document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-ancho', 'buscador-sheet-alto');
+                               const grid = document.getElementById('buscadorCadenasGrid');
+                               grid.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Cargando cadenas...</div>';
+
+                               try {
+                                   const token = localStorage.getItem('token');
+                                   const res = await fetch(`${CONFIG.API_URL}/cartelera/cadenas`, {
+                                       headers: { 'Authorization': `Bearer ${token}` }
+                                   });
+                                   if (!res.ok) throw new Error();
+                                   const cadenas = await res.json();
+
+                                   if (!cadenas.length) {
+                                       grid.innerHTML = '<div class="buscador-predictor-vacio">No pudimos cargar las cadenas.</div>';
+                                       return;
+                                   }
+
+                            grid.innerHTML = cadenas.map(c => {
+                                const logo = CADENA_LOGOS[c];
+                                const icono = logo
+                                    ? `<img src="${logo}" alt="${c}">`
+                                    : `<i class="fas fa-building buscador-cine-sinlogo"></i>`;
+                                return `
+                                    <div class="buscador-cine-item" onclick="window._buscadorSeleccionarCadena('${c.replace(/'/g, "\\'")}')" title="${c}">
+                                        <div class="buscador-cine-logo-wrap">${icono}</div>
+                                        <span>${c}</span>
+                                    </div>
+                                `;
+                            }).join('');
+                            window._buscadorActivarCarruselAuto('buscadorCadenasGrid');
+                        } catch (e) {
+                            grid.innerHTML = '<div class="buscador-predictor-vacio">No pudimos cargar las cadenas. Intentá de nuevo.</div>';
+                        }
+                    };
+
+                    // Elegir una cadena ya no va directo a funciones — primero
+                    // muestra sus sucursales (mismo ícono que la cadena, o el
+                    // genérico si no hay logo mapeado, con el nombre del cine).
+                    window._buscadorSeleccionarCadena = async function(cadena) {
+                        document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
+                        document.getElementById('buscadorNivel3CarteleraSucursales').style.display = 'block';
+                        document.getElementById('buscadorCarteleraSucursalesTitulo').textContent = `Sucursales de ${cadena}`;
+
+                        const grid = document.getElementById('buscadorSucursalesGrid');
+                        grid.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Cargando sucursales...</div>';
+
+                        try {
+                            const token = localStorage.getItem('token');
+                            const res = await fetch(`${CONFIG.API_URL}/cartelera/cadenas/${encodeURIComponent(cadena)}/cines`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (!res.ok) throw new Error();
+                            const cines = await res.json();
+
+                            if (!cines.length) {
+                                grid.innerHTML = '<div class="buscador-predictor-vacio">No encontramos sucursales de esta cadena en los cines que ya tenemos cargados.</div>';
+                                return;
+                            }
+
+                            const logo = CADENA_LOGOS[cadena];
+                            const icono = logo
+                                ? `<img src="${logo}" alt="${cadena}">`
+                                : `<i class="fas fa-building buscador-cine-sinlogo"></i>`;
+
+                            grid.innerHTML = cines.map(c => `
+                                <div class="buscador-cine-item" onclick="window._buscadorSeleccionarSucursal('${c.nombre.replace(/'/g, "\\'")}')" title="${c.nombre}">
+                                    <div class="buscador-cine-logo-wrap">${icono}</div>
+                                    <span>${c.nombre}</span>
+                                </div>
+                            `).join('');
+                            window._buscadorActivarCarruselAuto('buscadorSucursalesGrid');
+
+                            // Con una sola sucursal, ese paso intermedio no
+                            // aporta nada — se salta directo a sus funciones.
+                            // La bandera hace que "Volver" también salte ese
+                            // paso al regresar (si no, quedaría una pantalla
+                            // de sucursales con una sola opción sin sentido).
+                            window._buscadorCarteleraSaltoSucursales = cines.length === 1;
+                            if (cines.length === 1) {
+                                window._buscadorSeleccionarSucursal(cines[0].nombre);
+                            }
+                        } catch (e) {
+                            grid.innerHTML = '<div class="buscador-predictor-vacio">No pudimos cargar las sucursales. Intentá de nuevo.</div>';
+                        }
+                    };
+
+                    window._buscadorSeleccionarSucursal = async function(nombreCine) {
+                        document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
+                        document.getElementById('buscadorNivel3CarteleraCadenaFunciones').style.display = 'block';
+                        document.getElementById('buscadorCarteleraCadenaFuncionesTitulo').textContent = nombreCine;
+
+                        const lista = document.getElementById('buscadorCarteleraCadenaFuncionesLista');
+                        lista.innerHTML = `
+                            <div class="buscador-pensando">
+                                <img src="assets/images/icon-512.png" alt="Cinemarketer pensando">
+                                <span>Buscando funciones...</span>
+                            </div>
+                        `;
+
+                        try {
+                            const token = localStorage.getItem('token');
+                            const res = await fetch(`${CONFIG.API_URL}/cartelera/funciones-por-cine?cine=${encodeURIComponent(nombreCine)}`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (!res.ok) throw new Error();
+                            const funciones = await res.json();
+
+                            if (!funciones.length) {
+                                lista.innerHTML = '<div class="buscador-predictor-vacio">No encontramos funciones para esta sucursal.</div>';
+                                return;
+                            }
+
+                            // Chips de día — mismo criterio y misma función
+                            // de filtrado (_buscadorFuncionesFiltrarDia) que
+                            // ya usa "Ya sé qué quiero ver".
+                            const diasUnicos = [...new Set(funciones.map(f => f.dia))].sort();
+                            const diasChips = diasUnicos.map(dia => {
+                                const funcionDelDia = funciones.find(f => f.dia === dia);
+                                const fecha = new Date(dia + 'T00:00:00');
+                                const nombreCorto = funcionDelDia.esHoy ? 'Hoy' :
+                                    fecha.toLocaleDateString('es-AR', { weekday: 'short' }).replace('.', '');
+                                const numero = fecha.getDate();
+                                return `<button class="buscador-dia-chip" data-dia="${dia}" onclick="window._buscadorFuncionesFiltrarDia('${dia}')">${nombreCorto} ${numero}</button>`;
+                            }).join('');
+                            const filtroHtml = `
+                                <div class="buscador-funciones-dia-filtro" id="buscadorCarteleraFuncionesDiaFiltro">
+                                    <button class="buscador-dia-chip activo" data-dia="todos" onclick="window._buscadorFuncionesFiltrarDia('todos')">Todos</button>
+                                    ${diasChips}
+                                </div>
+                            `;
+
+                            // Agrupadas por película — acá el cine ya es fijo
+                            // (es el título de la pantalla), así que no hace
+                            // falta repetirlo en cada fila.
+                            const porPelicula = {};
+                            funciones.forEach(f => {
+                                if (!porPelicula[f.peliculaTitulo]) porPelicula[f.peliculaTitulo] = [];
+                                porPelicula[f.peliculaTitulo].push(f);
+                            });
+
+                            const gruposHtml = Object.keys(porPelicula).map(pelicula => {
+                                const filas = porPelicula[pelicula].map(f => `
+                                    <tr data-dia="${f.dia}">
+                                        <td>${f.dia}${f.esHoy ? '<span class="buscador-funciones-hoy">HOY</span>' : ''}</td>
+                                        <td>${f.horario}</td>
+                                        <td>${f.formato}${f.idioma ? ' ' + f.idioma : ''}</td>
+                                    </tr>
+                                `).join('');
+                                return `
+                                    <div class="buscador-cine-funciones-grupo">
+                                        <div class="buscador-pelicula-funciones-header">${pelicula}</div>
+                                        <table class="buscador-funciones-tabla">
+                                            <thead><tr><th>Día</th><th>Horario</th><th>Formato</th></tr></thead>
+                                            <tbody>${filas}</tbody>
+                                        </table>
+                                    </div>
+                                `;
+                            }).join('');
+
+                            lista.innerHTML = filtroHtml + gruposHtml;
+                        } catch (e) {
+                            lista.innerHTML = '<div class="buscador-predictor-vacio">No pudimos traer las funciones. Intentá de nuevo.</div>';
+                        }
+                    };
+
+                    window._buscadorVolverANivel3CarteleraSucursales = function() {
+                        document.getElementById('buscadorNivel3CarteleraCadenaFunciones').style.display = 'none';
+                        if (window._buscadorCarteleraSaltoSucursales) {
+                            // Se había saltado el paso de sucursales (cadena
+                            // con una sola) — volver también lo salta.
+                            document.getElementById('buscadorNivel3CarteleraCadena').style.display = 'block';
+                        } else {
+                            document.getElementById('buscadorNivel3CarteleraSucursales').style.display = 'block';
+                        }
+                    };
+
+                    window._buscadorVolverANivel3CarteleraCadena = function() {
+                        document.getElementById('buscadorNivel3CarteleraSucursales').style.display = 'none';
+                        document.getElementById('buscadorNivel3CarteleraCadena').style.display = 'block';
                     };
 
                     window._buscadorBuscarPorSaga = function(collectionId, nombre) {
@@ -7150,7 +8390,12 @@ window._buscadorAbrirNivel3Genero = async function() {
         window._buscadorTipoContenido === 'pelicula' ? 'Elegí un género de película' : 'Elegí un género de serie';
 
     const grid = document.getElementById('buscadorGenerosGrid');
-    grid.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Cargando géneros...</div>';
+    grid.innerHTML = `
+        <div class="buscador-pensando">
+            <img src="assets/images/icon-512.png" alt="Cinemarketer pensando">
+            <span>Cargando géneros...</span>
+        </div>
+    `;
 
     try {
         const token = localStorage.getItem('token');
@@ -7644,7 +8889,11 @@ window.abrirDondeVerla = async function(movieId, event) {
     overlay.style.display = 'block';
     panel.style.display   = 'block';
     document.body.style.overflow = 'hidden';
-    contenido.innerHTML   = '<div style="text-align:center;padding:1rem;color:#ccc;"><i class="fas fa-spinner fa-spin"></i></div>';
+    contenido.innerHTML = `
+        <div class="buscador-pensando" style="padding:1rem;">
+            <img src="assets/images/icon-512.png" alt="Cinemarketer pensando">
+        </div>
+    `;
 
     try {
         const token = localStorage.getItem('token');
@@ -7814,7 +9063,11 @@ window.abrirActorModal = async function(personId, nombre, movieId) {
     panel.style.transform = 'translate(-50%, -50%)';
     document.body.style.overflow = 'hidden';
 
-    contenido.innerHTML = '<div style="text-align:center;padding:2rem;color:#ccc;"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
+    contenido.innerHTML = `
+        <div class="buscador-pensando">
+            <img src="assets/images/icon-512.png" alt="Cinemarketer pensando">
+        </div>
+    `;
 
     try {
         const token = localStorage.getItem('token');

@@ -204,6 +204,10 @@
                     <i class="fas fa-map-marker-alt"></i>
                     <span>Dónde/cuándo verla</span>
                 </button>
+                <button class="buscador-opcion" onclick="window._buscadorIrANivel2('cartelera')">
+                    <i class="fas fa-ticket-alt"></i>
+                    <span>Cartelera y funciones</span>
+                </button>
                 <button class="buscador-opcion" onclick="window._buscadorIrANivel2('mi_actividad')">
                     <i class="fas fa-user-circle"></i>
                     <span>Sobre mi actividad cinéfila</span>
@@ -456,14 +460,6 @@
                         </div>
                         <i class="fas fa-chevron-right"></i>
                     </button>
-                    <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('donde_ver_cartelera')">
-                        <i class="fas fa-ticket-alt"></i>
-                        <div>
-                            <strong>Cartelera y funciones</strong>
-                            <span>Cines cerca tuyo, horarios de hoy o mañana</span>
-                        </div>
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
                     <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('donde_ver_estrenos')">
                         <i class="fas fa-calendar-plus"></i>
                         <div>
@@ -662,9 +658,255 @@
                 </div>
             </div>
 
+            <!-- NIVEL 2 — Cartelera y funciones (7ma puerta) -->
+            <div class="buscador-nivel2" id="buscadorNivel2Cartelera" style="display:none;">
+                <button class="buscador-volver" onclick="window._buscadorVolverNivel1()">
+                    <i class="fas fa-chevron-left"></i> Volver
+                </button>
+                <div class="buscador-nivel2-lista">
+                    <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('cartelera_ya_se_que_ver')">
+                        <i class="fas fa-magnifying-glass"></i>
+                        <div>
+                            <strong>Ya sé qué quiero ver</strong>
+                            <span>Elegí el título y te decimos cuándo y dónde</span>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('cartelera_recomendacion')">
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                        <div>
+                            <strong>¿Alguna recomendación?</strong>
+                            <span>Según tu espíritu cinéfilo</span>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('cartelera_que_hay')">
+                        <i class="fas fa-clapperboard"></i>
+                        <div>
+                            <strong>Organizar una salida</strong>
+                            <span>Según dónde, cuándo y cuánto $</span>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <button class="buscador-criterio" onclick="window._buscadorCriterioSeleccionado('cartelera_cadena')">
+                        <i class="fas fa-building"></i>
+                        <div>
+                            <strong>Por cadena de cine</strong>
+                            <span>Cinemark, Cinépolis, Hoyts y más</span>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- NIVEL 3 — Cartelera: "Ya sé qué quiero ver". Grilla de
+pósters (cartelera + próximos estrenos, scrapeados) con filtro
+en vivo — mismo patrón que buscadorNivel3Saga. -->
+            <div class="buscador-nivel2" id="buscadorNivel3CarteleraTitulo" style="display:none;">
+                <button class="buscador-volver" onclick="window._buscadorVolverANivel2Cartelera()">
+                    <i class="fas fa-chevron-left"></i> Volver
+                </button>
+                <p class="buscador-subtitulo">¿Cuál es?</p>
+                <input type="text" id="buscadorCarteleraTituloFiltro" class="filtro-input"
+                       placeholder="Buscar película..." oninput="window._buscadorFiltrarCarteleraTitulos(this.value)"
+                       style="margin-bottom:0.8rem;">
+                <div class="buscador-carrusel-wrap">
+                    <button class="buscador-carrusel-flecha buscador-carrusel-flecha-izq" onclick="window._buscadorCarruselMover('buscadorCarteleraTituloGrid', -1)"><i class="fas fa-chevron-left"></i></button>
+                    <div class="buscador-sagas-grid buscador-carrusel" id="buscadorCarteleraTituloGrid"></div>
+                    <button class="buscador-carrusel-flecha buscador-carrusel-flecha-der" onclick="window._buscadorCarruselMover('buscadorCarteleraTituloGrid', 1)"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+
+            <!-- NIVEL 3.5 — Cartelera: funciones de la película elegida.
+Sin diseño todavía a propósito — se muestra crudo tal cual
+viene del backend, hasta que decidamos cómo presentarlo. -->
+            <div class="buscador-nivel2" id="buscadorNivel3CarteleraFunciones" style="display:none;">
+                <button class="buscador-volver" onclick="window._buscadorVolverANivel3CarteleraTitulo()">
+                    <i class="fas fa-chevron-left"></i> Volver
+                </button>
+                <p class="buscador-subtitulo" id="buscadorCarteleraFuncionesTitulo"></p>
+                <div id="buscadorCarteleraFuncionesLista"></div>
+            </div>
+
+            <!-- NIVEL 3 — Cartelera: "¿Alguna recomendación?" — cruza el
+         top-3 de género del espíritu cinéfilo contra la cartelera real. -->
+            <div class="buscador-nivel2" id="buscadorNivel3CarteleraRecomendacion" style="display:none;">
+                <button class="buscador-volver" onclick="window._buscadorVolverANivel2Cartelera()">
+                    <i class="fas fa-chevron-left"></i> Volver
+                </button>
+                <p class="buscador-subtitulo">Según tu espíritu cinéfilo</p>
+                <div id="buscadorCarteleraRecomendacionTotem"></div>
+                <div id="buscadorCarteleraRecomendacionLista"></div>
+            </div>
+
+            <!-- NIVEL 3 — Cartelera: "¿Qué hay para ver?" — Paso 1: ¿Dónde?
+         Cascada: geolocalización → zona del perfil → texto manual. -->
+            <div class="buscador-nivel2" id="buscadorNivel3CarteleraDonde" style="display:none;">
+                <button class="buscador-volver" onclick="window._buscadorVolverDesdeDonde()">
+                    <i class="fas fa-chevron-left"></i> Volver
+                </button>
+                <p class="buscador-subtitulo" id="buscadorCarteleraDondeSubtitulo">¿Dónde estás?</p>
+
+                <div class="buscador-nivel2-lista">
+                    <button class="buscador-criterio" onclick="window._buscadorCarteleraAbrirProvinciaLocalidad()">
+                        <i class="fas fa-map-location-dot"></i>
+                        <div>
+                            <strong>Provincia/Localidad</strong>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+
+                    <button class="buscador-criterio" onclick="window._buscadorCarteleraUsarMiUbicacionPerfil()">
+                        <i class="fas fa-location-dot"></i>
+                        <div>
+                            <strong>Mi ubicación</strong>
+                            <span>Según los datos de tu perfil</span>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- NIVEL 3.5 — Cartelera: "Organizar una salida" — Paso 1b:
+         Provincia/Localidad (combos comunicados). -->
+            <div class="buscador-nivel2" id="buscadorNivel3CarteleraProvinciaLocalidad" style="display:none;">
+                <button class="buscador-volver" onclick="window._buscadorVolverANivel3CarteleraDondeDesdeCombos()">
+                    <i class="fas fa-chevron-left"></i> Volver
+                </button>
+                <p class="buscador-subtitulo" id="buscadorCarteleraProvinciaLocalidadSubtitulo">¿Dónde?</p>
+
+                <label style="display:block; font-size:0.8rem; font-weight:600; color:#555; margin-bottom:0.3rem;">Provincia</label>
+                <select id="buscadorCarteleraProvinciaSelect" class="filtro-input" style="margin-bottom:1rem;" onchange="window._buscadorCarteleraProvinciaCambio()">
+                    <option value="">Elegí una provincia...</option>
+                </select>
+
+                <label style="display:block; font-size:0.8rem; font-weight:600; color:#555; margin-bottom:0.3rem;">Localidad</label>
+                <select id="buscadorCarteleraLocalidadSelect" class="filtro-input" style="margin-bottom:1rem;" disabled onchange="window._buscadorCarteleraLocalidadCambio()">
+                    <option value="">Elegí primero una provincia...</option>
+                </select>
+
+                <button class="buscador-criterio" id="buscadorCarteleraContinuarBtn" disabled
+                        onclick="window._buscadorCarteleraAbrirCuando()"
+                        style="opacity:0.4; pointer-events:none; justify-content:center;">
+                    <span>Continuar</span>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- NIVEL 3.5 — Cartelera: "Organizar una salida" — Paso 2:
+         ¿Cuándo? Fecha obligatoria, franja horaria optativa. -->
+            <div class="buscador-nivel2" id="buscadorNivel3CarteleraCuando" style="display:none;">
+                <button class="buscador-volver" onclick="window._buscadorVolverANivel3ProvinciaLocalidad()">
+                    <i class="fas fa-chevron-left"></i> Volver
+                </button>
+                <p class="buscador-subtitulo">¿Cuándo tenés pensado salir?</p>
+
+                <label style="display:block; font-size:0.8rem; font-weight:600; color:#555; margin-bottom:0.3rem;">Fecha</label>
+                <input type="date" id="buscadorCarteleraFechaInput" class="filtro-input" style="margin-bottom:1rem;" onchange="window._buscadorCarteleraActualizarBotonCuandoContinuar()">
+
+                <label style="display:block; font-size:0.8rem; font-weight:600; color:#555; margin-bottom:0.3rem;">Horario (opcional)</label>
+                <select id="buscadorCarteleraHorarioSelect" class="filtro-input" style="margin-bottom:1rem;">
+                    <option value="">Sin preferencia</option>
+                    <option value="manana">Mañana</option>
+                    <option value="tarde">Tarde</option>
+                    <option value="noche">Noche</option>
+                </select>
+
+                <button class="buscador-criterio" id="buscadorCarteleraCuandoContinuarBtn" disabled
+                        onclick="window._buscadorCarteleraConfirmarCuando()"
+                        style="opacity:0.4; pointer-events:none; justify-content:center;">
+                    <span>Continuar</span>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- NIVEL 3.5 — Cartelera: "Organizar una salida" — Paso 3:
+         ¿Presupuesto? Optativo — no filtra resultados reales todavía
+         (la fuente no expone precio), solo se guarda la preferencia. -->
+            <div class="buscador-nivel2" id="buscadorNivel3CarteleraPresupuesto" style="display:none;">
+                <button class="buscador-volver" onclick="window._buscadorVolverANivel3CarteleraCuando()">
+                    <i class="fas fa-chevron-left"></i> Volver
+                </button>
+                <p class="buscador-subtitulo">¿Tenés pensado un presupuesto?</p>
+                <p style="color:#999; font-size:0.8rem; margin:-0.5rem 0 1rem;">Opcional — filtramos por precio donde ya tenemos el dato cargado; para el resto de los cines, mostramos la función igual sin descartarla.</p>
+
+                <select id="buscadorCarteleraPresupuestoSelect" class="filtro-input" style="margin-bottom:1rem;">
+                    <option value="">Sin preferencia</option>
+                    <option value="10000">Hasta $10.000</option>
+                    <option value="15000">Hasta $15.000</option>
+                    <option value="20000">Hasta $20.000</option>
+                    <option value="30000">Hasta $30.000</option>
+                    <option value="mas30000">Más de $30.000</option>
+                </select>
+
+                <button class="buscador-criterio" onclick="window._buscadorCarteleraConfirmarPresupuesto()" style="justify-content:center;">
+                    <span>Ver resultados</span>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- NIVEL 3.5 — Cartelera: resultado final de "Organizar una salida". -->
+            <div class="buscador-nivel2" id="buscadorNivel3CarteleraResultadoSalida" style="display:none;">
+                <button class="buscador-volver" onclick="window._buscadorVolverANivel3CarteleraPresupuesto()">
+                    <i class="fas fa-chevron-left"></i> Volver
+                </button>
+                <p class="buscador-subtitulo">Tu salida</p>
+                <div id="buscadorCarteleraResultadoSalidaLista"></div>
+            </div>
+
+            <!-- NIVEL 3.5 — Cartelera: resultado de "¿Dónde estás?" (cines
+         cercanos/filtrados). Pantalla propia, con su estado de carga. -->
+            <div class="buscador-nivel2" id="buscadorNivel3CarteleraDondeResultado" style="display:none;">
+                <button class="buscador-volver" onclick="window._buscadorVolverANivel3CarteleraDonde()">
+                    <i class="fas fa-chevron-left"></i> Volver
+                </button>
+                <p class="buscador-subtitulo">Cines encontrados</p>
+                <div id="buscadorCarteleraDondeResultado"></div>
+            </div>
+
+            <!-- NIVEL 3 — Cartelera: "Por cadena de cine". Mismo patrón que
+         la grilla de plataformas de "Dónde/cuándo verla". -->
+            <div class="buscador-nivel2" id="buscadorNivel3CarteleraCadena" style="display:none;">
+                <button class="buscador-volver" onclick="window._buscadorVolverANivel2Cartelera()">
+                    <i class="fas fa-chevron-left"></i> Volver
+                </button>
+                <p class="buscador-subtitulo">Elegí una cadena</p>
+                <div class="buscador-carrusel-wrap">
+                    <button class="buscador-carrusel-flecha buscador-carrusel-flecha-izq" onclick="window._buscadorCarruselMover('buscadorCadenasGrid', -1)"><i class="fas fa-chevron-left"></i></button>
+                    <div class="buscador-carrusel" id="buscadorCadenasGrid"></div>
+                    <button class="buscador-carrusel-flecha buscador-carrusel-flecha-der" onclick="window._buscadorCarruselMover('buscadorCadenasGrid', 1)"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+
+            <!-- NIVEL 3.5 — Cartelera: sucursales de la cadena elegida.
+         Mismo ícono para todas (genérico o el logo de la cadena),
+         nombre de cada sucursal. -->
+            <div class="buscador-nivel2" id="buscadorNivel3CarteleraSucursales" style="display:none;">
+                <button class="buscador-volver" onclick="window._buscadorVolverANivel3CarteleraCadena()">
+                    <i class="fas fa-chevron-left"></i> Volver
+                </button>
+                <p class="buscador-subtitulo" id="buscadorCarteleraSucursalesTitulo"></p>
+                <div class="buscador-carrusel-wrap">
+                    <button class="buscador-carrusel-flecha buscador-carrusel-flecha-izq" onclick="window._buscadorCarruselMover('buscadorSucursalesGrid', -1)"><i class="fas fa-chevron-left"></i></button>
+                    <div class="buscador-carrusel" id="buscadorSucursalesGrid"></div>
+                    <button class="buscador-carrusel-flecha buscador-carrusel-flecha-der" onclick="window._buscadorCarruselMover('buscadorSucursalesGrid', 1)"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+
+            <!-- NIVEL 3.5 — Cartelera: funciones de la cadena elegida.
+         Crudo por ahora, mismo criterio que las otras pantallas de
+         resultado — se le da formato después. -->
+            <div class="buscador-nivel2" id="buscadorNivel3CarteleraCadenaFunciones" style="display:none;">
+                <button class="buscador-volver" onclick="window._buscadorVolverANivel3CarteleraSucursales()">
+                    <i class="fas fa-chevron-left"></i> Volver
+                </button>
+                <p class="buscador-subtitulo" id="buscadorCarteleraCadenaFuncionesTitulo"></p>
+                <div id="buscadorCarteleraCadenaFuncionesLista"></div>
+            </div>
+
             <!-- NIVEL 3 — Próximamente (compartida por los criterios que
          todavía no están desarrollados) -->
-            <div class="buscador-nivel2" id="buscadorNivel3Proximamente" style="display:none;">
+            <div class="buscador-nivel3" id="buscadorNivel3Proximamente" style="display:none;">
                 <button class="buscador-volver" id="buscadorProximamenteVolverBtn">
                     <i class="fas fa-chevron-left"></i> Volver
                 </button>
