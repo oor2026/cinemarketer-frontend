@@ -7326,15 +7326,23 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                           window._buscadorVolverANivel3CarteleraTitulo = function() {
                                document.getElementById('buscadorNivel3CarteleraFunciones').style.display = 'none';
                                if (window._buscadorCarteleraModoDonde === 'pelicula') {
-                                   document.getElementById('buscadorNivel3CarteleraProvinciaLocalidad').style.display = 'block';
+                                   window._buscadorCarteleraAbrirProvinciaLocalidad();
                                    return;
                                }
                                if (window._buscadorCarteleraFuncionesOrigen === 'recomendacion') {
                                    window._buscadorCarteleraFuncionesOrigen = null;
                                    document.getElementById('buscadorNivel3CarteleraRecomendacion').style.display = 'block';
+                                   const nombreVolverReco = _buscadorPrimerNombre();
+                                   window._buscadorSetBurbuja(nombreVolverReco
+                                       ? `Acá tenés tu recomendación de nuevo, ${nombreVolverReco}.`
+                                       : 'Acá tenés tu recomendación de nuevo.');
                                    return;
                                }
                                document.getElementById('buscadorNivel3CarteleraTitulo').style.display = 'block';
+                               const nombreVolverTitulo = _buscadorPrimerNombre();
+                               window._buscadorSetBurbuja(nombreVolverTitulo
+                                   ? `Elegí la película, ${nombreVolverTitulo}, y te digo dónde y cuándo verla.`
+                                   : 'Elegí la película y te digo dónde y cuándo verla.');
                            };
 
                            // ============================================================
@@ -7355,11 +7363,18 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                     window._buscadorVolverDesdeDonde = function() {
                         if (window._buscadorCarteleraModoDonde === 'pelicula') {
                             document.getElementById('buscadorNivel3CarteleraDonde').style.display = 'none';
+                            const nombreVolverDonde = _buscadorPrimerNombre();
                             if (window._buscadorCarteleraFuncionesOrigen === 'recomendacion') {
                                 document.getElementById('buscadorNivel3CarteleraRecomendacion').style.display = 'block';
                                 document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-recomendacion');
+                                window._buscadorSetBurbuja(nombreVolverDonde
+                                    ? `Acá tenés tu recomendación de nuevo, ${nombreVolverDonde}.`
+                                    : 'Acá tenés tu recomendación de nuevo.');
                             } else {
                                 document.getElementById('buscadorNivel3CarteleraTitulo').style.display = 'block';
+                                window._buscadorSetBurbuja(nombreVolverDonde
+                                    ? `Elegí la película, ${nombreVolverDonde}, y te digo dónde y cuándo verla.`
+                                    : 'Elegí la película y te digo dónde y cuándo verla.');
                             }
                             return;
                         }
@@ -7469,6 +7484,20 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                         document.getElementById('buscadorCarteleraProvinciaLocalidadSubtitulo').textContent = '¿Dónde?';
                         document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
                         document.getElementById('buscadorNivel3CarteleraProvinciaLocalidad').style.display = 'block';
+
+                        const nombreProvLoc = _buscadorPrimerNombre();
+                        const peliculaElegida = window._buscadorPeliculaElegida ? window._buscadorPeliculaElegida.nombre : null;
+                        let mensajeProvLoc;
+                        if (window._buscadorCarteleraModoDonde === 'pelicula' && peliculaElegida) {
+                            mensajeProvLoc = nombreProvLoc
+                                ? `Elegí provincia y localidad, ${nombreProvLoc}, para ver "${peliculaElegida}" cerca tuyo.`
+                                : `Elegí provincia y localidad para ver "${peliculaElegida}" cerca tuyo.`;
+                        } else {
+                            mensajeProvLoc = nombreProvLoc
+                                ? `Elegí provincia y localidad, ${nombreProvLoc}, y seguimos.`
+                                : 'Elegí provincia y localidad y seguimos.';
+                        }
+                        window._buscadorSetBurbuja(mensajeProvLoc);
 
                         const selectProv = document.getElementById('buscadorCarteleraProvinciaSelect');
 
