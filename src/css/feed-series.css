@@ -101,6 +101,21 @@
 }
 
 @media (max-width: 768px) {
+    /* Mismo criterio que en películas: sin sinopsis ni "Ver más" en
+       mobile (quedaba muy alto), título centrado. */
+    .serie-descripcion,
+    .ver-mas {
+        display: none;
+    }
+
+    .serie-titulo {
+        text-align: center;
+        /* .pelicula-titulo no reserva esto — acá sí (min-height fijo para
+           2 líneas, arriba), y quedaba un hueco cuando el título era
+           corto (una sola línea). Se saca solo en mobile. */
+        min-height: 0;
+    }
+
     #filasSeriesContainer {
         margin-left: -1rem !important;
         margin-right: -1rem !important;
