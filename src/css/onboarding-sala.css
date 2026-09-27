@@ -1,0 +1,450 @@
+:root {
+    --onb-rojo: #e50914;
+    --onb-rojo-oscuro: #b2070f;
+    --onb-oscuro: #221f1f;
+    --onb-claro: #f5f5f1;
+    --onb-oro: #d4a13d; /* completado — distinto del rojo de acción, evoca un premio/estrella */
+    --onb-gris: #7f7f7f;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--onb-claro);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Fondo tipo "sala de cine" — oscuro, con un resplandor rojo tenue detrás
+   de la tarjeta, como una pantalla encendida en una sala a oscuras. Es el
+   único lugar donde nos permitimos algo llamativo — el resto de la
+   pantalla se mantiene sobrio. */
+.onb-fondo {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+        radial-gradient(ellipse 900px 600px at 50% 20%, rgba(229, 9, 20, 0.18), transparent 60%),
+        linear-gradient(180deg, #1a1717 0%, var(--onb-oscuro) 100%);
+}
+
+.onb-wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 3rem 2rem 5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.onb-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+}
+
+.onb-marca {
+    height: 76px;
+    width: auto;
+    background: var(--onb-claro);
+    padding: 0.6rem 1.1rem;
+    border-radius: 12px;
+}
+.onb-salir-todo {
+    background: none;
+    border: none;
+    color: rgba(245, 245, 241, 0.55);
+    font-size: 0.82rem;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.onb-salir-todo:hover { color: rgba(245, 245, 241, 0.85); }
+
+/* ===== Rollo de fotogramas — indicador de progreso ===== */
+/* Tira de película real: una banda oscura continua, con las
+   perforaciones corriendo a lo largo de todo el borde (arriba y abajo),
+   no una por cuadro — y los cuadros como ventanas separadas por líneas
+   finas, no tarjetas sueltas. */
+.onb-contexto {
+    text-align: center;
+    max-width: 620px;
+    margin: 0 0 1.75rem;
+}
+
+.onb-contexto h2 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--onb-claro);
+    margin: 0 0 0.4rem;
+    letter-spacing: -0.01em;
+}
+
+.onb-contexto p {
+    font-size: 0.9rem;
+    color: rgba(245, 245, 241, 0.55);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.onb-rollo {
+    display: flex;
+    gap: 0;
+    margin-bottom: 2.5rem;
+    background: #0d0b0b;
+    border-radius: 10px;
+    padding: 16px 4px;
+    position: relative;
+}
+
+.onb-rollo::before,
+.onb-rollo::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    height: 6px;
+    background-image: repeating-linear-gradient(
+        to right,
+        rgba(245, 245, 241, 0.4) 0 6px,
+        transparent 6px 16px
+    );
+    border-radius: 2px;
+}
+.onb-rollo::before { top: 5px; }
+.onb-rollo::after { bottom: 5px; }
+
+.onb-fotograma {
+    width: 60px;
+    height: 52px;
+    border-right: 1px solid rgba(245, 245, 241, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: rgba(245, 245, 241, 0.45);
+    position: relative;
+    transition: background 0.25s ease, color 0.25s ease;
+}
+.onb-fotograma:last-child { border-right: none; }
+.onb-fotograma:first-child { border-radius: 4px 0 0 4px; }
+.onb-fotograma:last-child { border-radius: 0 4px 4px 0; }
+
+.onb-fotograma.actual {
+    background: rgba(229, 9, 20, 0.22);
+    color: var(--onb-claro);
+}
+
+.onb-fotograma.hecho {
+    background: rgba(212, 161, 61, 0.16);
+    color: var(--onb-oro);
+}
+.onb-fotograma.hecho span::before { content: '\f00c'; font-family: 'Font Awesome 6 Free'; font-weight: 900; }
+
+.onb-fotograma.salteado {
+    color: rgba(245, 245, 241, 0.3);
+}
+.onb-fotograma.salteado span { text-decoration: line-through; }
+
+/* ===== Tarjeta principal ===== */
+.onb-card {
+    background: transparent;
+    color: var(--onb-claro);
+    border-radius: 0;
+    padding: 1rem 0 0;
+    width: 100%;
+    box-shadow: none;
+}
+
+.onb-eyebrow {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--onb-rojo);
+    margin: 0 0 0.6rem;
+}
+
+.onb-pregunta {
+    font-size: 2.4rem;
+    line-height: 1.2;
+    margin: 0 0 0.7rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--onb-claro);
+}
+
+.onb-sub {
+    font-size: 1.1rem;
+    color: rgba(245, 245, 241, 0.6);
+    margin: 0 0 2.25rem;
+    line-height: 1.5;
+}
+
+/* ===== Buscador con predictor ===== */
+.onb-buscador-wrap {
+    position: relative;
+    margin-bottom: 1.25rem;
+}
+
+.onb-buscador-icono {
+    position: absolute;
+    left: 0.2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(245, 245, 241, 0.4);
+    font-size: 1.05rem;
+}
+
+.onb-input {
+    width: 100%;
+    padding: 1rem 0.3rem 1rem 2.3rem;
+    border: none;
+    border-bottom: 2px solid rgba(245, 245, 241, 0.25);
+    border-radius: 0;
+    font-size: 1.15rem;
+    background: transparent;
+    color: var(--onb-claro);
+    transition: border-color 0.15s ease;
+}
+.onb-input::placeholder {
+    color: rgba(245, 245, 241, 0.4);
+}
+.onb-input:focus {
+    outline: none;
+    border-bottom-color: var(--onb-rojo);
+}
+
+.onb-input-simple {
+    padding-left: 0.3rem;
+}
+
+.onb-textarea {
+    resize: vertical;
+    min-height: 90px;
+    font-family: inherit;
+    line-height: 1.5;
+}
+
+.onb-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--onb-oscuro);
+    margin-bottom: 0.4rem;
+}
+.onb-label:not(:first-of-type) { margin-top: 1.25rem; }
+
+.onb-contador {
+    display: block;
+    text-align: right;
+    font-size: 0.75rem;
+    color: #aaa;
+    margin-top: 0.3rem;
+}
+
+.onb-predictor-resultados {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #e5e5e0;
+    border-radius: 12px;
+    max-height: 320px;
+    overflow-y: auto;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+    z-index: 10;
+}
+
+.onb-predictor-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.6rem 0.9rem;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0ed;
+}
+.onb-predictor-item:last-child { border-bottom: none; }
+.onb-predictor-item:hover { background: #fdf5f5; }
+
+.onb-predictor-item img,
+.onb-predictor-poster-vacio {
+    width: 64px;
+    height: 92px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #bbb;
+}
+
+.onb-predictor-item strong {
+    display: block;
+    font-size: 1.05rem;
+    line-height: 1.3;
+    color: var(--onb-oscuro);
+    font-weight: 700;
+}
+.onb-predictor-item span {
+    font-size: 0.88rem;
+    color: #999;
+}
+
+.onb-predictor-vacio {
+    padding: 1rem;
+    text-align: center;
+    color: #999;
+    font-size: 0.85rem;
+}
+
+/* ===== Elección confirmada (poster grande) ===== */
+.onb-elegida {
+    display: flex;
+    align-items: center;
+    gap: 1.3rem;
+    background: rgba(229, 9, 20, 0.1);
+    border: 1px solid rgba(229, 9, 20, 0.3);
+    border-radius: 16px;
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 1.5rem;
+}
+
+.onb-elegida img {
+    width: 76px;
+    height: 108px;
+    border-radius: 8px;
+    object-fit: cover;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+}
+
+.onb-elegida-info { flex: 1; min-width: 0; }
+.onb-elegida-label {
+    display: block;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--onb-rojo);
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+}
+.onb-elegida-info strong {
+    font-size: 1.4rem;
+    line-height: 1.3;
+    color: var(--onb-claro);
+}
+
+.onb-elegida-quitar {
+    background: none;
+    border: none;
+    color: rgba(245, 245, 241, 0.5);
+    font-size: 1.3rem;
+    cursor: pointer;
+    padding: 0.4rem;
+}
+.onb-elegida-quitar:hover { color: var(--onb-claro); }
+.onb-elegida-quitar:hover { color: var(--onb-rojo); }
+
+/* ===== Acciones ===== */
+.onb-acciones {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+}
+
+.onb-btn-saltear {
+    background: none;
+    border: none;
+    color: rgba(245, 245, 241, 0.5);
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.onb-btn-saltear:hover { color: var(--onb-claro); }
+
+.onb-btn-continuar {
+    background: var(--onb-rojo);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 1.1rem 2.1rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.15s ease, opacity 0.15s ease, transform 0.1s ease;
+}
+.onb-btn-continuar:hover:not(:disabled) {
+    background: var(--onb-rojo-oscuro);
+    transform: translateY(-1px);
+}
+.onb-btn-continuar:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ===== Pantalla de cierre ===== */
+.onb-paso-cierre {
+    text-align: center;
+}
+.onb-cierre-icono {
+    font-size: 2.4rem;
+    color: var(--onb-oro);
+    margin-bottom: 1rem;
+}
+.onb-btn-cierre {
+    margin: 1.5rem auto 0;
+    display: inline-flex;
+}
+
+/* ===== Tira de pósters acumulados ===== */
+.onb-tira-posters {
+    display: flex;
+    gap: -8px;
+    margin-top: 2rem;
+    min-height: 70px;
+}
+
+.onb-tira-poster {
+    width: 124px;
+    height: 176px;
+    border-radius: 10px;
+    object-fit: cover;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+    border: 3px solid var(--onb-claro);
+    margin-left: -36px;
+    transition: transform 0.2s ease;
+}
+.onb-tira-poster:first-child { margin-left: 0; }
+.onb-tira-poster:hover { transform: translateY(-6px); z-index: 1; }
+
+/* ===== SOLO MOBILE — desktop no se toca ===== */
+@media (max-width: 768px) {
+    .onb-pregunta {
+        font-size: 1.5rem;
+    }
+
+    .onb-tira-poster {
+        width: 62px;
+        height: 88px;
+        border-radius: 8px;
+        margin-left: -18px;
+    }
+
+    .onb-textarea {
+        min-height: 130px;
+    }
+
+    .onb-contexto {
+        text-align: left;
+    }
+}
