@@ -64,8 +64,16 @@ window.loadProfile = async function() {
                 // carga siempre al entrar a la página.
                                 window._inicializarConfiguracionCuenta();
 
-                        // Detectar si es cuenta Google y ajustar campo contraseña
-                        const isGoogleAccount = profile.googleId !== null && profile.googleId !== undefined;
+                // Detectar si es cuenta Google y ajustar campo contraseña.
+                // Ojo: esto solo controla si se OFRECE cambiar/crear
+                // contraseña más abajo en esta pantalla — para
+                // "Eliminar cuenta" se usa un criterio distinto
+                // (window._sinPassword, ver abajo), porque una cuenta
+                // puede tener Google vinculado Y contraseña propia a
+                // la vez (cuenta híbrida) — ahí sí hay que pedir la
+                // contraseña real, no la palabra de confirmación.
+                const isGoogleAccount = profile.googleId !== null && profile.googleId !== undefined;
+window._sinPassword = profile.tienePassword === false; // único criterio real para "Eliminar cuenta"
         const btnCambiarPassword = document.getElementById('btnCambiarPassword');
         const passwordDisplay = document.getElementById('passwordDisplay');
 
@@ -475,9 +483,15 @@ document.addEventListener('keydown', function(e) {
 
 window.abrirEliminarCuenta = function() {
     document.getElementById('inputEliminarPassword').value = '';
+    document.getElementById('inputEliminarConfirmacion').value = '';
     document.getElementById('eliminarError').style.display = 'none';
+
+    const esGoogle = !!window._sinPassword;
+    document.getElementById('bloqueEliminarPassword').style.display = esGoogle ? 'none' : 'block';
+    document.getElementById('bloqueEliminarConfirmacionGoogle').style.display = esGoogle ? 'block' : 'none';
+
     document.getElementById('modalEliminarCuenta').style.display = 'flex';
-    setTimeout(() => document.getElementById('inputEliminarPassword').focus(), 50);
+    setTimeout(() => document.getElementById(esGoogle ? 'inputEliminarConfirmacion' : 'inputEliminarPassword').focus(), 50);
 };
 
 window.cerrarEliminarCuenta = function() {
@@ -485,14 +499,27 @@ window.cerrarEliminarCuenta = function() {
 };
 
 window.confirmarEliminarCuenta = async function() {
-    const password = document.getElementById('inputEliminarPassword').value;
+    const esGoogle = !!window._sinPassword;
     const errorEl  = document.getElementById('eliminarError');
     errorEl.style.display = 'none';
 
-    if (!password) {
-        errorEl.textContent = 'Ingresá tu contraseña para confirmar.';
-        errorEl.style.display = 'block';
-        return;
+    let body;
+    if (esGoogle) {
+        const confirmacion = document.getElementById('inputEliminarConfirmacion').value.trim();
+        if (confirmacion.toUpperCase() !== 'ELIMINAR') {
+            errorEl.textContent = 'Escribí ELIMINAR (en mayúsculas) para confirmar.';
+            errorEl.style.display = 'block';
+            return;
+        }
+        body = { confirmacionGoogle: 'true' };
+    } else {
+        const password = document.getElementById('inputEliminarPassword').value;
+        if (!password) {
+            errorEl.textContent = 'Ingresá tu contraseña para confirmar.';
+            errorEl.style.display = 'block';
+            return;
+        }
+        body = { password };
     }
 
     const btn    = document.getElementById('btnEliminarConfirmar');
@@ -511,7 +538,7 @@ window.confirmarEliminarCuenta = async function() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ password })
+            body: JSON.stringify(body)
         });
 
         const data = await response.json();
@@ -521,7 +548,7 @@ window.confirmarEliminarCuenta = async function() {
             localStorage.clear();
             mostrarCuentaEliminada();
         } else if (response.status === 401) {
-            errorEl.textContent = 'La contraseña ingresada es incorrecta.';
+            errorEl.textContent = esGoogle ? 'No pudimos confirmar la eliminación. Intentá de nuevo.' : 'La contraseña ingresada es incorrecta.';
             errorEl.style.display = 'block';
         } else {
             errorEl.textContent = data.message || 'Ocurrió un error. Intentá nuevamente.';
