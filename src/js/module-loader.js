@@ -224,7 +224,23 @@ async function loadModule(moduleName, element = null, updateHash = true) {
     const container = document.getElementById('module-container');
     if (!container) return;
 
-    container.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>';
+    // Mismo lenguaje visual que el overlay de "pensando" de cada módulo
+    // (perfil, etc.) — inyectado una sola vez acá porque este loader
+    // genérico corre ANTES de que cargue el CSS del módulo en sí.
+    if (!document.getElementById('module-loader-pensando-style')) {
+        const estilo = document.createElement('style');
+        estilo.id = 'module-loader-pensando-style';
+        estilo.textContent = `
+            @keyframes moduleLoaderLatido { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+        `;
+        document.head.appendChild(estilo);
+    }
+    container.innerHTML = `
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.6rem; padding:3rem 1rem; text-align:center;">
+            <img src="assets/images/icon-512.png" alt="Cinemarketer pensando" style="width:40px; height:40px; animation:moduleLoaderLatido 1.1s ease-in-out infinite;">
+            <span style="font-size:0.85rem; color:#999;">Cargando...</span>
+        </div>
+    `;
 
     document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
     if (element) element.classList.add('active');
