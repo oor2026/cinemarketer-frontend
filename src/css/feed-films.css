@@ -849,6 +849,21 @@
     color: #b2070f;
 }
 
+/* Quita la sinopsis (y su "Ver más") de las tarjetas en mobile — con
+   ella, el contenido de cada carta quedaba muy alto y no se veía todo
+   de una. Aplica a TODOS los carruseles, sin distinción. Desktop no
+   se toca, sigue mostrando la sinopsis como siempre. */
+@media (max-width: 768px) {
+    .pelicula-descripcion,
+    .ver-mas {
+        display: none;
+    }
+
+    .pelicula-titulo {
+        text-align: center;
+    }
+}
+
 /* ========== MODAL COMPLETAMENTE REORGANIZADO ========== */
 
 /* Contenedor principal del modal */
