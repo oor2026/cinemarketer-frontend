@@ -377,7 +377,11 @@ window.cargarPeliculasPopulares = async function(pagina = 1) {
 
                 const esValida = (p) => {
                     if (!p.poster_path) return false;
-                    if (!p.overview || p.overview.trim() === '') return false;
+                    // "Próximamente" queda exento de la sinopsis obligatoria —
+                    // muchos estrenos lejanos todavía no la tienen cargada en
+                    // TMDb, y sumado al filtro de popularidad del backend
+                    // dejaba pasar casi nada.
+                    if (criterio !== 'proximamente' && (!p.overview || p.overview.trim() === '')) return false;
                     if (!p.title || !soloLatinos.test(p.title.trim())) return false;
                     if (criterio === 'proximamente') {
                         return !!p.release_date && new Date(p.release_date) > new Date();
@@ -759,7 +763,8 @@ async function cargarPeliculasFila(fila) {
     const soloLatinos = /^[a-zA-ZÀ-ÿ0-9\s\-:,.!?'"()\u00C0-\u024F\u1E00-\u1EFF]+$/;
 
             const esValida = (p, esProximamente) => {
-                if (!p.poster_path || !p.overview || p.overview.trim() === '') return false;
+                if (!p.poster_path) return false;
+                if (!esProximamente && (!p.overview || p.overview.trim() === '')) return false;
                 if (!p.title || !soloLatinos.test(p.title.trim())) return false;
                 if (esProximamente) {
                     return !!p.release_date && new Date(p.release_date) > new Date();
@@ -1082,7 +1087,8 @@ async function cargarMasPeliculasFila(fila, track) {
     const anioActual = new Date().getFullYear();
     const soloLatinos = /^[a-zA-ZÀ-ÿ0-9\s\-:,.!?'"()\u00C0-\u024F\u1E00-\u1EFF]+$/;
     const esValida = (p, esProximamente) => {
-        if (!p.poster_path || !p.overview || p.overview.trim() === '') return false;
+        if (!p.poster_path) return false;
+        if (!esProximamente && (!p.overview || p.overview.trim() === '')) return false;
         if (!p.title || !soloLatinos.test(p.title.trim())) return false;
         const anio = p.release_date ? new Date(p.release_date).getFullYear() : null;
         return esProximamente ? anio > anioActual : (!anio || anio <= anioActual);
@@ -1808,7 +1814,8 @@ window.cargarMas = async function() {
                     const anioActual = new Date().getFullYear();
                     const esValida = (p) => {
                         if (!p.poster_path) return false;
-                        if (!p.overview || p.overview.trim() === '') return false;
+                        // Ya estamos dentro del bloque exclusivo de "proximamente" —
+                        // acá la sinopsis nunca se exige.
                         const soloLatinos = /^[a-zA-ZÀ-ÿ0-9\s\-:,.!?'"()\u00C0-\u024F\u1E00-\u1EFF]+$/;
                         if (!p.title || !soloLatinos.test(p.title.trim())) return false;
                         return !!p.release_date && new Date(p.release_date) > new Date();
