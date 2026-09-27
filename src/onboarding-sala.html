@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Armá tu Sala — Cinemarketer</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="css/onboarding-sala.css">
+</head>
+<body>
+
+<div class="onb-fondo"></div>
+
+<main class="onb-wrap">
+
+    <header class="onb-header">
+        <img src="assets/images/isologotipo.webp" alt="Cinemarketer" class="onb-marca">
+        <button class="onb-salir-todo" id="btnSalirTodo">Prefiero hacerlo después</button>
+    </header>
+
+    <div class="onb-contexto">
+        <h2>Tu Sala cinéfila empieza acá.</h2>
+        <p>Tus respuestas arman tu espíritu cinéfilo — la base de tu perfil en Cinemarketer.</p>
+    </div>
+
+    <!-- Rollo de fotogramas — el indicador de progreso -->
+    <div class="onb-rollo" id="onbRollo">
+        <div class="onb-fotograma" data-paso="0"><span>1</span></div>
+        <div class="onb-fotograma" data-paso="1"><span>2</span></div>
+        <div class="onb-fotograma" data-paso="2"><span>3</span></div>
+        <div class="onb-fotograma" data-paso="3"><span>4</span></div>
+        <div class="onb-fotograma" data-paso="4"><span><i class="fas fa-pen"></i></span></div>
+    </div>
+
+    <section class="onb-card">
+
+        <!-- PASO 1-4: plantilla compartida para las 4 preguntas de película -->
+        <div class="onb-paso" id="onbPasoPelicula">
+            <p class="onb-eyebrow" id="onbPeliculaEyebrow">Pregunta 1 de 5</p>
+            <h1 class="onb-pregunta" id="onbPeliculaPregunta">¿Cuál es tu película favorita?</h1>
+            <p class="onb-sub" id="onbPeliculaSub">La que elegirías sin dudar un segundo.</p>
+
+            <div class="onb-buscador-wrap">
+                <i class="fas fa-magnifying-glass onb-buscador-icono"></i>
+                <input type="text" id="onbInputPelicula" class="onb-input" placeholder="Escribí el título..." autocomplete="off">
+                <div id="onbResultadosPelicula" class="onb-predictor-resultados" style="display:none;"></div>
+            </div>
+
+            <div class="onb-elegida" id="onbElegidaWrap" style="display:none;">
+                <img id="onbElegidaPoster" src="" alt="">
+                <div class="onb-elegida-info">
+                    <span class="onb-elegida-label">Elegiste</span>
+                    <strong id="onbElegidaTitulo"></strong>
+                </div>
+                <button class="onb-elegida-quitar" id="onbBtnQuitarEleccion" title="Elegir otra"><i class="fas fa-xmark"></i></button>
+            </div>
+
+            <div class="onb-acciones">
+                <button class="onb-btn-saltear" id="onbBtnSaltear">Saltear esta</button>
+                <button class="onb-btn-continuar" id="onbBtnContinuar" disabled>Continuar <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- PASO 5: bio -->
+        <div class="onb-paso" id="onbPasoBio" style="display:none;">
+            <p class="onb-eyebrow">Pregunta 5 de 5</p>
+            <h1 class="onb-pregunta">Ahora contanos quién sos</h1>
+            <p class="onb-sub">Una frase, una identidad — lo que quieras que se vea primero en tu perfil.</p>
+
+            <label class="onb-label" for="onbInputBioTitulo">Tu frase o lema personal</label>
+            <input type="text" id="onbInputBioTitulo" class="onb-input onb-input-simple" placeholder="Ej: Prefiero spoilers a sorpresas malas" maxlength="50">
+            <span class="onb-contador" id="onbContadorTitulo">0/50</span>
+
+            <label class="onb-label" for="onbInputBioTexto">¿Quién sos, como cinéfilo?</label>
+            <textarea id="onbInputBioTexto" class="onb-input onb-input-simple onb-textarea" placeholder="Una descripción corta de tu perfil cinéfilo: qué te gusta, qué te representa, contales a todos cómo sos" maxlength="255"></textarea>
+            <span class="onb-contador" id="onbContadorTexto">0/255</span>
+
+            <div class="onb-acciones">
+                <button class="onb-btn-saltear" id="onbBtnSaltearBio">Saltear</button>
+                <button class="onb-btn-continuar" id="onbBtnFinalizar">Entrar a Cinemarketer <i class="fas fa-clapperboard"></i></button>
+            </div>
+        </div>
+
+        <!-- Pantalla de cierre -->
+        <div class="onb-paso onb-paso-cierre" id="onbPasoCierre" style="display:none;">
+            <div class="onb-cierre-icono"><i class="fas fa-champagne-glasses"></i></div>
+            <h1 class="onb-pregunta">Tu Sala ya tiene algo tuyo</h1>
+            <p class="onb-sub" id="onbCierreTexto">Vas a poder completar o cambiar esto cuando quieras, desde Mi Sala.</p>
+            <button class="onb-btn-continuar onb-btn-cierre" id="onbBtnEntrar">Entrar a Cinemarketer <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+    </section>
+
+    <!-- Rollo de pósters elegidos — se va llenando a medida que avanzás -->
+    <div class="onb-tira-posters" id="onbTiraPosters"></div>
+
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/onboarding-sala.js"></script>
+</body>
+</html>

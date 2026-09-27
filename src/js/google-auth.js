@@ -167,6 +167,8 @@ window.googleAuth = {
         setTimeout(() => {
             if (data.role === 'ADMIN') {
                 window.location.replace('admin/admin.html');
+            } else if (data.necesitaOnboardingSala) {
+                window.location.replace('onboarding-sala.html');
             } else {
                 window.location.replace('dashboard.html');
             }
