@@ -80,6 +80,7 @@ window['init_perfil'] = async function(userId) {
 // ==============================================
 async function cargarPerfil(userId) {
     const token = localStorage.getItem('token');
+    document.getElementById('perfilCargandoOverlay').style.display = 'flex';
 
     // Reset visual por si venía de perfil bloqueado o privado
     document.querySelectorAll('.perfil-seccion').forEach(s => s.style.display = '');
@@ -180,11 +181,13 @@ async function cargarPerfil(userId) {
                                 window._inicializarModalGustoMobile();
 
         cargarPublicacionesPerfil(userId);
+        document.getElementById('perfilCargandoOverlay').style.display = 'none';
 
     } catch (error) {
             console.error('Error en cargarPerfil:', error);
             document.getElementById('perfilContenido').innerHTML =
                 '<div style="text-align:center;padding:3rem;color:#e50914;">Error al cargar el perfil</div>';
+            document.getElementById('perfilCargandoOverlay').style.display = 'none';
         }
 }
 
@@ -913,7 +916,15 @@ window.subirBanner = async function(input) {
                                             // ==============================================
                                             // CANDADO DE PRIVACIDAD DEL PERFIL
                                             // ==============================================
-                                            let _miSalaEsPrivado = false;
+                                            // var, no let — mismo motivo que _votacionesCargando y
+                                            // el resto del estado a nivel de archivo: el
+                                            // module-loader reinyecta este script entero cada vez
+                                            // que se visita un perfil, y "let" a nivel de archivo
+                                            // no se puede redeclarar entre cargas sucesivas (sacar
+                                            // el <script> del DOM no borra el binding ya ejecutado)
+                                            // — confirmado con un SyntaxError real al navegar entre
+                                            // perfiles.
+                                            var _miSalaEsPrivado = false;
 
                                             window._inicializarCandadoPrivacidad = async function() {
                                                 const token = localStorage.getItem('token');
