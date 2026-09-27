@@ -386,8 +386,12 @@ window.cargarPeliculasPopulares = async function(pagina = 1) {
                     if (criterio === 'proximamente') {
                         return !!p.release_date && new Date(p.release_date) > new Date();
                     }
-                    const anio = p.release_date ? new Date(p.release_date).getFullYear() : null;
-                    return !anio || anio <= anioActual;
+                    // No alcanza con comparar el año — una película que
+                    // estrena más adelante en el mismo año (ej. diciembre,
+                    // si hoy es septiembre) pasaba igual y se colaba en
+                    // "Más populares" sin haber estrenado todavía.
+                    if (!p.release_date) return true;
+                    return new Date(p.release_date) <= new Date();
                 };
 
                 let acumulados = [...data.results];
@@ -769,8 +773,8 @@ async function cargarPeliculasFila(fila) {
                 if (esProximamente) {
                     return !!p.release_date && new Date(p.release_date) > new Date();
                 }
-                const anio = p.release_date ? new Date(p.release_date).getFullYear() : null;
-                return !anio || anio <= anioActual;
+                if (!p.release_date) return true;
+                return new Date(p.release_date) <= new Date();
             };
 
             try {
@@ -1090,8 +1094,12 @@ async function cargarMasPeliculasFila(fila, track) {
         if (!p.poster_path) return false;
         if (!esProximamente && (!p.overview || p.overview.trim() === '')) return false;
         if (!p.title || !soloLatinos.test(p.title.trim())) return false;
-        const anio = p.release_date ? new Date(p.release_date).getFullYear() : null;
-        return esProximamente ? anio > anioActual : (!anio || anio <= anioActual);
+        if (esProximamente) {
+            const anio = p.release_date ? new Date(p.release_date).getFullYear() : null;
+            return anio > anioActual;
+        }
+        if (!p.release_date) return true;
+        return new Date(p.release_date) <= new Date();
     };
 
     try {
