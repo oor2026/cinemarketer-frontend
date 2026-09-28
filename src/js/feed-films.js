@@ -1095,8 +1095,10 @@ async function cargarMasPeliculasFila(fila, track) {
         if (!esProximamente && (!p.overview || p.overview.trim() === '')) return false;
         if (!p.title || !soloLatinos.test(p.title.trim())) return false;
         if (esProximamente) {
-            const anio = p.release_date ? new Date(p.release_date).getFullYear() : null;
-            return anio > anioActual;
+            // Por fecha completa, no por año: con el orden cronológico, las
+            // tandas siguientes traen estrenos de fines de este mismo año,
+            // y comparar solo el año los descartaba a todos.
+            return !!p.release_date && new Date(p.release_date) > new Date();
         }
         if (!p.release_date) return true;
         return new Date(p.release_date) <= new Date();
