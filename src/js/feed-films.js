@@ -3082,7 +3082,7 @@ window._confirmarAvisoEstreno = async function() {
             const contenedor = document.getElementById('similares-container');
             if (!contenedor) return;
 
-    track.innerHTML = '<div class="buscador-pensando-mini"><img src="assets/images/icon-512.png" alt="Cinemarketer pensando"></div>';
+    contenedor.innerHTML = '<div class="buscador-pensando-mini"><img src="assets/images/icon-512.png" alt="Cinemarketer pensando"></div>';
 
             try {
                 const token = localStorage.getItem('token');
