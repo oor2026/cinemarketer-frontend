@@ -105,6 +105,7 @@ const adminEstadisticas = {
             this.renderizarPremiumSorteos();
             this.renderizarSuscripciones();
             this.renderizarGuardadas();
+            this.renderizarLoQueSeViene();
             this.renderizarGanancias();
 
         } catch (error) {
@@ -1267,6 +1268,71 @@ const adminEstadisticas = {
                                         </div>
                                     `;
                                 },
+
+        // Pestaña "Lo que se viene": respuestas a "¿La estás esperando?" (solo películas)
+        renderizarLoQueSeViene: function() {
+            const body = document.getElementById('stats-lo-que-se-viene-body');
+            if (!body) return;
+            const s = this.datos.proximosEstrenos;
+            if (!s) {
+                body.innerHTML = '<p style="color:#999;">Sin datos</p>';
+                return;
+            }
+
+            const VERDE = '#2e9e5b';
+            const GRIS = '#8a8a8a';
+
+            const masEsperadas = (s.topMasEsperadas || []).map((p, i) =>
+                `<li><strong>${i + 1}. ${p.titulo}</strong>: ${p.siTotal} sí · ${p.noTotal} no</li>`
+            ).join('') || '<li>Sin datos</li>';
+
+            const menosEsperadas = (s.topMenosEsperadas || []).map((p, i) =>
+                `<li><strong>${i + 1}. ${p.titulo}</strong>: ${p.noTotal} no · ${p.siTotal} sí</li>`
+            ).join('') || '<li>Sin datos</li>';
+
+            const usuarios = (s.topUsuarios || []).map((u, i) =>
+                `<li><strong>${i + 1}. ${u.name}</strong>: ${u.total} respuestas (${u.siTotal} sí · ${u.noTotal} no)</li>`
+            ).join('') || '<li>Sin datos</li>';
+
+            body.innerHTML = `
+                <div class="stats-hero-numero">${this.formatearNumero(s.totalRespuestas)}</div>
+                <div class="stats-hero-label">respuestas a "¿La estás esperando?" en el período</div>
+
+                <div class="stats-split-bar">
+                    <div class="fill-peliculas" style="width:${s.pctEsperan}%; background:${VERDE};"></div>
+                    <div class="fill-series" style="width:${s.pctNoEsperan}%; background:${GRIS};"></div>
+                </div>
+                <div class="stats-split-legend">
+                    <span><span class="dot" style="background:${VERDE};"></span>La esperan · ${s.pctEsperan}%</span>
+                    <span><span class="dot" style="background:${GRIS};"></span>No la esperan · ${s.pctNoEsperan}%</span>
+                </div>
+
+                <div class="stats-kpi-row" style="display:flex; flex-wrap:wrap; gap:0.75rem;">
+                    <div class="stats-kpi-card" style="flex:0 0 auto; width:160px;"><div class="kpi-valor">${this.formatearNumero(s.esperan)}</div><div class="kpi-label">La esperan (Sí)</div></div>
+                    <div class="stats-kpi-card" style="flex:0 0 auto; width:160px;"><div class="kpi-valor">${this.formatearNumero(s.noEsperan)}</div><div class="kpi-label">No la esperan (No)</div></div>
+                    <div class="stats-kpi-card" style="flex:0 0 auto; width:160px;"><div class="kpi-valor">${this.formatearNumero(s.usuariosDistintos)}</div><div class="kpi-label">Usuarios distintos</div></div>
+                    <div class="stats-kpi-card" style="flex:0 0 auto; width:160px;"><div class="kpi-valor">${this.formatearNumero(s.avisosActivados)}</div><div class="kpi-label">Avisos de estreno<br><span style="font-size:0.68rem; color:#999;">${s.pctAvisos}% de los Sí</span></div></div>
+                </div>
+
+                <div style="display:flex; flex-wrap:wrap; gap:1rem; align-items:flex-start;">
+                    <div class="stats-top" style="border-top-color:${VERDE}; flex:0 0 auto; width:380px; max-width:100%;">
+                        <h4>🔥 Más esperadas</h4>
+                        <ul>${masEsperadas}</ul>
+                    </div>
+                    <div class="stats-top" style="border-top-color:${GRIS}; flex:0 0 auto; width:380px; max-width:100%;">
+                        <h4>🧊 Menos esperadas</h4>
+                        <ul>${menosEsperadas}</ul>
+                    </div>
+                </div>
+
+                <div class="stats-top" style="border-top-color:#e50914; margin-top:1rem;">
+                    <h4>👤 Usuarios que más responden</h4>
+                    <ul>${usuarios}</ul>
+                </div>
+
+                <p style="font-size:0.72rem;color:#999;margin-top:0.75rem;">Las respuestas se cuentan por la fecha en que el usuario respondió por primera vez, con el estado actual de esa respuesta. Solo películas.</p>
+            `;
+        },
 
         // Formatear números grandes (ej: 1234 → 1.2K)
         formatearNumero: function(num) {
