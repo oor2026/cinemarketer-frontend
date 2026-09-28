@@ -368,12 +368,12 @@
    concepto equivalente (verde "me gusta", dorado "recomendada",
    rojo "guardada", etc.) en vez de un color inventado. */
 .perfil-card .perfil-stat-inline { gap: 0.25rem; }
-.perfil-card .fa-thumbs-up.cine-stat-icon { color: #324C89; }
+.perfil-card .fa-thumbs-up.cine-stat-icon { color: #f5f5f5; -webkit-text-stroke: 1px rgba(0,0,0,0.5); }
 .perfil-card .fa-comment.cine-stat-icon { color: #f5f5f5; -webkit-text-stroke: 1px rgba(0,0,0,0.5); }
 .perfil-card .fa-envelope.cine-stat-icon { color: #e8b923; }
 .perfil-card .fa-bookmark.cine-stat-icon { color: var(--cine-accent); }
-.perfil-card .fa-users.cine-stat-icon { color: #6b3fa0; }
-.perfil-card .cine-stat-icon-compuesto { color: #0f7a68; }
+.perfil-card .fa-users.cine-stat-icon { color: #f5f5f5; -webkit-text-stroke: 1px rgba(0,0,0,0.5); }
+.perfil-card .cine-stat-icon-compuesto { color: #f5f5f5; -webkit-text-stroke: 1px rgba(0,0,0,0.5); }
 
 /* Modal "editar gusto" — el cascarón pasa a ser una tarjeta blanca
    real (hoy no tenía ningún estilo propio), y como las 8 cajas
