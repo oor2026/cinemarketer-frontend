@@ -171,7 +171,7 @@ window.abrirDetallePlanCreator = function() {
         modal.className = 'premium-modal-overlay';
         modal.innerHTML = `
             <div class="premium-modal-caja">
-                <div class="premium-modal-header" style="background:#241242;">
+                <div class="premium-modal-header creator-theme">
                     <h3>Cinemarketer Creator</h3>
                     <p>Suscripción mensual sin permanencia</p>
                 </div>

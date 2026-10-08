@@ -295,54 +295,25 @@
 /* ========== MOBILE REDESIGN ========== */
 @media (max-width: 768px) {
 
-    /* Header rediseñado */
-        .contacto-header {
-            flex-direction: row;
-            align-items: center;
-            text-align: left;
-            padding: 14px 16px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            gap: 10px;
-            flex-wrap: nowrap;
-        }
-        .contacto-header-decor { font-size: 6rem; }
+    .contacto-header { display: none; }
 
-    .contacto-header-left {
-        flex-direction: row;
+    .btn-soporte-mobile {
+        display: flex;
         align-items: center;
-        gap: 10px;
-        flex: 1;
-    }
-
-    .contacto-header .header-icon {
-        width: 40px;
-        height: 40px;
-        background: #e50914;
-        flex-shrink: 0;
-    }
-
-    .contacto-header .header-icon i {
-        font-size: 1.2rem;
-    }
-
-    .contacto-header .header-text h2 {
-        font-size: 1rem;
-        margin-bottom: 1px;
-    }
-
-    .contacto-header .header-text p {
-        font-size: 0.75rem;
-        opacity: 0.75;
-    }
-
-    .btn-soporte {
-        width: auto;
         justify-content: center;
-        padding: 0.5rem 1rem;
-        font-size: 0.82rem;
-        border-radius: 20px;
-        flex-shrink: 0;
+        gap: 8px;
+        width: 100%;
+        box-sizing: border-box;
+        background: linear-gradient(135deg,#f0553f,#c4321f);
+        color: #fff;
+        border: none;
+        border-radius: 30px;
+        padding: 0.75rem;
+        font-size: 0.9rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(196,50,31,0.35);
+        margin-bottom: 1.2rem;
     }
 
     /* FAQ section rediseñada */

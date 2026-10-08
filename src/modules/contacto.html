@@ -1,6 +1,14 @@
 <div class="contacto-container">
 
-    <!-- SECCIÓN HERO -->
+    <div class="modulo-header-card tono-marino">
+        <i class="fas fa-headset modulo-header-decor"></i>
+        <div class="modulo-header-texto">
+            <div class="modulo-header-titulo">Preguntas Frecuentes</div>
+            <div class="modulo-header-subtitulo">Respuestas a tus preguntas, o contactate con soporte</div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN HERO (desktop — sin cambios) -->
     <div class="contacto-header">
         <i class="fas fa-headset contacto-header-decor"></i>
         <div class="contacto-header-left">
@@ -17,6 +25,13 @@
             Soporte
         </button>
     </div>
+
+    <!-- Botón de soporte, mobile — vivía adentro del header viejo,
+         que ahora está oculto en mobile; queda como su propio botón
+         suelto, debajo de la cabecera nueva. -->
+    <button class="btn-soporte-mobile" onclick="contacto_abrirSoporte()">
+        <i class="fas fa-comment-dots"></i> Contactar a Soporte
+    </button>
 
     <!-- SECCIÓN FAQ -->
     <div class="faq-section">

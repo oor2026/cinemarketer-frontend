@@ -196,6 +196,22 @@ if (dashToggle && dashMenu) {
             return btnNuevaPub;
         }
 
+        let btnVotoRelampago = null;
+        function crearBotonVotoRelampago() {
+            if (btnVotoRelampago) return btnVotoRelampago;
+            btnVotoRelampago = document.createElement('button');
+            btnVotoRelampago.id = 'btnVotoRelampagoFlotante';
+            btnVotoRelampago.setAttribute('aria-label', 'Voto Relámpago');
+            btnVotoRelampago.innerHTML = '<i class="fas fa-bolt"></i>';
+            btnVotoRelampago.onclick = function() {
+                if (typeof window.abrirVotoRelampagoModal === 'function') {
+                    window.abrirVotoRelampagoModal();
+                }
+            };
+            document.body.appendChild(btnVotoRelampago);
+            return btnVotoRelampago;
+        }
+
                 let btnBuscar = null;
                 function crearBotonBuscar() {
                     if (btnBuscar) return btnBuscar;
@@ -257,15 +273,20 @@ if (dashToggle && dashMenu) {
                     }
 
                     const hash = window.location.hash.replace('#', '') || 'feed-films';
-                    if (hash !== 'feed-films') {
+                    if (hash !== 'feed-films' && hash !== 'comunidad') {
                         if (btnArriba) btnArriba.classList.remove('visible');
                         if (btnNuevaPub) btnNuevaPub.classList.remove('visible');
                         if (btnBuscar) btnBuscar.classList.remove('visible');
+                        if (btnVotoRelampago) btnVotoRelampago.classList.remove('visible');
                         buscadorDetenerVinetaPeriodica();
                         return;
                     }
 
-                    const enComunidad = window._tabActivo === 'comunidad';
+                    // window._tabActivo === 'comunidad' queda como fallback por si
+                    // en algún momento Comunidad vuelve a vivir como tab dentro de
+                    // feed-films — hoy con el módulo propio, lo que manda es el hash.
+                    const enComunidad = hash === 'comunidad' || window._tabActivo === 'comunidad';
+                    const enInicio = hash === 'feed-films';
                     const scrolleado = window.scrollY > 400;
 
                     const a = crearBotonArriba();
@@ -273,6 +294,9 @@ if (dashToggle && dashMenu) {
 
                     const p = crearBotonNuevaPub();
                     if (scrolleado && enComunidad) { p.classList.add('visible'); } else { p.classList.remove('visible'); }
+
+                    const r = crearBotonVotoRelampago();
+                    if (scrolleado && enInicio) { r.classList.add('visible'); } else { r.classList.remove('visible'); }
 
                     const b = crearBotonBuscar();
                     if (scrolleado && !enComunidad) {
@@ -341,7 +365,7 @@ if (dashToggle && dashMenu) {
                         };
 
                         function _renderProgresoBodyHeader(nivel, p) {
-                            const btnAceptar = `<button onclick="window.cerrarModalProgresoHeader()"
+                            const btnAceptar = `<button onclick="window.cerrarModalProgresoHeader()" class="modal-progreso-btn-aceptar"
                                 style="width:100%;background:#324C89;border:none;color:white;padding:0.65rem;border-radius:8px;font-size:14px;cursor:pointer;margin-top:1.25rem;">
                                 Aceptar
                             </button>`;

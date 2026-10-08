@@ -1,9 +1,141 @@
 <div class="feed-container">
-    <!-- HEADER CON BIENVENIDA -->
+    <!-- HEADER CON BIENVENIDA (desktop — sin cambios) -->
     <div class="feed-header">
         <div class="header-content">
             <h1>¡Lo mejor del cine está en vos!</h1>
             <p>La única y verdadera red social de cine donde descubrir, votar y comentar tiene su recompensa. ¡Empecemos!</p>
+        </div>
+    </div>
+
+    <!-- INICIO MOBILE: saludo + entrada al asistente. Solo mobile —
+         en desktop este bloque no se muestra y el feed-header de
+         arriba sigue exactamente igual que hoy. -->
+    <style>
+        .inicio-bienvenida-mobile { display: none; }
+        .inicio-switch-tipo { display: none; }
+        .inicio-catalogo-titulo { display: none; }
+        .inicio-catalogo-titulo-row { display: none; }
+.inicio-catalogo-subtitulo { display: none; }
+        @media (max-width: 768px) {
+            .feed-container { background: #ffffff; }
+            .feed-header { display: none; }
+            .feed-tabs { display: none; }
+            #triviaBadgeContainer { display: none !important; }
+            #triviaSeriesBadgeContainer { display: none !important; }
+            .inicio-bienvenida-mobile {
+                display: block;
+                padding: 2.2rem 1.2rem 1.2rem;
+                margin: 0 -1rem 0;
+                position: relative;
+                text-align: center;
+                background: linear-gradient(180deg, rgba(59,91,165,0.30) 0%, rgba(59,91,165,0) 23%);
+            }
+            .inicio-bienvenida-mobile .inicio-saludo { font-size: 0.80rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #000000; margin-bottom: 4px; }
+            .inicio-bienvenida-mobile h1 { margin: 0 0 14px; font-size: 2rem; line-height: 1.18; font-weight: 700; letter-spacing: -0.01em; font-family: 'Space Grotesk', sans-serif; color: #004f9b; }
+            .inicio-entrada-asistente { position: relative; width: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 11px; padding: 13px 40px 13px 13px; background: linear-gradient(100deg, rgba(240,85,63,0.07), rgba(22,38,77,0.05)); border: 1px solid #f0eeea; border-radius: 30px; cursor: pointer; font-family: inherit; text-align: left; font-size: 0.85rem; color: #8a8478; font-weight: 600; box-shadow: 0 10px 24px -8px rgba(22,38,77,0.16), 0 2px 6px rgba(22,38,77,0.06); }
+            .inicio-entrada-asistente .inicio-entrada-flecha { position: absolute; top: 50%; right: 16px; transform: translateY(-50%); color: #c9c4b8; font-size: 0.8rem; }
+            .inicio-entrada-asistente .inicio-entrada-icono { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 10px; background: linear-gradient(135deg,#f0553f,#c4321f); color: #fff !important; font-size: 0.85rem; box-shadow: 0 3px 8px rgba(196,50,31,0.35); flex-shrink: 0; }
+            .inicio-accesos-carrusel { margin: 16px 0 0; }
+            .inicio-accesos-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 14px 0 22px; margin: -14px 0 -22px; }
+            .inicio-accesos-track::-webkit-scrollbar { display: none; }
+            .inicio-accesos-slide { flex: 0 0 100%; scroll-snap-align: start; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+            .inicio-acceso-card { position: relative; overflow: hidden; box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px; background: #fff; border: none; border-radius: 18px; cursor: pointer; font-family: inherit; text-align: left; box-shadow: 0 10px 26px -6px rgba(20,20,20,0.16), 0 2px 5px rgba(20,20,20,0.07); }
+            .inicio-acceso-decor { position: absolute; right: -6px; bottom: -2px; font-size: 3.4rem; opacity: 0.10; pointer-events: none; }
+            .inicio-acceso-decor.tono-rojo { color: #c4321f; }
+            .inicio-acceso-decor.tono-marino { color: #16264d; }
+            .inicio-acceso-flecha { position: absolute; top: 35px; right: 14px; transform: translateY(-50%); color: #c9c4b8; font-size: 0.8rem; }
+            .inicio-acceso-icono { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+            .inicio-acceso-icono.tono-rojo { background: linear-gradient(135deg,#f0553f,#c4321f); box-shadow: 0 3px 10px rgba(196,50,31,0.3); }
+            .inicio-acceso-icono.tono-marino { background: linear-gradient(135deg,#243b72,#16264d); box-shadow: 0 3px 10px rgba(22,38,77,0.3); }
+            .inicio-acceso-icono i { color: #fff !important; font-size: 1rem; }
+            .inicio-acceso-titulo { font-size: 0.95rem; font-weight: 700; color: #221f1f; line-height: 1.2; }
+            .inicio-acceso-sub { font-size: 0.75rem; color: #666; margin-top: 2px; }
+            .inicio-accesos-dots { display: flex; justify-content: center; gap: 6px; margin-top: 10px; }
+            .inicio-accesos-dots span { width: 6px; height: 6px; border-radius: 50%; background: #d9d9d2; display: block; }
+            .inicio-accesos-dots span.activo { background: #e50914; }
+            .inicio-catalogo-header { background: linear-gradient(180deg, rgba(196,50,31,0.20) 0%, rgba(196,50,31,0) 95%); border-radius: 0; margin: 0 -1rem; padding: 1rem 0 0.1rem; }
+            .inicio-catalogo-header.tono-series { background: linear-gradient(180deg, rgba(0,79,155,0.20) 0%, rgba(0,79,155,0) 95%); }
+            .inicio-catalogo-titulo-row { display: flex; align-items: center; gap: 8px; padding: 0.9rem 1rem 0; }
+            .inicio-catalogo-titulo { display: block; margin: 0; font-size: 2rem; text-align: center; font-weight: 700; letter-spacing: -0.01em; background: #c4321f; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: #16264d; white-space: nowrap; font-family: 'Space Grotesk', sans-serif;}
+            .inicio-catalogo-header.tono-series .inicio-catalogo-titulo { background: none; -webkit-background-clip: initial; background-clip: initial; -webkit-text-fill-color: #004f9b; color: #004f9b; }
+            .inicio-catalogo-nuevo { background: linear-gradient(135deg,#f0553f,#c4321f); color: #fff; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.04em; padding: 3px 8px; border-radius: 10px; box-shadow: 0 2px 6px rgba(196,50,31,0.35); }
+            .inicio-catalogo-subtitulo { display: block; font-size: 0.8rem; color: #000000; padding: 0.25rem 1rem 0.9rem; position: relative; text-transform: uppercase; font-weight: 700;}
+            .inicio-catalogo-subtitulo::after { content: ''; position: absolute; left: 1rem; bottom: 0.35rem; width: 46px; height: 3px; border-radius: 2px; background: linear-gradient(100deg,#c4321f 0%,#16264d 100%); }
+            .inicio-switch-tipo { display: block; position: sticky; top: 56px; z-index: 40; padding: 0.6rem 1rem 0.85rem; }
+            .inicio-switch-tipo-track { display: flex; background: #ffffff; border-radius: 30px; padding: 4px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05), 0 8px 20px -8px rgba(20,20,20,0.14); }
+            .inicio-switch-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px; padding: 0.6rem 0; border: none; border-radius: 26px; background: transparent; color: #16264d; font-size: 0.85rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: background 0.2s, color 0.2s, box-shadow 0.2s; }
+            .inicio-switch-btn.active { background: linear-gradient(135deg,#f0553f,#c4321f); color: #fff; box-shadow: 0 4px 10px rgba(196,50,31,0.3); }
+            #inicioSwitchSeries.active { background: #004f9b; color: #fff; box-shadow: 0 4px 10px rgba(0,79,155,0.3); }
+        }
+    </style>
+    <div class="inicio-bienvenida-mobile">
+        <div class="inicio-saludo" id="inicioSaludoNombre">Hola</div>
+        <h1>¿Qué hacemos hoy?</h1>
+        <button type="button" class="inicio-entrada-asistente" onclick="window.abrirAsistenteBottomNav()">
+            <i class="fas fa-glasses inicio-entrada-icono"></i>
+            <span>Pedile al asistente lo que necesites</span>
+            <i class="fas fa-chevron-right inicio-entrada-flecha"></i>
+        </button>
+
+        <div class="inicio-accesos-carrusel">
+            <div class="inicio-accesos-track" id="inicioAccesosTrack">
+                <div class="inicio-accesos-slide">
+                    <button type="button" class="inicio-acceso-card" onclick="window.accesoRapidoInicio('buscar-titulo')">
+                        <i class="fas fa-film inicio-acceso-decor tono-rojo"></i>
+                        <i class="fas fa-chevron-right inicio-acceso-flecha"></i>
+                        <div class="inicio-acceso-icono tono-rojo"><i class="fas fa-clapperboard"></i></div>
+                        <div><div class="inicio-acceso-titulo">Buscar una película o serie</div><div class="inicio-acceso-sub">Por título</div></div>
+                    </button>
+                    <button type="button" class="inicio-acceso-card" onclick="window.accesoRapidoInicio('donde-verla')">
+                        <i class="fas fa-tv inicio-acceso-decor tono-marino"></i>
+                        <i class="fas fa-chevron-right inicio-acceso-flecha"></i>
+                        <div class="inicio-acceso-icono tono-marino"><i class="fas fa-play"></i></div>
+                        <div><div class="inicio-acceso-titulo">Dónde verla</div><div class="inicio-acceso-sub">Por plataforma</div></div>
+                    </button>
+                    <button type="button" class="inicio-acceso-card" onclick="window.accesoRapidoInicio('actor-director')">
+                        <i class="fas fa-camera-retro inicio-acceso-decor tono-marino"></i>
+                        <i class="fas fa-chevron-right inicio-acceso-flecha"></i>
+                        <div class="inicio-acceso-icono tono-marino"><i class="fas fa-user"></i></div>
+                        <div><div class="inicio-acceso-titulo">Actor, actriz o director</div><div class="inicio-acceso-sub">Buscar por nombre</div></div>
+                    </button>
+                    <button type="button" class="inicio-acceso-card" onclick="window.accesoRapidoInicio('trabajaron-juntos')">
+                        <i class="fas fa-user-friends inicio-acceso-decor tono-rojo"></i>
+                        <i class="fas fa-chevron-right inicio-acceso-flecha"></i>
+                        <div class="inicio-acceso-icono tono-rojo"><i class="fas fa-users"></i></div>
+                        <div><div class="inicio-acceso-titulo">Trabajaron juntos</div><div class="inicio-acceso-sub">Películas con dos personas a la vez</div></div>
+                    </button>
+                </div>
+                <div class="inicio-accesos-slide">
+                    <button type="button" class="inicio-acceso-card" onclick="window.accesoRapidoInicio('como-vengo')">
+                        <i class="fas fa-calendar-check inicio-acceso-decor tono-rojo"></i>
+                        <i class="fas fa-chevron-right inicio-acceso-flecha"></i>
+                        <div class="inicio-acceso-icono tono-rojo"><i class="fas fa-chart-line"></i></div>
+                        <div><div class="inicio-acceso-titulo">¿Cómo vengo este mes?</div><div class="inicio-acceso-sub">Puntos, acumulados y cupos</div></div>
+                    </button>
+                    <button type="button" class="inicio-acceso-card" onclick="window.accesoRapidoInicio('que-aprovechar')">
+                        <i class="fas fa-gift inicio-acceso-decor tono-marino"></i>
+                        <i class="fas fa-chevron-right inicio-acceso-flecha"></i>
+                        <div class="inicio-acceso-icono tono-marino"><i class="fas fa-star"></i></div>
+                        <div><div class="inicio-acceso-titulo">Qué puedo aprovechar</div><div class="inicio-acceso-sub">Premios a tu alcance</div></div>
+                    </button>
+                    <button type="button" class="inicio-acceso-card" onclick="window.accesoRapidoInicio('mi-premium')">
+                        <i class="fas fa-gem inicio-acceso-decor tono-marino"></i>
+                        <i class="fas fa-chevron-right inicio-acceso-flecha"></i>
+                        <div class="inicio-acceso-icono tono-marino"><i class="fas fa-crown"></i></div>
+                        <div><div class="inicio-acceso-titulo">Mi Premium este mes</div><div class="inicio-acceso-sub">Lo que te dio tu suscripción</div></div>
+                    </button>
+                    <button type="button" class="inicio-acceso-card" onclick="window.accesoRapidoInicio('mis-insignias')">
+                        <i class="fas fa-trophy inicio-acceso-decor tono-rojo"></i>
+                        <i class="fas fa-chevron-right inicio-acceso-flecha"></i>
+                        <div class="inicio-acceso-icono tono-rojo"><i class="fas fa-medal"></i></div>
+                        <div><div class="inicio-acceso-titulo">Mis insignias</div><div class="inicio-acceso-sub">Tu nivel y qué te falta</div></div>
+                    </button>
+                </div>
+            </div>
+            <div class="inicio-accesos-dots" id="inicioAccesosDots">
+                <span class="activo"></span>
+                <span></span>
+            </div>
         </div>
     </div>
 
@@ -70,6 +202,19 @@
         <div class="destacada-dots" id="destacadaDotsSerie" style="display:none;"></div>
     </div>
 
+    <div class="inicio-catalogo-header">
+        <div class="inicio-catalogo-titulo-row">
+            <div class="inicio-catalogo-titulo" style="text-align: center;">Explorá todo lo que hay</div>
+        </div>
+        <div class="inicio-catalogo-subtitulo" style="text-align: center;">Elegí el contenido que más quieras y empecemos!</div>
+        <div class="inicio-switch-tipo" id="inicioSwitchTipo">
+            <div class="inicio-switch-tipo-track">
+                <button type="button" class="inicio-switch-btn active" id="inicioSwitchPeliculas" onclick="window.cambiarSwitchTipoInicio('peliculas', this)"><i class="fas fa-clapperboard"></i> Películas</button>
+                <button type="button" class="inicio-switch-btn" id="inicioSwitchSeries" onclick="window.cambiarSwitchTipoInicio('series', this)"><i class="fas fa-tv"></i> Series</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ADIVINA ADIVINADOR (trivia diaria) -->
     <div id="triviaBadgeContainer" style="display:none;" onclick="window.abrirTrivia()">
         <!-- Viñeta que aparece sola, sin necesitar click — solo mobile. -->
@@ -98,19 +243,9 @@
         </div>
     </div>
 
-    <div id="triviaModal" class="trivia-modal-overlay" style="display:none;">
-        <div class="trivia-modal trivia-modal-peliculas">
-            <button class="trivia-cerrar" onclick="window.cerrarTrivia()"><i class="fas fa-times"></i></button>
-            <div id="triviaModalContenido"></div>
-        </div>
-    </div>
-
-    <div id="rankingTriviaModal" class="trivia-modal-overlay" style="display:none;">
-        <div class="trivia-modal trivia-modal-peliculas">
-            <button class="trivia-cerrar" onclick="window.cerrarRankingTrivia()"><i class="fas fa-times"></i></button>
-            <div id="rankingTriviaContenido"></div>
-        </div>
-    </div>
+    <!-- #triviaModal y #rankingTriviaModal se mudaron a dashboard.html
+         (mismo criterio que Voto Relámpago) — la lógica en trivia.js
+         no se tocó. -->
 
     <!-- TRIVIA DE SERIES (badge y modales — misma estructura que la de Películas) -->
     <div id="triviaSeriesBadgeContainer" style="display:none;" onclick="window.abrirTriviaSeries()">
@@ -140,12 +275,7 @@
         </div>
     </div>
 
-    <div id="triviaSeriesModal" class="trivia-modal-overlay" style="display:none;">
-        <div class="trivia-modal trivia-modal-series">
-            <button class="trivia-cerrar" onclick="window.cerrarTriviaSeries()"><i class="fas fa-times"></i></button>
-            <div id="triviaSeriesModalContenido"></div>
-        </div>
-    </div>
+    <!-- #triviaSeriesModal también se mudó a dashboard.html. -->
 
     <div id="rankingTriviaSeriesModal" class="trivia-modal-overlay" style="display:none;">
         <div class="trivia-modal trivia-modal-series">
@@ -154,58 +284,29 @@
         </div>
     </div>
 
-    <!-- VOTO RELÁMPAGO (like/dislike rápido, encadenado por similitud) -->
-    <div id="votoRelampagoContainer" style="display:none;">
-        <div class="vr-label">⚡ Voto Relámpago</div>
-        <div class="vr-leyenda">Tu voto, en un toque</div>
-        <div class="vr-wrap">
-            <div class="vr-card" id="vrCard"></div>
-            <div class="vr-flash" id="vrFlash"></div>
-            <i class="fas fa-bolt vr-bolt" id="vrBolt"></i>
-            <div class="vr-acciones">
-                <button class="vr-btn vr-btn-like" onclick="window.votoRelampagoVotar('like')">
-                    <i class="fas fa-thumbs-up"></i> Te banco
-                </button>
-                <button class="vr-btn vr-btn-dislike" onclick="window.votoRelampagoVotar('dislike')">
-                    <i class="fas fa-thumbs-down"></i> No te banco
-                </button>
-                <button class="vr-btn vr-btn-skip" onclick="window.votoRelampagoVotar('skip')">
-                    <i class="fas fa-eye-slash"></i> No la vi
-                </button>
-            </div>
-        </div>
-        <p class="vr-hint">Tocá la imagen para ver la ficha completa</p>
-    </div>
-
-    <!-- VOTO RELÁMPAGO — SERIES (mismo componente, mismo estilo, otro pool de datos) -->
-    <div id="votoRelampagoSeriesContainer" style="display:none;">
-        <div class="vr-label">⚡ Voto Relámpago</div>
-        <div class="vr-leyenda">Tu voto, en un toque</div>
-        <div class="vr-wrap">
-            <div class="vr-card" id="vrCardSerie"></div>
-            <div class="vr-flash" id="vrFlashSerie"></div>
-            <i class="fas fa-bolt vr-bolt" id="vrBoltSerie"></i>
-            <div class="vr-acciones">
-                <button class="vr-btn vr-btn-like" onclick="window.votoRelampagoSerieVotar('like')">
-                    <i class="fas fa-thumbs-up"></i> Te banco
-                </button>
-                <button class="vr-btn vr-btn-dislike" onclick="window.votoRelampagoSerieVotar('dislike')">
-                    <i class="fas fa-thumbs-down"></i> No te banco
-                </button>
-                <button class="vr-btn vr-btn-skip" onclick="window.votoRelampagoSerieVotar('skip')">
-                    <i class="fas fa-eye-slash"></i> No la vi
-                </button>
-            </div>
-        </div>
-        <p class="vr-hint">Tocá la imagen para ver la ficha completa</p>
-    </div>
+    <!-- Voto Relámpago se mudó a un modal aparte (ver dashboard.html),
+         disparado por el botón flotante amarillo. El HTML se movió
+         tal cual, mismos IDs — la lógica de carga/voto en
+         feed-films.js no se tocó para nada. -->
 
     <!-- PILLS DE ORDENAMIENTO -->
     <div class="ordenar-pills" id="ordenarPills">
-        <button class="pill-orden active" data-criterio="fecha" onclick="window.seleccionarOrden('fecha', this)">🔥 Más populares</button>
-        <button class="pill-orden" data-criterio="proximamente" onclick="window.seleccionarOrden('proximamente', this)">🎬 Lo que se viene</button>
-        <button class="pill-orden" data-criterio="votos" onclick="window.seleccionarOrden('votos', this)">👍 Más votadas</button>
-        <button class="pill-orden" data-criterio="titulo" onclick="window.seleccionarOrden('titulo', this)">🔤 Título A-Z</button>
+        <button class="pill-orden active" data-criterio="fecha" onclick="window.seleccionarOrden('fecha', this)">
+            <span class="pill-orden-icono"><i class="fas fa-fire"></i></span>
+            <span class="pill-orden-label">Más populares</span>
+        </button>
+        <button class="pill-orden" data-criterio="proximamente" onclick="window.seleccionarOrden('proximamente', this)">
+            <span class="pill-orden-icono"><i class="fas fa-clapperboard"></i></span>
+            <span class="pill-orden-label">Lo que se viene</span>
+        </button>
+        <button class="pill-orden" data-criterio="votos" onclick="window.seleccionarOrden('votos', this)">
+            <span class="pill-orden-icono"><i class="fas fa-thumbs-up"></i></span>
+            <span class="pill-orden-label">Más votadas</span>
+        </button>
+        <button class="pill-orden" data-criterio="titulo" onclick="window.seleccionarOrden('titulo', this)">
+            <span class="pill-orden-icono"><i class="fas fa-arrow-down-a-z"></i></span>
+            <span class="pill-orden-label">Título A-Z</span>
+        </button>
     </div>
 
     <!-- PILLS DE ORDENAMIENTO — SERIES (poblado por JS, igual que el de arriba) -->
@@ -1020,7 +1121,9 @@
             .feed-tab-filtro-icono-desktop { display: none; }
             .feed-tab-filtro-icono-mobile { display: inline; }
         }
+    </style>
 
+    <style>
         .rec-ctx-chip {
             font-size: 12px;
             padding: 5px 11px;
@@ -1354,16 +1457,21 @@
         }
         @media (max-width: 768px) {
             .destacada-card {
-                margin-left: -1rem !important;
-                margin-right: -1rem !important;
-                width: calc(100% + 2rem) !important;
-                border-radius: 0 !important;
+                margin: 0 1.1rem 12px !important;
+                width: auto !important;
+                border-radius: 20px !important;
+                box-shadow: 0 16px 32px -12px rgba(22,38,77,0.35) !important;
             }
-            .destacada-label {
-                margin-left: -1rem;
-                margin-right: -1rem;
-                padding-left: 1rem;
-                padding-right: 1rem;
+            .destacada-overlay {
+                background: linear-gradient(to top, rgba(9,12,24,0.94) 0%, rgba(14,23,48,0.25) 55%, transparent 100%) !important;
+            }
+            .destacada-badge {
+                background: linear-gradient(135deg,#f0553f,#c4321f) !important;
+                box-shadow: 0 3px 8px rgba(196,50,31,0.4);
+            }
+            .btn-dest-votar {
+                background: linear-gradient(135deg,#f0553f,#c4321f) !important;
+                box-shadow: 0 4px 10px rgba(196,50,31,0.4);
             }
             .vr-wrap {
                 margin-left: -1rem !important;
@@ -1377,6 +1485,37 @@
             .vr-card {
                 border-radius: 0 !important;
             }
+            /* Voto Relámpago ahora vive en su propio modal — el
+               amarillo ya no hace falta como marco puntual de la
+               tarjeta (eso era para diferenciarse del resto del feed
+               blanco alrededor); ahora es el fondo de todo el modal,
+               y la tarjeta flota directo encima. */
+            #votoRelampagoContainer,
+            #votoRelampagoSeriesContainer {
+                background: #ffe999 !important;
+                padding-bottom: 10px;
+            }
+            #votoRelampagoModalSheet .vr-wrap {
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                width: auto !important;
+                border: none !important;
+                background: transparent !important;
+                border-radius: 0 !important;
+                padding: 0 12px !important;
+            }
+            #votoRelampagoModalSheet .vr-card {
+                border-radius: 14px !important;
+            }
+            .vr-btn-like, .vr-btn-dislike {
+                background: #fff !important;
+                border-color: #f0eeea !important;
+                color: #16151a !important;
+            }
+            .vr-btn-like i { color: #2e7d32; }
+            .vr-btn-dislike i { color: #c62828; }
+            .vr-label { font-size: 14px !important; }
+            .vr-leyenda { font-size: 12.5px !important; }
             .vr-acciones {
                 padding: 0 10px;
             }

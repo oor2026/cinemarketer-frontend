@@ -303,16 +303,26 @@ async function loadModule(moduleName, element = null, updateHash = true) {
                 // entero en cada visita y ninguna variable de estado del módulo
                 // (contadores, flags de "ya cargado", etc.) quede pegada de una
                 // sesión anterior.
-                const jsId = `js-${moduleName}`;
-                await new Promise((resolve) => {
-                    const script = document.createElement('script');
-                    script.id = jsId;
-                    script.src = `${JS_PATH}${moduleName}.js?v=${Date.now()}`;
-                    script.onload = () => resolve();
-                    script.onerror = () => resolve();
-                    document.head.appendChild(script);
-                    window._tagsModuloActual.push(jsId);
-                });
+                //
+                // Excepción: feed-films.js ahora se carga UNA sola vez, global,
+                // desde dashboard.html — así el Buscador (abrirBuscadorAsistido,
+                // _buscadorCriterioSeleccionado, etc.) está siempre disponible
+                // sin importar qué módulo esté activo, no solo mientras Inicio
+                // está cargado. Acá no lo recreamos como <script> por módulo;
+                // init_feed-films() se sigue llamando igual que siempre más
+                // abajo, sobre la copia ya cargada.
+                if (moduleName !== 'feed-films') {
+                    const jsId = `js-${moduleName}`;
+                    await new Promise((resolve) => {
+                        const script = document.createElement('script');
+                        script.id = jsId;
+                        script.src = `${JS_PATH}${moduleName}.js?v=${Date.now()}`;
+                        script.onload = () => resolve();
+                        script.onerror = () => resolve();
+                        document.head.appendChild(script);
+                        window._tagsModuloActual.push(jsId);
+                    });
+                }
 
         // Inicializadores específicos
         setTimeout(() => {
@@ -328,7 +338,8 @@ async function loadModule(moduleName, element = null, updateHash = true) {
             } else {
                 if (moduleName === 'feed-films' && typeof window.cargarPeliculasPopulares === 'function') {
                                     window.cargarPeliculasPopulares(1);
-                } else if (moduleName === 'mis-premios' && typeof window.cargarCanjeados === 'function') {
+                }
+                if (moduleName === 'mis-premios' && typeof window.cargarCanjeados === 'function') {
                     window.cargarCanjeados();
                 } else if (moduleName === 'mi-cuenta' && typeof window.loadProfile === 'function') {
                     window.loadProfile();
@@ -337,6 +348,26 @@ async function loadModule(moduleName, element = null, updateHash = true) {
                 }
             }
         }, 200);
+
+        // Accesos de Inicio (carrusel + switch Películas/Series) — timeout
+        // propio, más largo que el de arriba. init_feed-films() SÍ existe
+        // (a diferencia de lo que asumimos al principio) y dispara trabajo
+        // async interno propio (restaurar la última tab vista, cargar
+        // destacados). Si forzáramos "Películas" antes de que termine,
+        // esa restauración interna nos lo pisa después.
+        if (moduleName === 'feed-films') {
+            setTimeout(() => {
+                if (typeof window.actualizarSaludoInicioMobile === 'function') {
+                    window.actualizarSaludoInicioMobile();
+                }
+                if (typeof window.inicializarCarruselAccesosInicio === 'function') {
+                    window.inicializarCarruselAccesosInicio();
+                }
+                if (typeof window.inicializarSwitchTipoInicio === 'function') {
+                    window.inicializarSwitchTipoInicio();
+                }
+            }, 600);
+        }
 
         // ACTUALIZAR HASH
         if (updateHash) {
@@ -400,6 +431,13 @@ async function cargarPerfilHeader() {
         // el modal de progreso desde cualquier módulo.
         window._perfilNivel = data.level || 'AMATEUR';
         window._perfilData  = data;
+
+        // Por si el saludo de Inicio ya se pintó antes de que este fetch
+        // resolviera (corrida de tiempos en la primera carga) — lo
+        // actualiza de nuevo acá apenas el nombre real está disponible.
+        if (typeof window.actualizarSaludoInicioMobile === 'function') {
+            window.actualizarSaludoInicioMobile();
+        }
 
     } catch (e) {}
 }

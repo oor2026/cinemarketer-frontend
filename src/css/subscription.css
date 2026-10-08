@@ -312,6 +312,11 @@
     color: white;
 }
 
+@media (max-width: 768px) {
+    .premium-modal-header { background: #c4321f !important; }
+    .premium-modal-header.creator-theme { background: #7c3aed !important; }
+}
+
 .premium-modal-header h3 {
     margin: 0 0 4px;
     font-size: 20px;

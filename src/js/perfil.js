@@ -954,10 +954,12 @@ window.subirBanner = async function(input) {
                                             window._abrirModalPrivacidad = function() {
                                                 _actualizarTextosModalPrivacidad(_miSalaEsPrivado);
                                                 document.getElementById('modalPrivacidadPerfil').style.display = 'flex';
+                                                document.body.style.overflow = 'hidden';
                                             };
 
                                             window._cerrarModalPrivacidad = function() {
                                                 document.getElementById('modalPrivacidadPerfil').style.display = 'none';
+                                                document.body.style.overflow = '';
                                             };
 
                                             // El switch dentro del modal solo cambia la vista previa —

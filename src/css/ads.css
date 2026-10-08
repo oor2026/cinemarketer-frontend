@@ -108,6 +108,7 @@ body.modulo-mi-cuenta .ads-sidebar-right {
     .dashboard-layout #module-container {
         padding-left: 0 !important;
         padding-right: 0 !important;
+        background: #ffffff;
     }
 }
 

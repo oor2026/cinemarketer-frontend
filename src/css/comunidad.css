@@ -670,24 +670,42 @@
         height: auto;
     }
 
-    /* .feed-container (definido en feed-films.css) le da padding:1rem a todo
-           lo que cuelga de él, incluido #comunidad-container por ser hermano de
-           #peliculasGrid. Acá cancelamos ESE padding puntual solo para el feed
-           de Comunidad — nunca tocamos #peliculasGrid ni .feed-container en sí,
-           así el feed de Películas queda 100% intacto. */
+    /* Comunidad ahora es su propio módulo (modules/comunidad.html),
+       ya no vive adentro de .feed-container — no hay ningún padding
+       de un padre que compensar acá. Los márgenes negativos que había
+       antes quedaron pensados para cuando SÍ colgaba de ahí; ahora
+       solo empujaban el contenido más ancho que la pantalla. */
     #comunidad-container {
-            margin-left: -1rem;
-            margin-right: -1rem;
-            width: calc(100% + 2rem);
-            padding-left: 0;
-            padding-right: 0;
+            width: 100%;
             box-sizing: border-box;
+            background: #ffffff;
+            padding: 1rem 1.1rem 0;
         }
 
-        #comunidad-container .com-nueva-pub {
-                margin-left: 0.5rem;
-                margin-right: 0.5rem;
-            }
+    .com-nueva-pub {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 13px 16px 13px 13px;
+        border: 1px solid #f0eeea;
+        border-radius: 18px;
+        box-shadow: 0 10px 24px -8px rgba(22,38,77,0.16), 0 2px 6px rgba(22,38,77,0.06);
+    }
+
+    .com-nueva-pub-placeholder {
+        font-size: 13.5px;
+        color: #8a8478;
+        font-weight: 600;
+    }
+
+    .com-nueva-pub-btn {
+        background: linear-gradient(135deg,#f0553f,#c4321f);
+        box-shadow: 0 3px 8px rgba(196,50,31,0.35);
+    }
+
+    .com-card {
+        border: none;
+        box-shadow: 0 8px 20px -6px rgba(20,20,20,0.10), 0 1px 3px rgba(20,20,20,0.05);
+    }
 }
 
 /* ── Desktop: ocultar chips horizontales ────── */
@@ -908,3 +926,57 @@
 .wf-hashtag-sugerencia-item:hover { background: #f4f6fb; }
 .wf-hashtag-sugerencia-nombre { font-weight: 600; color: #324C89; }
 .wf-hashtag-sugerencia-count { font-size: 0.75rem; color: #999; }
+
+/* ── Creator banner ─────────────────── */
+.creator-banner-compacto {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    background: linear-gradient(100deg, rgba(240,85,63,0.10), rgba(22,38,77,0.10));
+    border: 1px solid rgba(22,38,77,0.08);
+    border-radius: 14px;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    margin-bottom: 0.75rem;
+}
+.creator-banner-compacto-icono { font-size: 1.05rem; flex-shrink: 0; }
+.creator-banner-compacto-texto { flex: 1; font-size: 0.85rem; color: #16151a; font-weight: 600; }
+.creator-banner-compacto-texto strong { color: #c4321f; }
+.creator-banner-compacto i { color: #8a8478; font-size: 0.85rem; }
+
+.creator-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+.creator-modal-caja {
+    position: relative;
+    width: 100%;
+    max-width: 380px;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+.creator-modal-cerrar {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.06);
+    border: none;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    color: #444;
+    z-index: 1;
+}

@@ -1,0 +1,4 @@
+/* Todos los estilos de este módulo viven inline en cartelera.html,
+   siguiendo el mismo criterio que feed-films.html. Este archivo
+   existe solo para que module-loader.js no reciba un 404 al pedirlo
+   automáticamente por convención. */

@@ -1,5 +1,9 @@
 .mi-lista-contenedor { max-width: 1150px; margin: 0 auto; padding: 0 1rem 1.5rem; }
 
+@media (max-width: 768px) {
+    .mi-lista-contenedor { padding-top: 1rem; background: #ffffff; }
+}
+
 /* Header — mismo estilo visual que Club de Beneficios: degradé navy
    radial, ícono circular en fila con el título, ícono decorativo
    grande de fondo (mismo mi-lista-header-icon, en versión gigante). */
@@ -31,20 +35,7 @@
 .mi-lista-header-text p { opacity: 0.75; font-size: 0.95rem; margin: 0; }
 
 @media (max-width: 768px) {
-    .mi-lista-header {
-        padding: 1.5rem;
-        border-radius: 12px;
-        margin-bottom: 10px;
-    }
-    .mi-lista-header-decor { font-size: 6rem; }
-    .mi-lista-header-icon {
-        width: 40px;
-        height: 40px;
-        background: rgba(255,255,255,0.2);
-    }
-    .mi-lista-header-icon i { font-size: 1.2rem; }
-    .mi-lista-header-text h2 { font-size: 1.2rem; margin-bottom: 1px; }
-    .mi-lista-header-text p { font-size: 0.78rem; opacity: 0.7; }
+    .mi-lista-header { display: none; }
 }
 .mi-lista-switch { display: inline-flex; gap: 6px; margin-bottom: 1.2rem; }
 .mi-lista-switch-btn {
