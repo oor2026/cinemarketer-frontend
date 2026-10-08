@@ -5070,6 +5070,11 @@ window.abrirBuscadorAsistido = async function() {
         }
     }
 
+    // Si mientras tanto un atajo ya abrió un paso interno (el menú principal quedó oculto), ese paso
+    // tiene su propio mensaje: no se lo pisa con el saludo.
+    const nivel1 = document.getElementById('buscadorNivel1');
+    if (nivel1 && nivel1.style.display === 'none') return;
+
     const nombre = _buscadorPrimerNombre();
     window._buscadorSetBurbuja(nombre ? `¡Hola, ${nombre}! ¿Qué hacemos hoy?` : '¿Qué hacemos hoy?');
 };
@@ -5425,6 +5430,7 @@ window._buscadorConfigurarBotonPremium = async function() {
 };
 
 window._buscadorVolverNivel1 = function() {
+    window._buscadorCriterioTrasTipo = null; // al volver al menú se descarta lo que había pedido un atajo
     BUSCADOR_TODAS_LAS_PANTALLAS.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
@@ -5443,12 +5449,25 @@ window._buscadorVolverNivel1 = function() {
 // Paso 1 → paso 2 de "Película o serie": guarda el tipo elegido y
 // avanza directo a la lista de criterios (son los mismos 4 para
 // ambos casos, solo cambia el texto del subtítulo).
+
+// Criterio que pidió un atajo de Inicio antes de elegir el tipo (hoy solo 'titulo'). Si hay uno, al
+// elegir película o serie se sigue directo con ese criterio, sin pasar por la lista de criterios.
+window._buscadorCriterioTrasTipo = null;
+
 window._buscadorSetTipoYAvanzar = function(tipo) {
     window._buscadorTipoContenido = tipo;
     document.getElementById('buscadorTipoEleccion').style.display = 'none';
-    document.getElementById('buscadorNivel2PeliculaSerie').style.display = 'block';
     document.getElementById('buscadorNivel2PeliculaSerieTitulo').textContent =
         tipo === 'pelicula' ? 'Buscando una película' : 'Buscando una serie';
+
+    const criterioPendiente = window._buscadorCriterioTrasTipo;
+    if (criterioPendiente) {
+        window._buscadorCriterioTrasTipo = null;
+        window._buscadorCriterioSeleccionado(criterioPendiente);
+        return;
+    }
+
+    document.getElementById('buscadorNivel2PeliculaSerie').style.display = 'block';
 
     const nombre = _buscadorPrimerNombre();
     window._buscadorSetBurbuja(nombre
@@ -5463,6 +5482,14 @@ window._buscadorVolverATipoEleccion = function() {
     document.getElementById('buscadorTipoEleccion').style.display = 'block';
 };
 
+// Atajo de Inicio "Buscar una película o serie · Por título": primero pregunta si es película o serie
+// (el mismo paso 1 de la puerta principal) y, elegido el tipo, sigue directo al predictor de título.
+window._buscadorAbrirTipoParaTitulo = function() {
+    window._buscadorCriterioTrasTipo = 'titulo';
+    document.getElementById('buscadorTipoEleccion').style.display = 'block';
+    window._buscadorSetBurbuja(BUSCADOR_FRASES_NIVEL2.pelicula_serie(_buscadorPrimerNombre()));
+};
+
 window._buscadorSetTipo = function(tipo, btn) {
     window._buscadorTipoContenido = tipo;
     document.querySelectorAll('#buscadorNivel2PeliculaSerie .filtro-switch-btn').forEach(b => b.classList.remove('activo'));
@@ -5474,6 +5501,10 @@ window._buscadorSetTipo = function(tipo, btn) {
 window._buscadorCriterioSeleccionado = function(criterio) {
     if (criterio === 'titulo') {
         window._buscadorAbrirNivel3Titulo();
+        return;
+    }
+    if (criterio === 'titulo_con_tipo') {
+        window._buscadorAbrirTipoParaTitulo();
         return;
     }
         if (criterio === 'genero') {

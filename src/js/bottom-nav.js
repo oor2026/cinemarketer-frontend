@@ -139,7 +139,7 @@ window.inicializarCarruselAccesosInicio = function() {
 
 window.accesoRapidoInicio = async function(id) {
     const mapa = {
-        'buscar-titulo': 'titulo',
+        'buscar-titulo': 'titulo_con_tipo', // primero pregunta si es película o serie
         'donde-verla': 'donde_ver_plataforma',
         'actor-director': 'persona_nombre',
         'trabajaron-juntos': 'persona_cruce',
