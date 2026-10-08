@@ -3057,7 +3057,7 @@
     font-weight: 600;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
 
     .editar-label { display: none; }
     }
@@ -3076,11 +3076,59 @@
         display: none;
     }
 
+    .ordenar-pills {
+        gap: 18px;
+        padding: 1rem 1rem 0.6rem;
+        border-bottom: none;
+    }
     .pill-orden {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
         white-space: nowrap;
         flex-shrink: 0;
-        padding: 0.45rem 1rem;
-        font-size: 0.82rem;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+    .pill-orden-icono {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        color: #8a8478;
+        font-size: 1.2rem;
+        box-sizing: border-box;
+        border: 2px solid #c4321f;
+    }
+    #ordenarPillsSerie .pill-orden-icono {
+        border-color: #004f9b;
+    }
+    .pill-orden-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #8a8478;
+    }
+    .pill-orden.active .pill-orden-icono {
+        background: linear-gradient(135deg,#f0553f,#c4321f);
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(196,50,31,0.3);
+        text-shadow: 0 0 2px #fff, 1px 1px 1px #fff, -1px -1px 1px #fff, 1px -1px 1px #fff, -1px 1px 1px #fff;
+    }
+    .pill-orden.active .pill-orden-label {
+        color: #16151a;
+        font-weight: 700;
+    }
+    /* Series: mismo patrón, pero en azul cuando está activo */
+    #ordenarPillsSerie .pill-orden.active .pill-orden-icono {
+        background: #004f9b;
+        box-shadow: 0 4px 10px rgba(0,79,155,0.3);
     }
 }
 

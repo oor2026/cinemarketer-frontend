@@ -1,5 +1,15 @@
 <div class="profile-card">
 
+    <!-- Título mobile — reemplaza visualmente al banner navy de abajo
+         solo en mobile (ese banner sigue igual en desktop, sin tocar). -->
+    <div class="modulo-header-card tono-rojo">
+        <i class="fas fa-cog modulo-header-decor"></i>
+        <div class="modulo-header-texto">
+            <div class="modulo-header-titulo">Configuración</div>
+            <div class="modulo-header-subtitulo" style="text-align: center;"> Gestioná tus datos, tu cuenta y tus preferencias</div>
+        </div>
+    </div>
+
     <!-- BANNER — mismo estilo que Club de Beneficios / Mi Lista / Mis
          Mensajes / Contacto: degradé navy radial, ícono decorativo
          grande de fondo, título + bajada. -->
@@ -7,9 +17,9 @@
         <i class="fas fa-cog cuenta-header-v2-decor"></i>
         <div class="cuenta-header-v2-titulo-row">
             <div class="cuenta-header-v2-icono"><i class="fas fa-cog"></i></div>
-            <div class="cuenta-header-v2-texto">
+            <div class="cuenta-header-v2-texto"">
                 <h2>Configuración</h2>
-                <p>Gestioná tus datos, tu cuenta y tus preferencias</p>
+                <p>Gestioná tus datos, tu cuenta, tus preferencias y tus suscripciones</p>
             </div>
         </div>
     </div>
@@ -22,6 +32,8 @@
 
     <!-- PANEL PREMIUM -->
     <div class="cuenta-premium-panel" id="cuentaPremiumPanel">
+
+        <h3 class="cuenta-seccion-titulo cuenta-seccion-titulo-suelto">Mis suscripciones</h3>
 
         <div class="plan-carousel">
             <div class="plan-carousel-track" id="planCarouselTrack">
@@ -510,7 +522,7 @@
         <div class="modal-edicion-overlay" onclick="window.cerrarEliminarCuenta()"></div>
         <div class="modal-edicion-caja">
             <div class="modal-edicion-header">
-                <h3 style="color:#e50914;">⚠️ Eliminar cuenta</h3>
+                <h3 style="color:#fff;">⚠️ Eliminar cuenta</h3>
                 <button class="modal-edicion-cerrar" onclick="window.cerrarEliminarCuenta()">×</button>
             </div>
             <div class="modal-edicion-body">

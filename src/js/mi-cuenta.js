@@ -491,11 +491,13 @@ window.abrirEliminarCuenta = function() {
     document.getElementById('bloqueEliminarConfirmacionGoogle').style.display = esGoogle ? 'block' : 'none';
 
     document.getElementById('modalEliminarCuenta').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
     setTimeout(() => document.getElementById(esGoogle ? 'inputEliminarConfirmacion' : 'inputEliminarPassword').focus(), 50);
 };
 
 window.cerrarEliminarCuenta = function() {
     document.getElementById('modalEliminarCuenta').style.display = 'none';
+    document.body.style.overflow = '';
 };
 
 window.confirmarEliminarCuenta = async function() {

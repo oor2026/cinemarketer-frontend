@@ -7,6 +7,8 @@
     display: none;
 }
 
+.dash-config-mobile { display: none; }
+
 .dash-menu-toggle {
     display: none;
     background: none;
@@ -176,7 +178,7 @@ body {
         align-items: center;
         justify-content: center;
         position: absolute;
-        right: 1rem;
+        right: 3.6rem;
         top: 50%;
         transform: translateY(-50%);
         background: none;
@@ -186,31 +188,30 @@ body {
         cursor: pointer;
         padding: 0.5rem;
     }
+    .club-stat-item { background: #c4321f !important; }
 
                         /* La campanita vieja de adentro del menú hamburguesa se oculta —
                            ya no hace falta en mobile, migró al header. */
                         .dash-bell-desktop-li {
                             display: none;
                         }
-                        /* Mismo criterio para el ícono de progreso — ya está en el
-                           header, no hace falta duplicado adentro del hamburguesa. */
+                        /* Mismo criterio para el ícono de progreso y el de
+                           configuración — ya están en el header, no hace
+                           falta duplicado adentro del hamburguesa. */
                         .dash-progreso-desktop-li {
                             display: none;
                         }
             }
 
-            /* Ícono de progreso — mismo criterio que la campanita, a su
-               izquierda. */
-            .dash-progreso-mobile {
-                display: none;
-            }
             @media (max-width: 768px) {
-                .dash-progreso-mobile {
+                /* Configuración — mismo criterio, a la derecha de la
+                   campanita (el ítem más cercano al borde). */
+                .dash-config-mobile {
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     position: absolute;
-                    right: 3.6rem;
+                    right: 1rem;
                     top: 50%;
                     transform: translateY(-50%);
                     background: none;
@@ -220,7 +221,6 @@ body {
                     cursor: pointer;
                     padding: 0.5rem;
                 }
-
         /* Animación sutil cuando hay novedades sin leer — el 8% inicial
            de cada ciclo de 5s es el "sonido" (agita rápido y frena), el
            92% restante se queda quieta. Anima el ícono de adentro, no el
@@ -352,6 +352,12 @@ body {
 /* ========== RESPONSIVE ========== */
 @media (max-width: 768px) {
 
+.modal-progreso-header {
+        background: linear-gradient(135deg, #f0553f, #c4321f) !important;
+    }
+    .modal-progreso-btn-aceptar {
+        background: linear-gradient(135deg, #f0553f, #c4321f) !important;
+    }
 
 .nav-menu .nav-link {
         padding: 0.5rem 1rem;
@@ -709,6 +715,35 @@ body.menu-open {
     padding: 0.25rem;
 }
 
+/* ── Botón flotante "Voto Relámpago" ─────────────────────── */
+#btnVotoRelampagoFlotante {
+    position: fixed;
+    bottom: 5.25rem;
+    right: 1.25rem;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: #f5b400;
+    color: white;
+    border: none;
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    cursor: pointer;
+    z-index: 900;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+}
+#btnVotoRelampagoFlotante.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
 /* ── Botón flotante "Volver arriba" ─────────────────────── */
 #btnVolverArriba {
     position: fixed;
@@ -904,7 +939,7 @@ body.menu-open {
         align-items: center;
         justify-content: space-between;
         padding: 1rem 1.2rem;
-        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        background: #c4321f !important;
         color: white;
         font-weight: 700;
         font-size: 1.1rem;

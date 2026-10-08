@@ -1,0 +1,172 @@
+/* ==============================================
+   BARRA DE NAVEGACIÓN INFERIOR — SOLO MOBILE
+   No debe tener ningún efecto en desktop bajo
+   ninguna circunstancia — todo vive adentro del
+   @media de abajo.
+   ============================================== */
+.bottom-nav {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    body {
+        padding-bottom: 64px;
+    }
+
+    .bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: #ffffff;
+        border-top: 1px solid #eee;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.06);
+        z-index: 50;
+        align-items: center;
+        justify-content: space-around;
+        padding: 0 0.25rem;
+    }
+
+    .bottom-nav-link {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        flex: 1;
+        color: #999;
+        text-decoration: none;
+        font-size: 0.65rem;
+        font-weight: 600;
+        padding: 4px 0;
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    .bottom-nav-link i { font-size: 1.2rem; }
+
+    .bottom-nav-link.active { color: #e50914; position: relative; }
+    .bottom-nav-link.active::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 18px;
+        height: 3px;
+        border-radius: 2px;
+        background: #e50914;
+    }
+
+    .bottom-nav-link-asistente { position: relative; top: -14px; }
+
+    .bottom-nav-link-asistente .bottom-nav-asistente-circulo {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: #e50914;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(229,9,20,0.4);
+        margin-bottom: 2px;
+    }
+
+    .bottom-nav-link-asistente .bottom-nav-asistente-circulo i { font-size: 1.3rem; }
+
+        /* El buscador flotante queda redundante con el botón Asistente
+           de la barra — se elimina en mobile. "Volver arriba" se corre
+           por encima de la barra para no quedar tapado (no se toca en
+           desktop, que no tiene esta barra). */
+    #btnBuscarFlotante { display: none !important; }
+    #btnVolverArriba { bottom: calc(60px + 1.25rem) !important; }
+    #btnNuevaPubFlotante { bottom: calc(60px + 5.25rem) !important; }
+    .hamburguesa-duplicado-mobile { display: none !important; }
+    #btnVotoRelampagoFlotante { bottom: calc(60px + 5.25rem) !important; }
+
+    /* Mi Sala — mismos 3 flotantes, mismo criterio de correrlos por
+       encima de la barra. Los !important ganan por sobre las reglas
+       de perfil-mobile.css sin importar el orden de carga real entre
+       los dos archivos (que puede variar según qué módulo se cargó
+       último). */
+    .perfil-card .cine-fab-tema { bottom: calc(60px + 1.25rem) !important; }
+    .perfil-card .cine-fab-privacidad { bottom: calc(60px + 4.5rem) !important; }
+    .perfil-card .cine-fab-modo { bottom: calc(60px + 7.75rem) !important; }
+    .perfil-card.perfil-visitante .cine-fab-modo { bottom: calc(60px + 4.5rem) !important; }
+}
+
+.vr-modal-paso { padding: 2rem 1.5rem; text-align: center; position: relative; }
+.vr-modal-cerrar { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.06); border: none; color: #555; font-size: 1rem; cursor: pointer; }
+.vr-modal-intro-icono { font-size: 2.4rem; color: #f5b400; margin-bottom: 0.75rem; display: block; }
+.vr-modal-intro-titulo { font-size: 1.3rem; font-weight: 800; color: #16151a; margin-bottom: 0.3rem; }
+.vr-modal-intro-leyenda { font-size: 0.9rem; color: #8a8478; margin-bottom: 1.5rem; }
+.vr-modal-comenzar-btn { background: linear-gradient(135deg,#f0553f,#c4321f); color: #fff; border: none; border-radius: 24px; padding: 0.8rem 2.2rem; font-size: 0.95rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 10px rgba(196,50,31,0.35); }
+#vrModalPasoElegir { background: #ffe999; border-radius: 20px 20px 0 0; }
+.vr-modal-elegir-titulo { font-size: 1.1rem; font-weight: 800; color: #16151a; margin-bottom: 1.2rem; }
+.vr-modal-elegir-opciones { display: flex; flex-direction: column; gap: 0.7rem; }
+.vr-modal-elegir-btn { display: flex; align-items: center; justify-content: center; gap: 8px; background: #fff; border: 1.5px solid #f0eeea; border-radius: 16px; padding: 0.9rem; font-size: 0.95rem; font-weight: 700; color: #16264d; cursor: pointer; box-shadow: 0 8px 20px -6px rgba(20,20,20,0.10); }
+
+.modulo-header-card {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .modulo-header-card {
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        border-radius: 0;
+        padding: 2.2rem 1.2rem;
+        margin: 0 -1rem 1.2rem;
+    }
+    /* Cada contenedor de módulo trae su propio padding superior
+       (distinto entre sí) — se cancela puntual acá para que la
+       cabecera llegue pegada hasta arriba, sin bache de por medio. */
+    .bandeja-container .modulo-header-card { margin-top: -0.5rem; }
+    .mi-lista-contenedor .modulo-header-card { margin-top: -1rem; }
+    #comunidad-container .modulo-header-card { margin-top: -1rem; }
+    .profile-card .modulo-header-card { margin-top: -1rem; }
+    .contacto-container .modulo-header-card { margin-top: -1rem; }
+    .club-beneficios-container .club-header-v2 { margin-top: -1rem; }
+}
+.modulo-header-card.tono-rojo { background: linear-gradient(160deg, rgba(196,50,31,0.08), rgba(196,50,31,0.02)); }
+.modulo-header-card.tono-marino { background: linear-gradient(180deg, rgba(59,91,165,0.30) 0%, rgba(59,91,165,0) 100%); }
+.modulo-header-decor { position: absolute; right: -10px; top: 50%; transform: translateY(-50%) rotate(8deg); font-size: 5.5rem; opacity: 0.12; pointer-events: none; }
+.modulo-header-card.tono-rojo .modulo-header-decor { color: #c4321f; }
+.modulo-header-card.tono-marino .modulo-header-decor { color: #16264d; }
+.modulo-header-icono { width: 46px; height: 46px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; z-index: 1; }
+.modulo-header-card.tono-rojo .modulo-header-icono { background: linear-gradient(135deg,#f0553f,#c4321f); box-shadow: 0 4px 12px rgba(196,50,31,0.35); }
+.modulo-header-card.tono-marino .modulo-header-icono { background: linear-gradient(135deg,#243b72,#16264d); box-shadow: 0 4px 12px rgba(22,38,77,0.35); }
+.modulo-header-icono i { color: #fff; font-size: 1.3rem; }
+.modulo-header-texto { position: relative; z-index: 1; min-width: 0; }
+.modulo-header-titulo { font-size: 2rem; font-weight: 700; letter-spacing: -0.01em; line-height: 1.1; font-family: 'Space Grotesk', sans-serif; }
+.modulo-header-card.tono-rojo .modulo-header-titulo { color: #c4321f; }
+.modulo-header-card.tono-marino .modulo-header-titulo { color: #004f9b; }
+.modulo-header-subtitulo { font-size: 0.95rem; color: #000000; margin-top: 3px; }
+
+.trivia-eleccion-moderna { position: relative; overflow: hidden; }
+.trivia-eleccion-decor { position: absolute; right: -14px; top: -10px; font-size: 6rem; opacity: 0.07; color: #16264d; transform: rotate(12deg); pointer-events: none; }
+.trivia-eleccion-titulo { font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; position: relative; z-index: 1; margin-bottom: 1.4rem !important; }
+.trivia-eleccion-opciones { position: relative; z-index: 1; display: flex; justify-content: center; gap: 1.3rem; }
+.trivia-eleccion-opcion { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.trivia-eleccion-opcion span { font-size: 0.85rem; font-weight: 700; color: #16151a; }
+.trivia-eleccion-circulo {
+    width: 72px;
+    height: 72px;
+    border-radius: 22px;
+    border: none;
+    color: #fff;
+    font-size: 1.6rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.trivia-eleccion-circulo.tono-rojo { background: linear-gradient(135deg,#f0553f,#c4321f); box-shadow: 0 10px 20px -6px rgba(196,50,31,0.45); }
+.trivia-eleccion-circulo.tono-marino { background: linear-gradient(135deg,#1a6bc2,#004f9b); box-shadow: 0 10px 20px -6px rgba(0,79,155,0.45); }

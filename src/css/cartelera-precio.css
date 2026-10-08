@@ -1,0 +1,27 @@
+/* ==============================================
+   cartelera-precio.css - Bloque de precio de una función
+   Lo arma js/cartelera-precio.js (ver ahí qué se muestra y cuándo).
+   Verde = pagás menos; azul marino = hay una condición (el 2x1 solo sirve
+   de a dos). Mismos colores que ya usa Cartelera.
+   ============================================== */
+.cp-celda { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; line-height: 1.2; }
+.cp-linea,
+.cp-resumen { display: flex; align-items: baseline; flex-wrap: wrap; gap: 5px; }
+.cp-resumen { margin-top: 8px; }
+
+.cp-monto { font-size: 0.95rem; font-weight: 700; color: #16151a; white-space: nowrap; }
+.cp-desde,
+.cp-cu { font-size: 0.7rem; font-weight: 600; color: #8a8478; }
+.cp-tachado { font-size: 0.75rem; color: #b5b0a4; text-decoration: line-through; white-space: nowrap; }
+
+.cp-tag { font-size: 0.66rem; font-weight: 700; border-radius: 8px; padding: 2px 7px; }
+.cp-tag-reducida { color: #1e6b3a; background: rgba(30, 107, 58, 0.10); }
+.cp-tag-2x1 { color: #16264d; background: rgba(22, 38, 77, 0.09); }
+
+.cp-online { font-size: 0.72rem; color: #8a8478; }
+.cp-sin { color: #bbb; }
+
+/* Las tablas de funciones ganan una columna: si no entra, se desliza de
+   costado en vez de recortar el texto. */
+.buscador-cine-funciones-grupo { overflow-x: auto; }
+.buscador-funciones-tabla td.cp-td { min-width: 92px; }

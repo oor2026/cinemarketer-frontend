@@ -85,9 +85,15 @@ window.cargarFilasSeries = async function() {
         function renderPillsFilasSerie() {
                 const pillsCont = document.getElementById('ordenarPillsSerie');
                 if (!pillsCont) return;
-                pillsCont.innerHTML = window._filasSeries.map((f, i) =>
-                    `<button class="pill-orden${i === 0 ? ' active' : ''}" data-key="${f.key}" onclick="window.priorizarFilaGeneroSerie('${f.key}', this)">${f.label}</button>`
-                ).join('');
+                pillsCont.innerHTML = window._filasSeries.map((f, i) => {
+                    const partes = f.label.split(' ');
+                    const icono = partes[0];
+                    const texto = partes.slice(1).join(' ');
+                    return `<button class="pill-orden${i === 0 ? ' active' : ''}" data-key="${f.key}" onclick="window.priorizarFilaGeneroSerie('${f.key}', this)">
+                        <span class="pill-orden-icono">${icono}</span>
+                        <span class="pill-orden-label">${texto}</span>
+                    </button>`;
+                }).join('');
                 // La precarga en segundo plano (feed-films.js) llama a esta función
                 // mientras el usuario sigue en la tab Películas — no hay que
                 // mostrar la fila hasta que Series sea efectivamente la tab

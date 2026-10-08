@@ -109,6 +109,13 @@
 
                 <!-- COLUMNA CENTRAL: feed -->
                 <div class="com-col-center">
+                    <div class="modulo-header-card tono-marino">
+                        <i class="fas fa-users modulo-header-decor"></i>
+                        <div class="modulo-header-texto">
+                            <div class="modulo-header-titulo">Comunidad</div>
+                            <div class="modulo-header-subtitulo">El canal donde compartimos todo sobre películas, novedades, sorteos y mucho más.</div>
+                        </div>
+                    </div>
                     <!-- Caja nueva publicación -->
                         <div class="com-nueva-pub" onclick="window.abrirWorkflowPublicacion()">
                                 <div class="com-nueva-pub-avatar" id="comAvatarCaja"></div>
@@ -180,10 +187,13 @@
                                 renderBannerCreatorFeed();
                             }
 
-                            // Versión completa del banner Creator, para mobile — mismo diseño
-                            // colapsable que en Mi Cuenta (reutiliza las clases .premium-banner
-                            // de mi-cuenta.css/subscription.css, que ya están cargadas en toda
-                            // la app). Si el usuario ya es Creator, no se muestra nada.
+                            // Versión compacta del banner Creator, para mobile — una tira
+                            // angosta que solo invita a tocar; el detalle completo (precio,
+                            // beneficios, botón de suscripción) vive en un modal aparte, no
+                            // ocupando espacio fijo en el feed como antes. Reutiliza las
+                            // clases .premium-banner de mi-cuenta.css/subscription.css, ya
+                            // cargadas en toda la app. Si el usuario ya es Creator, no se
+                            // muestra nada.
                             function renderBannerCreatorFeed() {
                                 const slot = document.getElementById('comFeedCreatorBannerSlot');
                                 if (!slot) return;
@@ -192,15 +202,15 @@
                                 if (isCreator) { slot.innerHTML = ''; return; }
 
                                 slot.innerHTML = `
-                                    <div class="premium-banner creator-theme" id="comFeedCreatorBanner">
-                                        <div class="premium-banner-toggle-row">
-                                            <span class="premium-banner-toggle-label">🎬 Cinemarketer Creator</span>
-                                            <button class="premium-banner-toggle" id="comFeedCreatorBannerToggle"
-                                                    onclick="window.toggleCreatorBannerFeed()" aria-label="Colapsar banner">
-                                                <i class="fas fa-chevron-up" id="comFeedCreatorBannerChevron"></i>
-                                            </button>
-                                        </div>
-                                        <div class="premium-banner-colapsable" id="comFeedCreatorBannerColapsable">
+                                    <button class="creator-banner-compacto" id="comFeedCreatorBanner" onclick="window.abrirModalCreatorBanner()">
+                                        <span class="creator-banner-compacto-icono">🎬</span>
+                                        <span class="creator-banner-compacto-texto">Publicá mejor con <strong>Creator</strong></span>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+
+                                    <div id="modalCreatorBannerFeed" class="creator-modal-overlay" style="display:none;" onclick="window.cerrarModalCreatorBanner(event)">
+                                        <div class="creator-modal-caja premium-banner creator-theme" onclick="event.stopPropagation()">
+                                            <button class="creator-modal-cerrar" onclick="window.cerrarModalCreatorBanner()" aria-label="Cerrar">×</button>
                                             <div class="premium-banner-centro">
                                                 <div class="premium-banner-badge">🎬 Para creadores</div>
                                                 <p class="premium-banner-title">Cinemarketer Creator</p>
@@ -213,7 +223,7 @@
                                                         <li><span class="premium-check creator-theme"></span>Publicá con encuestas, votaciones y mucho más</li>
                                                     </ul>
                                                 </div>
-                                                <button class="btn-suscribirse creator-theme" onclick="window.abrirDetallePlanCreator()">
+                                                <button class="btn-suscribirse creator-theme" onclick="window.iniciarSuscripcionCreator()">
                                                     Quiero ser Creator
                                                 </button>
                                             </div>
@@ -221,16 +231,18 @@
                                     </div>`;
                             }
 
-                            window.toggleCreatorBannerFeed = function() {
-                                const colapsable = document.getElementById('comFeedCreatorBannerColapsable');
-                                const chevron    = document.getElementById('comFeedCreatorBannerChevron');
-                                const label      = document.querySelector('#comFeedCreatorBanner .premium-banner-toggle-label');
-                                if (!colapsable) return;
-                                const colapsado = colapsable.style.display === 'none';
-                                colapsable.style.display = colapsado ? '' : 'none';
-                                if (chevron) chevron.classList.toggle('fa-chevron-up', colapsado);
-                                if (chevron) chevron.classList.toggle('fa-chevron-down', !colapsado);
-                                if (label) label.style.display = colapsado ? 'none' : 'inline';
+                            window.abrirModalCreatorBanner = function() {
+                                const modal = document.getElementById('modalCreatorBannerFeed');
+                                if (!modal) return;
+                                modal.style.display = 'flex';
+                                document.body.style.overflow = 'hidden';
+                            };
+
+                            window.cerrarModalCreatorBanner = function(event) {
+                                if (event && event.target !== event.currentTarget) return;
+                                const modal = document.getElementById('modalCreatorBannerFeed');
+                                if (modal) modal.style.display = 'none';
+                                document.body.style.overflow = '';
                             };
 
             // Banner compacto de Creator en la columna derecha — si no es Creator,

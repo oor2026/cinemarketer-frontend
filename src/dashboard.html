@@ -12,6 +12,10 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
         <link rel="manifest" href="/manifest.json">
         <meta name="theme-color" content="#e50914">
         <meta name="mobile-web-app-capable" content="yes">
@@ -24,6 +28,7 @@
         <link rel="stylesheet" href="css/styles.css">
         <link rel="stylesheet" href="css/dashboard.css">
         <link rel="stylesheet" href="css/feed-films.css?v=2">
+        <link rel="stylesheet" href="css/cartelera-precio.css?v=1">
         <link rel="stylesheet" href="css/feed-series.css">
         <link rel="stylesheet" href="css/mi-cuenta.css?v=3">
         <link rel="stylesheet" href="css/mis-consultas.css">
@@ -35,6 +40,7 @@
         <!-- CSS PUBLICIDAD -->
         <link rel="stylesheet" href="css/ads.css">
         <link rel="stylesheet" href="css/emoji-picker.css">
+        <link rel="stylesheet" href="css/bottom-nav.css">
 
         <!-- SCRIPTS -->
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
@@ -47,6 +53,10 @@
         <script src="js/creator-tools/trivia.js"></script>
         <script src="js/creator-tools/trailer.js"></script>
         <script src="js/module-loader.js"></script>
+        <script src="js/bottom-nav.js"></script>
+        <script src="js/cartelera-precio.js?v=1"></script>
+        <script src="js/cartelera-modal.js?v=1"></script>
+        <script src="js/feed-films.js"></script>
         <script src="js/toast.js"></script>
         <script src="js/levelup.js"></script>
         <script src="js/subscription.js"></script>
@@ -79,12 +89,6 @@
                 <img src="assets/images/isologotipo.webp" alt="Cinemarketer" class="logo-img">
             </a>
             <button class="dash-menu-toggle" id="dashMenuToggle"><i class="fas fa-bars"></i></button>
-            <!-- Ícono de progreso — mismo criterio que la campanita:
-     vive en el header, fuera del menú hamburguesa, solo
-     mobile. Va a la izquierda de la campanita. -->
-            <button class="dash-progreso-mobile" id="dashProgresoMobile" onclick="window.abrirModalProgresoHeader()" title="Mi progreso">
-                <i class="fas fa-award"></i>
-            </button>
             <!-- Campanita mobile — vive en el header, fuera del menú
                  hamburguesa. Solo visible en mobile (CSS); en desktop
                  la campanita real sigue siendo la de adentro de
@@ -93,13 +97,20 @@
                 <i class="fas fa-bell"></i>
                 <span class="bell-badge" id="novedadesBadgeMobile" style="display:none;">0</span>
             </button>
+            <!-- Configuración mobile — mismo criterio que Progreso y
+                 Notificaciones: sale del hamburguesa y pasa a vivir
+                 acá, a la derecha de la campanita. Solo mobile; en
+                 desktop sigue estando únicamente en el hamburguesa. -->
+            <button class="dash-config-mobile" id="dashConfigMobile" onclick="if(typeof loadModule==='function')loadModule('mi-cuenta')" title="Configuración">
+                <i class="fas fa-cog"></i>
+            </button>
             <ul class="nav-menu" id="dashNavMenu">
                 <li><a class="nav-link" href="#feed-films" title="Ver películas"><i class="fas fa-home"></i></a></li>
                 <li class="nav-user-profile">
-                    <div class="user-profile-mini">
-                        <div class="user-avatar-mini" id="headerAvatar"><i class="fas fa-user-circle"></i></div>
-                        <div class="user-name-mini" id="headerUserName"><span class="user-name-text">Cargando...</span></div>
-                        <div class="user-level-mini" id="headerLevel"><span class="level-badge">🟢 Amateur</span></div>
+                    <div class="user-profile-mini" onclick="window.abrirModalProgresoHeader()" style="cursor:pointer;">
+                        <div class="user-avatar-mini" id="headerAvatar"><img src="https://res.cloudinary.com/dh0lanjs3/image/upload/v1788987283/avatars/custom/nmsd40tew0vmpm7f5hno.jpg" alt="Avatar" class="avatar-img"></div>
+                        <div class="user-name-mini" id="headerUserName"><span class="user-name-text">Laura Flor Carranza Fernández</span></div>
+                        <div class="user-level-mini" id="headerLevel"><span class="level-badge level-AMATEUR">🟢 Amateur</span></div>
                     </div>
                 </li>
                 <li class="dash-progreso-desktop-li">
@@ -139,14 +150,41 @@
                     </div>
                 </li>
                 <li><a class="nav-link nav-link-bell" href="#mis-consultas" title="Mis Mensajes"><div class="bell-wrapper"><i class="fas fa-comment-dots"></i><span class="bell-badge" id="bellBadge" style="display:none;">0</span></div><span class="nav-text">Mis Mensajes</span></a></li>
-                <li><a class="nav-link" href="javascript:void(0)" onclick="window.abrirPerfilUsuario(parseInt(localStorage.getItem('userId')))"><i class="fas fa-couch"></i><span class="nav-text">Mi Sala</span></a></li>
+                <li class="hamburguesa-duplicado-mobile"><a class="nav-link" href="javascript:void(0)" onclick="window.abrirPerfilUsuario(parseInt(localStorage.getItem('userId')))"><i class="fas fa-couch"></i><span class="nav-text">Mi Sala</span></a></li>
                 <li><a class="nav-link" href="#mi-lista"><i class="fas fa-bookmark"></i><span class="nav-text">Mi Lista</span></a></li>
-                <li><a class="nav-link" href="#club-beneficios"><i class="fas fa-gift"></i><span class="nav-text">Club de Beneficios</span></a></li>
-                <li><a class="nav-link" href="#mi-cuenta"><i class="fas fa-cog"></i><span class="nav-text">Configuración</span></a></li>
+                <li><a class="nav-link" href="javascript:void(0)" onclick="window.abrirTriviaEleccionModal()"><i class="fas fa-question-circle"></i><span class="nav-text">Trivia</span></a></li>
+                <li><a class="nav-link" href="#comunidad"><i class="fas fa-users"></i><span class="nav-text">Comunidad</span></a></li>
+                <li class="hamburguesa-duplicado-mobile"><a class="nav-link" href="#club-beneficios"><i class="fas fa-gift"></i><span class="nav-text">Club de Beneficios</span></a></li>
+                <li class="hamburguesa-duplicado-mobile"><a class="nav-link" href="#mi-cuenta"><i class="fas fa-cog"></i><span class="nav-text">Configuración</span></a></li>
                 <li><a class="nav-link" href="#contacto"><i class="fas fa-circle-question"></i><span class="nav-text nav-text-mobile">Preguntas frecuentes</span><span class="nav-text nav-text-desktop">FAQs</span></a></li>
                 <li><a href="#" class="nav-link" onclick="API.logout()"><i class="fas fa-sign-out-alt"></i><span class="nav-text">Cerrar Sesión</span></a></li>
             </ul>
         </div>
+    </nav>
+
+    <nav class="bottom-nav" id="bottomNav">
+        <a class="bottom-nav-link" data-module="feed-films" href="#feed-films"
+           onclick="if(window.location.hash==='#feed-films'){event.preventDefault();if(typeof loadModule==='function')loadModule('feed-films');}">
+            <i class="fas fa-home"></i>
+            <span>Inicio</span>
+        </a>
+        <a class="bottom-nav-link" data-module="cartelera" href="#cartelera">
+            <i class="fas fa-film"></i>
+            <span>Cartelera</span>
+        </a>
+        <button class="bottom-nav-link bottom-nav-link-asistente" type="button" onclick="window.abrirAsistenteBottomNav()">
+            <span class="bottom-nav-asistente-circulo"><i class="fas fa-glasses"></i></span>
+            <span>Asistente</span>
+        </button>
+        <a class="bottom-nav-link" data-module="perfil" href="javascript:void(0)"
+           onclick="window.abrirPerfilUsuario(parseInt(localStorage.getItem('userId')))">
+            <i class="fas fa-couch"></i>
+            <span>Mi Sala</span>
+        </a>
+        <a class="bottom-nav-link" data-module="club-beneficios" href="#club-beneficios">
+            <i class="fas fa-gift"></i>
+            <span>Beneficios</span>
+        </a>
     </nav>
 
     <!-- Modal full-screen de novedades — solo mobile -->
@@ -166,7 +204,7 @@
     <!-- Modal de progreso — global, funciona desde cualquier módulo -->
     <div id="modalProgresoHeader" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:1rem;" onclick="window.cerrarModalProgresoHeader()">
         <div style="background:white; border-radius:16px; max-width:440px; width:100%; overflow:hidden;" onclick="event.stopPropagation()">
-            <div style="background:radial-gradient(circle at 15% 20%, #001D7D 0%, #000d3d 70%); padding:1rem 1.25rem; display:flex; align-items:center; gap:10px;">
+            <div class="modal-progreso-header" style="background:radial-gradient(circle at 15% 20%, #001D7D 0%, #000d3d 70%); padding:1rem 1.25rem; display:flex; align-items:center; gap:10px;">
                 <i class="fas fa-award" style="color:#e50914; font-size:18px;"></i>
                 <span style="color:white; font-size:15px; font-weight:600;">Mi progreso</span>
             </div>
@@ -475,7 +513,7 @@
          2 pasos siguientes, tanto para "por título" como "por
          plataforma") -->
             <div class="buscador-nivel2" id="buscadorDondeVerTipo" style="display:none;">
-                <button class="buscador-volver" onclick="window._buscadorVolverANivel2DondeVer()">
+                <button class="buscador-volver" onclick="window._buscadorAbrirDondeVerTipo('donde_ver_plataforma')">
                     <i class="fas fa-chevron-left"></i> Volver
                 </button>
                 <p class="buscador-subtitulo">¿Película o serie?</p>
@@ -871,6 +909,9 @@ viene del backend, hasta que decidamos cómo presentarlo. -->
                     <i class="fas fa-chevron-left"></i> Volver
                 </button>
                 <p class="buscador-subtitulo">Elegí una cadena</p>
+                <input type="text" id="buscadorCadenaFiltro" class="filtro-input"
+                       placeholder="Buscar cadena..." oninput="window._buscadorFiltrarCadenas(this.value)"
+                       style="margin-bottom:0.8rem;">
                 <div class="buscador-carrusel-wrap">
                     <button class="buscador-carrusel-flecha buscador-carrusel-flecha-izq" onclick="window._buscadorCarruselMover('buscadorCadenasGrid', -1)"><i class="fas fa-chevron-left"></i></button>
                     <div class="buscador-carrusel" id="buscadorCadenasGrid"></div>
@@ -926,6 +967,124 @@ viene del backend, hasta que decidamos cómo presentarlo. -->
                 </button>
                 <div id="buscadorPlataformaContenido"></div>
             </div>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- VOTO RELÁMPAGO — modal global. El HTML interno
+         (#votoRelampagoContainer / #votoRelampagoSeriesContainer) es
+         el mismo que vivía en feed-films.html, mudado tal cual — la
+         lógica de carga/voto sigue en feed-films.js sin cambios. -->
+    <!-- ============================================== -->
+    <div class="filtros-modal-overlay" id="votoRelampagoModalOverlay" onclick="window.cerrarVotoRelampagoModal()"></div>
+    <div class="filtros-modal-sheet" id="votoRelampagoModalSheet">
+
+        <div id="vrModalPasoIntro" class="vr-modal-paso">
+            <button class="vr-modal-cerrar" onclick="window.cerrarVotoRelampagoModal()" aria-label="Cerrar"><i class="fas fa-times"></i></button>
+            <i class="fas fa-bolt vr-modal-intro-icono"></i>
+            <div class="vr-modal-intro-titulo">Voto Relámpago</div>
+            <div class="vr-modal-intro-leyenda">Tu voto, en un toque</div>
+            <button class="vr-modal-comenzar-btn" onclick="window._votoRelampagoModalIrAElegir()">Comenzar</button>
+        </div>
+
+        <div id="vrModalPasoElegir" class="vr-modal-paso" style="display:none;">
+            <button class="vr-modal-cerrar" onclick="window.cerrarVotoRelampagoModal()" aria-label="Cerrar"><i class="fas fa-times"></i></button>
+            <div class="vr-modal-elegir-titulo">¿Qué querés votar?</div>
+            <div class="vr-modal-elegir-opciones">
+                <button class="vr-modal-elegir-btn" onclick="window._votoRelampagoModalElegirTipo('peliculas')"><i class="fas fa-clapperboard"></i> Películas</button>
+                <button class="vr-modal-elegir-btn" onclick="window._votoRelampagoModalElegirTipo('series')"><i class="fas fa-tv"></i> Series</button>
+            </div>
+        </div>
+
+        <div id="votoRelampagoContainer" style="display:none;">
+            <div class="vr-label">⚡ Voto Relámpago</div>
+            <div class="vr-leyenda">Tu voto, en un toque</div>
+            <div class="vr-wrap">
+                <div class="vr-card" id="vrCard"></div>
+                <div class="vr-flash" id="vrFlash"></div>
+                <i class="fas fa-bolt vr-bolt" id="vrBolt"></i>
+                <div class="vr-acciones">
+                    <button class="vr-btn vr-btn-like" onclick="window.votoRelampagoVotar('like')">
+                        <i class="fas fa-thumbs-up"></i> Te banco
+                    </button>
+                    <button class="vr-btn vr-btn-dislike" onclick="window.votoRelampagoVotar('dislike')">
+                        <i class="fas fa-thumbs-down"></i> No te banco
+                    </button>
+                    <button class="vr-btn vr-btn-skip" onclick="window.votoRelampagoVotar('skip')">
+                        <i class="fas fa-eye-slash"></i> No la vi
+                    </button>
+                </div>
+            </div>
+            <p class="vr-hint">Tocá la imagen para ver la ficha completa</p>
+        </div>
+
+        <div id="votoRelampagoSeriesContainer" style="display:none;">
+            <div class="vr-label">⚡ Voto Relámpago</div>
+            <div class="vr-leyenda">Tu voto, en un toque</div>
+            <div class="vr-wrap">
+                <div class="vr-card" id="vrCardSerie"></div>
+                <div class="vr-flash" id="vrFlashSerie"></div>
+                <i class="fas fa-bolt vr-bolt" id="vrBoltSerie"></i>
+                <div class="vr-acciones">
+                    <button class="vr-btn vr-btn-like" onclick="window.votoRelampagoSerieVotar('like')">
+                        <i class="fas fa-thumbs-up"></i> Te banco
+                    </button>
+                    <button class="vr-btn vr-btn-dislike" onclick="window.votoRelampagoSerieVotar('dislike')">
+                        <i class="fas fa-thumbs-down"></i> No te banco
+                    </button>
+                    <button class="vr-btn vr-btn-skip" onclick="window.votoRelampagoSerieVotar('skip')">
+                        <i class="fas fa-eye-slash"></i> No la vi
+                    </button>
+                </div>
+            </div>
+            <p class="vr-hint">Tocá la imagen para ver la ficha completa</p>
+        </div>
+
+    </div>
+
+    <!-- ============================================== -->
+    <!-- TRIVIA — modal de elección + los 3 modales reales
+         (#triviaModal, #rankingTriviaModal, #triviaSeriesModal),
+         movidos tal cual desde feed-films.html. La lógica de
+         pregunta/respuesta sigue en trivia.js/trivia-series.js sin
+         cambios. -->
+    <!-- ============================================== -->
+    <div id="triviaEleccionModalOverlay" class="trivia-modal-overlay" style="display:none;" onclick="if(event.target===this) window.cerrarTriviaEleccionModal()">
+        <div class="trivia-modal trivia-modal-peliculas trivia-eleccion-moderna">
+            <button class="trivia-cerrar" onclick="window.cerrarTriviaEleccionModal()"><i class="fas fa-times"></i></button>
+            <i class="fas fa-question-circle trivia-eleccion-decor"></i>
+            <div class="vr-modal-elegir-titulo trivia-eleccion-titulo">Elegí el tema de la trivia</div>
+            <div class="trivia-eleccion-opciones">
+                <div class="trivia-eleccion-opcion">
+                    <button class="trivia-eleccion-circulo tono-rojo" onclick="window._triviaEleccionElegirTipo('peliculas')"><i class="fas fa-clapperboard"></i></button>
+                    <span>Películas</span>
+                </div>
+                <div class="trivia-eleccion-opcion">
+                    <button class="trivia-eleccion-circulo tono-marino" onclick="window._triviaEleccionElegirTipo('series')"><i class="fas fa-tv"></i></button>
+                    <span>Series</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="triviaModal" class="trivia-modal-overlay" style="display:none;">
+        <div class="trivia-modal trivia-modal-peliculas">
+            <button class="trivia-cerrar" onclick="window.cerrarTrivia()"><i class="fas fa-times"></i></button>
+            <div id="triviaModalContenido"></div>
+        </div>
+    </div>
+
+    <div id="rankingTriviaModal" class="trivia-modal-overlay" style="display:none;">
+        <div class="trivia-modal trivia-modal-peliculas">
+            <button class="trivia-cerrar" onclick="window.cerrarRankingTrivia()"><i class="fas fa-times"></i></button>
+            <div id="rankingTriviaContenido"></div>
+        </div>
+    </div>
+
+    <div id="triviaSeriesModal" class="trivia-modal-overlay" style="display:none;">
+        <div class="trivia-modal trivia-modal-series">
+            <button class="trivia-cerrar" onclick="window.cerrarTriviaSeries()"><i class="fas fa-times"></i></button>
+            <div id="triviaSeriesModalContenido"></div>
         </div>
     </div>
 

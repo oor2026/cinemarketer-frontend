@@ -460,6 +460,17 @@ window.cargarPeliculasPopulares = async function(pagina = 1) {
 // CARRUSEL DESTACADO (película + premios, configurado por el admin
 // desde Gestión Feed). Funciona igual en mobile y desktop.
 // ==============================================
+// Cancela el timer de rotación que haya quedado corriendo de la
+// carga ANTERIOR de este mismo script — sin depender de ningún
+// evento (a diferencia del hashchange, esto cubre también el caso
+// de re-entrar a Inicio estando ya en Inicio, que no dispara
+// hashchange porque el hash no cambia). window._carruselDestacado
+// es global y sobrevive hasta esta línea de abajo, así que todavía
+// tenemos la referencia al timer viejo en el momento justo antes
+// de pisarlo.
+if (window._carruselDestacado && window._carruselDestacado.timer) {
+    clearInterval(window._carruselDestacado.timer);
+}
 window._carruselDestacado = { items: [], actual: 0, timer: null };
 
 // ==============================================
@@ -544,9 +555,15 @@ window.cargarFilasGenero = async function() {
 function renderPillsFilas() {
     const pillsCont = document.getElementById('ordenarPills');
     if (!pillsCont) return;
-    pillsCont.innerHTML = window._filasGenero.map((f, i) =>
-        `<button class="pill-orden${i === 0 ? ' active' : ''}" data-key="${f.key}" onclick="window.priorizarFilaGenero('${f.key}', this)">${f.label}</button>`
-    ).join('');
+    pillsCont.innerHTML = window._filasGenero.map((f, i) => {
+        const partes = f.label.split(' ');
+        const icono = partes[0];
+        const texto = partes.slice(1).join(' ');
+        return `<button class="pill-orden${i === 0 ? ' active' : ''}" data-key="${f.key}" onclick="window.priorizarFilaGenero('${f.key}', this)">
+            <span class="pill-orden-icono">${icono}</span>
+            <span class="pill-orden-label">${texto}</span>
+        </button>`;
+    }).join('');
     activarDragScrollPills(pillsCont);
 }
 
@@ -4820,8 +4837,11 @@ window.seleccionarTabFeed = function(tab, el) {
         // sessionStorage / window._destacadaMovieId), así que reintentar
         // no duplica trabajo real, solo revalida el estado visual.
 
-    // Actualizar estado visual de los tabs
-    document.querySelectorAll('.feed-tab').forEach(b => b.classList.remove('active'));
+    // Actualizar estado visual de los tabs — incluye .inicio-switch-btn
+    // (el switch Películas/Series de Inicio en mobile) además de los
+    // .feed-tab originales, así ninguno de los dos queda "activo" a la
+    // vez cuando el cambio de tab viene de nuestro switch nuevo.
+    document.querySelectorAll('.feed-tab, .inicio-switch-btn').forEach(b => b.classList.remove('active'));
     if (el) el.classList.add('active');
 
     const gridPeliculas = document.getElementById('peliculasGrid');
@@ -5164,6 +5184,7 @@ var CADENA_LOGOS = {
     'Showcase': 'assets/images/cadenas/showcase.png',
     'Cinemacenter': 'assets/images/cadenas/cinemacenter.png',
     'Dinosaurio': 'assets/images/cadenas/dinosaurio.png',
+    'Cines Dino': 'assets/images/cadenas/dinosaurio.png',
     'Las Tipas': 'assets/images/cadenas/tipas.png',
     'Cinema Devoto': 'assets/images/cadenas/devoto.png',
     'Complejo Cinerama': 'assets/images/cadenas/cinerama.png',
@@ -5172,11 +5193,127 @@ var CADENA_LOGOS = {
     'Nuevo Monumental': 'assets/images/cadenas/monumental.png',
     'Cine Gran Pampa': 'assets/images/cadenas/granpampa.png',
     'Cines Pixel Adrogué': 'assets/images/cadenas/pixel.png',
+    'Cines Pixel': 'assets/images/cadenas/pixel.png',
     'Santa Rosa': 'assets/images/cadenas/santarosa.png',
     'Cines del Solar': 'assets/images/cadenas/solar.png',
     'Cine Opera Salta': 'assets/images/cadenas/opera3d.png',
     'Cine Gran Rex': 'assets/images/cadenas/granrex.png',
     'IMAX del Conocimiento': 'assets/images/cadenas/imax.png',
+
+    // Logos de las demás cadenas y cines. Los nombres de archivo van EXACTOS, con sus mayúsculas: en el
+    // servidor (Linux) "CAMPANA.jpg" y "campana.jpg" son archivos distintos. La clave puede ser parte del
+    // nombre ("Sunstar", "INCAA"): sirve para la cadena y para sus sucursales.
+    'Cinema Adrogué': 'assets/images/cadenas/adrogue.png',
+    'Annuar Shopping Cines': 'assets/images/cadenas/annuar.jpg',
+    'Cine Arte Cacodelphia': 'assets/images/cadenas/cacodelphia.jpg',
+    'Cine El Cairo': 'assets/images/cadenas/cairo.png',
+    'Cine Campana': 'assets/images/cadenas/CAMPANA.jpg',
+    'Cinema Concept': 'assets/images/cadenas/cinemaconcept.png',
+    'Cinema La Plata': 'assets/images/cadenas/cinemalaplata.png',
+    'Cine París': 'assets/images/cadenas/cineparis.png',
+    'Cine Círculo': 'assets/images/cadenas/circulo.jpg',
+    'Cine Cosmos UBA': 'assets/images/cadenas/cosmosuba.jpg',
+    'De la Costa': 'assets/images/cadenas/delacosta.png',
+    'Cines La Costa': 'assets/images/cadenas/lacosta.png',
+    'Cine Fantasio': 'assets/images/cadenas/fantasio.jpg',
+    'Cines Fénix': 'assets/images/cadenas/fenix.jpg',
+    'Flix Cinema': 'assets/images/cadenas/flixcinema.png',
+    'INCAA': 'assets/images/cadenas/INCAA.png',
+    'Cine Lorca': 'assets/images/cadenas/lorca.jpg',
+    'MALBA': 'assets/images/cadenas/malba.svg',
+    'Nuevo Cine Rex': 'assets/images/cadenas/nuevocinerex.png',
+    'Cines Ocean': 'assets/images/cadenas/ocean.jpg',
+    'SudCinemas': 'assets/images/cadenas/sudcinemas.png',
+    'Sunstar': 'assets/images/cadenas/sunstar.png',
+    'Centro Cultural Cine Zurro': 'assets/images/cadenas/zurro.jpg',
+};
+
+// Agendadecine agrupa algunas cadenas con el nombre de la empresa dueña y no con
+// el que conoce el usuario (ej. los Showcase figuran como "NAI"). Esto es lo que
+// se MUESTRA: al pedir sucursales y funciones se sigue usando el nombre original.
+var CADENA_NOMBRE_VISIBLE = {
+    'NAI': 'Showcase',
+};
+
+window._buscadorNombreCadena = function(cadena) {
+    return CADENA_NOMBRE_VISIBLE[cadena] || cadena;
+};
+
+// Cadenas que todavía no se pueden abrir: se ven en la grilla con un ícono genérico de cine, pero
+// al tocarlas solo sale el aviso "Próximamente". "Otros cines" es el grupo que junta a los cines
+// que no son una cadena. El nombre es el que manda el backend.
+var CADENAS_PROXIMAMENTE = ['Otros cines'];
+
+window._buscadorCadenaProximamente = function() {
+    if (typeof showToast === 'function') {
+        showToast('info', 'Próximamente');
+    } else {
+        alert('Próximamente');
+    }
+};
+
+// Estilos de la grilla de cadenas (se inyectan una sola vez): logos más grandes, y las cadenas
+// "Próximamente" apagadas y sin reaccionar al hover.
+function buscadorInyectarEstilosCadenas() {
+    if (document.getElementById('buscador-cadenas-estilos')) return;
+    const estilo = document.createElement('style');
+    estilo.id = 'buscador-cadenas-estilos';
+    estilo.textContent = [
+        // Logos más grandes. Con 140px, en el modal angosto el segundo recuadro queda cortado a propósito:
+        // eso avisa que se puede deslizar.
+        '#buscadorCadenasGrid .buscador-cine-item { flex: 0 0 140px; }',
+        '#buscadorCadenasGrid .buscador-cine-logo-wrap { padding: .4rem; }',
+        '#buscadorCadenasGrid .buscador-cine-sinlogo { font-size: 2.8rem; }',
+        '#buscadorCadenasGrid .buscador-cine-item span { font-size: .85rem; }',
+        // Cadenas "Próximamente"
+        '.buscador-cine-item.buscador-cine-proximamente { cursor: default; }',
+        '.buscador-cine-item.buscador-cine-proximamente .buscador-cine-logo-wrap { opacity: .55; background: #f6f6f6; }',
+        '.buscador-cine-item.buscador-cine-proximamente:hover .buscador-cine-logo-wrap { border-color: #eee; transform: none; }',
+        '.buscador-cine-item.buscador-cine-proximamente span { color: #999; }'
+    ].join('\n');
+    document.head.appendChild(estilo);
+}
+
+// Buscador de la grilla de cadenas: filtra en el momento, igual que el de "Ya sé qué quiero ver" (sin
+// distinguir mayúsculas ni tildes, y por cualquier parte del nombre). Busca por el nombre que ve el
+// usuario ("Showcase", no "NAI").
+window._buscadorFiltrarCadenas = function(texto) {
+    const grid = document.getElementById('buscadorCadenasGrid');
+    if (!grid) return;
+    const normalizar = (s) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const consulta = normalizar((texto || '').trim());
+
+    let coinciden = 0;
+    grid.querySelectorAll('.buscador-cine-item').forEach(item => {
+        const coincide = normalizar(item.dataset.nombre || '').includes(consulta);
+        item.style.display = coincide ? '' : 'none';
+        if (coincide) coinciden++;
+    });
+
+    // Si nada coincide se avisa; en cuanto vuelve a haber resultados, el aviso se saca.
+    let aviso = grid.querySelector('.buscador-cadenas-sin-resultados');
+    if (!coinciden && grid.querySelector('.buscador-cine-item')) {
+        if (!aviso) {
+            aviso = document.createElement('div');
+            aviso.className = 'buscador-predictor-vacio buscador-cadenas-sin-resultados';
+            aviso.textContent = 'No encontramos esa cadena.';
+            grid.appendChild(aviso);
+        }
+    } else if (aviso) {
+        aviso.remove();
+    }
+
+    // Los resultados arrancan desde el principio del carrusel, y el movimiento automático se pausa un rato
+    // para que no se los lleve mientras se escribe.
+    grid.scrollLeft = 0;
+    if (grid._buscadorPausarCarrusel) grid._buscadorPausarCarrusel(7000);
+};
+
+// Logo de una cadena tal como la informa el backend: "Atlas Cines" y "Cines
+// Multiplex" contienen el nombre con que está cargado el logo ("Atlas",
+// "Multiplex"), y "NAI" se resuelve por su nombre visible ("Showcase").
+window._buscadorLogoParaCadena = function(cadena) {
+    return window._buscadorLogoParaCine(window._buscadorNombreCadena(cadena));
 };
 
 var BUSCADOR_NIVEL2_IDS = {
@@ -6486,8 +6623,12 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                         const cast2 = cred2.cast || [];
                         const idsEnCast2 = new Set(cast2.map(p => p.id));
 
+                        // Se excluyen los documentales (género 99) — ahí suelen
+                        // aparecer como "ellos mismos" en retrospectivas o especiales
+                        // sobre algo que hicieron juntos hace tiempo (ej. "Reflections
+                        // on Titanic"), no como una colaboración actoral real.
                         const enComun = cast1
-                            .filter(p => idsEnCast2.has(p.id) && p.poster_path)
+                            .filter(p => idsEnCast2.has(p.id) && p.poster_path && !(p.genre_ids || []).includes(99))
                             .sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
 
                                 if (enComun.length === 0) {
@@ -7293,8 +7434,9 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                 const filas = porCine[cine].map(f => `
                                     <tr data-dia="${f.dia}">
                                         <td>${f.dia}${f.esHoy ? '<span class="buscador-funciones-hoy">HOY</span>' : ''}</td>
-                                        <td>${f.horario}</td>
+                                        <td>${CarteleraPrecio.hora(f.horario)}</td>
                                         <td>${f.formato}${f.idioma ? ' ' + f.idioma : ''}</td>
+                                        <td class="cp-td">${CarteleraPrecio.celda(f)}</td>
                                     </tr>
                                 `).join('');
                                 return `
@@ -7304,7 +7446,7 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                             <span>${cine}</span>
                                         </div>
                                         <table class="buscador-funciones-tabla">
-                                            <thead><tr><th>Día</th><th>Horario</th><th>Formato</th></tr></thead>
+                                            <thead><tr><th>Día</th><th>Horario</th><th>Formato</th><th>Precio</th></tr></thead>
                                             <tbody>${filas}</tbody>
                                         </table>
                                     </div>
@@ -7638,7 +7780,7 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                         document.getElementById('buscadorNivel3CarteleraCuando').style.display = 'block';
 
                         const fechaInput = document.getElementById('buscadorCarteleraFechaInput');
-                        fechaInput.min = new Date().toISOString().split('T')[0]; // no se puede elegir una fecha pasada
+  fechaInput.min = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }); // no se puede elegir una fecha pasada
                         fechaInput.value = '';
                         document.getElementById('buscadorCarteleraHorarioSelect').value = '';
                         window._buscadorCarteleraActualizarBotonCuandoContinuar();
@@ -7710,7 +7852,10 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                             if (presupuesto && presupuesto !== 'mas30000') {
                                 const tope = parseInt(presupuesto, 10);
                                 funcionesFiltradas = funciones.filter(f => {
-                                    const dentro = f.precioReferencia == null || f.precioReferencia <= tope;
+                                    // Un 2x1 no baja lo que paga quien va solo: para el
+                                    // presupuesto se usa el precio regular de la entrada.
+                                    const precioPresupuesto = CarteleraPrecio.precioParaPresupuesto(f);
+                                    const dentro = precioPresupuesto == null || precioPresupuesto <= tope;
                                     if (!dentro) ocultasPorPresupuesto++;
                                     return dentro;
                                 });
@@ -7722,6 +7867,14 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                     : '<div class="buscador-predictor-vacio">No encontramos funciones para esa fecha/zona todavía — probá con otra fecha o ampliá la búsqueda.</div>';
                                 return;
                             }
+
+                            // Si en la localidad elegida no había funciones, el backend amplió
+                            // la zona (a toda la provincia, en CABA a toda la ciudad) y lo marca
+                            // en cada función.
+                            const nombreZona = (PROVINCIAS_CARTELERA.find(([slug]) => slug === provincia) || [])[1] || 'la provincia';
+                            const avisoZona = (funciones.length && funciones[0].zonaAmpliada)
+                                ? `<p style="color:#999; font-size:0.78rem; margin-bottom:0.8rem;">No encontramos funciones en ${localidad} para esa búsqueda. Te mostramos las de ${nombreZona}.</p>`
+                                : '';
 
                             const avisoPresupuesto = ocultasPorPresupuesto > 0
                                 ? `<p style="color:#999; font-size:0.78rem; margin-bottom:0.8rem;">Se ocultaron ${ocultasPorPresupuesto} función(es) por encima del presupuesto elegido.</p>`
@@ -7740,16 +7893,16 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                             // por película — SOLO tiene efecto en mobile
                             // (ver CSS). En desktop se ve tal cual antes:
                             // solo la tabla de funciones, sin póster.
-                            lista.innerHTML = avisoPresupuesto + Object.keys(porPelicula).map((pelicula, idx) => {
+                            lista.innerHTML = avisoZona + avisoPresupuesto + Object.keys(porPelicula).map((pelicula, idx) => {
                                 const funcs = porPelicula[pelicula];
                                 const poster = funcs[0].poster || '';
                                 const carruselId = `buscadorSalidaCarrusel${idx}`;
                                 const filas = funcs.map(f => `
                                     <tr>
                                         <td>${f.cineNombre}</td>
-                                        <td>${f.horario}</td>
+                                        <td>${CarteleraPrecio.hora(f.horario)}</td>
                                         <td>${f.formato}${f.idioma ? ' ' + f.idioma : ''}</td>
-                                        <td>${f.precioReferencia ? '$' + f.precioReferencia.toLocaleString('es-AR') : '—'}</td>
+                                        <td class="cp-td">${CarteleraPrecio.celda(f)}</td>
                                     </tr>
                                 `).join('');
                                 return `
@@ -7762,7 +7915,7 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                                 <div class="buscador-cine-funciones-grupo">
                                                     <div class="buscador-pelicula-funciones-header">${pelicula}</div>
                                                     <table class="buscador-funciones-tabla">
-                                                        <thead><tr><th>Cine</th><th>Horario</th><th>Formato</th><th>Precio ref.</th></tr></thead>
+                                                        <thead><tr><th>Cine</th><th>Horario</th><th>Formato</th><th>Precio</th></tr></thead>
                                                         <tbody>${filas}</tbody>
                                                     </table>
                                                 </div>
@@ -7840,6 +7993,10 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                document.getElementById('buscadorNivel3CarteleraCadena').style.display = 'block';
                                document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-ancho', 'buscador-sheet-alto');
 
+                               // El buscador arranca vacío cada vez que se entra a la pantalla.
+                               const filtroCadenas = document.getElementById('buscadorCadenaFiltro');
+                               if (filtroCadenas) filtroCadenas.value = '';
+
                                const nombreCadena = _buscadorPrimerNombre();
                                window._buscadorSetBurbuja(nombreCadena
                                    ? `Elegí una cadena, ${nombreCadena}, y te muestro sus sucursales.`
@@ -7848,31 +8005,70 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                const grid = document.getElementById('buscadorCadenasGrid');
                                grid.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Cargando cadenas...</div>';
 
+                               // Cada apertura de esta pantalla cancela el reintento de la anterior.
+                               const intento = (window._buscadorCadenasIntento = (window._buscadorCadenasIntento || 0) + 1);
+                               const inicio = Date.now();
+                               const LIMITE_ESPERA_MS = 90000; // si en 90 segundos no cargaron las funciones, se avisa
+                               const sigueAbierta = () => intento === window._buscadorCadenasIntento
+                                   && document.getElementById('buscadorNivel3CarteleraCadena').style.display === 'block';
+
                                try {
                                    const token = localStorage.getItem('token');
-                                   const res = await fetch(`${CONFIG.API_URL}/cartelera/cadenas`, {
-                                       headers: { 'Authorization': `Bearer ${token}` }
-                                   });
-                                   if (!res.ok) throw new Error();
-                                   const cadenas = await res.json();
+                                   let cadenas = null;
+                                   while (true) {
+                                       const res = await fetch(`${CONFIG.API_URL}/cartelera/cadenas`, {
+                                           headers: { 'Authorization': `Bearer ${token}` }
+                                       });
+                                       if (res.status === 503) {
+                                           // El backend todavía está cargando las funciones (recién arrancó): no se
+                                           // sabe qué cadenas tienen funciones. Se sigue mostrando "Cargando" y se
+                                           // reintenta, en vez de mostrar cadenas sin filtrar o un error.
+                                           if (!sigueAbierta()) return;
+                                           if (Date.now() - inicio > LIMITE_ESPERA_MS) throw new Error('timeout');
+                                           await new Promise(r => setTimeout(r, 3000));
+                                           if (!sigueAbierta()) return;
+                                           continue;
+                                       }
+                                       if (!res.ok) throw new Error();
+                                       cadenas = await res.json();
+                                       break;
+                                   }
+                                   if (!sigueAbierta()) return;
 
                                    if (!cadenas.length) {
                                        grid.innerHTML = '<div class="buscador-predictor-vacio">No pudimos cargar las cadenas.</div>';
                                        return;
                                    }
 
+                            buscadorInyectarEstilosCadenas();
                             grid.innerHTML = cadenas.map(c => {
-                                const logo = CADENA_LOGOS[c];
+                                const nombre = window._buscadorNombreCadena(c);
+
+                                // Cadena que todavía no se puede abrir: ícono genérico de cine, apagada,
+                                // y al tocarla solo sale el aviso "Próximamente".
+                                if (CADENAS_PROXIMAMENTE.includes(c)) {
+                                    return `
+                                    <div class="buscador-cine-item buscador-cine-proximamente" data-nombre="${nombre.replace(/"/g, '&quot;')}" aria-disabled="true" onclick="window._buscadorCadenaProximamente()" title="Próximamente">
+                                        <div class="buscador-cine-logo-wrap"><i class="fas fa-film buscador-cine-sinlogo"></i></div>
+                                        <span>${nombre}</span>
+                                    </div>
+                                `;
+                                }
+
+                                const logo = window._buscadorLogoParaCadena(c);
                                 const icono = logo
-                                    ? `<img src="${logo}" alt="${c}">`
+                                    ? `<img src="${logo}" alt="${nombre}">`
                                     : `<i class="fas fa-building buscador-cine-sinlogo"></i>`;
                                 return `
-                                    <div class="buscador-cine-item" onclick="window._buscadorSeleccionarCadena('${c.replace(/'/g, "\\'")}')" title="${c}">
+                                    <div class="buscador-cine-item" data-nombre="${nombre.replace(/"/g, '&quot;')}" onclick="window._buscadorSeleccionarCadena('${c.replace(/'/g, "\\'")}')" title="${nombre}">
                                         <div class="buscador-cine-logo-wrap">${icono}</div>
-                                        <span>${c}</span>
+                                        <span>${nombre}</span>
                                     </div>
                                 `;
                             }).join('');
+
+                            // Si ya habían escrito algo mientras cargaban las cadenas, se aplica ahora.
+                            if (filtroCadenas && filtroCadenas.value) window._buscadorFiltrarCadenas(filtroCadenas.value);
                             window._buscadorActivarCarruselAuto('buscadorCadenasGrid');
                         } catch (e) {
                             grid.innerHTML = '<div class="buscador-predictor-vacio">No pudimos cargar las cadenas. Intentá de nuevo.</div>';
@@ -7883,14 +8079,20 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                     // muestra sus sucursales (mismo ícono que la cadena, o el
                     // genérico si no hay logo mapeado, con el nombre del cine).
                     window._buscadorSeleccionarCadena = async function(cadena) {
+                        // Las cadenas "Próximamente" no se abren, ni siquiera si algo llama directo a esta función.
+                        if (CADENAS_PROXIMAMENTE.includes(cadena)) {
+                            window._buscadorCadenaProximamente();
+                            return;
+                        }
                         document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
                         document.getElementById('buscadorNivel3CarteleraSucursales').style.display = 'block';
-                        document.getElementById('buscadorCarteleraSucursalesTitulo').textContent = `Sucursales de ${cadena}`;
+                        const nombreCadena = window._buscadorNombreCadena(cadena);
+                        document.getElementById('buscadorCarteleraSucursalesTitulo').textContent = `Sucursales de ${nombreCadena}`;
 
                         const nombreSucursales = _buscadorPrimerNombre();
                         window._buscadorSetBurbuja(nombreSucursales
-                            ? `Elegí la sucursal de ${cadena}, ${nombreSucursales}, y te muestro sus funciones.`
-                            : `Elegí la sucursal de ${cadena} y te muestro sus funciones.`);
+                            ? `Elegí la sucursal de ${nombreCadena}, ${nombreSucursales}, y te muestro sus funciones.`
+                            : `Elegí la sucursal de ${nombreCadena} y te muestro sus funciones.`);
 
                         const grid = document.getElementById('buscadorSucursalesGrid');
                         grid.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Cargando sucursales...</div>';
@@ -7908,17 +8110,26 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                 return;
                             }
 
-                            const logo = CADENA_LOGOS[cadena];
-                            const icono = logo
-                                ? `<img src="${logo}" alt="${cadena}">`
-                                : `<i class="fas fa-building buscador-cine-sinlogo"></i>`;
+                            // Ícono de cada sucursal: el suyo si lo tiene (ej. "Cinema Devoto"); si
+                            // no, el de la cadena (ej. los Showcase con nombre propio, como
+                            // "Norcenter"); y si tampoco, el genérico.
+                            const logoCadena = window._buscadorLogoParaCadena(cadena);
 
-                            grid.innerHTML = cines.map(c => `
-                                <div class="buscador-cine-item" onclick="window._buscadorSeleccionarSucursal('${c.nombre.replace(/'/g, "\\'")}')" title="${c.nombre}">
+                            grid.innerHTML = cines.map(c => {
+                                // Se muestra el nombre visible (si el cine lo trae); el nombre del
+                                // directorio es el que se usa para buscar sus funciones.
+                                const nombreVisible = c.nombreVisible || c.nombre;
+                                const logo = window._buscadorLogoParaCine(c.nombre) || logoCadena;
+                                const icono = logo
+                                    ? `<img src="${logo}" alt="${nombreVisible}">`
+                                    : `<i class="fas fa-building buscador-cine-sinlogo"></i>`;
+                                return `
+                                <div class="buscador-cine-item" onclick="window._buscadorSeleccionarSucursal('${c.nombre.replace(/'/g, "\\'")}', ${c.id ?? 'null'})" title="${nombreVisible}">
                                     <div class="buscador-cine-logo-wrap">${icono}</div>
-                                    <span>${c.nombre}</span>
+                                    <span>${nombreVisible}</span>
                                 </div>
-                            `).join('');
+                            `;
+                            }).join('');
                             window._buscadorActivarCarruselAuto('buscadorSucursalesGrid');
 
                             // Con una sola sucursal, ese paso intermedio no
@@ -7928,14 +8139,14 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                             // de sucursales con una sola opción sin sentido).
                             window._buscadorCarteleraSaltoSucursales = cines.length === 1;
                             if (cines.length === 1) {
-                                window._buscadorSeleccionarSucursal(cines[0].nombre);
+                                window._buscadorSeleccionarSucursal(cines[0].nombre, cines[0].id);
                             }
                         } catch (e) {
                             grid.innerHTML = '<div class="buscador-predictor-vacio">No pudimos cargar las sucursales. Intentá de nuevo.</div>';
                         }
                     };
 
-                    window._buscadorSeleccionarSucursal = async function(nombreCine) {
+                    window._buscadorSeleccionarSucursal = async function(nombreCine, cineId) {
                         document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
                         document.getElementById('buscadorNivel3CarteleraCadenaFunciones').style.display = 'block';
                         document.getElementById('buscadorCarteleraCadenaFuncionesTitulo').textContent = nombreCine;
@@ -7955,7 +8166,9 @@ window._buscadorCriterioSeleccionado = function(criterio) {
 
                         try {
                             const token = localStorage.getItem('token');
-                            const res = await fetch(`${CONFIG.API_URL}/cartelera/funciones-por-cine?cine=${encodeURIComponent(nombreCine)}`, {
+                            // Con el id del cine el backend cruza las funciones por id de complejo; el nombre solo no
+                            // alcanza: el del directorio puede no coincidir con el que traen las funciones.
+                            const res = await fetch(`${CONFIG.API_URL}/cartelera/funciones-por-cine?cine=${encodeURIComponent(nombreCine)}${cineId != null ? '&cineId=' + cineId : ''}`, {
                                 headers: { 'Authorization': `Bearer ${token}` }
                             });
                             if (!res.ok) throw new Error();
@@ -7998,15 +8211,16 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                 const filas = porPelicula[pelicula].map(f => `
                                     <tr data-dia="${f.dia}">
                                         <td>${f.dia}${f.esHoy ? '<span class="buscador-funciones-hoy">HOY</span>' : ''}</td>
-                                        <td>${f.horario}</td>
+                                        <td>${CarteleraPrecio.hora(f.horario)}</td>
                                         <td>${f.formato}${f.idioma ? ' ' + f.idioma : ''}</td>
+                                        <td class="cp-td">${CarteleraPrecio.celda(f)}</td>
                                     </tr>
                                 `).join('');
                                 return `
                                     <div class="buscador-cine-funciones-grupo">
                                         <div class="buscador-pelicula-funciones-header">${pelicula}</div>
                                         <table class="buscador-funciones-tabla">
-                                            <thead><tr><th>Día</th><th>Horario</th><th>Formato</th></tr></thead>
+                                            <thead><tr><th>Día</th><th>Horario</th><th>Formato</th><th>Precio</th></tr></thead>
                                             <tbody>${filas}</tbody>
                                         </table>
                                     </div>
@@ -8015,6 +8229,7 @@ window._buscadorCriterioSeleccionado = function(criterio) {
 
                             lista.innerHTML = filtroHtml + gruposHtml;
                         } catch (e) {
+                            console.error('Por cadena de cine → no se pudieron traer las funciones de', nombreCine, e);
                             lista.innerHTML = '<div class="buscador-predictor-vacio">No pudimos traer las funciones. Intentá de nuevo.</div>';
                         }
                     };

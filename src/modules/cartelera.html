@@ -1,0 +1,89 @@
+<div class="feed-container" id="carteleraContainer">
+    <style>
+        .cartelera-titulo-mobile { display: none; }
+        .cartelera-subtitulo-mobile { display: none; }
+        .cartelera-grid { display: none; }
+        .cartelera-cerca-seccion { display: none; }
+        @media (max-width: 768px) {
+            #carteleraContainer { background: #ffffff; padding: 0 1.1rem 2rem; min-height: 100vh; box-sizing: border-box; }
+            .cartelera-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.75rem; }
+            .cartelera-card { position: relative; overflow: hidden; box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px; background: #fff; border: none; border-radius: 18px; cursor: pointer; font-family: inherit; text-align: left; box-shadow: 0 10px 26px -6px rgba(20,20,20,0.16), 0 2px 5px rgba(20,20,20,0.07); }
+            .cartelera-decor { position: absolute; right: -8px; bottom: -4px; font-size: 3.4rem; opacity: 0.10; pointer-events: none; }
+            .cartelera-decor.tono-rojo { color: #c4321f; }
+            .cartelera-decor.tono-marino { color: #16264d; }
+            .cartelera-flecha { position: absolute; top: 35px; right: 14px; transform: translateY(-50%); color: #c9c4b8; font-size: 0.8rem; }
+            .cartelera-icono { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+            .cartelera-icono.tono-rojo { background: linear-gradient(135deg,#f0553f,#c4321f); box-shadow: 0 3px 10px rgba(196,50,31,0.3); }
+            .cartelera-icono.tono-marino { background: linear-gradient(135deg,#243b72,#16264d); box-shadow: 0 3px 10px rgba(22,38,77,0.3); }
+            .cartelera-icono i { color: #fff !important; font-size: 1rem; }
+            .cartelera-card-titulo { font-size: 13.5px; font-weight: 700; line-height: 1.25; color: #16151a; }
+            .cartelera-card-sub { font-size: 11.5px; color: #8a8478; margin-top: 2px; }
+            .cartelera-cerca-seccion { display: block; background: linear-gradient(160deg, rgba(196,50,31,0.06), rgba(22,38,77,0.06)); border-radius: 22px; padding: 1.1rem 1rem 1.2rem; margin: 0 -0.1rem; }
+            .cartelera-cerca-titulo { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 800; margin-bottom: 1.1rem; background: none; -webkit-background-clip: initial; background-clip: initial; -webkit-text-fill-color: #c4321f; color: #c4321f; position: relative; }
+            .cartelera-cerca-titulo::after { content: ''; position: absolute; left: 0; bottom: 0; width: 46px; height: 3px; border-radius: 2px; background: linear-gradient(100deg,#c4321f 0%,#16264d 100%); }
+            .cartelera-cerca-vacio { font-size: 0.85rem; color: #8a8478; background: #fff; border-radius: 16px; padding: 1.2rem; box-shadow: 0 8px 20px -6px rgba(20,20,20,0.10), 0 1px 3px rgba(20,20,20,0.05); text-align: center; }
+            .cartelera-cerca-card { display: flex; gap: 12px; background: #fff; border-radius: 16px; padding: 12px; margin-bottom: 10px; box-shadow: 0 10px 22px -8px rgba(22,38,77,0.18), 0 2px 5px rgba(196,50,31,0.08); }
+            .cartelera-cerca-poster { width: 64px; height: 94px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: #eee; }
+            .cartelera-cerca-info { flex: 1; min-width: 0; }
+            .cartelera-cerca-pelicula { font-size: 13.5px; font-weight: 700; color: #16151a; line-height: 1.25; }
+            .cartelera-cerca-cine { font-size: 11.5px; color: #8a8478; margin-top: 2px; }
+            .cartelera-cerca-horarios { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+            .cartelera-cerca-horario { font-size: 11px; font-weight: 700; color: #16264d; background: rgba(22,38,77,0.08); border-radius: 8px; padding: 3px 8px; }
+            .cartelera-cerca-horario.cartelera-cerca-mas { color: #8a8478; background: rgba(22,38,77,0.04); }
+        }
+    </style>
+
+    <div class="modulo-header-card tono-rojo">
+        <i class="fas fa-film modulo-header-decor"></i>
+        <div class="modulo-header-texto">
+            <div class="modulo-header-titulo">Cartelera</div>
+            <div class="modulo-header-subtitulo">Todo lo del cine físico, en un solo lugar</div>
+        </div>
+    </div>
+
+    <div class="cartelera-grid">
+        <button type="button" class="cartelera-card" onclick="window.accesoRapidoCartelera('ya-se-que-ver')">
+            <i class="fas fa-clapperboard cartelera-decor tono-rojo"></i>
+            <i class="fas fa-chevron-right cartelera-flecha"></i>
+            <div class="cartelera-icono tono-rojo"><i class="fas fa-ticket"></i></div>
+            <div>
+                <div class="cartelera-card-titulo">Ya sé qué quiero ver</div>
+                <div class="cartelera-card-sub">Elegí el título y te decimos cuándo y dónde</div>
+            </div>
+        </button>
+        <button type="button" class="cartelera-card" onclick="window.accesoRapidoCartelera('recomendacion-cines')">
+            <i class="fas fa-heart cartelera-decor tono-marino"></i>
+            <i class="fas fa-chevron-right cartelera-flecha"></i>
+            <div class="cartelera-icono tono-marino"><i class="fas fa-compass"></i></div>
+            <div>
+                <div class="cartelera-card-titulo">¿Alguna recomendación en cines?</div>
+                <div class="cartelera-card-sub">Según tu espíritu cinéfilo</div>
+            </div>
+        </button>
+        <button type="button" class="cartelera-card" onclick="window.accesoRapidoCartelera('organizar-salida')">
+            <i class="fas fa-calendar-days cartelera-decor tono-marino"></i>
+            <i class="fas fa-chevron-right cartelera-flecha"></i>
+            <div class="cartelera-icono tono-marino"><i class="fas fa-user-friends"></i></div>
+            <div>
+                <div class="cartelera-card-titulo">Organizar una salida</div>
+                <div class="cartelera-card-sub">Según dónde, cuándo y cuánto $</div>
+            </div>
+        </button>
+        <button type="button" class="cartelera-card" onclick="window.accesoRapidoCartelera('por-cadena')">
+            <i class="fas fa-building cartelera-decor tono-rojo"></i>
+            <i class="fas fa-chevron-right cartelera-flecha"></i>
+            <div class="cartelera-icono tono-rojo"><i class="fas fa-film"></i></div>
+            <div>
+                <div class="cartelera-card-titulo">Por cadena de cine</div>
+                <div class="cartelera-card-sub">Cinemark, Cinépolis, Hoyts y más</div>
+            </div>
+        </button>
+    </div>
+
+    <div class="cartelera-cerca-seccion">
+        <div class="cartelera-cerca-titulo">Hoy cerca tuyo</div>
+        <div id="carteleraCercaResultado">
+            <div class="cartelera-cerca-vacio">Cargando...</div>
+        </div>
+    </div>
+</div>
