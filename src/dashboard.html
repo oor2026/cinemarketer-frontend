@@ -29,6 +29,7 @@
         <link rel="stylesheet" href="css/dashboard.css">
         <link rel="stylesheet" href="css/feed-films.css?v=2">
         <link rel="stylesheet" href="css/cartelera-precio.css?v=1">
+        <link rel="stylesheet" href="css/credencial.css?v=1">
         <link rel="stylesheet" href="css/feed-series.css">
         <link rel="stylesheet" href="css/mi-cuenta.css?v=3">
         <link rel="stylesheet" href="css/mis-consultas.css">
@@ -56,6 +57,8 @@
         <script src="js/bottom-nav.js"></script>
         <script src="js/cartelera-precio.js?v=1"></script>
         <script src="js/cartelera-modal.js?v=1"></script>
+        <script src="js/vendor/qrcode.js"></script>
+        <script src="js/credencial.js?v=1"></script>
         <script src="js/feed-films.js"></script>
         <script src="js/toast.js"></script>
         <script src="js/levelup.js"></script>
@@ -117,6 +120,12 @@
                     <a class="nav-link" href="#" onclick="window.abrirModalProgresoHeader()" title="Mi progreso">
                         <i class="fas fa-award"></i>
                         <span class="nav-text nav-text-hide-desktop">Progreso</span>
+                    </a>
+                </li>
+                <li class="dash-credencial-desktop-li">
+                    <a class="nav-link" href="#" onclick="event.preventDefault(); window.abrirCredencial()" title="Mi credencial">
+                        <i class="fas fa-id-card"></i>
+                        <span class="nav-text nav-text-hide-desktop">Mi credencial</span>
                     </a>
                 </li>
                 <li style="position:relative;" class="dash-bell-desktop-li">

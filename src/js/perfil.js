@@ -254,6 +254,8 @@ function renderIdentidad(perfil) {
                         if (btnEditBio) btnEditBio.style.display = 'none';
                         if (btnEditFavorita) btnEditFavorita.style.display = 'none';
                         if (btnCambiarAvatar) btnCambiarAvatar.style.display = 'none';
+                        const btnMiCredencialVisita = document.getElementById('btnMiCredencial');
+                        if (btnMiCredencialVisita) btnMiCredencialVisita.style.display = 'none';
                 if (btnBloquearPerfil && !perfil.bloqueado) btnBloquearPerfil.style.display = 'flex';
 
                 if (perfil.bloqueado) {
@@ -278,6 +280,8 @@ function renderIdentidad(perfil) {
                         if (btnCandado) { btnCandado.style.display = 'flex'; window._inicializarCandadoPrivacidad(); }
                         if (btnEditFavorita) btnEditFavorita.style.display = 'inline-flex';
                         if (btnCambiarAvatar) btnCambiarAvatar.style.display = 'flex';
+                        const btnMiCredencial = document.getElementById('btnMiCredencial');
+                        if (btnMiCredencial) btnMiCredencial.style.display = 'inline-flex';
                         const btnEditVistaCine = document.getElementById('btnEditarVistaCine');
                         if (btnEditVistaCine) btnEditVistaCine.style.display = 'inline-flex';
                         const btnEditNoMeCanso = document.getElementById('btnEditarNoMeCanso');

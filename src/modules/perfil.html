@@ -453,6 +453,11 @@
                 <div class="cine-header-text">
                     <h1 class="cine-name" id="perfilNombre">Cargando...</h1>
 
+                    <!-- Credencial Digital Cinéfila — solo el dueño (perfil.js) -->
+                    <button id="btnMiCredencial" class="cred-btn-sala" onclick="window.abrirCredencial()" style="display:none;">
+                        <i class="fas fa-id-card"></i> Mi credencial cinéfila
+                    </button>
+
                     <div class="cine-stats-inline">
                         <span class="perfil-stat-inline" onclick="window._irAActividadDesdeMetrica('votaciones')" style="cursor:pointer;"><i class="fas fa-thumbs-up cine-stat-icon"></i><span class="cine-stat-num" id="perfilVotaciones">0</span><span class="cine-stat-lbl">votaciones</span></span>
                         <span class="perfil-stat-inline" onclick="window._irAActividadDesdeMetrica('comentarios')" style="cursor:pointer;"><i class="fas fa-comment cine-stat-icon"></i><span class="cine-stat-num" id="perfilComentarios">0</span><span class="cine-stat-lbl">comentarios</span></span>

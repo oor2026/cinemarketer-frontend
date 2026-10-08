@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Verificación de credencial — Cinemarketer</title>
+    <link rel="icon" type="image/png" href="assets/images/favicon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #f2f2f5;
+            color: #1a1a1a;
+            font-family: 'Space Grotesk', system-ui, sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+        .ver-header {
+            height: 56px;
+            background: #0d0e1a;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+        }
+        .ver-marca { font-size: 15px; font-weight: 700; letter-spacing: 0.12em; }
+        .ver-header-sub { font-size: 12px; color: #c9cfe8; }
+        .ver-contenedor {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .ver-banda {
+            color: #ffffff;
+            padding: 20px;
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+        .ver-banda--valida { background: #13804a; }
+        .ver-banda--ambar { background: #9a5a00; }
+        .ver-banda--roja { background: #a3121b; }
+        .ver-banda--neutra { background: #3b3f4c; }
+        .ver-banda-icono {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+        .ver-banda-textos { display: flex; flex-direction: column; gap: 3px; }
+        .ver-banda-eyebrow { font-size: 12px; letter-spacing: 0.16em; font-weight: 700; opacity: 0.9; }
+        .ver-banda-titulo { font-size: 22px; font-weight: 700; line-height: 1.2; }
+        .ver-banda-sub { font-size: 13px; display: flex; align-items: center; gap: 6px; }
+        .ver-mono { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+        @keyframes verPulso { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .ver-punto {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #ffffff; display: inline-block;
+            animation: verPulso 1.2s ease-in-out infinite;
+        }
+        .ver-cuerpo { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+        .ver-tarjeta {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+        }
+        .ver-identidad { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .ver-foto {
+            width: 120px;
+            height: 146px;
+            border-radius: 14px;
+            object-fit: cover;
+            background: #2a3566;
+        }
+        .ver-foto--inicial {
+            background: #e50914;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 64px;
+            font-weight: 700;
+        }
+        .ver-nombre { font-size: 22px; font-weight: 700; text-align: center; line-height: 1.2; overflow-wrap: anywhere; }
+        .ver-dni {
+            width: 100%;
+            border-top: 1px solid #ececf1;
+            padding-top: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .ver-etiqueta { font-size: 11px; letter-spacing: 0.16em; color: #5b6070; font-weight: 600; }
+        .ver-dni-numero { font-family: 'JetBrains Mono', monospace; font-size: 34px; font-weight: 700; letter-spacing: 0.02em; }
+        .ver-ayuda { font-size: 13px; color: #5b6070; text-align: center; line-height: 1.35; }
+        .ver-grilla { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+        .ver-mini {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .ver-mini-valor { font-size: 15px; font-weight: 700; }
+        .ver-filas { display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+        .ver-fila { display: flex; justify-content: space-between; gap: 8px; }
+        .ver-fila span:first-child { color: #5b6070; }
+        .ver-fila span:last-child { font-weight: 600; }
+        .ver-mensaje { font-size: 16px; line-height: 1.45; margin: 0 0 10px 0; }
+        .ver-nota { font-size: 13px; color: #5b6070; line-height: 1.4; margin: 0; }
+        .ver-que-hacer { font-size: 14px; line-height: 1.45; margin: 6px 0 0 0; }
+        .ver-pie {
+            margin-top: auto;
+            padding: 0 20px 18px 20px;
+            font-size: 12px;
+            color: #5b6070;
+            text-align: center;
+            line-height: 1.4;
+        }
+        .ver-cargando {
+            padding: 64px 20px;
+            text-align: center;
+            color: #5b6070;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
+        .ver-cargando i { font-size: 28px; }
+    </style>
+</head>
+<body>
+    <header class="ver-header">
+        <span class="ver-marca">CINEMARKETER</span>
+        <span class="ver-header-sub">Verificación de credencial</span>
+    </header>
+
+    <main class="ver-contenedor" id="verContenido">
+        <div class="ver-cargando">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span>Verificando credencial…</span>
+        </div>
+    </main>
+
+<script src="js/config.js"></script>
+<script>
+(function () {
+    // Página pública (sin login) que abre el comercio al escanear el QR de la
+    // Credencial Digital Cinéfila. Todo lo que muestra sale del servidor en
+    // este momento: GET /api/public/credencial/verificar?t=...
+    const ZONA_AR = 'America/Argentina/Buenos_Aires';
+    const contenido = document.getElementById('verContenido');
+    const token = new URLSearchParams(window.location.search).get('t') || '';
+
+    let desfaseServidorMs = 0;
+    let intervaloReloj = null;
+    let venceMs = null;
+
+    function escapar(texto) {
+        return String(texto ?? '')
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function hora(ms, conSegundos) {
+        const op = { timeZone: ZONA_AR, hour: '2-digit', minute: '2-digit', hour12: false };
+        if (conSegundos) op.second = '2-digit';
+        return new Date(ms).toLocaleTimeString('es-AR', op);
+    }
+    function fecha(ms) {
+        return new Date(ms).toLocaleDateString('es-AR', { timeZone: ZONA_AR, day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+    function fechaHora(iso) {
+        const ms = Date.parse(iso);
+        return isNaN(ms) ? '—' : fecha(ms) + ' · ' + hora(ms, false);
+    }
+    function inicial(nombre) {
+        const limpio = String(nombre || '').trim();
+        return limpio ? limpio.charAt(0).toUpperCase() : '?';
+    }
+
+    const ESTADOS = {
+        VENCIDA:              { titulo: 'La credencial venció',  banda: 'ambar', icono: 'fa-clock', regenerable: true },
+        DATOS_MODIFICADOS:    { titulo: 'Los datos cambiaron',   banda: 'ambar', icono: 'fa-rotate', regenerable: true },
+        CUENTA_NO_HABILITADA: { titulo: 'Cuenta no habilitada',  banda: 'roja',  icono: 'fa-xmark', regenerable: false },
+        INVALIDA:             { titulo: 'Código no válido',      banda: 'roja',  icono: 'fa-xmark', regenerable: false }
+    };
+
+    async function verificar() {
+        if (!token) {
+            renderNoValida({ estado: 'INVALIDA', mensaje: 'Este enlace no trae ningún código de credencial.', verificadaEn: new Date().toISOString() });
+            return;
+        }
+        try {
+            const res = await fetch(`${CONFIG.API_URL}/public/credencial/verificar?t=${encodeURIComponent(token)}`, { cache: 'no-store' });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const v = await res.json();
+            const servidor = Date.parse(v.verificadaEn);
+            if (!isNaN(servidor)) desfaseServidorMs = servidor - Date.now();
+            if (v.estado === 'VALIDA') renderValida(v);
+            else renderNoValida(v);
+        } catch (e) {
+            renderError();
+        }
+    }
+
+    function renderValida(v) {
+        venceMs = Date.parse(v.venceEn);
+        const foto = v.fotoUrl
+            ? `<img class="ver-foto" src="${escapar(v.fotoUrl)}" alt="Foto de ${escapar(v.nombre)}">`
+            : `<div class="ver-foto ver-foto--inicial" aria-hidden="true">${escapar(inicial(v.nombre))}</div>`;
+
+        contenido.innerHTML = `
+            <div class="ver-banda ver-banda--valida">
+                <span class="ver-banda-icono"><i class="fas fa-check"></i></span>
+                <div class="ver-banda-textos">
+                    <span class="ver-banda-titulo">Credencial válida</span>
+                    <span class="ver-banda-sub"><span class="ver-punto"></span> Consultado ahora · <span class="ver-mono" id="verReloj">--:--:--</span></span>
+                </div>
+            </div>
+            <div class="ver-cuerpo">
+                <div class="ver-tarjeta ver-identidad">
+                    ${foto}
+                    <span class="ver-nombre">${escapar(v.nombre)}</span>
+                    <div class="ver-dni">
+                        <span class="ver-etiqueta">DNI</span>
+                        <span class="ver-dni-numero">${escapar(v.numeroCredencial)}</span>
+                        <span class="ver-ayuda">Compará este número y el nombre con el DNI físico de la persona.</span>
+                    </div>
+                </div>
+                <div class="ver-grilla">
+                    <div class="ver-mini">
+                        <span class="ver-etiqueta">INSIGNIA</span>
+                        <span class="ver-mini-valor">${escapar(v.insigniaEmoji)} ${escapar(v.insigniaNombre)}</span>
+                    </div>
+                    <div class="ver-mini">
+                        <span class="ver-etiqueta">TÓTEM</span>
+                        <span class="ver-mini-valor">${escapar(v.totemEmoji || '')} ${escapar(v.totemNombre || '—')}</span>
+                    </div>
+                </div>
+                <div class="ver-tarjeta ver-filas">
+                    <div class="ver-fila"><span>Generada</span><span>${fechaHora(v.emitidaEn)} hs</span></div>
+                    <div class="ver-fila"><span>Válida hasta</span><span>${fechaHora(v.venceEn)} hs</span></div>
+                </div>
+            </div>
+            <p class="ver-pie">Estos datos salen de Cinemarketer en este momento, no del teléfono del usuario.</p>
+        `;
+        iniciarReloj();
+    }
+
+    function renderNoValida(v) {
+        detenerReloj();
+        const e = ESTADOS[v.estado] || ESTADOS.INVALIDA;
+        const consultado = Date.parse(v.verificadaEn);
+        contenido.innerHTML = `
+            <div class="ver-banda ver-banda--${e.banda}">
+                <span class="ver-banda-icono"><i class="fas ${e.icono}"></i></span>
+                <div class="ver-banda-textos">
+                    <span class="ver-banda-eyebrow">NO ACEPTAR EL BENEFICIO</span>
+                    <span class="ver-banda-titulo">${escapar(e.titulo)}</span>
+                </div>
+            </div>
+            <div class="ver-cuerpo">
+                <div class="ver-tarjeta">
+                    <p class="ver-mensaje">${escapar(v.mensaje)}</p>
+                    <p class="ver-nota">Por seguridad, cuando la credencial no es válida no mostramos ningún dato de la persona.</p>
+                </div>
+                ${e.regenerable ? `
+                <div class="ver-tarjeta">
+                    <span class="ver-etiqueta">QUÉ HACER</span>
+                    <p class="ver-que-hacer">Pedile que abra su credencial en la app, toque “Generar de nuevo” y te muestre el QR nuevo.</p>
+                </div>` : ''}
+            </div>
+            <p class="ver-pie">Consultado el <span class="ver-mono">${isNaN(consultado) ? '—' : fecha(consultado) + ' · ' + hora(consultado, true)}</span> hs</p>
+        `;
+    }
+
+    function renderError() {
+        detenerReloj();
+        contenido.innerHTML = `
+            <div class="ver-banda ver-banda--neutra">
+                <span class="ver-banda-icono"><i class="fas fa-wifi"></i></span>
+                <div class="ver-banda-textos">
+                    <span class="ver-banda-eyebrow">TODAVÍA NO ACEPTAR</span>
+                    <span class="ver-banda-titulo">No pudimos verificar</span>
+                </div>
+            </div>
+            <div class="ver-cuerpo">
+                <div class="ver-tarjeta">
+                    <p class="ver-mensaje">No pudimos conectarnos con Cinemarketer para validar la credencial.</p>
+                    <p class="ver-nota">Revisá la conexión y volvé a escanear el código.</p>
+                </div>
+            </div>`;
+    }
+
+    // Reloj en vivo con la hora del servidor. Si la credencial vence mientras
+    // la página está abierta, se vuelve a consultar y se muestra "venció".
+    function iniciarReloj() {
+        detenerReloj();
+        tic();
+        intervaloReloj = setInterval(tic, 1000);
+    }
+    function detenerReloj() {
+        if (intervaloReloj) clearInterval(intervaloReloj);
+        intervaloReloj = null;
+    }
+    function tic() {
+        const ahora = Date.now() + desfaseServidorMs;
+        const reloj = document.getElementById('verReloj');
+        if (reloj) reloj.textContent = hora(ahora, true);
+        if (venceMs && ahora >= venceMs) {
+            venceMs = null;
+            detenerReloj();
+            verificar();
+        }
+    }
+
+    verificar();
+})();
+</script>
+</body>
+</html>
