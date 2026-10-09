@@ -141,8 +141,12 @@ window.accesoRapidoInicio = async function(id) {
     const mapa = {
         'buscar-titulo': 'titulo_con_tipo', // primero pregunta si es película o serie
         'donde-verla': 'donde_ver_plataforma',
+        'sagas': 'caracteristica_saga',      // solo películas: abre directo la grilla de sagas
+        'remake': 'caracteristica_remake',   // solo películas: busca directo los remakes
         'actor-director': 'persona_nombre',
         'trabajaron-juntos': 'persona_cruce',
+        'por-genero': 'genero_con_tipo',     // primero pregunta si es película o serie
+        'anio-decada': 'epoca_con_tipo',     // primero pregunta si es película o serie
         'como-vengo': 'actividad_aprovechar',
         'que-aprovechar': 'actividad_proximo_premio',
         'mis-insignias': 'actividad_insignias',
