@@ -5482,14 +5482,38 @@ window._buscadorVolverATipoEleccion = function() {
     document.getElementById('buscadorTipoEleccion').style.display = 'block';
 };
 
-// Atajo de Inicio "Buscar una película o serie · Por título": primero pregunta si es película o serie
-// (el mismo paso 1 de la puerta principal) y, elegido el tipo, sigue directo al predictor de título.
-window._buscadorAbrirTipoParaTitulo = function() {
-    window._buscadorCriterioTrasTipo = 'titulo';
+// Atajos de Inicio que primero preguntan si es película o serie (Por título, Por género, Año o década):
+// muestra el mismo paso 1 de la puerta principal y, elegido el tipo, sigue directo con ese criterio,
+// sin pasar por la lista de criterios.
+window._buscadorAbrirTipoParaCriterio = function(criterio) {
+    window._buscadorCriterioTrasTipo = criterio;
     document.getElementById('buscadorTipoEleccion').style.display = 'block';
     window._buscadorSetBurbuja(BUSCADOR_FRASES_NIVEL2.pelicula_serie(_buscadorPrimerNombre()));
 };
 
+// Atajo de Inicio "Sagas": las sagas son exclusivas de películas (TMDb no tiene colecciones de series),
+// así que no se pregunta el tipo. Se arma el camino normal (película → criterios → característica → saga)
+// para que "Volver" lleve a pantallas completas y no vacías.
+window._buscadorAbrirSagasDirecto = function() {
+    window._buscadorTipoContenido = 'pelicula';
+    document.getElementById('buscadorNivel2PeliculaSerieTitulo').textContent = 'Buscando una película';
+    window._buscadorAbrirNivel3Caracteristica();   // llena la lista de características que muestra el "Volver"
+    window._buscadorAbrirNivel3Saga();
+
+    const nombre = _buscadorPrimerNombre();
+    window._buscadorSetBurbuja(nombre
+        ? `Elegí una saga, ${nombre}, y te muestro todas sus películas.`
+        : 'Elegí una saga y te muestro todas sus películas.');
+};
+
+// Atajo de Inicio "Remake": en películas es la característica "Remake" de la lista. Busca directo y
+// muestra los resultados abajo en Inicio, igual que al elegirla desde "Por característica".
+// (En series el equivalente es "Reboot", con otro id: este atajo es solo de películas.)
+window._buscadorAbrirRemakeDirecto = function() {
+    window._buscadorTipoContenido = 'pelicula';
+    const remake = BUSCADOR_CARACTERISTICAS_PELICULA.find(c => c.nombre === 'Remake');
+    if (remake) window._buscadorBuscarPorCaracteristica(remake.id, remake.nombre);
+};
 window._buscadorSetTipo = function(tipo, btn) {
     window._buscadorTipoContenido = tipo;
     document.querySelectorAll('#buscadorNivel2PeliculaSerie .filtro-switch-btn').forEach(b => b.classList.remove('activo'));
@@ -5503,8 +5527,17 @@ window._buscadorCriterioSeleccionado = function(criterio) {
         window._buscadorAbrirNivel3Titulo();
         return;
     }
-    if (criterio === 'titulo_con_tipo') {
-        window._buscadorAbrirTipoParaTitulo();
+    // Atajos de Inicio que primero preguntan película o serie: titulo_con_tipo, genero_con_tipo, epoca_con_tipo.
+    if (String(criterio).endsWith('_con_tipo')) {
+        window._buscadorAbrirTipoParaCriterio(criterio.slice(0, -'_con_tipo'.length));
+        return;
+    }
+    if (criterio === 'caracteristica_saga') {
+        window._buscadorAbrirSagasDirecto();
+        return;
+    }
+    if (criterio === 'caracteristica_remake') {
+        window._buscadorAbrirRemakeDirecto();
         return;
     }
         if (criterio === 'genero') {
@@ -6834,17 +6867,18 @@ window._buscadorCriterioSeleccionado = function(criterio) {
         // NIVEL 3 — Por característica (keywords de TMDb).
         // IDs confirmados contra la documentación de TMDb — no se resuelven
         // por texto libre, son fijos: "basada en hechos reales" = 9672,
-        // "remake" = 325286. Por ahora solo para película; serie y "saga"
-        // (que se resuelve distinto, por colección, no por keyword) quedan
-        // para una próxima pasada.
+        // "remake" = 9714 (más de mil películas). Ojo: NO es "film remake"
+        // (325286), que en TMDb tiene apenas 5. Por ahora solo para película;
+        // serie y "saga" (que se resuelve distinto, por colección, no por
+        // keyword) quedan para una próxima pasada.
         // ==============================================
         var BUSCADOR_CARACTERISTICAS_PELICULA = [
             { id: 9672, nombre: 'Basada en hechos reales' },
-            { id: 325286, nombre: 'Remake' },
+            { id: 9714, nombre: 'Remake' },
         ];
 
-        // "Reboot" en vez de "Remake" — esa keyword de películas (325286,
-        // "film remake") no tiene equivalente confirmado del lado series.
+        // "Reboot" en vez de "Remake" — la keyword "remake" de películas (9714)
+        // no tiene equivalente confirmado del lado series.
         // "Reboot" (161184) sí tiene su propia página de TMDb específica
         // para TV, con series reales etiquetadas.
         var BUSCADOR_CARACTERISTICAS_SERIE = [
