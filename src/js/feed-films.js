@@ -8699,7 +8699,14 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                         const tituloEl = document.getElementById(idTitulo);
                         if (tituloEl) tituloEl.textContent = tituloTexto;
                     }
-                    inicializarFilaBusqueda(); // ya tiene su propia guarda, no se duplica
+                    // Cada fila tiene su propio arranque (deslizamiento, scroll y carga de la página siguiente):
+                    // hay que iniciar la de series cuando se muestran series, no siempre la de películas.
+                    // Las dos tienen su propia guarda, no se duplican.
+                    if (idFila === 'fila-busqueda-serie') {
+                        inicializarFilaBusquedaSerie();
+                    } else {
+                        inicializarFilaBusqueda();
+                    }
                 };
 
                 window._buscadorScrollearAResultados = function(idFila) {
