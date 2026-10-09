@@ -5193,6 +5193,14 @@ window.abrirElencoCard = async function(movieId, event) {
     }
 }
 
+/* Teléfonos angostos (hasta 380px): póster un poco más chico para darle más ancho al texto y que la
+   tarjeta no necesite tanto alto. */
+@media (max-width: 380px) {
+    .buscador-sheet-recomendacion .buscador-recomendacion-poster {
+        flex-basis: 104px;
+    }
+}
+
 .buscador-recomendacion-totem-titulo {
     font-size: 1.1rem;
     font-weight: 800;
@@ -5271,6 +5279,27 @@ window.abrirElencoCard = async function(movieId, event) {
     color: #444;
     line-height: 1.35;
     margin: 0;
+}
+
+/* Recomendación — SOLO mobile. La tarjeta tenía un alto fijo de 200px y, con el texto centrado
+   verticalmente, un mensaje largo se recortaba por arriba (el título) y por abajo. Ahora el alto es
+   de 200px como mínimo y crece con el texto; las 3 tarjetas quedan del mismo alto (el de la más alta),
+   para que el modal no salte al deslizar. El margin-bottom: 0 ya estaba pensado para mobile más arriba,
+   pero la regla base, que viene después, lo pisaba. */
+@media (max-width: 768px) {
+    .buscador-sheet-recomendacion .buscador-recomendacion-slide {
+        display: flex;
+        flex-direction: column;
+    }
+    .buscador-sheet-recomendacion .buscador-recomendacion-card {
+        flex: 1 1 auto;
+        height: auto;
+        min-height: 200px;
+        margin-bottom: 0;
+    }
+    .buscador-sheet-recomendacion .buscador-recomendacion-poster {
+        height: auto; /* para que el póster se estire al alto de la tarjeta */
+    }
 }
 
 .buscador-pensando-mini {
