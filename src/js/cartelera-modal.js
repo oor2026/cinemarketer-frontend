@@ -15,6 +15,13 @@
 //   - cargarSinopsis (opcional): función que devuelve (como promesa) el texto de la sinopsis. Se
 //     usa si no vino "sinopsis": mientras llega se ve un placeholder, y si no hay sinopsis o falla
 //     el pedido simplemente no se muestra nada. Lo ya pedido se recuerda al reabrir la película.
+//   - cine (opcional): el nombre del cine. Si no viene, se toma de las funciones (cineNombre): con un solo
+//     cine se ve igual que siempre; con VARIOS (Organizar una salida) el slide de funciones muestra arriba
+//     "Tu mejor salida" (la función más barata y la más temprana) y debajo los cines apilados, ordenables.
+//   - slideInicial (opcional): 1 para abrir directo en las funciones. Por defecto abre en el póster.
+//   - contexto (opcional): lo que la persona eligió antes para organizar su salida, para recordárselo en
+//     "Tu mejor salida": { fecha: 'AAAA-MM-DD', preferencias: ['Por la tarde', 'Hasta $20.000'] }.
+//   - ahora (opcional, solo para pruebas): "HH:MM" que se toma como la hora actual.
 //   - elementoQueLoAbrio (opcional): al cerrar, el foco vuelve ahí.
 //
 // Es una pieza aparte, con sus propios estilos, para que el resto de los atajos de
@@ -86,6 +93,314 @@
             }).sort(function (a, b) { return porHorario(a.funciones[0], b.funciones[0]); });
             return { dia: dia, esHoy: d.esHoy, grupos: grupos };
         });
+    }
+
+    // ---------------------------------------------------------------
+    // Varios cines (Organizar una salida)
+    // ---------------------------------------------------------------
+    // Cuando las funciones son de más de un cine, el slide de funciones cambia: arriba "Tu mejor salida"
+    // (la función más barata y la más temprana) y abajo todos los cines apilados, que se pueden ordenar.
+    var CINES_VISIBLES = 3;          // cuántos cines se ven antes de "Ver N cines más"
+    var salidaActual = null;         // { cines, ahora, expandida } mientras hay un modal de varios cines abierto
+
+    // Agrupa las funciones por cine, en el orden en que aparecen.  → [{ nombre, funciones: [...] }]
+    function agruparPorCine(funciones) {
+        var orden = [], mapa = {};
+        (funciones || []).forEach(function (f) {
+            var nombre = String((f && f.cineNombre) || '').trim();
+            if (!mapa[nombre]) { mapa[nombre] = { nombre: nombre, funciones: [] }; orden.push(mapa[nombre]); }
+            mapa[nombre].funciones.push(f);
+        });
+        return orden;
+    }
+
+    // Hora actual de Argentina ("HH:MM"), la misma en cualquier teléfono o computadora.
+    function ahoraArgentina() {
+        try {
+            var texto = new Intl.DateTimeFormat('en-GB', {
+                timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit', hour12: false
+            }).format(new Date());
+            return texto.replace(/^24/, '00');                     // algunos motores dicen "24:05" a la medianoche
+        } catch (e) {
+            var d = new Date();
+            return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+        }
+    }
+
+    // "01:20" → 1520: las funciones de madrugada (00:00 a 04:59) van después de las de la noche.
+    function minutosOrden(h) {
+        var p = String(h || '').split(':');
+        var m = (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0);
+        return m < 300 ? m + 1440 : m;
+    }
+
+    // ¿Esta función de hoy ya empezó? Una de madrugada todavía no, mientras sea de día.
+    function yaEmpezo(f, ahora) {
+        if (!f || !f.esHoy) return false;
+        var h = hora(f.horario);
+        if (h < '05:00' && ahora >= '05:00') return false;
+        return h < ahora;
+    }
+
+    // El precio con el que se compara una función. Es el mismo criterio del filtro de presupuesto: un 2x1 no
+    // baja lo que paga quien va solo. null si la función no tiene precio de referencia.
+    function precioOrden(f) {
+        if (!f || f.precioReferencia == null) return null;
+        var p = window.CarteleraPrecio ? window.CarteleraPrecio.precioParaPresupuesto(f) : f.precioReferencia;
+        return p == null ? null : p;
+    }
+
+    // El precio como se ve en la pantalla: "$17.800" (y "c/u" si es un 2x1). Vacío si no hay.
+    function textoPrecio(f) {
+        if (!f || f.precioReferencia == null || !window.CarteleraPrecio) return '';
+        return window.CarteleraPrecio.monto(f.precioReferencia) + (f.promocion === '2X1' ? ' c/u' : '');
+    }
+
+    // La función más barata y la más temprana entre las que TODAVÍA no empezaron. Desempata la más barata por
+    // horario y la más temprana por precio. → { barata: {f, cine}|null, temprana: {f, cine}|null }
+    function elegirMejores(cines, ahora) {
+        var barata = null, temprana = null;
+        var antes = function (a, b) { return minutosOrden(hora(a.horario)) - minutosOrden(hora(b.horario)); };
+        cines.forEach(function (c) {
+            c.funciones.forEach(function (f) {
+                if (yaEmpezo(f, ahora)) return;
+                var x = { f: f, cine: c.nombre };
+                var p = precioOrden(f);
+                if (p != null) {
+                    var pb = barata ? precioOrden(barata.f) : null;
+                    if (!barata || p < pb || (p === pb && antes(f, barata.f) < 0)) barata = x;
+                }
+                if (!temprana) { temprana = x; return; }
+                var d = antes(f, temprana.f);
+                if (d < 0) { temprana = x; return; }
+                if (d === 0) {
+                    var pt = precioOrden(temprana.f);
+                    if (p != null && (pt == null || p < pt)) temprana = x;
+                }
+            });
+        });
+        return { barata: barata, temprana: temprana };
+    }
+
+    // Ordena los cines: por el precio más bajo o por el horario más temprano (solo cuentan las funciones que
+    // todavía no empezaron). Los cines sin dato van al final; el empate se desempata por el otro criterio y por nombre.
+    function ordenarCines(cines, criterio, ahora) {
+        var NULO = 1e9;
+        var claves = cines.map(function (c) {
+            var precio = null, hor = null;
+            c.funciones.forEach(function (f) {
+                if (yaEmpezo(f, ahora)) return;
+                var p = precioOrden(f);
+                if (p != null && (precio == null || p < precio)) precio = p;
+                var m = minutosOrden(hora(f.horario));
+                if (hor == null || m < hor) hor = m;
+            });
+            return { c: c, p: precio == null ? NULO : precio, h: hor == null ? NULO : hor };
+        });
+        claves.sort(function (a, b) {
+            var d = criterio === 'hora' ? (a.h - b.h || a.p - b.p) : (a.p - b.p || a.h - b.h);
+            return d || String(a.c.nombre).localeCompare(String(b.c.nombre));
+        });
+        return claves.map(function (x) { return x.c; });
+    }
+
+    function textoVerMas(n) {
+        return n === 1 ? 'Ver 1 cine más' : 'Ver ' + n + ' cines más';
+    }
+
+    // La marca de una función que no tiene el precio de siempre: "2x1" o "Reducida". Vacío si no corresponde.
+    function htmlMarcaFuncion(f) {
+        if (f.promocion === '2X1') return '<span class="cm-chip-tag cm-chip-tag-2x1">2x1</span>';
+        return f.tarifaReducida ? '<span class="cm-chip-tag cm-chip-tag-reducida">Reducida</span>' : '';
+    }
+
+    // Un horario, como botoncito: la hora, el precio debajo y, si corresponde, "2x1" o "Reducida".
+    function htmlChipFuncion(f) {
+        var precio = textoPrecio(f);
+        return '<div class="cm-chip-f"><b>' + esc(hora(f.horario)) + '</b><small>' + (precio ? esc(precio) : '—') + '</small>' + htmlMarcaFuncion(f) + '</div>';
+    }
+
+    // Un cine: tarjeta con forma de entrada, con su precio más bajo y sus horarios.
+    function htmlTicketCine(c, idx, oculto, mostrarDia) {
+        var dias = agrupar(c.funciones);
+        var variosDias = mostrarDia || dias.length > 1;          // si el modal mezcla días, cada tarjeta dice el suyo
+        var cantidadGrupos = 0;
+        dias.forEach(function (d) { cantidadGrupos += d.grupos.length; });
+        var unSoloFormato = !variosDias && cantidadGrupos === 1;   // un solo formato va en la línea de abajo, no como título
+        var cuerpo = dias.map(function (dia) {
+            return (variosDias ? '<div class="cm-dia">' + esc(etiquetaDia(dia.dia, dia.esHoy)) + '</div>' : '') +
+                dia.grupos.map(function (g) {
+                    return (unSoloFormato ? '' : '<div class="cm-grupo"><span class="cm-grupo-titulo">' + esc(g.titulo) + '</span></div>') +
+                        '<div class="cm-chips-f">' + g.funciones.map(htmlChipFuncion).join('') + '</div>';
+                }).join('');
+        }).join('');
+        var meta = (unSoloFormato ? dias[0].grupos[0].titulo + ' · ' : '') + textoFunciones(c.funciones.length);
+
+        var conPrecio = c.funciones.filter(function (f) { return f.precioReferencia != null; });
+        var desde = '';
+        if (conPrecio.length && window.CarteleraPrecio) {
+            var minimo = Math.min.apply(null, conPrecio.map(function (f) { return f.precioReferencia; }));
+            var varios = conPrecio.length < c.funciones.length ||
+                conPrecio.some(function (f) { return f.precioReferencia !== minimo; });
+            desde = '<div class="cm-t-desde">' + (varios ? '<small>Desde</small>' : '') +
+                '<b>' + esc(window.CarteleraPrecio.monto(minimo)) + '</b></div>';
+        }
+        return '<section class="cm-lugar cm-ticket' + (oculto ? ' cm-oculto' : '') + '" data-cine="' + idx + '" aria-label="Funciones en ' + esc(c.nombre) + '">' +
+            '<div class="cm-lugar-cab cm-t-cab"><div class="cm-t-fila">' +
+                '<span class="cm-t-icono"><i class="fas fa-location-dot"></i></span>' +
+                '<div class="cm-t-txt"><div class="cm-lugar-nombre">' + esc(c.nombre || 'Cine') + '</div>' +
+                    '<div class="cm-lugar-meta">' + esc(meta) + '</div></div>' + desde +
+            '</div></div>' +
+            '<div class="cm-lista cm-t-lista">' + cuerpo + '</div>' +
+            '</section>';
+    }
+
+    // Una de las dos recomendaciones: el cine, la hora y el precio, con su etiqueta.
+    function htmlPick(x, etiquetas) {
+        var f = x.f;
+        var formato = [f.formato, f.idioma].filter(Boolean).join(' · ');
+        var precio = textoPrecio(f);
+        var marca = htmlMarcaFuncion(f);
+        var ets = etiquetas.map(function (e) {
+            return '<span class="cm-pick-et cm-pick-et-' + e.clase + '"><i class="fas ' + e.icono + '"></i> ' + esc(e.texto) + '</span>';
+        }).join('');
+        return '<div class="cm-pick"><div class="cm-pick-ets">' + ets + '</div>' +
+            '<div class="cm-pick-fila"><span class="cm-t-icono"><i class="fas fa-location-dot"></i></span>' +
+                '<div class="cm-t-txt"><div class="cm-pick-cine">' + esc(x.cine || 'Cine') + '</div>' +
+                    ((formato || marca) ? '<div class="cm-pick-meta">' + esc(formato) + (formato && marca ? ' ' : '') + marca + '</div>' : '') + '</div>' +
+                '<div class="cm-pick-dato"><b>' + esc(hora(f.horario)) + '</b>' + (precio ? '<span>' + esc(precio) + '</span>' : '') + '</div>' +
+            '</div></div>';
+    }
+
+    // La banda azul con el título y la sinopsis: la misma que en el slide de un solo cine. "extra" es lo que se
+    // quiera sumar al final de la banda (acá, el título de "Tu mejor salida").
+    function htmlBandaPelicula(d, extra) {
+        return '<div class="cm-pelicula">' +
+            '<button type="button" class="cm-volver" data-ir="0"><i class="fas fa-chevron-left"></i> Póster</button>' +
+            '<span class="cm-etiqueta cm-etiqueta-pelicula"><i class="fas fa-clapperboard"></i> La película</span>' +
+            '<h2 class="cm-titulo">' + esc(d.pelicula) + '</h2>' +
+            htmlSinopsis(d) +
+            (extra || '') +
+            '</div>';
+    }
+
+    // "2026-10-09" → "09/10/2026". Vacío si no es una fecha con ese formato.
+    function formatearFecha(iso) {
+        var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || '').trim());
+        return m ? m[3] + '/' + m[2] + '/' + m[1] : '';
+    }
+
+    // El título de "Tu mejor salida", dentro de la banda azul. Le recuerda a la persona lo que eligió antes para
+    // organizar su salida: el día y, si los indicó, la franja horaria y el presupuesto.
+    //   contexto: { fecha: 'AAAA-MM-DD', preferencias: ['Por la tarde', 'Hasta $20.000'] }   (todo opcional)
+    // Si no vino la fecha se usa el día de las funciones.
+    function htmlTituloMejorSalida(contexto, diaDeLasFunciones) {
+        var c = contexto || {};
+        var fecha = formatearFecha(c.fecha) || formatearFecha(diaDeLasFunciones);
+        var prefs = (c.preferencias || []).filter(function (p) { return p && String(p).trim(); });
+        return '<div class="cm-mejor"><span class="cm-mejor-titulo">Tu mejor salida' + (fecha ? ' para el día ' + esc(fecha) : '') + '</span>' +
+            (prefs.length ? '<span class="cm-mejor-pref">' + prefs.map(function (p) { return esc(p); }).join(' · ') + '</span>' : '') +
+            '</div>';
+    }
+
+    // Slide de funciones cuando hay varios cines. Las recomendaciones solo se arman si todas las funciones son
+    // de un mismo día (en Organizar una salida siempre lo son): "la más barata" entre días no tendría sentido.
+    function htmlSlideFuncionesVarios(d) {
+        var cines = d.cines;
+        var funciones = d.funciones || [];
+        var ahora = d.ahora || ahoraArgentina();
+        var dias = agrupar(funciones);
+        var unDia = dias.length === 1;
+
+        var mejores = unDia ? elegirMejores(cines, ahora) : { barata: null, temprana: null };
+        var picks = '', titulo = '';
+        if (mejores.barata || mejores.temprana) {
+            var etBarata = { clase: 'barata', icono: 'fa-tag', texto: 'La más barata' };
+            var esHoy = !!(mejores.temprana && mejores.temprana.f.esHoy);
+            var etTemprana = { clase: 'temprana', icono: 'fa-clock', texto: esHoy ? 'La próxima' : 'La más temprana' };
+            var misma = mejores.barata && mejores.temprana && mejores.barata.f === mejores.temprana.f;
+            picks = '<div class="cm-picks">' +
+                (misma ? htmlPick(mejores.barata, [etBarata, etTemprana])
+                    : (mejores.barata ? htmlPick(mejores.barata, [etBarata]) : '') +
+                      (mejores.temprana ? htmlPick(mejores.temprana, [etTemprana]) : '')) +
+                '</div>';
+            titulo = htmlTituloMejorSalida(d.contexto, unDia ? dias[0].dia : '');
+        }
+
+        // La lista de abajo no repite las funciones que ya se recomendaron arriba. Los cines que se quedan sin
+        // funciones no aparecen, y si no queda ninguna función no se muestra la lista (ni su título ni el orden).
+        var recomendadas = [];
+        if (mejores.barata) recomendadas.push(mejores.barata.f);
+        if (mejores.temprana) recomendadas.push(mejores.temprana.f);
+        var restantes = cines.map(function (c) {
+            return { nombre: c.nombre, funciones: c.funciones.filter(function (f) { return recomendadas.indexOf(f) < 0; }) };
+        }).filter(function (c) { return c.funciones.length; });
+        var cantidad = 0;
+        restantes.forEach(function (c) { cantidad += c.funciones.length; });
+
+        salidaActual = { cines: restantes, ahora: ahora, expandida: false };
+        var ordenados = ordenarCines(restantes, 'precio', ahora);
+        var pila = ordenados.map(function (c, i) { return htmlTicketCine(c, restantes.indexOf(c), i >= CINES_VISIBLES, !unDia); }).join('');
+        var ocultos = Math.max(0, restantes.length - CINES_VISIBLES);
+        var hayPrecio = funciones.some(function (f) { return f && f.precioReferencia != null; });
+
+        var lista = '';
+        if (restantes.length) {
+            lista = '<div class="cm-seccion cm-seccion-todas">' + (recomendadas.length ? 'Más funciones' : 'Todas las funciones') + ' · ' + cantidad + '</div>' +
+                (unDia ? '<div class="cm-seccion-dia">' + esc(etiquetaDia(dias[0].dia, dias[0].esHoy)) + '</div>' : '') +
+                (restantes.length > 1
+                    ? '<div class="cm-orden" role="group" aria-label="Ordenar los cines"><span>Ordenar</span>' +
+                        '<button type="button" class="cm-orden-btn on" data-orden="precio" aria-pressed="true">Más barata</button>' +
+                        '<button type="button" class="cm-orden-btn" data-orden="hora" aria-pressed="false">Más temprano</button></div>'
+                    : '') +
+                '<div class="cm-pila">' + pila + '</div>' +
+                (ocultos ? '<button type="button" class="cm-mas-cines">' + textoVerMas(ocultos) + ' <i class="fas fa-chevron-down"></i></button>' : '');
+        }
+
+        return htmlBandaPelicula(d, titulo) + picks + lista +
+            (hayPrecio && window.CarteleraPrecio
+                ? '<p class="cm-nota">Precios de referencia. Confirmalos en la boletería o en la web del cine.</p>' : '');
+    }
+
+    // Reordena los cines que ya están en pantalla y marca qué orden está elegido.
+    function aplicarOrden(criterio) {
+        if (!salidaActual || !hoja) return;
+        var pila = hoja.querySelector('.cm-pila');
+        if (!pila) return;
+        ordenarCines(salidaActual.cines, criterio, salidaActual.ahora).forEach(function (c, i) {
+            var t = pila.querySelector('[data-cine="' + salidaActual.cines.indexOf(c) + '"]');
+            if (!t) return;
+            pila.appendChild(t);
+            t.classList.toggle('cm-oculto', !salidaActual.expandida && i >= CINES_VISIBLES);
+        });
+        Array.prototype.forEach.call(hoja.querySelectorAll('.cm-orden-btn'), function (b) {
+            var activo = b.getAttribute('data-orden') === criterio;
+            b.classList.toggle('on', activo);
+            b.setAttribute('aria-pressed', activo ? 'true' : 'false');
+        });
+    }
+
+    // "Ver N cines más": muestra los que faltaban y saca el botón (el foco pasa a la hoja, para no perderse).
+    function verMasCines() {
+        if (!salidaActual || !hoja) return;
+        salidaActual.expandida = true;
+        Array.prototype.forEach.call(hoja.querySelectorAll('.cm-ticket'), function (t) { t.classList.remove('cm-oculto'); });
+        var boton = hoja.querySelector('.cm-mas-cines');
+        if (boton && boton.parentNode) boton.parentNode.removeChild(boton);
+        if (typeof hoja.focus === 'function') hoja.focus({ preventScroll: true });
+    }
+
+    // Copia los datos y resuelve el cine: el que vino, o el que dicen las funciones. Si son varios, "cines" tiene
+    // la lista y "cine" dice cuántos son (así lo muestra el póster).
+    function prepararDatos(datos) {
+        var d = {};
+        for (var k in datos) { if (Object.prototype.hasOwnProperty.call(datos, k)) d[k] = datos[k]; }
+        if (!d.cine || !String(d.cine).trim()) {
+            var cines = agruparPorCine(d.funciones);
+            if (cines.length > 1) { d.cines = cines; d.cine = cines.length + ' cines'; }
+            else if (cines.length === 1) d.cine = cines[0].nombre;
+        }
+        return d;
     }
 
     // ---------------------------------------------------------------
@@ -175,7 +490,56 @@
         '.cm-hora { font-family: "Space Grotesk", sans-serif; font-size: 1.05rem; font-weight: 800; color: #16151a; }',
         '.cm-fila .cp-celda { align-items: flex-end; text-align: right; }',
         '.cm-nota { margin: 14px 28px 0; text-align: center; font-size: .7rem; line-height: 1.35; color: rgba(255,255,255,.78); }',
-        '.cm-vacio { padding: 16px 0 8px; font-size: .85rem; color: #8a8478; }'
+        '.cm-vacio { padding: 16px 0 8px; font-size: .85rem; color: #8a8478; }',
+
+        // — Varios cines (Organizar una salida): "Tu mejor salida" y los cines apilados
+        '.cm-seccion { margin: 0 0 8px 4px; font-size: .64rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: rgba(255,255,255,.9); }',
+        '.cm-picks { position: relative; margin: -22px 14px 0; }',
+        '.cm-mejor { margin: 16px 0 0; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.16); }',
+        '.cm-mejor-titulo { display: block; font-size: .95rem; font-weight: 800; letter-spacing: .05em; line-height: 1.3; text-transform: uppercase; color: #fff; }',
+        '.cm-mejor-pref { display: block; margin-top: 4px; font-size: .88rem; font-weight: 700; line-height: 1.35; color: #ffb4a8; }',
+        '.cm-pick { margin-bottom: 10px; padding: 11px 14px 12px; border-radius: 16px; background: #fff; box-shadow: 0 12px 16px -10px rgba(20,4,2,.5); }',
+        '.cm-pick-ets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }',
+        '.cm-pick-et { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 999px; font-size: .62rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }',
+        '.cm-pick-et-barata { color: #1b6b45; background: #e3f4ea; }',
+        '.cm-pick-et-temprana { color: #16264d; background: rgba(22,38,77,.09); }',
+        '.cm-pick-fila, .cm-t-fila { display: flex; align-items: center; gap: 11px; }',
+        '.cm-t-icono { flex: 0 0 auto; width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: .85rem; color: #fff; background: #16264d; }',
+        '.cm-t-txt { flex: 1; min-width: 0; }',
+        '.cm-pick-cine { font-family: "Space Grotesk", sans-serif; font-size: .98rem; font-weight: 800; line-height: 1.2; color: #16151a; }',
+        '.cm-pick-meta { margin-top: 1px; font-size: .74rem; color: #8a8478; }',
+        '.cm-pick-dato { text-align: right; line-height: 1.15; }',
+        '.cm-pick-dato b { display: block; font-family: "Space Grotesk", sans-serif; font-size: 1.25rem; font-weight: 800; color: #16151a; }',
+        '.cm-pick-dato span { font-size: .78rem; font-weight: 800; color: #c4321f; }',
+        '.cm-seccion-todas { margin: 18px 18px 2px; }',
+        '.cm-pelicula + .cm-seccion-todas { margin-top: -22px; }',
+        '.cm-seccion-dia { margin: 0 18px 8px; font-size: .78rem; font-weight: 700; color: rgba(255,255,255,.8); }',
+        '.cm-seccion-dia::first-letter { text-transform: uppercase; }',
+        '.cm-orden { display: flex; align-items: center; gap: 8px; margin: 10px 14px 0; }',
+        '.cm-orden > span { font-size: .66rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.8); }',
+        '.cm-orden-btn { border: 0; border-radius: 999px; padding: 6px 12px; cursor: pointer; font-size: .74rem; font-weight: 700; color: #fff; background: rgba(255,255,255,.18); white-space: nowrap; }',
+        '.cm-orden-btn.on { color: #16264d; background: #fff; }',
+        '.cm-orden-btn:focus-visible, .cm-mas-cines:focus-visible { outline: 2px solid #ffb4a8; outline-offset: 2px; }',
+        '.cm-pila { display: flex; flex-direction: column; gap: 14px; padding: 12px 14px 0; }',
+        '.cm-pila .cm-lugar { margin: 0; }',
+        '.cm-oculto { display: none; }',
+        '.cm-t-cab { padding-bottom: 12px; }',
+        '.cm-t-desde { text-align: right; line-height: 1.1; }',
+        '.cm-t-desde small { display: block; font-size: .62rem; color: #8a8478; }',
+        '.cm-t-desde b { font-family: "Space Grotesk", sans-serif; font-size: 1rem; font-weight: 800; color: #16151a; }',
+        '.cm-t-lista { padding-bottom: 14px; }',
+        '.cm-chips-f { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }',
+        '.cm-chip-f { min-width: 74px; padding: 7px 10px 6px; border: 1px solid #e4dfd3; border-radius: 12px; text-align: center; background: #fff; }',
+        '.cm-chip-f b { display: block; font-family: "Space Grotesk", sans-serif; font-size: 1rem; font-weight: 800; line-height: 1.15; color: #16151a; }',
+        '.cm-chip-f small { display: block; margin-top: 1px; font-size: .68rem; font-weight: 700; color: #8a8478; }',
+        '.cm-chip-tag { display: inline-block; margin-top: 3px; padding: 1px 6px; border-radius: 6px; font-size: .58rem; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; }',
+        '.cm-chip-tag-2x1 { color: #1b6b45; background: #e3f4ea; }',
+        '.cm-chip-tag-reducida { color: #16264d; background: rgba(22,38,77,.09); }',
+        '.cm-mas-cines { display: block; margin: 14px auto 0; border: 0; border-radius: 999px; padding: 10px 20px; cursor: pointer; font-size: .82rem; font-weight: 700; color: #fff; background: rgba(255,255,255,.18); }',
+
+        // — Sin slide de póster (Organizar una salida): solo las funciones, sin puntitos ni "‹ Póster"
+        '.cm-sheet.cm-solo-funciones .cm-slide-poster, .cm-sheet.cm-solo-funciones .cm-puntos, .cm-sheet.cm-solo-funciones .cm-volver { display: none; }',
+        '.cm-sheet.cm-solo-funciones .cm-slide-funciones { padding-bottom: 24px; }'
     ].join('\n');
 
     function inyectarEstilos() {
@@ -269,6 +633,7 @@
     // ---------------------------------------------------------------
     var overlay = null, hoja = null, track = null, slides = [], puntos = [];
     var abierto = false, slideActual = 0, abiertoPor = null, temporizadorCierre = null;
+    var soloFunciones = false;    // true mientras el modal abierto no tiene slide de póster
     var sesion = 0;            // cuenta las aperturas: la respuesta tardía de otra película se descarta
     var cacheSinopsis = {};    // título → texto, para no volver a pedirla al reabrir la misma película
 
@@ -327,13 +692,16 @@
                 mas.textContent = abierta ? 'Ver menos' : 'Ver más';
                 return;
             }
+            var orden = e.target.closest('.cm-orden-btn');           // "Más barata" / "Más temprano"
+            if (orden) { aplicarOrden(orden.getAttribute('data-orden')); return; }
+            if (e.target.closest('.cm-mas-cines')) { verMasCines(); return; }
             var ir = e.target.closest('[data-ir]');
             if (ir) irA(Number(ir.getAttribute('data-ir')));
         });
 
         // Al deslizar con el dedo, los puntitos siguen al slide que quedó a la vista.
         track.addEventListener('scroll', function () {
-            if (!track.clientWidth) return;
+            if (soloFunciones || !track.clientWidth) return;
             var n = Math.round(track.scrollLeft / track.clientWidth);
             if (n !== slideActual) mostrarSlide(n);
         });
@@ -351,6 +719,7 @@
 
     // Va a un slide: actualiza lo que se ve y mueve el carrusel.
     function irA(n, suave) {
+        if (soloFunciones) n = 1;                                // sin póster: la única pantalla es la de funciones
         mostrarSlide(n);
         var x = slideActual * (track.clientWidth || 0);
         var comportamiento = suave === false ? 'auto' : 'smooth';
@@ -388,8 +757,16 @@
         montar();
         clearTimeout(temporizadorCierre);
         var miSesion = ++sesion;
-        slides[0].innerHTML = htmlSlidePoster(datos);
-        slides[1].innerHTML = htmlSlideFunciones(datos);
+        datos = prepararDatos(datos);                            // copia; resuelve si son uno o varios cines
+        salidaActual = null;
+        soloFunciones = datos.soloFunciones === true;            // sin slide de póster (Organizar una salida)
+        hoja.classList.toggle('cm-solo-funciones', soloFunciones);
+        if (soloFunciones) { hoja.removeAttribute('aria-labelledby'); hoja.setAttribute('aria-label', String(datos.pelicula || '')); }
+        else { hoja.setAttribute('aria-labelledby', 'cmTitulo'); hoja.removeAttribute('aria-label'); }
+        slides[0].innerHTML = soloFunciones ? '' : htmlSlidePoster(datos);
+        slides[1].innerHTML = datos.cines ? htmlSlideFuncionesVarios(datos) : htmlSlideFunciones(datos);
+        slides[0].scrollTop = 0;                                 // cada apertura empieza arriba
+        slides[1].scrollTop = 0;
         pedirSinopsis(datos, miSesion);
 
         // Si el póster no carga, queda el recuadro con el ícono (en vez de la imagen rota).
@@ -408,8 +785,9 @@
         overlay.classList.add('cm-montado');
         overlay.setAttribute('aria-hidden', 'false');
         document.body.classList.add('cm-abierto');
-        track.scrollLeft = 0;
-        mostrarSlide(0);                                         // siempre arranca en el póster
+        var inicial = (soloFunciones || datos.slideInicial === 1) ? 1 : 0;   // por defecto arranca en el póster
+        track.scrollLeft = soloFunciones ? 0 : inicial * (track.clientWidth || 0);   // sin animación
+        mostrarSlide(inicial);
 
         var aparecer = function () {
             overlay.classList.add('cm-visible');
