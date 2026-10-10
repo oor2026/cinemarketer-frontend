@@ -5231,6 +5231,7 @@ var CADENA_LOGOS = {
     'SudCinemas': 'assets/images/cadenas/sudcinemas.png',
     'Sunstar': 'assets/images/cadenas/sunstar.png',
     'Centro Cultural Cine Zurro': 'assets/images/cadenas/zurro.jpg',
+    'Cineclub Center': 'assets/images/cadenas/cineclubcenter.png',
 };
 
 // Agendadecine agrupa algunas cadenas con el nombre de la empresa dueña y no con
