@@ -7290,6 +7290,112 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                             });
                         };
 
+                        // ---- Organizar una salida: los resultados como grilla de pósters ----
+                        // Cada película es una tarjeta (póster, un chip con el precio más bajo y el botón "Ver salida").
+                        window._buscadorSalidaTarjetas = [];
+
+                        window._buscadorSalidaEsc = function(texto) {
+                            return String(texto == null ? '' : texto).replace(/[&<>"']/g, c =>
+                                ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+                        };
+
+                        // Del póster solo se aceptan direcciones http(s) o rutas relativas: nada de "javascript:" ni "data:".
+                        window._buscadorSalidaUrlPoster = function(url) {
+                            const u = String(url == null ? '' : url).trim();
+                            return (/^(https?:)?\/\//i.test(u) || /^[\w./-]+$/.test(u)) ? u : '';
+                        };
+
+                        // Si no hay póster (o no carga) queda el título sobre un fondo azul.
+                        window._buscadorSalidaSinPoster = function(titulo) {
+                            return `<div class="buscador-resultado-sinposter"><i class="fas fa-film"></i><span>${window._buscadorSalidaEsc(titulo)}</span></div>`;
+                        };
+
+                        // Texto del chip: el precio más bajo ("Desde $17.800"), o cuántos cines son si ninguna función tiene precio.
+                        window._buscadorSalidaChip = function(funciones) {
+                            const conPrecio = funciones.filter(f => f.precioReferencia != null);
+                            if (conPrecio.length) {
+                                const minimo = Math.min(...conPrecio.map(f => f.precioReferencia));
+                                const varios = conPrecio.length < funciones.length || conPrecio.some(f => f.precioReferencia !== minimo);
+                                return (varios ? 'Desde ' : '') + CarteleraPrecio.monto(minimo);
+                            }
+                            const cines = new Set(funciones.map(f => f.cineNombre)).size;
+                            return cines === 1 ? '1 cine' : cines + ' cines';
+                        };
+
+                        // Lo que se eligió para organizar la salida, para recordárselo en el modal de funciones: el día
+                        // y, si los indicó, la franja horaria y el presupuesto (con las mismas opciones de los pasos anteriores).
+                        window._buscadorSalidaContexto = function(salida) {
+                            const s = salida || {};
+                            const preferencias = [];
+                            const franjas = { manana: 'Por la mañana', tarde: 'Por la tarde', noche: 'Por la noche' };
+                            if (s.horario && franjas[s.horario]) preferencias.push(franjas[s.horario]);
+                            if (s.presupuesto === 'mas30000') {
+                                preferencias.push('Más de ' + CarteleraPrecio.monto(30000));
+                            } else if (s.presupuesto && /^\d+$/.test(String(s.presupuesto))) {
+                                preferencias.push('Hasta ' + CarteleraPrecio.monto(parseInt(s.presupuesto, 10)));
+                            }
+                            return { fecha: s.fecha || '', preferencias };
+                        };
+
+                        window._buscadorSalidaTarjetaHtml = function(tarjeta, idx) {
+                            const esc = window._buscadorSalidaEsc;
+                            const url = window._buscadorSalidaUrlPoster(tarjeta.poster);
+                            const imagen = url ? `<img src="${esc(url)}" alt="" loading="lazy">` : window._buscadorSalidaSinPoster(tarjeta.pelicula);
+                            return `
+                                <div class="buscador-resultado-card" role="button" tabindex="0" data-i="${idx}" aria-label="Ver salida: ${esc(tarjeta.pelicula)}">
+                                    ${imagen}
+                                    <div class="buscador-resultado-pie">
+                                        <span class="buscador-resultado-chip">${esc(window._buscadorSalidaChip(tarjeta.funciones))}</span>
+                                        <span class="buscador-resultado-boton">Ver salida</span>
+                                    </div>
+                                </div>`;
+                        };
+
+                        // Abre el modal de funciones de esa película. Está por encima de este buscador (capa 10000 contra
+                        // 1101), así que al cerrarlo se vuelve acá: el buscador nunca se cierra ni se toca.
+                        window._buscadorSalidaAbrir = function(idx, origen) {
+                            const tarjeta = window._buscadorSalidaTarjetas[idx];
+                            if (!tarjeta) return;
+                            if (window.CarteleraModal) {
+                                window.CarteleraModal.abrir(tarjeta, origen);
+                            } else if (typeof window.mostrarToast === 'function') {
+                                window.mostrarToast('No pudimos abrir la salida. Recargá la página e intentá de nuevo.', 'error');
+                            }
+                        };
+
+                        // Toque o teclado sobre una tarjeta, y póster que no carga. Se asigna a la propiedad (no con
+                        // addEventListener) para que, aunque se rearmen los resultados, quede un solo manejador.
+                        window._buscadorSalidaEnlazar = function(lista) {
+                            lista.onclick = (e) => {
+                                const card = e.target.closest('.buscador-resultado-card');
+                                if (card) window._buscadorSalidaAbrir(Number(card.dataset.i), card);
+                            };
+                            lista.onkeydown = (e) => {
+                                if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('buscador-resultado-card')) {
+                                    e.preventDefault();
+                                    window._buscadorSalidaAbrir(Number(e.target.dataset.i), e.target);
+                                }
+                            };
+                            lista.querySelectorAll('.buscador-resultado-card img').forEach(img => {
+                                img.addEventListener('error', () => {
+                                    const card = img.closest('.buscador-resultado-card');
+                                    const tarjeta = card ? window._buscadorSalidaTarjetas[Number(card.dataset.i)] : null;
+                                    img.outerHTML = window._buscadorSalidaSinPoster(tarjeta ? tarjeta.pelicula : '');
+                                }, { once: true });
+                            });
+                        };
+
+                        // Sinopsis para el modal (el mismo pedido que usa Cartelera). Vacío si no hay o si falla.
+                        window._buscadorSalidaSinopsis = async function(titulo) {
+                            const token = localStorage.getItem('token');
+                            const res = await fetch(`${CONFIG.API_URL}/cartelera/pelicula-info?titulo=${encodeURIComponent(titulo)}`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (!res.ok) return '';
+                            const info = await res.json();
+                            return (info && info.sinopsis) || '';
+                        };
+
                         window._buscadorRecomendacionInicializarDots = function(cantidad) {
                             const carrusel = document.getElementById('buscadorRecomendacionCarrusel');
                             const dotsEl = document.getElementById('buscadorRecomendacionDots');
@@ -7945,56 +8051,37 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                 ? `<p style="color:#999; font-size:0.78rem; margin-bottom:0.8rem;">Se ocultaron ${ocultasPorPresupuesto} función(es) por encima del presupuesto elegido.</p>`
                                 : '';
 
-                            // Agrupadas por película — puede haber varios
-                            // cines distintos, así que acá sí se muestra el
-                            // nombre del cine en cada fila.
+                            // Agrupadas por película. Cada una es un póster con un botón "Ver salida": al tocarlo se abre
+                            // el modal de funciones (cartelera-modal.js), que muestra los cines de la zona con sus
+                            // horarios y precios. Ese modal va por encima de este buscador: al cerrarlo, esta grilla
+                            // sigue abierta.
                             const porPelicula = {};
                             funcionesFiltradas.forEach(f => {
                                 if (!porPelicula[f.peliculaTitulo]) porPelicula[f.peliculaTitulo] = [];
                                 porPelicula[f.peliculaTitulo].push(f);
                             });
 
-                            // Mini-carrusel de 2 slides (póster / funciones)
-                            // por película — SOLO tiene efecto en mobile
-                            // (ver CSS). En desktop se ve tal cual antes:
-                            // solo la tabla de funciones, sin póster.
-                            lista.innerHTML = avisoZona + avisoPresupuesto + Object.keys(porPelicula).map((pelicula, idx) => {
-                                const funcs = porPelicula[pelicula];
-                                const poster = funcs[0].poster || '';
-                                const carruselId = `buscadorSalidaCarrusel${idx}`;
-                                const filas = funcs.map(f => `
-                                    <tr>
-                                        <td>${f.cineNombre}</td>
-                                        <td>${CarteleraPrecio.hora(f.horario)}</td>
-                                        <td>${f.formato}${f.idioma ? ' ' + f.idioma : ''}</td>
-                                        <td class="cp-td">${CarteleraPrecio.celda(f)}</td>
-                                    </tr>
-                                `).join('');
-                                return `
-                                    <div class="buscador-salida-pelicula-wrap">
-                                        <div class="buscador-salida-pelicula-carrusel" id="${carruselId}">
-                                            <div class="buscador-salida-slide buscador-salida-slide-poster">
-                                                <img src="${poster}" alt="${pelicula}" loading="lazy">
-                                            </div>
-                                            <div class="buscador-salida-slide buscador-salida-slide-funciones">
-                                                <div class="buscador-cine-funciones-grupo">
-                                                    <div class="buscador-pelicula-funciones-header">${pelicula}</div>
-                                                    <table class="buscador-funciones-tabla">
-                                                        <thead><tr><th>Cine</th><th>Horario</th><th>Formato</th><th>Precio</th></tr></thead>
-                                                        <tbody>${filas}</tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="buscador-salida-dots" data-target="${carruselId}">
-                                            <span class="buscador-salida-dot activo" data-i="0"></span>
-                                            <span class="buscador-salida-dot" data-i="1"></span>
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('');
+                            // Lo que la persona eligió antes (día, franja horaria y presupuesto): el modal se lo
+                            // recuerda en "Tu mejor salida".
+                            const contexto = window._buscadorSalidaContexto(window._buscadorCarteleraSalida);
 
-                            window._buscadorSalidaInicializarCarruseles();
+                            window._buscadorSalidaTarjetas = Object.keys(porPelicula).map(pelicula => {
+                                const funcs = porPelicula[pelicula];
+                                return {
+                                    pelicula,
+                                    poster: funcs[0].poster || '',
+                                    funciones: funcs,
+                                    soloFunciones: true,   // sin slide de póster: el póster ya se tocó en los resultados
+                                    contexto,
+                                    cargarSinopsis: () => window._buscadorSalidaSinopsis(pelicula)
+                                };
+                            });
+
+                            lista.innerHTML = avisoZona + avisoPresupuesto +
+                                '<div class="buscador-resultado-grilla">' +
+                                window._buscadorSalidaTarjetas.map((tarjeta, idx) => window._buscadorSalidaTarjetaHtml(tarjeta, idx)).join('') +
+                                '</div>';
+                            window._buscadorSalidaEnlazar(lista);
                         } catch (e) {
                             lista.innerHTML = '<div class="buscador-predictor-vacio">No pudimos armar los resultados. Intentá de nuevo.</div>';
                         }

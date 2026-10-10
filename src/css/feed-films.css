@@ -5302,6 +5302,107 @@ window.abrirElencoCard = async function(movieId, event) {
     }
 }
 
+/* Organizar una salida — resultados: una grilla de pósters, 2 por fila. Cada tarjeta se toca para abrir
+   el modal de funciones (cartelera-modal.js); ese modal va por encima del buscador. */
+.buscador-resultado-grilla {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.buscador-resultado-card {
+    position: relative;
+    aspect-ratio: 2 / 3;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #1a1a2e;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 8px 18px -10px rgba(0, 0, 0, 0.45);
+    transition: transform 0.12s ease;
+}
+
+.buscador-resultado-card:active {
+    transform: scale(0.985);
+}
+
+.buscador-resultado-card:focus-visible {
+    outline: 2px solid #c4321f;
+    outline-offset: 2px;
+}
+
+.buscador-resultado-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Sin póster: el título sobre un fondo azul, con lugar abajo para el botón. */
+.buscador-resultado-sinposter {
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 10px 90px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 1.2;
+    background: linear-gradient(160deg, #2a4180, #0c1430);
+}
+
+.buscador-resultado-sinposter i {
+    font-size: 2rem;
+    color: rgba(255, 255, 255, 0.35);
+}
+
+/* El chip y el botón van sobre la parte de abajo del póster, con un degradé oscuro para que se lean. */
+.buscador-resultado-pie {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 56px 8px 8px;
+    background: linear-gradient(to top, rgba(8, 10, 24, 0.92) 0%, rgba(8, 10, 24, 0.7) 45%, rgba(8, 10, 24, 0) 100%);
+}
+
+.buscador-resultado-chip {
+    align-self: flex-start;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 3px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 999px;
+    font-size: 0.64rem;
+    font-weight: 700;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.buscador-resultado-boton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(135deg, #f0553f, #c4321f);
+    box-shadow: 0 8px 18px -8px rgba(196, 50, 31, 0.9);
+}
+
 .buscador-pensando-mini {
     display: flex; align-items: center; justify-content: center;
     padding: 0.8rem;
