@@ -7163,6 +7163,7 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                             document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
                             document.getElementById('buscadorNivel2Cartelera').style.display = 'block';
                             document.getElementById('buscadorModalSheet').classList.remove('buscador-sheet-ancho', 'buscador-sheet-alto', 'buscador-sheet-recomendacion');
+                            window._buscadorSetBurbuja(BUSCADOR_FRASES_NIVEL2.cartelera(_buscadorPrimerNombre()));   // el mensaje del menú de Cartelera
                         };
 
                         // Mismos mapas que perfil.js — duplicados acá porque
@@ -7523,14 +7524,23 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                         window._buscadorCarteleraModoDonde = 'pelicula';
                         document.getElementById('buscadorCarteleraDondeSubtitulo').textContent = '¿Dónde te gustaría verla?';
 
-                        const nombreUsuarioDonde = _buscadorPrimerNombre();
-                        window._buscadorSetBurbuja(nombreUsuarioDonde
-                            ? `Decime dónde te gustaría ver "${nombre}", ${nombreUsuarioDonde}.`
-                            : `Decime dónde te gustaría ver "${nombre}".`);
+                        window._buscadorBurbujaCarteleraDondePelicula();
 
                         document.getElementById('buscadorModalSheet').classList.remove('buscador-sheet-recomendacion');
                         document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
                         document.getElementById('buscadorNivel3CarteleraDonde').style.display = 'block';
+                    };
+
+                    // Mensaje del encabezado de "¿Dónde?" cuando se llegó eligiendo una película. Se usa al abrir esa
+                    // pantalla y también en los "Volver" que regresan a ella (desde provincia y localidad y desde los
+                    // resultados por ubicación), para que el encabezado no quede con el mensaje de la pantalla de la que se viene.
+                    window._buscadorBurbujaCarteleraDondePelicula = function() {
+                        const elegida = window._buscadorPeliculaElegida;
+                        if (!elegida) return;
+                        const nombre = _buscadorPrimerNombre();
+                        window._buscadorSetBurbuja(nombre
+                            ? `Decime dónde te gustaría ver "${elegida.nombre}", ${nombre}.`
+                            : `Decime dónde te gustaría ver "${elegida.nombre}".`);
                     };
 
                     // Trae y muestra las funciones de la película elegida,
@@ -7679,11 +7689,48 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                            // ============================================================
                            // Cartelera — "¿Qué hay para ver?" — Paso 1: ¿Dónde?
                            // ============================================================
+                    // Mensajes del encabezado de cada paso de "Organizar una salida". Se usan al entrar a cada
+                    // pantalla y también en los "Volver" que regresan a ella, para que el encabezado nunca se quede
+                    // con el mensaje de otro paso.
+                    window._buscadorBurbujaSalida = function(paso) {
+                        const n = _buscadorPrimerNombre();
+                        const c = n ? `, ${n}` : '';
+                        const mensajes = {
+                            donde: `Armemos tu salida${c}. Primero, decime dónde estás.`,
+                            cuando: `¿Para cuándo es tu salida${c}? Elegí el día y, si querés, el horario.`,
+                            presupuesto: `¿Tenés un presupuesto en mente${c}? Si no, seguí sin preferencia.`,
+                            armando: `Armando tu salida${c}...`,
+                            resultado: `Acá tenés tu salida${c}. Tocá una película para ver dónde y a qué hora.`,
+                            sinFunciones: `No encontré funciones para esa fecha y zona${c}. Probá con otra.`,
+                            superaPresupuesto: `Todo lo que encontré supera tu presupuesto${c}. Probá con un rango mayor.`,
+                            error: `No pude armar tu salida${c}. Intentá de nuevo.`
+                        };
+                        if (mensajes[paso]) window._buscadorSetBurbuja(mensajes[paso]);
+                    };
+
+                    // Mensaje de "provincia y localidad": el de la película elegida o el de "Organizar una salida".
+                    window._buscadorBurbujaCarteleraProvinciaLocalidad = function() {
+                        const nombreProvLoc = _buscadorPrimerNombre();
+                        const peliculaElegida = window._buscadorPeliculaElegida ? window._buscadorPeliculaElegida.nombre : null;
+                        let mensajeProvLoc;
+                        if (window._buscadorCarteleraModoDonde === 'pelicula' && peliculaElegida) {
+                            mensajeProvLoc = nombreProvLoc
+                                ? `Elegí provincia y localidad, ${nombreProvLoc}, para ver "${peliculaElegida}" cerca tuyo.`
+                                : `Elegí provincia y localidad para ver "${peliculaElegida}" cerca tuyo.`;
+                        } else {
+                            mensajeProvLoc = nombreProvLoc
+                                ? `Elegí provincia y localidad, ${nombreProvLoc}, y seguimos.`
+                                : 'Elegí provincia y localidad y seguimos.';
+                        }
+                        window._buscadorSetBurbuja(mensajeProvLoc);
+                    };
+
                     window._buscadorAbrirCarteleraDonde = function() {
                         window._buscadorCarteleraModoDonde = 'salida';
                         document.getElementById('buscadorCarteleraDondeSubtitulo').textContent = '¿Dónde estás?';
                         document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
                         document.getElementById('buscadorNivel3CarteleraDonde').style.display = 'block';
+                        window._buscadorBurbujaSalida('donde');
                     };
 
                     // Vuelve desde "¿Dónde estás?" según el modo: si se
@@ -7729,6 +7776,8 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                            window._buscadorVolverANivel3CarteleraDonde = function() {
                                document.getElementById('buscadorNivel3CarteleraDondeResultado').style.display = 'none';
                                document.getElementById('buscadorNivel3CarteleraDonde').style.display = 'block';
+                               if (window._buscadorCarteleraModoDonde === 'pelicula') window._buscadorBurbujaCarteleraDondePelicula();
+                               else window._buscadorBurbujaSalida('donde');
                            };
 
                            window._buscadorCarteleraUsarGeolocalizacion = function() {
@@ -7816,19 +7865,7 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                         document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
                         document.getElementById('buscadorNivel3CarteleraProvinciaLocalidad').style.display = 'block';
 
-                        const nombreProvLoc = _buscadorPrimerNombre();
-                        const peliculaElegida = window._buscadorPeliculaElegida ? window._buscadorPeliculaElegida.nombre : null;
-                        let mensajeProvLoc;
-                        if (window._buscadorCarteleraModoDonde === 'pelicula' && peliculaElegida) {
-                            mensajeProvLoc = nombreProvLoc
-                                ? `Elegí provincia y localidad, ${nombreProvLoc}, para ver "${peliculaElegida}" cerca tuyo.`
-                                : `Elegí provincia y localidad para ver "${peliculaElegida}" cerca tuyo.`;
-                        } else {
-                            mensajeProvLoc = nombreProvLoc
-                                ? `Elegí provincia y localidad, ${nombreProvLoc}, y seguimos.`
-                                : 'Elegí provincia y localidad y seguimos.';
-                        }
-                        window._buscadorSetBurbuja(mensajeProvLoc);
+                        window._buscadorBurbujaCarteleraProvinciaLocalidad();
 
                         const selectProv = document.getElementById('buscadorCarteleraProvinciaSelect');
 
@@ -7904,6 +7941,8 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                     window._buscadorVolverANivel3CarteleraDondeDesdeCombos = function() {
                         document.getElementById('buscadorNivel3CarteleraProvinciaLocalidad').style.display = 'none';
                         document.getElementById('buscadorNivel3CarteleraDonde').style.display = 'block';
+                        if (window._buscadorCarteleraModoDonde === 'pelicula') window._buscadorBurbujaCarteleraDondePelicula();
+                        else window._buscadorBurbujaSalida('donde');
                     };
 
                     window._buscadorCarteleraProvinciaCambio = function() {
@@ -7950,6 +7989,7 @@ window._buscadorCriterioSeleccionado = function(criterio) {
 
                         document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
                         document.getElementById('buscadorNivel3CarteleraCuando').style.display = 'block';
+                        window._buscadorBurbujaSalida('cuando');
 
                         const fechaInput = document.getElementById('buscadorCarteleraFechaInput');
   fechaInput.min = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }); // no se puede elegir una fecha pasada
@@ -7969,6 +8009,7 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                     window._buscadorVolverANivel3ProvinciaLocalidad = function() {
                         document.getElementById('buscadorNivel3CarteleraCuando').style.display = 'none';
                         document.getElementById('buscadorNivel3CarteleraProvinciaLocalidad').style.display = 'block';
+                        window._buscadorBurbujaCarteleraProvinciaLocalidad();
                     };
 
                     window._buscadorCarteleraConfirmarCuando = function() {
@@ -7978,11 +8019,13 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                         document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
                         document.getElementById('buscadorNivel3CarteleraPresupuesto').style.display = 'block';
                         document.getElementById('buscadorCarteleraPresupuestoSelect').value = '';
+                        window._buscadorBurbujaSalida('presupuesto');
                     };
 
                     window._buscadorVolverANivel3CarteleraCuando = function() {
                         document.getElementById('buscadorNivel3CarteleraPresupuesto').style.display = 'none';
                         document.getElementById('buscadorNivel3CarteleraCuando').style.display = 'block';
+                        window._buscadorBurbujaSalida('cuando');
                     };
 
                     window._buscadorCarteleraConfirmarPresupuesto = async function() {
@@ -7991,6 +8034,7 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                         document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
                         document.getElementById('buscadorNivel3CarteleraResultadoSalida').style.display = 'block';
                         document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-alto');
+                        window._buscadorBurbujaSalida('armando');
 
                         const lista = document.getElementById('buscadorCarteleraResultadoSalidaLista');
                         lista.innerHTML = `
@@ -8037,6 +8081,7 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                 lista.innerHTML = ocultasPorPresupuesto > 0
                                     ? '<div class="buscador-predictor-vacio">Todas las funciones que encontramos superan el presupuesto elegido. Probá con un rango más amplio.</div>'
                                     : '<div class="buscador-predictor-vacio">No encontramos funciones para esa fecha/zona todavía — probá con otra fecha o ampliá la búsqueda.</div>';
+                                window._buscadorBurbujaSalida(ocultasPorPresupuesto > 0 ? 'superaPresupuesto' : 'sinFunciones');
                                 return;
                             }
 
@@ -8083,8 +8128,10 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                 window._buscadorSalidaTarjetas.map((tarjeta, idx) => window._buscadorSalidaTarjetaHtml(tarjeta, idx)).join('') +
                                 '</div>';
                             window._buscadorSalidaEnlazar(lista);
+                            window._buscadorBurbujaSalida('resultado');
                         } catch (e) {
                             lista.innerHTML = '<div class="buscador-predictor-vacio">No pudimos armar los resultados. Intentá de nuevo.</div>';
+                            window._buscadorBurbujaSalida('error');
                         }
                     };
 
@@ -8092,6 +8139,7 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                         document.getElementById('buscadorNivel3CarteleraResultadoSalida').style.display = 'none';
                         document.getElementById('buscadorNivel3CarteleraPresupuesto').style.display = 'block';
                         document.getElementById('buscadorModalSheet').classList.remove('buscador-sheet-salida');
+                        window._buscadorBurbujaSalida('presupuesto');
                     };
 
                     window._buscadorCarteleraUsarZonaPerfil = function() {
@@ -8150,10 +8198,7 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                                const filtroCadenas = document.getElementById('buscadorCadenaFiltro');
                                if (filtroCadenas) filtroCadenas.value = '';
 
-                               const nombreCadena = _buscadorPrimerNombre();
-                               window._buscadorSetBurbuja(nombreCadena
-                                   ? `Elegí una cadena, ${nombreCadena}, y te muestro sus sucursales.`
-                                   : 'Elegí una cadena y te muestro sus sucursales.');
+                               window._buscadorBurbujaCarteleraCadenas();
 
                                const grid = document.getElementById('buscadorCadenasGrid');
                                grid.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Cargando cadenas...</div>';
@@ -8242,10 +8287,8 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                         const nombreCadena = window._buscadorNombreCadena(cadena);
                         document.getElementById('buscadorCarteleraSucursalesTitulo').textContent = `Sucursales de ${nombreCadena}`;
 
-                        const nombreSucursales = _buscadorPrimerNombre();
-                        window._buscadorSetBurbuja(nombreSucursales
-                            ? `Elegí la sucursal de ${nombreCadena}, ${nombreSucursales}, y te muestro sus funciones.`
-                            : `Elegí la sucursal de ${nombreCadena} y te muestro sus funciones.`);
+                        window._buscadorCarteleraCadenaElegida = nombreCadena;   // para recuperar este mensaje al volver desde las funciones
+                        window._buscadorBurbujaCarteleraSucursales();
 
                         const grid = document.getElementById('buscadorSucursalesGrid');
                         grid.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Cargando sucursales...</div>';
@@ -8387,20 +8430,41 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                         }
                     };
 
+                    // Mensajes del encabezado de las pantallas de "Por cadena de cine". Se usan al entrar a cada
+                    // pantalla y también al volver a ella, para que el encabezado nunca se quede con el mensaje de
+                    // la pantalla de la que se viene.
+                    window._buscadorBurbujaCarteleraCadenas = function() {
+                        const nombre = _buscadorPrimerNombre();
+                        window._buscadorSetBurbuja(nombre
+                            ? `Elegí una cadena, ${nombre}, y te muestro sus sucursales.`
+                            : 'Elegí una cadena y te muestro sus sucursales.');
+                    };
+
+                    window._buscadorBurbujaCarteleraSucursales = function() {
+                        const cadena = window._buscadorCarteleraCadenaElegida || '';
+                        const nombre = _buscadorPrimerNombre();
+                        window._buscadorSetBurbuja(nombre
+                            ? `Elegí la sucursal de ${cadena}, ${nombre}, y te muestro sus funciones.`
+                            : `Elegí la sucursal de ${cadena} y te muestro sus funciones.`);
+                    };
+
                     window._buscadorVolverANivel3CarteleraSucursales = function() {
                         document.getElementById('buscadorNivel3CarteleraCadenaFunciones').style.display = 'none';
                         if (window._buscadorCarteleraSaltoSucursales) {
                             // Se había saltado el paso de sucursales (cadena
                             // con una sola) — volver también lo salta.
                             document.getElementById('buscadorNivel3CarteleraCadena').style.display = 'block';
+                            window._buscadorBurbujaCarteleraCadenas();
                         } else {
                             document.getElementById('buscadorNivel3CarteleraSucursales').style.display = 'block';
+                            window._buscadorBurbujaCarteleraSucursales();
                         }
                     };
 
                     window._buscadorVolverANivel3CarteleraCadena = function() {
                         document.getElementById('buscadorNivel3CarteleraSucursales').style.display = 'none';
                         document.getElementById('buscadorNivel3CarteleraCadena').style.display = 'block';
+                        window._buscadorBurbujaCarteleraCadenas();
                     };
 
                     window._buscadorBuscarPorSaga = function(collectionId, nombre) {

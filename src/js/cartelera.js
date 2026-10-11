@@ -24,9 +24,13 @@ function carteleraSlugProvincia(texto) {
     return match ? match[0] : null;
 }
 
-window.init_cartelera = async function() {
+// opciones.refresco: lo manda el refresco automático (ver carteleraProgramarRefresco); al entrar a Cartelera no se pasa nada.
+window.init_cartelera = async function(opciones) {
     const cont = document.getElementById('carteleraCercaResultado');
     if (!cont) return;
+    const esRefresco = !!(opciones && opciones.refresco);
+    window._carteleraUltimaCarga = Date.now();
+    carteleraProgramarRefresco();
 
     // Pide el perfil fresco en vez de confiar en window._perfilData —
     // esa foto se toma una sola vez al cargar dashboard.html y nunca
@@ -69,13 +73,24 @@ window.init_cartelera = async function() {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error('status ' + res.status);
-        const funciones = await res.json();
-        console.log('[cartelera-debug] funciones recibidas:', funciones);
+        const todas = await res.json();
+        console.log('[cartelera-debug] funciones recibidas:', todas);
+
+        // Solo las que empiezan desde 30 minutos atrás hasta las 23:59 de hoy: las que ya pasaron hace más
+        // que eso no se muestran (ver carteleraFuncionesVigentes).
+        const funciones = carteleraFuncionesVigentes(todas);
 
         if (!funciones.length) {
-            cont.innerHTML = '<div class="cartelera-cerca-vacio">No encontramos funciones para hoy en tu zona.</div>';
+            cont.innerHTML = todas.length
+                ? '<div class="cartelera-cerca-vacio">Ya no quedan funciones para hoy en tu zona.</div>'
+                : '<div class="cartelera-cerca-vacio">No encontramos funciones para hoy en tu zona.</div>';
             return;
         }
+
+        // En el refresco automático, si desde la última vez no cambió nada no se vuelve a armar: así no se
+        // mueve el carrusel mientras la persona lo está mirando. Al entrar a Cartelera siempre se arma.
+        const firma = funciones.map(f => `${f.peliculaTitulo}|${f.cineNombre}|${f.horario}`).join(';');
+        if (esRefresco && cont.dataset.firma === firma && cont.querySelector('.cartelera-cerca-card')) return;
 
         // Una tarjeta por película Y por cine, así aparecen las funciones de TODOS los cines de la
         // zona. (Antes había una tarjeta por película y se mostraba un solo cine, el de la primera
@@ -133,6 +148,7 @@ window.init_cartelera = async function() {
 
         // Hasta 5 tarjetas a la vista; si hay más, un carrusel para pasar a las siguientes.
         carteleraMontarCarrusel(cont, htmlTarjetas, TARJETAS_POR_PAGINA);
+        cont.dataset.firma = firma;
         // Tocar una tarjeta (o Enter / Espacio con el foco en ella) abre el modal de la película.
         // Se asigna con onclick / onkeydown, no con addEventListener, para que volver a entrar
         // a Cartelera no deje el evento duplicado.
@@ -168,6 +184,69 @@ function carteleraFechaHoy() {
     }).formatToParts(new Date());
     const valor = (tipo) => partes.find(p => p.type === tipo).value;
     return `${valor('year')}-${valor('month')}-${valor('day')}`;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Qué funciones de hoy se muestran: desde (ahora − 30 minutos) hasta las 23:59.
+// (var y no const: este archivo se vuelve a ejecutar entero en cada visita a Cartelera.)
+// ---------------------------------------------------------------------------------------------
+
+// Cuánto hacia atrás se sigue mostrando una función que ya empezó: con 30 minutos todavía se puede comprar
+// la entrada y entrar a la sala. Más atrás, la película ya va por la mitad y no se muestra.
+var CARTELERA_MARGEN_MINUTOS = 30;
+
+// Cada cuánto se vuelve a calcular qué funciones se muestran. Cada tanto una función sale de la ventana de
+// 30 minutos y, a medianoche, cambia el día: se vuelve a pedir y a armar todo.
+var CARTELERA_REFRESCO_MS = 5 * 60 * 1000;
+
+// Los minutos que pasaron desde las 00:00 en Argentina ("13:18" → 798). No depende de la zona horaria del
+// teléfono.
+function carteleraMinutosAhora() {
+    const partes = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit', hour12: false
+    }).formatToParts(new Date());
+    const valor = (tipo) => parseInt(partes.find(p => p.type === tipo).value, 10);
+    return (valor('hour') % 24) * 60 + valor('minute');   // algunos motores dicen "24" a la medianoche
+}
+
+// "13:20:00" → 800. NaN si no se puede leer.
+function carteleraHoraAMinutos(h) {
+    const m = /^(\d{1,2}):(\d{2})/.exec(String(h || ''));
+    return m ? parseInt(m[1], 10) * 60 + parseInt(m[2], 10) : NaN;
+}
+
+// De las funciones de hoy, deja las que empiezan desde (ahora − margen) hasta las 23:59. Entre las 00:00 y
+// las 00:30 el piso es la medianoche: no hay "ayer". Si la hora de una función no se puede leer se la deja,
+// porque no hay forma de saber si ya pasó.
+function carteleraFuncionesVigentes(funciones, ahoraMin) {
+    const ahora = ahoraMin == null ? carteleraMinutosAhora() : ahoraMin;
+    const desde = Math.max(0, ahora - CARTELERA_MARGEN_MINUTOS);
+    return funciones.filter(f => {
+        const m = carteleraHoraAMinutos(f.horario);
+        return isNaN(m) || m >= desde;
+    });
+}
+
+// Vuelve a ejecutar la sección pasado un rato. Cada ejecución reprograma la siguiente. Si la sección ya no
+// está en pantalla no hace nada, y con la pestaña en segundo plano espera a que se vuelva a ver.
+function carteleraProgramarRefresco() {
+    clearTimeout(window._carteleraRefresco);
+    window._carteleraRefresco = setTimeout(() => {
+        const cont = document.getElementById('carteleraCercaResultado');
+        if (!cont || !cont.isConnected) return;
+        if (document.hidden) { carteleraProgramarRefresco(); return; }
+        window.init_cartelera({ refresco: true });
+    }, CARTELERA_REFRESCO_MS);
+
+    // Al volver a la pestaña después de un rato, se actualiza enseguida en vez de esperar al próximo ciclo.
+    if (!window._carteleraVisibilidad) {
+        window._carteleraVisibilidad = true;
+        document.addEventListener('visibilitychange', () => {
+            const cont = document.getElementById('carteleraCercaResultado');
+            if (document.hidden || !cont || !cont.isConnected) return;
+            if (Date.now() - (window._carteleraUltimaCarga || 0) >= CARTELERA_REFRESCO_MS) window.init_cartelera({ refresco: true });
+        });
+    }
 }
 
 // Cuántas tarjetas se ven a la vez en "Hoy cerca tuyo"; si hay más, se pasan con el carrusel.
