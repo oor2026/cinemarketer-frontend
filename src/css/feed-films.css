@@ -4952,6 +4952,15 @@ window.abrirElencoCard = async function(movieId, event) {
     50% { transform: scale(1.12); opacity: 1; }
 }
 
+/* Cartelera: el estado de carga ("Cargando...") dentro de un carrusel — películas, cadenas o sucursales — es una
+   fila flexible, y el loader entraba como un ítem más, pegado a la izquierda. Acá ocupa todo el ancho del
+   carrusel y queda centrado. Los mensajes vacíos o de error que van en esos mismos carruseles también. */
+[id^="buscadorNivel3Cartelera"] .buscador-carrusel > .buscador-pensando,
+[id^="buscadorNivel3Cartelera"] .buscador-carrusel > .buscador-predictor-vacio {
+    flex: 0 0 100%;
+    box-sizing: border-box;
+}
+
 /* Versión chica — para tiras/carruseles angostos donde el bloque
    grande (ícono 56px + texto) no entra. Sin texto, solo el ícono. */
 /* Modal más ancho solo en el paso de recomendación — en desktop no hay
