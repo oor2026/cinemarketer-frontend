@@ -92,6 +92,7 @@ function getNotifIcono(type, referenceType) {
         case 'FOLLOW_REQUEST_ACCEPTED':  return '👤';
         case 'RECOMMENDATION_RATED':     return '🎬';
         case 'NEW_RECOMMENDATION':       return '🎬';
+        case 'MOVIE_RELEASED_EXPECTED':  return '🍿';
         case 'DRAW_WINNER':              return '🏆';
         case 'POINTS_RELEASED':          return '🪙';
         case 'ADMIN_GRANT_POINTS':       return '🪙';

@@ -2948,11 +2948,22 @@ window._confirmarAvisoEstreno = async function() {
 
     const token = localStorage.getItem('token');
     try {
-        await fetch(`${CONFIG.API_URL}/movies/${id}/expectation/notify`, {
+        const res = await fetch(`${CONFIG.API_URL}/movies/${id}/expectation/notify`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
         });
-    } catch (e) {}
+        // Antes un error acá pasaba en silencio: la persona creía que el aviso quedaba pedido y no se había guardado.
+        if (!res.ok) {
+            // El backend explica el motivo en { "error": "..." } (por ejemplo, un 400): queda en la consola.
+            let motivo = '';
+            try { motivo = (await res.json()).error || ''; } catch (e2) {}
+            throw new Error('status ' + res.status + (motivo ? ' — ' + motivo : ''));
+        }
+        window.mostrarToast('Listo, te avisamos cuando se estrene.', 'success');
+    } catch (e) {
+        console.error('No se pudo activar el aviso de estreno de la película', id, e);
+        window.mostrarToast('No pudimos activar el aviso de estreno. Intentá de nuevo.', 'error');
+    }
 };
 
         window.cargarDatosPelicula = async function(id) {

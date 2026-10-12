@@ -39,11 +39,10 @@ window.init_cartelera = async function(opciones) {
     let provincia, localidad;
     try {
         const perfil = await API.getProfile();
-        console.log('[cartelera-debug] perfil fresco:', perfil);
         provincia = perfil.provincia;
         localidad = perfil.localidad;
     } catch (e) {
-        console.log('[cartelera-debug] API.getProfile() falló:', e);
+        // Si el pedido falla, se usa la foto del perfil que ya estaba cargada.
         provincia = window._perfilData && window._perfilData.provincia;
         localidad = window._perfilData && window._perfilData.localidad;
     }
@@ -68,13 +67,11 @@ window.init_cartelera = async function(opciones) {
         if (localidad) params.set('localidad', localidad);
 
         const token = localStorage.getItem('token');
-        console.log('[cartelera-debug] pidiendo:', `${CONFIG.API_URL}/cartelera/organizar-salida?${params}`);
         const res = await fetch(`${CONFIG.API_URL}/cartelera/organizar-salida?${params}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error('status ' + res.status);
         const todas = await res.json();
-        console.log('[cartelera-debug] funciones recibidas:', todas);
 
         // Solo las que empiezan desde 30 minutos atrás hasta las 23:59 de hoy: las que ya pasaron hace más
         // que eso no se muestran (ver carteleraFuncionesVigentes).
