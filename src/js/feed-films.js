@@ -254,7 +254,7 @@ window.generarTarjetasHTML = async function(peliculas) {
                                 </button>
                             </div>`;
 
-                        return plantilla
+                        const tarjeta = plantilla
                             .replace(/{id}/g, pelicula.id)
                             .replace(/{posterUrl}/g, posterUrl)
                             .replace(/{title}/g, pelicula.title)
@@ -264,11 +264,27 @@ window.generarTarjetasHTML = async function(peliculas) {
                             .replace(/{popularity}/g, Math.round(pelicula.popularity))
                             .replace(/{vote_count}/g, pelicula.vote_count)
                             .replace(/{accionesVotacion}/g, accionesVotacion);
+                        return pelicula.reestreno ? window._insertarEtiquetaReestreno(tarjeta, pelicula.reestreno) : tarjeta;
                     }).join('');
 
     } catch (error) {
         return generarTarjetasFallback(peliculas);
     }
+};
+
+// "En cines desde el 8/10" (ya está en cartelera) o "Reestreno el 17/10" (todavía no empezó). `reestreno.fecha` llega como
+// 'AAAA-MM-DD' y NO se pasa por Date: con la zona horaria del dispositivo el día correría uno para atrás.
+window._etiquetaReestreno = function(reestreno) {
+    const partes = String(reestreno.fecha).split('-');
+    const corta = `${parseInt(partes[2], 10)}/${parseInt(partes[1], 10)}`;
+    const hoyArgentina = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date());
+    return String(reestreno.fecha) <= hoyArgentina ? `En cines desde el ${corta}` : `Reestreno el ${corta}`;
+};
+
+// Pone la etiqueta sobre el póster de la tarjeta. Si la plantilla no tuviera el contenedor del póster, la tarjeta sale igual, sin etiqueta.
+window._insertarEtiquetaReestreno = function(htmlTarjeta, reestreno) {
+    const etiqueta = `<span class="reestreno-etiqueta"><i class="fas fa-film"></i> ${window._etiquetaReestreno(reestreno)}</span>`;
+    return htmlTarjeta.replace(/(<[^>]*class="[^"]*\bpelicula-poster\b[^"]*"[^>]*>)/, `$1${etiqueta}`);
 };
 
 function generarTarjetasFallback(peliculas) {
@@ -514,6 +530,7 @@ window.cargarFilasGenero = async function() {
     const fijas = [
         { key: 'fecha', label: '🔥 Más populares', tipo: 'fijo' },
         { key: 'proximamente', label: '🎬 Lo que se viene', tipo: 'fijo' },
+        { key: 'reestrenos', label: '📽️ Reestrenos', tipo: 'fijo' },
         { key: 'votos', label: '👍 Más votadas', tipo: 'fijo' }
     ];
 
@@ -826,6 +843,18 @@ async function cargarPeliculasFila(fila) {
                     }
                     fila.pagina = pagina - 1; // así la paginación por scroll sigue desde acá, sin repetir páginas ya consumidas
 
+                } else if (fila.key === 'reestrenos') {
+                    // Películas que ya existen y vuelven a cines en Argentina (en cartelera ahora o anunciadas). El backend las
+                    // detecta con las fechas de estreno por país de TMDb y manda en cada una `reestreno: { fecha, nota }`.
+                    // Es una lista acotada: no hay paginación por scroll.
+                    const res = await fetch(`${CONFIG.API_URL}/movies/reestrenos`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) throw new Error('status ' + res.status);
+                    const data = await res.json();
+                    resultados = (data.results || []).filter(p => esValida(p, false));
+                    fila.finDelCatalogo = true;
+
                         } else if (fila.key === 'votos') {
                     const res = await fetch(`${CONFIG.API_URL}/movies/popular?page=1`, {
                         headers: { 'Authorization': `Bearer ${token}` }
@@ -862,7 +891,7 @@ async function cargarPeliculasFila(fila) {
                     window._primerosPeliculasUsados.add(resultados[0].id);
                 }
 
-                                fila.peliculas = resultados.slice(0, 15);
+                                fila.peliculas = resultados.slice(0, fila.key === 'reestrenos' ? 30 : 15);
                                 await renderCardsFila(fila);
 
                                 if (fila._votosPendientes) {
@@ -899,7 +928,9 @@ async function renderCardsFila(fila) {
     if (!track) return;
 
     if (fila.peliculas.length === 0) {
-        track.innerHTML = '<div class="fila-genero-vacia">No encontramos películas acá todavía.</div>';
+        track.innerHTML = '<div class="fila-genero-vacia">' + (fila.key === 'reestrenos'
+            ? 'Por ahora no hay reestrenos en cartelera ni anunciados.'
+            : 'No encontramos películas acá todavía.') + '</div>';
         return;
     }
 
