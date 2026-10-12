@@ -4042,6 +4042,33 @@ window.abrirElencoCard = async function(movieId, event) {
                     padding: 40px 20px; text-align: center; color: #999; flex: 0 0 100%;
                 }
 
+                /* Carruseles del feed (películas y series): mientras cargan, el logo de Cinemarketer late (el mismo
+                   del asistente) en lugar del spinner y de los pósters grises vacíos. Va todo por CSS para no tocar
+                   cada lugar de feed-films.js que arma un "Cargando". */
+                .fila-genero-loading i.fa-spinner { display: none; }
+                .fila-genero-loading::before,
+                .sk-poster::before {
+                    content: '';
+                    display: block;
+                    width: 56px; height: 56px;
+                    border-radius: 50%;
+                    background: url('../assets/images/icon-512.png') center / cover no-repeat;
+                    animation: buscadorLatido 1.1s ease-in-out infinite;
+                }
+                .fila-genero-loading::before { margin: 0 auto; }
+                /* La palabra "Cargando..." debajo del logo, como en el asistente (.buscador-pensando). */
+                .fila-genero-loading::after,
+                .sk-poster::after {
+                    content: 'Cargando...';
+                    display: block;
+                    margin-top: 1rem;
+                    color: #666; font-size: 0.9rem; font-weight: 600; text-align: center;
+                }
+                .sk-poster { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+                @media (prefers-reduced-motion: reduce) {
+                    .fila-genero-loading::before, .sk-poster::before { animation: none; }
+                }
+
                 /* Skeleton loader — mismo tamaño/forma que una card real, para que
                    el "cargando" no se sienta como un vacío feo mientras llega el fetch. */
                 .fila-genero-skeleton {
