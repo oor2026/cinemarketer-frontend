@@ -184,7 +184,7 @@ async function _cargarPeliculasNoInteresaIds() {
 
 window.generarTarjetasHTML = async function(peliculas) {
     try {
-         const soloLatinos = /^[a-zA-ZÀ-ÿ0-9\s\-:,.!?'"()\u00C0-\u024F\u1E00-\u1EFF]+$/;
+         const soloLatinos = /^[\p{Script=Latin}0-9\p{No}\p{P}\p{S}\p{Z}\p{M}\s]+$/u;
          const anioActual = new Date().getFullYear();
          const criterio = window._criterioOrden || 'fecha';
          const excluidas = await _cargarPeliculasNoInteresaIds();
@@ -387,7 +387,7 @@ window.cargarPeliculasPopulares = async function(pagina = 1) {
         window.estadoPaginacion.totalResultados = data.total_results;
 
         // Acumular páginas hasta tener 20 válidos
-                const soloLatinos = /^[a-zA-ZÀ-ÿ0-9\s\-:,.!?'"()\u00C0-\u024F\u1E00-\u1EFF]+$/;
+                const soloLatinos = /^[\p{Script=Latin}0-9\p{No}\p{P}\p{S}\p{Z}\p{M}\s]+$/u;
                 const anioActual = new Date().getFullYear();
                 const criterio = window._criterioOrden || 'fecha';
 
@@ -798,7 +798,7 @@ async function cargarPeliculasFila(fila) {
     fila.cargado = true; // redundante si vino de cargarFilaConCola (ya lo marcó al encolar), pero se deja por si se llama directo
     const token = localStorage.getItem('token');
     const anioActual = new Date().getFullYear();
-    const soloLatinos = /^[a-zA-ZÀ-ÿ0-9\s\-:,.!?'"()\u00C0-\u024F\u1E00-\u1EFF]+$/;
+    const soloLatinos = /^[\p{Script=Latin}0-9\p{No}\p{P}\p{S}\p{Z}\p{M}\s]+$/u;
 
             const esValida = (p, esProximamente) => {
                 if (!p.poster_path) return false;
@@ -1137,7 +1137,7 @@ async function cargarMasPeliculasFila(fila, track) {
     fila.pagina = (fila.pagina || 1) + 1;
     const token = localStorage.getItem('token');
     const anioActual = new Date().getFullYear();
-    const soloLatinos = /^[a-zA-ZÀ-ÿ0-9\s\-:,.!?'"()\u00C0-\u024F\u1E00-\u1EFF]+$/;
+    const soloLatinos = /^[\p{Script=Latin}0-9\p{No}\p{P}\p{S}\p{Z}\p{M}\s]+$/u;
     const esValida = (p, esProximamente) => {
         if (!p.poster_path) return false;
         if (!esProximamente && (!p.overview || p.overview.trim() === '')) return false;
@@ -1874,7 +1874,7 @@ window.cargarMas = async function() {
                         if (!p.poster_path) return false;
                         // Ya estamos dentro del bloque exclusivo de "proximamente" —
                         // acá la sinopsis nunca se exige.
-                        const soloLatinos = /^[a-zA-ZÀ-ÿ0-9\s\-:,.!?'"()\u00C0-\u024F\u1E00-\u1EFF]+$/;
+                        const soloLatinos = /^[\p{Script=Latin}0-9\p{No}\p{P}\p{S}\p{Z}\p{M}\s]+$/u;
                         if (!p.title || !soloLatinos.test(p.title.trim())) return false;
                         return !!p.release_date && new Date(p.release_date) > new Date();
                     };
@@ -3151,7 +3151,7 @@ window._confirmarAvisoEstreno = async function() {
                 if (!response.ok) throw new Error();
 
                 const data = await response.json();
-                const soloLatinos = /^[a-zA-ZÀ-ÿ0-9\s\-:,.!?'"()\u00C0-\u024F\u1E00-\u1EFF]+$/;
+                const soloLatinos = /^[\p{Script=Latin}0-9\p{No}\p{P}\p{S}\p{Z}\p{M}\s]+$/u;
 
                 const peliculas = (data.results || [])
                         .filter(p => p.poster_path && p.title && soloLatinos.test(p.title.trim()))
@@ -6950,7 +6950,7 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                     { id: 2344, nombre: 'Matrix' },
                     { id: 8650, nombre: 'Transformers' },
                     { id: 9485, nombre: 'Rápidos y Furiosos' },
-                    { id: 9735, nombre: 'Viernes 13' },
+                    { id: 9735, nombre: 'Viernes 13', peliculasExtra: [13207] },   // peliculasExtra: ids de películas de la saga que TMDb no incluye en la colección
                     { id: 10194, nombre: 'Toy Story' },
                     { id: 12263, nombre: 'El Exorcista' },
                     { id: 1241, nombre: 'Harry Potter' },
@@ -8534,9 +8534,21 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                         if (!res.ok) throw new Error(`Error ${res.status}`);
                         const data = await res.json();
 
+                        // Películas de la saga que TMDb no incluye en la colección (una película solo puede estar en una):
+                        // se piden una por una y se suman. Si alguna falla, la saga se muestra igual con el resto.
+                        const partes = [...(data.parts || [])];
+                        const saga = BUSCADOR_SAGAS.find(s => s.id === collectionId);
+                        const extras = await Promise.all(((saga && saga.peliculasExtra) || []).map(async (idPelicula) => {
+                            try {
+                                const r = await fetch(`${CONFIG.API_URL}/movies/${idPelicula}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                                return r.ok ? await r.json() : null;
+                            } catch (e) { return null; }
+                        }));
+                        extras.filter(Boolean).forEach(p => { if (!partes.some(x => x.id === p.id)) partes.push(p); });
+
                         // Solo con poster y fecha real, ordenadas cronológicamente
                         // (TMDb no las devuelve necesariamente en ese orden).
-                        const resultados = (data.parts || []).filter(p => p.poster_path && p.release_date);
+                        const resultados = partes.filter(p => p.poster_path && p.release_date);
                         resultados.sort((a, b) => new Date(a.release_date) - new Date(b.release_date));
 
                         window._filaBusqueda.peliculas = resultados;
