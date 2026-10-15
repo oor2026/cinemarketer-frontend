@@ -6985,6 +6985,17 @@ var BUSCADOR_SAGAS = [
                     { id: -6, nombre: 'Animales Fantásticos', peliculas: [259316, 338952, 338953] },   // saga armada a mano: Animales fantásticos y dónde encontrarlos, Los crímenes de Grindelwald, Los secretos de Dumbledore
                     { id: 87359, nombre: 'Misión Imposible' },
                     { id: 404609, nombre: 'John Wick' },
+                    { id: -19, nombre: 'James Bond', peliculas: [646, 657, 658, 660, 667, 668, 681, 253, 682, 691, 698, 699, 700, 36670, 707, 708, 709, 710, 714, 36643, 36669, 36557, 10764, 37724, 206647, 370172] },   // saga armada a mano: las 25 oficiales, de Agente 007 contra el Dr. No (1962) a Sin tiempo para morir (2021), más Nunca digas nunca jamás (1983)
+                    { id: -20, nombre: 'Bourne', peliculas: [2501, 2502, 2503, 49040, 324668] },   // saga armada a mano: las 5 películas, de El caso Bourne a Jason Bourne
+                    { id: -21, nombre: 'Rambo', peliculas: [1368, 1369, 1370, 7555, 522938] },   // saga armada a mano: las 5 películas, de Acorralado a Rambo: Last Blood
+                    { id: -22, nombre: 'Depredador', peliculas: [106, 169, 395, 440, 34851, 346910] },   // saga armada a mano: Depredador 1 y 2, los dos Alien contra Predator, Predators y Predator (2018)
+                    { id: -23, nombre: 'RoboCop', peliculas: [5548, 5549, 5550, 97020] },   // saga armada a mano: RoboCop 1, 2 y 3 y el remake de 2014
+                    { id: -24, nombre: 'Arma mortal', peliculas: [941, 942, 943, 944] },   // saga armada a mano: Arma letal 1 a 4
+                    { id: -25, nombre: 'Hombres de negro', peliculas: [607, 608, 41154, 479455] },   // saga armada a mano: Hombres de negro, II, Men in Black 3 e International
+                    { id: -26, nombre: 'Búsqueda implacable', peliculas: [8681, 82675, 260346] },   // saga armada a mano: Venganza (2008), Venganza: Conexión Estambul (2012) y V3nganza (2014)
+                    { id: -27, nombre: 'Los Mercenarios', peliculas: [27578, 76163, 138103, 299054] },   // saga armada a mano: Los mercenarios 1 a 4
+                    { id: -28, nombre: 'Bad Boys', peliculas: [9737, 8961, 38700, 573435] },   // saga armada a mano: Dos policías rebeldes 1 y 2, Bad Boys for Life y Ride or Die
+                    { id: -29, nombre: 'Top Gun', peliculas: [744, 361743] },   // saga armada a mano: Top Gun: Ídolos del aire y Top Gun: Maverick
                     { id: 8091, nombre: 'Alien', peliculasExtra: [70981, 126889, 945961, 395, 440] },   // Prometheus, Alien: Covenant, Alien: Romulus, Alien contra Predator, AVP 2
                     { id: 91361, nombre: 'Halloween', peliculasExtra: [2082, 24150] },   // Halloween: El Origen (2007), Halloween II (2009)
                     { id: 2602, nombre: 'Scream' },
