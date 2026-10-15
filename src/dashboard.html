@@ -786,6 +786,31 @@ viene del backend, hasta que decidamos cómo presentarlo. -->
                 <div id="buscadorCarteleraRecomendacionLista"></div>
             </div>
 
+            <!-- NIVEL 3 — Cartelera: "Cine argentino" — películas de los Espacios INCAA
+         de la zona elegida (mismo carrusel que "¿Alguna recomendación?"). -->
+            <div class="buscador-nivel2" id="buscadorNivel3CarteleraArgentino" style="display:none;">
+                <button class="buscador-volver" onclick="window._buscadorVolverDesdeArgentino()">
+                    <i class="fas fa-chevron-left"></i> Volver
+                </button>
+                <p class="buscador-subtitulo">Películas argentinas en los Espacios INCAA de tu zona</p>
+                <div id="buscadorCarteleraArgentinoLista"></div>
+            </div>
+
+            <!-- NIVEL 3 — Cartelera: "Sorteos" — cadenas con sorteos cargados en el admin
+         (Integraciones). Cada una abre el sitio oficial de la cadena en otra pestaña. -->
+            <div class="buscador-nivel2" id="buscadorNivel3CarteleraSorteos" style="display:none;">
+                <button class="buscador-volver" onclick="window._buscadorVolverANivel2Cartelera()">
+                    <i class="fas fa-chevron-left"></i> Volver
+                </button>
+                <p class="buscador-subtitulo">Elegí una cadena y te llevamos a sus sorteos</p>
+                <div class="buscador-carrusel-wrap">
+                    <button class="buscador-carrusel-flecha buscador-carrusel-flecha-izq" onclick="window._buscadorCarruselMover('buscadorSorteosGrid', -1)"><i class="fas fa-chevron-left"></i></button>
+                    <div class="buscador-carrusel" id="buscadorSorteosGrid"></div>
+                    <button class="buscador-carrusel-flecha buscador-carrusel-flecha-der" onclick="window._buscadorCarruselMover('buscadorSorteosGrid', 1)"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <p style="font-size:0.75rem; color:#8a8478; margin:0.7rem 0 0; text-align:left;">Los sorteos son de cada cadena: se abren en su sitio oficial.</p>
+            </div>
+
             <!-- NIVEL 3 — Cartelera: "¿Qué hay para ver?" — Paso 1: ¿Dónde?
          Cascada: geolocalización → zona del perfil → texto manual. -->
             <div class="buscador-nivel2" id="buscadorNivel3CarteleraDonde" style="display:none;">

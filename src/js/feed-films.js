@@ -5274,6 +5274,10 @@ var CADENA_LOGOS = {
     'Sunstar': 'assets/images/cadenas/sunstar.png',
     'Centro Cultural Cine Zurro': 'assets/images/cadenas/zurro.jpg',
     'Cineclub Center': 'assets/images/cadenas/cineclubcenter.png',
+    'Cine Gaumont': 'assets/images/cadenas/gaumont.jpg',
+    'Centro Cultural Cotesma': 'assets/images/cadenas/cotesma.png',
+    'Centro Cultural Florencio Constantino': 'assets/images/cadenas/florencioconstantino.png',
+    'Cine Teatro Tapalqué': 'assets/images/cadenas/tapalque.png',
 };
 
 // Agendadecine agrupa algunas cadenas con el nombre de la empresa dueña y no con
@@ -5392,6 +5396,8 @@ var BUSCADOR_TODAS_LAS_PANTALLAS = [
     'buscadorNivel3CarteleraTitulo', // Cartelera — "Ya sé qué quiero ver"
     'buscadorNivel3CarteleraFunciones', // Cartelera — funciones de la película elegida
     'buscadorNivel3CarteleraRecomendacion', // Cartelera — "¿Alguna recomendación?"
+    'buscadorNivel3CarteleraArgentino', // Cartelera — "Cine argentino": películas de los Espacios INCAA
+    'buscadorNivel3CarteleraSorteos', // Cartelera — "Sorteos": cadenas con sorteos (Integraciones)
     'buscadorNivel3CarteleraDonde', // Cartelera — "¿Qué hay para ver?" Paso 1: ¿Dónde?
     'buscadorNivel3CarteleraDondeResultado', // Cartelera — resultado de "¿Dónde estás?"
     'buscadorNivel3CarteleraProvinciaLocalidad', // Organizar salida — Paso 1b: combos
@@ -5621,6 +5627,18 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                            }
                            if (criterio === 'cartelera_recomendacion') {
                                window._buscadorAbrirCarteleraRecomendacion();
+                               return;
+                           }
+                           if (criterio === 'cartelera_modo_ahorro') {
+                               window._buscadorAbrirCarteleraAhorro();
+                               return;
+                           }
+                           if (criterio === 'cartelera_argentino') {
+                               window._buscadorAbrirCarteleraArgentino();
+                               return;
+                           }
+                           if (criterio === 'cartelera_sorteos') {
+                               window._buscadorAbrirCarteleraSorteos();
                                return;
                            }
                             if (criterio === 'donde_ver_estrenos') {
@@ -6931,47 +6949,49 @@ window._buscadorCriterioSeleccionado = function(criterio) {
 
         // Sagas confirmadas contra TMDb — exclusivo de películas, no
         // existe el concepto de "colección" del lado de series.
-                var BUSCADOR_SAGAS = [
-                    { id: 10, nombre: 'Star Wars' },
+var BUSCADOR_SAGAS = [
+                    { id: 10, nombre: 'Star Wars', peliculasExtra: [330459, 348350] },   // Rogue One, Han Solo
                     { id: 84, nombre: 'Indiana Jones' },
                     { id: 119, nombre: 'El Señor de los Anillos' },
-                    { id: 151, nombre: 'Star Trek' },
+                    { id: 151, nombre: 'Star Trek', peliculasExtra: [193, 199, 200, 201, 13475, 54138, 188927] },   // La próxima generación, Primer Contacto, Insurrección, Nemesis, Star Trek (2009), En la oscuridad, Más allá
                     { id: 528, nombre: 'Terminator' },
                     { id: 656, nombre: 'Saw' },
                     { id: 748, nombre: 'X-Men' },
+                    { id: -2, nombre: 'Wolverine', peliculas: [2080, 76170, 263115] },   // saga armada a mano (no depende de una colección de TMDb): X-Men orígenes: Lobezno, Lobezno inmortal, Logan
                     { id: 230, nombre: 'El Padrino' },
                     { id: 263, nombre: 'Batman - El Caballero de la Noche' },
                     { id: 264, nombre: 'Volver al Futuro' },
                     { id: 295, nombre: 'Piratas del Caribe' },
-                    { id: 304, nombre: "Ocean's" },
+                    { id: 304, nombre: "Ocean's", peliculasExtra: [402900] },   // Ocean's 8
                     { id: 328, nombre: 'Jurassic Park' },
                     { id: 1575, nombre: 'Rocky' },
                     { id: 2150, nombre: 'Shrek' },
                     { id: 2344, nombre: 'Matrix' },
-                    { id: 8650, nombre: 'Transformers' },
+                    { id: 8650, nombre: 'Transformers', peliculasExtra: [667538, 698687] },   // El despertar de las bestias, Transformers One
                     { id: 9485, nombre: 'Rápidos y Furiosos' },
-                    { id: 9735, nombre: 'Viernes 13', peliculasExtra: [13207] },   // peliculasExtra: ids de películas de la saga que TMDb no incluye en la colección
+                    { id: 9735, nombre: 'Viernes 13', peliculasExtra: [13207] },   // Viernes 13 (remake de 2009)
                     { id: 10194, nombre: 'Toy Story' },
                     { id: 12263, nombre: 'El Exorcista' },
                     { id: 1241, nombre: 'Harry Potter' },
                     { id: 87359, nombre: 'Misión Imposible' },
                     { id: 404609, nombre: 'John Wick' },
-                    { id: 8091, nombre: 'Alien' },
-                    { id: 91361, nombre: 'Halloween' },
+                    { id: 8091, nombre: 'Alien', peliculasExtra: [70981, 126889, 945961, 395, 440] },   // Prometheus, Alien: Covenant, Alien: Romulus, Alien contra Predator, AVP 2
+                    { id: 91361, nombre: 'Halloween', peliculasExtra: [2082, 24150] },   // Halloween: El Origen (2007), Halloween II (2009)
                     { id: 2602, nombre: 'Scream' },
                     { id: 313086, nombre: 'El Conjuro' },
-                    { id: 17255, nombre: 'Resident Evil' },
+                    { id: -1, nombre: 'Annabelle', peliculas: [250546, 396422, 521029] },   // saga armada a mano (no depende de una colección de TMDb): Annabelle, Annabelle: Creation, Annabelle: Vuelve a casa
+                    { id: 17255, nombre: 'Resident Evil', peliculasExtra: [460458, 1423191] },   // Bienvenidos a Raccoon City (2021), Resident Evil (2026)
                     { id: 8945, nombre: 'Mad Max' },
                     { id: 1570, nombre: 'Duro de Matar' },
                     { id: 8580, nombre: 'Karate Kid' },
-                    { id: 8581, nombre: 'Pesadilla en la Calle Elm' },
+                    { id: 8581, nombre: 'Pesadilla en la Calle Elm', peliculasExtra: [6466, 23437] },   // Freddy contra Jason (TMDb la tiene en la colección de Viernes 13), Pesadilla en Elm Street: El origen (2010)
                     { id: 228446, nombre: 'Insidious' },
-                    { id: 2980, nombre: 'Cazafantasmas' },
+                    { id: 2980, nombre: 'Cazafantasmas', peliculasExtra: [43074] },   // Cazafantasmas (2016)
                     { id: 495527, nombre: 'Jumanji' },
-                    { id: 131635, nombre: 'Los Juegos del Hambre' },
+                    { id: 131635, nombre: 'Los Juegos del Hambre', peliculasExtra: [695721] },   // Balada de pájaros cantores y serpientes
                     { id: 8354, nombre: 'La Era de Hielo' },
-                    { id: 86066, nombre: 'Mi Villano Favorito' },
-                    { id: 14740, nombre: 'Madagascar' },
+                    { id: 86066, nombre: 'Mi Villano Favorito', peliculasExtra: [211672, 438148, 1315772] },   // Los Minions, Minions: El origen de Gru, Minions & Monsters
+                    { id: 14740, nombre: 'Madagascar', peliculasExtra: [270946] },   // Los pingüinos de Madagascar (2014)
                     { id: 8864, nombre: 'Destino Final' },
                     { id: 33514, nombre: 'Crepúsculo' },
                     { id: 52984, nombre: 'La Búsqueda' },
@@ -7035,7 +7055,9 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                         try {
                             const resultados = await Promise.all(BUSCADOR_SAGAS.map(async (s) => {
                                 try {
-                                    const res = await fetch(`${CONFIG.API_URL}/movies/collection/${s.id}`, {
+                                    // Las sagas armadas a mano (sin colección en TMDb) usan como portada el póster de su primera película.
+                                    const ruta = s.peliculas ? `/movies/${s.peliculas[0]}` : `/movies/collection/${s.id}`;
+                                    const res = await fetch(`${CONFIG.API_URL}${ruta}`, {
                                         headers: { 'Authorization': `Bearer ${token}` }
                                     });
                                     const data = await res.json();
@@ -7613,6 +7635,8 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                             const token = localStorage.getItem('token');
                             const params = new URLSearchParams({ provincia });
                             if (localidad) params.set('localidad', localidad);
+                            // "Cine argentino": solo las funciones de los Espacios INCAA de la zona.
+                            if (window._buscadorCarteleraModoDonde === 'argentino') params.set('cadena', 'Espacios INCAA');
                             const res = await fetch(`${CONFIG.API_URL}/cartelera/peliculas/${slug}/funciones-por-geografia?${params}`, {
                                 headers: { 'Authorization': `Bearer ${token}` }
                             });
@@ -7708,7 +7732,14 @@ window._buscadorCriterioSeleccionado = function(criterio) {
 
                           window._buscadorVolverANivel3CarteleraTitulo = function() {
                                document.getElementById('buscadorNivel3CarteleraFunciones').style.display = 'none';
-                               if (window._buscadorCarteleraModoDonde === 'pelicula') {
+                               if (window._buscadorCarteleraModoDonde === 'argentino') {
+                                   document.getElementById('buscadorNivel3CarteleraArgentino').style.display = 'block';
+                                   document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-recomendacion');
+                                   window._buscadorBurbujaArgentino('resultado');
+                                   return;
+                               }
+                               if (window._buscadorCarteleraModoDonde === 'pelicula' || window._buscadorCarteleraModoDonde === 'ahorro') {
+                                   window._buscadorAhorro = null;
                                    window._buscadorCarteleraAbrirProvinciaLocalidad();
                                    return;
                                }
@@ -7799,6 +7830,449 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                             return;
                         }
                         window._buscadorVolverANivel2Cartelera();
+                    };
+
+                    // ============================================================
+                    // Cartelera — "Cine modo ahorro"
+                    // ============================================================
+                    // Pide la zona con las mismas pantallas de "¿Dónde?" y
+                    // provincia/localidad que los otros atajos, y muestra las
+                    // funciones de esa zona de la más barata a la más cara, sin
+                    // importar cadena ni sucursal. Usa /cartelera/organizar-salida,
+                    // que ya trae los datos de precio de cada función (ver
+                    // js/cartelera-precio.js). Los cines sin precio quedan afuera.
+                    // El día se elige con chips: cada día se pide al tocarlo y queda
+                    // guardado mientras la pantalla siga abierta.
+                    var BUSCADOR_AHORRO_DIAS = 7;
+                    var BUSCADOR_AHORRO_MAX_HORARIOS = 6;
+
+                    window._buscadorAbrirCarteleraAhorro = function() {
+                        window._buscadorCarteleraModoDonde = 'ahorro';
+                        document.getElementById('buscadorCarteleraDondeSubtitulo').textContent = '¿Dónde querés ver cine?';
+                        document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
+                        document.getElementById('buscadorNivel3CarteleraDonde').style.display = 'block';
+                        window._buscadorBurbujaAhorro('donde');
+                    };
+
+                    window._buscadorBurbujaAhorro = function(paso) {
+                        const n = _buscadorPrimerNombre();
+                        const c = n ? `, ${n}` : '';
+                        const mensajes = {
+                            donde: `Busquemos el cine más barato${c}. Decime dónde estás.`,
+                            buscando: `Buscando las funciones más baratas${c}...`,
+                            resultado: `Acá tenés las funciones de tu zona${c}, de la más barata a la más cara.`,
+                            sinPrecios: `Todavía no tenemos precios de los cines de esa zona${c}.`,
+                            sinFunciones: `No encontré funciones con precio para ese día${c}. Probá con otro.`,
+                            error: `No pude traer las funciones${c}. Intentá de nuevo.`
+                        };
+                        if (mensajes[paso]) window._buscadorSetBurbuja(mensajes[paso]);
+                    };
+
+                    function _buscadorAhorroEsc(texto) {
+                        return String(texto == null ? '' : texto).replace(/[&<>"']/g, c =>
+                            ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+                    }
+
+                    // Hoy y los 6 días siguientes, en hora argentina, como "AAAA-MM-DD".
+                    function _buscadorAhorroDias() {
+                        const hoy = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
+                        const base = new Date(hoy + 'T12:00:00');
+                        const dias = [];
+                        for (let i = 0; i < BUSCADOR_AHORRO_DIAS; i++) {
+                            const d = new Date(base);
+                            d.setDate(base.getDate() + i);
+                            const iso = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+                            const etiqueta = i === 0 ? 'Hoy'
+                                : i === 1 ? 'Mañana'
+                                : d.toLocaleDateString('es-AR', { weekday: 'short' }).replace('.', '') + ' ' + d.getDate();
+                            dias.push({ iso, etiqueta });
+                        }
+                        return dias;
+                    }
+
+                    function _buscadorAhorroMinutosAhora() {
+                        const partes = new Date().toLocaleTimeString('en-GB', {
+                            timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit', hour12: false
+                        }).split(':').map(Number);
+                        return (partes[0] % 24) * 60 + partes[1];
+                    }
+
+                    function _buscadorAhorroHoraAMinutos(h) {
+                        const partes = String(h || '').split(':').map(Number);
+                        return (partes[0] || 0) * 60 + (partes[1] || 0);
+                    }
+
+                    // Lo que paga de verdad una persona por una entrada ese día: el
+                    // precio de referencia ya es el del día (y en un 2x1, el de cada
+                    // entrada); si comprando online sale menos, cuenta ese.
+                    function _buscadorAhorroPrecioOrden(f) {
+                        const ref = f.precioReferencia;
+                        return (f.precioOnline != null && f.precioOnline < ref) ? f.precioOnline : ref;
+                    }
+
+                    function _buscadorAhorroInyectarEstilos() {
+                        if (document.getElementById('buscadorAhorroEstilos')) return;
+                        const estilo = document.createElement('style');
+                        estilo.id = 'buscadorAhorroEstilos';
+                        estilo.textContent = `
+                            .ahorro-dias { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px 0 12px; }
+                            .ahorro-dias::-webkit-scrollbar { display: none; }
+                            .ahorro-dia-chip { flex-shrink: 0; border: 1.5px solid #e0dcd2; background: #fff; color: #16264d; border-radius: 999px; padding: 7px 14px; font-family: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
+                            .ahorro-dia-chip.activo { background: #16264d; border-color: #16264d; color: #fff; }
+                            .ahorro-encabezado { font-size: 0.85rem; color: #555; margin: 0 0 0.8rem; }
+                            .ahorro-encabezado strong { color: #c4321f; }
+                            .ahorro-aviso { color: #999; font-size: 0.78rem; margin: 0 0 0.8rem; }
+                            .ahorro-card { display: flex; gap: 12px; background: #fff; border-radius: 16px; padding: 12px; margin-bottom: 10px; box-shadow: 0 10px 22px -8px rgba(22,38,77,0.18), 0 2px 5px rgba(196,50,31,0.08); }
+                            .ahorro-poster { width: 84px; height: 124px; align-self: center; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: #eee; }
+                            .ahorro-info { flex: 1; min-width: 0; }
+                            .ahorro-pelicula { font-size: 0.9rem; font-weight: 700; color: #16151a; line-height: 1.25; }
+                            .ahorro-cine { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: #6b6b6b; margin-top: 3px; }
+                            .ahorro-cine img { width: 18px; height: 18px; object-fit: contain; border-radius: 4px; }
+                            .ahorro-formato { font-size: 0.72rem; color: #8a8478; margin-top: 2px; }
+                            .ahorro-horarios { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+                            .ahorro-horario { font-size: 0.72rem; font-weight: 700; color: #16264d; background: rgba(22,38,77,0.08); border-radius: 8px; padding: 3px 8px; }
+                            .ahorro-horario.ahorro-mas { color: #8a8478; background: rgba(22,38,77,0.04); }
+                            .ahorro-precio { margin-top: 8px; }
+                            .ahorro-nota { font-size: 0.75rem; color: #8a8478; margin: 0.4rem 0 0; text-align: center; }
+                        `;
+                        document.head.appendChild(estilo);
+                    }
+
+                    window._buscadorCarteleraMostrarAhorro = function(provincia, localidad) {
+                        window._buscadorAhorro = { provincia, localidad, cache: {}, dia: null };
+                        _buscadorAhorroInyectarEstilos();
+
+                        document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
+                        document.getElementById('buscadorNivel3CarteleraFunciones').style.display = 'block';
+                        document.getElementById('buscadorCarteleraFuncionesTitulo').textContent = 'Cine modo ahorro';
+
+                        const dias = _buscadorAhorroDias();
+                        document.getElementById('buscadorCarteleraFuncionesLista').innerHTML = `
+                            <div class="ahorro-dias" id="buscadorAhorroDias">
+                                ${dias.map(d => `<button type="button" class="ahorro-dia-chip" data-dia="${d.iso}" onclick="window._buscadorAhorroElegirDia('${d.iso}')">${d.etiqueta}</button>`).join('')}
+                            </div>
+                            <div id="buscadorAhorroResultado"></div>
+                        `;
+                        window._buscadorAhorroElegirDia(dias[0].iso);
+                    };
+
+                    window._buscadorAhorroElegirDia = async function(dia) {
+                        const estado = window._buscadorAhorro;
+                        if (!estado) return;
+                        estado.dia = dia;
+                        document.querySelectorAll('#buscadorAhorroDias .ahorro-dia-chip').forEach(chip => {
+                            chip.classList.toggle('activo', chip.dataset.dia === dia);
+                        });
+                        const cont = document.getElementById('buscadorAhorroResultado');
+                        if (!cont) return;
+
+                        let funciones = estado.cache[dia];
+                        if (!funciones) {
+                            cont.innerHTML = `
+                                <div class="buscador-pensando">
+                                    <img src="assets/images/icon-512.png" alt="Cinemarketer pensando">
+                                    <span>Buscando las funciones más baratas...</span>
+                                </div>
+                            `;
+                            window._buscadorBurbujaAhorro('buscando');
+                            try {
+                                const params = new URLSearchParams({ provincia: estado.provincia, fecha: dia });
+                                if (estado.localidad) params.set('localidad', estado.localidad);
+                                const token = localStorage.getItem('token');
+                                const res = await fetch(`${CONFIG.API_URL}/cartelera/organizar-salida?${params}`, {
+                                    headers: { 'Authorization': `Bearer ${token}` }
+                                });
+                                if (!res.ok) throw new Error('status ' + res.status);
+                                funciones = await res.json();
+                                estado.cache[dia] = funciones;
+                            } catch (e) {
+                                if (window._buscadorAhorro === estado && estado.dia === dia) {
+                                    cont.innerHTML = '<div class="buscador-predictor-vacio">No pudimos traer las funciones. Intentá de nuevo.</div>';
+                                    window._buscadorBurbujaAhorro('error');
+                                }
+                                return;
+                            }
+                            // Si mientras llegaba la respuesta se eligió otro día (o se
+                            // salió de la pantalla), no se pisa lo que se está mostrando.
+                            if (window._buscadorAhorro !== estado || estado.dia !== dia) return;
+                        }
+                        _buscadorAhorroRender(cont, funciones, dia, estado);
+                    };
+
+                    function _buscadorAhorroRender(cont, funciones, dia, estado) {
+                        const esHoy = dia === _buscadorAhorroDias()[0].iso;
+                        const ahora = _buscadorAhorroMinutosAhora();
+                        // De hoy, solo las que todavía no empezaron.
+                        const vigentes = esHoy
+                            ? funciones.filter(f => _buscadorAhorroHoraAMinutos(f.horario) >= ahora)
+                            : funciones;
+                        const conPrecio = vigentes.filter(f => f.precioReferencia != null);
+
+                        if (!conPrecio.length) {
+                            let mensaje;
+                            if (!funciones.length) {
+                                mensaje = 'No encontramos funciones para ese día en la zona elegida. Probá con otro día.';
+                                window._buscadorBurbujaAhorro('sinFunciones');
+                            } else if (!vigentes.length) {
+                                mensaje = 'Ya no quedan funciones para hoy en la zona elegida. Probá con otro día.';
+                                window._buscadorBurbujaAhorro('sinFunciones');
+                            } else {
+                                mensaje = 'Todavía no tenemos precios de los cines de esta zona. Probá con otra zona o con otro día.';
+                                window._buscadorBurbujaAhorro('sinPrecios');
+                            }
+                            cont.innerHTML = `<div class="buscador-predictor-vacio">${mensaje}</div>`;
+                            return;
+                        }
+
+                        // Una tarjeta por película + cine + formato + precio: el mismo
+                        // precio se repite en todos los horarios de esa combinación.
+                        const grupos = new Map();
+                        conPrecio.forEach(f => {
+                            const precio = _buscadorAhorroPrecioOrden(f);
+                            const clave = [f.peliculaTitulo, f.cineNombre, f.formato || '', f.idioma || '', precio, f.promocion || '', !!f.tarifaReducida].join('\u0000');
+                            if (!grupos.has(clave)) grupos.set(clave, { precio, funciones: [] });
+                            grupos.get(clave).funciones.push(f);
+                        });
+                        const ordenados = [...grupos.values()].map(g => {
+                            g.funciones.sort((a, b) => _buscadorAhorroHoraAMinutos(a.horario) - _buscadorAhorroHoraAMinutos(b.horario));
+                            g.primera = _buscadorAhorroHoraAMinutos(g.funciones[0].horario);
+                            return g;
+                        }).sort((a, b) => (a.precio - b.precio) || (a.primera - b.primera));
+
+                        // Cines de la zona que ese día no informan ningún precio.
+                        const cinesConPrecio = new Set(conPrecio.map(f => f.cineNombre));
+                        const cinesSinPrecio = new Set(vigentes.filter(f => !cinesConPrecio.has(f.cineNombre)).map(f => f.cineNombre)).size;
+
+                        const nombreZona = (PROVINCIAS_CARTELERA.find(([slug]) => slug === estado.provincia) || [])[1] || 'la provincia';
+                        const avisoZona = funciones[0] && funciones[0].zonaAmpliada
+                            ? `<p class="ahorro-aviso">No encontramos funciones en ${_buscadorAhorroEsc(estado.localidad)} para ese día. Te mostramos las de ${_buscadorAhorroEsc(nombreZona)}.</p>`
+                            : '';
+                        const encabezado = `<p class="ahorro-encabezado">Desde <strong>${CarteleraPrecio.monto(ordenados[0].precio)}</strong> por entrada en tu zona.</p>`;
+
+                        const tarjetas = ordenados.map(g => {
+                            const f = g.funciones[0];
+                            const logo = window._buscadorLogoParaCine ? window._buscadorLogoParaCine(f.cineNombre) : null;
+                            const visibles = g.funciones.length <= BUSCADOR_AHORRO_MAX_HORARIOS + 1
+                                ? g.funciones : g.funciones.slice(0, BUSCADOR_AHORRO_MAX_HORARIOS);
+                            const ocultas = g.funciones.length - visibles.length;
+                            const horarios = visibles.map(x => `<span class="ahorro-horario">${CarteleraPrecio.hora(x.horario)}</span>`).join('')
+                                + (ocultas > 0 ? `<span class="ahorro-horario ahorro-mas">+${ocultas}</span>` : '');
+                            const formato = [f.formato, f.idioma].filter(Boolean).map(_buscadorAhorroEsc).join(' · ');
+                            return `
+                                <div class="ahorro-card">
+                                    ${f.poster ? `<img src="${_buscadorAhorroEsc(f.poster)}" alt="${_buscadorAhorroEsc(f.peliculaTitulo)}" class="ahorro-poster" loading="lazy">` : ''}
+                                    <div class="ahorro-info">
+                                        <div class="ahorro-pelicula">${_buscadorAhorroEsc(f.peliculaTitulo)}</div>
+                                        <div class="ahorro-cine">${logo ? `<img src="${logo}" alt="">` : ''}<span>${_buscadorAhorroEsc(f.cineNombre)}</span></div>
+                                        ${formato ? `<div class="ahorro-formato">${formato}</div>` : ''}
+                                        <div class="ahorro-horarios">${horarios}</div>
+                                        <div class="ahorro-precio">${CarteleraPrecio.celda(f)}</div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+
+                        const nota = cinesSinPrecio > 0
+                            ? `<p class="ahorro-nota">${cinesSinPrecio === 1 ? '1 cine de la zona no informa precio y no aparece acá.' : cinesSinPrecio + ' cines de la zona no informan precio y no aparecen acá.'}</p>`
+                            : '';
+
+                        cont.innerHTML = avisoZona + encabezado + tarjetas + nota;
+                        window._buscadorBurbujaAhorro('resultado');
+                    }
+
+                    // ============================================================
+                    // Cartelera — "Cine argentino" (por ahora, Espacios INCAA)
+                    // ============================================================
+                    // Zona primero (mismas pantallas que Modo ahorro), después las
+                    // películas que se dan en los Espacios INCAA de esa zona, en el
+                    // mismo carrusel que "¿Alguna recomendación?", y al elegir una,
+                    // sus funciones solo en esas salas, con el filtro de días de
+                    // siempre (pantalla compartida con "Ya sé qué quiero ver").
+                    var BUSCADOR_ARGENTINO_LARGO_SINOPSIS = 260;
+
+                    window._buscadorAbrirCarteleraArgentino = function() {
+                        window._buscadorCarteleraModoDonde = 'argentino';
+                        document.getElementById('buscadorCarteleraDondeSubtitulo').textContent = '¿Dónde querés ver cine argentino?';
+                        document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
+                        document.getElementById('buscadorNivel3CarteleraDonde').style.display = 'block';
+                        window._buscadorBurbujaArgentino('donde');
+                    };
+
+                    window._buscadorBurbujaArgentino = function(paso) {
+                        const n = _buscadorPrimerNombre();
+                        const c = n ? `, ${n}` : '';
+                        const mensajes = {
+                            donde: `Busquemos cine argentino en los Espacios INCAA${c}. Decime dónde estás.`,
+                            buscando: `Buscando qué se da en los Espacios INCAA de tu zona${c}...`,
+                            resultado: `Estas son las películas argentinas en los Espacios INCAA de tu zona${c}. Elegí una y te muestro las funciones.`,
+                            vacio: `Todavía no hay películas argentinas en los Espacios INCAA de esa zona${c}.`,
+                            error: `No pude traer las películas${c}. Intentá de nuevo.`
+                        };
+                        if (mensajes[paso]) window._buscadorSetBurbuja(mensajes[paso]);
+                    };
+
+                    function _buscadorArgentinoSinopsis(texto) {
+                        if (!texto) return 'Sin sinopsis disponible.';
+                        const limpio = String(texto).trim();
+                        return limpio.length > BUSCADOR_ARGENTINO_LARGO_SINOPSIS
+                            ? limpio.slice(0, BUSCADOR_ARGENTINO_LARGO_SINOPSIS).replace(/\s+\S*$/, '') + '…'
+                            : limpio;
+                    }
+
+                    window._buscadorCarteleraMostrarArgentino = async function(provincia, localidad) {
+                        const zona = { provincia, localidad };
+                        window._buscadorArgentinoZona = zona;
+                        window._buscadorArgentinoPeliculas = [];
+
+                        document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
+                        document.getElementById('buscadorNivel3CarteleraArgentino').style.display = 'block';
+                        document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-recomendacion', 'buscador-sheet-alto');
+
+                        // "¿Alguna recomendación?" usa los mismos ids de carrusel y puntitos:
+                        // se vacía su lista para que no haya dos carruseles con el mismo id.
+                        const listaReco = document.getElementById('buscadorCarteleraRecomendacionLista');
+                        if (listaReco) listaReco.innerHTML = '';
+
+                        const lista = document.getElementById('buscadorCarteleraArgentinoLista');
+                        lista.innerHTML = `
+                            <div class="buscador-pensando">
+                                <img src="assets/images/icon-512.png" alt="Cinemarketer pensando">
+                                <span>Buscando películas en los Espacios INCAA...</span>
+                            </div>
+                        `;
+                        window._buscadorBurbujaArgentino('buscando');
+
+                        let data;
+                        try {
+                            const params = new URLSearchParams({ provincia, soloArgentinas: 'true' });
+                            if (localidad) params.set('localidad', localidad);
+                            const token = localStorage.getItem('token');
+                            const res = await fetch(`${CONFIG.API_URL}/cartelera/cadenas/${encodeURIComponent('Espacios INCAA')}/peliculas?${params}`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (!res.ok) throw new Error('status ' + res.status);
+                            data = await res.json();
+                        } catch (e) {
+                            if (window._buscadorArgentinoZona !== zona) return;
+                            lista.innerHTML = '<div class="buscador-predictor-vacio">No pudimos traer las películas. Intentá de nuevo.</div>';
+                            window._buscadorBurbujaArgentino('error');
+                            return;
+                        }
+                        // Si mientras llegaba la respuesta se volvió atrás, no se pisa nada.
+                        if (window._buscadorArgentinoZona !== zona) return;
+
+                        const peliculas = (data && data.peliculas) || [];
+                        if (!peliculas.length) {
+                            lista.innerHTML = '<div class="buscador-predictor-vacio">Todavía no hay películas argentinas en los Espacios INCAA de esta zona. Probá con otra provincia o localidad.</div>';
+                            window._buscadorBurbujaArgentino('vacio');
+                            return;
+                        }
+                        window._buscadorArgentinoPeliculas = peliculas;
+
+                        const nombreZona = (PROVINCIAS_CARTELERA.find(([slug]) => slug === provincia) || [])[1] || 'la provincia';
+                        const aviso = data.zonaAmpliada
+                            ? `<p class="buscador-predictor-vacio" style="margin:0 0 0.6rem; text-align:left;">No hay películas argentinas en los Espacios INCAA de ${_buscadorAhorroEsc(localidad)}. Te mostramos las de ${_buscadorAhorroEsc(nombreZona)}.</p>`
+                            : '';
+
+                        lista.innerHTML = aviso + `
+                            <div class="buscador-recomendacion-carrusel" id="buscadorRecomendacionCarrusel">
+                                ${peliculas.map((p, i) => `
+                                    <div class="buscador-recomendacion-slide">
+                                        <p class="buscador-recomendacion-numero">${i + 1} de ${peliculas.length}</p>
+                                        <div class="buscador-recomendacion-card" onclick="window._buscadorArgentinoElegirPelicula(${i})">
+                                            <div class="buscador-recomendacion-poster">
+                                                <img src="${_buscadorAhorroEsc(p.poster || '')}" alt="${_buscadorAhorroEsc(p.titulo)}" loading="lazy">
+                                            </div>
+                                            <div class="buscador-recomendacion-info">
+                                                <h4>${_buscadorAhorroEsc(p.titulo)}</h4>
+                                                <div class="buscador-recomendacion-generos">${p.salas === 1 ? 'En 1 sala INCAA' : `En ${p.salas} salas INCAA`}${(p.generos || []).length ? ' · ' + p.generos.map(_buscadorAhorroEsc).join(' · ') : ''}</div>
+                                                <p class="buscador-recomendacion-mensaje">${_buscadorAhorroEsc(_buscadorArgentinoSinopsis(p.sinopsis))}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="buscador-recomendacion-dots" id="buscadorRecomendacionDots"></div>
+                        `;
+                        window._buscadorRecomendacionInicializarDots(peliculas.length);
+                        window._buscadorBurbujaArgentino('resultado');
+                    };
+
+                    window._buscadorArgentinoElegirPelicula = function(indice) {
+                        const p = (window._buscadorArgentinoPeliculas || [])[indice];
+                        const zona = window._buscadorArgentinoZona;
+                        if (!p || !zona) return;
+                        window._buscadorPeliculaElegida = { slug: p.slug, nombre: p.titulo };
+                        document.getElementById('buscadorModalSheet').classList.remove('buscador-sheet-recomendacion');
+                        window._buscadorCarteleraMostrarFuncionesDePeliculaPorGeografia(zona.provincia, zona.localidad);
+                    };
+
+                    // "Volver" desde las películas: a provincia y localidad, con lo elegido.
+                    window._buscadorVolverDesdeArgentino = function() {
+                        window._buscadorArgentinoZona = null;
+                        document.getElementById('buscadorModalSheet').classList.remove('buscador-sheet-recomendacion');
+                        document.getElementById('buscadorNivel3CarteleraArgentino').style.display = 'none';
+                        window._buscadorCarteleraAbrirProvinciaLocalidad();
+                    };
+
+                    // ============================================================
+                    // Cartelera — "Sorteos"
+                    // ============================================================
+                    // Las cadenas con sorteos vigentes que se cargan en el admin
+                    // (Integraciones › Sorteos), con el mismo estilo de "Por cadena de
+                    // cine". Al tocar una se abre su sitio oficial en otra pestaña, a
+                    // través del back, que cuenta el clic antes de redirigir.
+                    window._buscadorAbrirCarteleraSorteos = async function() {
+                        document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
+                        document.getElementById('buscadorNivel3CarteleraSorteos').style.display = 'block';
+                        document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-ancho', 'buscador-sheet-alto');
+
+                        const n = _buscadorPrimerNombre();
+                        window._buscadorSetBurbuja(n
+                            ? `Estos son los sorteos que tienen hoy los cines, ${n}. Elegí uno y te llevo.`
+                            : 'Estos son los sorteos que tienen hoy los cines. Elegí uno y te llevo.');
+
+                        buscadorInyectarEstilosCadenas();
+                        const grid = document.getElementById('buscadorSorteosGrid');
+                        grid.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Cargando sorteos...</div>';
+
+                        let enlaces;
+                        try {
+                            const res = await fetch(`${CONFIG.API_URL}/public/integraciones/enlaces?tipo=SORTEO`);
+                            if (!res.ok) throw new Error('status ' + res.status);
+                            enlaces = await res.json();
+                        } catch (e) {
+                            grid.innerHTML = '<div class="buscador-predictor-vacio">No pudimos cargar los sorteos. Intentá de nuevo.</div>';
+                            return;
+                        }
+                        if (document.getElementById('buscadorNivel3CarteleraSorteos').style.display !== 'block') return;
+
+                        if (!enlaces.length) {
+                            grid.innerHTML = '<div class="buscador-predictor-vacio">Por ahora no hay sorteos de cines. Volvé pronto.</div>';
+                            return;
+                        }
+
+                        grid.innerHTML = enlaces.map(e => {
+                            const nombre = window._buscadorNombreCadena(e.cadena);
+                            const logo = window._buscadorLogoParaCadena(e.cadena);
+                            const icono = logo
+                                ? `<img src="${_buscadorAhorroEsc(logo)}" alt="${_buscadorAhorroEsc(nombre)}">`
+                                : `<i class="fas fa-gift buscador-cine-sinlogo"></i>`;
+                            const titulo = e.titulo || `Sorteos de ${nombre}`;
+                            return `
+                                <div class="buscador-cine-item" role="link" tabindex="0" title="${_buscadorAhorroEsc(titulo)}"
+                                     onclick="window._buscadorAbrirSorteo(${Number(e.id)})"
+                                     onkeydown="if (event.key === 'Enter') window._buscadorAbrirSorteo(${Number(e.id)})">
+                                    <div class="buscador-cine-logo-wrap">${icono}</div>
+                                    <span>${_buscadorAhorroEsc(nombre)}</span>
+                                </div>
+                            `;
+                        }).join('');
+                    };
+
+                    // Se abre en otra pestaña: Cinemarketer queda abierto atrás.
+                    window._buscadorAbrirSorteo = function(id) {
+                        window.open(`${CONFIG.API_URL}/public/integraciones/ir/${encodeURIComponent(id)}`, '_blank', 'noopener');
                     };
 
                            // Muestra la pantalla de resultado con el estado de
@@ -7984,6 +8458,8 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                         document.getElementById('buscadorNivel3CarteleraProvinciaLocalidad').style.display = 'none';
                         document.getElementById('buscadorNivel3CarteleraDonde').style.display = 'block';
                         if (window._buscadorCarteleraModoDonde === 'pelicula') window._buscadorBurbujaCarteleraDondePelicula();
+                        else if (window._buscadorCarteleraModoDonde === 'ahorro') window._buscadorBurbujaAhorro('donde');
+                        else if (window._buscadorCarteleraModoDonde === 'argentino') window._buscadorBurbujaArgentino('donde');
                         else window._buscadorBurbujaSalida('donde');
                     };
 
@@ -8024,6 +8500,16 @@ window._buscadorCriterioSeleccionado = function(criterio) {
 
                         if (window._buscadorCarteleraModoDonde === 'pelicula') {
                             window._buscadorCarteleraMostrarFuncionesDePeliculaPorGeografia(provincia, localidad);
+                            return;
+                        }
+
+                        if (window._buscadorCarteleraModoDonde === 'ahorro') {
+                            window._buscadorCarteleraMostrarAhorro(provincia, localidad);
+                            return;
+                        }
+
+                        if (window._buscadorCarteleraModoDonde === 'argentino') {
+                            window._buscadorCarteleraMostrarArgentino(provincia, localidad);
                             return;
                         }
 
@@ -8528,23 +9014,30 @@ window._buscadorCriterioSeleccionado = function(criterio) {
 
                     try {
                         const token = localStorage.getItem('token');
-                        const res = await fetch(`${CONFIG.API_URL}/movies/collection/${collectionId}`, {
-                            headers: { 'Authorization': `Bearer ${token}` }
-                        });
-                        if (!res.ok) throw new Error(`Error ${res.status}`);
-                        const data = await res.json();
+                        const saga = BUSCADOR_SAGAS.find(s => s.id === collectionId);
+                        // Saga armada a mano (Annabelle, Wolverine): no existe como colección en TMDb, se arma con su lista de películas.
+                        const armadaAMano = !!(saga && saga.peliculas);
+                        let partes = [];
+                        if (!armadaAMano) {
+                            const res = await fetch(`${CONFIG.API_URL}/movies/collection/${collectionId}`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (!res.ok) throw new Error(`Error ${res.status}`);
+                            const data = await res.json();
+                            partes = [...(data.parts || [])];
+                        }
 
                         // Películas de la saga que TMDb no incluye en la colección (una película solo puede estar en una):
                         // se piden una por una y se suman. Si alguna falla, la saga se muestra igual con el resto.
-                        const partes = [...(data.parts || [])];
-                        const saga = BUSCADOR_SAGAS.find(s => s.id === collectionId);
-                        const extras = await Promise.all(((saga && saga.peliculasExtra) || []).map(async (idPelicula) => {
+                        const idsExtra = armadaAMano ? saga.peliculas : ((saga && saga.peliculasExtra) || []);
+                        const extras = await Promise.all(idsExtra.map(async (idPelicula) => {
                             try {
                                 const r = await fetch(`${CONFIG.API_URL}/movies/${idPelicula}`, { headers: { 'Authorization': `Bearer ${token}` } });
                                 return r.ok ? await r.json() : null;
                             } catch (e) { return null; }
                         }));
                         extras.filter(Boolean).forEach(p => { if (!partes.some(x => x.id === p.id)) partes.push(p); });
+                        if (armadaAMano && partes.length === 0) throw new Error('No se pudo cargar ninguna película de la saga');
 
                         // Solo con poster y fecha real, ordenadas cronológicamente
                         // (TMDb no las devuelve necesariamente en ese orden).

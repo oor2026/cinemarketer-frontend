@@ -110,6 +110,8 @@ const adminUI = {
             adminEstadisticas.init();
         } else if (sectionName === 'comercial' && typeof adminComercial !== 'undefined') {
             adminComercial.cargar();
+        } else if (sectionName === 'integraciones' && typeof adminIntegraciones !== 'undefined') {
+            adminIntegraciones.init();
         }
     },
 

@@ -7,7 +7,13 @@
         .cartelera-cerca-seccion { display: none; }
         @media (max-width: 768px) {
             #carteleraContainer { background: #ffffff; padding: 0 1.1rem 2rem; min-height: 100vh; box-sizing: border-box; }
-            .cartelera-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.75rem; }
+            .cartelera-grid { display: block; margin-bottom: 1.75rem; }
+            .cartelera-accesos-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 14px 0 22px; margin: -14px 0 -22px; }
+            .cartelera-accesos-track::-webkit-scrollbar { display: none; }
+            .cartelera-accesos-slide { flex: 0 0 100%; scroll-snap-align: start; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+            .cartelera-accesos-dots { display: flex; justify-content: center; gap: 6px; margin-top: 10px; }
+            .cartelera-accesos-dots span { width: 6px; height: 6px; border-radius: 50%; background: #d9d9d2; display: block; }
+            .cartelera-accesos-dots span.activo { background: #e50914; }
             .cartelera-card { position: relative; overflow: hidden; box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px; background: #fff; border: none; border-radius: 18px; cursor: pointer; font-family: inherit; text-align: left; box-shadow: 0 10px 26px -6px rgba(20,20,20,0.16), 0 2px 5px rgba(20,20,20,0.07); }
             .cartelera-decor { position: absolute; right: -8px; bottom: -4px; font-size: 3.4rem; opacity: 0.10; pointer-events: none; }
             .cartelera-decor.tono-rojo { color: #c4321f; }
@@ -44,42 +50,90 @@
     </div>
 
     <div class="cartelera-grid">
-        <button type="button" class="cartelera-card" onclick="window.accesoRapidoCartelera('ya-se-que-ver')">
-            <i class="fas fa-clapperboard cartelera-decor tono-rojo"></i>
-            <i class="fas fa-chevron-right cartelera-flecha"></i>
-            <div class="cartelera-icono tono-rojo"><i class="fas fa-ticket"></i></div>
-            <div>
-                <div class="cartelera-card-titulo">Ya sé qué quiero ver</div>
-                <div class="cartelera-card-sub">Elegí el título y te decimos cuándo y dónde</div>
+        <div class="cartelera-accesos-track" id="carteleraAccesosTrack">
+            <!-- Slide 1 -->
+            <div class="cartelera-accesos-slide">
+                <button type="button" class="cartelera-card" onclick="window.accesoRapidoCartelera('ya-se-que-ver')">
+                    <i class="fas fa-clapperboard cartelera-decor tono-rojo"></i>
+                    <i class="fas fa-chevron-right cartelera-flecha"></i>
+                    <div class="cartelera-icono tono-rojo"><i class="fas fa-ticket"></i></div>
+                    <div>
+                        <div class="cartelera-card-titulo">Ya sé qué quiero ver</div>
+                        <div class="cartelera-card-sub">Elegí el título y te decimos cuándo y dónde</div>
+                    </div>
+                </button>
+                <button type="button" class="cartelera-card" onclick="window.accesoRapidoCartelera('recomendacion-cines')">
+                    <i class="fas fa-heart cartelera-decor tono-marino"></i>
+                    <i class="fas fa-chevron-right cartelera-flecha"></i>
+                    <div class="cartelera-icono tono-marino"><i class="fas fa-compass"></i></div>
+                    <div>
+                        <div class="cartelera-card-titulo">¿Alguna recomendación en cines?</div>
+                        <div class="cartelera-card-sub">Según tu espíritu cinéfilo</div>
+                    </div>
+                </button>
+                <button type="button" class="cartelera-card" onclick="window.accesoRapidoCartelera('organizar-salida')">
+                    <i class="fas fa-calendar-days cartelera-decor tono-marino"></i>
+                    <i class="fas fa-chevron-right cartelera-flecha"></i>
+                    <div class="cartelera-icono tono-marino"><i class="fas fa-user-friends"></i></div>
+                    <div>
+                        <div class="cartelera-card-titulo">Organizar una salida</div>
+                        <div class="cartelera-card-sub">Según dónde, cuándo y cuánto $</div>
+                    </div>
+                </button>
+                <button type="button" class="cartelera-card" onclick="window.accesoRapidoCartelera('promos-bancos')">
+                    <i class="fas fa-building-columns cartelera-decor tono-rojo"></i>
+                    <i class="fas fa-chevron-right cartelera-flecha"></i>
+                    <div class="cartelera-icono tono-rojo"><i class="fas fa-credit-card"></i></div>
+                    <div>
+                        <div class="cartelera-card-titulo">Promos y bancos</div>
+                        <div class="cartelera-card-sub">Descuentos de bancos y billeteras en cada cine</div>
+                    </div>
+                </button>
             </div>
-        </button>
-        <button type="button" class="cartelera-card" onclick="window.accesoRapidoCartelera('recomendacion-cines')">
-            <i class="fas fa-heart cartelera-decor tono-marino"></i>
-            <i class="fas fa-chevron-right cartelera-flecha"></i>
-            <div class="cartelera-icono tono-marino"><i class="fas fa-compass"></i></div>
-            <div>
-                <div class="cartelera-card-titulo">¿Alguna recomendación en cines?</div>
-                <div class="cartelera-card-sub">Según tu espíritu cinéfilo</div>
+            <!-- Slide 2 -->
+            <div class="cartelera-accesos-slide">
+                <button type="button" class="cartelera-card" onclick="window.accesoRapidoCartelera('por-cadena')">
+                    <i class="fas fa-building cartelera-decor tono-rojo"></i>
+                    <i class="fas fa-chevron-right cartelera-flecha"></i>
+                    <div class="cartelera-icono tono-rojo"><i class="fas fa-film"></i></div>
+                    <div>
+                        <div class="cartelera-card-titulo">Por cadena de cine</div>
+                        <div class="cartelera-card-sub">Cinemark, Cinépolis, Hoyts y más</div>
+                    </div>
+                </button>
+                <button type="button" class="cartelera-card" onclick="window.accesoRapidoCartelera('cine-argentino')">
+                    <i class="fas fa-sun cartelera-decor tono-marino"></i>
+                    <i class="fas fa-chevron-right cartelera-flecha"></i>
+                    <div class="cartelera-icono tono-marino"><i class="fas fa-video"></i></div>
+                    <div>
+                        <div class="cartelera-card-titulo">Cine argentino</div>
+                        <div class="cartelera-card-sub">Funciones en Espacios INCAA y cines independientes</div>
+                    </div>
+                </button>
+                <button type="button" class="cartelera-card" onclick="window.accesoRapidoCartelera('modo-ahorro')">
+                    <i class="fas fa-coins cartelera-decor tono-marino"></i>
+                    <i class="fas fa-chevron-right cartelera-flecha"></i>
+                    <div class="cartelera-icono tono-marino"><i class="fas fa-piggy-bank"></i></div>
+                    <div>
+                        <div class="cartelera-card-titulo">Cine modo ahorro</div>
+                        <div class="cartelera-card-sub">Las funciones más baratas cerca tuyo</div>
+                    </div>
+                </button>
+                <button type="button" class="cartelera-card" onclick="window.accesoRapidoCartelera('sorteos')">
+                    <i class="fas fa-star cartelera-decor tono-rojo"></i>
+                    <i class="fas fa-chevron-right cartelera-flecha"></i>
+                    <div class="cartelera-icono tono-rojo"><i class="fas fa-gift"></i></div>
+                    <div>
+                        <div class="cartelera-card-titulo">Sorteos</div>
+                        <div class="cartelera-card-sub">Los sorteos que ofrecen los cines, en un solo lugar</div>
+                    </div>
+                </button>
             </div>
-        </button>
-        <button type="button" class="cartelera-card" onclick="window.accesoRapidoCartelera('organizar-salida')">
-            <i class="fas fa-calendar-days cartelera-decor tono-marino"></i>
-            <i class="fas fa-chevron-right cartelera-flecha"></i>
-            <div class="cartelera-icono tono-marino"><i class="fas fa-user-friends"></i></div>
-            <div>
-                <div class="cartelera-card-titulo">Organizar una salida</div>
-                <div class="cartelera-card-sub">Según dónde, cuándo y cuánto $</div>
-            </div>
-        </button>
-        <button type="button" class="cartelera-card" onclick="window.accesoRapidoCartelera('por-cadena')">
-            <i class="fas fa-building cartelera-decor tono-rojo"></i>
-            <i class="fas fa-chevron-right cartelera-flecha"></i>
-            <div class="cartelera-icono tono-rojo"><i class="fas fa-film"></i></div>
-            <div>
-                <div class="cartelera-card-titulo">Por cadena de cine</div>
-                <div class="cartelera-card-sub">Cinemark, Cinépolis, Hoyts y más</div>
-            </div>
-        </button>
+        </div>
+        <div class="cartelera-accesos-dots" id="carteleraAccesosDots">
+            <span class="activo"></span>
+            <span></span>
+        </div>
     </div>
 
     <div class="cartelera-cerca-seccion">
