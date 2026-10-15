@@ -114,6 +114,10 @@
                 <i class="fas fa-thumbtack"></i>
                 <span>Gestión Feed</span>
             </li>
+            <li class="sidebar-item" onclick="adminUI.switchSection('integraciones', this)">
+                <i class="fas fa-plug"></i>
+                <span>Integraciones</span>
+            </li>
             </li>
         </ul>
     </aside>
@@ -455,6 +459,27 @@
                 </button>
             </div>
             <div id="adminFaqLista" class="admin-faq-lista">
+                <div class="admin-loading"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN: INTEGRACIONES — sorteos y promos de las cadenas (ver js/admin-integraciones.js) -->
+        <section id="section-integraciones" class="admin-section">
+            <div class="section-header">
+                <div>
+                    <h1>Integraciones</h1>
+                    <p>Sorteos y promociones de las cadenas: se muestran en Cartelera y llevan a su sitio oficial</p>
+                </div>
+                <button class="btn-nuevo" onclick="adminIntegraciones.abrirFormulario(null)">
+                    <i class="fas fa-plus"></i> Nuevo enlace
+                </button>
+            </div>
+            <div class="integ-tabs">
+                <button type="button" class="integ-tab activo" data-tipo="SORTEO" onclick="adminIntegraciones.cambiarTipo('SORTEO')">Sorteos</button>
+                <button type="button" class="integ-tab" data-tipo="PROMO_CADENA" onclick="adminIntegraciones.cambiarTipo('PROMO_CADENA')">Promos por cadena</button>
+            </div>
+            <div id="adminIntegracionesResumen" class="integ-resumen"></div>
+            <div id="adminIntegracionesLista">
                 <div class="admin-loading"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>
             </div>
         </section>
@@ -2466,6 +2491,7 @@
 <script src="../js/admin-feed.js"></script>
 <script src="../js/admin-comercial.js"></script>
 <script src="../js/admin-notificaciones.js"></script>
+<script src="../js/admin-integraciones.js"></script>
 
 <!-- MODAL DESBLOQUEAR USUARIO -->
 <div id="modalDesbloquearOverlay" style="display:none;position:fixed;inset:0;

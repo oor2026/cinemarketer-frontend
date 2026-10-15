@@ -28,6 +28,7 @@ function carteleraSlugProvincia(texto) {
 window.init_cartelera = async function(opciones) {
     const cont = document.getElementById('carteleraCercaResultado');
     if (!cont) return;
+    carteleraIniciarCarruselAccesos();
     const esRefresco = !!(opciones && opciones.refresco);
     window._carteleraUltimaCarga = Date.now();
     carteleraProgramarRefresco();
@@ -357,15 +358,58 @@ async function carteleraSinopsis(titulo) {
     return (info && info.sinopsis) || '';
 }
 
+// Atajos que ya se ven en el carrusel pero todavía no tienen su flujo:
+// al tocarlos muestran un aviso de "Próximamente". Cuando cada uno tenga
+// su forma final, se saca de esta lista y se agrega a su ruteo.
+var CARTELERA_ATAJOS_PROXIMAMENTE = ['promos-bancos'];
+
 window.accesoRapidoCartelera = function(id) {
+    if (CARTELERA_ATAJOS_PROXIMAMENTE.indexOf(id) !== -1) {
+        carteleraAvisoProximamente();
+        return;
+    }
     const mapa = {
         'ya-se-que-ver': 'cartelera_ya_se_que_ver',
         'recomendacion-cines': 'cartelera_recomendacion',
         'organizar-salida': 'cartelera_que_hay',
         'por-cadena': 'cartelera_cadena',
+        'modo-ahorro': 'cartelera_modo_ahorro',
+        'cine-argentino': 'cartelera_argentino',
+        'sorteos': 'cartelera_sorteos',
     };
     const criterio = mapa[id];
     if (criterio && typeof window._abrirBuscadorEnCriterio === 'function') {
         window._abrirBuscadorEnCriterio(criterio);
     }
 };
+
+// Carrusel de atajos (2 slides de 4): mueve el puntito activo según el
+// slide visible. El módulo se vuelve a inyectar cada vez que se entra a
+// Cartelera, así que la marca data-listo evita sumar el mismo listener
+// dos veces sobre el mismo carrusel.
+function carteleraIniciarCarruselAccesos() {
+    const track = document.getElementById('carteleraAccesosTrack');
+    const dots = document.getElementById('carteleraAccesosDots');
+    if (!track || !dots || track.dataset.listo) return;
+    track.dataset.listo = '1';
+    const puntos = dots.querySelectorAll('span');
+    track.addEventListener('scroll', function () {
+        const indice = Math.round(track.scrollLeft / Math.max(1, track.clientWidth));
+        puntos.forEach(function (punto, n) { punto.classList.toggle('activo', n === indice); });
+    }, { passive: true });
+}
+
+// Aviso chico y temporal para los atajos que todavía no están listos.
+function carteleraAvisoProximamente() {
+    const previo = document.getElementById('carteleraAvisoProximamente');
+    if (previo) previo.remove();
+    const aviso = document.createElement('div');
+    aviso.id = 'carteleraAvisoProximamente';
+    aviso.setAttribute('role', 'status');
+    aviso.textContent = 'Próximamente: estamos preparando este atajo.';
+    aviso.style.cssText = 'position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:100000;' +
+        'background:#16264d;color:#fff;font-size:13px;font-weight:600;padding:10px 16px;border-radius:12px;' +
+        'box-shadow:0 8px 20px rgba(0,0,0,0.25);max-width:86vw;text-align:center;';
+    document.body.appendChild(aviso);
+    setTimeout(function () { if (aviso.parentNode) aviso.remove(); }, 2200);
+}
