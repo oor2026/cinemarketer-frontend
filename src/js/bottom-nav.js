@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', actualizarBottomNavActivo);
 // desde cualquier módulo sin navegar a ningún lado.
 window._CRITERIOS_AUTOCONTENIDOS = [
     'cartelera_ya_se_que_ver', 'cartelera_que_hay', 'cartelera_cadena', 'cartelera_recomendacion',
-    'cartelera_modo_ahorro', 'cartelera_argentino', 'cartelera_sorteos',
+    'cartelera_modo_ahorro', 'cartelera_argentino', 'cartelera_sorteos', 'cartelera_promos',
     'actividad_proximo_premio', 'actividad_aprovechar', 'actividad_reforzar_premium',
     'actividad_vale_premium', 'actividad_insignias',
 ];

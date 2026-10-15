@@ -361,7 +361,7 @@ async function carteleraSinopsis(titulo) {
 // Atajos que ya se ven en el carrusel pero todavía no tienen su flujo:
 // al tocarlos muestran un aviso de "Próximamente". Cuando cada uno tenga
 // su forma final, se saca de esta lista y se agrega a su ruteo.
-var CARTELERA_ATAJOS_PROXIMAMENTE = ['promos-bancos'];
+var CARTELERA_ATAJOS_PROXIMAMENTE = [];
 
 window.accesoRapidoCartelera = function(id) {
     if (CARTELERA_ATAJOS_PROXIMAMENTE.indexOf(id) !== -1) {
@@ -376,6 +376,7 @@ window.accesoRapidoCartelera = function(id) {
         'modo-ahorro': 'cartelera_modo_ahorro',
         'cine-argentino': 'cartelera_argentino',
         'sorteos': 'cartelera_sorteos',
+        'promos-bancos': 'cartelera_promos',
     };
     const criterio = mapa[id];
     if (criterio && typeof window._abrirBuscadorEnCriterio === 'function') {
