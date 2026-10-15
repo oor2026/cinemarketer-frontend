@@ -5398,6 +5398,8 @@ var BUSCADOR_TODAS_LAS_PANTALLAS = [
     'buscadorNivel3CarteleraRecomendacion', // Cartelera — "¿Alguna recomendación?"
     'buscadorNivel3CarteleraArgentino', // Cartelera — "Cine argentino": películas de los Espacios INCAA
     'buscadorNivel3CarteleraSorteos', // Cartelera — "Sorteos": cadenas con sorteos (Integraciones)
+    'buscadorNivel3CarteleraPromos', // Cartelera — "Promos y bancos": por cadena o por banco/billetera
+    'buscadorNivel3CarteleraPromosCadena', // Cartelera — "Promos y bancos" › por cadena (Integraciones)
     'buscadorNivel3CarteleraDonde', // Cartelera — "¿Qué hay para ver?" Paso 1: ¿Dónde?
     'buscadorNivel3CarteleraDondeResultado', // Cartelera — resultado de "¿Dónde estás?"
     'buscadorNivel3CarteleraProvinciaLocalidad', // Organizar salida — Paso 1b: combos
@@ -5639,6 +5641,10 @@ window._buscadorCriterioSeleccionado = function(criterio) {
                            }
                            if (criterio === 'cartelera_sorteos') {
                                window._buscadorAbrirCarteleraSorteos();
+                               return;
+                           }
+                           if (criterio === 'cartelera_promos') {
+                               window._buscadorAbrirCarteleraPromos();
                                return;
                            }
                             if (criterio === 'donde_ver_estrenos') {
@@ -8232,39 +8238,39 @@ var BUSCADOR_SAGAS = [
                     };
 
                     // ============================================================
-                    // Cartelera — "Sorteos"
+                    // Cartelera — enlaces de Integraciones: "Sorteos" y "Promos y bancos"
                     // ============================================================
-                    // Las cadenas con sorteos vigentes que se cargan en el admin
-                    // (Integraciones › Sorteos), con el mismo estilo de "Por cadena de
-                    // cine". Al tocar una se abre su sitio oficial en otra pestaña, a
-                    // través del back, que cuenta el clic antes de redirigir.
-                    window._buscadorAbrirCarteleraSorteos = async function() {
+                    // Las cadenas que se cargan en el admin (Integraciones), con el mismo
+                    // estilo de "Por cadena de cine". Al tocar una se abre su sitio
+                    // oficial en otra pestaña, a través del back, que cuenta el clic
+                    // antes de redirigir. Una sola función arma la grilla para los dos
+                    // atajos; cada uno le pasa su pantalla, su tipo y sus textos.
+                    async function _buscadorMostrarEnlacesIntegracion(opciones) {
                         document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
-                        document.getElementById('buscadorNivel3CarteleraSorteos').style.display = 'block';
+                        const pantalla = document.getElementById(opciones.pantallaId);
+                        pantalla.style.display = 'block';
                         document.getElementById('buscadorModalSheet').classList.add('buscador-sheet-ancho', 'buscador-sheet-alto');
 
                         const n = _buscadorPrimerNombre();
-                        window._buscadorSetBurbuja(n
-                            ? `Estos son los sorteos que tienen hoy los cines, ${n}. Elegí uno y te llevo.`
-                            : 'Estos son los sorteos que tienen hoy los cines. Elegí uno y te llevo.');
+                        window._buscadorSetBurbuja(opciones.burbuja(n ? `, ${n}` : ''));
 
                         buscadorInyectarEstilosCadenas();
-                        const grid = document.getElementById('buscadorSorteosGrid');
-                        grid.innerHTML = '<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> Cargando sorteos...</div>';
+                        const grid = document.getElementById(opciones.gridId);
+                        grid.innerHTML = `<div class="buscador-predictor-vacio"><i class="fas fa-spinner fa-spin"></i> ${opciones.cargando}</div>`;
 
                         let enlaces;
                         try {
-                            const res = await fetch(`${CONFIG.API_URL}/public/integraciones/enlaces?tipo=SORTEO`);
+                            const res = await fetch(`${CONFIG.API_URL}/public/integraciones/enlaces?tipo=${encodeURIComponent(opciones.tipo)}`);
                             if (!res.ok) throw new Error('status ' + res.status);
                             enlaces = await res.json();
                         } catch (e) {
-                            grid.innerHTML = '<div class="buscador-predictor-vacio">No pudimos cargar los sorteos. Intentá de nuevo.</div>';
+                            grid.innerHTML = `<div class="buscador-predictor-vacio">${opciones.error}</div>`;
                             return;
                         }
-                        if (document.getElementById('buscadorNivel3CarteleraSorteos').style.display !== 'block') return;
+                        if (pantalla.style.display !== 'block') return;
 
                         if (!enlaces.length) {
-                            grid.innerHTML = '<div class="buscador-predictor-vacio">Por ahora no hay sorteos de cines. Volvé pronto.</div>';
+                            grid.innerHTML = `<div class="buscador-predictor-vacio">${opciones.vacio}</div>`;
                             return;
                         }
 
@@ -8273,22 +8279,72 @@ var BUSCADOR_SAGAS = [
                             const logo = window._buscadorLogoParaCadena(e.cadena);
                             const icono = logo
                                 ? `<img src="${_buscadorAhorroEsc(logo)}" alt="${_buscadorAhorroEsc(nombre)}">`
-                                : `<i class="fas fa-gift buscador-cine-sinlogo"></i>`;
-                            const titulo = e.titulo || `Sorteos de ${nombre}`;
+                                : `<i class="fas ${opciones.iconoSinLogo} buscador-cine-sinlogo"></i>`;
+                            const titulo = e.titulo || opciones.tituloPorDefecto(nombre);
                             return `
                                 <div class="buscador-cine-item" role="link" tabindex="0" title="${_buscadorAhorroEsc(titulo)}"
-                                     onclick="window._buscadorAbrirSorteo(${Number(e.id)})"
-                                     onkeydown="if (event.key === 'Enter') window._buscadorAbrirSorteo(${Number(e.id)})">
+                                     onclick="window._buscadorAbrirEnlaceIntegracion(${Number(e.id)})"
+                                     onkeydown="if (event.key === 'Enter') window._buscadorAbrirEnlaceIntegracion(${Number(e.id)})">
                                     <div class="buscador-cine-logo-wrap">${icono}</div>
                                     <span>${_buscadorAhorroEsc(nombre)}</span>
                                 </div>
                             `;
                         }).join('');
-                    };
+                    }
 
                     // Se abre en otra pestaña: Cinemarketer queda abierto atrás.
-                    window._buscadorAbrirSorteo = function(id) {
+                    window._buscadorAbrirEnlaceIntegracion = function(id) {
                         window.open(`${CONFIG.API_URL}/public/integraciones/ir/${encodeURIComponent(id)}`, '_blank', 'noopener');
+                    };
+                    // Nombre anterior, por si quedó alguna referencia.
+                    window._buscadorAbrirSorteo = window._buscadorAbrirEnlaceIntegracion;
+
+                    // "Sorteos"
+                    window._buscadorAbrirCarteleraSorteos = function() {
+                        return _buscadorMostrarEnlacesIntegracion({
+                            pantallaId: 'buscadorNivel3CarteleraSorteos',
+                            gridId: 'buscadorSorteosGrid',
+                            tipo: 'SORTEO',
+                            iconoSinLogo: 'fa-gift',
+                            tituloPorDefecto: nombre => `Sorteos de ${nombre}`,
+                            burbuja: c => `Estos son los sorteos que tienen hoy los cines${c}. Elegí uno y te llevo.`,
+                            cargando: 'Cargando sorteos...',
+                            vacio: 'Por ahora no hay sorteos de cines. Volvé pronto.',
+                            error: 'No pudimos cargar los sorteos. Intentá de nuevo.'
+                        });
+                    };
+
+                    // "Promos y bancos" — primero se elige el camino: por cadena de cine
+                    // (enlaces de Integraciones) o por banco/billetera (próximamente).
+                    window._buscadorAbrirCarteleraPromos = function() {
+                        document.querySelectorAll('.buscador-nivel2').forEach(el => { el.style.display = 'none'; });
+                        document.getElementById('buscadorNivel3CarteleraPromos').style.display = 'block';
+                        document.getElementById('buscadorModalSheet').classList.remove('buscador-sheet-ancho', 'buscador-sheet-alto');
+                        const n = _buscadorPrimerNombre();
+                        window._buscadorSetBurbuja(n
+                            ? `¿Cómo querés buscar promociones, ${n}? Por cine o por tu banco o billetera.`
+                            : '¿Cómo querés buscar promociones? Por cine o por tu banco o billetera.');
+                    };
+
+                    window._buscadorAbrirPromosPorCadena = function() {
+                        return _buscadorMostrarEnlacesIntegracion({
+                            pantallaId: 'buscadorNivel3CarteleraPromosCadena',
+                            gridId: 'buscadorPromosCadenaGrid',
+                            tipo: 'PROMO_CADENA',
+                            iconoSinLogo: 'fa-tags',
+                            tituloPorDefecto: nombre => `Promociones de ${nombre}`,
+                            burbuja: c => `Estas son las cadenas con promociones${c}. Elegí una y te llevo a su sitio.`,
+                            cargando: 'Cargando promociones...',
+                            vacio: 'Por ahora no hay promociones de cines cargadas. Volvé pronto.',
+                            error: 'No pudimos cargar las promociones. Intentá de nuevo.'
+                        });
+                    };
+
+                    window._buscadorPromosPorBancoProximamente = function() {
+                        const n = _buscadorPrimerNombre();
+                        window._buscadorSetBurbuja(n
+                            ? `Muy pronto vas a poder ver qué beneficios tiene tu banco o billetera en cada cine, ${n}.`
+                            : 'Muy pronto vas a poder ver qué beneficios tiene tu banco o billetera en cada cine.');
                     };
 
                            // Muestra la pantalla de resultado con el estado de

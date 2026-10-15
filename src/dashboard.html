@@ -811,6 +811,46 @@ viene del backend, hasta que decidamos cómo presentarlo. -->
                 <p style="font-size:0.75rem; color:#8a8478; margin:0.7rem 0 0; text-align:left;">Los sorteos son de cada cadena: se abren en su sitio oficial.</p>
             </div>
 
+            <!-- NIVEL 3 — Cartelera: "Promos y bancos" — se elige el camino:
+         por cadena de cine (enlaces de Integraciones) o por banco/billetera (próximamente). -->
+            <div class="buscador-nivel2" id="buscadorNivel3CarteleraPromos" style="display:none;">
+                <button class="buscador-volver" onclick="window._buscadorVolverANivel2Cartelera()">
+                    <i class="fas fa-chevron-left"></i> Volver
+                </button>
+                <div class="buscador-nivel2-lista">
+                    <button class="buscador-criterio" onclick="window._buscadorAbrirPromosPorCadena()">
+                        <i class="fas fa-building"></i>
+                        <div>
+                            <strong>Por cadena de cine</strong>
+                            <span>Las promociones de cada cine, en su sitio oficial</span>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <button class="buscador-criterio" onclick="window._buscadorPromosPorBancoProximamente()" style="opacity:0.6;">
+                        <i class="fas fa-credit-card"></i>
+                        <div>
+                            <strong>Por banco y/o billetera</strong>
+                            <span>Próximamente</span>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- NIVEL 3.5 — Cartelera: "Promos y bancos" › por cadena de cine. -->
+            <div class="buscador-nivel2" id="buscadorNivel3CarteleraPromosCadena" style="display:none;">
+                <button class="buscador-volver" onclick="window._buscadorAbrirCarteleraPromos()">
+                    <i class="fas fa-chevron-left"></i> Volver
+                </button>
+                <p class="buscador-subtitulo">Elegí una cadena y te llevamos a sus promociones</p>
+                <div class="buscador-carrusel-wrap">
+                    <button class="buscador-carrusel-flecha buscador-carrusel-flecha-izq" onclick="window._buscadorCarruselMover('buscadorPromosCadenaGrid', -1)"><i class="fas fa-chevron-left"></i></button>
+                    <div class="buscador-carrusel" id="buscadorPromosCadenaGrid"></div>
+                    <button class="buscador-carrusel-flecha buscador-carrusel-flecha-der" onclick="window._buscadorCarruselMover('buscadorPromosCadenaGrid', 1)"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <p style="font-size:0.75rem; color:#8a8478; margin:0.7rem 0 0; text-align:left;">Las promociones son de cada cadena: se abren en su sitio oficial.</p>
+            </div>
+
             <!-- NIVEL 3 — Cartelera: "¿Qué hay para ver?" — Paso 1: ¿Dónde?
          Cascada: geolocalización → zona del perfil → texto manual. -->
             <div class="buscador-nivel2" id="buscadorNivel3CarteleraDonde" style="display:none;">
