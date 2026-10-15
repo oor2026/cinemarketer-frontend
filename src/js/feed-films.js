@@ -6953,6 +6953,7 @@ var BUSCADOR_SAGAS = [
                     { id: 10, nombre: 'Star Wars', peliculasExtra: [330459, 348350] },   // Rogue One, Han Solo
                     { id: 84, nombre: 'Indiana Jones' },
                     { id: 119, nombre: 'El Señor de los Anillos' },
+                    { id: -5, nombre: 'El Hobbit', peliculas: [49051, 57158, 122917] },   // saga armada a mano: Un viaje inesperado, La desolación de Smaug, La batalla de los cinco ejércitos
                     { id: 151, nombre: 'Star Trek', peliculasExtra: [193, 199, 200, 201, 13475, 54138, 188927] },   // La próxima generación, Primer Contacto, Insurrección, Nemesis, Star Trek (2009), En la oscuridad, Más allá
                     { id: 528, nombre: 'Terminator' },
                     { id: 656, nombre: 'Saw' },
@@ -6965,7 +6966,9 @@ var BUSCADOR_SAGAS = [
                     { id: 304, nombre: "Ocean's", peliculasExtra: [402900] },   // Ocean's 8
                     { id: 328, nombre: 'Jurassic Park' },
                     { id: 1575, nombre: 'Rocky' },
+                    { id: -3, nombre: 'Creed', peliculas: [312221, 480530, 677179] },   // saga armada a mano: Creed, Creed II, Creed III
                     { id: 2150, nombre: 'Shrek' },
+                    { id: -7, nombre: 'El gato con botas', peliculas: [417859, 315162] },   // saga armada a mano: El Gato con Botas, El último deseo
                     { id: 2344, nombre: 'Matrix' },
                     { id: 8650, nombre: 'Transformers', peliculasExtra: [667538, 698687] },   // El despertar de las bestias, Transformers One
                     { id: 9485, nombre: 'Rápidos y Furiosos' },
@@ -6973,6 +6976,7 @@ var BUSCADOR_SAGAS = [
                     { id: 10194, nombre: 'Toy Story' },
                     { id: 12263, nombre: 'El Exorcista' },
                     { id: 1241, nombre: 'Harry Potter' },
+                    { id: -6, nombre: 'Animales Fantásticos', peliculas: [259316, 338952, 338953] },   // saga armada a mano: Animales fantásticos y dónde encontrarlos, Los crímenes de Grindelwald, Los secretos de Dumbledore
                     { id: 87359, nombre: 'Misión Imposible' },
                     { id: 404609, nombre: 'John Wick' },
                     { id: 8091, nombre: 'Alien', peliculasExtra: [70981, 126889, 945961, 395, 440] },   // Prometheus, Alien: Covenant, Alien: Romulus, Alien contra Predator, AVP 2
@@ -6980,12 +6984,24 @@ var BUSCADOR_SAGAS = [
                     { id: 2602, nombre: 'Scream' },
                     { id: 313086, nombre: 'El Conjuro' },
                     { id: -1, nombre: 'Annabelle', peliculas: [250546, 396422, 521029] },   // saga armada a mano (no depende de una colección de TMDb): Annabelle, Annabelle: Creation, Annabelle: Vuelve a casa
+                    { id: -4, nombre: 'La Monja', peliculas: [439079, 968051] },   // saga armada a mano: La Monja, La Monja II
                     { id: 17255, nombre: 'Resident Evil', peliculasExtra: [460458, 1423191] },   // Bienvenidos a Raccoon City (2021), Resident Evil (2026)
                     { id: 8945, nombre: 'Mad Max' },
                     { id: 1570, nombre: 'Duro de Matar' },
                     { id: 8580, nombre: 'Karate Kid' },
                     { id: 8581, nombre: 'Pesadilla en la Calle Elm', peliculasExtra: [6466, 23437] },   // Freddy contra Jason (TMDb la tiene en la colección de Viernes 13), Pesadilla en Elm Street: El origen (2010)
                     { id: 228446, nombre: 'Insidious' },
+                    { id: -8, nombre: 'Chucky', peliculas: [10585, 11186, 11187, 11932, 11249, 167032, 393345, 533642] },   // saga armada a mano: Muñeco diabólico 1, 2 y 3, La novia, La semilla, La maldición, El culto y el reinicio de 2019
+                    { id: -9, nombre: 'La Purga', peliculas: [158015, 238636, 316727, 442249, 602223] },   // saga armada a mano: las 5 películas
+                    { id: -10, nombre: 'Actividad Paranormal', peliculas: [23827, 41436, 59429, 72571, 82990, 227348, 146301, 609972] },   // saga armada a mano: las 1 a 4, Tokyo Night, Los señalados, Dimensión fantasma y Allegados
+                    { id: -11, nombre: 'Sé lo que hicisteis', peliculas: [3597, 3600, 3602, 1083433] },   // saga armada a mano: 1997, 1998, 2006 y 2025
+                    { id: -12, nombre: 'Evil Dead', peliculas: [764, 765, 766, 109428, 713704, 1212763] },   // saga armada a mano: Posesión infernal 1981, Terroríficamente muertos, El ejército de las tinieblas, remake 2013, El despertar, En llamas
+                    { id: -13, nombre: 'It (Eso)', peliculas: [346364, 474350] },   // saga armada a mano: It (2017) e It: Capítulo 2 (2019)
+                    { id: -14, nombre: 'Un lugar en silencio', peliculas: [447332, 520763, 762441] },   // saga armada a mano: Un lugar tranquilo 1, 2 y Día uno
+                    { id: -15, nombre: 'Terrifier', peliculas: [420634, 663712, 1034541] },   // saga armada a mano: Terrifier 1, 2 y 3
+                    { id: -16, nombre: 'El aro', peliculas: [2671, 9669, 9674, 565, 10320, 140441, 257527, 382602, 14564, 583132] },   // saga armada a mano: las japonesas (Ringu, Ring 2, Ring 0, Sadako 3D y 3D 2, Sadako vs. Kayako, Sadako) y las occidentales (The Ring, The Ring 2, Rings)
+                    { id: -17, nombre: 'La masacre de Texas', peliculas: [30497, 16337, 25018, 16780, 9373, 10781, 76617, 300665, 632727] },   // saga armada a mano: las 9 películas, de 1974 a 2022
+                    { id: -18, nombre: 'Hellraiser', peliculas: [9003, 9064, 11569, 8766, 12597, 11246, 17455, 12699, 70584, 444149, 338947] },   // saga armada a mano: las 11 películas, de 1987 a 2022
                     { id: 2980, nombre: 'Cazafantasmas', peliculasExtra: [43074] },   // Cazafantasmas (2016)
                     { id: 495527, nombre: 'Jumanji' },
                     { id: 131635, nombre: 'Los Juegos del Hambre', peliculasExtra: [695721] },   // Balada de pájaros cantores y serpientes
