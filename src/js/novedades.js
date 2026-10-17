@@ -535,13 +535,40 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
 
 async function _abrirModalPremioDesdeNotificacion(rewardId, esPremiumReward) {
     // "mis-premios" (módulo viejo) fue reemplazado por "club-beneficios".
-    loadModule('club-beneficios');
+    const yaEnClub = window.location.hash.replace('#', '') === 'club-beneficios';
+
+    // Se navega al Club UNA sola vez, cambiando solo el hash: el listener de
+    // 'hashchange' de module-loader.js hace la carga. Llamar además a
+    // loadModule() acá provocaba una segunda carga (loadModule actualiza el
+    // hash al terminar, y ese cambio vuelve a disparar loadModule), que
+    // reinyectaba el HTML del Club y destruía el modal si ya se había abierto.
+    // Con la latencia de producción pasaba siempre; en local, no.
+    if (!yaEnClub) {
+        // Los catálogos y las funciones de una visita anterior siguen en
+        // window. Si no se descartan, la espera de abajo los toma por listos y
+        // actúa sobre un Club que todavía se está cargando (por ejemplo, forzar
+        // la pestaña Premium con la marca "ya cargado" de la visita anterior,
+        // lo que impedía que ese catálogo llegara a cargarse). Al borrarlos, la
+        // espera solo avanza cuando el JS nuevo del Club ya los volvió a definir.
+        window._clubFreeCache = [];
+        window._clubPremiumCache = [];
+        window._clubPremiumYaCargado = false;
+        delete window._abrirModalPremioClub;
+        delete window.cambiarTabClubBeneficios;
+        window.location.hash = 'club-beneficios';
+    }
     if (!rewardId) return; // notificación vieja, de antes de guardar el id — solo navega
 
     let tabPremiumForzada = false;
     let intentos = 0;
     const esperar = setInterval(() => {
         intentos++;
+
+        // Esperar a que el HTML del Club (con su modal) ya esté en pantalla
+        if (!document.getElementById('modalPremioClub')) {
+            if (intentos > 75) clearInterval(esperar);
+            return;
+        }
 
         // El catálogo Premium carga lazy recién al activar esa pestaña
         // (window.cambiarTabClubBeneficios) — a diferencia de Free, que
@@ -562,7 +589,7 @@ async function _abrirModalPremioDesdeNotificacion(rewardId, esPremiumReward) {
             clearInterval(esperar);
             const p = cache.find(x => x.id === rewardId);
             if (p) window._abrirModalPremioClub(rewardId, esPremiumReward ? 'premium' : 'free');
-        } else if (intentos > 25) {
+        } else if (intentos > 75) {
             clearInterval(esperar);
         }
     }, 200);
