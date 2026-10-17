@@ -26,7 +26,7 @@
 
         <!-- CSS BASE -->
         <link rel="stylesheet" href="css/styles.css">
-        <link rel="stylesheet" href="css/dashboard.css">
+        <link rel="stylesheet" href="css/dashboard.css?v=2">
         <link rel="stylesheet" href="css/feed-films.css?v=20261012">
         <link rel="stylesheet" href="css/cartelera-precio.css?v=1">
         <link rel="stylesheet" href="css/credencial.css?v=1">
@@ -108,15 +108,25 @@
                 <i class="fas fa-cog"></i>
             </button>
             <ul class="nav-menu" id="dashNavMenu">
-                <li><a class="nav-link" href="#feed-films" title="Ver películas"><i class="fas fa-home"></i></a></li>
+                <li class="nav-desk-inicio"><a class="nav-link" href="#feed-films" title="Ver películas"><i class="fas fa-home"></i><span class="nav-text nav-text-solo-desktop">Inicio</span></a></li>
                 <li class="nav-user-profile">
                     <div class="user-profile-mini" onclick="window.abrirModalProgresoHeader()" style="cursor:pointer;">
                         <div class="user-avatar-mini" id="headerAvatar"><img src="https://res.cloudinary.com/dh0lanjs3/image/upload/v1788987283/avatars/custom/nmsd40tew0vmpm7f5hno.jpg" alt="Avatar" class="avatar-img"></div>
                         <div class="user-name-mini" id="headerUserName"><span class="user-name-text">Laura Flor Carranza Fernández</span></div>
                         <div class="user-level-mini" id="headerLevel"><span class="level-badge level-AMATEUR">🟢 Amateur</span></div>
+                        <i class="fas fa-chevron-down nav-cuenta-chevron" aria-hidden="true"></i>
+                    </div>
+                    <!-- Menú de cuenta — solo escritorio. En celular queda oculto por CSS y no se usa:
+                         allá todo sigue viviendo en el menú hamburguesa. -->
+                    <div class="nav-cuenta-menu" id="navCuentaMenu" role="menu" aria-label="Menú de cuenta">
+                        <a class="nav-cuenta-item" role="menuitem" href="#" onclick="window.abrirModalProgresoHeader(); return false;"><i class="fas fa-award"></i>Mi progreso</a>
+                        <a class="nav-cuenta-item" role="menuitem" href="#mi-cuenta"><i class="fas fa-cog"></i>Configuración</a>
+                        <a class="nav-cuenta-item" role="menuitem" href="#contacto"><i class="fas fa-circle-question"></i>Preguntas frecuentes</a>
+                        <div class="nav-cuenta-sep"></div>
+                        <a class="nav-cuenta-item" role="menuitem" href="#" onclick="API.logout(); return false;"><i class="fas fa-sign-out-alt"></i>Cerrar sesión</a>
                     </div>
                 </li>
-                <li class="dash-progreso-desktop-li">
+                <li class="dash-progreso-desktop-li nav-desk-en-menu">
                     <a class="nav-link" href="#" onclick="window.abrirModalProgresoHeader()" title="Mi progreso">
                         <i class="fas fa-award"></i>
                         <span class="nav-text nav-text-hide-desktop">Progreso</span>
@@ -158,15 +168,15 @@
                         </div>
                     </div>
                 </li>
-                <li><a class="nav-link nav-link-bell" href="#mis-consultas" title="Mis Mensajes"><div class="bell-wrapper"><i class="fas fa-comment-dots"></i><span class="bell-badge" id="bellBadge" style="display:none;">0</span></div><span class="nav-text">Mis Mensajes</span></a></li>
-                <li class="hamburguesa-duplicado-mobile"><a class="nav-link" href="javascript:void(0)" onclick="window.abrirPerfilUsuario(parseInt(localStorage.getItem('userId')))"><i class="fas fa-couch"></i><span class="nav-text">Mi Sala</span></a></li>
-                <li><a class="nav-link" href="#mi-lista"><i class="fas fa-bookmark"></i><span class="nav-text">Mi Lista</span></a></li>
-                <li><a class="nav-link" href="javascript:void(0)" onclick="window.abrirTriviaEleccionModal()"><i class="fas fa-question-circle"></i><span class="nav-text">Trivia</span></a></li>
-                <li><a class="nav-link" href="#comunidad"><i class="fas fa-users"></i><span class="nav-text">Comunidad</span></a></li>
-                <li class="hamburguesa-duplicado-mobile"><a class="nav-link" href="#club-beneficios"><i class="fas fa-gift"></i><span class="nav-text">Club de Beneficios</span></a></li>
-                <li class="hamburguesa-duplicado-mobile"><a class="nav-link" href="#mi-cuenta"><i class="fas fa-cog"></i><span class="nav-text">Configuración</span></a></li>
-                <li><a class="nav-link" href="#contacto"><i class="fas fa-circle-question"></i><span class="nav-text nav-text-mobile">Preguntas frecuentes</span><span class="nav-text nav-text-desktop">FAQs</span></a></li>
-                <li><a href="#" class="nav-link" onclick="API.logout()"><i class="fas fa-sign-out-alt"></i><span class="nav-text">Cerrar Sesión</span></a></li>
+                <li class="nav-desk-icono nav-desk-mensajes"><a class="nav-link nav-link-bell" href="#mis-consultas" title="Mis Mensajes"><div class="bell-wrapper"><i class="fas fa-comment-dots"></i><span class="bell-badge" id="bellBadge" style="display:none;">0</span></div><span class="nav-text">Mis Mensajes</span></a></li>
+                <li class="hamburguesa-duplicado-mobile nav-desk-sala"><a class="nav-link" href="javascript:void(0)" title="Mi Sala" onclick="window.abrirPerfilUsuario(parseInt(localStorage.getItem('userId')))"><i class="fas fa-couch"></i><span class="nav-text">Mi Sala</span></a></li>
+                <li class="nav-desk-lista"><a class="nav-link" href="#mi-lista" title="Mi Lista"><i class="fas fa-bookmark"></i><span class="nav-text">Mi Lista</span></a></li>
+                <li class="nav-desk-trivia"><a class="nav-link" href="javascript:void(0)" title="Trivia" onclick="window.abrirTriviaEleccionModal()"><i class="fas fa-question-circle"></i><span class="nav-text">Trivia</span></a></li>
+                <li class="nav-desk-comunidad"><a class="nav-link" href="#comunidad" title="Comunidad"><i class="fas fa-users"></i><span class="nav-text">Comunidad</span></a></li>
+                <li class="hamburguesa-duplicado-mobile nav-desk-club"><a class="nav-link" href="#club-beneficios" title="Club de Beneficios"><i class="fas fa-gift"></i><span class="nav-text nav-text-mobile">Club de Beneficios</span><span class="nav-text nav-text-desktop">Beneficios</span></a></li>
+                <li class="hamburguesa-duplicado-mobile nav-desk-en-menu"><a class="nav-link" href="#mi-cuenta"><i class="fas fa-cog"></i><span class="nav-text">Configuración</span></a></li>
+                <li class="nav-desk-en-menu"><a class="nav-link" href="#contacto"><i class="fas fa-circle-question"></i><span class="nav-text nav-text-mobile">Preguntas frecuentes</span><span class="nav-text nav-text-desktop">FAQs</span></a></li>
+                <li class="nav-desk-en-menu"><a href="#" class="nav-link" onclick="API.logout()"><i class="fas fa-sign-out-alt"></i><span class="nav-text">Cerrar Sesión</span></a></li>
             </ul>
         </div>
     </nav>
@@ -1392,6 +1402,7 @@ viene del backend, hasta que decidamos cómo presentarlo. -->
     <script src="js/watchlist.js"></script>
     <script src="js/feed-series.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/header-desktop.js"></script>
     <script>
         // Banner de "modo demo" — visible durante toda la sesión si
         // el usuario logueado es una cuenta demo (isDemo, seteado en

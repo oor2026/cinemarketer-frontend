@@ -1000,3 +1000,98 @@ body.menu-open {
             color: #ffcf4d;
             margin-right: 0.4rem;
         }
+
+/* ==============================================
+   HEADER DE ESCRITORIO — navegación a la izquierda, cuenta a la derecha
+   Todo lo que cambia el aspecto vive dentro de @media (min-width: 769px):
+   en celular (hasta 768 px) este bloque no modifica nada.
+   ============================================== */
+
+/* Elementos nuevos: ocultos en todos los anchos y solo se muestran en escritorio */
+.nav-text-solo-desktop { display: none; }
+.nav-cuenta-chevron { display: none; }
+.nav-cuenta-menu { display: none; }
+
+@media (min-width: 769px) {
+    .nav-text-solo-desktop { display: inline; }
+
+    /* La lista ocupa todo el ancho que sobra, así la zona de la derecha queda pegada al borde */
+    .nav-menu { flex: 1; min-width: 0; gap: 0.2rem; }
+    .nav-menu > li { order: 80; }
+
+    /* Zona izquierda: navegación. Trivia va al final de la zona y es la que empuja al resto hacia el borde derecho */
+    .nav-menu > li.nav-desk-inicio { order: 10; }
+    .nav-menu > li.nav-desk-sala { order: 20; }
+    .nav-menu > li.nav-desk-lista { order: 30; }
+    .nav-menu > li.nav-desk-comunidad { order: 40; }
+    .nav-menu > li.nav-desk-club { order: 50; }
+    .nav-menu > li.nav-desk-trivia { order: 60; margin-right: auto; }
+
+    /* Zona derecha: atajos con ícono, campanita y cuenta */
+    .nav-menu > li.nav-desk-mensajes { order: 90; }
+    .nav-menu > li.dash-bell-desktop-li { order: 100; }
+    .nav-menu > li.nav-user-profile { order: 110; }
+
+    /* Estos cuatro pasan al menú de la cuenta */
+    .nav-menu > li.nav-desk-en-menu { display: none; }
+
+    /* Atajos que se muestran solo con ícono (el título queda como ayuda al pasar el mouse) */
+    .nav-desk-icono .nav-text { display: none; }
+
+    .nav-menu .nav-link { padding: 0.45rem 0.7rem; font-size: 0.9rem; }
+    .nav-menu .nav-desk-icono .nav-link { padding: 0.45rem 0.65rem; }
+    .nav-menu .nav-text { margin-left: 0.4rem; }
+
+    /* Cuenta: avatar + nivel + flecha, con menú desplegable */
+    .nav-menu > li.nav-user-profile { position: relative; margin-left: 0.5rem; }
+    .user-profile-mini { gap: 0.5rem; padding: 0.2rem 0.55rem 0.2rem 0.2rem; }
+    .user-profile-mini:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .nav-cuenta-chevron { display: inline-block; font-size: 0.7rem; color: var(--gray); transition: transform 0.2s; }
+    .nav-user-profile.is-open .nav-cuenta-chevron { transform: rotate(180deg); }
+    .nav-user-profile.is-open .user-profile-mini { background: var(--light); }
+
+    .nav-cuenta-menu {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        width: 232px;
+        background: var(--white);
+        border: 1px solid #eee;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+        padding: 0.4rem;
+        z-index: 1100;
+    }
+    .nav-cuenta-menu.is-open { display: block; }
+    .nav-cuenta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        padding: 0.6rem 0.75rem;
+        border-radius: 8px;
+        color: var(--dark);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    .nav-cuenta-item i { width: 18px; text-align: center; color: var(--primary); }
+    .nav-cuenta-item:hover, .nav-cuenta-item:focus-visible { background: var(--light); color: var(--primary); outline: none; }
+    .nav-cuenta-sep { height: 1px; background: #eee; margin: 0.35rem 0.5rem; }
+}
+
+/* Ventanas de escritorio angostas: la navegación queda solo con íconos para que todo entre en una fila */
+@media (min-width: 769px) and (max-width: 1199px) {
+    .nav-desk-inicio .nav-text-solo-desktop,
+    .nav-desk-sala .nav-text,
+    .nav-desk-lista .nav-text,
+    .nav-desk-comunidad .nav-text,
+    .nav-desk-club .nav-text,
+    .nav-desk-trivia .nav-text { display: none; }
+}
+
+/* Ventanas de escritorio muy angostas (769 a 899 px): márgenes laterales más chicos para que todo entre */
+@media (min-width: 769px) and (max-width: 899px) {
+    .nav-container { padding: 0 1rem; }
+    .nav-menu { gap: 0.1rem; }
+    .nav-menu .nav-link, .nav-menu .nav-desk-icono .nav-link { padding: 0.45rem 0.55rem; }
+}
