@@ -72,6 +72,11 @@
     box-shadow: 0 6px 20px rgba(0,0,0,0.2);
 }
 
+/* Botón "Contactar a Soporte" — solo se muestra en mobile.
+   Queda oculto por defecto: sus estilos viven dentro de la media query de
+   mobile, y sin esta regla aparecía suelto y sin estilos en escritorio. */
+.btn-soporte-mobile { display: none; }
+
 .faq-section {
     background: #E50914;
     border-radius: 15px;
