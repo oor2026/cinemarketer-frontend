@@ -96,6 +96,68 @@
     color: white;
 }
 
+/* ── Pastillas circulares por territorio (mobile) ──────────────
+   Mismo patrón visual que los géneros de Películas (.pill-orden):
+   círculo con ícono arriba y nombre abajo; la activa va en degradé rojo.
+   En desktop no se ven: ahí los territorios viven en la columna izquierda. */
+.com-pills-territorio { display: none; }
+
+@media (max-width: 768px) {
+    .com-pills-territorio {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 18px;
+        overflow-x: auto;
+        position: relative;
+        padding: 0 1rem 0.6rem;
+        margin-bottom: 0.5rem;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        -webkit-overflow-scrolling: touch;
+    }
+    .com-pills-territorio::-webkit-scrollbar { display: none; }
+    .com-pill-terr {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+        background: transparent;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        white-space: nowrap;
+        font-weight: 500;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .com-pill-terr-icono {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f2f0eb;
+        color: #8a8478;
+        font-size: 1.2rem;
+    }
+    .com-pill-terr-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #8a8478;
+    }
+    .com-pill-terr.active { font-weight: 600; }
+    .com-pill-terr.active .com-pill-terr-icono {
+        background: linear-gradient(135deg,#f0553f,#c4321f);
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(196,50,31,0.3);
+    }
+    .com-pill-terr.active .com-pill-terr-label {
+        color: #16151a;
+        font-weight: 700;
+    }
+}
+
 /* ── Card publicación ───────────────────────── */
 .com-card {
     background: white;

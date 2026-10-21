@@ -109,6 +109,7 @@
 
                 <!-- COLUMNA CENTRAL: feed -->
                 <div class="com-col-center">
+                    <!-- Encabezado del módulo -->
                     <div class="modulo-header-card tono-marino">
                         <i class="fas fa-users modulo-header-decor"></i>
                         <div class="modulo-header-texto">
@@ -116,12 +117,46 @@
                             <div class="modulo-header-subtitulo">El canal donde compartimos todo sobre películas, novedades, sorteos y mucho más.</div>
                         </div>
                     </div>
+
                     <!-- Caja nueva publicación -->
                         <div class="com-nueva-pub" onclick="window.abrirWorkflowPublicacion()">
                                 <div class="com-nueva-pub-avatar" id="comAvatarCaja"></div>
                                 <div class="com-nueva-pub-placeholder">¿Qué querés compartir sobre una película?</div>
                                 <button class="com-nueva-pub-btn">+</button>
                             </div>
+
+                    <!-- Filtros por territorio — solo mobile (en desktop viven en la columna izquierda).
+                         Van justo debajo de la caja de crear publicación, con el mismo patrón visual
+                         que los géneros de Películas: círculo con ícono y nombre abajo. -->
+                    <div class="com-pills-territorio" id="comPillsTerritorio">
+                        <button class="com-pill-terr active" data-territory="" onclick="window.filtrarComunidad('', this)">
+                            <span class="com-pill-terr-icono">✨</span><span class="com-pill-terr-label">Todo</span>
+                        </button>
+                        <button class="com-pill-terr" data-territory="PELICULAS_SERIES" onclick="window.filtrarComunidad('PELICULAS_SERIES', this)">
+                            <span class="com-pill-terr-icono">🎬</span><span class="com-pill-terr-label">Películas</span>
+                        </button>
+                        <button class="com-pill-terr" data-territory="LO_QUE_VIENE" onclick="window.filtrarComunidad('LO_QUE_VIENE', this)">
+                            <span class="com-pill-terr-icono">📅</span><span class="com-pill-terr-label">Estrenos</span>
+                        </button>
+                        <button class="com-pill-terr" data-territory="GENTE_CINE" onclick="window.filtrarComunidad('GENTE_CINE', this)">
+                            <span class="com-pill-terr-icono">🎭</span><span class="com-pill-terr-label">Gente de cine</span>
+                        </button>
+                        <button class="com-pill-terr" data-territory="PREMIOS" onclick="window.filtrarComunidad('PREMIOS', this)">
+                            <span class="com-pill-terr-icono">🏆</span><span class="com-pill-terr-label">Premios</span>
+                        </button>
+                        <button class="com-pill-terr" data-territory="INDUSTRIA" onclick="window.filtrarComunidad('INDUSTRIA', this)">
+                            <span class="com-pill-terr-icono">💰</span><span class="com-pill-terr-label">Industria</span>
+                        </button>
+                        <button class="com-pill-terr" data-territory="EXPERIENCIA" onclick="window.filtrarComunidad('EXPERIENCIA', this)">
+                            <span class="com-pill-terr-icono">🍿</span><span class="com-pill-terr-label">Experiencia</span>
+                        </button>
+                        <button class="com-pill-terr" data-territory="ARTE_CULTURA" onclick="window.filtrarComunidad('ARTE_CULTURA', this)">
+                            <span class="com-pill-terr-icono">🎓</span><span class="com-pill-terr-label">Arte y cultura</span>
+                        </button>
+                        <button class="com-pill-terr" data-territory="EVENTOS" onclick="window.filtrarComunidad('EVENTOS', this)">
+                            <span class="com-pill-terr-icono">🎪</span><span class="com-pill-terr-label">Eventos</span>
+                        </button>
+                    </div>
 
                             <!-- Banner Creator, solo mobile (en desktop ya está en la sidebar derecha) -->
                             <div id="comFeedCreatorBannerSlot" style="margin-bottom:0.75rem;"></div>
@@ -315,8 +350,13 @@
     // ==============================================
     // CARGAR PUBLICACIONES
     // ==============================================
+    let _recargarPendiente = false;
+
     async function cargarPublicaciones(reset = false) {
-        if (_loading) return;
+        // Si llega un cambio de filtro mientras hay una carga en curso, no se pierde: queda
+        // pendiente y se recarga apenas termina la actual. Antes se descartaba, y el feed
+        // quedaba mostrando el filtro anterior mientras el nuevo figuraba como activo.
+        if (_loading) { if (reset) _recargarPendiente = true; return; }
         _loading = true;
 
         if (reset) {
@@ -343,6 +383,9 @@
             if (!res.ok) throw new Error();
 
             const data = await res.json();
+            // Llegó otro filtro mientras tanto: esta respuesta ya no corresponde, se descarta
+            // (el finally recarga con el filtro vigente).
+            if (_recargarPendiente) return;
             const pubs = data.content || [];
             _hasMore = !data.last;
 
@@ -380,6 +423,10 @@
             if (feed) feed.innerHTML = '<div class="com-vacio"><p>Error al cargar las publicaciones.</p></div>';
         } finally {
             _loading = false;
+            if (_recargarPendiente) {
+                _recargarPendiente = false;
+                cargarPublicaciones(true);
+            }
         }
     }
 
@@ -389,10 +436,22 @@
         cargarPublicaciones(false);
     };
 
+    // Centra la pastilla activa dentro de la fila (mobile) sin mover la página
+    function _centrarPillTerritorio(territory) {
+        const fila = document.getElementById('comPillsTerritorio');
+        const pill = fila && fila.querySelector(`.com-pill-terr[data-territory="${territory}"]`);
+        if (!pill || fila.scrollWidth <= fila.clientWidth) return;
+        fila.scrollTo({ left: pill.offsetLeft - (fila.clientWidth - pill.offsetWidth) / 2, behavior: 'smooth' });
+    }
+
     window.filtrarComunidad = function(territory, el) {
             _filtroTerritory = territory;
-            document.querySelectorAll('.com-filtro-chip, .com-cat-item').forEach(c => c.classList.remove('active'));
-            if (el) el.classList.add('active');
+            // Se marca el mismo territorio en la columna izquierda (desktop) y en las pastillas
+            // circulares (mobile): los dos controles quedan siempre sincronizados.
+            document.querySelectorAll('.com-filtro-chip, .com-cat-item, .com-pill-terr').forEach(c => {
+                c.classList.toggle('active', c === el || (c.dataset.territory !== undefined && c.dataset.territory === territory));
+            });
+            _centrarPillTerritorio(territory);
             window.limpiarFiltroHashtag(false);
             cargarPublicaciones(true);
         };
@@ -404,9 +463,9 @@
 
             // El hashtag es transversal a los territorios: mostramos "Todo" activo
             // en el sidebar para comunicar que no hay restricción de categoría.
-            document.querySelectorAll('.com-filtro-chip, .com-cat-item').forEach(c => c.classList.remove('active'));
-            const chipTodo = document.querySelector('.com-cat-item[data-territory=""]');
-            if (chipTodo) chipTodo.classList.add('active');
+            document.querySelectorAll('.com-filtro-chip, .com-cat-item, .com-pill-terr').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.com-cat-item[data-territory=""], .com-pill-terr[data-territory=""]').forEach(c => c.classList.add('active'));
+            _centrarPillTerritorio('');
 
             const barra = document.getElementById('comHashtagFiltroActivo');
             const texto = document.getElementById('comHashtagFiltroTexto');
