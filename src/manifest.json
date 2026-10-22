@@ -10,6 +10,37 @@
   "theme_color": "#e50914",
   "orientation": "portrait",
   "lang": "es",
+  "categories": ["entertainment", "social"],
+  "screenshots": [
+    {
+      "src": "/assets/images/screenshots/inicio.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Inicio: todo el cine en un solo lugar"
+    },
+    {
+      "src": "/assets/images/screenshots/cartelera.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Cartelera con funciones y precios"
+    },
+    {
+      "src": "/assets/images/screenshots/mi-sala.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Mi Sala: tu identidad cinéfila"
+    },
+    {
+      "src": "/assets/images/screenshots/comunidad.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Tu credencial cinéfila"
+    }
+  ],
   "icons": [
     {
       "src": "/assets/images/icon-192.png",
