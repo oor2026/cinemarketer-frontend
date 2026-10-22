@@ -2,7 +2,7 @@
 // sw.js — Service Worker Cinemarketer PWA
 // ==============================================
 
-const CACHE_NAME = 'cinemarketer-v2'; // subir este número cada vez que cambie la lista de STATIC_ASSETS
+const CACHE_NAME = 'cinemarketer-v3'; // subir este número cada vez que cambie la lista de STATIC_ASSETS
 
 // Solo assets verdaderamente estáticos — íconos, manifest, logo. Nunca
 // código de la app (JS/CSS/HTML de módulos), que se sirve siempre fresco
@@ -11,7 +11,8 @@ const STATIC_ASSETS = [
     '/assets/images/icon-192.png',
     '/assets/images/icon-512.png',
     '/assets/images/isologotipo.webp',
-    '/assets/images/favicon.png'
+    '/assets/images/favicon.png',
+    '/offline.html'
 ];
 
 // Extensiones/origen que SÍ pueden cachearse con fallback offline —
@@ -41,6 +42,16 @@ self.addEventListener('activate', (event) => {
 // ── Fetch ─────────────────────────────────────────────────────────────────────
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
+
+    // Navegación (abrir una página) sin conexión: en vez del error del
+    // navegador, la página propia de "sin conexión". Con conexión, todo
+    // sigue igual: siempre a red.
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            fetch(event.request).catch(() => caches.match('/offline.html'))
+        );
+        return;
+    }
 
     // API, y cualquier request de mismo origen que no sea un asset
     // estático (JS, CSS, HTML de módulos, fuentes de datos) — siempre red,

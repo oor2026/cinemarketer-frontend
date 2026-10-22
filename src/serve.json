@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/.well-known/assetlinks.json", "destination": "/well-known/assetlinks.json" },
     { "source": "/dashboard", "destination": "/dashboard.html" },
     { "source": "/forgot-password", "destination": "/forgot-password.html" },
     { "source": "/login", "destination": "/login.html" },
