@@ -127,7 +127,7 @@
 
                     <!-- Filtros por territorio — solo mobile (en desktop viven en la columna izquierda).
                          Van justo debajo de la caja de crear publicación, con el mismo patrón visual
-                         que los géneros de Películas: círculo con ícono y nombre abajo. -->
+                         que los géneros de Películas: círculo con ícono y nombre abajo -->
                     <div class="com-pills-territorio" id="comPillsTerritorio">
                         <button class="com-pill-terr active" data-territory="" onclick="window.filtrarComunidad('', this)">
                             <span class="com-pill-terr-icono">✨</span><span class="com-pill-terr-label">Todo</span>
