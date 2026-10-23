@@ -76,13 +76,16 @@
         <span id="pubPeliculaNombre"></span>
       </div>
 
-      <div id="pubCountdown" style="display:none;"></div>
-
       <h2 id="pubTitulo" class="pub-titulo" style="display:none;"></h2>
+
+      <div id="pubVideo"></div>
 
       <div id="pubImagenes" class="pub-imagenes"></div>
 
       <div id="pubContenidoTexto" class="pub-contenido-texto"></div>
+
+      <!-- Bloque de Creator Tools (votación, trivia, ranking, etc.): debajo del contenido, como en el feed -->
+      <div id="pubBloque" style="display:none;"></div>
 
     </div>
 
@@ -128,10 +131,20 @@
 
 </div><!-- /.pub-layout -->
 
+<!-- Herramientas de Creator Tools: son las mismas del feed. publicacion-bloques.js las adapta al modo visitante -->
+<script src="js/creator-tools/votacion.js"></script>
+<script src="js/creator-tools/trivia.js"></script>
+<script src="js/creator-tools/ranking.js"></script>
+<script src="js/creator-tools/ficha-pelicula.js"></script>
+<script src="js/creator-tools/countdown.js"></script>
+<script src="js/creator-tools/trailer.js"></script>
+<script src="js/publicacion-bloques.js"></script>
+
 <script>
   const API_URL = window.location.hostname === 'localhost'
     ? 'http://localhost:8080/api'
     : 'https://cinemarketer-backend-production.up.railway.app/api';
+  window._comunidadApiUrl = API_URL;   // lo usan las herramientas para armar sus pedidos
 
   async function cargarPublicacion() {
       const params = new URLSearchParams(window.location.search);
@@ -274,8 +287,8 @@
       // Avatar
       const avatarEl = document.getElementById('pubAvatar');
       avatarEl.innerHTML = autor.avatarUrl
-          ? `<img src="${autor.avatarUrl}" alt="${autor.name}">`
-          : `<span>${inicial}</span>`;
+          ? `<img src="${escapeHtml(autor.avatarUrl)}" alt="${escapeHtml(autor.name)}">`
+          : `<span>${escapeHtml(inicial)}</span>`;
 
       document.getElementById('pubAutor').textContent = autor.name || 'Usuario';
       document.getElementById('pubTiempo').textContent = tiempoRelativo(pub.createdAt);
@@ -291,20 +304,21 @@
       const badges = document.getElementById('pubBadges');
       badges.innerHTML = `
           ${pub.territoryGroup ? `<span class="pub-badge-territory">${formatTerritory(pub.territoryGroup)}</span>` : ''}
-          ${pub.tone ? `<span class="pub-badge-tone">${pub.tone}</span>` : ''}`;
+          ${pub.tone ? `<span class="pub-badge-tone">${escapeHtml(pub.tone)}</span>` : ''}`;
 
-      // Película vinculada
-      if (pub.movieId) {
+      // Bloque de Creator Tools de esta publicación (si tiene): se usa la misma herramienta del feed
+      const herramienta = (window.CreatorTools || []).find(t => typeof t.activoPara === 'function' && t.activoPara(pub)) || null;
+      const muestraPelicula = !herramienta || (typeof herramienta.muestraPeliculaVinculada === 'function'
+          ? herramienta.muestraPeliculaVinculada(pub)
+          : !!herramienta.muestraPeliculaVinculada);
+
+      // Película vinculada (la oculta la herramienta que ya muestra la película por su cuenta, igual que en el feed)
+      if (pub.movieId && muestraPelicula) {
           document.getElementById('pubPeliculaVinculada').style.display = 'flex';
           document.getElementById('pubPeliculaNombre').textContent = 'Ver película vinculada';
           document.getElementById('pubPeliculaVinculada').onclick = () => {
               window.location.href = `/pelicula?id=${pub.movieId}`;
           };
-      }
-
-      // Countdown de estreno (Creator Tool)
-      if (pub.movieId && pub.countdownEnabled && pub.countdownCountryCode) {
-          renderCountdownPublico(pub);
       }
 
       // Contenido
@@ -314,8 +328,16 @@
               <div class="pub-spoiler-mask">
                   <i class="fas fa-exclamation-triangle"></i>
                   <span>Esta publicación contiene spoilers</span>
-                  <button onclick="this.parentElement.innerHTML = \`<p>${escapeHtml(pub.content)}</p>\`">Ver bajo tu propio riesgo</button>
+                  <button type="button" id="pubSpoilerBtn">Ver bajo tu propio riesgo</button>
               </div>`;
+          // El texto de la publicación nunca va dentro de un atributo onclick ni se arma como HTML:
+          // se inserta con textContent, que no interpreta nada de lo que escribió el autor.
+          document.getElementById('pubSpoilerBtn').addEventListener('click', () => {
+              const mask = contenidoEl.querySelector('.pub-spoiler-mask');
+              const p = document.createElement('p');
+              p.textContent = pub.content || '';
+              mask.replaceChildren(p);
+          });
       } else {
           contenidoEl.textContent = pub.content || '';
       }
@@ -323,8 +345,14 @@
       // Imágenes
       if (pub.imageUrls && pub.imageUrls.length > 0) {
           document.getElementById('pubImagenes').innerHTML =
-              pub.imageUrls.map(url => `<img src="${url}" alt="imagen">`).join('');
+              pub.imageUrls.map(url => `<img src="${escapeHtml(url)}" alt="imagen">`).join('');
       }
+
+      // Video (Cloudflare Stream) — mismo reproductor que el feed
+      if (typeof window.pubRenderVideo === 'function') window.pubRenderVideo(pub, document.getElementById('pubVideo'));
+
+      // Bloque de Creator Tools (votación, trivia, ranking, ficha, tráiler, cuenta regresiva)
+      if (typeof window.pubRenderBloque === 'function') window.pubRenderBloque(pub, herramienta, document.getElementById('pubBloque'));
 
       // OG tags
       document.title = `${autor.name} en Cinemarketer`;
