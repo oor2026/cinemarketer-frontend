@@ -491,11 +491,11 @@
         const autor = pub.user || {};
         const inicial = (autor.name || 'U').charAt(0).toUpperCase();
         const avatarHtml = autor.avatarUrl
-            ? `<img src="${autor.avatarUrl}" alt="${autor.name}">`
-            : `<span>${inicial}</span>`;
+            ? `<img src="${escapeHtml(autor.avatarUrl)}" alt="${escapeHtml(autor.name)}">`
+            : `<span>${escapeHtml(inicial)}</span>`;
 
         const hace = tiempoRelativo(pub.createdAt);
-        const badgeTone = pub.tone ? `<span class="com-badge-tone">${pub.tone}</span>` : '';
+        const badgeTone = pub.tone ? `<span class="com-badge-tone">${escapeHtml(pub.tone)}</span>` : '';
         const badgeTerritory = pub.territoryGroup
             ? `<span class="com-badge-territory">${formatTerritory(pub.territoryGroup)}</span>` : '';
 
