@@ -113,6 +113,10 @@ window.init_cartelera = async function(opciones) {
             // Cada tarjeta es de UN cine: los horarios y el precio salen solo de las funciones
             // de ese cine, así que nunca se mezclan con los de otro.
             const cine = delCine[0].cineNombre;
+
+            // A cuánto queda ese cine de la zona de la persona (el backend lo manda si conoce la posición
+            // del cine y el centro de su localidad). Sin dato, no se muestra nada.
+            const distancia = carteleraDistanciaTexto(delCine[0].distanciaKm, delCine[0].distanciaDesde);
             const funcs = delCine.slice().sort((a, b) => String(a.horario).localeCompare(String(b.horario)));
 
             // Hasta 4 horarios. Si quedan más, un pill "+N" con las que no entran;
@@ -130,13 +134,13 @@ window.init_cartelera = async function(opciones) {
 
             // El modal recibe TODAS las funciones de ese cine: la tarjeta muestra hasta 4
             // horarios, el modal los muestra todos con su precio.
-            tarjetas[idx] = { pelicula, poster, cine, funciones: funcs, cargarSinopsis: () => carteleraSinopsis(pelicula) };
+            tarjetas[idx] = { pelicula, poster, cine, distancia, funciones: funcs, cargarSinopsis: () => carteleraSinopsis(pelicula) };
             return `
                 <div class="cartelera-cerca-card"${conModal ? ` role="button" tabindex="0" data-idx="${idx}"` : ''}>
                     ${poster ? `<img src="${poster}" alt="${pelicula}" class="cartelera-cerca-poster" loading="lazy">` : ''}
                     <div class="cartelera-cerca-info">
                         <div class="cartelera-cerca-pelicula">${pelicula}</div>
-                        <div class="cartelera-cerca-cine">${cine}</div>
+                        <div class="cartelera-cerca-cine">${cine}${distancia ? ` <span class="cartelera-cerca-dist">· ${carteleraEscapar(distancia)}</span>` : ''}</div>
                         <div class="cartelera-cerca-horarios">${horarios}</div>
                         ${precio}
                     </div>
@@ -167,6 +171,22 @@ window.init_cartelera = async function(opciones) {
         cont.innerHTML = '<div class="cartelera-cerca-vacio">No pudimos cargar las funciones. Intentá de nuevo.</div>';
     }
 };
+
+// Texto de la distancia al cine. Se mide desde el CENTRO de la localidad o barrio que la persona cargó en su
+// perfil, no desde su casa: por eso lleva "~" y dice desde dónde se mide. Devuelve texto plano (quien lo use
+// en HTML lo escapa); sin un dato válido devuelve '' y no se muestra nada.
+function carteleraDistanciaTexto(km, desde) {
+    if (typeof km !== 'number' || !isFinite(km) || km < 0) return '';
+    const lugar = desde ? ' de ' + desde : '';
+    const redondeado = Math.round(km * 10) / 10;
+    if (redondeado < 1) return 'a menos de 1 km' + lugar;
+    const valor = redondeado < 10 ? redondeado.toFixed(1).replace('.', ',') : String(Math.round(redondeado));
+    return 'a ~' + valor + ' km' + lugar;
+}
+
+function carteleraEscapar(texto) {
+    return String(texto).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
 
 // "13:20:00" → "13:20" (el backend manda la hora con segundos).
 function carteleraHora(h) {

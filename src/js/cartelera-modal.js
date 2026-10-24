@@ -8,7 +8,8 @@
 //      hasta 4), formato, idioma y el precio completo de cada función.
 //
 // Uso:
-//   window.CarteleraModal.abrir({ pelicula, poster, cine, funciones, sinopsis, cargarSinopsis }, elementoQueLoAbrio)
+//   window.CarteleraModal.abrir({ pelicula, poster, cine, distancia, funciones, sinopsis, cargarSinopsis }, elementoQueLoAbrio)
+//   - distancia (opcional): texto ya armado, ej. "a ~2,4 km de Belgrano". Se muestra junto al cine.
 //   - funciones: las que devuelve el backend (peliculaTitulo, cineNombre, dia, esHoy,
 //     horario, formato, idioma, y los campos de precio que describe cartelera-precio.js).
 //   - sinopsis (opcional): el texto, si ya se tiene. Se muestra debajo del título, en el slide 2.
@@ -446,6 +447,7 @@
         '.cm-poster-vacio { display: flex; align-items: center; justify-content: center; font-size: 2.6rem; color: rgba(255,255,255,.35); }',
         '.cm-titulo { margin: 0; font-family: "Space Grotesk", sans-serif; font-size: 1.25rem; font-weight: 800; line-height: 1.2; }',
         '.cm-cine { font-size: .85rem; color: rgba(255,255,255,.72); }',
+        '.cm-dist { white-space: nowrap; }',
         '.cm-chip { display: inline-block; font-size: .72rem; font-weight: 700; color: #ffb4a8; background: rgba(240,85,63,.2); border-radius: 999px; padding: 4px 11px; }',
         '.cm-btn-principal { margin-top: 4px; border: 0; border-radius: 999px; padding: 11px 22px; cursor: pointer; font-size: .85rem; font-weight: 700; color: #fff; background: linear-gradient(135deg, #f0553f, #c4321f); box-shadow: 0 8px 18px -6px rgba(196,50,31,.6); }',
 
@@ -561,7 +563,7 @@
         var cantidad = (d.funciones || []).length;
         return '<div class="cm-poster-wrap">' + poster +
             '<h2 class="cm-titulo" id="cmTitulo">' + esc(d.pelicula) + '</h2>' +
-            '<div class="cm-cine"><i class="fas fa-location-dot"></i> ' + esc(d.cine) + '</div>' +
+            '<div class="cm-cine"><i class="fas fa-location-dot"></i> ' + esc(d.cine) + (d.distancia ? ' <span class="cm-dist">· ' + esc(d.distancia) + '</span>' : '') + '</div>' +
             (cantidad ? '<span class="cm-chip">' + textoFunciones(cantidad) + '</span>' : '') +
             '<button type="button" class="cm-btn-principal" data-ir="1">Ver funciones <i class="fas fa-chevron-right"></i></button>' +
             '</div>';
@@ -606,6 +608,7 @@
         // Si hay un solo día se dice junto al cine; si hay varios, cada uno lleva su título.
         var meta = textoFunciones(funciones.length);
         if (dias.length === 1) meta = etiquetaDia(dias[0].dia, dias[0].esHoy) + ' · ' + meta;
+        if (d.distancia) meta += ' · ' + d.distancia;
         var hayPrecio = funciones.some(function (f) { return f && f.precioReferencia != null; });
 
         // Dos secciones: LA PELÍCULA (título + sinopsis, sobre azul) y EL CINE (nombre + funciones,
