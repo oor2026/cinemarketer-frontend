@@ -653,27 +653,76 @@
         } catch(e) {}
     };
 
-    window.togglePunto = function(pubId, btn) {
+    // El modal "¡Merecés un punto!" vive en feed-films.html (módulo Películas) y ya trae todo su estilo en línea.
+    // Si no está en la página (por ejemplo, al entrar directo a Comunidad), se lo trae acá: solo ese modal.
+    // Se guarda su HTML para no volver a pedirlo.
+    let _tplModalMerecePunto = null;
+    let _abriendoModalPunto = false;
+    async function _traerModalMerecePunto() {
+        try {
+            if (!_tplModalMerecePunto) {
+                const res = await fetch('modules/feed-films.html');
+                if (!res.ok) return null;
+                const temp = document.createElement('div');
+                temp.innerHTML = await res.text();
+                const el = temp.querySelector('#modalMerecePunto');
+                if (!el) return null;
+                _tplModalMerecePunto = el.outerHTML;
+            }
+            const cont = document.createElement('div');
+            cont.innerHTML = _tplModalMerecePunto;
+            const modal = cont.firstElementChild;
+            modal.dataset.bgAsset = 'feed-films';   // loadModule('feed-films') lo limpia: así no queda un ID duplicado
+            document.body.appendChild(modal);
+            return modal;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    window.togglePunto = async function(pubId, btn) {
             // Si ya dio el punto, mostrar toast irreversible
             if (btn.dataset.active === 'true') {
                 window.mostrarToast('Ya le diste un punto a esta publicación. Esta acción es irreversible.', 'info');
                 return;
             }
+            if (_abriendoModalPunto) return;   // un segundo toque mientras se trae el modal no abre otro
 
             // Obtener nombre del autor desde la card
             const card = document.querySelector(`.com-card[data-id="${pubId}"]`);
             const autorNombre = card?.querySelector('.com-card-autor')?.textContent?.trim() || 'este usuario';
 
-            // Reutilizar el modal existente de merecePunto
-            const modal = document.getElementById('modalMerecePunto');
+            // Reutilizar el modal existente de merecePunto; si no está en la página, traerlo
+            let modal = document.getElementById('modalMerecePunto');
+            let propio = false;   // true si lo trajo este flujo: entonces es solo de este flujo
+            if (!modal) {
+                _abriendoModalPunto = true;
+                try { modal = await _traerModalMerecePunto(); } finally { _abriendoModalPunto = false; }
+                propio = !!modal;
+            }
             const nombreEl = document.getElementById('merecePuntoAutorNombre');
             const btnConfirmar = document.getElementById('btnConfirmarMerecePunto');
 
             if (!modal || !nombreEl || !btnConfirmar) {
+                if (propio) modal.remove();
                 // Fallback si el modal no está disponible
                 if (!confirm(`¿Querés darle un punto a ${autorNombre}? Esta acción es irreversible.`)) return;
                 _ejecutarTogglePunto(pubId, btn);
                 return;
+            }
+
+            // Si el modal lo trajo este flujo, se cierra y se quita al terminar (no deja nada pegado para otros
+            // módulos) y sus botones no dependen de funciones que viven en Películas.
+            const cerrar = () => {
+                modal.style.display = 'none';
+                if (propio) modal.remove();
+            };
+            if (propio) {
+                modal.querySelectorAll('button:not(#btnConfirmarMerecePunto)').forEach(b => {
+                    b.removeAttribute('onclick');
+                    b.addEventListener('click', cerrar);
+                });
+                modal.addEventListener('click', e => { if (e.target === modal) cerrar(); });
             }
 
             nombreEl.textContent = autorNombre;
@@ -681,9 +730,10 @@
 
             // Reemplazar el onclick del botón confirmar temporalmente
             const nuevoBtn = btnConfirmar.cloneNode(true);
+            if (propio) nuevoBtn.removeAttribute('onclick');
             btnConfirmar.parentNode.replaceChild(nuevoBtn, btnConfirmar);
             nuevoBtn.addEventListener('click', async () => {
-                modal.style.display = 'none';
+                cerrar();
                 await _ejecutarTogglePunto(pubId, btn);
             });
         };
