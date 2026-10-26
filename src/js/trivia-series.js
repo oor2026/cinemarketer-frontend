@@ -483,6 +483,14 @@ window.cerrarRankingTriviaSeries = function() {
     document.body.style.overflow = '';
 };
 
+// Los nombres de las personas se pintan como texto, nunca como HTML: un nombre con etiquetas no debe
+// ejecutarse ni convertirse en un link en el ranking de quien lo mira.
+function _escHtmlTriviaSeries(texto) {
+    return String(texto == null ? '' : texto)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 function renderRankingTriviaSeries(ranking) {
     const cont = document.getElementById('rankingTriviaSeriesContenido');
 
@@ -510,7 +518,7 @@ function renderRankingTriviaSeries(ranking) {
                 ${ranking.map(r => `
                     <div class="ranking-fila${r.esUsuarioActual ? ' yo' : ''}">
                         <span class="ranking-pos${r.posicion <= 3 ? ' top3' : ''}">#${r.posicion}</span>
-                        <span style="cursor:pointer;" onclick="event.stopPropagation(); window.cerrarRankingTriviaSeries(); window.abrirPerfilUsuario(${r.userId})">${r.nombre}${r.esUsuarioActual ? ' (vos)' : ''}</span>
+                        <span style="cursor:pointer;" onclick="event.stopPropagation(); window.cerrarRankingTriviaSeries(); window.abrirPerfilUsuario(${r.userId})">${_escHtmlTriviaSeries(r.nombre)}${r.esUsuarioActual ? ' (vos)' : ''}</span>
                         <span class="ranking-aciertos">${r.aciertos}</span>
                         <span class="ranking-tiempo">${formatTiempo(r.tiempoTotalSegundos)}</span>
                     </div>
@@ -523,7 +531,8 @@ function renderComparacionRankingTriviaSeries(ranking, otroUsuarioId, otroNombre
     const cont = document.getElementById('rankingTriviaSeriesContenido');
     const yo = ranking.find(r => r.esUsuarioActual);
     const otro = ranking.find(r => String(r.userId) === String(otroUsuarioId));
-    const nombre = otroNombre || 'esta persona';
+    // El nombre de la otra persona llega de afuera (su perfil) y va a la frase y a la etiqueta de la columna: se escapa una sola vez acá.
+    const nombre = _escHtmlTriviaSeries(otroNombre || 'esta persona');
 
     const formatTiempo = (seg) => {
         const m = Math.floor(seg / 60);
