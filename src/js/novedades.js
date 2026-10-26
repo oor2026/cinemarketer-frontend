@@ -68,6 +68,14 @@ function cerrarTodosLosMenus() {
     }
 }
 
+// El mensaje de cada novedad llega del backend y puede incluir el nombre de otra persona: se pinta como texto,
+// nunca como HTML (si no, un nombre con etiquetas se ejecutaría en la campanita de quien lo recibe).
+function _escHtmlNovedad(texto) {
+    return String(texto == null ? '' : texto)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 function getNotifIcono(type, referenceType) {
     if (type === 'NEW_REWARD' || type === 'NEW_PREMIUM_REWARD') {
         switch(referenceType) {
@@ -103,6 +111,8 @@ function getNotifIcono(type, referenceType) {
         case 'VIDEO_APROBADO':           return '🎬';
         case 'VIDEO_PENDIENTE_REVISION': return '🕓';
         case 'VIDEO_RECHAZADO':          return '⛔';
+        case 'TRIVIA_SUPERADO':          return '📉';
+        case 'TRIVIA_SERIES_SUPERADO':   return '📉';
         default:                         return '💬';
     }
 }
@@ -174,7 +184,7 @@ window.cargarNovedades = async function() {
                     <div style="display:flex;align-items:flex-start;gap:0.5rem;">
                             <span style="font-size:1rem;flex-shrink:0;">${getNotifIcono(n.type, n.referenceType)}</span>
                             <div style="flex:1;min-width:0;">
-                                <div style="font-size:0.83rem;color:#333;line-height:1.4;">${n.message}</div>
+                                <div style="font-size:0.83rem;color:#333;line-height:1.4;">${_escHtmlNovedad(n.message)}</div>
                                 <div style="font-size:0.75rem;color:#999;margin-top:0.2rem;">${new Date(n.createdAt).toLocaleDateString('es-ES')} ${new Date(n.createdAt).toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'})}</div>
                                 ${botonesFollow}
                             </div>
@@ -190,6 +200,26 @@ window.cargarNovedades = async function() {
         lista.innerHTML = '<div style="padding:1rem;text-align:center;color:#999;font-size:0.85rem;">Error al cargar novedades</div>';
     }
 };
+
+// El modal del ranking de Trivia de Series vive en feed-films.html, que solo se carga al entrar a Películas. Si la
+// campanita lo necesita y no está en la página, se trae solo ese modal; queda marcado para que loadModule lo limpie
+// al entrar a Películas (que trae el suyo) y no queden dos con el mismo id.
+async function _asegurarModalRankingSeriesEnDOM() {
+    if (document.getElementById('rankingTriviaSeriesModal')) return true;
+    try {
+        const res = await fetch('modules/feed-films.html');
+        if (!res.ok) return false;
+        const temp = document.createElement('div');
+        temp.innerHTML = await res.text();
+        const modal = temp.querySelector('#rankingTriviaSeriesModal');
+        if (!modal) return false;
+        modal.dataset.bgAsset = 'feed-films';
+        document.body.appendChild(modal);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
 
 window.clickNovedad = async function(notificationId, movieId, commentId, replyId, type, yaLeida, actorId, publicationId, rewardId, seriesId) {
      console.log('clickNovedad ejecutado, type:', type);
@@ -233,6 +263,18 @@ window.clickNovedad = async function(notificationId, movieId, commentId, replyId
             }
             return;
         }
+
+    // Te superaron en la trivia: se abre el ranking correspondiente.
+    if (type === 'TRIVIA_SUPERADO') {
+        if (typeof window.abrirRankingTrivia === 'function') window.abrirRankingTrivia();
+        return;
+    }
+    if (type === 'TRIVIA_SERIES_SUPERADO') {
+        if (await _asegurarModalRankingSeriesEnDOM() && typeof window.abrirRankingTriviaSeries === 'function') {
+            window.abrirRankingTriviaSeries();
+        }
+        return;
+    }
 
     // Abrir película al clickear recomendación nueva
                 if (type === 'NEW_RECOMMENDATION') {
@@ -681,7 +723,7 @@ window.cargarNovedadesMobile = async function() {
                             <div style="display:flex;align-items:flex-start;gap:0.5rem;">
                                 <span style="font-size:1rem;flex-shrink:0;">${getNotifIcono(n.type, n.referenceType)}</span>
                                 <div style="flex:1;min-width:0;">
-                                    <div style="font-size:0.83rem;color:#333;line-height:1.4;">${n.message}</div>
+                                    <div style="font-size:0.83rem;color:#333;line-height:1.4;">${_escHtmlNovedad(n.message)}</div>
                                     <div style="font-size:0.75rem;color:#999;margin-top:0.2rem;">${new Date(n.createdAt).toLocaleDateString('es-ES')} ${new Date(n.createdAt).toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'})}</div>
                                     ${botonesFollow}
                                 </div>
