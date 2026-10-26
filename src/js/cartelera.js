@@ -67,6 +67,10 @@ window.init_cartelera = async function(opciones) {
         const params = new URLSearchParams({ provincia: provinciaSlug, fecha: hoy });
         if (localidad) params.set('localidad', localidad);
 
+        // Hoy cerca tuyo pide el modo "cerca": todo lo que hay hasta el radio que define el backend (10 km) del
+        // punto de tu zona, de lo más cercano a lo más lejano. Las otras pantallas que usan este endpoint no lo mandan.
+        params.set('cerca', '1');
+
         const token = localStorage.getItem('token');
         const res = await fetch(`${CONFIG.API_URL}/cartelera/organizar-salida?${params}`, {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -93,7 +97,7 @@ window.init_cartelera = async function(opciones) {
         // Una tarjeta por película Y por cine, así aparecen las funciones de TODOS los cines de la
         // zona. (Antes había una tarjeta por película y se mostraba un solo cine, el de la primera
         // función: si la película estaba en dos cines de la zona, el otro quedaba oculto.)
-        // El orden es el que manda el backend: arriba, lo que empieza antes.
+        // El orden es el que manda el backend: arriba, el cine más cercano; y dentro de cada cine, lo que empieza antes.
         const grupos = new Map();
         funciones.forEach(f => {
             const clave = `${f.peliculaTitulo}\u0000${f.cineNombre}`;
