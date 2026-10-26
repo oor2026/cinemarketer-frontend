@@ -138,7 +138,7 @@ window.init_cartelera = async function(opciones) {
 
             // El modal recibe TODAS las funciones de ese cine: la tarjeta muestra hasta 4
             // horarios, el modal los muestra todos con su precio.
-            tarjetas[idx] = { pelicula, poster, cine, distancia, funciones: funcs, cargarSinopsis: () => carteleraSinopsis(pelicula) };
+            tarjetas[idx] = { pelicula, poster, cine, distancia, genero: delCine[0].genero, duracionMinutos: delCine[0].duracionMinutos, funciones: funcs, cargarSinopsis: () => carteleraSinopsis(pelicula) };
             return `
                 <div class="cartelera-cerca-card"${conModal ? ` role="button" tabindex="0" data-idx="${idx}"` : ''}>
                     ${poster ? `<img src="${poster}" alt="${pelicula}" class="cartelera-cerca-poster" loading="lazy">` : ''}

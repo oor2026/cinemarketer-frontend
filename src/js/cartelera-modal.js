@@ -10,6 +10,9 @@
 // Uso:
 //   window.CarteleraModal.abrir({ pelicula, poster, cine, distancia, funciones, sinopsis, cargarSinopsis }, elementoQueLoAbrio)
 //   - distancia (opcional): texto ya armado, ej. "a ~2,4 km de Belgrano". Se muestra junto al cine.
+//   - genero (opcional): arreglo con los géneros de la película, y duracionMinutos (opcional): su duración en
+//     minutos. Se muestran como etiquetas "Género: ..." y "Duración: ..." debajo del título, en los dos slides.
+//     Lo que falte simplemente no se muestra.
 //   - funciones: las que devuelve el backend (peliculaTitulo, cineNombre, dia, esHoy,
 //     horario, formato, idioma, y los campos de precio que describe cartelera-precio.js).
 //   - sinopsis (opcional): el texto, si ya se tiene. Se muestra debajo del título, en el slide 2.
@@ -60,6 +63,41 @@
 
     function textoFunciones(n) {
         return n === 1 ? '1 función' : n + ' funciones';
+    }
+
+    // Géneros que agendadecine escribe sin tilde: se muestran bien. Lo que no está acá se muestra como viene.
+    var GENEROS_CORREGIDOS = {
+        'accion': 'Acción', 'animacion': 'Animación', 'ciencia ficcion': 'Ciencia ficción',
+        'fantasia': 'Fantasía', 'musica': 'Música', 'belica': 'Bélica'
+    };
+
+    function nombreGenero(g) {
+        var t = String(g == null ? '' : g).trim();
+        if (!t) return '';
+        var clave = t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        return GENEROS_CORREGIDOS[clave] || t;
+    }
+
+    // 181 → "3 h 1 min", 120 → "2 h", 45 → "45 min". Vacío si no es una cantidad de minutos válida.
+    function textoDuracion(minutos) {
+        var m = Math.round(Number(minutos));
+        if (!isFinite(m) || m <= 0) return '';
+        var h = Math.floor(m / 60), r = m % 60;
+        if (!h) return r + ' min';
+        return r ? h + ' h ' + r + ' min' : h + ' h';
+    }
+
+    // Las etiquetas "Género: ..." y "Duración: ..." que van debajo del título. Hasta 3 géneros. Si no hay
+    // ninguno de los dos datos, no devuelve nada (no queda un hueco).
+    function htmlTagsPelicula(d) {
+        var lista = Array.isArray(d.genero) ? d.genero : (d.genero ? [d.genero] : []);
+        var generos = lista.map(nombreGenero).filter(Boolean).slice(0, 3);
+        var duracion = textoDuracion(d.duracionMinutos);
+        if (!generos.length && !duracion) return '';
+        return '<div class="cm-tags">' +
+            (generos.length ? '<span class="cm-tag"><span class="cm-tag-etq">Género:</span> ' + esc(generos.join(', ')) + '</span>' : '') +
+            (duracion ? '<span class="cm-tag"><span class="cm-tag-etq">Duración:</span> ' + esc(duracion) + '</span>' : '') +
+            '</div>';
     }
 
     // "Hoy · miércoles 7 de octubre" / "jueves 8 de octubre"
@@ -280,6 +318,7 @@
             '<button type="button" class="cm-volver" data-ir="0"><i class="fas fa-chevron-left"></i> Póster</button>' +
             '<span class="cm-etiqueta cm-etiqueta-pelicula"><i class="fas fa-clapperboard"></i> La película</span>' +
             '<h2 class="cm-titulo">' + esc(d.pelicula) + '</h2>' +
+            htmlTagsPelicula(d) +
             htmlSinopsis(d) +
             (extra || '') +
             '</div>';
@@ -448,6 +487,10 @@
         '.cm-titulo { margin: 0; font-family: "Space Grotesk", sans-serif; font-size: 1.25rem; font-weight: 800; line-height: 1.2; }',
         '.cm-cine { font-size: .85rem; color: rgba(255,255,255,.72); }',
         '.cm-dist { white-space: nowrap; }',
+        '.cm-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }',
+        '.cm-pelicula .cm-tags { justify-content: flex-start; margin-top: 10px; }',
+        '.cm-tag { display: inline-block; max-width: 100%; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,.14); color: rgba(255,255,255,.92); font-size: .72rem; font-weight: 600; line-height: 1.3; }',
+        '.cm-tag-etq { font-weight: 500; color: rgba(255,255,255,.62); }',
         '.cm-chip { display: inline-block; font-size: .72rem; font-weight: 700; color: #ffb4a8; background: rgba(240,85,63,.2); border-radius: 999px; padding: 4px 11px; }',
         '.cm-btn-principal { margin-top: 4px; border: 0; border-radius: 999px; padding: 11px 22px; cursor: pointer; font-size: .85rem; font-weight: 700; color: #fff; background: linear-gradient(135deg, #f0553f, #c4321f); box-shadow: 0 8px 18px -6px rgba(196,50,31,.6); }',
 
@@ -563,6 +606,7 @@
         var cantidad = (d.funciones || []).length;
         return '<div class="cm-poster-wrap">' + poster +
             '<h2 class="cm-titulo" id="cmTitulo">' + esc(d.pelicula) + '</h2>' +
+            htmlTagsPelicula(d) +
             '<div class="cm-cine"><i class="fas fa-location-dot"></i> ' + esc(d.cine) + (d.distancia ? ' <span class="cm-dist">· ' + esc(d.distancia) + '</span>' : '') + '</div>' +
             (cantidad ? '<span class="cm-chip">' + textoFunciones(cantidad) + '</span>' : '') +
             '<button type="button" class="cm-btn-principal" data-ir="1">Ver funciones <i class="fas fa-chevron-right"></i></button>' +
@@ -617,6 +661,7 @@
                 '<button type="button" class="cm-volver" data-ir="0"><i class="fas fa-chevron-left"></i> Póster</button>' +
                 '<span class="cm-etiqueta cm-etiqueta-pelicula"><i class="fas fa-clapperboard"></i> La película</span>' +
                 '<h2 class="cm-titulo">' + esc(d.pelicula) + '</h2>' +
+                htmlTagsPelicula(d) +
                 htmlSinopsis(d) +
             '</div>' +
             '<section class="cm-lugar" aria-label="Funciones en ' + esc(d.cine) + '">' +

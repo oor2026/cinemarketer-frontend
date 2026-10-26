@@ -8727,6 +8727,10 @@ var BUSCADOR_SAGAS = [
                                 return {
                                     pelicula,
                                     poster: funcs[0].poster || '',
+                                    // Género y duración de la película: el backend los manda en cada función y el modal
+                                    // los muestra como etiquetas debajo del título.
+                                    genero: funcs[0].genero,
+                                    duracionMinutos: funcs[0].duracionMinutos,
                                     funciones: funcs,
                                     soloFunciones: true,   // sin slide de póster: el póster ya se tocó en los resultados
                                     contexto,
