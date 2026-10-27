@@ -2758,6 +2758,68 @@
     margin: 0;
 }
 
+/* ==============================================
+   VERSIONES DEL TRÁILER
+   Pastillas debajo del video para elegir la versión (Español, Inglés, oficial...). Las usan los modales de
+   películas y de series. Si hay una sola versión el contenedor queda vacío y no se ve.
+   ============================================== */
+.trailer-versiones {
+    margin-top: 0.75rem;
+    margin-bottom: 0.75rem;
+    text-align: center;
+}
+
+.trailer-versiones:empty {
+    display: none;
+}
+
+.trailer-versiones-titulo {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 0.45rem;
+}
+
+.trailer-versiones-lista {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+}
+
+.trailer-version-pill {
+    background: white;
+    border: 1.5px solid #ddd;
+    border-radius: 20px;
+    padding: 0.4rem 0.95rem;
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.trailer-version-pill:hover {
+    border-color: #1a3a6b;
+    color: #1a3a6b;
+}
+
+.trailer-version-pill:focus-visible {
+    outline: 2px solid #1a3a6b;
+    outline-offset: 2px;
+}
+
+.trailer-version-pill.activa {
+    background: #1a3a6b;
+    border-color: #1a3a6b;
+    color: white;
+    font-weight: 600;
+}
+
 /* Placeholder inicial antes de cargar */
 .trailer-placeholder {
     display: flex;
