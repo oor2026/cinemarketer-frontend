@@ -3197,6 +3197,12 @@ window._confirmarAvisoEstreno = async function() {
 window.cargarTrailerPelicula = async function(movieId, backdropPath) {
     const container = document.getElementById('modalTrailerContainer');
     if (!container) return;
+    const versionesEl = document.getElementById('trailerVersiones');
+
+    // Cada carga lleva su número: si se abre otro título mientras este todavía busca, la respuesta atrasada se
+    // descarta (si no, el tráiler o las pastillas del título anterior pisarían a los del nuevo).
+    const peticion = (window._trailerPeliculaPeticion = (window._trailerPeliculaPeticion || 0) + 1);
+    const vigente = () => peticion === window._trailerPeliculaPeticion;
 
     container.innerHTML = `
         <div class="buscador-pensando">
@@ -3204,62 +3210,138 @@ window.cargarTrailerPelicula = async function(movieId, backdropPath) {
             <span>Cargando tráiler...</span>
         </div>
     `;
+    if (versionesEl) versionesEl.innerHTML = '';
 
     const token = localStorage.getItem('token');
-    const idiomas = ['es-MX', 'es-ES', 'en-US'];
-    let videoToUse = null;
 
-    for (const lang of idiomas) {
+    // Tráilers de YouTube de un idioma. Si el pedido falla, ese idioma simplemente no aporta videos.
+    // La clave se valida porque va a parar a una URL: tiene que ser un id de YouTube. Cada video queda con su
+    // idioma real (el que trae él mismo en iso_639_1); solo si no lo trajera se usa el del pedido.
+    const pedirTrailers = async (lang) => {
         try {
             const response = await fetch(
                 `${CONFIG.API_URL}/movies/${movieId}/videos?language=${lang}`,
                 { headers: { 'Authorization': `Bearer ${token}` } }
             );
-            if (!response.ok) continue;
-
+            if (!response.ok) return [];
             const data = await response.json();
-
-            videoToUse = data.results?.find(v =>
-                v.site === 'YouTube' && v.type === 'Trailer' && v.official === true
-            ) || data.results?.find(v =>
-                v.site === 'YouTube' && v.type === 'Trailer'
-            );
-
-            if (videoToUse) break;
+            return (data.results || [])
+                .filter(v => v && v.site === 'YouTube' && v.type === 'Trailer' && /^[A-Za-z0-9_-]{6,20}$/.test(v.key || ''))
+                .map(v => ({ ...v, idiomaReal: String(v.iso_639_1 || lang.slice(0, 2)).toLowerCase() }));
         } catch (e) {
-            continue;
-        }
-    }
-
-        if (videoToUse?.key) {
-            container.innerHTML = `
-                <div class="trailer-embed">
-                    <iframe
-                        width="100%"
-                        height="100%"
-                        src="https://www.youtube.com/embed/${videoToUse.key}"
-                        title="Tráiler"
-                        frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowfullscreen>
-                    </iframe>
-                </div>
-            `;
-        } else {
-            container.innerHTML = `
-                <div class="sin-trailer">
-                    <i class="fas fa-video-slash"></i>
-                    <p>Tráiler no disponible</p>
-                </div>
-            `;
-        }
-
-        // Hero de fondo detrás de la ficha de datos — solo desktop. Reusa
-        // el mismo video que ya se buscó acá arriba, sin pedirlo dos veces.
-        if (window.innerWidth > 768 && typeof window._aplicarHeroModalPelicula === 'function') {
-            window._aplicarHeroModalPelicula(videoToUse?.key || null, backdropPath);
+            return [];
         }
     };
+
+    // Español se pide en sus dos variantes (es-MX y es-ES) porque cada una trae videos distintos: la que tiene
+    // solo uno subtitulado puede no tener el doblado, que está en la otra. Los tres pedidos van a la vez.
+    const respuestas = await Promise.all(['es-MX', 'es-ES', 'en-US'].map(pedirTrailers));
+    if (!vigente()) return;
+
+    // TMDB marca como "español" a los tráilers subtitulados, que en realidad tienen el audio en inglés. El único
+    // dato que lo delata es el nombre del video.
+    const esSubtitulado = (nombre) => /subtitul|subtitled|\bsubs?\.?[\s:_-]*(?:esp|spa|eng|ing|lat)/i.test(nombre || '');
+
+    // Cada video se clasifica por lo que dice él mismo, no por el pedido en que llegó:
+    //  - Español: está en español y NO es subtitulado (o sea, doblado, o hablado originalmente en español).
+    //  - Inglés: está en inglés, y también los subtitulados aunque vengan etiquetados como español.
+    //  - Cualquier otro idioma no se muestra.
+    const opciones = [];
+    [].concat(...respuestas).forEach(v => {
+        if (opciones.some(o => o.key === v.key)) return;   // el mismo video no se repite
+        const subtitulado = esSubtitulado(v.name);
+        let idioma;
+        if (v.idiomaReal === 'es') idioma = subtitulado ? 'Inglés' : 'Español';
+        else if (v.idiomaReal === 'en') idioma = 'Inglés';
+        else return;
+        opciones.push({
+            key: v.key,
+            name: (v.name || '') + (v.iso_3166_1 ? ' (' + v.iso_3166_1 + ')' : ''),
+            idioma,
+            oficial: v.official === true,
+            subtitulado
+        });
+    });
+
+    // Orden: primero el Español (el oficial antes), después los subtitulados al español (los más útiles para
+    // quien no entiende inglés) y por último el Inglés, siempre con el oficial primero. El primero es el que
+    // se muestra al abrir.
+    const peso = (o) => (o.idioma === 'Español' ? 0 : 10) + (o.subtitulado ? 0 : 2) + (o.oficial ? 0 : 1);
+    opciones.sort((a, b) => peso(a) - peso(b));
+
+    // Texto de cada pastilla: "Español", "Inglés · Oficial", "Inglés · Subtitulado". Si dos tuvieran el mismo, se numeran.
+    opciones.forEach(o => { o.etiqueta = o.idioma + (o.oficial ? ' · Oficial' : '') + (o.subtitulado ? ' · Subtitulado' : ''); });
+    const total = {};
+    opciones.forEach(o => { total[o.etiqueta] = (total[o.etiqueta] || 0) + 1; });
+    const contados = {};
+    opciones.forEach(o => {
+        const base = o.etiqueta;
+        if (total[base] > 1) {
+            contados[base] = (contados[base] || 0) + 1;
+            o.etiqueta = base + ' ' + contados[base];
+        }
+    });
+
+    const escapar = (t) => String(t == null ? '' : t)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+    const pintarVideo = (key, conAutoplay) => {
+        container.innerHTML = `
+            <div class="trailer-embed">
+                <iframe
+                    width="100%"
+                    height="100%"
+                    src="https://www.youtube.com/embed/${key}${conAutoplay ? '?autoplay=1' : ''}"
+                    title="Tráiler"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+                </iframe>
+            </div>
+        `;
+    };
+
+    if (opciones.length > 0) {
+        pintarVideo(opciones[0].key, false);
+    } else {
+        container.innerHTML = `
+            <div class="sin-trailer">
+                <i class="fas fa-video-slash"></i>
+                <p>Tráiler no disponible</p>
+            </div>
+        `;
+    }
+
+    // Pastillas para elegir la versión (como al crear una publicación): solo si hay más de una.
+    if (versionesEl && opciones.length > 1) {
+        versionesEl.innerHTML = `
+            <p class="trailer-versiones-titulo">Versión del tráiler</p>
+            <div class="trailer-versiones-lista">
+                ${opciones.map((o, i) => `<button type="button" class="trailer-version-pill${i === 0 ? ' activa' : ''}" data-key="${o.key}" title="${escapar(o.name)}" aria-pressed="${i === 0}">${escapar(o.etiqueta)}</button>`).join('')}
+            </div>
+        `;
+        let activa = opciones[0].key;
+        versionesEl.querySelectorAll('.trailer-version-pill').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (!vigente() || btn.dataset.key === activa) return;
+                activa = btn.dataset.key;
+                pintarVideo(activa, true);   // la persona lo pidió: arranca solo
+                versionesEl.querySelectorAll('.trailer-version-pill').forEach(b => {
+                    const esta = b.dataset.key === activa;
+                    b.classList.toggle('activa', esta);
+                    b.setAttribute('aria-pressed', esta ? 'true' : 'false');
+                });
+            });
+        });
+    }
+
+    // Hero de fondo detrás de la ficha de datos — solo desktop. Usa siempre el video inicial: no cambia al
+    // elegir otra versión con las pastillas.
+    if (window.innerWidth > 768 && typeof window._aplicarHeroModalPelicula === 'function') {
+        window._aplicarHeroModalPelicula(opciones[0]?.key || null, backdropPath);
+    }
+};
 
     window._aplicarHeroModalPelicula = function(videoKey, backdropPath) {
         const hero = document.getElementById('modalHeroFondo');

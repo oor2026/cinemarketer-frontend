@@ -2708,6 +2708,12 @@ window.scrollSimilaresSerie = function(direccion) {
 window.cargarTrailerSerie = async function(seriesId, backdropPath) {
     const container = document.getElementById('modalTrailerContainerSerie');
     if (!container) return;
+    const versionesEl = document.getElementById('trailerVersionesSerie');
+
+    // Cada carga lleva su número: si se abre otro título mientras este todavía busca, la respuesta atrasada se
+    // descarta (si no, el tráiler o las pastillas del título anterior pisarían a los del nuevo).
+    const peticion = (window._trailerSeriePeticion = (window._trailerSeriePeticion || 0) + 1);
+    const vigente = () => peticion === window._trailerSeriePeticion;
 
     container.innerHTML = `
         <div class="trailer-loading">
@@ -2715,60 +2721,119 @@ window.cargarTrailerSerie = async function(seriesId, backdropPath) {
             <span>Cargando tráiler...</span>
         </div>
     `;
+    if (versionesEl) versionesEl.innerHTML = '';
 
     const token = localStorage.getItem('token');
-    const idiomas = ['es-MX', 'es-ES', 'en-US'];
-    let videoToUse = null;
 
-    for (const lang of idiomas) {
+    // Tráilers de YouTube de un idioma. Si el pedido falla, ese idioma simplemente no aporta versiones.
+    // La clave se valida porque va a parar a una URL: tiene que ser un id de YouTube.
+    const pedirTrailers = async (lang) => {
         try {
             const response = await fetch(
-                `${CONFIG.API_URL}/series/${seriesId}/videos?language=${lang}`,
+                `${CONFIG.API_URL}/movies/${movieId}/videos?language=${lang}`,
                 { headers: { 'Authorization': `Bearer ${token}` } }
             );
-            if (!response.ok) continue;
-
+            if (!response.ok) return [];
             const data = await response.json();
-            videoToUse = data.results?.find(v =>
-                v.site === 'YouTube' && v.type === 'Trailer' && v.official === true
-            ) || data.results?.find(v =>
-                v.site === 'YouTube' && v.type === 'Trailer'
+            return (data.results || []).filter(v =>
+                v && v.site === 'YouTube' && v.type === 'Trailer' && /^[A-Za-z0-9_-]{6,20}$/.test(v.key || '')
             );
-            if (videoToUse) break;
         } catch (e) {
-            continue;
-        }
-    }
-
-        if (videoToUse?.key) {
-            container.innerHTML = `
-                <div class="trailer-embed">
-                    <iframe
-                        width="100%"
-                        height="100%"
-                        src="https://www.youtube.com/embed/${videoToUse.key}"
-                        title="Tráiler"
-                        frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowfullscreen>
-                    </iframe>
-                </div>
-            `;
-        } else {
-            container.innerHTML = `
-                <div class="sin-trailer">
-                    <i class="fas fa-video-slash"></i>
-                    <p>Tráiler no disponible</p>
-                </div>
-            `;
-        }
-
-        // Hero de fondo detrás de la ficha de datos — solo desktop.
-        // Prioridad: backdrop → video (solo si no hay backdrop) → oscuro.
-        if (window.innerWidth > 768 && typeof window._aplicarHeroModalSerie === 'function') {
-            window._aplicarHeroModalSerie(videoToUse?.key || null, backdropPath);
+            return [];
         }
     };
+
+    // Español (es-MX, y es-ES solo si no hay nada) e Inglés se piden a la vez.
+    const [espanol, ingles] = await Promise.all([
+        pedirTrailers('es-MX').then(r => r.length ? r : pedirTrailers('es-ES')),
+        pedirTrailers('en-US')
+    ]);
+    if (!vigente()) return;
+
+    // Una opción por video (sin repetir), con el oficial primero dentro de cada idioma. La primera es el video
+    // que se mostraba antes de que existieran las pastillas: el oficial del primer idioma que tenía tráiler.
+    const opciones = [];
+    [['Español', espanol], ['Inglés', ingles]].forEach(([idioma, lista]) => {
+        lista.filter(v => v.official === true).concat(lista.filter(v => v.official !== true)).forEach(v => {
+            if (!opciones.some(o => o.key === v.key)) {
+                opciones.push({ key: v.key, name: v.name || '', idioma, oficial: v.official === true });
+            }
+        });
+    });
+
+    // Texto de cada pastilla: "Español · Oficial". Si dos tuvieran el mismo, se numeran.
+    opciones.forEach(o => { o.etiqueta = o.idioma + (o.oficial ? ' · Oficial' : ''); });
+    const total = {};
+    opciones.forEach(o => { total[o.etiqueta] = (total[o.etiqueta] || 0) + 1; });
+    const contados = {};
+    opciones.forEach(o => {
+        const base = o.etiqueta;
+        if (total[base] > 1) {
+            contados[base] = (contados[base] || 0) + 1;
+            o.etiqueta = base + ' ' + contados[base];
+        }
+    });
+
+    const escapar = (t) => String(t == null ? '' : t)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+    const pintarVideo = (key, conAutoplay) => {
+        container.innerHTML = `
+            <div class="trailer-embed">
+                <iframe
+                    width="100%"
+                    height="100%"
+                    src="https://www.youtube.com/embed/${key}${conAutoplay ? '?autoplay=1' : ''}"
+                    title="Tráiler"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+                </iframe>
+            </div>
+        `;
+    };
+
+    if (opciones.length > 0) {
+        pintarVideo(opciones[0].key, false);
+    } else {
+        container.innerHTML = `
+            <div class="sin-trailer">
+                <i class="fas fa-video-slash"></i>
+                <p>Tráiler no disponible</p>
+            </div>
+        `;
+    }
+
+    // Pastillas para elegir la versión (como al crear una publicación): solo si hay más de una.
+    if (versionesEl && opciones.length > 1) {
+        versionesEl.innerHTML = `
+            <p class="trailer-versiones-titulo">Versión del tráiler</p>
+            <div class="trailer-versiones-lista">
+                ${opciones.map((o, i) => `<button type="button" class="trailer-version-pill${i === 0 ? ' activa' : ''}" data-key="${o.key}" title="${escapar(o.name)}" aria-pressed="${i === 0}">${escapar(o.etiqueta)}</button>`).join('')}
+            </div>
+        `;
+        let activa = opciones[0].key;
+        versionesEl.querySelectorAll('.trailer-version-pill').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (!vigente() || btn.dataset.key === activa) return;
+                activa = btn.dataset.key;
+                pintarVideo(activa, true);   // la persona lo pidió: arranca solo
+                versionesEl.querySelectorAll('.trailer-version-pill').forEach(b => {
+                    const esta = b.dataset.key === activa;
+                    b.classList.toggle('activa', esta);
+                    b.setAttribute('aria-pressed', esta ? 'true' : 'false');
+                });
+            });
+        });
+    }
+
+    // Hero de fondo detrás de la ficha de datos — solo desktop. Usa siempre el video inicial: no cambia al
+    // elegir otra versión con las pastillas.
+    if (window.innerWidth > 768 && typeof window._aplicarHeroModalSerie === 'function') {
+        window._aplicarHeroModalSerie(opciones[0]?.key || null, backdropPath);
+    }
+};
 
     window._aplicarHeroModalSerie = function(videoKey, backdropPath) {
         const hero = document.getElementById('modalHeroFondoSerie');
