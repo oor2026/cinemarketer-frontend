@@ -309,6 +309,13 @@ body {
     object-fit: cover;
 }
 
+/* Avatar de la cabecera mientras todavía no cargó el de la persona (o si no tiene): un ícono neutro,
+   nunca la foto de nadie. */
+.user-avatar-mini .avatar-placeholder {
+    font-size: 1.1rem;
+    color: #b5b5b5;
+}
+
 /* Nivel mini */
 .user-level-mini {
     display: flex;
