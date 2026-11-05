@@ -1,4 +1,11 @@
 // js/api.js - Único archivo de servicios
+
+// Claves del navegador que pertenecen a la persona que tenía la sesión. Se borran todas al cerrarla (o al vencer),
+// para que quien entre después desde el mismo navegador no vea por un momento el avatar, el nombre o los permisos
+// de la anterior.
+const CLAVES_DE_SESION = ['token', 'userEmail', 'userRole', 'userPoints', 'userId', 'userName', 'userLevel',
+                          'userAvatarUrl', 'userPremium', 'userCreator', 'isDemo'];
+
 const API = {
     BASE_URL: CONFIG.API_URL,
 
@@ -16,10 +23,7 @@ async request(endpoint, method = 'GET', data = null) {
 
     // Si el servidor devuelve 401, la sesión expiró o fue invalidada
     if (response.status === 401) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userEmail');
-        localStorage.removeItem('userRole');
-        localStorage.removeItem('userPoints');
+        CLAVES_DE_SESION.forEach(clave => localStorage.removeItem(clave));
         sessionStorage.clear();
         window.location.replace('login.html');
         return;
@@ -76,10 +80,7 @@ async request(endpoint, method = 'GET', data = null) {
             }
         }
 
-        localStorage.removeItem('token');
-        localStorage.removeItem('userEmail');
-        localStorage.removeItem('userRole');
-        localStorage.removeItem('userPoints');
+        CLAVES_DE_SESION.forEach(clave => localStorage.removeItem(clave));
         sessionStorage.clear();
         window.location.replace('login.html');
     }
