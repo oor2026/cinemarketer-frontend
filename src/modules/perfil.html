@@ -504,8 +504,19 @@
                 <div class="cine-adn-dots" id="perfilAdnDots"></div>
             </div>
 
+            <!-- ===== REDISEÑO MOBILE: barra de secciones (solo se ve en mobile). Cada pestaña lleva a su sección. ===== -->
+            <nav class="sala-movil sala-tabs" id="salaTabs" aria-label="Secciones de Mi Sala">
+                <button type="button" class="sala-tab on" data-sec="perfilGustosTitulo" onclick="window._salaIr('perfilGustosTitulo')">Gustos</button>
+                <button type="button" class="sala-tab" data-sec="salaActividad" onclick="window._salaIr('salaActividad')">Actividad<span aria-hidden="true" id="salaTabAct"></span></button>
+                <button type="button" class="sala-tab" data-sec="salaLista" id="salaTabLista" style="display:none;" onclick="window._salaIr('salaLista')">Mi Lista<span aria-hidden="true" id="salaTabListaN"></span></button>
+                <button type="button" class="sala-tab" data-sec="salaLogros" onclick="window._salaIr('salaLogros')">Logros<span aria-hidden="true" id="salaTabLogros"></span></button>
+                <button type="button" class="sala-tab" data-sec="perfilPublicacionesSeccion" onclick="window._salaIr('perfilPublicacionesSeccion')">Publicaciones</button>
+            </nav>
+
             <p class="cine-section-title" id="perfilGustosTitulo">Mis gustos o preferencias</p>
-            <div class="cine-spread" id="cineSpreadPeliculas">
+            <!-- En mobile los dos bloques de gustos (películas y series) se muestran juntos, en una sola fila de pósters. -->
+            <div class="sala-gustos-fila">
+                <div class="cine-spread" id="cineSpreadPeliculas">
                 <div class="cine-snapshot" style="position:relative;">
                     <button id="btnEditarFavorita" onclick="window.abrirEdicionFavorita()" class="cine-edit-btn" style="display:none;">
                         <i class="fas fa-pencil-alt"></i>
@@ -686,6 +697,7 @@
                     </div>
                 </div>
             </div>
+            </div><!-- /sala-gustos-fila -->
 
             <p class="cine-section-title" id="cineActividadTitulo">Mi actividad cinéfila</p>
             <div class="cine-actividad-wrap" id="cineActividadWrap">
@@ -714,6 +726,42 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ===== REDISEÑO MOBILE: secciones nuevas. Solo se ven en mobile; el escritorio mantiene "Mi actividad" de arriba. ===== -->
+            <section class="sala-movil sala-sec" id="salaActividad">
+                <div class="sala-cab"><div><h2 class="sala-h2">Mi actividad cinéfila</h2><p class="sala-sub">Todo lo que votaste y comentaste</p></div></div>
+                <div class="sala-seg" role="tablist" aria-label="Actividad">
+                    <button type="button" role="tab" class="on" data-crit="votaciones" onclick="window._salaCriterio('votaciones')">Votaciones <b id="salaCountVot"></b></button>
+                    <button type="button" role="tab" data-crit="comentarios" onclick="window._salaCriterio('comentarios')">Comentarios <b id="salaCountCom"></b></button>
+                </div>
+                <div class="sala-chips" role="group" aria-label="Tipo de contenido">
+                    <button type="button" class="sala-chip pel on" data-tipo="peliculas" onclick="window._salaTipo('peliculas')">Películas</button>
+                    <button type="button" class="sala-chip ser" data-tipo="series" onclick="window._salaTipo('series')">Series</button>
+                </div>
+                <div id="salaActividadCuerpo"></div>
+                <button type="button" class="sala-btnv" id="salaActividadMas" style="display:none;" onclick="window._salaCargarMas()">Cargar más</button>
+            </section>
+
+            <section class="sala-movil sala-sec" id="salaLista" style="display:none;">
+                <div class="sala-cab">
+                    <div><h2 class="sala-h2">Mi Lista</h2><p class="sala-sub" id="salaListaSub">Lo que guardes para ver más tarde</p></div>
+                    <button type="button" class="sala-ver" id="salaListaVer" style="display:none;" onclick="window._salaListaToggle()">Ver toda</button>
+                </div>
+                <div class="sala-chips" role="group" aria-label="Tipo de contenido">
+                    <button type="button" class="sala-chip pel on" data-tipo="peliculas" onclick="window._salaListaTipo('peliculas')">Películas <span id="salaListaNPel"></span></button>
+                    <button type="button" class="sala-chip ser" data-tipo="series" onclick="window._salaListaTipo('series')">Series <span id="salaListaNSer"></span></button>
+                </div>
+                <div id="salaListaCuerpo"></div>
+            </section>
+
+            <section class="sala-movil sala-sec" id="salaLogros">
+                <div class="sala-cab">
+                    <div><h2 class="sala-h2">Mis logros</h2><p class="sala-sub">Los sellos que ganaste cumpliendo misiones</p></div>
+                    <span class="sala-contador" id="salaLogrosContador" style="display:none;"></span>
+                </div>
+                <div id="salaLogrosCuerpo"></div>
+                <button type="button" class="sala-btnv" id="salaLogrosMas" style="display:none;" onclick="window._salaLogrosToggle()">Ver todos los sellos</button>
+            </section>
 
         </div>
         <div class="cine-vineta-overlay" id="cineVinetaOverlay" onclick="window._cerrarVineta()">

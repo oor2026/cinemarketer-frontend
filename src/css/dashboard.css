@@ -1102,3 +1102,154 @@ body.menu-open {
     .nav-menu { gap: 0.1rem; }
     .nav-menu .nav-link, .nav-menu .nav-desk-icono .nav-link { padding: 0.45rem 0.55rem; }
 }
+
+/* =====================================================================================================================
+   HEADER MOBILE EN DOS NIVELES
+   Nivel 1 (siempre visible): menú, logo, puntos disponibles y campanita.
+   Nivel 2 ("extensión", del mismo color): pastillas Películas / Series / Comunidad. Se oculta al bajar y vuelve al subir
+   (header-nav.js le pone la clase nav-ext-oculta al .navbar). Está montada ENCIMA del contenido (position: absolute) y no
+   empuja nada: ocultarla o mostrarla no mueve la página. Solo mobile, y solo en Inicio y Comunidad: para sumar otro módulo,
+   agregarlo en las dos listas de más abajo (y en MODULOS_CON_EXTENSION de header-nav.js).
+   ===================================================================================================================== */
+.dash-puntos-mobile,
+.nav-ext { display: none; }
+
+@media (max-width: 768px) {
+    :root { --nav-ext-h: 54px; }
+
+    /* La campanita pasa al extremo derecho (el lugar del engranaje, que migró al menú hamburguesa). */
+    .dash-bell-mobile { right: 1rem; }
+
+    /* Puntos DISPONIBLES (no los acumulados), a la izquierda de la campanita: moneda + valor, sin caja para ocupar poco. */
+    .dash-puntos-mobile {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        position: absolute;
+        right: 3.7rem;
+        top: 50%;
+        transform: translateY(-50%);
+        max-width: 4.6rem;
+        height: 44px;
+        padding: 0;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+        font-weight: 700;
+        font-size: 0.82rem;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+        color: var(--dark);
+        -webkit-tap-highlight-color: transparent;
+    }
+    .dash-puntos-mobile i { flex: none; font-size: 1.5rem; color: #F2A900; }
+    /* header-nav.js mide el chip contra el logo: si no entra con la moneda, se la saca; si todavía no entra, se achica la letra. */
+    .dash-puntos-mobile.sin-moneda i { display: none; }
+    .dash-puntos-mobile.letra-chica { font-size: 1.2rem; }
+    .dash-puntos-mobile .dash-puntos-valor { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+    /* La extensión. */
+    .nav-ext {
+        box-sizing: border-box;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 100%;
+        z-index: 1;
+        height: var(--nav-ext-h);
+        padding: 7px 1rem;
+        background: var(--white);
+        box-shadow: 0 6px 10px -6px rgba(0, 0, 0, 0.18);
+        visibility: visible;
+        transition: transform 0.28s ease, opacity 0.2s ease, visibility 0s 0s;
+    }
+    .navbar.nav-ext-oculta .nav-ext {
+        transform: translateY(-100%);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: transform 0.28s ease, opacity 0.2s ease, visibility 0s 0.28s;
+    }
+    .nav-ext-pastillas { display: flex; gap: 8px; height: 100%; }
+    .nav-pastilla {
+        flex: 1 1 0;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        border: 1px solid #E6E6E1;
+        border-radius: 999px;
+        background: #F5F5F2;
+        color: #3C414D;
+        font-family: inherit;
+        font-size: 0.86rem;
+        font-weight: 600;
+        line-height: 1;
+        white-space: nowrap;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .nav-pastilla i { font-size: 0.8rem; }
+    .nav-pastilla.activa { border-color: transparent; color: #fff; }
+    .nav-pastilla.activa[data-pastilla="peliculas"] { background: linear-gradient(135deg, #D93D27, #B82C1B); box-shadow: 0 4px 10px rgba(196, 50, 31, 0.3); }
+    .nav-pastilla.activa[data-pastilla="series"] { background: #004F9B; box-shadow: 0 4px 10px rgba(0, 79, 155, 0.3); }
+    .nav-pastilla.activa[data-pastilla="comunidad"] { background: #1A3A6B; box-shadow: 0 4px 10px rgba(26, 58, 107, 0.3); }
+
+    /* Dónde se ve la extensión (y el lugar que se le reserva arriba del contenido para que no lo tape). */
+    body.modulo-feed-films .nav-ext,
+    body.modulo-comunidad .nav-ext { display: block; }
+    body.modulo-feed-films #module-container,
+    body.modulo-comunidad #module-container { padding-top: var(--nav-ext-h); }
+    /* Con el menú hamburguesa abierto la extensión no se muestra. */
+    body.menu-open .nav-ext { display: none; }
+
+    /* Lo que antes se mostraba en el feed como switch Películas/Series ahora vive en el header (las pastillas). */
+    .inicio-switch-tipo { display: none !important; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .nav-ext,
+        .navbar.nav-ext-oculta .nav-ext { transition: none; }
+    }
+}
+
+/* =====================================================================================================================
+   HEADER MOBILE — "Mis Mensajes" pasa del menú hamburguesa al header, entre las monedas y la campana.
+   Los tres íconos (monedas, mensajes, campana) miden 1,5 rem. El logo se centra solo en el espacio que queda entre la
+   hamburguesa y el grupo de la derecha. Va al FINAL de dashboard.css (después del bloque de dos niveles del header).
+   Escritorio no cambia: todo está dentro del media query de mobile, salvo el display:none del botón nuevo.
+   ===================================================================================================================== */
+.dash-mensajes-mobile { display: none; }
+
+@media (max-width: 768px) {
+    /* "Mis Mensajes" ya no está en el menú hamburguesa: vive en el header. El ítem sigue en el HTML (escritorio lo usa)
+       y su globito (#bellBadge) lo sigue actualizando quien lo actualizaba; el ícono del header lo espeja. */
+    #dashNavMenu .nav-desk-mensajes { display: none !important; }
+
+    /* Espacio para los íconos: izquierda la hamburguesa, derecha las monedas + mensajes + campana. El logo (que está
+       centrado) queda centrado en lo que sobra, o sea corrido a la izquierda lo necesario. */
+    .nav-container { padding-left: 3.6rem; padding-right: 10.25rem; }
+    /* Y el logo puede encogerse (manteniendo su proporción) si el espacio que sobra no le alcanza: nunca pisa la hamburguesa. */
+    .logo { flex: 0 1 auto; min-width: 0; }
+    .logo-img { max-width: 100%; }
+
+    /* Los tres íconos: 1,5 rem. Cada botón es una zona tocable de 44 × 44 px. */
+    .dash-bell-mobile,
+    .dash-mensajes-mobile {
+        display: flex; align-items: center; justify-content: center;
+        position: absolute; top: 50%; transform: translateY(-50%);
+        width: 44px; height: 44px; padding: 0; background: none; border: 0; cursor: pointer;
+        font-size: 1.5rem; line-height: 1; text-decoration: none; -webkit-tap-highlight-color: transparent;
+    }
+    .dash-bell-mobile { right: 0.5rem; color: var(--dark); }
+    .dash-mensajes-mobile { right: calc(0.5rem + 44px); color: #000000 }
+    .dash-bell-mobile i, .dash-mensajes-mobile i { font-size: 1.5rem; }
+    /* El globito sigue pegado a la esquina superior derecha del ícono (no del botón de 44 px). */
+    .dash-bell-mobile .bell-badge, .dash-mensajes-mobile .bell-badge { top: 4px; right: 1px; }
+
+    /* Monedas: ícono de 1,5 rem, a la izquierda de "Mis Mensajes". */
+    .dash-puntos-mobile { right: calc(0.5rem + 88px); }
+    .dash-puntos-mobile i { font-size: 1.5rem; }
+}

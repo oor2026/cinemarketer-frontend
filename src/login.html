@@ -31,6 +31,8 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/toast.css">
     <link rel="stylesheet" href="css/google-auth.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/login-cine.css">
     <!-- Google Identity Services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="js/google-auth.js"></script>
@@ -285,6 +287,7 @@
 <script src="js/config.js"></script>
 <script src="js/api.js"></script>
 <script src="js/footer.js"></script>
+<script src="js/login-cine.js"></script>
 <script src="js/trivia.js"></script>
 <script>
     // ==============================================
@@ -338,9 +341,11 @@
         forgotPassword.style.opacity = '';
 
         // Botón Google
-        const googleLogin = document.getElementById('googleLogin');
-        googleLogin.disabled = false;
-        googleLogin.style.opacity = '';
+        const googleLogin = document.getElementById('googleLoginBtn');
+        if (googleLogin) {
+            googleLogin.style.pointerEvents = '';
+            googleLogin.style.opacity = '';
+        }
 
         // Regístrate gratis
         const registerLink = document.getElementById('registerLink');

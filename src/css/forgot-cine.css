@@ -1,0 +1,196 @@
+/* =====================================================================================================================
+   RECUPERAR CONTRASEÑA MOBILE — "Luz de proyector"
+   Va DESPUÉS de login-cine.css, que ya resuelve lo que esta pantalla comparte con el login: el muro de pósters, el fondo
+   blanco, la estructura sin caja, el título y la bajada, el campo de correo y su etiqueta y el pie legal. Acá va solo lo propio:
+   el botón "Enviar enlace", el "¿Recordaste tu contraseña?", los dos paneles de resultado ("¡Revisá tu bandeja!" y "Tu cuenta
+   está vinculada a Google", que traen estilos en línea y se pisan con !important) y el pie grande.
+   Solo mobile (hasta 768 px): escritorio no cambia. Como el aspecto original vive en forgot-password.css y styles.css, cada
+   regla fija explícitamente lo que importa.
+   ===================================================================================================================== */
+
+/* El logo mobile lo agrega forgot-password.html (igual que el registro); en escritorio no se ve. */
+.auth-logo-mobile { display: none; }
+
+@media (max-width: 768px) {
+    /* La bajada trae un <br> forzado ("...base de datos, <br>te enviaremos...") que en mobile deja una línea huérfana: se
+       anula y el texto fluye solo. */
+    .auth-header p br { display: none; }
+
+    /* El JavaScript oculta el formulario con style="display:none" al mostrar el resultado. El login-cine.css le fija
+       display:flex !important a todos los .auth-form (en el login y el registro nunca se oculta); acá se respeta el ocultamiento. */
+    #forgotForm[style*="display: none"] { display: none !important; }
+
+    /* ----- Botón "Enviar enlace" (mismo que "Iniciar Sesión") ----- */
+    .auth-form #submitBtn {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        width: 100% !important;
+        height: 54px !important;
+        min-height: 54px;
+        margin: 6px 0 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 999px !important;
+        background: #E50914 !important;
+        background-image: none !important;
+        box-shadow: 0 10px 24px rgba(229, 9, 20, 0.32) !important;
+        color: #ffffff !important;
+        font-family: 'Space Grotesk', system-ui, sans-serif !important;
+        font-size: 16px !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.01em;
+        text-transform: none !important;
+        cursor: pointer;
+    }
+    .auth-form #submitBtn:disabled { opacity: 0.75; box-shadow: none !important; cursor: wait; }
+
+    /* ----- Paneles de resultado (el JavaScript los muestra con style.display; acá no se toca el display) ----- */
+    #successState,
+    #googleState {
+        padding: 8px 0 4px !important;
+        text-align: center;
+    }
+    #successState > div:first-child,
+    #googleState > div:first-child {
+        width: 72px !important;
+        height: 72px !important;
+        margin: 0 auto 16px !important;
+    }
+    #successState h3,
+    #googleState h3 {
+        margin: 0 0 8px !important;
+        font-family: 'Space Grotesk', system-ui, sans-serif;
+        font-size: 22px;
+        font-weight: 700;
+        line-height: 1.2;
+        color: #0B2A63 !important;
+    }
+    #successState p,
+    #googleState p {
+        margin: 0 0 16px !important;
+        font-size: 15px !important;
+        line-height: 22px !important;
+        color: #475467 !important;
+    }
+    #googleState br { display: none; }
+    /* "Ir a Iniciar sesión": el botón rojo de siempre, a todo el ancho. */
+    #googleState a[href="login.html"] {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        gap: 8px !important;
+        box-sizing: border-box;
+        width: 100%;
+        height: 54px;
+        margin: 0 !important;
+        padding: 0 !important;
+        border-radius: 999px !important;
+        background: #E50914 !important;
+        box-shadow: 0 10px 24px rgba(229, 9, 20, 0.32);
+        color: #ffffff !important;
+        font-family: 'Space Grotesk', system-ui, sans-serif;
+        font-size: 16px !important;
+        font-weight: 600 !important;
+        text-decoration: none !important;
+    }
+    #googleState a[href="register.html"] {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        margin: 6px 0 0 !important;
+        font-size: 14px !important;
+        font-weight: 600;
+        color: #C4000F !important;
+        text-decoration: underline !important;
+        text-underline-offset: 4px;
+    }
+
+    /* ----- "¿Recordaste tu contraseña? Iniciar sesión" ----- */
+    .auth-footer .login-prompt {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0 8px;
+        min-height: 44px;
+        margin: 10px 0 0 !important;
+        padding: 0 !important;
+        font-size: 14px !important;
+        color: #475467 !important;
+    }
+    .auth-footer .login-link {
+        display: inline-flex !important;
+        align-items: center;
+        gap: 4px;
+        min-height: 44px;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: none !important;
+        box-shadow: none !important;
+        font-weight: 700 !important;
+        color: #C4000F !important;
+        text-decoration: underline !important;
+        text-decoration-color: #C4000F;
+        text-decoration-thickness: 2px;
+        text-underline-offset: 5px;
+    }
+    .auth-footer .login-link i { font-size: 13px; }
+
+    /* ----- Pie grande (marca, redes, enlaces, contacto, horarios, legales): de oscuro a claro, compacto ----- */
+    .footer { margin: 20px 0 0 !important; padding: 4px 0 calc(16px + env(safe-area-inset-bottom, 0px)) !important; }
+    .footer .container { width: 100% !important; max-width: none !important; margin: 0 !important; padding: 0 !important; }
+    .footer .footer-content { display: block !important; margin: 0 !important; text-align: center; }
+    .footer .footer-section {
+        padding: 14px 16px !important;
+        border: 0 !important;
+        border-bottom: 1px solid #EAECF0 !important;
+        text-align: center;
+    }
+    .footer .footer-section ul { margin: 0 !important; padding: 0 !important; list-style: none; }
+    .footer .footer-section:first-child h3 {
+        margin: 0 0 2px !important;
+        font-family: 'Space Grotesk', system-ui, sans-serif;
+        font-size: 16px !important;
+        font-weight: 700;
+        color: #0B2A63 !important;
+    }
+    .footer .footer-section:first-child p { margin: 0 0 10px !important; font-size: 13px !important; color: #667085 !important; }
+    .footer .social-links { display: flex !important; justify-content: center; gap: 10px !important; margin: 0 !important; }
+    .footer .social-links a {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 44px !important;
+        height: 44px !important;
+        border: 1.5px solid #D0D5DD !important;
+        border-radius: 50% !important;
+        background: #ffffff !important;
+    }
+    .footer .social-links i { font-size: 16px; color: #0B2A63 !important; }
+    .footer .footer-section a { color: #475467 !important; text-decoration: none; }
+    .footer .footer-section:nth-child(2) h3,
+    .footer .footer-section:nth-child(3) h3 { display: none !important; }
+    .footer .footer-section:nth-child(2) ul { display: flex !important; flex-wrap: wrap; align-items: center; justify-content: center; }
+    .footer .footer-section:nth-child(2) li { margin: 0 !important; font-size: 13px !important; color: #667085 !important; }
+    .footer .footer-section:nth-child(2) li a { display: inline-flex; align-items: center; min-height: 44px; }
+    .footer .footer-section:nth-child(2) li + li::before { content: "|" !important; margin: 0 10px !important; color: #D0D5DD !important; }
+    .footer .footer-section:nth-child(3) ul { display: flex !important; justify-content: center; }
+    .footer .footer-section:nth-child(3) li { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0 !important; font-size: 13px !important; color: #667085 !important; }
+    .footer .footer-section:nth-child(3) li i { font-size: 12px; color: #98A2B3 !important; opacity: 1 !important; }
+    .footer .footer-section:nth-child(4) {
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        text-align: left;
+    }
+    .footer .footer-section:nth-child(4) h3 { margin: 0 !important; font-size: 12px !important; font-weight: 500 !important; color: #667085 !important; }
+    .footer .footer-section:nth-child(4) li { margin: 0 !important; font-size: 13px !important; color: #475467 !important; }
+    .footer .footer-bottom { padding: 12px 16px 0 !important; border-top: 0 !important; color: #667085 !important; }
+    .footer .footer-bottom p { margin: 6px 0 0 !important; font-size: 11px !important; line-height: 16px; color: #667085 !important; }
+}

@@ -40,6 +40,11 @@
     <div class="pelicula-info">
         <h3 class="pelicula-titulo">{title}</h3>
 
+        <!-- SOLO MOBILE (tarjeta horizontal): año + estado, y resumen de votos. En escritorio no se ven.
+             El resumen lo mantiene window._resumenTarjetaMobile (bottom-nav.js) a partir de los contadores. -->
+        <div class="card-m-chips">{chipsMobile}</div>
+        <div class="card-m-resumen"></div>
+
         <p class="pelicula-descripcion">
             {overview} <span class="ver-mas" onclick="event.stopPropagation(); window.abrirDetallePelicula({id})">Ver más</span>
         </p>

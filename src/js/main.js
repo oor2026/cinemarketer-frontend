@@ -115,53 +115,10 @@ if (dashToggle && dashMenu) {
             });
 }
 
-// ── Hide/show navbar on scroll (solo mobile y solo en feed-films) ──
-(function() {
-    let lastScrollY = 0;
-    let ticking = false;
-
-    // Si el navbar quedó oculto por scroll dentro del feed y el usuario
-    // navega a otro módulo (por ejemplo, un perfil público) sin volver a
-    // scrollear en el feed antes, la clase navbar-hidden se quedaba pegada
-    // para siempre — porque la única lógica que la saca vive adentro del
-    // scroll handler, que corta apenas el hash deja de ser feed-films.
-    // Por eso hay que restaurarlo explícitamente al cambiar de módulo.
-    window.addEventListener('hashchange', function() {
-        const hash = window.location.hash.replace('#', '') || 'feed-films';
-        if (hash !== 'feed-films') {
-            const navbar = document.querySelector('.navbar');
-            if (navbar) navbar.classList.remove('navbar-hidden');
-        }
-    });
-
-    window.addEventListener('scroll', function() {
-        if (window.innerWidth > 768) return;
-
-        const hash = window.location.hash.replace('#', '') || 'feed-films';
-        if (hash !== 'feed-films') return;
-
-        const currentScrollY = window.scrollY;
-
-        if (!ticking) {
-            requestAnimationFrame(function() {
-                const navbar = document.querySelector('.navbar');
-                if (!navbar) { ticking = false; return; }
-
-                if (currentScrollY > lastScrollY && currentScrollY > 60) {
-                    // Scroll hacia abajo — ocultar
-                    navbar.classList.add('navbar-hidden');
-                } else {
-                    // Scroll hacia arriba — mostrar
-                    navbar.classList.remove('navbar-hidden');
-                }
-
-                lastScrollY = currentScrollY;
-                ticking = false;
-            });
-            ticking = true;
-        }
-    }, { passive: true });
-})();
+// ── El header ya no se oculta al scrollear ──
+// Antes este bloque ocultaba el header ENTERO al bajar (clase navbar-hidden). Ahora el nivel de arriba (menú, logo, puntos y
+// campanita) queda siempre visible y solo se oculta su extensión (las pastillas Películas / Series / Comunidad). Esa lógica
+// vive en header-nav.js.
 
 // ── Botones flotantes "Volver arriba" + "Nueva publicación" (solo mobile) ──
 (function() {

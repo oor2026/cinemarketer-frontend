@@ -191,6 +191,10 @@ window.inicializarSwitchTipoInicio = function() {
 
         const header = document.querySelector('.inicio-catalogo-header');
         if (header) header.classList.toggle('tono-series', tab === 'series');
+
+        // El degradé de los filtros (selector + íconos) es rojo en Películas y azul en Series.
+        const catalogo = document.querySelector('.inicio-catalogo-mobile');
+        if (catalogo) catalogo.classList.toggle('tono-series', tab === 'series');
     };
 
     // Se envuelve una sola vez por carga del módulo (el flag evita
@@ -211,10 +215,14 @@ window.inicializarSwitchTipoInicio = function() {
     // importar qué tab haya quedado guardada de una visita anterior
     // (a diferencia del comportamiento normal del feed, que sí la
     // restaura). Fuerza tanto el contenido como el estado del switch.
+    // Salvo que se haya llegado desde una pastilla del header (por ejemplo "Series" estando en Comunidad): en ese caso arranca
+    // en la pestaña pedida, una sola vez.
+    const tabInicial = window._tabInicioPendiente === 'series' ? 'series' : 'peliculas';
+    window._tabInicioPendiente = null;
     if (typeof window.seleccionarTabFeed === 'function') {
-        window.seleccionarTabFeed('peliculas', document.getElementById('inicioSwitchPeliculas'));
+        window.seleccionarTabFeed(tabInicial, document.getElementById(tabInicial === 'series' ? 'inicioSwitchSeries' : 'inicioSwitchPeliculas'));
     } else {
-        sincronizar('peliculas');
+        sincronizar(tabInicial);
     }
 };
 
@@ -287,4 +295,235 @@ window._triviaEleccionElegirTipo = function(tipo) {
     } else {
         if (typeof window.abrirTriviaSeries === 'function') window.abrirTriviaSeries();
     }
+};
+
+// ==============================================
+// TARJETA HORIZONTAL DE PELÍCULA / SERIE (solo mobile)
+// 1) Resumen "33% · 3 votos · 1 comentario". Los contadores los escriben varias funciones de feed-films.js y
+//    feed-series.js (la carga de estadísticas, el voto, el comentario...), cada una a su manera. En vez de tocarlas a
+//    todas, un observador mira los cambios dentro de cada tarjeta y vuelve a armar el resumen leyendo lo que ya está
+//    en pantalla (el texto de los botones de like y dislike, y el contador de comentarios).
+// 2) Puntos que da cada acción: se muestran en los botones recién cuando se cargan acá abajo (no hay otra fuente en el
+//    código: solo el servidor los devuelve después de votar). Mientras estén en null, el botón muestra solo el ícono.
+// ==============================================
+window._PUNTOS_ACCION = { like: null, dislike: null, comentario: null };
+window._aplicarPuntosAccion = function() {
+    const estilo = document.documentElement.style;
+    ['like', 'dislike', 'comentario'].forEach(clave => {
+        const valor = window._PUNTOS_ACCION[clave];
+        estilo.setProperty('--pts-' + clave, valor ? `"+${valor}"` : 'none');
+    });
+};
+
+window._resumenTarjetaMobile = function(tarjeta) {
+    const destino = tarjeta.querySelector('.card-m-resumen');
+    if (!destino) return;
+    const numero = (el) => { const n = parseInt(((el && el.textContent) || '').replace(/\D/g, ''), 10); return isNaN(n) ? 0 : n; };
+    const likes = numero(tarjeta.querySelector('.btn-like'));
+    const dislikes = numero(tarjeta.querySelector('.btn-dislike'));
+    const comentarios = numero(tarjeta.querySelector('.comentarios-count'));
+    const votos = likes + dislikes;
+    const plural = (n, singular, plural_) => `${n.toLocaleString('es-AR')} ${n === 1 ? singular : plural_}`;
+    const html = (votos > 0 ? `<b>${Math.round(likes / votos * 100)}%</b> · ${plural(votos, 'voto', 'votos')}` : 'Sin votos todavía')
+        + ` · ${plural(comentarios, 'comentario', 'comentarios')}`;
+    if (destino.innerHTML !== html) destino.innerHTML = html;
+};
+
+window._iniciarResumenTarjetasMobile = function() {
+    if (window._obsResumenTarjetas || typeof MutationObserver === 'undefined') return;
+    const SELECTOR = '.pelicula-card, .serie-card';
+    const pendientes = new Set();
+    let programado = false;
+    const esMobile = () => !!(window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
+    const procesar = () => {
+        programado = false;
+        if (esMobile()) pendientes.forEach(t => { if (t.isConnected) window._resumenTarjetaMobile(t); });
+        pendientes.clear();
+    };
+    window._obsResumenTarjetas = new MutationObserver(registros => {
+        for (const r of registros) {
+            const el = r.target.nodeType === 1 ? r.target : r.target.parentElement;
+            if (el && el.closest && !el.closest('.card-m-resumen')) {   // ignorar lo que escribimos nosotros
+                const tarjeta = el.closest(SELECTOR);
+                if (tarjeta) pendientes.add(tarjeta);
+            }
+            r.addedNodes.forEach(n => {
+                if (n.nodeType !== 1) return;
+                if (n.matches && n.matches(SELECTOR)) pendientes.add(n);
+                else if (n.querySelectorAll) n.querySelectorAll(SELECTOR).forEach(t => pendientes.add(t));
+            });
+        }
+        if (pendientes.size && !programado) { programado = true; requestAnimationFrame(procesar); }
+    });
+    window._obsResumenTarjetas.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
+    // Si la pantalla pasa de escritorio a mobile (por ejemplo al girar el teléfono), las tarjetas ya dibujadas se actualizan.
+    if (window.matchMedia) window.matchMedia('(max-width: 768px)').addEventListener('change', e => {
+        if (e.matches) document.querySelectorAll(SELECTOR).forEach(t => window._resumenTarjetaMobile(t));
+    });
+};
+window._aplicarPuntosAccion();
+window._iniciarResumenTarjetasMobile();
+
+// ==============================================
+// ÍCONOS 3D de los pills de orden y de género (feed de Películas y de Series; solo se ven en mobile)
+// Cambian el emoji de cada pill por un ícono 3D (Fluent Emoji 3D de Microsoft, licencia MIT; el texto de la
+// licencia está en assets/images/iconos3d/LICENSE.txt). El emoji queda en el HTML como respaldo: si la imagen no
+// carga, se muestra él. Un género que no esté en la lista usa el ícono de la tira de fotogramas.
+// ==============================================
+window._ICONOS_3D_PILLS = {
+    '🔥': 'fire', '🎬': 'clapper_board', '📽': 'film_projector', '👍': 'thumbs_up', '📅': 'calendar',
+    '💥': 'collision', '🗺': 'world_map', '🎨': 'artist_palette', '😂': 'face_with_tears_of_joy', '🔪': 'kitchen_knife',
+    '🎥': 'movie_camera', '🎭': 'performing_arts', '📜': 'scroll', '👻': 'ghost', '🎵': 'musical_note',
+    '🔎': 'magnifying_glass_tilted_right', '💕': 'two_hearts', '🚀': 'rocket', '📺': 'television', '😰': 'anxious_face_with_sweat',
+    '⚔': 'crossed_swords', '🤠': 'cowboy_hat_face', '🎞': 'film_frames', '🧒': 'child', '📰': 'newspaper',
+    '🎪': 'circus_tent', '💔': 'broken_heart', '🎤': 'microphone', '🧙': 'person_mage', '👨': 'house_with_garden'
+};
+window.iconoPill3D = function(emoji) {
+    // Se compara por el primer carácter: así "📽️" (con variante) y "👨‍👩‍👧" (compuesto) también coinciden.
+    const clave = emoji ? String.fromCodePoint(emoji.codePointAt(0)) : '';
+    const archivo = window._ICONOS_3D_PILLS[clave] || window._ICONOS_3D_PILLS['🎞'];
+    return `<span class="pill-orden-emoji">${emoji}</span>` +
+        `<img class="pill-orden-img" src="assets/images/iconos3d/${archivo}.webp" alt="" width="38" height="38" loading="lazy" decoding="async" draggable="false" ` +
+        `onerror="this.style.display='none'; this.previousElementSibling.style.display='block';">`;
+};
+
+// ==============================================
+// TARJETA "TUS PUNTOS" — primera diapositiva del carrusel destacado de Inicio (solo mobile)
+// Muestra la propuesta de valor (votá, comentá, sumá) con los puntos del mes. La comparten el carrusel de
+// Películas y el de Series, y por eso vive acá: bottom-nav.js se carga siempre. Cada carrusel solo la agrega
+// a su lista y le pide a esta función que la dibuje.
+// ==============================================
+window._esMobileInicio = function() {
+    return !!(window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
+};
+
+window._misPuntosInicio = { listo: false, cargando: false, ts: 0, datos: null };
+
+window._escHtmlInicio = function(texto) {
+    return String(texto == null ? '' : texto)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+};
+
+// Los números salen de los mismos datos y con las mismas reglas que "¿Cómo vengo este mes?" y "Qué puedo
+// aprovechar" del asistente, para que la tarjeta y el asistente nunca se contradigan.
+window._cargarMisPuntosInicio = async function() {
+    const est = window._misPuntosInicio;
+    est.cargando = true;
+    try {
+        const token = localStorage.getItem('token');
+        const cab = { headers: { 'Authorization': `Bearer ${token}` } };
+        const [resResumen, resFree] = await Promise.all([
+            fetch(`${CONFIG.API_URL}/users/me/points/resumen`, cab),
+            fetch(`${CONFIG.API_URL}/rewards/all`, cab)
+        ]);
+        if (!resResumen.ok) throw new Error();
+        const resumen = await resResumen.json();
+        let premios = resFree.ok ? await resFree.json() : [];
+        if (resumen.premium) {
+            const resPremium = await fetch(`${CONFIG.API_URL}/premium/rewards`, cab);
+            if (resPremium.ok) premios = premios.concat(await resPremium.json());
+        }
+
+        // Lo que realmente se deposita el 1°: lo acumulado en el mes, con el tope mensual de los usuarios free.
+        const acumulados = resumen.accumulatedPoints || 0;
+        const superoTope = resumen.monthlyCap != null && acumulados > resumen.monthlyCap;
+        const aLiberar = superoTope ? resumen.monthlyCap : acumulados;
+
+        // Premio más cercano: el vigente que todavía no alcanzás, el de menor costo (igual que el asistente).
+        const vigentes = premios.filter(p => p.hasStock && !p.isExpired && (p.type !== 'SORTEO' || p.drawExecuted !== true));
+        const pendientes = vigentes.filter(p => !p.canRedeem).sort((a, b) => a.pointsRequired - b.pointsRequired);
+
+        est.datos = {
+            premium: !!resumen.premium,
+            disponibles: resumen.availablePoints || 0,
+            aLiberar,
+            superoTope,
+            premioCercano: pendientes[0] ? { nombre: pendientes[0].name || 'un premio', puntos: pendientes[0].pointsRequired } : null,
+            yaPodesCanjear: pendientes.length === 0 && vigentes.some(p => p.canRedeem)
+        };
+    } catch (e) {
+        // Se conservan los datos anteriores, si había.
+    }
+    est.listo = true;
+    est.cargando = false;
+    est.ts = Date.now();
+    try { sessionStorage.setItem('cm_mis_puntos', JSON.stringify({ datos: est.datos, ts: est.ts })); } catch (e) {}
+};
+
+// Hacerse Premium: el plan se contrata en Mi cuenta.
+window.irAPremiumDesdeInicio = function() {
+    window.location.hash = '#mi-cuenta';
+};
+
+// Dibuja la tarjeta dentro de la card del carrusel. "repintar" se llama cuando terminan de llegar los datos,
+// para que el carrusel la vuelva a dibujar si sigue siendo la diapositiva que se está viendo.
+window._renderTarjetaMisPuntos = function(card, label, repintar) {
+    const est = window._misPuntosInicio;
+
+    // Primer pintado con lo último que se sepa (caché de la sesión) mientras se revalida en segundo plano.
+    if (!est.listo) {
+        try {
+            const cache = JSON.parse(sessionStorage.getItem('cm_mis_puntos') || 'null');
+            if (cache && cache.datos) { est.datos = cache.datos; est.listo = true; est.ts = cache.ts || 0; }
+        } catch (e) {}
+    }
+    // Los puntos cambian al votar o comentar: si pasó más de un minuto, se vuelven a pedir.
+    const vencido = !est.ts || (Date.now() - est.ts) > 60000;
+    if (!est.cargando && vencido) {
+        window._cargarMisPuntosInicio().then(() => { if (typeof repintar === 'function') repintar(); });
+    }
+
+    label.textContent = '🪙 Tus puntos';
+    card.onclick = () => { window.location.hash = '#club-beneficios'; };
+
+    const d = est.datos;
+    const esc = window._escHtmlInicio;
+    const nombreCompleto = (window._perfilData && window._perfilData.name) || localStorage.getItem('userName') || '';
+    const primerNombre = nombreCompleto.trim().split(/\s+/)[0];
+    const saludo = primerNombre ? `Hola, ${esc(primerNombre)}` : 'Hola';
+
+    // Premium: informativo si ya lo es; botón para hacerse Premium si no.
+    let premiumHtml = '';
+    if (d) {
+        premiumHtml = d.premium
+            ? '<span class="mis-puntos-premium">×2 con Premium</span>'
+            : '<button type="button" class="mis-puntos-premium mis-puntos-premium-btn" onclick="event.stopPropagation(); window.irAPremiumDesdeInicio()">Hacete Premium ×2</button>';
+    }
+
+    const numero = d ? d.aLiberar.toLocaleString('es-AR') : '—';
+    const rotulo = d && d.superoTope ? 'puntos · tope del mes' : 'puntos este mes';
+    const primero = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1);
+    const fecha = `Se depositan<br>el 1° de ${primero.toLocaleDateString('es-AR', { month: 'long' })}`;
+
+    // Barra hacia el premio más cercano: lo disponible hoy (sólido) y, a continuación, lo que se suma el 1° (suave).
+    let premioHtml = '';
+    if (d && d.premioCercano && d.premioCercano.puntos > 0) {
+        const req = d.premioCercano.puntos;
+        const pctDisp = Math.min(100, (d.disponibles / req) * 100);
+        const pctMes = Math.max(0, Math.min(100 - pctDisp, (d.aLiberar / req) * 100));
+        const nombrePremio = esc(d.premioCercano.nombre);
+        premioHtml = `
+            <div class="mis-puntos-barra" role="img" aria-label="Tenés ${d.disponibles} de ${req} puntos para ${nombrePremio}">
+                <div class="mis-puntos-barra-disp" style="width:${pctDisp}%"></div>
+                <div class="mis-puntos-barra-mes" style="width:${pctMes}%"></div>
+            </div>
+            <div class="mis-puntos-premio"><span>Premio más cercano: ${nombrePremio}</span><span>${d.disponibles.toLocaleString('es-AR')} / ${req.toLocaleString('es-AR')}</span></div>`;
+    } else if (d && d.yaPodesCanjear) {
+        premioHtml = '<div class="mis-puntos-premio mis-puntos-premio-ok"><span>Ya podés canjear un premio</span></div>';
+    }
+
+    card.innerHTML = `
+        <div class="destacada-img-real mis-puntos-card">
+            <div class="mis-puntos-top">
+                <span class="mis-puntos-saludo">${saludo}</span>
+                ${premiumHtml}
+            </div>
+            <div class="mis-puntos-titulo">Lo mejor del cine está en vos</div>
+            <div class="mis-puntos-fila">
+                <div class="mis-puntos-total"><span class="mis-puntos-num">${numero}</span><span class="mis-puntos-lbl">${rotulo}</span></div>
+                <span class="mis-puntos-fecha">${fecha}</span>
+            </div>
+            ${premioHtml}
+        </div>`;
 };
