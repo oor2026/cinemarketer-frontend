@@ -12,6 +12,12 @@
          arriba sigue exactamente igual que hoy. -->
     <style>
         .inicio-bienvenida-mobile { display: none; }
+        .inicio-hero-mobile { display: contents; }
+        .inicio-catalogo-mobile { display: contents; }
+        .pill-orden-img { display: none; }
+        .card-m-chips, .card-m-resumen { display: none; }
+        .modal-hero-capa, .modal-logo-barra { display: none; }
+        .inicio-mision { display: none; }
         .inicio-switch-tipo { display: none; }
         .inicio-catalogo-titulo { display: none; }
         .inicio-catalogo-titulo-row { display: none; }
@@ -22,6 +28,49 @@
             .feed-tabs { display: none; }
             #triviaBadgeContainer { display: none !important; }
             #triviaSeriesBadgeContainer { display: none !important; }
+            /* Hero de Inicio: agrupa saludo, título, carrusel y misión de hoy. Fondo blanco, sin degradé. */
+            .inicio-hero-mobile {
+                /* flow-root: el contenedor contiene los márgenes de sus hijos. */
+                display: flow-root;
+                margin: 0 -1rem;
+                padding: 0 1rem;
+            }
+            /* El saludo no lleva lavado de color: queda blanco. */
+            .inicio-hero-mobile .inicio-bienvenida-mobile { background: none; }
+            /* Título de Inicio ("Votá, comentá y sumá puntos"): arriba de todo, en azul (el mismo azul del título de Series),
+               de 1,6 rem y centrado. El texto es más ancho que un celular, así que pasa a 2 líneas (antes tenía nowrap) y
+               text-wrap: balance las reparte parejas ("Votá, comentá y / sumá puntos"). */
+            .inicio-hero-mobile .inicio-catalogo-titulo { background: none; -webkit-background-clip: initial; background-clip: initial; -webkit-text-fill-color: #004f9b; color: #004f9b; font-size: 1.6rem; text-align: center; white-space: normal; text-wrap: balance; }
+            /* Se salen del relleno lateral del contenedor para conservar la geometría que tenían dentro del encabezado
+               del catálogo (que también ocupaba todo el ancho): sin esto el título quedaba corrido y pegado al borde. */
+            .inicio-hero-mobile .inicio-catalogo-titulo-row,
+            .inicio-hero-mobile .inicio-catalogo-subtitulo { margin-left: -1rem; margin-right: -1rem; }
+            /* Sin saludo arriba, el título lleva su propio aire respecto de la cabecera. */
+            .inicio-hero-mobile .inicio-catalogo-titulo-row { justify-content: center; padding-top: 1.4rem; }
+            .inicio-hero-mobile .inicio-catalogo-subtitulo { padding-bottom: 1.1rem; }
+            /* Misión de hoy (maqueta: por ahora solo visual). Tarjeta blanca con un filete finito para que se distinga
+               del fondo blanco, alineada con la tarjeta del carrusel (12 px del borde de la pantalla). */
+            .inicio-mision {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin: 0 calc(12px - 1rem) 14px;
+                padding: 12px 14px;
+                background: #fff;
+                border: 1px solid rgba(22,38,77,0.08);
+                border-radius: 18px;
+                box-shadow: 0 10px 24px -14px rgba(22,38,77,0.35);
+            }
+            .inicio-mision-icono { flex: none; width: 40px; height: 40px; border-radius: 12px; background: #0d58a0; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.05rem; }
+            .inicio-mision-texto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 7px; }
+            .inicio-mision-rotulo { display: block; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #5a5f6b; line-height: 1.1; }
+            .inicio-mision-titulo { display: block; margin-top: 2px; font-size: 15px; font-weight: 600; color: #1b1d24; line-height: 1.2; }
+            .inicio-mision-avance { display: flex; gap: 4px; }
+            .inicio-mision-avance span { flex: 1; height: 6px; border-radius: 3px; background: #e3e6ee; }
+            .inicio-mision-avance span.hecho { background: #1a3a6b; }
+            .inicio-mision-premio { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+            .inicio-mision-puntos { font-size: 13px; font-weight: 700; color: #ffffff; background: linear-gradient(135deg, #D93D27, #B82C1B); border-radius: 12px; padding: 4px 10px; }
+            .inicio-mision-conteo { font-size: 12px; color: #5a5f6b; }
             .inicio-bienvenida-mobile {
                 display: block;
                 padding: 2.2rem 1.2rem 1.2rem;
@@ -53,8 +102,61 @@
             .inicio-accesos-dots { display: flex; justify-content: center; gap: 6px; margin-top: 10px; }
             .inicio-accesos-dots span { width: 6px; height: 6px; border-radius: 50%; background: #d9d9d2; display: block; }
             .inicio-accesos-dots span.activo { background: #e50914; }
-            .inicio-catalogo-header { background: linear-gradient(180deg, rgba(196,50,31,0.20) 0%, rgba(196,50,31,0) 95%); border-radius: 0; margin: 0 -1rem; padding: 1rem 0 0.1rem; }
-            .inicio-catalogo-header.tono-series { background: linear-gradient(180deg, rgba(0,79,155,0.20) 0%, rgba(0,79,155,0) 95%); }
+            /* Filtros (selector Películas/Series + íconos de orden y género). Sin fondo: ya no hay degradé de color que
+               cambie con el tipo (rojo en Películas, azul en Series); queda el blanco de la página. */
+            .inicio-catalogo-mobile {
+                display: flow-root;
+                margin: 0 -1rem;
+                padding: 0 1rem;
+            }
+            .inicio-catalogo-header { border-radius: 0; margin: 0 -1rem; padding: 1rem 0 0.1rem; }
+            /* Íconos de orden y de género: solo el ícono 3D con su nombre debajo, sin baldosa ni fondo. El seleccionado se
+               eleva un poco y lleva una rayita del color del tipo. Los selectores arrancan con #inicioCatalogoMobile para
+               ganarle a las reglas de feed-films.css (que usan ids en Series). */
+            #inicioCatalogoMobile .ordenar-pills { gap: 16px; padding: 4px 1rem 0; margin-bottom: 10px; }
+            #inicioCatalogoMobile .ordenar-pills .pill-orden { gap: 4px; }
+            #inicioCatalogoMobile .ordenar-pills .pill-orden-icono {
+                width: auto;
+                height: auto;
+                border-radius: 0;
+                background: none;
+                box-shadow: none;
+                transition: transform 0.18s ease;
+            }
+            #inicioCatalogoMobile .ordenar-pills .pill-orden-emoji { display: none; }
+            #inicioCatalogoMobile .ordenar-pills .pill-orden-img {
+                display: block;
+                width: 56px;
+                height: 56px;
+                object-fit: contain;
+                filter: drop-shadow(0 3px 3px rgba(22,38,77,0.22));
+                pointer-events: none;
+            }
+            #inicioCatalogoMobile .ordenar-pills .pill-orden-label { font-size: 12.5px; }
+            #inicioCatalogoMobile .ordenar-pills .pill-orden::after { content: ''; width: 22px; height: 3px; border-radius: 2px; background: transparent; }
+            #inicioCatalogoMobile .ordenar-pills .pill-orden:active .pill-orden-icono { transform: scale(0.95); }
+            #inicioCatalogoMobile .ordenar-pills .pill-orden.active .pill-orden-icono {
+                background: none;
+                box-shadow: none;
+                transform: translateY(-2px) scale(1.06);
+            }
+            #inicioCatalogoMobile .ordenar-pills .pill-orden.active::after { background: linear-gradient(135deg,#f0553f,#c4321f); }
+            #inicioCatalogoMobile #ordenarPillsSerie .pill-orden.active::after { background: #004f9b; }
+            /* Rótulo del ícono inactivo más oscuro que el original (#8a8478), para que se lea bien sobre el blanco. */
+            #inicioCatalogoMobile .ordenar-pills .pill-orden:not(.active) .pill-orden-label { color: #5f5a51; }
+            /* La grilla vieja (#peliculasGrid) está vacía, pero conservaba 32 px de margen justo entre los íconos y la
+               primera fila. Vacía, no deja espacio. */
+            .peliculas-grid:empty { margin-bottom: 0; }
+            /* Nombre de cada fila de carrusel ("🔥 Más populares"): solo el texto, sin la pastilla de fondo. */
+            .fila-genero .fila-genero-titulo {
+                display: block;
+                margin: 0 0 10px 12px;
+                padding: 0;
+                background: none;
+                border-radius: 0;
+                font-size: 17px;
+                line-height: 1.2;
+            }
             .inicio-catalogo-titulo-row { display: flex; align-items: center; gap: 8px; padding: 0.9rem 1rem 0; }
             .inicio-catalogo-titulo { display: block; margin: 0; font-size: 2rem; text-align: center; font-weight: 700; letter-spacing: -0.01em; background: #c4321f; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: #16264d; white-space: nowrap; font-family: 'Space Grotesk', sans-serif;}
             .inicio-catalogo-header.tono-series .inicio-catalogo-titulo { background: none; -webkit-background-clip: initial; background-clip: initial; -webkit-text-fill-color: #004f9b; color: #004f9b; }
@@ -67,104 +169,357 @@
             .inicio-switch-btn.active { background: linear-gradient(135deg,#f0553f,#c4321f); color: #fff; box-shadow: 0 4px 10px rgba(196,50,31,0.3); }
             #inicioSwitchSeries.active { background: #004f9b; color: #fff; box-shadow: 0 4px 10px rgba(0,79,155,0.3); }
         }
+        /* ===== TARJETAS DE PELÍCULA Y SERIE COMO PÓSTER (feed, solo mobile) =====
+           Cada fila muestra 2 tarjetas y un pedazo de la tercera. Para ver 3, bajar --fila-cards a 3.25; para 2 justas, 2.
+           El póster ocupa toda la tarjeta; abajo, un degradé oscuro sostiene el título (el logo de TMDB; o el texto, si no
+           hay) y los tres íconos de votación. Qué título va lo decide cards-poster.js con el mismo criterio que el modal:
+           el póster ya trae el título impreso -> nada (clase titulo-impreso); hay logo -> el logo (con-logo); si no, el texto.
+           La navegación es solo con el dedo: el "guiño" del carrusel está apagado en mobile (ver feed-films.js y feed-series.js).
+           Los selectores arrancan con .fila-genero-slide para ganarle a feed-films.css y feed-series.css (varias reglas con !important). */
+        @media (max-width: 768px) {
+            .fila-genero-track {
+                --fila-cards: 2.25;
+                gap: 10px !important;
+                padding: 0 12px !important;
+                scroll-padding-left: 12px;
+                scroll-snap-type: x mandatory;
+            }
+            .fila-genero-slide,
+            .fila-genero-skeleton { flex: 0 0 calc((100% - 10px * (var(--fila-cards) - 1)) / var(--fila-cards)) !important; min-width: 0 !important; }
+            .fila-genero-slide { scroll-snap-stop: normal !important; }
+            .fila-genero-dots { display: none !important; }
+            /* Sin los puntitos (que daban el aire al pie de cada fila), el espacio entre filas se fija acá. */
+            .fila-genero { margin-bottom: 26px !important; }
+            .fila-genero-slide .pelicula-card,
+            .fila-genero-slide .serie-card {
+                position: relative;
+                isolation: isolate;
+                box-sizing: border-box;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: flex-end !important;
+                width: 100% !important;
+                max-width: none !important;
+                height: auto !important;
+                min-height: 0 !important;
+                max-height: none !important;
+                aspect-ratio: 2 / 3 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: 0 !important;
+                border-radius: 16px !important;
+                background: #1B1D24 !important;
+                box-shadow: 0 10px 18px -10px rgba(22, 38, 77, 0.55) !important;
+                transform: none !important;
+                overflow: hidden;
+            }
+            .fila-genero-slide .pelicula-poster,
+            .fila-genero-slide .serie-poster {
+                position: absolute !important;
+                inset: 0 !important;
+                z-index: -1;
+                width: 100% !important;
+                height: 100% !important;
+                min-height: 0 !important;
+                max-height: none !important;
+                aspect-ratio: auto !important;
+                margin: 0 !important;
+                border-radius: 0 !important;
+                background: #1B1D24;
+                overflow: hidden;
+            }
+            .fila-genero-slide .pelicula-poster img,
+            .fila-genero-slide .serie-poster img { width: 100%; height: 100%; max-height: none; aspect-ratio: auto; object-fit: cover !important; object-position: center top; display: block; border-radius: 0; }
+            /* Lo que antes iba sobre el póster (dónde verla, elenco, guardar, compartir, recomendar...) se ve en el modal. */
+            .fila-genero-slide .pelicula-overlay,
+            .fila-genero-slide .serie-overlay,
+            .fila-genero-slide .reestreno-etiqueta,
+            .fila-genero-slide .pelicula-descripcion,
+            .fila-genero-slide .serie-descripcion,
+            .fila-genero-slide .card-m-resumen,
+            .fila-genero-slide .porcentaje-container { display: none !important; }
+            /* Degradé inferior: el contenido de abajo (título + íconos) define cuánto sube. */
+            .fila-genero-slide .pelicula-info,
+            .fila-genero-slide .serie-info {
+                position: static !important;
+                box-sizing: border-box;
+                flex: none;
+                width: 100%;
+                min-height: 0 !important;
+                margin: 0 !important;
+                padding: 64px 8px 6px !important;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 4px;
+                text-align: center;
+                background: linear-gradient(to top, rgba(10, 12, 22, 0.96) 0%, rgba(10, 12, 22, 0.88) 50%, rgba(10, 12, 22, 0.5) 78%, rgba(10, 12, 22, 0) 100%) !important;
+            }
+            .fila-genero-slide .pelicula-titulo,
+            .fila-genero-slide .serie-titulo {
+                margin: 0 !important;
+                padding: 0 !important;
+                text-align: center !important;
+                font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+                font-weight: 700;
+                font-size: 15px !important;
+                line-height: 19px;
+                color: #fff !important;
+                text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+                overflow: hidden;
+            }
+            .fila-genero-slide .card-p-logo { display: none; max-width: 88%; max-height: 46px; width: auto; height: auto; object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.7)) drop-shadow(0 0 10px rgba(0, 0, 0, 0.5)); }
+            .fila-genero-slide .con-logo .card-p-logo { display: block; }
+            .fila-genero-slide .con-logo .pelicula-titulo,
+            .fila-genero-slide .con-logo .serie-titulo { display: none !important; }
+            .fila-genero-slide .titulo-cargando .pelicula-titulo,
+            .fila-genero-slide .titulo-cargando .serie-titulo { visibility: hidden; }
+            .fila-genero-slide .titulo-impreso .pelicula-titulo,
+            .fila-genero-slide .titulo-impreso .serie-titulo,
+            .fila-genero-slide .titulo-impreso .card-p-logo { display: none !important; }
+            .fila-genero-slide .titulo-impreso .pelicula-info,
+            .fila-genero-slide .titulo-impreso .serie-info { padding-top: 40px !important; background: linear-gradient(to top, rgba(10, 12, 22, 0.92) 0%, rgba(10, 12, 22, 0) 100%) !important; }
+            /* Etiqueta sobre el póster: solo lo especial (reestreno, "Estreno el d/m"). El año, que es la primera chip, no se muestra. */
+            .fila-genero-slide .card-m-chips { position: absolute; top: 8px; left: 8px; right: 8px; margin: 0; display: flex; flex-wrap: wrap; gap: 4px; pointer-events: none; }
+            .fila-genero-slide .card-m-chip:first-child { display: none; }
+            .fila-genero-slide .card-m-chip { background: rgba(255, 255, 255, 0.94); color: #1B1D24; font-size: 11px; font-weight: 700; line-height: 14px; border-radius: 8px; padding: 3px 8px; }
+            .fila-genero-slide .card-m-chip-cine { color: #A8141B; }
+            /* Íconos de votación: sin caja, blancos; verde si votaste "me gusta", rojo si votaste "no me gusta" y azul si
+               hay comentarios. Son tonos más claros que los de siempre porque ahora van sobre fondo oscuro. El contador
+               (texto suelto dentro del botón) se oculta con font-size: 0: el estado se lee por el color. */
+            .fila-genero-slide .votacion-container { width: 100%; margin: 0 !important; padding: 0 !important; border: 0 !important; background: none !important; }
+            .fila-genero-slide .votacion-buttons { display: flex !important; flex-wrap: nowrap !important; justify-content: center; gap: 2px !important; margin: 0 !important; }
+            .fila-genero-slide .btn-like,
+            .fila-genero-slide .btn-dislike,
+            .fila-genero-slide .btn-comentarios-card {
+                flex: 1 1 0 !important;
+                width: auto;
+                max-width: 44px;
+                height: 40px;
+                min-width: 0;
+                margin: 0;
+                padding: 0 !important;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0 !important;
+                border: 0 !important;
+                border-radius: 10px !important;
+                background: none !important;
+                color: #fff !important;
+                font-size: 0 !important;
+                -webkit-tap-highlight-color: transparent;
+            }
+            .fila-genero-slide .btn-like::after,
+            .fila-genero-slide .btn-dislike::after,
+            .fila-genero-slide .btn-comentarios-card::after { content: none !important; }
+            .fila-genero-slide .votacion-buttons i { font-size: 19px; line-height: 1; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6)); }
+            .fila-genero-slide .votacion-buttons .btn-like.votado { color: #4ADE80 !important; }
+            .fila-genero-slide .votacion-buttons .btn-dislike.votado { color: #FF6B6B !important; }
+            .fila-genero-slide .votacion-buttons .btn-comentarios-card.tiene-comentarios { color: #60A5FA !important; }
+            /* Próximo estreno: en vez de votar, "¿La estás esperando?" con Sí / No. */
+            .fila-genero-slide .card-expectativa { width: 100%; text-align: center; }
+            .fila-genero-slide .card-expectativa-titulo { margin: 0 0 4px !important; font-size: 11px !important; font-weight: 600; line-height: 14px; color: rgba(255, 255, 255, 0.88) !important; }
+            .fila-genero-slide .card-expectativa-botones { display: flex; gap: 6px; margin: 0 !important; justify-content: center; }
+            .fila-genero-slide .expectativa-btn { flex: 1 1 0; min-width: 0; height: 34px; justify-content: center; padding: 0 !important; border-radius: 10px !important; border: 1.5px solid rgba(255, 255, 255, 0.7) !important; background: rgba(255, 255, 255, 0.14) !important; color: #fff !important; font-size: 13px !important; font-weight: 700; }
+            .fila-genero-slide .expectativa-btn-si.activo { background: #2E9E5B !important; border-color: #2E9E5B !important; }
+            .fila-genero-slide .expectativa-btn-no.activo { background: #6B7280 !important; border-color: #6B7280 !important; }
+            .fila-genero-slide .card-expectativa-resumen { margin: 4px 0 0 !important; min-height: 0 !important; font-size: 11px !important; line-height: 14px; color: rgba(255, 255, 255, 0.8) !important; }
+            /* Esqueleto de carga: mismo tamaño y forma que la tarjeta, para que no "salte" al llegar los datos. */
+            .fila-genero-skeleton { box-sizing: border-box; display: block; aspect-ratio: 2 / 3; padding: 0; border: 0 !important; border-radius: 16px !important; box-shadow: none !important; overflow: hidden; }
+            .fila-genero-skeleton .sk-poster { width: 100%; height: 100%; aspect-ratio: auto; margin: 0; }
+            .fila-genero-skeleton .sk-linea { display: none; }
+        }
+        /* ===== MODAL DE PELÍCULA / SERIE EN MOBILE: portada fija y contenido que sube por encima =====
+           La portada es el fondo fijo del .modal-contenido (::before) y el .modal-body scrollea por encima, con el
+           fondo transparente arriba y un degradé que pasa a blanco: así los estilos de todo el contenido (sinopsis,
+           elenco, comentarios...) no cambian, porque siguen sobre blanco. Las variables --hero-dim, --titulo-grande,
+           --titulo-chico y --barra-fondo las escribe modal-hero.js con el scroll. Los selectores usan :is() con los
+           ids para ganarle a las reglas de feed-films.css y feed-series.css, que son de id y con !important. */
+        @media (max-width: 768px) {
+            :is(#modalPelicula, #modalSerie).modal {
+                position: fixed !important;
+                inset: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                align-items: stretch !important;
+                justify-content: stretch !important;
+                background: #fff !important;
+            }
+            :is(#modalPelicula, #modalSerie).modal .modal-overlay { display: none !important; }
+            :is(#modalPelicula, #modalSerie).modal .modal-contenido-wrapper { display: contents !important; }
+            :is(#modalPelicula, #modalSerie).modal .modal-contenido {
+                --poster-h: 62vh;
+                position: relative !important;
+                width: 100% !important;
+                max-width: none !important;
+                height: 100vh !important;
+                height: 100dvh !important;
+                max-height: none !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+                background: #fff !important;
+                overflow: hidden !important;
+                display: flex !important;
+                flex-direction: column !important;
+            }
+            /* La portada (::before) y, encima, una capa negra cuya opacidad sube con el scroll (::after). */
+            :is(#modalPelicula, #modalSerie).modal .modal-contenido::before,
+            :is(#modalPelicula, #modalSerie).modal .modal-contenido::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: var(--poster-h); z-index: 0; pointer-events: none; }
+            :is(#modalPelicula, #modalSerie).modal .modal-contenido::before { background: #111 var(--modal-poster, none) center top / cover no-repeat; }
+            :is(#modalPelicula, #modalSerie).modal .modal-contenido::after { background: #000; opacity: var(--hero-dim, 0); }
+            /* Barra superior: transparente sobre la portada (con un degradé para que el cierre se vea) y sólida al final. */
+            :is(#modalPelicula, #modalSerie).modal .modal-header {
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                z-index: 5 !important;
+                box-sizing: border-box !important;
+                min-height: 56px !important;
+                padding: calc(env(safe-area-inset-top, 0px) + 8px) 12px 8px !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 0 !important;
+                border: 0 !important;
+                box-shadow: none !important;
+                background-color: rgba(11, 15, 28, var(--barra-fondo, 0)) !important;
+                background-image: linear-gradient(to bottom, rgba(0, 0, 0, calc(0.5 * (1 - var(--barra-fondo, 0)))), rgba(0, 0, 0, 0)) !important;
+            }
+            :is(#modalPelicula, #modalSerie).modal .modal-header.spoiler-mode { background-image: none !important; background-color: #6c63ff !important; }
+            :is(#modalPelicula, #modalSerie).modal .modal-header h2 {
+                flex: 1 1 auto !important;
+                margin: 0 !important;
+                padding: 0 36px !important;
+                text-align: center !important;
+                font-size: 1rem !important;
+                line-height: 1.3 !important;
+                color: #fff !important;
+                opacity: var(--titulo-chico, 0);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                pointer-events: none;
+            }
+            :is(#modalPelicula, #modalSerie).modal .modal-header .modal-logo-barra { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); height: 28px; max-width: 50%; object-fit: contain; opacity: var(--titulo-chico, 0); pointer-events: none; }
+            :is(#modalPelicula, #modalSerie).modal.con-logo .modal-header h2 { visibility: hidden; }
+            :is(#modalPelicula, #modalSerie).modal.con-logo .modal-header .modal-logo-barra { display: block; }
+            /* El cuerpo scrollea por encima de la portada. */
+            :is(#modalPelicula, #modalSerie).modal .modal-body {
+                position: relative !important;
+                z-index: 1 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                flex: 1 1 auto !important;
+                height: 0 !important;
+                min-height: 0 !important;
+                padding: 0 0.75rem 0.75rem !important;
+                gap: 0.75rem !important;
+                overflow-x: hidden !important;
+                overflow-y: auto !important;
+                overscroll-behavior: contain;
+                -webkit-overflow-scrolling: touch;
+                background: linear-gradient(to bottom, transparent 0, transparent calc(var(--poster-h) - 104px), #fff calc(var(--poster-h) - 40px)) local !important;
+            }
+            /* Capa transparente del principio: deja ver la portada y lleva el título y los botones. */
+            :is(#modalPelicula, #modalSerie).modal .modal-hero-capa {
+                display: flex !important;
+                flex: none;
+                flex-direction: column;
+                justify-content: flex-end;
+                gap: 12px;
+                box-sizing: border-box;
+                min-height: calc(var(--poster-h) - 40px);
+                margin: 0 -0.75rem;
+                padding: 0 1rem 56px;
+                background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 20%, rgba(0, 0, 0, 0.55) 55%, rgba(0, 0, 0, 0.72) 100%);
+            }
+            :is(#modalPelicula, #modalSerie).modal .modal-titulo-hero { position: relative; isolation: isolate; display: flex; justify-content: center; align-items: flex-end; opacity: var(--titulo-grande, 1); }
+            /* El logo es lo que más tiene que resaltar: más grande, con sombra doble y un halo oscuro suave detrás. */
+            :is(#modalPelicula, #modalSerie).modal .modal-logo-titulo { display: none; max-width: 88%; max-height: 140px; object-fit: contain; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.7)) drop-shadow(0 0 22px rgba(0, 0, 0, 0.6)); }
+            :is(#modalPelicula, #modalSerie).modal.con-logo .modal-titulo-hero::before { content: ''; position: absolute; inset: -44px -12%; z-index: -1; background: radial-gradient(closest-side, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5) 60%, rgba(0, 0, 0, 0)); pointer-events: none; }
+            :is(#modalPelicula, #modalSerie).modal .modal-titulo-texto { display: block; text-align: center; color: #fff; font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif; font-weight: 700; font-size: 1.7rem; line-height: 1.1; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6); }
+            :is(#modalPelicula, #modalSerie).modal.con-logo .modal-logo-titulo { display: block; }
+            :is(#modalPelicula, #modalSerie).modal.con-logo .modal-titulo-texto { display: none; }
+            /* Qué título va sobre la portada (lo decide modal-hero.js con lo que dice TMDB):
+               - mientras se decide, oculto (así el texto no aparece un instante y desaparece);
+               - si el póster ya trae el título impreso, no se agrega ninguno y el degradé oscuro solo queda detrás de los
+                 botones, para que el título impreso se vea con todo su brillo;
+               - si no, el logo (clase con-logo, arriba) o, si no hay, el texto. */
+            :is(#modalPelicula, #modalSerie).modal.titulo-cargando .modal-titulo-hero { visibility: hidden; }
+            :is(#modalPelicula, #modalSerie).modal.titulo-impreso .modal-titulo-hero { display: none; }
+            :is(#modalPelicula, #modalSerie).modal.titulo-impreso .modal-hero-capa { background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 65%, rgba(0, 0, 0, 0.55) 100%); }
+            :is(#modalPelicula, #modalSerie).modal .modal-acciones-hero { flex-wrap: wrap !important; justify-content: center !important; gap: 8px !important; }
+            /* El carrusel de dos páginas (póster | datos) deja de ser un carrusel: el póster ya es el fondo. */
+            :is(#modalPelicula, #modalSerie).modal .modal-fila-superior { display: block !important; width: 100% !important; }
+            :is(#modalPelicula, #modalSerie).modal .modal-carrusel { display: block !important; overflow: visible !important; width: 100% !important; margin: 0 !important; scroll-snap-type: none !important; }
+            :is(#modalPelicula, #modalSerie).modal .carrusel-slide:first-child { display: none !important; }
+            :is(#modalPelicula, #modalSerie).modal .carrusel-slide:last-child { display: block !important; width: 100% !important; height: auto !important; padding: 0 !important; overflow: visible !important; }
+            :is(#modalPelicula, #modalSerie).modal .carrusel-slide:last-child .modal-columna-derecha { height: auto !important; overflow: visible !important; padding: 0 !important; }
+            :is(#modalPelicula, #modalSerie).modal .carrusel-slide:last-child .modal-info { min-height: 0 !important; justify-content: flex-start !important; }
+            :is(#modalPelicula, #modalSerie).modal .carrusel-dots { display: none !important; }
+            /* ----- Ficha de datos compacta -----
+               La barra de votos y los tres datos (estreno, duración o temporadas, idioma) forman una sola ficha rosa:
+               arriba votos y popularidad, abajo los tres datos en UNA fila de tres columnas, con filetes finos entre
+               ellos. Cada dato lleva su ícono y su etiqueta chica arriba y el valor en negrita abajo. Antes eran una barra
+               y dos filas de tarjetas con un ícono en círculo cada una. El JavaScript no cambia: los id son los mismos. */
+            :is(#modalPelicula, #modalSerie).modal .carrusel-slide:last-child .modal-info { gap: 0.6rem !important; }
+            :is(#modalPelicula, #modalSerie).modal .modal-hero-fondo { display: flex !important; flex-direction: column !important; gap: 0 !important; }
+            :is(#modalPelicula, #modalSerie).modal .modal-stat-bar { border-radius: 14px 14px 0 0 !important; padding: 0.5rem 0.75rem !important; gap: 0.6rem !important; }
+            :is(#modalPelicula, #modalSerie).modal .modal-stat-item,
+            :is(#modalPelicula, #modalSerie).modal .modal-stat-item i { font-size: 0.82rem !important; }
+            :is(#modalPelicula, #modalSerie).modal .modal-stat-item { gap: 0.35rem !important; }
+            :is(#modalPelicula, #modalSerie).modal .modal-chips-grid {
+                display: grid !important;
+                grid-auto-flow: column !important;
+                grid-auto-columns: minmax(0, 1fr) !important;
+                gap: 0 !important;
+                padding: 0.4rem 0 !important;
+                background: #fdf0ef !important;
+                border-top: 1px solid rgba(192, 57, 43, 0.14) !important;
+                border-radius: 0 0 14px 14px !important;
+            }
+            :is(#modalPelicula, #modalSerie).modal .modal-chips-grid .modal-chip {
+                display: grid !important;
+                grid-template-columns: auto auto !important;
+                justify-content: center !important;
+                align-items: center !important;
+                column-gap: 5px !important;
+                row-gap: 1px !important;
+                min-width: 0 !important;
+                padding: 0.15rem 0.3rem !important;
+                background: none !important;
+                border-radius: 0 !important;
+                text-align: center !important;
+            }
+            :is(#modalPelicula, #modalSerie).modal .modal-chips-grid .modal-chip + .modal-chip { border-left: 1px solid rgba(192, 57, 43, 0.14) !important; }
+            :is(#modalPelicula, #modalSerie).modal .modal-chips-grid .modal-chip-full { grid-column: auto !important; }
+            :is(#modalPelicula, #modalSerie).modal .modal-chips-grid .modal-chip .modal-chip-icon { grid-column: 1; grid-row: 1; width: auto !important; height: auto !important; background: none !important; border-radius: 0 !important; font-size: 0.7rem !important; color: #c0392b !important; }
+            :is(#modalPelicula, #modalSerie).modal .modal-chips-grid .modal-chip .modal-chip-texto { display: contents !important; }
+            :is(#modalPelicula, #modalSerie).modal .modal-chips-grid .modal-chip .modal-chip-label { grid-column: 2; grid-row: 1; font-size: 0.64rem !important; font-weight: 700 !important; letter-spacing: 0.06em !important; color: #c0392b !important; }
+            :is(#modalPelicula, #modalSerie).modal .modal-chips-grid .modal-chip .modal-chip-valor { grid-column: 1 / -1; grid-row: 2; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: clamp(0.8rem, 4vw, 0.9rem) !important; font-weight: 700 !important; color: #1b1d24 !important; }
+            :is(#modalPelicula, #modalSerie).modal .modal-generos { margin-top: 0.55rem !important; gap: 0.35rem !important; }
+            :is(#modalPelicula, #modalSerie).modal .modal-sinopsis { margin: 0 !important; padding: 0.7rem 0.9rem !important; }
+            :is(#modalPelicula, #modalSerie).modal .modal-sinopsis-titulo { margin-bottom: 0.25rem !important; }
+            :is(#modalPelicula, #modalSerie).modal .modal-sinopsis p { font-size: 0.92rem !important; line-height: 1.5 !important; }
+            /* En pantallas muy angostas el ícono + "TEMPORADAS" no entran en una columna: se oculta el ícono, que es lo de menos. */
+            @media (max-width: 340px) {
+                :is(#modalPelicula, #modalSerie).modal .modal-chips-grid .modal-chip .modal-chip-icon { display: none !important; }
+            }
+        }
     </style>
-    <div class="inicio-bienvenida-mobile">
-        <div class="inicio-saludo" id="inicioSaludoNombre">Hola</div>
-        <h1>¿Qué hacemos hoy?</h1>
-        <button type="button" class="inicio-entrada-asistente" onclick="window.abrirAsistenteBottomNav()">
-            <i class="fas fa-glasses inicio-entrada-icono"></i>
-            <span>Pedile al asistente lo que necesites</span>
-            <i class="fas fa-chevron-right inicio-entrada-flecha"></i>
-        </button>
-
-        <div class="inicio-accesos-carrusel">
-            <div class="inicio-accesos-track" id="inicioAccesosTrack">
-                <div class="inicio-accesos-slide">
-                    <button type="button" class="inicio-acceso-card" onclick="window.accesoRapidoInicio('buscar-titulo')">
-                        <i class="fas fa-film inicio-acceso-decor tono-rojo"></i>
-                        <i class="fas fa-chevron-right inicio-acceso-flecha"></i>
-                        <div class="inicio-acceso-icono tono-rojo"><i class="fas fa-clapperboard"></i></div>
-                        <div><div class="inicio-acceso-titulo">Buscar una película o serie</div><div class="inicio-acceso-sub">Por título</div></div>
-                    </button>
-                    <button type="button" class="inicio-acceso-card" onclick="window.accesoRapidoInicio('donde-verla')">
-                        <i class="fas fa-tv inicio-acceso-decor tono-marino"></i>
-                        <i class="fas fa-chevron-right inicio-acceso-flecha"></i>
-                        <div class="inicio-acceso-icono tono-marino"><i class="fas fa-play"></i></div>
-                        <div><div class="inicio-acceso-titulo">Dónde verla</div><div class="inicio-acceso-sub">Por plataforma</div></div>
-                    </button>
-                    <button type="button" class="inicio-acceso-card" onclick="window.accesoRapidoInicio('sagas')">
-                        <i class="fas fa-clone inicio-acceso-decor tono-marino"></i>
-                        <i class="fas fa-chevron-right inicio-acceso-flecha"></i>
-                        <div class="inicio-acceso-icono tono-marino"><i class="fas fa-layer-group"></i></div>
-                        <div><div class="inicio-acceso-titulo">Sagas</div><div class="inicio-acceso-sub">Todas las películas de una saga</div></div>
-                    </button>
-                    <button type="button" class="inicio-acceso-card" onclick="window.accesoRapidoInicio('remake')">
-                        <i class="fas fa-sync-alt inicio-acceso-decor tono-rojo"></i>
-                        <i class="fas fa-chevron-right inicio-acceso-flecha"></i>
-                        <div class="inicio-acceso-icono tono-rojo"><i class="fas fa-redo-alt"></i></div>
-                        <div><div class="inicio-acceso-titulo">Remake</div><div class="inicio-acceso-sub">Versiones nuevas de películas</div></div>
-                    </button>
-                </div>
-                <div class="inicio-accesos-slide">
-                    <button type="button" class="inicio-acceso-card" onclick="window.accesoRapidoInicio('actor-director')">
-                        <i class="fas fa-camera-retro inicio-acceso-decor tono-rojo"></i>
-                        <i class="fas fa-chevron-right inicio-acceso-flecha"></i>
-                        <div class="inicio-acceso-icono tono-rojo"><i class="fas fa-user"></i></div>
-                        <div><div class="inicio-acceso-titulo">Actor, actriz o director</div><div class="inicio-acceso-sub">Buscar por nombre</div></div>
-                    </button>
-                    <button type="button" class="inicio-acceso-card" onclick="window.accesoRapidoInicio('trabajaron-juntos')">
-                        <i class="fas fa-user-friends inicio-acceso-decor tono-marino"></i>
-                        <i class="fas fa-chevron-right inicio-acceso-flecha"></i>
-                        <div class="inicio-acceso-icono tono-marino"><i class="fas fa-users"></i></div>
-                        <div><div class="inicio-acceso-titulo">Trabajaron juntos</div><div class="inicio-acceso-sub">Películas con dos personas a la vez</div></div>
-                    </button>
-                    <button type="button" class="inicio-acceso-card" onclick="window.accesoRapidoInicio('por-genero')">
-                        <i class="fas fa-ticket-alt inicio-acceso-decor tono-marino"></i>
-                        <i class="fas fa-chevron-right inicio-acceso-flecha"></i>
-                        <div class="inicio-acceso-icono tono-marino"><i class="fas fa-theater-masks"></i></div>
-                        <div><div class="inicio-acceso-titulo">Por género</div><div class="inicio-acceso-sub">Terror, comedia, drama...</div></div>
-                    </button>
-                    <button type="button" class="inicio-acceso-card" onclick="window.accesoRapidoInicio('anio-decada')">
-                        <i class="fas fa-hourglass-half inicio-acceso-decor tono-rojo"></i>
-                        <i class="fas fa-chevron-right inicio-acceso-flecha"></i>
-                        <div class="inicio-acceso-icono tono-rojo"><i class="fas fa-calendar-alt"></i></div>
-                        <div><div class="inicio-acceso-titulo">Año o década</div><div class="inicio-acceso-sub">Qué salió en cada época</div></div>
-                    </button>
-                </div>
-                <div class="inicio-accesos-slide">
-                    <button type="button" class="inicio-acceso-card" onclick="window.accesoRapidoInicio('como-vengo')">
-                        <i class="fas fa-calendar-check inicio-acceso-decor tono-rojo"></i>
-                        <i class="fas fa-chevron-right inicio-acceso-flecha"></i>
-                        <div class="inicio-acceso-icono tono-rojo"><i class="fas fa-chart-line"></i></div>
-                        <div><div class="inicio-acceso-titulo">¿Cómo vengo este mes?</div><div class="inicio-acceso-sub">Puntos, acumulados y cupos</div></div>
-                    </button>
-                    <button type="button" class="inicio-acceso-card" onclick="window.accesoRapidoInicio('que-aprovechar')">
-                        <i class="fas fa-gift inicio-acceso-decor tono-marino"></i>
-                        <i class="fas fa-chevron-right inicio-acceso-flecha"></i>
-                        <div class="inicio-acceso-icono tono-marino"><i class="fas fa-star"></i></div>
-                        <div><div class="inicio-acceso-titulo">Qué puedo aprovechar</div><div class="inicio-acceso-sub">Premios a tu alcance</div></div>
-                    </button>
-                    <button type="button" class="inicio-acceso-card" onclick="window.accesoRapidoInicio('mi-premium')">
-                        <i class="fas fa-gem inicio-acceso-decor tono-marino"></i>
-                        <i class="fas fa-chevron-right inicio-acceso-flecha"></i>
-                        <div class="inicio-acceso-icono tono-marino"><i class="fas fa-crown"></i></div>
-                        <div><div class="inicio-acceso-titulo">Mi Premium este mes</div><div class="inicio-acceso-sub">Lo que te dio tu suscripción</div></div>
-                    </button>
-                    <button type="button" class="inicio-acceso-card" onclick="window.accesoRapidoInicio('mis-insignias')">
-                        <i class="fas fa-trophy inicio-acceso-decor tono-rojo"></i>
-                        <i class="fas fa-chevron-right inicio-acceso-flecha"></i>
-                        <div class="inicio-acceso-icono tono-rojo"><i class="fas fa-medal"></i></div>
-                        <div><div class="inicio-acceso-titulo">Mis insignias</div><div class="inicio-acceso-sub">Tu nivel y qué te falta</div></div>
-                    </button>
-                </div>
-            </div>
-            <div class="inicio-accesos-dots" id="inicioAccesosDots">
-                <span class="activo"></span>
-                <span></span>
-                <span></span>
-            </div>
+    <!-- HERO DE INICIO (mobile): agrupa el saludo, el título, el carrusel destacado y la misión de hoy, sobre fondo
+         blanco (ver .inicio-hero-mobile). En escritorio no tiene efecto. -->
+    <div class="inicio-hero-mobile" id="inicioHeroMobile">
+        <!-- TÍTULO DE INICIO (mobile): va arriba de todo, sin saludo. Usa las clases del antiguo título del catálogo
+             ("Explorá todo lo que hay"), que antes estaba debajo del carrusel. En escritorio sigue oculto, como siempre. -->
+        <div class="inicio-catalogo-titulo-row">
+            <div class="inicio-catalogo-titulo" style="text-align: center;">Votá, comentá y sumá puntos</div>
         </div>
-    </div>
 
     <!-- BANNER HORIZONTAL (se muestra solo si hay banner activo para FEED_FILMS) -->
     <div id="feedBannerHorizontal" style="display:none;">
@@ -223,18 +578,28 @@
         <div class="destacada-dots" id="destacadaDots" style="display:none;"></div>
     </div>
 
-    <div id="destacadaContainerSerie" style="display:none;">
-        <div class="destacada-label" id="destacadaLabelSerie">⭐ Destacado</div>
-        <div class="destacada-card" id="destacadaCardSerie"></div>
-        <div class="destacada-dots" id="destacadaDotsSerie" style="display:none;"></div>
-    </div>
-
-    <div class="inicio-catalogo-header">
-        <div class="inicio-catalogo-titulo-row">
-            <div class="inicio-catalogo-titulo" style="text-align: center;">Explorá todo lo que hay</div>
+        <div id="destacadaContainerSerie" style="display:none;">
+            <div class="destacada-label" id="destacadaLabelSerie">⭐ Destacado</div>
+            <div class="destacada-card" id="destacadaCardSerie"></div>
+            <div class="destacada-dots" id="destacadaDotsSerie" style="display:none;"></div>
         </div>
-        <div class="inicio-catalogo-subtitulo" style="text-align: center;">Elegí el contenido que más quieras y empecemos!</div>
-        <div class="inicio-switch-tipo" id="inicioSwitchTipo">
+        <!-- MISIÓN DE HOY (maqueta: textos fijos, sin datos ni acción todavía; solo mobile). Cuando sea funcional pasa a ser
+             un <button> que abre el modal de misiones. -->
+        <!--       <div class="inicio-mision" role="group" aria-label="Misión de hoy: votá 3 títulos, 1 de 3, suma 150 puntos">
+                   <div class="inicio-mision-icono"><i class="fas fa-bolt" aria-hidden="true"></i></div>
+                   <div class="inicio-mision-texto">
+                       <div><span class="inicio-mision-rotulo">Misión de hoy</span><span class="inicio-mision-titulo">Votá 3 títulos</span></div>
+                       <div class="inicio-mision-avance"><span class="hecho"></span><span></span><span></span></div>
+                   </div>
+                   <div class="inicio-mision-premio"><span class="inicio-mision-puntos">+150 pts</span><span class="inicio-mision-conteo">1 de 3</span></div>
+               </div>-->
+           </div><!-- /inicio-hero-mobile -->
+
+    <!-- FILTROS (mobile): selector Películas/Series + íconos de orden y género. Acá empieza el degradé de color (rojo en
+         Películas, azul en Series) y baja por detrás de los íconos. En escritorio no tiene efecto. -->
+    <div class="inicio-catalogo-mobile" id="inicioCatalogoMobile">
+        <div class="inicio-catalogo-header">
+            <div class="inicio-switch-tipo" id="inicioSwitchTipo">
             <div class="inicio-switch-tipo-track">
                 <button type="button" class="inicio-switch-btn active" id="inicioSwitchPeliculas" onclick="window.cambiarSwitchTipoInicio('peliculas', this)"><i class="fas fa-clapperboard"></i> Películas</button>
                 <button type="button" class="inicio-switch-btn" id="inicioSwitchSeries" onclick="window.cambiarSwitchTipoInicio('series', this)"><i class="fas fa-tv"></i> Series</button>
@@ -337,7 +702,8 @@
     </div>
 
     <!-- PILLS DE ORDENAMIENTO — SERIES (poblado por JS, igual que el de arriba) -->
-    <div class="ordenar-pills" id="ordenarPillsSerie" style="display:none;"></div>
+        <div class="ordenar-pills" id="ordenarPillsSerie" style="display:none;"></div>
+    </div><!-- /inicio-catalogo-mobile -->
 
     <!-- GRID DE PELÍCULAS (legado, ya no se usa para resultados de búsqueda) -->
     <div class="peliculas-grid" id="peliculasGrid"></div>
@@ -385,6 +751,7 @@
             <!-- HEADER: título + rating + cerrar -->
             <div class="modal-header">
                 <h2 id="modalTitulo">Título de la película</h2>
+                <img class="modal-logo-barra" id="modalLogoBarra" alt="">
                 <div class="modal-header-right">
                     <div class="modal-rating" id="modalRating">⭐ <span class="modal-rating-num">0</span><span class="modal-rating-label"> votos</span></div>
                     <div class="modal-rating modal-badge-comentarios" id="modalComentariosCount">💬 <span class="modal-rating-num">0</span><span class="modal-rating-label"> comentarios</span></div>
@@ -433,9 +800,18 @@
                 <div class="modal-body">
 
                 <!-- FILA SUPERIOR: carrusel en móvil, lado a lado en desktop -->
-                <div class="modal-fila-superior">
+                    <!-- CAPA SOBRE LA PORTADA (solo mobile): el título (logo o texto) y los botones del encabezado, que modal-hero.js
+                                         mueve acá. En escritorio no se ve. -->
+                    <div class="modal-hero-capa">
+                        <div class="modal-titulo-hero">
+                            <img class="modal-logo-titulo" id="modalLogoTitulo" alt="">
+                            <span class="modal-titulo-texto" id="modalTituloTexto"></span>
+                        </div>
+                        <div class="modal-header-right modal-acciones-hero" id="modalAccionesHero"></div>
+                    </div>
+                    <div class="modal-fila-superior">
 
-                    <!-- CARRUSEL MÓVIL -->
+                        <!-- CARRUSEL MÓVIL -->
                     <div class="modal-carrusel" id="modalCarrusel">
 
                         <!-- Slide 1: Poster -->
@@ -681,6 +1057,7 @@
             <!-- HEADER: título + rating + cerrar -->
             <div class="modal-header">
                 <h2 id="modalTituloSerie">Título de la serie</h2>
+                <img class="modal-logo-barra" id="modalLogoBarraSerie" alt="">
                 <div class="modal-header-right">
                     <div class="modal-rating" id="modalRatingSerie">⭐ <span class="modal-rating-num">0</span><span class="modal-rating-label"> votos</span></div>
                     <div class="modal-rating modal-badge-comentarios" id="modalComentariosCountSerie">💬 <span class="modal-rating-num">0</span><span class="modal-rating-label"> comentarios</span></div>
@@ -723,6 +1100,15 @@
             <div class="modal-body">
 
                 <!-- FILA SUPERIOR: carrusel en móvil, lado a lado en desktop -->
+                <!-- CAPA SOBRE LA PORTADA (solo mobile): el título (logo o texto) y los botones del encabezado, que modal-hero.js
+                                     mueve acá. En escritorio no se ve. -->
+                <div class="modal-hero-capa">
+                    <div class="modal-titulo-hero">
+                        <img class="modal-logo-titulo" id="modalLogoTituloSerie" alt="">
+                        <span class="modal-titulo-texto" id="modalTituloTextoSerie"></span>
+                    </div>
+                    <div class="modal-header-right modal-acciones-hero" id="modalAccionesHeroSerie"></div>
+                </div>
                 <div class="modal-fila-superior">
 
                     <div class="modal-carrusel" id="modalCarruselSerie">
@@ -1485,14 +1871,21 @@
             }
         }
         @media (max-width: 768px) {
+            /* El carrusel ocupa casi todo el ancho de la pantalla: el contenedor se sale del relleno lateral del
+               feed (igual que el bloque de bienvenida) y la tarjeta deja 12 px a cada lado, alineada con su etiqueta. */
+            #destacadaContainer,
+            #destacadaContainerSerie {
+                margin-left: -1rem;
+                margin-right: -1rem;
+            }
             .destacada-card {
-                margin: 0 1.1rem 12px !important;
+                margin: 0 12px 12px !important;
                 width: auto !important;
                 border-radius: 20px !important;
                 box-shadow: 0 16px 32px -12px rgba(22,38,77,0.35) !important;
             }
             .destacada-overlay {
-                background: linear-gradient(to top, rgba(9,12,24,0.94) 0%, rgba(14,23,48,0.25) 55%, transparent 100%) !important;
+                background: linear-gradient(to top, rgba(0,13,61,0.94) 0%, rgba(0,13,61,0.25) 55%, transparent 100%) !important;
             }
             .destacada-badge {
                 background: linear-gradient(135deg,#f0553f,#c4321f) !important;
@@ -1502,6 +1895,73 @@
                 background: linear-gradient(135deg,#f0553f,#c4321f) !important;
                 box-shadow: 0 4px 10px rgba(196,50,31,0.4);
             }
+            /* Carrusel destacado más alto en mobile (340 px). Todas las diapositivas miden lo mismo (si no, el carrusel
+               "salta" al rotar) y la tarjeta de puntos entra completa. */
+            .destacada-img-real {
+                aspect-ratio: auto !important;
+                height: 340px !important;
+                max-height: none !important;
+            }
+            /* Portada con degradé: la IMAGEN se funde hacia el azul oscuro de la tarjeta (el mismo del asistente y de la
+               tarjeta de puntos). Solo afecta a la imagen: títulos, badges, botones y puntos son capas aparte y no se tocan. */
+            .destacada-card {
+                background: #000d3d;
+                --fade-portada: linear-gradient(to bottom, #000 0%, #000 40%, rgba(0,0,0,0.55) 60%, rgba(0,0,0,0.2) 78%, transparent 94%);
+            }
+            img.destacada-img-real {
+                -webkit-mask-image: var(--fade-portada);
+                        mask-image: var(--fade-portada);
+                /* Arriba y sin fondo propio: si la imagen no ocupa todo el alto (premios, que se ven completos) no queda
+                   una franja negra arriba ni un escalón donde termina; el resto es el azul de la tarjeta. */
+                object-position: center top;
+                background: transparent !important;
+            }
+            /* Los premios muestran su imagen completa (object-fit: contain) y, si es apaisada, termina antes de llegar
+               abajo: el degradé es más corto para que no quede un borde donde la imagen termina. */
+            img.destacada-img-real[style*="object-fit:contain"] {
+                -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 48%, rgba(0,0,0,0.35) 62%, transparent 72%);
+                        mask-image: linear-gradient(to bottom, #000 0%, #000 48%, rgba(0,0,0,0.35) 62%, transparent 72%);
+            }
+            /* En la diapositiva de ranking la portada es un bloque con íconos adentro: el degradé va en una capa propia
+               que queda debajo del trofeo (que tiene z-index), así el trofeo se ve nítido. */
+            div.destacada-img-real:not(.mis-puntos-card)::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(to bottom, rgba(0,13,61,0) 40%, rgba(0,13,61,0.45) 60%, rgba(0,13,61,0.8) 78%, #000d3d 94%);
+                pointer-events: none;
+            }
+            /* Tarjeta "Tus puntos" (primera diapositiva del carrusel) */
+            .mis-puntos-card {
+                box-sizing: border-box;
+                padding: 16px;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                gap: 6px;
+                /* Mismo azul degradé del encabezado del asistente (.buscador-header-asistente). */
+                background: radial-gradient(circle at 15% 15%, #001D7D 0%, #000d3d 75%);
+                color: #fff;
+                text-align: left;
+            }
+            .mis-puntos-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 28px; }
+            .mis-puntos-saludo { font-size: 13px; color: #d3dcee; }
+            .mis-puntos-premium { flex: none; border: 0; border-radius: 12px; padding: 4px 10px; background: rgba(255,255,255,0.16); color: #fff; font-family: inherit; font-size: 12px; font-weight: 600; }
+            .mis-puntos-premium-btn { position: relative; background: #ffc83d; color: #1b1d24; cursor: pointer; }
+            .mis-puntos-premium-btn::after { content: ''; position: absolute; inset: -8px; }
+            .mis-puntos-titulo { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 24px; line-height: 28px; color: #fff; }
+            .mis-puntos-fila { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+            .mis-puntos-total { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+            .mis-puntos-num { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 38px; line-height: 38px; color: #ffc83d; }
+            .mis-puntos-lbl { font-size: 13px; color: #d3dcee; }
+            .mis-puntos-fecha { flex: none; font-size: 12px; line-height: 16px; color: #d3dcee; text-align: right; }
+            .mis-puntos-barra { display: flex; height: 8px; border-radius: 4px; background: rgba(255,255,255,0.2); overflow: hidden; }
+            .mis-puntos-barra-disp { background: #ffc83d; }
+            .mis-puntos-barra-mes { background: repeating-linear-gradient(135deg, rgba(255,200,61,0.75) 0 4px, rgba(255,200,61,0.3) 4px 8px); }
+            .mis-puntos-premio { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: #d3dcee; }
+            .mis-puntos-premio span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            .mis-puntos-premio span:last-child { flex: none; }
+            .mis-puntos-premio-ok { font-size: 13px; font-weight: 600; color: #ffc83d; }
             .vr-wrap {
                 margin-left: -1rem !important;
                 margin-right: -1rem !important;

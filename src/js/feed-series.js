@@ -90,7 +90,7 @@ window.cargarFilasSeries = async function() {
                     const icono = partes[0];
                     const texto = partes.slice(1).join(' ');
                     return `<button class="pill-orden${i === 0 ? ' active' : ''}" data-key="${f.key}" onclick="window.priorizarFilaGeneroSerie('${f.key}', this)">
-                        <span class="pill-orden-icono">${icono}</span>
+                        <span class="pill-orden-icono">${window.iconoPill3D ? window.iconoPill3D(icono) : icono}</span>
                         <span class="pill-orden-label">${texto}</span>
                     </button>`;
                 }).join('');
@@ -155,6 +155,9 @@ function renderFilasSeries() {
             trackNuevo.addEventListener('click', () => fijarPosicionActualSerie(trackNuevo), true);
         }
         cont.appendChild(el);
+
+        // Idem Películas: la fila volvió a armarse con esqueleto pero ya tiene sus series en memoria: se pintan de una, sin red.
+        if (f.cargado && f.series && f.series.length > 0 && el.querySelector('.fila-genero-skeleton')) renderCardsFilaSerie(f);
     });
 
     configurarLazyLoadFilasSeries();
@@ -460,6 +463,10 @@ function generarTarjetaSerieHTML(serie) {
                 </div>
                 <div class="serie-info">
                     <h3 class="serie-titulo">${serie.name || ''}</h3>
+                    <!-- SOLO MOBILE (tarjeta horizontal): año y resumen de votos. En escritorio no se ven.
+                         El resumen lo mantiene window._resumenTarjetaMobile (bottom-nav.js). -->
+                    <div class="card-m-chips"><span class="card-m-chip">${year}</span></div>
+                    <div class="card-m-resumen"></div>
                     <p class="serie-descripcion">${overview} <span class="ver-mas" onclick="event.stopPropagation(); window.abrirDetalleSerie(${serie.id})">Ver más</span></p>
                     <div class="votacion-container" id="votacion-serie-${serie.id}">
                         <div class="votacion-buttons">
@@ -514,6 +521,8 @@ function reiniciarGuinoTimerSerie(fila, track) {
 }
 
 function iniciarGuinoIntermitenteSerie(fila, track) {
+    // Mobile: la fila se navega solo con el dedo (varias tarjetas por pantalla, sin movimiento automático).
+    if (window.matchMedia('(max-width: 768px)').matches) return;
     if (fila.guinoTimeout) return;
     reiniciarGuinoTimerSerie(fila, track);
 }
@@ -542,6 +551,8 @@ function animarScrollTrackSerie(track, destino, duracion) {
 }
 
 function dispararGuinoSerie(track) {
+    // Mobile: la fila se navega solo con el dedo (varias tarjetas por pantalla, sin movimiento automático).
+    if (window.matchMedia('(max-width: 768px)').matches) return;
     if (track.dataset.dragging === '1') return;
     if (track.scrollWidth <= track.clientWidth + 2) return;
 
@@ -564,6 +575,9 @@ function dispararGuinoSerie(track) {
 }
 
 function fijarPosicionActualSerie(track) {
+    // Mobile: esta función supone UNA tarjeta por pantalla (redondea el scroll a un múltiplo del ancho de la pantalla). Con
+    // varias tarjetas a la vez movería la fila en cada toque; ahí el scroll-snap del CSS alcanza.
+    if (window.matchMedia('(max-width: 768px)').matches) return;
     track._scrollToken = (track._scrollToken || 0) + 1;
     if (track._guinoTimeouts) {
         track._guinoTimeouts.forEach(id => clearTimeout(id));
@@ -602,7 +616,7 @@ function configurarScrollFilaSerie(fila, track) {
         if (fila.guinoTimeout) reiniciarGuinoTimerSerie(fila, track);
         actualizarDotActivoSerie(fila, indice);
 
-        if (!fila.cargandoMas && !fila.finDelCatalogo && indice >= track.children.length - 3) {
+        if (!fila.cargandoMas && !fila.finDelCatalogo && indice >= track.children.length - (window.matchMedia('(max-width: 768px)').matches ? 6 : 3)) {
             cargarMasSeriesFila(fila, track);
         }
     });
@@ -2483,6 +2497,7 @@ window.abrirDetalleSerie = function(id) {
         window.cargarDatosSerie(id);
         modal.style.display = 'flex';
         document.body.classList.add('modal-open');
+        if (window._modalHero) window._modalHero.abrir('serie');
         window.inicializarCarruselSerie();
         window.irASlideSerie(0);
 
@@ -2500,6 +2515,7 @@ window.cerrarModalSerie = function() {
     if (!modal) return;
     modal.style.display = 'none';
     document.body.classList.remove('modal-open');
+    if (window._modalHero) window._modalHero.cerrar('serie');
 
     const iframe = modal.querySelector('iframe');
     if (iframe) iframe.src = iframe.src;
@@ -2573,11 +2589,13 @@ window.cargarDatosSerie = async function(id) {
         const serie = await response.json();
 
         document.getElementById('modalTituloSerie').textContent = serie.name || 'Título no disponible';
+        if (window._modalHero) window._modalHero.titulo('serie', id, serie.name);
 
         const posterEl = document.getElementById('modalPosterSerie');
         posterEl.src = serie.poster_path
             ? `https://image.tmdb.org/t/p/w500${serie.poster_path}`
             : 'https://via.placeholder.com/300x450?text=Sin+imagen';
+        if (window._modalHero) window._modalHero.poster('serie', serie.poster_path);
 
         document.getElementById('modalSinopsisSerie').textContent = serie.overview || 'Sinopsis no disponible';
 
@@ -3871,11 +3889,12 @@ window.cargarSerieDestacada = async function() {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (resDestacada.status === 204 || !resDestacada.ok) {
-                contenedor.style.display = 'none';
-                return;
+                // Sin tarjetas del admin: en mobile igual queda la de puntos, así que no se corta acá.
+                items = [];
+            } else {
+                const { seriesId } = await resDestacada.json();
+                items = [{ tipo: 'SERIE_DESTACADA', seriesId }];
             }
-            const { seriesId } = await resDestacada.json();
-            items = [{ tipo: 'SERIE_DESTACADA', seriesId }];
         }
 
         const resueltos = await Promise.all(items.map(async (item) => {
@@ -3902,18 +3921,27 @@ window.cargarSerieDestacada = async function() {
         }));
 
         const validos = resueltos.filter(Boolean);
+        // Mobile: la primera diapositiva es siempre la de puntos (los datos los pide la propia tarjeta).
+        if (typeof window._renderTarjetaMisPuntos === 'function' && window._esMobileInicio()) {
+            validos.unshift({ tipo: 'MIS_PUNTOS', data: null });
+        }
         if (validos.length === 0) {
             contenedor.style.display = 'none';
             return;
         }
 
-        try { sessionStorage.setItem('cm_destacada_serie_cache', JSON.stringify(validos)); } catch (e) {}
+const _cachePrevio = sessionStorage.getItem('cm_destacada_serie_cache');
+        const _cacheNuevo = JSON.stringify(validos);
+        try { sessionStorage.setItem('cm_destacada_serie_cache', _cacheNuevo); } catch (e) {}
 
                 // Mismo chequeo que Película, a la inversa — si para cuando este
                 // fetch termina el usuario ya volvió a Películas, no lo mostramos.
                 if (window._tabActivo !== 'series') {
                     return;
                 }
+
+                // Idem Películas: si ya está pintado con lo mismo (venía de la caché), no se vuelve a pintar.
+                if (_cachePrevio === _cacheNuevo && contenedor.style.display === 'block' && window._carruselDestacadoSerie.items.length > 0) return;
 
                 window._carruselDestacadoSerie.items = validos;
                 window._carruselDestacadoSerie.actual = 0;
@@ -3977,7 +4005,14 @@ function iniciarRotacionDestacadoSerie() {
         `<span class="destacada-dot${i === 0 ? ' activo' : ''}" onclick="irASlideDestacadoSerie(${i})"></span>`
     ).join('');
 
+    state._ticks = 0;
     state.timer = setInterval(() => {
+        // La tarjeta de puntos es la propuesta de valor: se queda el doble de tiempo que las demás (6 s en vez de 3).
+        if (state.items[state.actual] && state.items[state.actual].tipo === 'MIS_PUNTOS') {
+            state._ticks = (state._ticks || 0) + 1;
+            if (state._ticks < 2) return;
+        }
+        state._ticks = 0;
         const siguiente = (state.actual + 1) % state.items.length;
         renderSlideDestacadoSerie(siguiente);
     }, 3000);
@@ -4002,6 +4037,14 @@ function renderSlideDestacadoSerie(idx) {
     const item = state.items[idx];
 
     document.querySelectorAll('#destacadaDotsSerie .destacada-dot').forEach((d, i) => d.classList.toggle('activo', i === idx));
+
+    if (item.tipo === 'MIS_PUNTOS') {
+        window._renderTarjetaMisPuntos(card, label, () => {
+            const st = window._carruselDestacadoSerie;
+            if (st.items[st.actual] && st.items[st.actual].tipo === 'MIS_PUNTOS') renderSlideDestacadoSerie(st.actual);
+        });
+        return;
+    }
 
     if (item.tipo === 'RANKING_TRIVIA') {
             label.textContent = '🏆 Ranking de series';

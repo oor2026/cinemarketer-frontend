@@ -16,6 +16,11 @@
     background: linear-gradient(155deg, #12141b, #0d0f14);
 }
 
+
+/* Rediseño mobile de Mi Sala: las secciones nuevas (barra de secciones, actividad, Mi Lista, logros) solo existen en mobile.
+   perfil-mobile.css las vuelve a mostrar. */
+.sala-movil { display: none; }
+
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }

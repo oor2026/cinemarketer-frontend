@@ -254,6 +254,15 @@ window.generarTarjetasHTML = async function(peliculas) {
                                 </button>
                             </div>`;
 
+                        // Chips de la tarjeta horizontal (solo mobile): el año y, si corresponde, el estado. Un reestreno usa la
+                        // misma etiqueta que el póster ("En cines desde el 8/10" / "Reestreno el 17/10"); un próximo estreno,
+                        // "Estreno el 14/11". La fecha se parte como texto (no con Date) para que la zona horaria no corra el día.
+                        const partesFecha = pelicula.release_date ? String(pelicula.release_date).split('-') : [];
+                        const fechaCorta = partesFecha.length === 3 ? `${parseInt(partesFecha[2], 10)}/${parseInt(partesFecha[1], 10)}` : '';
+                        const chipsMobile = `<span class="card-m-chip">${year}</span>` + (pelicula.reestreno
+                            ? `<span class="card-m-chip card-m-chip-cine">${window._etiquetaReestreno(pelicula.reestreno)}</span>`
+                            : (esProximoEstreno && fechaCorta ? `<span class="card-m-chip">Estreno el ${fechaCorta}</span>` : ''));
+
                         const tarjeta = plantilla
                             .replace(/{id}/g, pelicula.id)
                             .replace(/{posterUrl}/g, posterUrl)
@@ -263,6 +272,7 @@ window.generarTarjetasHTML = async function(peliculas) {
                             .replace(/{overview}/g, overview)
                             .replace(/{popularity}/g, Math.round(pelicula.popularity))
                             .replace(/{vote_count}/g, pelicula.vote_count)
+                            .replace(/{chipsMobile}/g, chipsMobile)
                             .replace(/{accionesVotacion}/g, accionesVotacion);
                         return pelicula.reestreno ? window._insertarEtiquetaReestreno(tarjeta, pelicula.reestreno) : tarjeta;
                     }).join('');
@@ -577,7 +587,7 @@ function renderPillsFilas() {
         const icono = partes[0];
         const texto = partes.slice(1).join(' ');
         return `<button class="pill-orden${i === 0 ? ' active' : ''}" data-key="${f.key}" onclick="window.priorizarFilaGenero('${f.key}', this)">
-            <span class="pill-orden-icono">${icono}</span>
+            <span class="pill-orden-icono">${window.iconoPill3D ? window.iconoPill3D(icono) : icono}</span>
             <span class="pill-orden-label">${texto}</span>
         </button>`;
     }).join('');
@@ -641,14 +651,13 @@ window.priorizarFilaGenero = function(key, btn) {
 
         const cont = document.getElementById('filasGeneroContainer');
             if (cont) {
-                // En mobile el header se auto-oculta al bajar (ver main.js,
-                // "navbar-hidden") — el offset fijo de desktop dejaba
-                // demasiado aire arriba, frenando en los pills en vez del
-                // título de la fila.
+                // En mobile el header de arriba (menú, logo, puntos y campanita) queda siempre visible; lo que se oculta al
+                // bajar es solo su extensión (ver header-nav.js). Por eso el margen es el alto de ese header más un respiro:
+                // frena en el título de la fila y no detrás del header.
                 const esMobile = window.innerWidth <= 768;
                 let offset;
                 if (esMobile) {
-                    offset = 12;
+                    offset = 12 + (typeof window._alturaHeaderMobile === 'function' ? window._alturaHeaderMobile() : 0);
                 } else {
                     const header = document.querySelector('header');
                     offset = (header ? header.offsetHeight : 70) + 16;
@@ -732,6 +741,10 @@ function renderFilasGenero() {
                                 trackNuevo.addEventListener('click', () => fijarPosicionActual(trackNuevo), true); // true = fase de captura, no la frena el stopPropagation del botón
                             }
         cont.appendChild(el); // appendChild sobre un nodo existente lo MUEVE, no lo duplica
+
+        // Volver al feed desde otro módulo: el DOM se armó de cero (con esqueleto) pero la fila ya tiene sus películas en memoria
+        // (fila.cargado quedó en true de la visita anterior y nadie las vuelve a pedir). Se pintan sus tarjetas de una, sin red.
+        if (f.cargado && f.peliculas && f.peliculas.length > 0 && el.querySelector('.fila-genero-skeleton')) renderCardsFila(f);
     });
 
     configurarLazyLoadFilas();
@@ -1024,6 +1037,8 @@ function reiniciarGuinoTimer(fila, track) {
 }
 
 function iniciarGuinoIntermitente(fila, track) {
+    // Mobile: la fila se navega solo con el dedo (varias tarjetas por pantalla, sin movimiento automático).
+    if (window.matchMedia('(max-width: 768px)').matches) return;
     if (fila.guinoTimeout) return; // ya está corriendo, no duplicar
     reiniciarGuinoTimer(fila, track);
 }
@@ -1052,6 +1067,8 @@ function animarScrollTrack(track, destino, duracion) {
 }
 
 function dispararGuino(track) {
+    // Mobile: la fila se navega solo con el dedo (varias tarjetas por pantalla, sin movimiento automático).
+    if (window.matchMedia('(max-width: 768px)').matches) return;
     if (track.dataset.dragging === '1') return;
     if (track.scrollWidth <= track.clientWidth + 2) return;
 
@@ -1074,7 +1091,10 @@ function dispararGuino(track) {
 }
 
 function fijarPosicionActual(track) {
-    track._scrollToken = (track._scrollToken || 0) + 1; // corta cualquier animación de guiño en curso
+    // Mobile: esta función supone UNA tarjeta por pantalla (redondea el scroll a un múltiplo del ancho de la pantalla). Con
+    // varias tarjetas a la vez movería la fila en cada toque; ahí el scroll-snap del CSS alcanza.
+    if (window.matchMedia('(max-width: 768px)').matches) return;
+    track._scrollToken = (track._scrollToken || 0) + 1;// corta cualquier animación de guiño en curso
     if (track._guinoTimeouts) {
         track._guinoTimeouts.forEach(id => clearTimeout(id));
         track._guinoTimeouts = [];
@@ -1116,7 +1136,7 @@ function configurarScrollFila(fila, track) {
         if (fila.guinoTimeout) reiniciarGuinoTimer(fila, track);
         actualizarDotActivo(fila, indice);
 
-        if (!fila.cargandoMas && !fila.finDelCatalogo && indice >= track.children.length - 3) {
+        if (!fila.cargandoMas && !fila.finDelCatalogo && indice >= track.children.length - (window.matchMedia('(max-width: 768px)').matches ? 6 : 3)) {
             cargarMasPeliculasFila(fila, track);
         }
     });
@@ -1263,11 +1283,12 @@ window.cargarPeliculaDestacada = async function() {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (resDestacada.status === 204 || !resDestacada.ok) {
-                contenedor.style.display = 'none';
-                return;
+                // Sin tarjetas del admin: en mobile igual queda la de puntos, así que no se corta acá.
+                items = [];
+            } else {
+                const { movieId } = await resDestacada.json();
+                items = [{ tipo: 'PELICULA_DESTACADA', movieId }];
             }
-            const { movieId } = await resDestacada.json();
-            items = [{ tipo: 'PELICULA_DESTACADA', movieId }];
         }
 
         // Resolvemos cada ítem en paralelo (película o premio según tipo)
@@ -1297,6 +1318,10 @@ window.cargarPeliculaDestacada = async function() {
                 }));
 
         const validos = resueltos.filter(Boolean);
+        // Mobile: la primera diapositiva es siempre la de puntos (los datos los pide la propia tarjeta).
+        if (typeof window._renderTarjetaMisPuntos === 'function' && window._esMobileInicio()) {
+            validos.unshift({ tipo: 'MIS_PUNTOS', data: null });
+        }
         if (validos.length === 0) {
             contenedor.style.display = 'none';
             return;
@@ -1304,7 +1329,9 @@ window.cargarPeliculaDestacada = async function() {
 
         // Guardar en caché de sesión para que la próxima vez (incluso
                 // volviendo de otro módulo del dashboard) pinte instantáneo.
-                try { sessionStorage.setItem('cm_destacada_cache', JSON.stringify(validos)); } catch (e) {}
+const _cachePrevio = sessionStorage.getItem('cm_destacada_cache');
+                const _cacheNuevo = JSON.stringify(validos);
+                try { sessionStorage.setItem('cm_destacada_cache', _cacheNuevo); } catch (e) {}
 
                 // Si para cuando este fetch (async) termina el usuario ya cambió
                 // a otra tab, no mostramos nada — evita que el carrusel de
@@ -1313,6 +1340,10 @@ window.cargarPeliculaDestacada = async function() {
                 if (window._tabActivo !== 'peliculas') {
                     return;
                 }
+
+                // Si el carrusel ya está pintado (desde la caché) con exactamente lo mismo, no se vuelve a pintar: re-pintar reiniciaba
+                // la rotación y parpadeaba justo cuando el resto de la pantalla terminaba de cargar.
+                if (_cachePrevio === _cacheNuevo && contenedor.style.display === 'block' && window._carruselDestacado.items.length > 0) return;
 
                 window._carruselDestacado.items = validos;
                 window._carruselDestacado.actual = 0;
@@ -1382,7 +1413,14 @@ function iniciarRotacionDestacado() {
         `<span class="destacada-dot${i === 0 ? ' activo' : ''}" onclick="irASlideDestacado(${i})"></span>`
     ).join('');
 
+    state._ticks = 0;
     state.timer = setInterval(() => {
+            // La tarjeta de puntos es la propuesta de valor: se queda el doble de tiempo que las demás (6 s en vez de 3).
+            if (state.items[state.actual] && state.items[state.actual].tipo === 'MIS_PUNTOS') {
+                state._ticks = (state._ticks || 0) + 1;
+                if (state._ticks < 2) return;
+            }
+            state._ticks = 0;
             const siguiente = (state.actual + 1) % state.items.length;
             renderSlideDestacado(siguiente);
         }, 3000);
@@ -1410,6 +1448,14 @@ function renderSlideDestacado(idx) {
     const item = state.items[idx];
 
     document.querySelectorAll('.destacada-dot').forEach((d, i) => d.classList.toggle('activo', i === idx));
+
+    if (item.tipo === 'MIS_PUNTOS') {
+        window._renderTarjetaMisPuntos(card, label, () => {
+            const st = window._carruselDestacado;
+            if (st.items[st.actual] && st.items[st.actual].tipo === 'MIS_PUNTOS') renderSlideDestacado(st.actual);
+        });
+        return;
+    }
 
     if (item.tipo === 'RANKING_TRIVIA') {
             label.textContent = '🏆 Ranking de cinéfilos';
@@ -2752,6 +2798,7 @@ window.abrirDetallePelicula = function(id) {
             window.cargarComentariosPelicula(id);
             modal.style.display = 'flex';
             document.body.classList.add('modal-open');
+            if (window._modalHero) window._modalHero.abrir('pelicula');
             inicializarContadorCaracteres();
             inicializarCarrusel();
             irASlide(0);
@@ -2822,6 +2869,7 @@ window.cerrarModal = function() {
     if (modal) {
         modal.style.display = 'none';
         document.body.classList.remove('modal-open');
+        if (window._modalHero) window._modalHero.cerrar('pelicula');
 
         // Reset modo spoiler
         activarModoSpoiler(false);
@@ -3012,6 +3060,7 @@ window._confirmarAvisoEstreno = async function() {
         const pelicula = await response.json();
 
         document.getElementById('modalTitulo').textContent = pelicula.title || 'Título no disponible';
+        if (window._modalHero) window._modalHero.titulo('pelicula', id, pelicula.title);
         const tituloComentarios = document.getElementById('comentariosTitulo');
                 if (tituloComentarios) tituloComentarios.textContent = `💬 Comentarios`;
         const posterEl = document.getElementById('modalPoster');
@@ -3019,6 +3068,7 @@ window._confirmarAvisoEstreno = async function() {
             ? `https://image.tmdb.org/t/p/w500${pelicula.poster_path}`
             : 'https://via.placeholder.com/300x450?text=Sin+imagen';
         posterEl.src = posterSrc;
+        if (window._modalHero) window._modalHero.poster('pelicula', pelicula.poster_path);
         posterEl.onload = () => igualarAlturaSlides();
         posterEl.onerror = () => igualarAlturaSlides();
         document.getElementById('modalSinopsis').textContent = pelicula.overview || 'Sinopsis no disponible';
@@ -9588,12 +9638,10 @@ var BUSCADOR_SAGAS = [
                     const esMobile = window.innerWidth <= 768;
                     let offset;
                     if (esMobile) {
-                        // En mobile el header se auto-oculta al bajar (ver main.js,
-                        // "navbar-hidden") — el offset fijo pensado para desktop
-                        // (header siempre visible) dejaba demasiado aire arriba,
-                        // mostrando los pills por encima del título del resultado
-                        // en vez de aterrizar justo ahí.
-                        offset = 12;
+                        // En mobile el header de arriba (menú, logo, puntos y campanita) queda siempre visible; lo que se oculta
+                        // al bajar es solo su extensión (ver header-nav.js). El margen es el alto de ese header más un respiro,
+                        // para aterrizar justo en el título del resultado y no detrás del header.
+                        offset = 12 + (typeof window._alturaHeaderMobile === 'function' ? window._alturaHeaderMobile() : 0);
                     } else {
                         const header = document.querySelector('header');
                         offset = (header ? header.offsetHeight : 70) + 16;

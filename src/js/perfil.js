@@ -180,6 +180,9 @@ async function cargarPerfil(userId) {
                                 window._inicializarSwipeStacks();
                                 window._inicializarModalGustoMobile();
 
+        // Rediseño mobile de Mi Sala: actividad, Mi Lista, Mis logros y barra de secciones (ver el bloque al final de este archivo).
+        if (typeof window._salaIniciar === 'function') window._salaIniciar(perfil, userId);
+
         cargarPublicacionesPerfil(userId);
         document.getElementById('perfilCargandoOverlay').style.display = 'none';
 
@@ -4104,3 +4107,362 @@ document.addEventListener('click', function(e) {
         if (typeof window[item[2]] === 'function') window[item[2]]();
     });
 });
+
+// =====================================================================================================================
+// MI SALA — REDISEÑO MOBILE
+// Secciones nuevas (solo mobile, hasta 768 px; escritorio sigue con lo de siempre): barra de secciones, Mi actividad con
+// grilla de votaciones y lista de comentarios (reemplaza las pilas de tarjetas), Mi Lista (migrada del menú hamburguesa) y
+// Mis logros (sellos de misiones cumplidas). Reutiliza los mismos pedidos y las mismas acciones que ya usaba el módulo.
+// Rojo = películas, azul = series; los colores salen de las variables del módulo, así que el modo oscuro funciona solo.
+// =====================================================================================================================
+(function () {
+    const MOBILE = () => window.matchMedia('(max-width: 768px)').matches;
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const imgTmdb = (p) => (p ? `https://image.tmdb.org/t/p/w342${p}` : '');
+    const cabecera = () => ({ headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+    const cubo = (tam, items, total) => ({ items: items || [], pagina: 0, tam, hayMas: (items || []).length < (total || 0), cargando: false });
+
+    const S = window._sala = { userId: null, propio: false, criterio: 'votaciones', tipo: 'peliculas', cubos: null, lista: { tipo: 'peliculas', datos: { peliculas: [], series: [] }, abierta: false }, logros: { cumplidas: 0, sellos: [], abiertos: false }, listo: false };
+
+    // ------------------------------------------------------------------------------------------------ Actividad
+    const ENDPOINT = {
+        votaciones: { peliculas: 'votaciones', series: 'votaciones-series' },
+        comentarios: { peliculas: 'comentarios', series: 'comentarios-series' }
+    };
+    const cuboActual = () => S.cubos[S.criterio][S.tipo];
+    const totalActual = () => {
+        const c = window._perfilCounts || {};
+        return S.criterio === 'votaciones'
+            ? (S.tipo === 'series' ? c.votacionesSeries : c.votacionesPeliculas)
+            : (S.tipo === 'series' ? c.comentariosSeries : c.comentariosPeliculas);
+    };
+
+    function pintarActividad() {
+        const cuerpo = $('salaActividadCuerpo');
+        if (!cuerpo || !S.cubos) return;
+        const cb = cuboActual(), serie = S.tipo === 'series';
+
+        document.querySelectorAll('#salaActividad .sala-seg button').forEach((b) => b.classList.toggle('on', b.dataset.crit === S.criterio));
+        document.querySelectorAll('#salaActividad .sala-chips .sala-chip').forEach((b) => b.classList.toggle('on', b.dataset.tipo === S.tipo));
+        const c = window._perfilCounts || {};
+        const nv = $('salaCountVot'), nc = $('salaCountCom');
+        if (nv) nv.textContent = (S.tipo === 'series' ? c.votacionesSeries : c.votacionesPeliculas) || 0;
+        if (nc) nc.textContent = (S.tipo === 'series' ? c.comentariosSeries : c.comentariosPeliculas) || 0;
+
+        if (!cb.items.length) {
+            const que = S.criterio === 'votaciones' ? 'votaciones' : 'comentarios';
+            cuerpo.innerHTML = `<p class="sala-vacio">${S.propio ? `Todavía no tenés ${que} de ${serie ? 'series' : 'películas'}.` : `Sin ${que} de ${serie ? 'series' : 'películas'} aún.`}</p>`;
+        } else if (S.criterio === 'votaciones') {
+            cuerpo.innerHTML = `<div class="sala-grid3">${cb.items.map((v, i) => {
+                const titulo = serie ? v.seriesTitle : v.movieTitle, like = v.voto === 'LIKE';
+                const foto = imgTmdb(v.posterPath);
+                return `<button type="button" class="sala-poster" onclick="window._salaAbrir('votaciones', ${i})" aria-label="${esc(titulo || '')}, ${like ? 'me gustó' : 'no me gustó'}">
+                    ${foto ? `<img src="${foto}" alt="" loading="lazy">` : `<span class="sala-sinfoto">${esc(titulo || '')}</span>`}
+                    <span class="sala-voto ${like ? 'like' : 'dislike'}"><i class="fas ${like ? 'fa-thumbs-up' : 'fa-thumbs-down'}"></i></span>
+                </button>`;
+            }).join('')}</div>`;
+        } else {
+            cuerpo.innerHTML = `<div class="sala-lista-com">${cb.items.map((cm, i) => {
+                const titulo = serie ? cm.seriesTitle : cm.movieTitle, foto = imgTmdb(cm.posterPath);
+                return `<article class="sala-com ${serie ? 'ser' : 'pel'}${cm.spoiler ? ' es-spoiler' : ''}">
+                    <button type="button" class="sala-mini" onclick="window._salaAbrir('comentarios', ${i})" aria-label="Abrir ${esc(titulo || '')}">
+                        ${foto ? `<img src="${foto}" alt="" loading="lazy">` : ''}
+                        <span class="sala-ic"><i class="fas fa-comment-dots"></i></span>
+                    </button>
+                    <div class="sala-com-cuerpo">
+                        <h3>${esc(titulo || '')}</h3>
+                        ${cm.spoiler ? '<span class="sala-spoiler-chip">Spoiler</span>' : ''}
+                        <p>${esc(cm.contenido || '')}</p>
+                        <div class="sala-com-meta"><button type="button" class="sala-ver" onclick="window._salaVerComentario(${i})">Ver comentario</button></div>
+                    </div>
+                </article>`;
+            }).join('')}</div>`;
+        }
+
+        const mas = $('salaActividadMas'), total = totalActual() || 0;
+        if (mas) {
+            mas.style.display = cb.hayMas ? 'flex' : 'none';
+            mas.disabled = cb.cargando;
+            mas.textContent = cb.cargando ? 'Cargando...' : (total > cb.items.length ? `Cargar más (${cb.items.length} de ${total})` : 'Cargar más');
+        }
+        const tabAct = $('salaTabAct');
+        if (tabAct) tabAct.textContent = ((c.votacionesPeliculas || 0) + (c.votacionesSeries || 0) + (c.comentariosPeliculas || 0) + (c.comentariosSeries || 0)) || '';
+    }
+
+    window._salaCriterio = function (criterio) { S.criterio = criterio === 'comentarios' ? 'comentarios' : 'votaciones'; pintarActividad(); };
+    window._salaTipo = function (tipo) { S.tipo = tipo === 'series' ? 'series' : 'peliculas'; pintarActividad(); };
+
+    window._salaCargarMas = async function () {
+        const cb = cuboActual();
+        if (cb.cargando || !cb.hayMas) return;
+        const criterio = S.criterio, tipo = S.tipo;
+        cb.cargando = true; pintarActividad();
+        try {
+            const res = await fetch(`${CONFIG.API_URL}/users/${S.userId}/${ENDPOINT[criterio][tipo]}?page=${cb.pagina + 1}&size=${cb.tam}`, cabecera());
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            const nuevos = (criterio === 'votaciones' ? data.votaciones : data.comentarios) || [];
+            const clave = (x) => criterio === 'votaciones' ? `${x.movieId || x.seriesId}-${x.voto}` : String(x.commentId);
+            const ya = new Set(cb.items.map(clave));
+            nuevos.forEach((x) => { if (!ya.has(clave(x))) cb.items.push(x); });
+            cb.pagina++;
+            cb.hayMas = !!data.hayMas && nuevos.length > 0;
+        } catch (e) { /* queda el botón para reintentar */ }
+        cb.cargando = false; pintarActividad();
+    };
+
+    window._salaAbrir = function (criterio, i) {
+        const x = S.cubos[criterio][S.tipo].items[i];
+        if (!x) return;
+        if (S.tipo === 'series') { if (x.seriesId && window._abrirSerieDesdePerfil) window._abrirSerieDesdePerfil(x.seriesId); }
+        else if (x.movieId && window._abrirPeliculaDesdePerfil) window._abrirPeliculaDesdePerfil(x.movieId);
+    };
+
+    window._salaVerComentario = function (i) {
+        const cm = S.cubos.comentarios[S.tipo].items[i];
+        if (!cm) return;
+        // Mismo contexto y misma acción que la viñeta de siempre ("Ver más"): lleva al comentario dentro de su película o serie.
+        window._vinetaContexto = S.tipo === 'series'
+            ? { tipo: 'serie', id: cm.seriesId, commentId: cm.commentId, spoiler: cm.spoiler }
+            : { tipo: 'pelicula', id: cm.movieId, commentId: cm.commentId, spoiler: cm.spoiler };
+        if (typeof window._responderDesdeVineta === 'function') window._responderDesdeVineta();
+    };
+
+    // ------------------------------------------------------------------------------------------------ Mi Lista
+    async function cargarLista() {
+        const sec = $('salaLista');
+        if (!sec || !S.propio) return;
+        try {
+            const [rp, rs] = await Promise.all([
+                fetch(`${CONFIG.API_URL}/watchlist`, cabecera()),
+                fetch(`${CONFIG.API_URL}/series-watchlist`, cabecera())
+            ]);
+            S.lista.datos.peliculas = rp.ok ? await rp.json() : [];
+            S.lista.datos.series = rs.ok ? await rs.json() : [];
+        } catch (e) { S.lista.datos = { peliculas: [], series: [] }; }
+        sec.style.display = '';
+        const tab = $('salaTabLista'); if (tab) tab.style.display = '';
+        pintarLista();
+    }
+
+    function pintarLista() {
+        const cuerpo = $('salaListaCuerpo');
+        if (!cuerpo) return;
+        const tipo = S.lista.tipo, serie = tipo === 'series', items = S.lista.datos[tipo] || [];
+        const np = S.lista.datos.peliculas.length, ns = S.lista.datos.series.length;
+        document.querySelectorAll('#salaLista .sala-chips .sala-chip').forEach((b) => b.classList.toggle('on', b.dataset.tipo === tipo));
+        const cp = $('salaListaNPel'), cs = $('salaListaNSer'); if (cp) cp.textContent = np; if (cs) cs.textContent = ns;
+        const sub = $('salaListaSub'); if (sub) sub.textContent = (np + ns) ? `${np + ns} ${(np + ns) === 1 ? 'título guardado' : 'títulos guardados'} para ver` : 'Lo que guardes para ver más tarde';
+        const tabN = $('salaTabListaN'); if (tabN) tabN.textContent = (np + ns) || '';
+        const ver = $('salaListaVer'); if (ver) { ver.style.display = items.length > 3 ? '' : 'none'; ver.textContent = S.lista.abierta ? 'Ver menos' : 'Ver toda'; }
+
+        if (!items.length) { cuerpo.innerHTML = `<p class="sala-vacio">Todavía no guardaste ${serie ? 'series' : 'películas'} en tu lista.</p>`; return; }
+        const tarjeta = (it, i) => {
+            const titulo = serie ? it.seriesTitle : it.movieTitle, foto = imgTmdb(serie ? it.seriesPosterPath : it.moviePosterPath);
+            return `<div class="sala-item ${serie ? 'ser' : 'pel'}">
+                <button type="button" class="sala-poster" onclick="window._salaAbrirLista(${i})" aria-label="${esc(titulo || '')}">
+                    ${foto ? `<img src="${foto}" alt="" loading="lazy">` : ''}<span class="sala-velo"></span><span class="sala-tit">${esc(titulo || '')}</span>
+                </button>
+                <button type="button" class="sala-quitar" onclick="window._salaQuitar(${i})" aria-label="Quitar ${esc(titulo || '')} de mi lista" title="Quitar de mi lista"><i class="fas fa-bookmark"></i></button>
+            </div>`;
+        };
+        cuerpo.innerHTML = S.lista.abierta
+            ? `<div class="sala-lista-grid">${items.map(tarjeta).join('')}</div>`
+            : `<div class="sala-fila">${items.slice(0, 10).map(tarjeta).join('')}</div>`;
+    }
+
+    window._salaListaTipo = function (tipo) { S.lista.tipo = tipo === 'series' ? 'series' : 'peliculas'; pintarLista(); };
+    window._salaListaToggle = function () { S.lista.abierta = !S.lista.abierta; pintarLista(); };
+    window._salaAbrirLista = function (i) {
+        const it = S.lista.datos[S.lista.tipo][i];
+        if (!it) return;
+        if (S.lista.tipo === 'series') { const id = it.seriesId || it.tmdbId; if (id && window._abrirSerieDesdePerfil) window._abrirSerieDesdePerfil(id); }
+        else { const id = it.movieId || it.tmdbId; if (id && window._abrirPeliculaDesdePerfil) window._abrirPeliculaDesdePerfil(id); }
+    };
+    window._salaQuitar = async function (i) {
+        const tipo = S.lista.tipo, it = S.lista.datos[tipo][i];
+        if (!it) return;
+        const url = tipo === 'series' ? `${CONFIG.API_URL}/series-watchlist/${it.id}` : `${CONFIG.API_URL}/watchlist/${it.id}`;
+        try {
+            const res = await fetch(url, { method: 'DELETE', headers: cabecera().headers });
+            if (!res.ok) return;
+            S.lista.datos[tipo].splice(i, 1);
+            pintarLista();
+            if (typeof showToast === 'function') showToast('success', 'Fue quitada de tu lista correctamente');
+        } catch (e) { /* sin cambios */ }
+    };
+
+    // ------------------------------------------------------------------------------------------------ Mis logros
+    const IC = {
+        votos: '<path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/>',
+        comentarios: '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+        constancia: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+        maraton: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18"/><path d="M3 7.5h4"/><path d="M3 12h18"/><path d="M3 16.5h4"/><path d="M17 3v18"/><path d="M17 7.5h4"/><path d="M17 16.5h4"/>',
+        trivia: '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+        comunidad: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+        _: '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>'
+    };
+    const COLOR = { votos: ['#0B4DA2', '#1B6FD1'], comentarios: ['#B54708', '#D9631A'], constancia: ['#92400E', '#C2610C'], maraton: ['#B42318', '#E50914'], trivia: ['#5B2EA6', '#7A4CC7'], comunidad: ['#0E7C7B', '#14A09E'], _: ['#344054', '#667085'] };
+
+    // Sello: una estampilla perforada, con color e ícono propios por categoría (no depende solo del color para distinguirse).
+    function selloSvg(cat, tam, id) {
+        const k = IC[cat] ? cat : '_', [c1, c2] = COLOR[k], g = `gSello${id}`;
+        return `<svg width="${tam}" height="${tam}" viewBox="0 0 84 84" aria-hidden="true"><defs><linearGradient id="${g}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs>
+            <circle cx="42" cy="42" r="39" fill="none" stroke="${c2}" stroke-opacity=".45" stroke-width="5" stroke-dasharray="3.2 3.2"/>
+            <circle cx="42" cy="42" r="32" fill="url(#${g})"/>
+            <circle cx="42" cy="42" r="27" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.2"/>
+            <g transform="translate(30 30)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${IC[k]}</g></svg>`;
+    }
+    const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    const MESES_LARGO = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const fechaCorta = (f) => { const d = new Date(f); return isNaN(d) ? '' : `${d.getDate()} ${MESES[d.getMonth()]}`; };
+    const fechaLarga = (f) => { const d = new Date(f); return isNaN(d) ? '' : `${d.getDate()} de ${MESES_LARGO[d.getMonth()]} de ${d.getFullYear()}`; };
+
+    async function cargarLogros() {
+        const cuerpo = $('salaLogrosCuerpo');
+        if (!cuerpo) return;
+        let datos = null;
+        try {
+            const res = await fetch(`${CONFIG.API_URL}/users/${S.userId}/logros`, cabecera());
+            if (res.ok) datos = await res.json();
+        } catch (e) { /* todavía sin servicio de logros */ }
+        S.logros = { cumplidas: (datos && datos.cumplidas) || 0, sellos: (datos && datos.sellos) || [], abiertos: false };
+        pintarLogros();
+    }
+
+    function pintarLogros() {
+        const cuerpo = $('salaLogrosCuerpo'), cont = $('salaLogrosContador'), btn = $('salaLogrosMas');
+        if (!cuerpo) return;
+        const L = S.logros, n = L.cumplidas || L.sellos.length;
+        const tab = $('salaTabLogros'); if (tab) tab.textContent = n || '';
+        if (cont) { cont.style.display = n ? '' : 'none'; cont.innerHTML = `<i class="fas fa-trophy"></i>${n} ${n === 1 ? 'misión cumplida' : 'misiones cumplidas'}`; }
+        if (!L.sellos.length) {
+            cuerpo.innerHTML = `<p class="sala-vacio">${S.propio ? 'Tus sellos van a aparecer acá cuando cumplas tus primeras misiones.' : 'Todavía no tiene sellos.'}</p>`;
+            if (btn) btn.style.display = 'none';
+            return;
+        }
+        const visibles = L.abiertos ? L.sellos : L.sellos.slice(0, 6);
+        cuerpo.innerHTML = `<div class="sala-sellos">${visibles.map((s, i) => `<button type="button" class="sala-sello" onclick="window._salaSello(${i})" aria-label="Sello ${esc(s.nombre)}${s.fecha ? ', conseguido el ' + esc(fechaLarga(s.fecha)) : ''}">
+            ${selloSvg(s.categoria, 84, 'c' + i)}<strong>${esc(s.nombre)}</strong>${s.fecha ? `<span>${esc(fechaCorta(s.fecha))}</span>` : ''}</button>`).join('')}</div>`;
+        if (btn) { btn.style.display = L.sellos.length > 6 ? 'flex' : 'none'; btn.textContent = L.abiertos ? 'Ver menos' : `Ver los ${L.sellos.length} sellos`; }
+    }
+    window._salaLogrosToggle = function () { S.logros.abiertos = !S.logros.abiertos; pintarLogros(); };
+
+    // Hoja de detalle de un sello (bottom sheet).
+    window._salaSello = function (i) {
+        const s = (S.logros.abiertos ? S.logros.sellos : S.logros.sellos.slice(0, 6))[i];
+        if (!s) return;
+        window._salaCerrarSello();
+        const oscuro = !!document.querySelector('.perfil-card.modo-oscuro');
+        const puede = S.propio && typeof navigator.share === 'function';
+        const fondo = document.createElement('div');
+        fondo.className = 'sala-hoja-fondo'; fondo.id = 'salaHojaFondo';
+        fondo.onclick = (e) => { if (e.target === fondo) window._salaCerrarSello(); };
+        fondo.innerHTML = `<div class="sala-hoja${oscura(oscuro)}" role="dialog" aria-modal="true" aria-label="Detalle del sello ${esc(s.nombre)}">
+            <div class="sala-asa"></div>
+            ${selloSvg(s.categoria, 148, 'h')}
+            <h2>${esc(s.nombre)}</h2>
+            ${s.descripcion ? `<p>${esc(s.descripcion)}</p>` : ''}
+            ${s.fecha ? `<div class="sala-dato"><i class="fas fa-calendar-day" aria-hidden="true"></i><span>Conseguido el <b>${esc(fechaLarga(s.fecha))}</b></span></div>` : ''}
+            ${s.puntos ? `<div class="sala-dato"><i class="fas fa-trophy" aria-hidden="true"></i><span>Recompensa: <b>+${esc(s.puntos)} puntos</b></span></div>` : ''}
+            ${puede ? '<button type="button" class="sala-acc" id="salaHojaCompartir">Compartir mi logro</button>' : ''}
+            <button type="button" class="sala-cerrar" onclick="window._salaCerrarSello()">Cerrar</button>
+        </div>`;
+        document.body.appendChild(fondo);
+        const comp = $('salaHojaCompartir');
+        if (comp) comp.onclick = () => navigator.share({ title: 'Mi logro en Cinemarketer', text: `Conseguí el sello «${s.nombre}» en Cinemarketer.` }).catch(() => {});
+        window._salaHojaTecla = (e) => { if (e.key === 'Escape') window._salaCerrarSello(); };
+        document.addEventListener('keydown', window._salaHojaTecla);
+    };
+    function oscura(o) { return o ? ' oscura' : ''; }
+    window._salaCerrarSello = function () {
+        const f = $('salaHojaFondo'); if (f) f.remove();
+        if (window._salaHojaTecla) { document.removeEventListener('keydown', window._salaHojaTecla); window._salaHojaTecla = null; }
+    };
+
+    // ------------------------------------------------------------------------------------- Barra de secciones
+    const ORDEN = ['perfilGustosTitulo', 'salaActividad', 'salaLista', 'salaLogros', 'perfilPublicacionesSeccion'];
+    const altoHeader = () => { const nb = document.querySelector('.navbar'); return nb ? Math.max(0, Math.round(nb.getBoundingClientRect().bottom)) : 0; };
+
+    window._salaIr = function (id) {
+        const el = $(id);
+        if (!el) return;
+        const barra = $('salaTabs');
+        const y = el.getBoundingClientRect().top + window.scrollY - altoHeader() - (barra ? barra.offsetHeight : 0) - 8;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+    };
+
+    function iniciarBarra() {
+        const barra = $('salaTabs');
+        if (!barra) return;
+        let espacio = $('salaTabsEspacio');
+        if (!espacio) { espacio = document.createElement('div'); espacio.id = 'salaTabsEspacio'; barra.parentNode.insertBefore(espacio, barra); }
+        if (window._salaScroll) window.removeEventListener('scroll', window._salaScroll);
+        let pendiente = false;
+        const actualizar = () => {
+            pendiente = false;
+            if (!document.body.contains(barra)) { window.removeEventListener('scroll', window._salaScroll); return; }
+            const top = altoHeader();
+            barra.style.setProperty('--sala-top', top + 'px');
+            const pasada = espacio.getBoundingClientRect().top <= top;
+            if (pasada && !barra.classList.contains('fijo')) { espacio.style.height = barra.offsetHeight + 'px'; barra.classList.add('fijo'); }
+            else if (!pasada && barra.classList.contains('fijo')) { barra.classList.remove('fijo'); espacio.style.height = '0px'; }
+            // La pestaña de la sección que está a la vista queda marcada.
+            const linea = top + barra.offsetHeight + 24;
+            let activa = ORDEN[0];
+            ORDEN.forEach((id) => { const e = $(id); if (e && e.offsetParent !== null && e.getBoundingClientRect().top <= linea) activa = id; });
+            // Al llegar al fondo de la página, la última sección queda activa (no hay más scroll para que su título alcance la línea).
+            if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 4) { for (let i = ORDEN.length - 1; i >= 0; i--) { const e = $(ORDEN[i]); if (e && e.offsetParent !== null) { activa = ORDEN[i]; break; } } }
+            barra.querySelectorAll('.sala-tab').forEach((t) => {
+                const on = t.dataset.sec === activa;
+                t.classList.toggle('on', on);
+                if (on) t.setAttribute('aria-current', 'true'); else t.removeAttribute('aria-current');
+            });
+        };
+        window._salaScroll = () => { if (!pendiente) { pendiente = true; requestAnimationFrame(actualizar); } };
+        window.addEventListener('scroll', window._salaScroll, { passive: true });
+        window.addEventListener('resize', window._salaScroll, { passive: true });
+        actualizar();
+    }
+
+    // ------------------------------------------------------------------------------------------------ Arranque
+    // Lo llama cargarPerfil() una vez pintado todo lo demás.
+    window._salaIniciar = function (perfil, userId) {
+        const secciones = Array.from(document.querySelectorAll('.sala-movil'));
+        const sinAcceso = !!(perfil.bloqueado || $('perfilPrivadoMsg'));      // bloqueado o privado: se oculta todo lo nuevo
+        const oculto = !MOBILE() || sinAcceso;
+        secciones.forEach((e) => { e.style.display = (oculto || e.id === 'salaLista') ? 'none' : ''; });
+        // El contenedor de los gustos solo se oculta si no hay acceso. En escritorio NO se toca: ahí envuelve a las columnas de siempre.
+        const fila = document.querySelector('.sala-gustos-fila'); if (fila) fila.style.display = sinAcceso ? 'none' : '';
+        S.listo = false;
+        if (oculto) return;
+
+        S.userId = userId;
+        S.propio = !document.querySelector('.perfil-card')?.classList.contains('perfil-visitante');
+        const c = window._perfilCounts || {};
+        S.cubos = {
+            votaciones: { peliculas: cubo(6, perfil.ultimasVotaciones, c.votacionesPeliculas), series: cubo(6, perfil.ultimasVotacionesSeries, c.votacionesSeries) },
+            comentarios: { peliculas: cubo(5, perfil.ultimosComentarios, c.comentariosPeliculas), series: cubo(5, perfil.ultimosComentariosSeries, c.comentariosSeries) }
+        };
+        S.criterio = 'votaciones'; S.tipo = 'peliculas';
+        S.lista = { tipo: 'peliculas', datos: { peliculas: [], series: [] }, abierta: false };
+        S.listo = true;
+        pintarActividad();
+        iniciarBarra();
+        cargarLista();
+        cargarLogros();
+    };
+
+    // Las métricas de la parte superior (👍 votaciones, 💬 comentarios, ✎ publicaciones) siguen llevando a su sección.
+    const irActividadViejo = window._irAActividadDesdeMetrica;
+    window._irAActividadDesdeMetrica = function (criterio) {
+        if (S.listo && MOBILE()) { window._salaCriterio(criterio); window._salaIr('salaActividad'); return; }
+        if (typeof irActividadViejo === 'function') irActividadViejo(criterio);
+    };
+    const irPublicacionesViejo = window._irAPublicacionesDesdeMetrica;
+    window._irAPublicacionesDesdeMetrica = function () {
+        if (S.listo && MOBILE()) { window._salaIr('perfilPublicacionesSeccion'); return; }
+        if (typeof irPublicacionesViejo === 'function') irPublicacionesViejo();
+    };
+})();

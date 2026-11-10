@@ -14,6 +14,12 @@ const JS_PATH = 'js/';
 // nunca se re-ejecutaba porque el <script> viejo seguía ahí).
 window._tagsModuloActual = [];
 
+// Un único valor por carga de página (no uno por cada visita a un módulo): el navegador puede reutilizar del caché el CSS y el
+// JS de un módulo que ya se visitó en esta sesión, y cada sesión nueva (cada recarga) sigue trayendo lo último publicado.
+// Antes cada visita usaba Date.now(), un valor distinto cada vez, y todo se volvía a descargar.
+const _VERSION_SESION = Date.now();
+window._cmVersionSesion = _VERSION_SESION;
+
 function limpiarTagsModuloAnterior() {
     window._tagsModuloActual.forEach(id => {
         const el = document.getElementById(id);
@@ -207,6 +213,11 @@ async function loadModule(moduleName, element = null, updateHash = true) {
         return;
     }
 
+    // Número de esta navegación: si mientras se espera la red el usuario pide otro módulo, esta carga queda vieja y se abandona
+    // (antes dos cargas en vuelo se pisaban entre sí al escribir el contenedor).
+    const miNav = window._navToken = (window._navToken || 0) + 1;
+    const esVieja = () => miNav !== window._navToken;
+
     // Si había una búsqueda con filtros activa en Películas, navegar a
     // cualquier otro módulo (o incluso volver a cargar Películas) equivale
     // a quitar el filtro — evita que el usuario vuelva y se encuentre
@@ -245,6 +256,9 @@ async function loadModule(moduleName, element = null, updateHash = true) {
     document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
     if (element) element.classList.add('active');
 
+    // Avisa a feed-nav.js (cortina de carga de Películas / Series / Comunidad en mobile).
+    if (window._feedNav) window._feedNav.moduloIniciado(moduleName, miNav);
+
     // Actualiza la clase del body según el módulo — controla visibilidad del banner
         actualizarClaseModulo(moduleName);
 
@@ -260,8 +274,10 @@ async function loadModule(moduleName, element = null, updateHash = true) {
                     // HTML
                     const htmlResponse = await fetch(`${MODULE_PATH}${moduleName}.html`);
                     if (!htmlResponse.ok) throw new Error(`Error HTTP: ${htmlResponse.status}`);
+                    const htmlTexto = await htmlResponse.text();
+                    if (esVieja()) return;   // el usuario ya pidió otro módulo: no se le pisa lo suyo
 
-                    container.innerHTML = await htmlResponse.text();
+                    container.innerHTML = htmlTexto;
                     window.scrollTo(0, 0);
 
             // Carga los banners correspondientes al módulo desde la API.
@@ -277,7 +293,7 @@ async function loadModule(moduleName, element = null, updateHash = true) {
                                 const link = document.createElement('link');
                                 link.id = cssId;
                                 link.rel = 'stylesheet';
-                                link.href = `${CSS_PATH}${moduleName}.css?v=${Date.now()}`;
+                                link.href = `${CSS_PATH}${moduleName}.css?v=${_VERSION_SESION}`;
                                 document.head.appendChild(link);
                                 window._tagsModuloActual.push(cssId);
 
@@ -293,7 +309,7 @@ async function loadModule(moduleName, element = null, updateHash = true) {
                     linkMobile.id = cssMobileId;
                     linkMobile.rel = 'stylesheet';
                     linkMobile.media = '(max-width: 768px)';
-                    linkMobile.href = `${CSS_PATH}${moduleName}-mobile.css?v=${Date.now()}`;
+                    linkMobile.href = `${CSS_PATH}${moduleName}-mobile.css?v=${_VERSION_SESION}`;
                     document.head.appendChild(linkMobile);
                     window._tagsModuloActual.push(cssMobileId);
                 }
@@ -316,7 +332,7 @@ async function loadModule(moduleName, element = null, updateHash = true) {
                     await new Promise((resolve) => {
                         const script = document.createElement('script');
                         script.id = jsId;
-                        script.src = `${JS_PATH}${moduleName}.js?v=${Date.now()}`;
+                        script.src = `${JS_PATH}${moduleName}.js?v=${_VERSION_SESION}`;
                         script.onload = () => resolve();
                         script.onerror = () => resolve();
                         document.head.appendChild(script);
@@ -324,8 +340,11 @@ async function loadModule(moduleName, element = null, updateHash = true) {
                     });
                 }
 
+        if (esVieja()) return;   // idem: mientras bajaban los archivos se pidió otro módulo
+
         // Inicializadores específicos
         setTimeout(() => {
+                    if (esVieja()) return;
                     const initFn = window[`init_${moduleName}`];
 
             if (typeof initFn === 'function') {
@@ -357,6 +376,7 @@ async function loadModule(moduleName, element = null, updateHash = true) {
         // esa restauración interna nos lo pisa después.
         if (moduleName === 'feed-films') {
             setTimeout(() => {
+                if (esVieja()) return;
                 if (typeof window.actualizarSaludoInicioMobile === 'function') {
                     window.actualizarSaludoInicioMobile();
                 }
@@ -366,12 +386,18 @@ async function loadModule(moduleName, element = null, updateHash = true) {
                 if (typeof window.inicializarSwitchTipoInicio === 'function') {
                     window.inicializarSwitchTipoInicio();
                 }
+                // Avisa a feed-nav.js que el feed ya terminó de inicializarse: desde acá un cambio de pestaña es seguro.
+                if (window._feedNav) window._feedNav.feedInicializado();
             }, 600);
         }
 
         // ACTUALIZAR HASH
-        if (updateHash) {
+        // Cambiar el hash dispara 'hashchange', y ese listener vuelve a llamar a loadModule: sin esta marca el módulo se cargaba DOS
+        // veces (la segunda pisaba a la primera y perdía, por ejemplo, la pestaña pedida desde un pill del header).
+        if (updateHash && window.location.hash.replace('#', '') !== moduleName) {
+            window._hashPropio = moduleName;
             window.location.hash = moduleName;
+            setTimeout(() => { if (window._hashPropio === moduleName) window._hashPropio = null; }, 400);
         }
 
     } catch (error) {
@@ -475,6 +501,8 @@ function loadDefaultModule() {
 // ESCUCHAR CAMBIO DE HASH
 // ==============================================
 window.addEventListener('hashchange', function() {
+    // Si el hash lo acaba de poner loadModule, ese módulo ya se está cargando: no hay que cargarlo de nuevo.
+    if (window._hashPropio && getModuleFromHash() === window._hashPropio) { window._hashPropio = null; return; }
     loadDefaultModule();
 });
 

@@ -54,12 +54,14 @@
         <script src="js/creator-tools/trivia.js"></script>
         <script src="js/creator-tools/trailer.js"></script>
         <script src="js/module-loader.js"></script>
-        <script src="js/bottom-nav.js?v=20261012"></script>
+        <script src="js/bottom-nav.js?v=20261106"></script>
+        <script src="js/modal-hero.js?v=20261107"></script>
+        <script src="js/cards-poster.js?v=20261107"></script>
         <script src="js/cartelera-precio.js?v=1"></script>
         <script src="js/cartelera-modal.js?v=20261012"></script>
         <script src="js/vendor/qrcode.js"></script>
         <script src="js/credencial.js?v=1"></script>
-        <script src="js/feed-films.js?v=20261026"></script>
+        <script src="js/feed-films.js?v=20261107"></script>
         <script src="js/toast.js"></script>
         <script src="js/levelup.js"></script>
         <script src="js/subscription.js"></script>
@@ -100,12 +102,16 @@
                 <i class="fas fa-bell"></i>
                 <span class="bell-badge" id="novedadesBadgeMobile" style="display:none;">0</span>
             </button>
-            <!-- Configuración mobile — mismo criterio que Progreso y
-                 Notificaciones: sale del hamburguesa y pasa a vivir
-                 acá, a la derecha de la campanita. Solo mobile; en
-                 desktop sigue estando únicamente en el hamburguesa. -->
-            <button class="dash-config-mobile" id="dashConfigMobile" onclick="if(typeof loadModule==='function')loadModule('mi-cuenta')" title="Configuración">
-                <i class="fas fa-cog"></i>
+            <!-- Mis Mensajes — mobile: vive en el header, entre las monedas y la campanita (en el menú hamburguesa ya no está).
+                 El globito lo espeja header-nav.js del #bellBadge del ítem del menú, que sigue actualizándolo quien lo actualizaba. -->
+            <a class="dash-mensajes-mobile" id="dashMensajesMobile" href="#mis-consultas" title="Mis Mensajes" aria-label="Mis Mensajes">
+                <i class="fas fa-comment-dots"></i>
+                <span class="bell-badge" id="mensajesBadgeMobile" style="display:none;">0</span>
+            </a>
+            <!-- Puntos DISPONIBLES (no los acumulados) — mobile, a la izquierda de Mis Mensajes. El valor lo rellena
+                 header-nav.js. Configuración ya no está acá: pasó al menú hamburguesa, arriba de Cerrar sesión. -->
+            <button class="dash-puntos-mobile" id="dashPuntosMobile" type="button" title="Tus puntos disponibles" aria-label="Tus puntos disponibles">
+                <i class="fas fa-coins"></i><span class="dash-puntos-valor" id="dashPuntosValor">–</span>
             </button>
             <ul class="nav-menu" id="dashNavMenu">
                 <li class="nav-desk-inicio"><a class="nav-link" href="#feed-films" title="Ver películas"><i class="fas fa-home"></i><span class="nav-text nav-text-solo-desktop">Inicio</span></a></li>
@@ -170,14 +176,23 @@
                 </li>
                 <li class="nav-desk-icono nav-desk-mensajes"><a class="nav-link nav-link-bell" href="#mis-consultas" title="Mis Mensajes"><div class="bell-wrapper"><i class="fas fa-comment-dots"></i><span class="bell-badge" id="bellBadge" style="display:none;">0</span></div><span class="nav-text">Mis Mensajes</span></a></li>
                 <li class="hamburguesa-duplicado-mobile nav-desk-sala"><a class="nav-link" href="javascript:void(0)" title="Mi Sala" onclick="window.abrirPerfilUsuario(parseInt(localStorage.getItem('userId')))"><i class="fas fa-couch"></i><span class="nav-text">Mi Sala</span></a></li>
-                <li class="nav-desk-lista"><a class="nav-link" href="#mi-lista" title="Mi Lista"><i class="fas fa-bookmark"></i><span class="nav-text">Mi Lista</span></a></li>
-                <li class="nav-desk-trivia"><a class="nav-link" href="javascript:void(0)" title="Trivia" onclick="window.abrirTriviaEleccionModal()"><i class="fas fa-question-circle"></i><span class="nav-text">Trivia</span></a></li>
-                <li class="nav-desk-comunidad"><a class="nav-link" href="#comunidad" title="Comunidad"><i class="fas fa-users"></i><span class="nav-text">Comunidad</span></a></li>
-                <li class="hamburguesa-duplicado-mobile nav-desk-club"><a class="nav-link" href="#club-beneficios" title="Club de Beneficios"><i class="fas fa-gift"></i><span class="nav-text nav-text-mobile">Club de Beneficios</span><span class="nav-text nav-text-desktop">Beneficios</span></a></li>
-                <li class="hamburguesa-duplicado-mobile nav-desk-en-menu"><a class="nav-link" href="#mi-cuenta"><i class="fas fa-cog"></i><span class="nav-text">Configuración</span></a></li>
-                <li class="nav-desk-en-menu"><a class="nav-link" href="#contacto"><i class="fas fa-circle-question"></i><span class="nav-text nav-text-mobile">Preguntas frecuentes</span><span class="nav-text nav-text-desktop">FAQs</span></a></li>
-                <li class="nav-desk-en-menu"><a href="#" class="nav-link" onclick="API.logout()"><i class="fas fa-sign-out-alt"></i><span class="nav-text">Cerrar Sesión</span></a></li>
-            </ul>
+                <!--    <li class="nav-desk-lista"><a class="nav-link" href="#mi-lista" title="Mi Lista"><i class="fas fa-bookmark"></i><span class="nav-text">Mi Lista</span></a></li>-->
+                    <li class="nav-desk-trivia"><a class="nav-link" href="javascript:void(0)" title="Trivia" onclick="window.abrirTriviaEleccionModal()"><i class="fas fa-question-circle"></i><span class="nav-text">Trivia</span></a></li>
+                    <li class="hamburguesa-duplicado-mobile nav-desk-comunidad"><a class="nav-link" href="#comunidad" title="Comunidad"><i class="fas fa-users"></i><span class="nav-text">Comunidad</span></a></li>
+                    <li class="hamburguesa-duplicado-mobile nav-desk-club"><a class="nav-link" href="#club-beneficios" title="Club de Beneficios"><i class="fas fa-gift"></i><span class="nav-text nav-text-mobile">Club de Beneficios</span><span class="nav-text nav-text-desktop">Beneficios</span></a></li>
+                    <li class="nav-desk-en-menu"><a class="nav-link" href="#contacto"><i class="fas fa-circle-question"></i><span class="nav-text nav-text-mobile">Preguntas frecuentes</span><span class="nav-text nav-text-desktop">FAQs</span></a></li>
+                    <li class="nav-desk-en-menu"><a class="nav-link" href="#mi-cuenta"><i class="fas fa-cog"></i><span class="nav-text">Configuración</span></a></li>
+                    <li class="nav-desk-en-menu"><a href="#" class="nav-link" onclick="API.logout()"><i class="fas fa-sign-out-alt"></i><span class="nav-text">Cerrar Sesión</span></a></li>
+                </ul>
+            </div>
+            <!-- Extensión del header (solo mobile): pastillas que cambian el contenido del feed. Se oculta al bajar y vuelve al
+                 subir; el nivel de arriba queda fijo. Lo maneja header-nav.js; el CSS está en dashboard.css. -->
+        <div class="nav-ext" id="navExt">
+            <div class="nav-ext-pastillas" role="group" aria-label="Secciones">
+                <button type="button" class="nav-pastilla" data-pastilla="peliculas"><i class="fas fa-clapperboard"></i><span>Películas</span></button>
+                <button type="button" class="nav-pastilla" data-pastilla="series"><i class="fas fa-tv"></i><span>Series</span></button>
+                <button type="button" class="nav-pastilla" data-pastilla="comunidad"><i class="fas fa-users"></i><span>Comunidad</span></button>
+            </div>
         </div>
     </nav>
 
@@ -1400,8 +1415,10 @@ viene del backend, hasta que decidamos cómo presentarlo. -->
         };
     </script>
     <script src="js/watchlist.js"></script>
-    <script src="js/feed-series.js?v=20261026"></script>
+    <script src="js/feed-series.js?v=20261106"></script>
     <script src="js/main.js"></script>
+    <script src="js/header-nav.js"></script>
+    <script src="js/feed-nav.js?v=20261109"></script>
     <script src="js/header-desktop.js"></script>
     <script>
         // Banner de "modo demo" — visible durante toda la sesión si
