@@ -492,7 +492,7 @@ window._renderTarjetaMisPuntos = function(card, label, repintar) {
     }
 
     const numero = d ? d.aLiberar.toLocaleString('es-AR') : '—';
-    const rotulo = d && d.superoTope ? 'puntos · tope del mes' : 'puntos este mes';
+    const rotulo = d && d.superoTope ? 'puntos · tope del mes' : 'puntos acumulados este mes';
     const primero = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1);
     const fecha = `Se depositan<br>el 1° de ${primero.toLocaleDateString('es-AR', { month: 'long' })}`;
 
