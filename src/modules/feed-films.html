@@ -583,16 +583,9 @@
             <div class="destacada-card" id="destacadaCardSerie"></div>
             <div class="destacada-dots" id="destacadaDotsSerie" style="display:none;"></div>
         </div>
-        <!-- MISIÓN DE HOY (maqueta: textos fijos, sin datos ni acción todavía; solo mobile). Cuando sea funcional pasa a ser
-             un <button> que abre el modal de misiones. -->
-        <!--       <div class="inicio-mision" role="group" aria-label="Misión de hoy: votá 3 títulos, 1 de 3, suma 150 puntos">
-                   <div class="inicio-mision-icono"><i class="fas fa-bolt" aria-hidden="true"></i></div>
-                   <div class="inicio-mision-texto">
-                       <div><span class="inicio-mision-rotulo">Misión de hoy</span><span class="inicio-mision-titulo">Votá 3 títulos</span></div>
-                       <div class="inicio-mision-avance"><span class="hecho"></span><span></span><span></span></div>
-                   </div>
-                   <div class="inicio-mision-premio"><span class="inicio-mision-puntos">+150 pts</span><span class="inicio-mision-conteo">1 de 3</span></div>
-               </div>-->
+        <!-- MISIÓN DE HOY: la completa misiones.js con la misión MÁS FÁCIL de cumplir (la elige el servidor). Es un botón que abre
+             «Tus misiones». Mientras el servidor no tenga misiones queda oculta. Solo mobile. -->
+        <button type="button" class="inicio-mision" id="inicioMision" hidden style="display:none;" aria-label="Misiones"></button>
            </div><!-- /inicio-hero-mobile -->
 
     <!-- FILTROS (mobile): selector Películas/Series + íconos de orden y género. Acá empieza el degradé de color (rojo en
