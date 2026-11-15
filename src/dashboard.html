@@ -110,7 +110,7 @@
             </a>
             <!-- Puntos DISPONIBLES (no los acumulados) — mobile, a la izquierda de Mis Mensajes. El valor lo rellena
                  header-nav.js. Configuración ya no está acá: pasó al menú hamburguesa, arriba de Cerrar sesión. -->
-            <button class="dash-puntos-mobile" id="dashPuntosMobile" type="button" title="Tus puntos disponibles" aria-label="Tus puntos disponibles">
+            <button class="dash-puntos-mobile" id="dashPuntosMobile" type="button" title="Tus puntos disponibles" aria-label="Tus puntos disponibles" onclick="if(typeof window.abrirHistorialPuntos==='function')window.abrirHistorialPuntos()">
                 <i class="fas fa-coins"></i><span class="dash-puntos-valor" id="dashPuntosValor">–</span>
             </button>
             <ul class="nav-menu" id="dashNavMenu">
@@ -1418,6 +1418,8 @@ viene del backend, hasta que decidamos cómo presentarlo. -->
     <script src="js/feed-series.js?v=20261106"></script>
     <script src="js/main.js"></script>
     <script src="js/header-nav.js"></script>
+    <script src="js/misiones.js?v=20261113"></script>
+    <script src="js/puntos-historial.js?v=20261111"></script>
     <script src="js/feed-nav.js?v=20261109"></script>
     <script src="js/header-desktop.js"></script>
     <script>

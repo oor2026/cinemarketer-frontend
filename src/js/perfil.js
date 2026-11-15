@@ -4108,6 +4108,8 @@ document.addEventListener('click', function(e) {
     });
 });
 
+
+
 // =====================================================================================================================
 // MI SALA — REDISEÑO MOBILE
 // Secciones nuevas (solo mobile, hasta 768 px; escritorio sigue con lo de siempre): barra de secciones, Mi actividad con
@@ -4301,18 +4303,35 @@ document.addEventListener('click', function(e) {
         maraton: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18"/><path d="M3 7.5h4"/><path d="M3 12h18"/><path d="M3 16.5h4"/><path d="M17 3v18"/><path d="M17 7.5h4"/><path d="M17 16.5h4"/>',
         trivia: '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
         comunidad: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+        genero: '<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5"/>',
+        autor: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18"/><path d="M3 7.5h4"/><path d="M3 12h18"/><path d="M3 16.5h4"/><path d="M17 3v18"/><path d="M17 7.5h4"/><path d="M17 16.5h4"/>',
+        especial: '<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>',
+        saga: '<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>',
+        elenco: '<circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/>',
+        premios: '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/>',
+        perfil: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+        recomendaciones: '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
         _: '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>'
     };
-    const COLOR = { votos: ['#0B4DA2', '#1B6FD1'], comentarios: ['#B54708', '#D9631A'], constancia: ['#92400E', '#C2610C'], maraton: ['#B42318', '#E50914'], trivia: ['#5B2EA6', '#7A4CC7'], comunidad: ['#0E7C7B', '#14A09E'], _: ['#344054', '#667085'] };
+    const COLOR = { votos: ['#067647', '#12B76A'], comentarios: ['#B54708', '#D9631A'], constancia: ['#8A5A00', '#C99700'], genero: ['#A11043', '#DD2590'], autor: ['#3538CD', '#6172F3'], trivia: ['#5B2EA6', '#7A4CC7'], comunidad: ['#0E7C7B', '#14A09E'], especial: ['#B42318', '#E50914'], misterio: ['#101828', '#344054'], saga: ['#4D7C0F', '#84CC16'], elenco: ['#0E7490', '#06B6D4'], premios: ['#BE185D', '#F472B6'], perfil: ['#0369A1', '#38BDF8'], recomendaciones: ['#86198F', '#D946EF'], _: ['#344054', '#667085'] };
+    const ALIAS = { maraton: 'autor' };      // nombre viejo de una categoría
 
     // Sello: una estampilla perforada, con color e ícono propios por categoría (no depende solo del color para distinguirse).
-    function selloSvg(cat, tam, id) {
+    // img = imagen propia del sello (la sube el admin). Solo https. Va dentro del disco, sobre el ícono; si no carga, se quita sola y queda el ícono de la categoría.
+    function selloSvg(cat, tam, id, img) {
+        cat = ALIAS[cat] || cat;
         const k = IC[cat] ? cat : '_', [c1, c2] = COLOR[k], g = `gSello${id}`;
+        const foto = typeof img === 'string' && /^https:\/\//.test(img)
+            ? `<g><circle cx="42" cy="42" r="29" fill="#fff"/><clipPath id="cImg${id}"><circle cx="42" cy="42" r="29"/></clipPath><image href="${esc(img)}" x="13" y="13" width="58" height="58" preserveAspectRatio="xMidYMid slice" clip-path="url(#cImg${id})" onerror="this.parentNode.remove()"/></g>` : '';
         return `<svg width="${tam}" height="${tam}" viewBox="0 0 84 84" aria-hidden="true"><defs><linearGradient id="${g}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs>
             <circle cx="42" cy="42" r="39" fill="none" stroke="${c2}" stroke-opacity=".45" stroke-width="5" stroke-dasharray="3.2 3.2"/>
             <circle cx="42" cy="42" r="32" fill="url(#${g})"/>
             <circle cx="42" cy="42" r="27" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.2"/>
-            <g transform="translate(30 30)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${IC[k]}</g></svg>`;
+            <g transform="translate(30 30)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${IC[k]}</g>${foto}</svg>`;
+    }
+    function selloMisterio(tam, id) {
+        const [c1, c2] = COLOR.misterio, g = `gMist${id}`;
+        return `<svg width="${tam}" height="${tam}" viewBox="0 0 84 84" aria-hidden="true"><defs><linearGradient id="${g}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs><circle cx="42" cy="42" r="39" fill="none" stroke="${c2}" stroke-opacity=".5" stroke-width="5" stroke-dasharray="3.2 3.2"/><circle cx="42" cy="42" r="32" fill="url(#${g})"/><circle cx="42" cy="42" r="27" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="1.2"/><text x="42" y="52" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="30" font-weight="700" fill="#fff">?</text></svg>`;
     }
     const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
     const MESES_LARGO = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
@@ -4327,7 +4346,7 @@ document.addEventListener('click', function(e) {
             const res = await fetch(`${CONFIG.API_URL}/users/${S.userId}/logros`, cabecera());
             if (res.ok) datos = await res.json();
         } catch (e) { /* todavía sin servicio de logros */ }
-        S.logros = { cumplidas: (datos && datos.cumplidas) || 0, sellos: (datos && datos.sellos) || [], abiertos: false };
+        S.logros = { cumplidas: (datos && datos.cumplidas) || 0, sellos: (datos && datos.sellos) || [], porDescubrir: (datos && datos.porDescubrir) || 0, abiertos: false };
         pintarLogros();
     }
 
@@ -4336,15 +4355,17 @@ document.addEventListener('click', function(e) {
         if (!cuerpo) return;
         const L = S.logros, n = L.cumplidas || L.sellos.length;
         const tab = $('salaTabLogros'); if (tab) tab.textContent = n || '';
-        if (cont) { cont.style.display = n ? '' : 'none'; cont.innerHTML = `<i class="fas fa-trophy"></i>${n} ${n === 1 ? 'misión cumplida' : 'misiones cumplidas'}`; }
+        if (cont) { cont.style.display = n ? '' : 'none'; cont.innerHTML = `<i class="fas fa-trophy"></i>${n} ${n === 1 ? 'sello ganado' : 'sellos ganados'}`; }
+        const misterios = Math.min(L.porDescubrir || 0, 6);
+        const panelMist = misterios ? `<p class="sala-sub" style="margin:18px 0 8px;font-weight:600">Sellos por descubrir</p><div class="sala-sellos sala-misterio">${Array.from({ length: misterios }, (_, i) => `<div class="sala-sello sala-mist" aria-label="Sello por descubrir">${selloMisterio(84, i)}<strong>???</strong></div>`).join('')}</div>` : '';
         if (!L.sellos.length) {
-            cuerpo.innerHTML = `<p class="sala-vacio">${S.propio ? 'Tus sellos van a aparecer acá cuando cumplas tus primeras misiones.' : 'Todavía no tiene sellos.'}</p>`;
+            cuerpo.innerHTML = `<p class="sala-vacio">${S.propio ? 'Tus sellos van a aparecer acá cuando cumplas tus primeras misiones.' : 'Todavía no tiene sellos.'}</p>${panelMist}`;
             if (btn) btn.style.display = 'none';
             return;
         }
         const visibles = L.abiertos ? L.sellos : L.sellos.slice(0, 6);
         cuerpo.innerHTML = `<div class="sala-sellos">${visibles.map((s, i) => `<button type="button" class="sala-sello" onclick="window._salaSello(${i})" aria-label="Sello ${esc(s.nombre)}${s.fecha ? ', conseguido el ' + esc(fechaLarga(s.fecha)) : ''}">
-            ${selloSvg(s.categoria, 84, 'c' + i)}<strong>${esc(s.nombre)}</strong>${s.fecha ? `<span>${esc(fechaCorta(s.fecha))}</span>` : ''}</button>`).join('')}</div>`;
+            <span class="sala-sello-img">${selloSvg(s.categoria, 84, 'c' + i, s.imagenUrl)}${s.nivel > 1 ? `<em class="sala-nivel">Nv ${s.nivel}</em>` : ''}</span><strong>${esc(s.nombre)}</strong>${s.fecha ? `<span>${esc(fechaCorta(s.fecha))}</span>` : ''}</button>`).join('')}</div>${panelMist}`;
         if (btn) { btn.style.display = L.sellos.length > 6 ? 'flex' : 'none'; btn.textContent = L.abiertos ? 'Ver menos' : `Ver los ${L.sellos.length} sellos`; }
     }
     window._salaLogrosToggle = function () { S.logros.abiertos = !S.logros.abiertos; pintarLogros(); };
@@ -4361,11 +4382,12 @@ document.addEventListener('click', function(e) {
         fondo.onclick = (e) => { if (e.target === fondo) window._salaCerrarSello(); };
         fondo.innerHTML = `<div class="sala-hoja${oscura(oscuro)}" role="dialog" aria-modal="true" aria-label="Detalle del sello ${esc(s.nombre)}">
             <div class="sala-asa"></div>
-            ${selloSvg(s.categoria, 148, 'h')}
+            ${selloSvg(s.categoria, 148, 'h', s.imagenUrl)}
             <h2>${esc(s.nombre)}</h2>
             ${s.descripcion ? `<p>${esc(s.descripcion)}</p>` : ''}
             ${s.fecha ? `<div class="sala-dato"><i class="fas fa-calendar-day" aria-hidden="true"></i><span>Conseguido el <b>${esc(fechaLarga(s.fecha))}</b></span></div>` : ''}
-            ${s.puntos ? `<div class="sala-dato"><i class="fas fa-trophy" aria-hidden="true"></i><span>Recompensa: <b>+${esc(s.puntos)} puntos</b></span></div>` : ''}
+            ${s.nivel > 1 ? `<div class="sala-dato"><i class="fas fa-layer-group" aria-hidden="true"></i><span>Nivel <b>${esc(s.nivel)}</b></span></div>` : ''}
+            <div class="sala-dato"><i class="fas fa-trophy" aria-hidden="true"></i><span>Es parte de tu colección: los sellos no suman puntos.</span></div>
             ${puede ? '<button type="button" class="sala-acc" id="salaHojaCompartir">Compartir mi logro</button>' : ''}
             <button type="button" class="sala-cerrar" onclick="window._salaCerrarSello()">Cerrar</button>
         </div>`;
@@ -4450,8 +4472,11 @@ document.addEventListener('click', function(e) {
         S.listo = true;
         pintarActividad();
         iniciarBarra();
-        cargarLista();
-        cargarLogros();
+        const cargas = [cargarLista(), cargarLogros()];
+        // Si se llegó desde el modal de misiones («Ver todos mis logros»), se baja hasta esa sección cuando ya está armada.
+        let destino = null;
+        try { destino = sessionStorage.getItem('salaIrA'); sessionStorage.removeItem('salaIrA'); } catch (e) {}
+        if (destino) Promise.all(cargas).then(() => setTimeout(() => window._salaIr(destino), 250));
     };
 
     // Las métricas de la parte superior (👍 votaciones, 💬 comentarios, ✎ publicaciones) siguen llevando a su sección.
