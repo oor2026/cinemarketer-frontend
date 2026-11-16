@@ -18,6 +18,22 @@
     const abierto = (id) => { const m = document.getElementById(id); return !!m && m.style.display === 'flex'; };
     const empujar = () => { try { history.pushState({ atrasModal: true }, '', location.href); } catch (e) { /* sin historial: el modal funciona igual, solo que sin «atrás» */ } };
 
+    const hayCapaAbierta = () => !!document.getElementById('tvHoja')
+        || !!document.querySelector('#modalSerie .modal-fila-comentarios.comentarios-sheet-open, #modalPelicula .modal-fila-comentarios.comentarios-sheet-open')
+        || abierto('modalPelicula') || abierto('modalSerie');
+
+    // Cierra la capa de más arriba que esté abierta. true si cerró alguna.
+    function cerrarCapaSuperior() {
+        const tv = document.getElementById('tvHoja');
+        if (tv) { const x = tv.querySelector('.tv-cerrar'); if (x) x.click(); else tv.remove(); return true; }
+
+        if (document.querySelector('#modalSerie .modal-fila-comentarios.comentarios-sheet-open') && typeof window.cerrarComentariosSheetSerie === 'function') { window.cerrarComentariosSheetSerie(); return true; }
+        if (document.querySelector('#modalPelicula .modal-fila-comentarios.comentarios-sheet-open') && typeof window.cerrarComentariosSheet === 'function') { window.cerrarComentariosSheet(); return true; }
+        if (abierto('modalPelicula') && typeof window.cerrarModal === 'function') { window.cerrarModal(); return true; }
+        if (abierto('modalSerie') && typeof window.cerrarModalSerie === 'function') { window.cerrarModalSerie(); return true; }
+        return false;
+    }
+
     window._atrasModal = {
         // Se llama ANTES de abrir el modal (solo suma una entrada si estaba cerrado: navegar de película en película dentro del mismo modal no suma).
         alAbrirModal(id) { if (!abierto(id)) empujar(); },
@@ -26,14 +42,13 @@
 
         // Devuelve true si cerró algo (entonces el dashboard no debe deshacer el «atrás»).
         alRetroceder() {
-            const tv = document.getElementById('tvHoja');
-            if (tv) { const x = tv.querySelector('.tv-cerrar'); if (x) x.click(); else tv.remove(); return true; }
-
-            if (document.querySelector('#modalSerie .modal-fila-comentarios.comentarios-sheet-open') && typeof window.cerrarComentariosSheetSerie === 'function') { window.cerrarComentariosSheetSerie(); return true; }
-            if (document.querySelector('#modalPelicula .modal-fila-comentarios.comentarios-sheet-open') && typeof window.cerrarComentariosSheet === 'function') { window.cerrarComentariosSheet(); return true; }
-            if (abierto('modalPelicula') && typeof window.cerrarModal === 'function') { window.cerrarModal(); return true; }
-            if (abierto('modalSerie') && typeof window.cerrarModalSerie === 'function') { window.cerrarModalSerie(); return true; }
-            return false;
+            const cerro = cerrarCapaSuperior();
+            // Al cerrar la ÚLTIMA capa hay que dejar al historial como lo espera el freno del dashboard: parado sobre una entrada que
+            // tenga otra DEBAJO. Si no (por ejemplo cuando el navegador salteó entradas al volver), el siguiente «atrás» sale de la
+            // aplicación. Por eso, cuando ya no queda nada abierto, se suma una entrada nueva: queda arriba de todo y el freno de
+            // siempre (history.go(1)) vuelve a funcionar.
+            if (cerro && !hayCapaAbierta()) { try { history.pushState({ root: true }, '', location.href); } catch (e) { /* sin historial */ } }
+            return cerro;
         }
     };
 
