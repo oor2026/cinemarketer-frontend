@@ -456,7 +456,7 @@
             :is(#modalPelicula, #modalSerie).modal .modal-acciones-hero { flex-wrap: wrap !important; justify-content: center !important; gap: 8px !important; }
             /* El carrusel de dos páginas (póster | datos) deja de ser un carrusel: el póster ya es el fondo. */
             :is(#modalPelicula, #modalSerie).modal .modal-fila-superior { display: block !important; width: 100% !important; }
-            :is(#modalPelicula, #modalSerie).modal .modal-carrusel { display: block !important; overflow: visible !important; width: 100% !important; margin: 0 !important; scroll-snap-type: none !important; }
+            :is(#modalPelicula, #modalSerie).modal .modal-carrusel { display: block !important; overflow: visible !important; width: 100% !important; margin: 0 !important; scroll-snap-type: none !important; aspect-ratio: auto !important; height: auto !important; min-height: 0 !important; }
             :is(#modalPelicula, #modalSerie).modal .carrusel-slide:first-child { display: none !important; }
             :is(#modalPelicula, #modalSerie).modal .carrusel-slide:last-child { display: block !important; width: 100% !important; height: auto !important; padding: 0 !important; overflow: visible !important; }
             :is(#modalPelicula, #modalSerie).modal .carrusel-slide:last-child .modal-columna-derecha { height: auto !important; overflow: visible !important; padding: 0 !important; }
