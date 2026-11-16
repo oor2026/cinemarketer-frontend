@@ -3369,34 +3369,87 @@ window.cargarTrailerPelicula = async function(movieId, backdropPath) {
         `;
     }
 
-    // Pastillas para elegir la versión (como al crear una publicación): solo si hay más de una.
-    if (versionesEl && opciones.length > 1) {
-        versionesEl.innerHTML = `
-            <p class="trailer-versiones-titulo">Versión del tráiler</p>
-            <div class="trailer-versiones-lista">
-                ${opciones.map((o, i) => `<button type="button" class="trailer-version-pill${i === 0 ? ' activa' : ''}" data-key="${o.key}" title="${escapar(o.name)}" aria-pressed="${i === 0}">${escapar(o.etiqueta)}</button>`).join('')}
-            </div>
-        `;
-        let activa = opciones[0].key;
-        versionesEl.querySelectorAll('.trailer-version-pill').forEach(btn => {
-            btn.addEventListener('click', () => {
-                if (!vigente() || btn.dataset.key === activa) return;
-                activa = btn.dataset.key;
-                pintarVideo(activa, true);   // la persona lo pidió: arranca solo
-                versionesEl.querySelectorAll('.trailer-version-pill').forEach(b => {
-                    const esta = b.dataset.key === activa;
-                    b.classList.toggle('activa', esta);
-                    b.setAttribute('aria-pressed', esta ? 'true' : 'false');
-                });
-            });
-        });
-    }
+    // Selector de versión: un solo botón que abre una hojita con las opciones; con una sola versión no se muestra nada.
+    window._montarVersionesTrailer(versionesEl, opciones, (key) => {
+        if (!vigente()) return;
+        pintarVideo(key, true);   // la persona lo pidió: arranca solo
+    });
 
     // Hero de fondo detrás de la ficha de datos — solo desktop. Usa siempre el video inicial: no cambia al
     // elegir otra versión con las pastillas.
     if (window.innerWidth > 768 && typeof window._aplicarHeroModalPelicula === 'function') {
         window._aplicarHeroModalPelicula(opciones[0]?.key || null, backdropPath);
     }
+};
+
+// ==============================================
+// SELECTOR DE VERSIÓN DEL TRÁILER (modales de película y de serie)
+// Con más de una versión muestra UN solo botón «Versión del tráiler»; al tocarlo se abre una hojita con las opciones.
+// Con una sola (o ninguna) no muestra nada. Es la misma función para las dos: la define el primer archivo que cargue.
+// cont: el contenedor de las versiones · opciones: [{ key, name, etiqueta }] · alElegir(key): se llama solo si eligió otra versión.
+// ==============================================
+window._montarVersionesTrailer = window._montarVersionesTrailer || function(cont, opciones, alElegir) {
+    const hojaVieja = document.getElementById('tvHoja');
+    if (hojaVieja) hojaVieja.remove();
+    if (!cont) return;
+    cont.innerHTML = '';
+    if (!opciones || opciones.length < 2) return;
+
+    if (!document.getElementById('tvEstilos')) {
+        const estilo = document.createElement('style');
+        estilo.id = 'tvEstilos';
+        estilo.textContent = `
+            .tv-boton { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0.6rem auto 0; padding: 0.5rem 1.1rem; background: #fff; border: 1.5px solid #d6dae4; border-radius: 999px; color: #16264d; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; }
+            .tv-boton i { font-size: 0.8rem; }
+            .tv-boton .fa-chevron-down { font-size: 0.65rem; opacity: 0.7; }
+            .tv-fondo { position: fixed; inset: 0; z-index: 100000; display: flex; align-items: flex-end; justify-content: center; background: rgba(0, 0, 0, 0.55); }
+            .tv-panel { width: 100%; max-width: 440px; max-height: 70vh; display: flex; flex-direction: column; background: #fff; border-radius: 18px 18px 0 0; box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.3); }
+            .tv-cabecera { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1rem 0.6rem; }
+            .tv-titulo { font-size: 0.95rem; font-weight: 800; color: #16264d; }
+            .tv-cerrar { width: 32px; height: 32px; border: none; border-radius: 50%; background: rgba(0, 0, 0, 0.06); color: #555; font-size: 1.1rem; line-height: 1; cursor: pointer; }
+            .tv-lista { overflow-y: auto; padding: 0 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.4rem; }
+            .tv-opcion { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; padding: 0.75rem 0.9rem; background: #f6f7fa; border: 1.5px solid transparent; border-radius: 12px; color: #1b1d24; font-size: 0.9rem; font-weight: 600; text-align: left; cursor: pointer; }
+            .tv-opcion.activa { background: #eaf0fb; border-color: #16264d; color: #16264d; }
+            .tv-opcion i { color: #16264d; }
+            @media (min-width: 769px) { .tv-fondo { align-items: center; } .tv-panel { border-radius: 18px; } }`;
+        document.head.appendChild(estilo);
+    }
+
+    const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    let activa = opciones[0].key;
+
+    cont.innerHTML = '<button type="button" class="tv-boton" aria-haspopup="dialog"><i class="fas fa-film"></i> Versión del tráiler <i class="fas fa-chevron-down"></i></button>';
+
+    const cerrar = () => { const h = document.getElementById('tvHoja'); if (h) h.remove(); document.removeEventListener('keydown', alTeclado); };
+    function alTeclado(e) { if (e.key === 'Escape') { e.stopPropagation(); cerrar(); } }
+
+    cont.querySelector('.tv-boton').addEventListener('click', (e) => {
+        e.stopPropagation();
+        cerrar();
+        const hoja = document.createElement('div');
+        hoja.id = 'tvHoja';
+        hoja.className = 'tv-fondo';
+        hoja.setAttribute('role', 'dialog');
+        hoja.setAttribute('aria-label', 'Versión del tráiler');
+        hoja.innerHTML = `
+            <div class="tv-panel">
+                <div class="tv-cabecera"><span class="tv-titulo">Versión del tráiler</span><button type="button" class="tv-cerrar" aria-label="Cerrar">×</button></div>
+                <div class="tv-lista">
+                    ${opciones.map(o => `<button type="button" class="tv-opcion${o.key === activa ? ' activa' : ''}" data-key="${esc(o.key)}" title="${esc(o.name)}"><span>${esc(o.etiqueta)}</span>${o.key === activa ? '<i class="fas fa-check"></i>' : ''}</button>`).join('')}
+                </div>
+            </div>`;
+        hoja.addEventListener('click', (ev) => { if (ev.target === hoja) cerrar(); });
+        hoja.querySelector('.tv-cerrar').addEventListener('click', cerrar);
+        hoja.querySelectorAll('.tv-opcion').forEach(btn => btn.addEventListener('click', () => {
+            const key = btn.dataset.key;
+            cerrar();
+            if (key === activa) return;
+            activa = key;
+            alElegir(key);
+        }));
+        document.body.appendChild(hoja);
+        document.addEventListener('keydown', alTeclado);
+    });
 };
 
     window._aplicarHeroModalPelicula = function(videoKey, backdropPath) {
