@@ -34,6 +34,43 @@
         return false;
     }
 
+    // ----------------------------------------------------------------------------------------------
+    // MODO DIAGNÓSTICO (apagado por defecto). Se enciende entrando una vez con «?atrasdebug=1» en la dirección y se apaga con «?atrasdebug=0».
+    // Muestra en pantalla qué pasa con el historial en cada «atrás» y guarda las últimas líneas, así, si la app se cierra, se ven al volver a entrar.
+    // ----------------------------------------------------------------------------------------------
+    const VERSION = 'atras-modal v4';
+    let anotar = () => {};
+    try {
+        const q = new URLSearchParams(location.search).get('atrasdebug');
+        if (q === '1') localStorage.setItem('atrasDebug', '1');
+        if (q === '0') localStorage.removeItem('atrasDebug');
+        if (localStorage.getItem('atrasDebug') === '1') {
+            const previas = JSON.parse(localStorage.getItem('atrasLog') || '[]');
+            const lineas = previas.map(l => '↩ ' + l);
+            let caja = null;
+            const pintar = () => {
+                if (!document.body) return;
+                if (!caja) { caja = document.createElement('pre'); caja.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:2147483647;margin:0;padding:4px 6px;max-height:45vh;overflow:auto;background:rgba(0,0,0,.82);color:#7CFC00;font:10px/1.25 monospace;pointer-events:none;white-space:pre-wrap'; document.body.appendChild(caja); }
+                caja.textContent = lineas.slice(-28).join('\n');
+            };
+            anotar = (txt) => {
+                const h = new Date(); const l = h.toTimeString().slice(0, 8) + ' ' + txt + ' | len=' + history.length + ' st=' + JSON.stringify(history.state);
+                lineas.push(l);
+                try { localStorage.setItem('atrasLog', JSON.stringify(lineas.filter(x => x.charAt(0) !== '↩').slice(-25))); } catch (e) {}
+                pintar();
+            };
+            anotar(VERSION + ' cargado');
+            document.addEventListener('DOMContentLoaded', pintar);
+            window.addEventListener('pagehide', () => anotar('pagehide (la página se va)'));
+            window.addEventListener('popstate', () => anotar('popstate'));
+            const push = history.pushState.bind(history), go = history.go.bind(history);
+            history.pushState = function (...a) { anotar('pushState ' + JSON.stringify(a[0])); return push(...a); };
+            history.go = function (n) { anotar('history.go(' + n + ')'); return go(n); };
+        }
+    } catch (e) { /* el diagnóstico nunca debe romper nada */ }
+
+    let restaurando = false;
+
     window._atrasModal = {
         // Se llama ANTES de abrir el modal (solo suma una entrada si estaba cerrado: navegar de película en película dentro del mismo modal no suma).
         alAbrirModal(id) { if (!abierto(id)) empujar(); },
@@ -42,12 +79,16 @@
 
         // Devuelve true si cerró algo (entonces el dashboard no debe deshacer el «atrás»).
         alRetroceder() {
+            if (restaurando) { restaurando = false; return true; }   // eco del history.go(1) propio: no es un «atrás» de la persona
             const cerro = cerrarCapaSuperior();
-            // Al cerrar la ÚLTIMA capa hay que dejar al historial como lo espera el freno del dashboard: parado sobre una entrada que
-            // tenga otra DEBAJO. Si no (por ejemplo cuando el navegador salteó entradas al volver), el siguiente «atrás» sale de la
-            // aplicación. Por eso, cuando ya no queda nada abierto, se suma una entrada nueva: queda arriba de todo y el freno de
-            // siempre (history.go(1)) vuelve a funcionar.
-            if (cerro && !hayCapaAbierta()) { try { history.pushState({ root: true }, '', location.href); } catch (e) { /* sin historial */ } }
+            anotar('alRetroceder -> ' + (cerro ? 'cerró una capa' : 'no había capas (frena el dashboard)'));
+            if (cerro) {
+                // Igual que el freno del dashboard: después de cerrar la capa se vuelve a la entrada de arriba de todo, así la persona
+                // siempre queda parada arriba del historial, con entradas debajo (no se suman entradas nuevas desde acá).
+                restaurando = true;
+                setTimeout(() => { restaurando = false; }, 700);
+                history.go(1);
+            }
             return cerro;
         }
     };
