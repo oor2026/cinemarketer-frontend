@@ -32,7 +32,7 @@
     const cab = () => ({ headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
     const api = () => (window.CONFIG && CONFIG.API_URL) || '';
 
-    const E = { resumen: null, completo: null, abierto: false, vista: 'lista', filtro: 'todas', detalleId: null, disparador: null, cargando: false, error: false, ultimoResumen: 0, fiesta: null, vistas: {}, descartadas: null, confirmar: null, disparadorConf: null, avisosVistos: {} };
+    const E = { resumen: null, completo: null, abierto: false, vista: 'lista', filtro: 'todas', detalleId: null, disparador: null, cargando: false, error: false, ultimoResumen: 0, fiesta: null, vistas: {}, descartadas: null, confirmar: null, disparadorConf: null, avisosVistos: {}, reclamando: {} };
 
     // ------------------------------------------------------------------------------------------------ Sellos
     const IC = {
@@ -220,6 +220,18 @@
         .mi-x.osc{color:#fff}.mi-x.osc i{background:rgba(255,255,255,.2)}
         .mi-tag.nv{background:#FFF6E5;color:#93370D}
         .mi-tag.fam{background:#F2F4F7;color:var(--mi-c1,#475467)}
+        .mi-tag.rc{background:#ECFDF3;color:#067647}
+        .mi-mis.rcl{align-items:flex-start;border-color:#ABEFC6;background:#F6FEF9}
+        .mi-reclamar{display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;margin-top:10px;padding:0 20px;border:0;border-radius:999px;background:#067647;font-family:'Space Grotesk','Inter',sans-serif;font-size:14.5px;font-weight:700;color:#fff;cursor:pointer;box-shadow:0 6px 16px rgba(6,118,71,.28)}
+        .mi-reclamar:disabled{opacity:.6;cursor:default;box-shadow:none}
+        .mi-reclamar svg{width:16px;height:16px;stroke:#fff}
+        .mi-rcl-n{margin:0 0 10px;font-size:13px;line-height:18px;color:#475467}
+        .mi-tag.rc{background:#ECFDF3;color:#067647}
+        .mi-mis.rcl{align-items:flex-start;border-color:#ABEFC6;background:#F6FEF9}
+        .mi-reclamar{display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;margin-top:10px;padding:0 20px;border:0;border-radius:999px;background:#067647;font-family:'Space Grotesk','Inter',sans-serif;font-size:14.5px;font-weight:700;color:#fff;cursor:pointer;box-shadow:0 6px 16px rgba(6,118,71,.28)}
+        .mi-reclamar:disabled{opacity:.6;cursor:default;box-shadow:none}
+        .mi-reclamar svg{width:16px;height:16px;stroke:#fff}
+        .mi-rcl-n{margin:0 0 10px;font-size:13px;line-height:18px;color:#475467}
         .mi-quitar{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;margin-top:12px;border:1px solid #D0D5DD;border-radius:999px;background:#fff;font-family:inherit;font-size:14px;font-weight:600;color:#475467;cursor:pointer}
         .mi-quitar svg{width:16px;height:16px}
         .mi-enlace{display:flex;align-items:center;justify-content:center;width:100%;min-height:48px;margin-top:18px;border:0;background:transparent;font-family:inherit;font-size:13.5px;font-weight:600;color:#475467;text-decoration:underline;cursor:pointer}
@@ -260,7 +272,8 @@
         const d = r && r.destacada;
         const pendiente = r && r.cumplidasSinVer && r.cumplidasSinVer[0];
         const ocultar = () => { el.hidden = true; el.style.display = 'none'; };
-        if (!esMobile() || (!d && !pendiente)) { ocultar(); return; }
+        const porReclamar = (r && r.porReclamar) || 0;
+        if (!esMobile() || (!d && !pendiente && !porReclamar)) { ocultar(); return; }
         el.hidden = false; el.style.display = '';
         if (pendiente && !E.vistas[pendiente.id]) {
             const sg = pendiente.sello || {}, niv = pendiente.nivel > 1;      // al subir de nivel dice «Subiste de nivel», no «Misión cumplida»
@@ -271,8 +284,14 @@
                 ${sello(sg.categoria, '', 'm', sg.imagenUrl)}<i class="fas fa-chevron-right inicio-mision-flecha" aria-hidden="true"></i>`;
             return;
         }
-        if (!d) { ocultar(); return; }
-        const rot = (d.vigencia === 'HOY' ? 'Misión de hoy' : d.vigencia === 'SEMANA' ? 'Misión de la semana' : 'Misión') + (d.escalera && d.nivel ? ` · Nv ${d.nivel}` : '');
+        if (!d) {                                          // sin misión en curso pero con algo para reclamar
+            el.className = 'inicio-mision';
+            el.setAttribute('aria-label', `Tenés ${porReclamar} ${porReclamar === 1 ? 'sello' : 'sellos'} para reclamar. Ver mis misiones`);
+            el.innerHTML = `<span class="inicio-mision-icono"><i class="fas fa-bolt" aria-hidden="true"></i></span>
+                <span class="inicio-mision-texto"><span><span class="inicio-mision-rotulo">Para reclamar</span><span class="inicio-mision-titulo">Tenés ${porReclamar} ${porReclamar === 1 ? 'sello' : 'sellos'} esperándote</span></span></span><i class="fas fa-chevron-right inicio-mision-flecha" aria-hidden="true"></i>`;
+            return;
+        }
+        const rot = porReclamar ? `${porReclamar} para reclamar · ` + (d.vigencia === 'HOY' ? 'Misión de hoy' : d.vigencia === 'SEMANA' ? 'Misión de la semana' : 'Misión') : (d.vigencia === 'HOY' ? 'Misión de hoy' : d.vigencia === 'SEMANA' ? 'Misión de la semana' : 'Misión') + (d.escalera && d.nivel ? ` · Nv ${d.nivel}` : '');
         const avance = d.meta && d.meta <= 6
             ? `<span class="inicio-mision-avance">${Array.from({ length: d.meta }, (_, i) => `<span class="${i < (d.progreso || 0) ? 'hecho' : ''}"></span>`).join('')}</span>`
             : `<span class="inicio-mision-barra"><i style="width:${pct(d)}%"></i></span>`;
@@ -324,6 +343,7 @@
     // ------------------------------------------------------------------------------------------------ Quitar misiones, avisos y cartelitos
     const ATRAS = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>';
     const TILDE = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+    const TILDE_B = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
     const ALERTA = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>';
 
     // La ✕ de una misión rotativa (saga, actor/actriz, director, género). Va AL LADO de la tarjeta y no adentro: la tarjeta es un botón.
@@ -414,6 +434,50 @@
         } catch (e) { toast('No pudimos recuperar la misión. Probá de nuevo.', 3800, true); }
     }
 
+    // «Reclamar»: el sello de una misión que el usuario ya había cumplido con su actividad de antes. La celebración llega por el aviso de siempre.
+    async function reclamar(id, nombre) {
+        if (E.reclamando[id]) return;
+        E.reclamando[id] = true;
+        pintarHoja();
+        try {
+            const res = await fetch(`${api()}/missions/me/${id}/reclamar`, { method: 'POST', headers: cab().headers });
+            if (res.status === 404) {
+                toast('Esa misión ya no tiene nada para reclamar.', 3600);
+            } else if (!res.ok) throw new Error();
+            if (E.completo && E.completo.porReclamar) E.completo.porReclamar = E.completo.porReclamar.filter((m) => String(m.id) !== String(id));
+            if (E.resumen && E.resumen.porReclamar) { E.resumen.porReclamar = Math.max(0, E.resumen.porReclamar - 1); if (!E.resumen.porReclamar) delete E.resumen.porReclamar; }
+            delete E.reclamando[id];
+            pintarHoja(); pintarTarjeta();
+            cargarResumen(true);                               // trae la celebración («Misión cumplida» / «Subiste de nivel») y refresca la lista
+        } catch (e) {
+            delete E.reclamando[id];
+            pintarHoja();
+            toast('No pudimos reclamar el sello. Probá de nuevo.', 3800, true);
+        }
+    }
+
+        // «Reclamar»: el sello de una misión que el usuario ya había cumplido con su actividad de antes. La celebración llega por el aviso de siempre.
+        async function reclamar(id, nombre) {
+            if (E.reclamando[id]) return;
+            E.reclamando[id] = true;
+            pintarHoja();
+            try {
+                const res = await fetch(`${api()}/missions/me/${id}/reclamar`, { method: 'POST', headers: cab().headers });
+                if (res.status === 404) {
+                    toast('Esa misión ya no tiene nada para reclamar.', 3600);
+                } else if (!res.ok) throw new Error();
+                if (E.completo && E.completo.porReclamar) E.completo.porReclamar = E.completo.porReclamar.filter((m) => String(m.id) !== String(id));
+                if (E.resumen && E.resumen.porReclamar) { E.resumen.porReclamar = Math.max(0, E.resumen.porReclamar - 1); if (!E.resumen.porReclamar) delete E.resumen.porReclamar; }
+                delete E.reclamando[id];
+                pintarHoja(); pintarTarjeta();
+                cargarResumen(true);                               // trae la celebración («Misión cumplida» / «Subiste de nivel») y refresca la lista
+            } catch (e) {
+                delete E.reclamando[id];
+                pintarHoja();
+                toast('No pudimos reclamar el sello. Probá de nuevo.', 3800, true);
+            }
+        }
+
     // ------------------------------------------------------------------------------------------------ La hoja
     function crearHoja() {
         let o = $('miOverlay');
@@ -490,6 +554,10 @@
                 <span class="seg">${seg}<span>${d.progreso || 0} de ${d.meta}</span></span></span>
                 ${sello((d.sello || {}).categoria || d.categoria, 'apag', 'g', (d.sello || {}).imagenUrl)}</button>`, d, true);
         }
+        const rec = C.porReclamar || [];
+        if (rec.length) {
+            html += `<div class="mi-cab"><h2 class="mi-h2">Para reclamar</h2><span class="mi-cuenta">${rec.length}</span></div><p class="mi-rcl-n">Ya cumpliste ${rec.length === 1 ? 'esta misión' : 'estas misiones'} con tu actividad de antes. Reclamá ${rec.length === 1 ? 'el sello' : 'los sellos'} cuando quieras.</p><div class="mi-lista">${rec.map(tarjetaReclamar).join('')}</div>`;
+        }
         const filtros = [['todas', 'Todas'], ['hoy', 'Hoy'], ['semana', 'Esta semana'], ['perm', 'Permanentes']];
         html += `<div class="mi-chips" role="group" aria-label="Filtrar misiones">${filtros.map(([k, n]) => `<button type="button" class="mi-chip${E.filtro === k ? ' on' : ''}" data-mi="filtro" data-f="${k}" aria-pressed="${E.filtro === k}">${n}</button>`).join('')}</div>`;
         const pasa = (m) => E.filtro === 'todas' || (E.filtro === 'hoy' && m.vigencia === 'HOY') || (E.filtro === 'semana' && m.vigencia === 'SEMANA') || (E.filtro === 'perm' && (m.vigencia === 'PERMANENTE' || m.vigencia === 'RACHA'));
@@ -515,6 +583,14 @@
         return conX(`<button type="button" class="mi-mis mi-c-${c}" data-mi="detalle" data-id="${m.id}" aria-label="${esc(m.titulo)}, ${m.progreso || 0} de ${m.meta}. Ver detalle">${sello((m.sello || {}).categoria || m.categoria, 'apag', 'm', (m.sello || {}).imagenUrl)}
             <span class="mi-mis-c"><span class="mi-meta">${tagVig(m)}${tagNivel(m)}${tagTipo(m)}</span><h3>${esc(m.titulo)}</h3><p>${esc(m.descripcion || '')}</p>
             <span class="mi-barra" style="display:block"><i style="width:${pct(m)}%"></i></span><span class="mi-prog" style="display:block">${m.progreso || 0} de ${m.meta}${m.unidad === 'días' ? ' días' : ''}</span></span>${CHEV}</button>`, m);
+    }
+
+    function tarjetaReclamar(m) {
+        const c = cat((m.sello || {}).categoria || m.categoria);
+        const ocupado = !!E.reclamando[m.id];
+        return `<div class="mi-mis rcl mi-c-${c}">${sello((m.sello || {}).categoria || m.categoria, '', 'm', (m.sello || {}).imagenUrl)}
+            <div class="mi-mis-c"><div class="mi-meta"><span class="mi-tag rc">Para reclamar</span>${tagVig(m)}${tagTipo(m)}</div><h3>${esc(m.titulo)}</h3><p>${esc(m.descripcion || '')}</p>
+            <button type="button" class="mi-reclamar" data-mi="reclamar" data-id="${m.id}" data-nombre="${esc(m.titulo)}"${ocupado ? ' disabled' : ''} aria-label="Reclamar el sello de ${esc(m.titulo)}">${TILDE_B}${ocupado ? 'Reclamando…' : 'Reclamar'}</button></div></div>`;
     }
 
     function tarjetaProxima(m) {
@@ -641,6 +717,7 @@
         else if (acc === 'descartadas') { E.vista = 'descartadas'; pintarHoja(); const c = $('miScroll'); if (c) { c.scrollTop = 0; const v = c.querySelector('.mi-volver'); if (v) v.focus(); } cargarDescartadas(); }
         else if (acc === 'volver-lista') { E.vista = 'lista'; pintarHoja(); const c = $('miScroll'); const x = c && c.querySelector('[data-mi="descartadas"]'); if (x) x.focus(); }
         else if (acc === 'recuperar') restaurar(b.dataset.id, b.dataset.nombre);
+        else if (acc === 'reclamar') reclamar(b.dataset.id, b.dataset.nombre);
         else if (acc === 'accion') { const d = b.dataset.destino; cerrar(); if (d) window.location.hash = d.charAt(0) === '#' ? d : '#' + d; }
     });
 

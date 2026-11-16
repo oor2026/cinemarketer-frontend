@@ -4335,8 +4335,10 @@ document.addEventListener('click', function(e) {
     }
     const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
     const MESES_LARGO = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-    const fechaCorta = (f) => { const d = new Date(f); return isNaN(d) ? '' : `${d.getDate()} ${MESES[d.getMonth()]}`; };
-    const fechaLarga = (f) => { const d = new Date(f); return isNaN(d) ? '' : `${d.getDate()} de ${MESES_LARGO[d.getMonth()]} de ${d.getFullYear()}`; };
+    // «2026-11-15» (solo el día) lo interpreta el navegador como medianoche UTC, que en Argentina es el 14 a las 21:00: se arma con el día local.
+    const aFecha = (f) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(f)); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : new Date(f); };
+    const fechaCorta = (f) => { const d = aFecha(f); return isNaN(d) ? '' : `${d.getDate()} ${MESES[d.getMonth()]}`; };
+    const fechaLarga = (f) => { const d = aFecha(f); return isNaN(d) ? '' : `${d.getDate()} de ${MESES_LARGO[d.getMonth()]} de ${d.getFullYear()}`; };
 
     async function cargarLogros() {
         const cuerpo = $('salaLogrosCuerpo');
