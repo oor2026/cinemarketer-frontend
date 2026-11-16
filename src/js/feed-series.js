@@ -3297,7 +3297,7 @@ window.activarModoSpoilerSerie = function(activar) {
 // ==============================================
 window._gifSeleccionadoSerie = null;
 
-window.mostrarAreaComentarioSerie = function() {
+window.mostrarAreaComentarioSerie = function(sinFoco) {
     document.querySelectorAll('#modalSerie .reply-form').forEach(f => f.remove());
 
     document.querySelectorAll('#modalSerie [data-texto-original]').forEach(el => {
@@ -3313,7 +3313,7 @@ window.mostrarAreaComentarioSerie = function() {
         area.style.display = 'block';
         const textarea = document.getElementById('nuevoComentarioSerie');
         if (textarea) {
-            textarea.focus();
+            if (!sinFoco) textarea.focus();   // al «ver» los comentarios no se levanta el teclado
             const restantes = document.getElementById('caracteresRestantesSerie');
             if (restantes) restantes.textContent = `${textarea.value.length}/2000`;
 
@@ -3364,9 +3364,8 @@ window.abrirComentariosSheetSerie = function(enfocarEscritura) {
     const modal = document.getElementById('modalSerie');
     if (modal) modal.classList.add('comentarios-abiertos');   // el header de la serie se oculta mientras la hoja está abierta
 
-    if (enfocarEscritura) {
-        window.mostrarAreaComentarioSerie();
-    }
+    // Misma vista para ver y para escribir (ver comentario en películas).
+    window.mostrarAreaComentarioSerie(!enfocarEscritura);
 };
 
 window.cerrarComentariosSheetSerie = function() {
@@ -3376,6 +3375,13 @@ window.cerrarComentariosSheetSerie = function() {
     fila.classList.remove('comentarios-sheet-open');
     const modal = document.getElementById('modalSerie');
     if (modal) modal.classList.remove('comentarios-abiertos');   // vuelve el header de la serie
+
+    // Al volver, el modal queda como estaba: la caja se esconde y vuelve la barra «Escribí un comentario...».
+    const area = document.getElementById('areaEscrituraSerie');
+    if (area) area.style.display = 'none';
+    const teaser = document.getElementById('comentarioTeaserSerie');
+    if (teaser) teaser.style.removeProperty('display');
+
     setTimeout(() => {
         fila.classList.remove('comentarios-sheet-fixed');
     }, 300);
@@ -3472,6 +3478,9 @@ window.enviarComentarioSerie = async function() {
         input.value = '';
         window._gifSeleccionadoSerie = null;
         window.cancelarComentarioSerie();
+
+        // Si la hoja de comentarios sigue abierta, la caja queda disponible para escribir otro comentario
+        if (document.querySelector('#modalSerie .modal-fila-comentarios.comentarios-sheet-open')) window.mostrarAreaComentarioSerie(true);
 
         const contadorCard = document.getElementById(`comentarios-card-serie-${seriesId}`);
                 if (contadorCard) {
