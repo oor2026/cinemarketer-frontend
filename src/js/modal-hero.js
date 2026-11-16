@@ -109,14 +109,18 @@
             clearTimeout(st.espera); modal.classList.remove('con-logo', 'titulo-impreso', 'titulo-cargando');
             if (cuerpo) { cuerpo.scrollTop = 0; }
             escribir(modal, 0);
-            if (cuerpo && !st.alScroll) {
+            // El modal vive dentro del HTML de cada módulo: al ir a otro módulo y volver, el navegador crea un .modal-body NUEVO.
+            // Por eso el escucha del scroll se engancha cada vez que cambia el elemento (y se saca del viejo), no una sola vez.
+            if (cuerpo && st.cuerpo !== cuerpo) {
+                if (st.cuerpo && st.alScroll) st.cuerpo.removeEventListener('scroll', st.alScroll);
+                st.cuerpo = cuerpo;
                 let pendiente = false;
                 st.alScroll = () => { if (pendiente) return; pendiente = true; requestAnimationFrame(() => { pendiente = false; escribir(modal, cuerpo.scrollTop); }); };
                 cuerpo.addEventListener('scroll', st.alScroll, { passive: true });
             }
             if (!st.mq && window.matchMedia) {                           // si gira el teléfono o cambia el ancho con el modal abierto
                 st.mq = window.matchMedia('(max-width: 768px)');
-                st.mq.addEventListener('change', e => { if (modal.style.display !== 'none') mover(tipo, e.matches); });
+                st.mq.addEventListener('change', e => { const m = por(t.modal); if (m && m.style.display !== 'none') mover(tipo, e.matches); });
             }
         },
 
