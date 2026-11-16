@@ -2799,6 +2799,7 @@ window.abrirDetallePelicula = function(id) {
     setTimeout(() => {
             window.cargarDatosPelicula(id);
             window.cargarComentariosPelicula(id);
+            if (window._atrasModal) window._atrasModal.alAbrirModal('modalPelicula');   // suma la entrada de «atrás» (solo si estaba cerrado)
             modal.style.display = 'flex';
             document.body.classList.add('modal-open');
             if (window._modalHero) window._modalHero.abrir('pelicula');
@@ -4480,6 +4481,7 @@ window.abrirComentariosSheet = function(enfocarEscritura) {
     const fila = document.querySelector('#modalPelicula .modal-fila-comentarios');
     if (!fila) return;
 
+    if (window._atrasModal) window._atrasModal.alAbrirHoja(fila);   // suma la entrada de «atrás» (solo si la hoja estaba cerrada)
     fila.classList.add('comentarios-sheet-fixed');
     fila.offsetHeight;
     fila.classList.add('comentarios-sheet-open');

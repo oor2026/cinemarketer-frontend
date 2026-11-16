@@ -62,6 +62,7 @@
         <script src="js/vendor/qrcode.js"></script>
         <script src="js/credencial.js?v=1"></script>
         <script src="js/feed-films.js?v=20261109"></script>
+        <script src="js/atras-modal.js?v=1"></script>
         <script src="js/toast.js"></script>
         <script src="js/levelup.js"></script>
         <script src="js/subscription.js"></script>
@@ -74,7 +75,12 @@
                 sessionStorage.setItem('in_dashboard', 'true');
                 history.replaceState(null,null,location.href);
                 history.pushState({root:true},null,location.href);
-                window.addEventListener('popstate', ()=>{ if(sessionStorage.getItem('in_dashboard')==='true') history.go(1); });
+                window.addEventListener('popstate', ()=>{
+                    if(sessionStorage.getItem('in_dashboard')!=='true') return;
+                    // Si hay un modal de película/serie abierto, «atrás» lo cierra (ver js/atras-modal.js); si no, sigue anulado como siempre.
+                    if (window._atrasModal && window._atrasModal.alRetroceder()) return;
+                    history.go(1);
+                });
 
                 fetch(`${CONFIG.API_URL}/users/me`, {headers:{'Authorization':`Bearer ${token}`}})
                     .then(r=>{if(!r.ok){localStorage.removeItem('token'); sessionStorage.removeItem('in_dashboard'); window.location.replace('login.html');}})
