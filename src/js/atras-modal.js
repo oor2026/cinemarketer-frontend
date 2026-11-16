@@ -38,7 +38,7 @@
     // MODO DIAGNÓSTICO (apagado por defecto). Se enciende entrando una vez con «?atrasdebug=1» en la dirección y se apaga con «?atrasdebug=0».
     // Muestra en pantalla qué pasa con el historial en cada «atrás» y guarda las últimas líneas, así, si la app se cierra, se ven al volver a entrar.
     // ----------------------------------------------------------------------------------------------
-    const VERSION = 'atras-modal v4';
+    const VERSION = 'atras-modal v5';
     let anotar = () => {};
     try {
         const q = new URLSearchParams(location.search).get('atrasdebug');
@@ -74,8 +74,9 @@
     window._atrasModal = {
         // Se llama ANTES de abrir el modal (solo suma una entrada si estaba cerrado: navegar de película en película dentro del mismo modal no suma).
         alAbrirModal(id) { if (!abierto(id)) empujar(); },
-        // Se llama ANTES de abrir la hoja de comentarios.
-        alAbrirHoja(fila) { if (fila && !fila.classList.contains('comentarios-sheet-open')) empujar(); },
+        // Se llama ANTES de abrir la hoja de comentarios. No suma entrada al historial: la hoja y el selector de tráiler viven DENTRO del modal,
+        // que ya tiene la suya. (Se deja la función para no tener que tocar feed-films.js ni feed-series.js.)
+        alAbrirHoja() {},
 
         // Devuelve true si cerró algo (entonces el dashboard no debe deshacer el «atrás»).
         alRetroceder() {
@@ -93,11 +94,4 @@
         }
     };
 
-    // El selector de versión del tráiler se agrega al <body> al abrirse: ahí se suma su entrada al historial.
-    if (typeof MutationObserver !== 'undefined') {
-        const vigilar = () => new MutationObserver((cambios) => {
-            for (const c of cambios) for (const n of c.addedNodes) if (n.id === 'tvHoja') empujar();
-        }).observe(document.body, { childList: true });
-        if (document.body) vigilar(); else document.addEventListener('DOMContentLoaded', vigilar);   // el script puede cargarse en el <head>
-    }
 })();
