@@ -4427,7 +4427,7 @@ window.activarModoSpoiler = function activarModoSpoiler(activar) {
 // ==============================================
 // FUNCIONES DE COMENTARIOS EN MODAL
 // ==============================================
-window.mostrarAreaComentario = function() {
+window.mostrarAreaComentario = function(sinFoco) {
     // Cerrar cualquier form de respuesta abierto
     document.querySelectorAll('.reply-form').forEach(f => f.remove());
 
@@ -4447,7 +4447,7 @@ window.mostrarAreaComentario = function() {
             area.style.display = 'block';
         const textarea = document.getElementById('nuevoComentario');
         if (textarea) {
-            textarea.focus();
+            if (!sinFoco) textarea.focus();   // al «ver» los comentarios no se levanta el teclado
             const restantes = document.getElementById('caracteresRestantes');
             if (restantes) restantes.textContent = `${textarea.value.length}/2000`;
 
@@ -4486,9 +4486,9 @@ window.abrirComentariosSheet = function(enfocarEscritura) {
     const modal = document.getElementById('modalPelicula');
     if (modal) modal.classList.add('comentarios-abiertos');   // el header de la película se oculta mientras la hoja está abierta
 
-    if (enfocarEscritura) {
-        window.mostrarAreaComentario();
-    }
+    // Es la misma vista para ver y para escribir: la caja siempre está disponible.
+    // Si entró con «Escribí un comentario» queda enfocada y lista; si entró con «Ver los comentarios», visible pero sin teclado.
+    window.mostrarAreaComentario(!enfocarEscritura);
 };
 
 window.cerrarComentariosSheet = function() {
@@ -4498,6 +4498,14 @@ window.cerrarComentariosSheet = function() {
     fila.classList.remove('comentarios-sheet-open');
     const modal = document.getElementById('modalPelicula');
     if (modal) modal.classList.remove('comentarios-abiertos');   // vuelve el header de la película
+
+    // Al volver, el modal queda como estaba: la caja se esconde y vuelve la barra «Escribí un comentario...».
+    // El texto escrito se conserva (solo «Cancelar» lo borra).
+    const area = document.getElementById('areaEscritura');
+    if (area) area.style.display = 'none';
+    const teaser = document.getElementById('comentarioTeaser');
+    if (teaser) teaser.style.removeProperty('display');
+
     setTimeout(() => {
         fila.classList.remove('comentarios-sheet-fixed');
     }, 300);
@@ -4597,6 +4605,9 @@ window.enviarComentario = async function() {
                 input.value = '';
                 window._gifSeleccionado = null;
                 window.cancelarComentario();
+
+                // Si la hoja de comentarios sigue abierta, la caja queda disponible para escribir otro comentario
+                if (document.querySelector('#modalPelicula .modal-fila-comentarios.comentarios-sheet-open')) window.mostrarAreaComentario(true);
 
         const contadorCard = document.getElementById(`comentarios-card-${movieId}`);
                 if (contadorCard) {
