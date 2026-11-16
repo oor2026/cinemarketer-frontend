@@ -1013,6 +1013,13 @@
         border-right: none !important;
         border-bottom: none !important;
     }
+
+
+    /* La caja para escribir es más alta dentro de la hoja a pantalla completa (ver feed-films.css). */
+    #modalSerie .comentarios-sheet-fixed .comentario-escritura textarea {
+        min-height: 150px !important;
+        max-height: 45vh !important;
+    }
 }
 
 /* ===== FICHA DE DATOS DE LA PELÍCULA — base (todas las resoluciones) ===== */

@@ -4063,6 +4063,13 @@
         border-right: none !important;
         border-bottom: none !important;
     }
+
+        /* La caja para escribir es más alta dentro de la hoja a pantalla completa: se escribe más cómodo sin tener que estirarla.
+       Si el texto es largo crece hasta el 45 % de la pantalla y de ahí en adelante scrollea por dentro. */
+        #modalPelicula .comentarios-sheet-fixed .comentario-escritura textarea {
+        min-height: 150px !important;
+        max-height: 45vh !important;
+    }
 }
 
 window.abrirElencoCard = async function(movieId, event) {
