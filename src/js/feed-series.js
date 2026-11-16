@@ -2490,6 +2490,9 @@ window.serieActualId = null;
 window.abrirDetalleSerie = function(id) {
     window.serieActualId = id;
 
+    // Si venís de otra serie, no se hereda su caja de comentarios
+    window.resetComentariosSheetSerie();
+
     const modal = document.getElementById('modalSerie');
     if (!modal) return;
 
@@ -2513,14 +2516,17 @@ window.abrirDetalleSerie = function(id) {
 window.cerrarModalSerie = function() {
     const modal = document.getElementById('modalSerie');
     if (!modal) return;
-    modal.style.display = 'none';
-    document.body.classList.remove('modal-open');
-    if (window._modalHero) window._modalHero.cerrar('serie');
+modal.style.display = 'none';
+document.body.classList.remove('modal-open');
+if (window._modalHero) window._modalHero.cerrar('serie');
 
-    const iframe = modal.querySelector('iframe');
-    if (iframe) iframe.src = iframe.src;
+// Cada serie arranca independiente: la caja de comentarios no queda abierta
+window.resetComentariosSheetSerie();
 
-    // Refrescar la tarjeta de la fila, igual que hace Películas al cerrar
+const iframe = modal.querySelector('iframe');
+if (iframe) iframe.src = iframe.src;
+
+// Refrescar la tarjeta de la fila, igual que hace Películas al cerrar
     const seriesId = window.serieActualId;
     if (seriesId) {
         const card = document.querySelector(`.serie-card[data-id="${seriesId}"]`);
@@ -3284,6 +3290,13 @@ window.mostrarAreaComentarioSerie = function() {
             }
         }
     }
+};
+
+// Deja la caja de comentarios del modal de serie como recién abierta (ver resetComentariosSheet en películas).
+window.resetComentariosSheetSerie = function() {
+    const fila = document.querySelector('#modalSerie .modal-fila-comentarios');
+    if (fila) fila.classList.remove('comentarios-sheet-open', 'comentarios-sheet-fixed');
+    if (typeof window.cancelarComentarioSerie === 'function') window.cancelarComentarioSerie();
 };
 
 window.abrirComentariosSheetSerie = function(enfocarEscritura) {

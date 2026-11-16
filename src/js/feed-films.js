@@ -2786,6 +2786,9 @@ window.abrirDetallePelicula = function(id) {
     window.peliculaActualId = id;
     window.modalActualId = id;
 
+    // Si venís de otra película (por ejemplo desde "similares"), no se hereda su caja de comentarios
+    window.resetComentariosSheet();
+
     limpiarModalesDuplicados();
 
     const modal = document.getElementById('modalPelicula');
@@ -2868,8 +2871,11 @@ window.cerrarModal = function() {
     const modal = document.getElementById('modalPelicula');
     if (modal) {
         modal.style.display = 'none';
+        modal.style.display = 'none';
         document.body.classList.remove('modal-open');
-        if (window._modalHero) window._modalHero.cerrar('pelicula');
+
+        // Cada película arranca independiente: la caja de comentarios no queda abierta
+        window.resetComentariosSheet();
 
         // Reset modo spoiler
         activarModoSpoiler(false);
@@ -4405,6 +4411,14 @@ window.mostrarAreaComentario = function() {
             }
         }
     }
+};
+
+// Deja la caja de comentarios del modal de película como recién abierta: cerrada y sin texto a medias.
+// Se usa al cerrar el modal y al abrir otra película, para que cada película arranque independiente.
+window.resetComentariosSheet = function() {
+    const fila = document.querySelector('#modalPelicula .modal-fila-comentarios');
+    if (fila) fila.classList.remove('comentarios-sheet-open', 'comentarios-sheet-fixed');
+    if (typeof window.cancelarComentario === 'function') window.cancelarComentario();
 };
 
 window.abrirComentariosSheet = function(enfocarEscritura) {
