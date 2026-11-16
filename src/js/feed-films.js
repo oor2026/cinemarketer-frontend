@@ -4471,6 +4471,8 @@ window.mostrarAreaComentario = function() {
 window.resetComentariosSheet = function() {
     const fila = document.querySelector('#modalPelicula .modal-fila-comentarios');
     if (fila) fila.classList.remove('comentarios-sheet-open', 'comentarios-sheet-fixed');
+    const modal = document.getElementById('modalPelicula');
+    if (modal) modal.classList.remove('comentarios-abiertos');
     if (typeof window.cancelarComentario === 'function') window.cancelarComentario();
 };
 
@@ -4481,6 +4483,8 @@ window.abrirComentariosSheet = function(enfocarEscritura) {
     fila.classList.add('comentarios-sheet-fixed');
     fila.offsetHeight;
     fila.classList.add('comentarios-sheet-open');
+    const modal = document.getElementById('modalPelicula');
+    if (modal) modal.classList.add('comentarios-abiertos');   // el header de la película se oculta mientras la hoja está abierta
 
     if (enfocarEscritura) {
         window.mostrarAreaComentario();
@@ -4492,6 +4496,8 @@ window.cerrarComentariosSheet = function() {
     if (!fila) return;
 
     fila.classList.remove('comentarios-sheet-open');
+    const modal = document.getElementById('modalPelicula');
+    if (modal) modal.classList.remove('comentarios-abiertos');   // vuelve el header de la película
     setTimeout(() => {
         fila.classList.remove('comentarios-sheet-fixed');
     }, 300);

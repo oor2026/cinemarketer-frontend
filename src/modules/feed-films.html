@@ -391,6 +391,8 @@
                 background-image: linear-gradient(to bottom, rgba(0, 0, 0, calc(0.5 * (1 - var(--barra-fondo, 0)))), rgba(0, 0, 0, 0)) !important;
             }
             :is(#modalPelicula, #modalSerie).modal .modal-header.spoiler-mode { background-image: none !important; background-color: #6c63ff !important; }
+            /* Con la caja de comentarios abierta (hoja a pantalla completa) el header de la película se va: así se ve su flecha «Volver». */
+            :is(#modalPelicula, #modalSerie).modal.comentarios-abiertos .modal-header { display: none !important; }
             :is(#modalPelicula, #modalSerie).modal .modal-header h2 {
                 flex: 1 1 auto !important;
                 margin: 0 !important;
@@ -1013,7 +1015,7 @@
                         </div>
                         <div class="comentario-acciones">
                             <div class="comentario-botones">
-                                <button class="btn-cancelar" onclick="window.cancelarComentario()">
+                                <button class="btn-cancelar" onclick="window.cancelarComentario(); window.cerrarComentariosSheet()">
                                     <i class="fas fa-times"></i> Cancelar
                                 </button>
                                 <button class="btn-enviar" onclick="window.enviarComentario()">
@@ -1293,7 +1295,7 @@
                         </div>
                         <div class="comentario-acciones">
                             <div class="comentario-botones">
-                                <button class="btn-cancelar" onclick="window.cancelarComentarioSerie()">
+                                <button class="btn-cancelar" onclick="window.cancelarComentarioSerie(); window.cerrarComentariosSheetSerie()">
                                     <i class="fas fa-times"></i> Cancelar
                                 </button>
                                 <button class="btn-enviar" onclick="window.enviarComentarioSerie()">

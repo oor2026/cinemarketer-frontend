@@ -3349,6 +3349,8 @@ window.mostrarAreaComentarioSerie = function() {
 window.resetComentariosSheetSerie = function() {
     const fila = document.querySelector('#modalSerie .modal-fila-comentarios');
     if (fila) fila.classList.remove('comentarios-sheet-open', 'comentarios-sheet-fixed');
+    const modal = document.getElementById('modalSerie');
+    if (modal) modal.classList.remove('comentarios-abiertos');
     if (typeof window.cancelarComentarioSerie === 'function') window.cancelarComentarioSerie();
 };
 
@@ -3359,6 +3361,8 @@ window.abrirComentariosSheetSerie = function(enfocarEscritura) {
     fila.classList.add('comentarios-sheet-fixed');
     fila.offsetHeight;
     fila.classList.add('comentarios-sheet-open');
+    const modal = document.getElementById('modalSerie');
+    if (modal) modal.classList.add('comentarios-abiertos');   // el header de la serie se oculta mientras la hoja está abierta
 
     if (enfocarEscritura) {
         window.mostrarAreaComentarioSerie();
@@ -3370,6 +3374,8 @@ window.cerrarComentariosSheetSerie = function() {
     if (!fila) return;
 
     fila.classList.remove('comentarios-sheet-open');
+    const modal = document.getElementById('modalSerie');
+    if (modal) modal.classList.remove('comentarios-abiertos');   // vuelve el header de la serie
     setTimeout(() => {
         fila.classList.remove('comentarios-sheet-fixed');
     }, 300);
