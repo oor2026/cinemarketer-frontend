@@ -1,11 +1,12 @@
 // =====================================================================================================================
-// login-cine.js — Muro de pósters del login mobile
+// login-cine.js — Muro de pósters del login (mobile y escritorio)
 //
 // El aspecto es CSS (css/login-cine.css). Este archivo solo arma el muro de pósters de arriba: pide las rutas de los pósters
 // del momento (películas y series en tendencia, de TMDB) a GET /api/public/login-posters y los acomoda en cuatro columnas.
 //
 // El login no depende de esto para nada: no toca el formulario ni su JavaScript. Si el pedido falla, tarda o devuelve algo
-// raro, el muro queda con pósters ilustrados (solo CSS) y el login funciona igual. Solo actúa en mobile (hasta 768 px).
+// raro, el muro queda con pósters ilustrados (solo CSS) y el login funciona igual. En mobile el muro va arriba; en escritorio
+// (desde 769 px) va a la izquierda, a toda la altura. Dónde y cómo se ve lo decide el CSS (login-cine.css / login-cine-desktop.css).
 //
 // Va al final del body, después de config.js (necesita CONFIG.API_URL).
 // =====================================================================================================================
@@ -14,7 +15,7 @@
     if (window._loginCine) return;
 
     const MOBILE = window.matchMedia('(max-width: 768px)');
-    const TMDB_IMG = 'https://image.tmdb.org/t/p/w185';
+    const TMDB_IMG = 'https://image.tmdb.org/t/p/' + (MOBILE.matches ? 'w185' : 'w342');   // en escritorio los pósters se ven más grandes
     const RUTA_VALIDA = /^\/[A-Za-z0-9._-]+\.(?:jpg|jpeg|png|webp)$/i;   // lo que llega del servidor se valida antes de armar una URL
     const COLUMNAS = 4, FILAS = 6, ANCHO = 140, ALTO = 210, SEPARACION = 12;
     const DESPLAZAMIENTOS = [-70, -170, -30, -120];                       // cada columna arranca a otra altura
@@ -77,9 +78,11 @@
         return muro;
     }
 
-    // En pantallas más anchas (tablets) el muro se agranda para cubrir el ancho completo, con el giro incluido.
+    // El muro se agranda hasta cubrir su zona completa, con el giro incluido: por ancho en mobile y tablets, y también por alto
+    // en escritorio, donde la zona es una columna a toda la altura de la pantalla.
     function ajustarEscala(muro) {
-        muro.style.setProperty('--lc-escala', String(Math.max(1, (window.innerWidth * 1.07) / 620)));
+        const ancho = muro.clientWidth || window.innerWidth, alto = muro.clientHeight || 0;
+        muro.style.setProperty('--lc-escala', String(Math.max(1, (ancho * 1.07) / 620, (alto * 1.12) / 1040)));
     }
 
     // Pósters con imagen real: cada uno reemplaza al ilustrado cuando carga (y si no carga, se queda el ilustrado).
@@ -133,6 +136,5 @@
     }
 
     window._loginCine = { iniciar, _rutaValida: RUTA_VALIDA };
-    if (MOBILE.matches) iniciar();
-    else if (MOBILE.addEventListener) MOBILE.addEventListener('change', e => { if (e.matches) iniciar(); });
+    iniciar();
 })();
