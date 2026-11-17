@@ -1,0 +1,157 @@
+/* =====================================================================================================================
+   NUEVA CONTRASEÑA (reset-password.html) — "Luz de proyector", mobile y escritorio en un solo archivo
+   Va AL FINAL de todos los <link> de reset-password.html: después de login-cine.css, forgot-cine.css, login-cine-desktop.css y
+   forgot-cine-desktop.css. Esos cuatro archivos ya resuelven lo que esta pantalla comparte con el login y con "Recuperar
+   contraseña": el muro de pósters, el fondo blanco, la estructura sin caja, el título y la bajada, los campos de contraseña, el
+   botón "Guardar nueva contraseña" (#submitBtn), los paneles de resultado con estilos en línea y el pie grande.
+   Acá va solo lo propio de esta pantalla: el ojo de las dos contraseñas (acá es .password-wrapper), la ayuda y el mensaje de error
+   bajo el campo, y el panel "Enlace inválido" con sus botones.
+   Mobile hasta 768 px y escritorio desde 769 px. Como el aspecto original vive en forgot-password.css y styles.css, cada regla
+   fija explícitamente lo que importa (con !important).
+   ===================================================================================================================== */
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+    /* La zona del muro: la de siempre (clamp 150–232). El formulario es corto, entra de sobra. */
+
+    /* ----- Contraseñas: el ojo ----- */
+    .auth-form .password-wrapper { position: relative !important; display: block !important; margin: 0 !important; }
+    .auth-form .password-wrapper input[type="password"],
+    .auth-form .password-wrapper input[type="text"] { padding-right: 54px !important; }
+
+    /* Ayuda y mensaje de error bajo el campo (el JavaScript muestra #passwordError con style.display) */
+    .auth-form .field-hint {
+        display: block;
+        margin: 0 !important;
+        padding: 0 !important;
+        font-size: 12px !important;
+        line-height: 16px !important;
+        color: #667085 !important;
+    }
+    #passwordError {
+        margin: 2px 0 0 !important;
+        padding: 10px 12px !important;
+        border: 1px solid #FDA29B;
+        border-radius: 12px;
+        background: #FEF3F2;
+        font-size: 13px !important;
+        line-height: 18px;
+        color: #B42318 !important;
+    }
+
+    /* ----- Panel "Enlace inválido" (igual que los otros paneles de resultado) ----- */
+    #invalidToken { padding: 8px 0 4px !important; text-align: center; }
+    #invalidToken > div:first-child { width: 72px !important; height: 72px !important; margin: 0 auto 16px !important; }
+    #invalidToken h3,
+    #successState h3 {
+        margin: 0 0 8px !important;
+        font-family: 'Space Grotesk', system-ui, sans-serif;
+        font-size: 22px;
+        font-weight: 700;
+        line-height: 1.2;
+        color: #0B2A63 !important;
+    }
+    #invalidToken p,
+    #successState p {
+        margin: 0 0 16px !important;
+        font-size: 15px !important;
+        line-height: 22px !important;
+        color: #475467 !important;
+    }
+    /* Botones de los dos paneles ("Solicitar nuevo enlace", "Ir al login"): el rojo de siempre, a todo el ancho. */
+    #invalidToken a.btn,
+    #successState a.btn {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 54px;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 999px !important;
+        background: #E50914 !important;
+        background-image: none !important;
+        box-shadow: 0 10px 24px rgba(229, 9, 20, 0.32) !important;
+        color: #ffffff !important;
+        font-family: 'Space Grotesk', system-ui, sans-serif;
+        font-size: 16px !important;
+        font-weight: 600 !important;
+        text-decoration: none !important;
+    }
+}
+
+/* ===== ESCRITORIO ===== */
+@media (min-width: 769px) {
+    /* ----- Contraseñas: el ojo ----- */
+    .auth-form .password-wrapper { position: relative !important; display: block !important; margin: 0 !important; }
+    .auth-form .password-wrapper input[type="password"],
+    .auth-form .password-wrapper input[type="text"] { padding-right: 54px !important; }
+
+    /* Ayuda y mensaje de error bajo el campo */
+    .auth-form .field-hint {
+        display: block;
+        margin: 0 !important;
+        padding: 0 !important;
+        font-size: 12px !important;
+        line-height: 16px !important;
+        color: #667085 !important;
+    }
+    #passwordError {
+        margin: 2px 0 0 !important;
+        padding: 10px 12px !important;
+        border: 1px solid #FDA29B;
+        border-radius: 12px;
+        background: #FEF3F2;
+        font-size: 13px !important;
+        line-height: 18px;
+        color: #B42318 !important;
+    }
+
+    /* ----- Panel "Enlace inválido" (igual que los otros paneles de resultado) ----- */
+    #invalidToken { padding: 8px 0 4px !important; text-align: center; }
+    #invalidToken > div:first-child { width: 76px !important; height: 76px !important; margin: 0 auto 18px !important; }
+    #invalidToken h3,
+    #successState h3 {
+        margin: 0 0 8px !important;
+        font-family: 'Space Grotesk', system-ui, sans-serif;
+        font-size: 24px;
+        font-weight: 700;
+        line-height: 1.2;
+        color: #0B2A63 !important;
+    }
+    #invalidToken p,
+    #successState p {
+        margin: 0 0 18px !important;
+        font-size: 16px !important;
+        line-height: 24px !important;
+        color: #475467 !important;
+    }
+    #invalidToken a.btn,
+    #successState a.btn {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 54px;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 999px !important;
+        background: #E50914 !important;
+        background-image: none !important;
+        box-shadow: 0 10px 24px rgba(229, 9, 20, 0.32) !important;
+        color: #ffffff !important;
+        font-family: 'Space Grotesk', system-ui, sans-serif;
+        font-size: 16px !important;
+        font-weight: 600 !important;
+        text-decoration: none !important;
+        transition: background-color 0.15s ease;
+    }
+    #invalidToken a.btn:hover,
+    #successState a.btn:hover { background: #C4000F !important; transform: none !important; }
+}
