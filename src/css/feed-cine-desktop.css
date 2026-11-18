@@ -1,0 +1,797 @@
+/* =====================================================================================================================
+   feed-cine-desktop.css — Inicio (feed) en ESCRITORIO, estilo "Luz de proyector".
+   Alcance: todo lo que está ARRIBA de los carruseles de películas/series (hero con asistente, pestañas, carrusel destacado,
+   Misión de hoy, Voto Relámpago, trivia y las categorías). Los carruseles no se tocan.
+
+   Va como ÚLTIMO <link> de dashboard.html (después de feed-films.css y feed-series.css). No modifica ningún otro CSS.
+   Todo está dentro de @media (min-width: 769px): en mobile no cambia nada.
+   ===================================================================================================================== */
+
+/* Elementos nuevos que solo existen en escritorio: ocultos por defecto (mobile). */
+.fcd-hero,
+.fcd-vr { display: none; }
+
+/* En mobile los dos envoltorios nuevos desaparecen del layout: los hijos quedan donde estaban. */
+.fcd-escena,
+.fcd-escena-principal,
+.fcd-escena-lateral { display: contents; }
+
+@media (min-width: 769px) {
+
+    .feed-container {
+        --fcd-rojo: #e50914;
+        --fcd-rojo-1: #f0553f;
+        --fcd-rojo-2: #c4321f;
+        --fcd-marino: #16264d;
+        --fcd-azul: #004f9b;
+        --fcd-tinta: #1b1d24;
+        --fcd-gris: #6b6f7a;
+        --fcd-linea: #ece8e1;
+        --fcd-alto-destacada: 440px;
+    }
+
+    /* El banner navy viejo ya no existe en el HTML; por si alguna copia lo conserva, no se muestra. */
+    .feed-container .feed-header { display: none !important; }
+
+    /* ================================================================================================================
+       HERO: saludo + título + barra del asistente + accesos rápidos
+       ================================================================================================================ */
+    .fcd-hero {
+        display: block;
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+        margin: 18px 0 0;
+        padding: 34px 40px 30px;
+        border-radius: 28px;
+        background: #fff;
+        border: 1px solid var(--fcd-linea);
+        box-shadow: 0 30px 60px -40px rgba(22, 38, 77, 0.45);
+    }
+    /* Halo de proyector: dos luces (roja y azul) que nacen arriba y se disuelven en blanco. */
+    .fcd-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -2;
+        background:
+            radial-gradient(60% 95% at 8% -18%, rgba(240, 85, 63, 0.20) 0%, rgba(240, 85, 63, 0) 70%),
+            radial-gradient(55% 100% at 96% -25%, rgba(0, 79, 155, 0.20) 0%, rgba(0, 79, 155, 0) 72%);
+    }
+    /* Resplandor central tenue (la "lámpara" del proyector), sin bordes duros. */
+    .fcd-hero::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background: radial-gradient(50% 75% at 50% -22%, rgba(255, 228, 190, 0.55) 0%, rgba(255, 255, 255, 0) 70%);
+    }
+
+    .fcd-hero-cabecera {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 40px;
+    }
+    .fcd-hero-textos { flex: none; }
+    .fcd-saludo {
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #000;
+        margin: 0 0 6px;
+    }
+    .fcd-titulo {
+        margin: 0;
+        font-family: 'Space Grotesk', system-ui, sans-serif;
+        font-size: clamp(2.2rem, 3.6vw, 3.1rem);
+        line-height: 1.08;
+        font-weight: 700;
+        letter-spacing: -0.015em;
+        color: var(--fcd-azul);
+    }
+    .fcd-sub {
+        margin: 0 0 6px;
+        font-size: 0.98rem;
+        line-height: 1.45;
+        color: var(--fcd-gris);
+        max-width: 430px;
+    }
+
+    /* ---- Accesos rápidos (las mismas tarjetas del asistente en mobile) ---- */
+    .fcd-accesos {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 24px;
+    }
+    .fcd-acceso {
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-sizing: border-box;
+        min-width: 0;
+        padding: 12px 34px 12px 12px;
+        background: #fff;
+        border: 1px solid #f1eee8;
+        border-radius: 16px;
+        cursor: pointer;
+        font-family: inherit;
+        text-align: left;
+        box-shadow: 0 10px 22px -10px rgba(20, 20, 20, 0.18), 0 2px 4px rgba(20, 20, 20, 0.05);
+        transition: transform 0.16s ease, box-shadow 0.16s ease;
+    }
+    .fcd-acceso:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 28px -12px rgba(20, 20, 20, 0.28), 0 2px 4px rgba(20, 20, 20, 0.05);
+    }
+    .fcd-acceso:focus-visible { outline: 3px solid rgba(0, 79, 155, 0.4); outline-offset: 2px; }
+    .fcd-acceso-decor {
+        position: absolute;
+        right: -4px;
+        bottom: -6px;
+        font-size: 2.6rem;
+        opacity: 0.09;
+        pointer-events: none;
+    }
+    .fcd-acceso-decor.tono-rojo { color: var(--fcd-rojo-2); }
+    .fcd-acceso-decor.tono-marino { color: var(--fcd-marino); }
+    .fcd-acceso-flecha {
+        position: absolute;
+        top: 50%;
+        right: 12px;
+        transform: translateY(-50%);
+        color: #c9c4b8;
+        font-size: 0.75rem;
+        transition: transform 0.16s ease, color 0.16s ease;
+    }
+    .fcd-acceso:hover .fcd-acceso-flecha { transform: translate(3px, -50%); color: var(--fcd-rojo-2); }
+    .fcd-acceso-icono {
+        flex: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+    }
+    .fcd-acceso-icono i { color: #fff; font-size: 0.95rem; }
+    .fcd-acceso-icono.tono-rojo { background: linear-gradient(135deg, var(--fcd-rojo-1), var(--fcd-rojo-2)); box-shadow: 0 3px 10px rgba(196, 50, 31, 0.30); }
+    .fcd-acceso-icono.tono-marino { background: linear-gradient(135deg, #243b72, var(--fcd-marino)); box-shadow: 0 3px 10px rgba(22, 38, 77, 0.30); }
+    .fcd-acceso-titulo { display: block; font-size: 0.92rem; font-weight: 700; color: #221f1f; line-height: 1.2; }
+    .fcd-acceso-sub { display: block; margin-top: 2px; font-size: 0.76rem; color: #6b6f7a; line-height: 1.25; }
+    /* Segunda fila ("Tu actividad"): píldoras compactas, una sola línea. */
+    .fcd-acceso-chip {
+        padding: 8px 14px 8px 8px;
+        gap: 10px;
+        border-radius: 999px;
+    }
+    .fcd-acceso-chip .fcd-acceso-icono { width: 32px; height: 32px; border-radius: 50%; }
+    .fcd-acceso-chip .fcd-acceso-icono i { font-size: 0.8rem; }
+    .fcd-acceso-chip .fcd-acceso-titulo { font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .fcd-accesos-etiqueta {
+        grid-column: 1 / -1;
+        margin: 6px 0 -2px;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--fcd-rojo);
+    }
+
+    /* ================================================================================================================
+       PESTAÑAS Películas / Series / Comunidad
+       ================================================================================================================ */
+    .feed-container .feed-tabs {
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        padding: 0;
+        margin: 22px 0 0;
+        gap: 8px;
+    }
+    .feed-container .feed-tab {
+        padding: 10px 22px;
+        border-radius: 999px;
+        border: 1px solid var(--fcd-linea);
+        background: #fff;
+        color: #4a4a55;
+        font-size: 0.95rem;
+        font-weight: 600;
+        box-shadow: 0 6px 14px -10px rgba(22, 38, 77, 0.35);
+        transition: transform 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+    }
+    .feed-container .feed-tab:hover { transform: translateY(-1px); color: var(--fcd-rojo-2); }
+    .feed-container .feed-tab.active {
+        background: linear-gradient(135deg, var(--fcd-rojo-1), var(--fcd-rojo-2));
+        border-color: transparent;
+        color: #fff;
+        box-shadow: 0 10px 20px -8px rgba(196, 50, 31, 0.55);
+    }
+    .feed-container #tabSeries.active {
+        background: var(--fcd-azul);
+        box-shadow: 0 10px 20px -8px rgba(0, 79, 155, 0.55);
+    }
+    /* "Filtros avanzados" ya abre el asistente: la barra grande de arriba lo reemplaza. */
+    .feed-container .feed-tab-filtro { display: none; }
+
+    /* ================================================================================================================
+       ESCENA: carrusel destacado (izquierda) + Misión / Voto Relámpago / Trivia (derecha)
+       ================================================================================================================ */
+    .fcd-escena {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 340px;
+        gap: 24px;
+        align-items: start;
+        margin: 6px 0 24px;
+    }
+    .fcd-escena-principal { display: block; min-width: 0; }
+    .fcd-escena-lateral {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        min-width: 0;
+        /* arranca a la altura de la tarjeta del carrusel (debajo de su etiqueta) y la acompaña hasta abajo */
+        margin-top: 44px;
+        min-height: var(--fcd-alto-destacada);
+    }
+
+    /* ---- Carrusel destacado como portada de cine ---- */
+    .fcd-escena-principal .destacada-label {
+        height: 20px;
+        margin: 12px 0 0;
+        padding: 0 4px;
+        font-size: 0.78rem;
+        letter-spacing: 0.12em;
+        color: var(--fcd-rojo);
+        align-items: center;
+    }
+    .fcd-escena-principal .destacada-card {
+        margin: 12px 0 0;
+        max-width: none;
+        border-radius: 26px;
+        background: #000d3d;
+        box-shadow: 0 34px 60px -30px rgba(22, 38, 77, 0.65), 0 10px 22px -12px rgba(0, 0, 0, 0.35);
+    }
+    .fcd-escena-principal .destacada-img-real {
+        height: var(--fcd-alto-destacada);
+        max-height: none;
+        aspect-ratio: auto;
+        object-fit: cover;
+    }
+    /* Premios: se ven completos sobre el azul de la tarjeta (no la franja negra del inline) */
+    .fcd-escena-principal img.destacada-img-real[style*="object-fit:contain"] { background: transparent !important; }
+    /* Viñeta cinematográfica: oscurece a la izquierda (donde va el texto) y abajo, la luz queda a la derecha. */
+    .fcd-escena-principal .destacada-overlay {
+        padding: 0 52px 44px;
+        align-items: flex-start;
+        background:
+            linear-gradient(90deg, rgba(0, 13, 61, 0.92) 0%, rgba(0, 13, 61, 0.55) 40%, rgba(0, 13, 61, 0) 72%),
+            linear-gradient(0deg, rgba(0, 13, 61, 0.85) 0%, rgba(0, 13, 61, 0) 55%);
+    }
+    .fcd-escena-principal .destacada-badge,
+    .fcd-escena-principal .destacada-premio-badge {
+        z-index: 2;
+        top: 28px;
+        left: 36px;
+        padding: 8px 18px;
+        font-size: 0.78rem;
+        letter-spacing: 0.08em;
+    }
+    .fcd-escena-principal .destacada-badge {
+        background: linear-gradient(135deg, var(--fcd-rojo-1), var(--fcd-rojo-2));
+        box-shadow: 0 6px 14px rgba(196, 50, 31, 0.45);
+    }
+    .fcd-escena-principal .destacada-titulo {
+        max-width: 62%;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin-bottom: 8px;
+        font-family: 'Space Grotesk', system-ui, sans-serif;
+        font-size: clamp(2rem, 3.4vw, 3rem);
+        line-height: 1.05;
+        font-weight: 700;
+        letter-spacing: -0.015em;
+    }
+    .fcd-escena-principal .destacada-meta {
+        margin-bottom: 22px;
+        font-size: 1.02rem;
+        color: rgba(255, 255, 255, 0.78);
+    }
+    .fcd-escena-principal .destacada-acciones { gap: 12px; width: 100%; }
+    .fcd-escena-principal .btn-dest-votar,
+    .fcd-escena-principal .btn-dest-ver {
+        padding: 12px 28px;
+        font-size: 1rem;
+        background: linear-gradient(135deg, var(--fcd-rojo-1), var(--fcd-rojo-2));
+        box-shadow: 0 10px 22px -6px rgba(196, 50, 31, 0.6);
+        transition: transform 0.15s ease;
+    }
+    .fcd-escena-principal .btn-dest-comentar {
+        padding: 12px 26px;
+        font-size: 1rem;
+        background: rgba(255, 255, 255, 0.14);
+        border: 1.5px solid rgba(255, 255, 255, 0.35);
+    }
+    .fcd-escena-principal .btn-dest-votar:hover,
+    .fcd-escena-principal .btn-dest-ver:hover,
+    .fcd-escena-principal .btn-dest-comentar:hover { transform: translateY(-2px); }
+    .fcd-escena-principal .destacada-score {
+        padding: 6px 16px;
+        border-radius: 999px;
+        background: rgba(0, 13, 61, 0.55);
+        backdrop-filter: blur(6px);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        font-size: 1.5rem;
+    }
+    .fcd-escena-principal .destacada-puntos-numero { font-size: 2rem; }
+    .fcd-escena-principal .destacada-puntos-label { font-size: 0.8rem; }
+    .fcd-escena-principal .destacada-dots { margin: 14px 0 0; }
+    .fcd-escena-principal .destacada-dot { background: rgba(22, 38, 77, 0.2); }
+    .fcd-escena-principal .destacada-dot.activo { background: var(--fcd-rojo); }
+
+    /* Diapositiva del ranking: el trofeo más grande y a la derecha, el texto a la izquierda. */
+    .fcd-escena-principal div.destacada-img-real > .fa-trophy {
+        font-size: 130px !important;
+        margin-left: 46%;
+    }
+
+    /* ---- Diapositiva "Tus puntos" del carrusel (mismas clases que en mobile) ---- */
+    .fcd-escena-principal .mis-puntos-card {
+        box-sizing: border-box;
+        padding: 34px 48px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 10px;
+        background: radial-gradient(circle at 15% 15%, #001D7D 0%, #000d3d 75%);
+        color: #fff;
+        text-align: left;
+    }
+    .fcd-escena-principal .mis-puntos-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 34px; }
+    .fcd-escena-principal .mis-puntos-saludo { font-size: 1rem; color: #d3dcee; }
+    .fcd-escena-principal .mis-puntos-premium { flex: none; border: 0; border-radius: 999px; padding: 7px 16px; background: rgba(255, 255, 255, 0.16); color: #fff; font-family: inherit; font-size: 0.85rem; font-weight: 600; }
+    .fcd-escena-principal .mis-puntos-premium-btn { position: relative; background: #ffc83d; color: #1b1d24; cursor: pointer; }
+    .fcd-escena-principal .mis-puntos-titulo { font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 700; font-size: 2.2rem; line-height: 1.1; color: #fff; max-width: 70%; }
+    .fcd-escena-principal .mis-puntos-fila { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+    .fcd-escena-principal .mis-puntos-total { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+    .fcd-escena-principal .mis-puntos-num { font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 700; font-size: 4.2rem; line-height: 1; color: #ffc83d; }
+    .fcd-escena-principal .mis-puntos-lbl { font-size: 1rem; color: #d3dcee; }
+    .fcd-escena-principal .mis-puntos-fecha { flex: none; font-size: 0.9rem; line-height: 1.3; color: #d3dcee; text-align: right; }
+    .fcd-escena-principal .mis-puntos-barra { display: flex; height: 10px; border-radius: 5px; background: rgba(255, 255, 255, 0.2); overflow: hidden; }
+    .fcd-escena-principal .mis-puntos-barra-disp { background: #ffc83d; }
+    .fcd-escena-principal .mis-puntos-barra-mes { background: repeating-linear-gradient(135deg, rgba(255, 200, 61, 0.75) 0 4px, rgba(255, 200, 61, 0.3) 4px 8px); }
+    .fcd-escena-principal .mis-puntos-premio { display: flex; justify-content: space-between; gap: 8px; font-size: 0.92rem; color: #d3dcee; }
+    .fcd-escena-principal .mis-puntos-premio-ok { font-size: 1rem; font-weight: 600; color: #ffc83d; }
+
+    /* ---- Misión de hoy (la rellena misiones.js dentro de #inicioMision) ---- */
+    .fcd-escena-lateral .inicio-mision {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-sizing: border-box;
+        width: auto !important;
+        margin: 0;
+        padding: 14px 16px;
+        background: #fff;
+        border: 1px solid rgba(22, 38, 77, 0.08);
+        border-radius: 20px;
+        box-shadow: 0 16px 30px -18px rgba(22, 38, 77, 0.45);
+        cursor: pointer;
+        text-align: left;
+        font-family: inherit;
+        color: inherit;
+        transition: transform 0.16s ease, box-shadow 0.16s ease;
+    }
+    .fcd-escena-lateral .inicio-mision:hover { transform: translateY(-2px); }
+    .fcd-escena-lateral .inicio-mision-icono { flex: none; width: 42px; height: 42px; border-radius: 13px; background: #0d58a0; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.05rem; }
+    .fcd-escena-lateral .inicio-mision-texto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 7px; }
+    .fcd-escena-lateral .inicio-mision-rotulo { display: block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #5a5f6b; line-height: 1.1; }
+    .fcd-escena-lateral .inicio-mision-titulo { display: block; margin-top: 2px; font-size: 0.95rem; font-weight: 600; color: #1b1d24; line-height: 1.2; }
+    .fcd-escena-lateral .inicio-mision-avance { display: flex; gap: 4px; }
+    .fcd-escena-lateral .inicio-mision-avance span { flex: 1; height: 6px; border-radius: 3px; background: #e3e6ee; }
+    .fcd-escena-lateral .inicio-mision-avance span.hecho { background: #1a3a6b; }
+    .fcd-escena-lateral .inicio-mision-conteo { flex: none; font-size: 0.78rem; font-weight: 600; color: #475467; white-space: nowrap; }
+    .fcd-escena-lateral .inicio-mision-premio { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .fcd-escena-lateral .inicio-mision-puntos { font-size: 0.8rem; font-weight: 700; color: #fff; background: linear-gradient(135deg, #D93D27, #B82C1B); border-radius: 12px; padding: 4px 10px; }
+    .fcd-escena-lateral .inicio-mision-flecha { flex: none; color: #667085; font-size: 0.8rem; }
+
+    /* ---- Voto Relámpago: tarjeta que abre su modal ---- */
+    .fcd-escena-lateral .fcd-vr {
+        position: relative;
+        overflow: hidden;
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        gap: 4px;
+        box-sizing: border-box;
+        min-height: 150px;
+        padding: 20px 22px;
+        border: none;
+        border-radius: 22px;
+        cursor: pointer;
+        text-align: left;
+        font-family: inherit;
+        background: radial-gradient(120% 140% at 100% 0%, #ffd34d 0%, #ffe999 55%, #fff3c4 100%);
+        box-shadow: 0 22px 36px -22px rgba(224, 142, 0, 0.75), 0 2px 6px rgba(224, 142, 0, 0.18);
+        transition: transform 0.16s ease, box-shadow 0.16s ease;
+    }
+    .fcd-escena-lateral .fcd-vr:hover { transform: translateY(-2px); box-shadow: 0 28px 40px -22px rgba(224, 142, 0, 0.85), 0 2px 6px rgba(224, 142, 0, 0.18); }
+    .fcd-escena-lateral .fcd-vr:focus-visible { outline: 3px solid rgba(0, 79, 155, 0.4); outline-offset: 3px; }
+    .fcd-vr-rayo {
+        position: absolute;
+        right: -6px;
+        top: -10px;
+        font-size: 7rem;
+        color: #e08e00;
+        opacity: 0.16;
+        transform: rotate(14deg);
+        pointer-events: none;
+    }
+    .fcd-vr-icono {
+        margin-bottom: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 13px;
+        background: #1b1d24;
+        color: #ffd34d;
+        font-size: 1.1rem;
+        box-shadow: 0 8px 16px -6px rgba(27, 29, 36, 0.6);
+    }
+    .fcd-vr-icono i { color: #ffd34d; }
+    .fcd-vr-titulo { display: block; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 1.45rem; font-weight: 700; color: #1b1d24; line-height: 1.1; }
+    .fcd-vr-sub { display: block; font-size: 0.9rem; color: #5b4a12; }
+    .fcd-vr-cta {
+        margin-top: 4px;
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 18px;
+        border-radius: 999px;
+        background: #1b1d24;
+        color: #fff;
+        font-size: 0.88rem;
+        font-weight: 700;
+    }
+
+    /* ---- Trivia: tarjeta compacta (conserva rojo en Películas y azul en Series) ---- */
+    .fcd-escena-lateral #triviaBadgeContainer,
+    .fcd-escena-lateral #triviaSeriesBadgeContainer { flex: 0 0 auto; }
+    .fcd-escena-lateral .trivia-badge {
+        margin: 0;
+        padding: 14px 16px;
+        gap: 12px;
+        border-radius: 20px;
+        border-width: 1px;
+        box-shadow: 0 16px 30px -20px rgba(22, 38, 77, 0.45);
+        transition: transform 0.16s ease, box-shadow 0.16s ease;
+    }
+    .fcd-escena-lateral .trivia-badge:hover { transform: translateY(-2px); }
+    .fcd-escena-lateral .trivia-badge-icon { width: 44px; height: 44px; border-radius: 13px; font-size: 1.2rem; }
+    .fcd-escena-lateral .trivia-badge-titulo { font-size: 1.08rem; }
+    .fcd-escena-lateral .trivia-badge-sub { font-size: 0.85rem; margin-top: 2px; }
+
+    /* ================================================================================================================
+       CATEGORÍAS (íconos 3D, una sola fila) — mismo lenguaje que mobile
+       ================================================================================================================ */
+    .feed-container .ordenar-pills {
+        gap: 26px;
+        margin: 0 0 22px;
+        padding: 16px 26px 14px;
+        background: #fff;
+        border: 1px solid var(--fcd-linea);
+        border-radius: 24px;
+        box-shadow: 0 18px 34px -26px rgba(22, 38, 77, 0.45);
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    .feed-container .ordenar-pills::-webkit-scrollbar { display: none; }
+    .feed-container .ordenar-pills .pill-orden {
+        gap: 6px;
+        min-width: 64px;
+        transition: transform 0.18s ease;
+    }
+    .feed-container .ordenar-pills .pill-orden:hover { transform: translateY(-2px); }
+    .feed-container .ordenar-pills .pill-orden-icono {
+        width: auto;
+        height: auto;
+        border-radius: 0;
+        background: none !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+        transition: transform 0.18s ease;
+    }
+    /* Si el JS dibuja la imagen 3D, se usa; si no, queda el emoji de siempre. */
+    .feed-container .ordenar-pills .pill-orden-img {
+        display: block;
+        width: 58px;
+        height: 58px;
+        object-fit: contain;
+        filter: drop-shadow(0 4px 4px rgba(22, 38, 77, 0.22));
+        pointer-events: none;
+    }
+    .feed-container .ordenar-pills .pill-orden:has(.pill-orden-img) .pill-orden-emoji { display: none; }
+    .feed-container .ordenar-pills .pill-orden-emoji { font-size: 2.1rem; line-height: 1; }
+    .feed-container .ordenar-pills .pill-orden-label { font-size: 0.8rem; color: #8a8478; }
+    .feed-container .ordenar-pills .pill-orden::after {
+        content: '';
+        width: 24px;
+        height: 3px;
+        border-radius: 2px;
+        background: transparent;
+        transition: background 0.18s ease;
+    }
+    .feed-container .ordenar-pills .pill-orden.active .pill-orden-icono { transform: translateY(-2px) scale(1.06); }
+    .feed-container .ordenar-pills .pill-orden.active .pill-orden-label { color: #16151a; font-weight: 700; }
+    .feed-container .ordenar-pills .pill-orden.active::after { background: var(--fcd-rojo); }
+    .feed-container #ordenarPillsSerie .pill-orden.active::after { background: var(--fcd-azul); }
+}
+
+/* ====================================================================================================================
+   Sin carrusel destacado a la vista (por ejemplo, mientras se muestran resultados de una búsqueda del asistente): el
+   JS oculta los dos #destacadaContainer*. Entonces Misión / Voto Relámpago / Trivia no se quedan solos en una columna
+   angosta: pasan a una fila a todo el ancho.
+   ==================================================================================================================== */
+@media (min-width: 769px) {
+    .fcd-escena:has(#destacadaContainer:is([style*="display:none"], [style*="display: none"])):has(#destacadaContainerSerie:is([style*="display:none"], [style*="display: none"])) {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
+    }
+    .fcd-escena:has(#destacadaContainer:is([style*="display:none"], [style*="display: none"])):has(#destacadaContainerSerie:is([style*="display:none"], [style*="display: none"])) .fcd-escena-lateral {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        align-items: stretch;
+        margin-top: 14px;
+        min-height: 0;
+    }
+    .fcd-escena:has(#destacadaContainer:is([style*="display:none"], [style*="display: none"])):has(#destacadaContainerSerie:is([style*="display:none"], [style*="display: none"])) .fcd-escena-lateral .fcd-vr { min-height: 0; }
+}
+
+/* ====================================================================================================================
+   Pantallas medianas de escritorio (769–1100 px): el lateral baja debajo del carrusel, en fila.
+   ==================================================================================================================== */
+@media (min-width: 769px) and (max-width: 1100px) {
+    .fcd-hero { padding: 28px 28px 26px; }
+    .fcd-hero-cabecera { gap: 24px; }
+    .fcd-sub { max-width: 340px; font-size: 0.92rem; }
+    .fcd-escena { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    .fcd-escena-lateral {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        align-items: start;
+        margin-top: 0;
+        min-height: 0;
+    }
+    .fcd-escena-lateral .fcd-vr { min-height: 0; }
+    .fcd-escena-principal .destacada-titulo { max-width: 80%; }
+    .feed-container { --fcd-alto-destacada: 380px; }
+}
+/* Por debajo de 900 px los accesos pasan a 2 columnas. */
+@media (min-width: 769px) and (max-width: 899px) {
+    .fcd-accesos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Pantallas bajas (notebooks): hero más compacto para que el carrusel entre en la primera pantalla. */
+@media (min-width: 1101px) and (max-height: 800px) {
+    .fcd-hero { padding: 26px 36px 24px; }
+    .fcd-acceso-sub { display: none; }
+    .feed-container { --fcd-alto-destacada: 400px; }
+}
+
+/* ====================================================================================================================
+   FONDO DE PÓSTERS en los laterales (lo arma js/feed-muro.js). Solo desde 1280 px de ancho: antes no hay laterales libres.
+   Dos muros inclinados (izquierdo y derecho), con el halo rojo y azul de los lentes 3D, que se disuelven en el color de la
+   página hacia el centro. Van DETRÁS de todo (z-index -1) y el contenido del feed no se mueve ni un píxel.
+   ==================================================================================================================== */
+.fcd-muro { display: none; }
+@media (min-width: 1280px) {
+    /* Ancho de cada lateral: lo que sobra a cada lado del contenido (1200 px) más 70 px que se meten por debajo, ya
+       disueltos; máximo 520. */
+    :root { --fcd-lado: min(520px, calc((100vw - 1200px) / 2 + 70px)); }
+    .fcd-muro {
+        display: block;
+        position: fixed;
+        left: 0; top: 0; right: 0; bottom: 0;
+        z-index: -1;
+        pointer-events: none;
+    }
+    .fcd-muro-lado {
+        position: absolute;
+        top: 0; bottom: 0;
+        width: var(--fcd-lado);
+        overflow: hidden;
+    }
+    .fcd-muro-izq { left: 0; }
+    .fcd-muro-der { right: 0; }
+    .fcd-muro-inner {
+        position: absolute;
+        top: calc(50% - 520px);
+        width: 480px;
+        height: 1040px;
+        transform-origin: 50% 50%;
+        filter: drop-shadow(-4px 0 0 rgba(229, 9, 20, 0.55)) drop-shadow(4px 0 0 rgba(0, 120, 255, 0.55));
+        animation: fcdMuroEntrada 0.6s ease both;
+    }
+    .fcd-muro-izq .fcd-muro-inner { left: -130px; transform: rotate(-10deg) scale(var(--fcd-escala, 1)); }
+    .fcd-muro-der .fcd-muro-inner { right: -130px; transform: rotate(10deg) scale(var(--fcd-escala, 1)); }
+    .fcd-liviano .fcd-muro-inner { filter: none; }
+    @keyframes fcdMuroEntrada { from { opacity: 0; } to { opacity: 1; } }
+
+    /* El blanco degradé: transparente en el borde de la pantalla y del color de la página hacia el contenido. */
+    .fcd-muro-lado::after {
+        content: "";
+        position: absolute;
+        left: 0; top: 0; right: 0; bottom: 0;
+        pointer-events: none;
+    }
+    .fcd-muro-izq::after {
+        background: linear-gradient(90deg, rgba(245, 245, 241, 0) 0%, rgba(245, 245, 241, 0.35) 38%, rgba(245, 245, 241, 0.86) 72%, #f5f5f1 96%);
+    }
+    .fcd-muro-der::after {
+        background: linear-gradient(270deg, rgba(245, 245, 241, 0) 0%, rgba(245, 245, 241, 0.35) 38%, rgba(245, 245, 241, 0.86) 72%, #f5f5f1 96%);
+    }
+
+    .fcd-poster {
+        position: absolute;
+        width: 140px;
+        height: 210px;
+        overflow: hidden;
+        border-radius: 8px;
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3);
+    }
+    .fcd-poster-titulo {
+        position: absolute;
+        left: 10px; right: 10px; bottom: 14px;
+        font: 700 14px/1.05 'Space Grotesk', system-ui, sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #fff;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+    .fcd-poster img {
+        position: absolute;
+        left: 0; top: 0;
+        width: 100%; height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 0.45s ease;
+    }
+    .fcd-poster img.fcd-ok { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .fcd-muro-inner { animation: none; }
+    .fcd-poster img { transition: none; }
+}
+
+/* ====================================================================================================================
+   ASISTENTE FLOTANTE (lo arma js/feed-asistente.js): el lente rojo del asistente en la esquina inferior derecha, igual que
+   el botón «Asistente» de la barra inferior en mobile. Aparece solo en Inicio. Al scrollear, «habla» con una viñeta.
+   ==================================================================================================================== */
+.fcd-fab { display: none; }
+@media (min-width: 769px) {
+    .fcd-fab {
+        display: block;
+        position: fixed;
+        right: 28px;
+        bottom: 28px;
+        z-index: 900;
+        width: 64px;
+        height: 64px;
+        padding: 0;
+        border: 0;
+        background: none;
+        cursor: pointer;
+        font-family: inherit;
+    }
+    .fcd-fab-circulo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #f0553f, #c4321f);
+        color: #fff;
+        font-size: 1.65rem;
+        box-shadow: 0 10px 24px rgba(196, 50, 31, 0.45), 0 3px 8px rgba(0, 0, 0, 0.18);
+        transition: transform 0.18s ease;
+        animation: fcdFabAura 3.4s ease-out 1.5s infinite;
+    }
+    .fcd-fab-circulo i { color: #fff; }
+    .fcd-fab:hover .fcd-fab-circulo { transform: scale(1.07); }
+    .fcd-fab:active .fcd-fab-circulo { transform: scale(0.94); }
+    .fcd-fab:focus-visible { outline: none; }
+    .fcd-fab:focus-visible .fcd-fab-circulo { outline: 3px solid rgba(0, 79, 155, 0.5); outline-offset: 3px; }
+    @keyframes fcdFabAura {
+        0%   { box-shadow: 0 10px 24px rgba(196, 50, 31, 0.45), 0 3px 8px rgba(0, 0, 0, 0.18), 0 0 0 0 rgba(240, 85, 63, 0.45); }
+        65%, 100% { box-shadow: 0 10px 24px rgba(196, 50, 31, 0.45), 0 3px 8px rgba(0, 0, 0, 0.18), 0 0 0 18px rgba(240, 85, 63, 0); }
+    }
+
+    /* Viñeta: a la izquierda del botón, con la colita apuntándole. */
+    .fcd-fab-vineta {
+        position: absolute;
+        right: calc(100% + 16px);
+        top: 50%;
+        opacity: 0;
+        pointer-events: none;
+        transform: translate(8px, -50%) scale(0.92);
+        transform-origin: right center;
+        transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    .fcd-fab-vineta.visible,
+    .fcd-fab:hover .fcd-fab-vineta,
+    .fcd-fab:focus-visible .fcd-fab-vineta { opacity: 1; transform: translate(0, -50%) scale(1); }
+    .fcd-fab-vineta-inner {
+        position: relative;
+        display: block;
+        padding: 0.7rem 1.1rem;
+        border-radius: 18px;
+        background: #fff;
+        color: var(--fcd-marino);
+        font: 700 0.92rem/1.2 'Space Grotesk', system-ui, sans-serif;
+        white-space: nowrap;
+        box-shadow: 0 10px 24px rgba(22, 38, 77, 0.22), 0 2px 6px rgba(22, 38, 77, 0.08);
+    }
+    .fcd-fab-vineta-inner::after {
+        content: "";
+        position: absolute;
+        right: -9px;
+        top: 50%;
+        width: 0;
+        height: 0;
+        margin-top: -8px;
+        border-top: 8px solid transparent;
+        border-bottom: 8px solid transparent;
+        border-left: 10px solid #fff;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .fcd-fab-circulo { animation: none; transition: none; }
+    .fcd-fab-vineta { transition: none; }
+}
+
+/* ====================================================================================================================
+   FONDO DE PÓSTERS también en Mi Sala (escritorio, desde 1280 px). Va al FINAL de feed-cine-desktop.css, después de la
+   sección «FONDO DE PÓSTERS». Mi Sala tiene el contenido más angosto que el feed (1100 px en vez de 1200), así que los
+   laterales son 50 px más anchos; y en modo oscuro el degradé se disuelve en el color oscuro de la página, no en el claro.
+   ==================================================================================================================== */
+@media (min-width: 1280px) {
+    :root:has(#perfilContenido) { --fcd-lado: min(520px, calc((100vw - 1100px) / 2 + 70px)); }
+
+    /* Modo oscuro: la página pasa a ser oscura en TODO el ancho (antes solo el contenedor del módulo), para que el muro se vea sobre ella. */
+    body:has(.perfil-card.modo-oscuro) { background: #0f1117; }
+    body #module-container:has(.perfil-card.modo-oscuro) { background: transparent !important; }
+    body:has(.perfil-card.modo-oscuro) .fcd-muro-izq::after {
+        background: linear-gradient(90deg, rgba(15, 17, 23, 0.05) 0%, rgba(15, 17, 23, 0.45) 38%, rgba(15, 17, 23, 0.9) 72%, #0f1117 96%);
+    }
+    body:has(.perfil-card.modo-oscuro) .fcd-muro-der::after {
+        background: linear-gradient(270deg, rgba(15, 17, 23, 0.05) 0%, rgba(15, 17, 23, 0.45) 38%, rgba(15, 17, 23, 0.9) 72%, #0f1117 96%);
+    }
+    body:has(.perfil-card.modo-oscuro) .fcd-poster { box-shadow: 0 10px 22px rgba(0, 0, 0, 0.6); }
+}
+
+@media (min-width: 1280px) {
+    :root:has(#cuentaPremiumPanel) { --fcd-lado: min(520px, calc((100vw - 860px) / 2 + 70px)); }
+}
+
+@media (min-width: 1280px) {
+    :root:has(#faqLista) { --fcd-lado: min(520px, calc((100vw - 860px) / 2 + 70px)); }
+}
+
+@media (min-width: 1280px) {
+    :root:has(#bandejaPanelMensajes) { --fcd-lado: min(520px, calc((100vw - 860px) / 2 + 70px)); }
+}
+
+@media (min-width: 1280px) {
+    :root:has(#clubGridFree) { --fcd-lado: min(520px, calc((100vw - 1040px) / 2 + 70px)); }
+}

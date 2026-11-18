@@ -584,6 +584,16 @@
 
         // — Sin slide de póster (Organizar una salida): solo las funciones, sin puntitos ni "‹ Póster"
         '.cm-sheet.cm-solo-funciones .cm-slide-poster, .cm-sheet.cm-solo-funciones .cm-puntos, .cm-sheet.cm-solo-funciones .cm-volver { display: none; }',
+        // — Escritorio: el slide del póster se ajusta al alto de la ventana (sin scroll) y no se ve la barra de scroll
+        '@media (min-width: 769px) {',
+        '.cm-overlay .cm-sheet { max-width: 480px; height: min(90vh, 780px); }',
+        '.cm-overlay .cm-slide { scrollbar-width: none; }',
+        '.cm-overlay .cm-slide::-webkit-scrollbar { display: none; }',
+        '.cm-overlay .cm-slide-poster { overflow: hidden; padding: 52px 28px 56px; }',
+        '.cm-overlay .cm-poster-wrap { height: 100%; min-height: 0; margin: 0 auto; justify-content: center; gap: 12px; }',
+        '.cm-overlay .cm-poster-wrap > * { flex: 0 0 auto; }',
+        '.cm-overlay .cm-poster-wrap > .cm-poster, .cm-overlay .cm-poster-wrap > .cm-poster-vacio { flex: 1 1 0; min-height: 0; width: auto; height: auto; max-width: 100%; max-height: 380px; }',
+        '}',
         '.cm-sheet.cm-solo-funciones .cm-slide-funciones { padding-bottom: 24px; }'
     ].join('\n');
 

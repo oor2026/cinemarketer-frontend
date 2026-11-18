@@ -42,6 +42,7 @@
         <link rel="stylesheet" href="css/ads.css">
         <link rel="stylesheet" href="css/emoji-picker.css">
         <link rel="stylesheet" href="css/bottom-nav.css">
+        <link rel="stylesheet" href="css/feed-cine-desktop.css?v=3">
 
         <!-- SCRIPTS -->
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
@@ -58,10 +59,12 @@
         <script src="js/modal-hero.js?v=20261107"></script>
         <script src="js/cards-poster.js?v=20261107"></script>
         <script src="js/cartelera-precio.js?v=1"></script>
-        <script src="js/cartelera-modal.js?v=20261012"></script>
+        <script src="js/cartelera-modal.js?v=2026103"></script>
         <script src="js/vendor/qrcode.js"></script>
         <script src="js/credencial.js?v=1"></script>
         <script src="js/feed-films.js?v=20261109"></script>
+        <script src="js/feed-muro.js?v=6"></script>
+        <script src="js/feed-asistente.js?v=1"></script>
         <script src="js/atras-modal.js?v=5"></script>
         <script src="js/toast.js"></script>
         <script src="js/levelup.js"></script>
@@ -121,6 +124,7 @@
             </button>
             <ul class="nav-menu" id="dashNavMenu">
                 <li class="nav-desk-inicio"><a class="nav-link" href="#feed-films" title="Ver películas"><i class="fas fa-home"></i><span class="nav-text nav-text-solo-desktop">Inicio</span></a></li>
+                <li class="hamburguesa-duplicado-mobile nav-desk-cartelera"><a class="nav-link" href="#cartelera" title="Cartelera"><i class="fas fa-film"></i><span class="nav-text">Cartelera</span></a></li>
                 <li class="nav-user-profile">
                     <div class="user-profile-mini" onclick="window.abrirModalProgresoHeader()" style="cursor:pointer;">
                         <div class="user-avatar-mini" id="headerAvatar"><i class="fas fa-user avatar-placeholder" aria-hidden="true"></i></div>
@@ -1424,7 +1428,7 @@ viene del backend, hasta que decidamos cómo presentarlo. -->
     <script src="js/feed-series.js?v=20261108"></script>
     <script src="js/main.js"></script>
     <script src="js/header-nav.js"></script>
-    <script src="js/misiones.js?v=20261114"></script>
+    <script src="js/misiones.js?v=20261116"></script>
     <script src="js/puntos-historial.js?v=20261112"></script>
     <script src="js/feed-nav.js?v=20261109"></script>
     <script src="js/header-desktop.js"></script>

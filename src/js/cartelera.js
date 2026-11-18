@@ -29,6 +29,7 @@ window.init_cartelera = async function(opciones) {
     const cont = document.getElementById('carteleraCercaResultado');
     if (!cont) return;
     carteleraIniciarCarruselAccesos();
+    carteleraIniciarNavAccesos();
     const esRefresco = !!(opciones && opciones.refresco);
     window._carteleraUltimaCarga = Date.now();
     carteleraProgramarRefresco();
@@ -273,7 +274,7 @@ function carteleraProgramarRefresco() {
 
 // Cuántas tarjetas se ven a la vez en "Hoy cerca tuyo"; si hay más, se pasan con el carrusel.
 // (var y no const: este archivo se vuelve a ejecutar entero en cada visita a Cartelera.)
-var TARJETAS_POR_PAGINA = 5;
+var TARJETAS_POR_PAGINA = (window.matchMedia && window.matchMedia('(min-width: 1000px)').matches) ? 6 : 5;
 
 // Estilos del carrusel. Se inyectan una sola vez; los de las tarjetas siguen en cartelera.html.
 function carteleraInyectarEstilos() {
@@ -422,6 +423,59 @@ function carteleraIniciarCarruselAccesos() {
         const indice = Math.round(track.scrollLeft / Math.max(1, track.clientWidth));
         puntos.forEach(function (punto, n) { punto.classList.toggle('activo', n === indice); });
     }, { passive: true });
+}
+
+// Escritorio: flechas y puntos del carrusel de atajos (una "página" es lo que entra en pantalla: 4, 3 o 2 atajos).
+// En mobile las flechas y los puntos de este carrusel no se ven; ahí manda carteleraIniciarCarruselAccesos.
+function carteleraIniciarNavAccesos() {
+    const track = document.getElementById('carteleraAccesosTrack');
+    const puntos = document.getElementById('carteleraAccesosPuntos');
+    const botones = document.querySelectorAll('#carteleraContainer .cart-flecha');
+    if (!track || !puntos || track.dataset.navListo) return;
+    track.dataset.navListo = '1';
+    const ESPACIO = 16; // el gap de .cartelera-accesos-track en escritorio
+    let paginas = 0;
+
+    const maximo = () => track.scrollWidth - track.clientWidth;
+    const paginaActual = () => {
+        if (maximo() <= 2) return 0;
+        if (track.scrollLeft >= maximo() - 2) return paginas - 1;
+        return Math.min(paginas - 1, Math.round(track.scrollLeft / (track.clientWidth + ESPACIO)));
+    };
+    const irA = (n) => {
+        n = Math.max(0, Math.min(paginas - 1, n));
+        const x = Math.min(n * (track.clientWidth + ESPACIO), maximo());
+        if (typeof track.scrollTo === 'function') track.scrollTo({ left: x, behavior: 'smooth' });
+        else track.scrollLeft = x;
+    };
+    const actualizar = () => {
+        const p = paginaActual();
+        puntos.querySelectorAll('button').forEach((b, i) => b.classList.toggle('activo', i === p));
+        if (botones[0]) botones[0].disabled = p <= 0;
+        if (botones[1]) botones[1].disabled = p >= paginas - 1;
+    };
+    const dibujar = () => {
+        const n = Math.max(1, Math.ceil((track.scrollWidth + ESPACIO - 2) / (track.clientWidth + ESPACIO)));
+        if (n !== paginas) {
+            paginas = n;
+            puntos.innerHTML = Array.from({ length: n }, (_, i) => '<button type="button" aria-label="Ir al grupo ' + (i + 1) + ' de atajos"></button>').join('');
+        }
+        // Si todo entra en una sola vista, no hacen falta ni flechas ni puntos.
+        const sobra = paginas <= 1;
+        puntos.style.display = sobra ? 'none' : '';
+        if (botones[0] && botones[0].parentNode) botones[0].parentNode.style.display = sobra ? 'none' : '';
+        actualizar();
+    };
+
+    track.addEventListener('scroll', actualizar, { passive: true });
+    puntos.addEventListener('click', (e) => {
+        const todos = Array.from(puntos.querySelectorAll('button'));
+        const i = todos.indexOf(e.target.closest('button'));
+        if (i >= 0) irA(i);
+    });
+    botones.forEach((b) => b.addEventListener('click', () => irA(paginaActual() + Number(b.dataset.paso))));
+    if (typeof ResizeObserver === 'function') new ResizeObserver(dibujar).observe(track);
+    dibujar();
 }
 
 // Aviso chico y temporal para los atajos que todavía no están listos.

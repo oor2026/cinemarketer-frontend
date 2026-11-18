@@ -1,144 +1,351 @@
 <div class="feed-container" id="carteleraContainer">
     <style>
-        .cartelera-titulo-mobile { display: none; }
-        .cartelera-subtitulo-mobile { display: none; }
-        .cartelera-aviso-orientativo { margin-top: 8px; font-size: 0.72rem; line-height: 1.4; color: #6b6b6b; }
-        .cartelera-grid { display: none; }
-        .cartelera-cerca-seccion { display: none; }
+        /* Solo escritorio: en mobile no se ven. */
+        .cart-flechas, .cart-puntos { display: none; }
+
+        /* ====== COMPARTIDO (mobile y escritorio): tarjetas de atajo y entradas ====== */
+        /* Cada atajo es una "foto": un fondo oscuro con luz de color. Para ponerle una foto real a uno solo,
+           se agrega al botón style="--foto: url('assets/images/cartelera/lo-que-sea.jpg')". */
+        .cat-card { position: relative; isolation: isolate; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 6px;
+            min-height: 104px; padding: 14px 8px 14px 16px; border: 0; border-radius: 20px; cursor: pointer; font-family: inherit; text-align: left; color: #fff;
+            box-shadow: 0 12px 20px -8px rgba(60, 15, 8, 0.45); -webkit-tap-highlight-color: transparent; transition: transform 0.12s ease; }
+        .cat-card:active { transform: scale(0.985); }
+        .cat-card:focus-visible { outline: 2px solid #c4321f; outline-offset: 2px; }
+        .cat-card::before { content: ""; position: absolute; inset: 0; z-index: -2;
+            background: var(--foto, none) center / cover no-repeat, var(--luz), linear-gradient(100deg, #16090c, #2a0f12); }
+        .cat-card::after { content: ""; position: absolute; inset: 0; z-index: -1;
+            background: linear-gradient(90deg, rgba(18, 8, 10, 0.66) 0%, rgba(30, 12, 12, 0.34) 58%, rgba(20, 8, 8, 0) 100%); }
+        .cat-card[style*="--foto"]::after { background: linear-gradient(90deg, rgba(18, 8, 10, 0.88) 0%, rgba(40, 14, 14, 0.62) 55%, rgba(196, 50, 31, 0.30) 100%); }
+        .cat-rojo  { --luz: radial-gradient(85% 190% at 96% 0%, rgba(240, 85, 63, 0.95), rgba(240, 85, 63, 0) 62%), radial-gradient(55% 110% at 6% 120%, rgba(130, 20, 25, 0.95), rgba(130, 20, 25, 0) 70%); --kicker: #ffb4a5; }
+        .cat-azul  { --luz: radial-gradient(85% 190% at 96% 0%, rgba(66, 118, 230, 0.95), rgba(66, 118, 230, 0) 62%), radial-gradient(55% 110% at 6% 120%, rgba(22, 38, 77, 1), rgba(22, 38, 77, 0) 70%); --kicker: #a9c6ff; }
+        .cat-ambar { --luz: radial-gradient(85% 190% at 96% 0%, rgba(244, 172, 20, 0.90), rgba(244, 172, 20, 0) 62%), radial-gradient(55% 110% at 6% 120%, rgba(150, 40, 20, 0.95), rgba(150, 40, 20, 0) 70%); --kicker: #ffd98a; }
+        .cat-vino  { --luz: radial-gradient(85% 190% at 96% 0%, rgba(176, 70, 176, 0.90), rgba(176, 70, 176, 0) 62%), radial-gradient(55% 110% at 6% 120%, rgba(70, 15, 50, 1), rgba(70, 15, 50, 0) 70%); --kicker: #f1b8f1; }
+        .cat-textos { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+        .cat-k { font-size: 9.5px; font-weight: 700; letter-spacing: 0.15em; color: var(--kicker, #ffb4a5); }
+        .cat-t { margin-top: 5px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 17px; line-height: 1.12; letter-spacing: -0.01em; color: #fff; }
+        .cat-s { margin-top: 4px; font-size: 11.5px; line-height: 1.3; color: rgba(255, 255, 255, 0.78); }
+        .cat-ico { position: relative; flex: none; width: 76px; height: 76px; display: flex; align-items: center; justify-content: center; }
+        .cat-ico::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0) 68%); }
+        .cat-ico img { position: relative; width: 62px; height: 62px; filter: drop-shadow(0 8px 9px rgba(0, 0, 0, 0.45)); }
+        .cat-ico i { position: relative; font-size: 2rem; color: #fff; }
+        .cat-ico i[hidden] { display: none; }
+        .cartelera-cerca-titulo { position: relative; display: flex; align-items: center; gap: 8px; margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 22px; line-height: 1.1; letter-spacing: -0.015em;
+            background: none; -webkit-background-clip: initial; background-clip: initial; -webkit-text-fill-color: currentColor; color: #16151a; }
+        .cartelera-cerca-titulo::after { display: none; }
+        .cartelera-cerca-titulo b { width: 8px; height: 8px; border-radius: 50%; background: #f0553f; box-shadow: 0 0 0 4px rgba(240, 85, 63, 0.18); }
+        .cartelera-cerca-vacio { font-size: 0.85rem; color: #8a8478; background: #fff; border-radius: 16px; padding: 1.2rem; box-shadow: 0 8px 20px -6px rgba(20, 20, 20, 0.10), 0 1px 3px rgba(20, 20, 20, 0.05); text-align: center; }
+        /* La tarjeta es una entrada: póster, datos y, si hay precio, un talón separado por una línea punteada y dos muescas.
+           El HTML lo arma cartelera.js sin cambios: .cartelera-cerca-info se "disuelve" (display: contents) para que sus
+           partes entren en la grilla de la tarjeta. */
+        .cartelera-cerca-card { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-rows: auto auto auto 1fr; align-content: start; column-gap: 0;
+            box-sizing: border-box; margin-bottom: 12px; padding: 13px 0 13px 12px; background: #fff; border: 1px solid rgba(22, 38, 77, 0.06); border-radius: 18px;
+            box-shadow: 0 10px 22px -10px rgba(22, 38, 77, 0.28), 0 2px 5px rgba(22, 38, 77, 0.06); }
+        .cartelera-cerca-info { display: contents; }
+        .cartelera-cerca-poster { grid-column: 1; grid-row: 1 / span 4; width: 62px; height: 92px; margin-right: 11px; border-radius: 8px; object-fit: cover; background: #eee; box-shadow: 0 6px 12px -4px rgba(0, 0, 0, 0.35); }
+        .cartelera-cerca-pelicula { grid-column: 2; grid-row: 1; padding-right: 10px; font-size: 14.5px; font-weight: 700; line-height: 1.2; letter-spacing: -0.005em; color: #16151a; }
+        .cartelera-cerca-cine { grid-column: 2; grid-row: 2; padding-right: 10px; margin-top: 3px; font-size: 12px; line-height: 1.3; font-weight: 600; color: #5f5a51; }
+        .cartelera-cerca-dist { white-space: nowrap; font-weight: 400; color: #8a8478; font-size: 11px; }
+        .cartelera-cerca-horarios { grid-column: 2; grid-row: 3; padding-right: 10px; display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+        .cartelera-cerca-horario { font-size: 11px; font-weight: 700; color: #16264d; background: rgba(22, 38, 77, 0.08); border-radius: 8px; padding: 3px 7px; font-variant-numeric: tabular-nums; }
+        .cartelera-cerca-horario.cartelera-cerca-mas { color: #8a8478; background: rgba(22, 38, 77, 0.04); }
+        /* Sin precio no hay talón: queda la flecha de antes. */
+        .cartelera-cerca-card:not(:has(.cp-resumen)) :is(.cartelera-cerca-pelicula, .cartelera-cerca-cine, .cartelera-cerca-horarios) { padding-right: 26px; }
+        .cartelera-cerca-card:has(.cp-resumen) .cm-flecha { display: none; }
+        /* El talón: el precio que arma cartelera-precio.js. */
+        .cartelera-cerca-card .cp-resumen { grid-column: 3; grid-row: 1 / -1; align-self: stretch; box-sizing: border-box; width: var(--talon, 92px); margin: -13px 0; padding: 10px 8px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; flex-wrap: nowrap; gap: 2px; text-align: center; border-left: 2px dashed rgba(22, 38, 77, 0.20); }
+        .cartelera-cerca-card .cp-tachado { font-size: 10.5px; color: #b0a99c; }
+        .cartelera-cerca-card .cp-desde { font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #8a8478; }
+        .cartelera-cerca-card .cp-monto { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 20px; line-height: 1.05; letter-spacing: -0.02em; color: #16264d; }
+        .cartelera-cerca-card .cp-cu { font-size: 10px; color: #8a8478; }
+        .cartelera-cerca-card .cp-tag { margin-top: 6px; font-size: 10px; white-space: nowrap; border-radius: 6px; padding: 2px 7px; }
+        /* Las dos muescas de la entrada, justo donde cruza la línea punteada. */
+        .cartelera-cerca-card:has(.cp-resumen)::before,
+        .cartelera-cerca-card:has(.cp-resumen)::after { content: ""; position: absolute; left: calc(100% - var(--talon, 92px) - 8px); width: 18px; height: 18px; box-sizing: border-box; border-radius: 50%; background: #fff; border: 1px solid rgba(22, 38, 77, 0.10); z-index: 2; pointer-events: none; }
+        .cartelera-cerca-card:has(.cp-resumen)::before { top: -10px; clip-path: inset(50% 0 0 0); }
+        .cartelera-cerca-card:has(.cp-resumen)::after { bottom: -10px; clip-path: inset(0 0 50% 0); }
+
+        /* ====== MOBILE ====== */
         @media (max-width: 768px) {
             #carteleraContainer { background: #ffffff; padding: 0 1.1rem 2rem; min-height: 100vh; box-sizing: border-box; }
-            .cartelera-grid { display: block; margin-bottom: 1.75rem; }
-            .cartelera-accesos-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 14px 0 22px; margin: -14px 0 -22px; }
+            /* ---------- CABECERA: marquesina ---------- */
+            .cart-hero { display: block; position: relative; overflow: hidden; margin: 0 -1.1rem; padding: 14px 1.1rem 6px;
+                background:
+                    radial-gradient(120% 85% at 100% 0%, rgba(240,85,63,0.17), rgba(240,85,63,0) 62%),
+                    radial-gradient(90% 70% at 0% 0%, rgba(196,50,31,0.10), rgba(196,50,31,0) 66%),
+                    #fff; }
+            .cart-hero-marca { position: absolute; right: -14px; top: 18px; font-size: 140px; line-height: 1; color: rgba(196,50,31,0.07); transform: rotate(-14deg); pointer-events: none; }
+            .cart-bulbs { position: relative; display: flex; justify-content: space-between; padding: 0 2px; margin-bottom: 16px; }
+            .cart-bulbs i { width: 5px; height: 5px; border-radius: 50%; background: #f0553f; opacity: 0.6; box-shadow: 0 0 7px rgba(240,85,63,0.7); }
+            .cart-bulbs i:nth-child(even) { opacity: 0.22; box-shadow: none; }
+            .cart-eyebrow { position: relative; display: flex; align-items: center; gap: 7px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.16em; color: #c4321f; }
+            .cart-eyebrow b { width: 7px; height: 7px; border-radius: 50%; background: #f0553f; box-shadow: 0 0 0 4px rgba(240,85,63,0.18); }
+            .cart-titulo { position: relative; margin: 6px 0 0; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 46px; line-height: 1.02; letter-spacing: -0.025em;
+                background: linear-gradient(100deg, #e24a33 0%, #b3281a 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+            .cart-sub { position: relative; margin-top: 6px; font-size: 15.5px; font-weight: 700; color: #16151a; letter-spacing: -0.005em; }
+            .cartelera-aviso-orientativo { position: relative; display: flex; gap: 7px; margin-top: 12px; font-size: 10.5px; line-height: 1.4; color: #8a8478; }
+            .cartelera-aviso-orientativo i { margin-top: 2px; color: #c9bfb2; }
+            /* ---------- ATAJOS: carrusel de a 2 ---------- */
+            .cartelera-grid { display: block; margin: 14px 0 1.4rem; }
+            .cartelera-accesos-titulo { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 17px; color: #16151a; margin-bottom: 8px; }
+            .cartelera-accesos-track { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 6px 0 26px; margin: -6px 0 -26px; }
             .cartelera-accesos-track::-webkit-scrollbar { display: none; }
-            .cartelera-accesos-slide { flex: 0 0 100%; scroll-snap-align: start; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-            .cartelera-accesos-dots { display: flex; justify-content: center; gap: 6px; margin-top: 10px; }
-            .cartelera-accesos-dots span { width: 6px; height: 6px; border-radius: 50%; background: #d9d9d2; display: block; }
-            .cartelera-accesos-dots span.activo { background: #e50914; }
-            .cartelera-card { position: relative; overflow: hidden; box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px; background: #fff; border: none; border-radius: 18px; cursor: pointer; font-family: inherit; text-align: left; box-shadow: 0 10px 26px -6px rgba(20,20,20,0.16), 0 2px 5px rgba(20,20,20,0.07); }
-            .cartelera-decor { position: absolute; right: -8px; bottom: -4px; font-size: 3.4rem; opacity: 0.10; pointer-events: none; }
-            .cartelera-decor.tono-rojo { color: #c4321f; }
-            .cartelera-decor.tono-marino { color: #16264d; }
-            .cartelera-flecha { position: absolute; top: 35px; right: 14px; transform: translateY(-50%); color: #c9c4b8; font-size: 0.8rem; }
-            .cartelera-icono { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-            .cartelera-icono.tono-rojo { background: linear-gradient(135deg,#f0553f,#c4321f); box-shadow: 0 3px 10px rgba(196,50,31,0.3); }
-            .cartelera-icono.tono-marino { background: linear-gradient(135deg,#243b72,#16264d); box-shadow: 0 3px 10px rgba(22,38,77,0.3); }
-            .cartelera-icono i { color: #fff !important; font-size: 1rem; }
-            .cartelera-card-titulo { font-size: 13.5px; font-weight: 700; line-height: 1.25; color: #16151a; }
-            .cartelera-card-sub { font-size: 11.5px; color: #8a8478; margin-top: 2px; }
-            .cartelera-cerca-seccion { display: block; background: linear-gradient(160deg, rgba(196,50,31,0.06), rgba(22,38,77,0.06)); border-radius: 22px; padding: 1.1rem 1rem 1.2rem; margin: 0 -0.1rem; }
-            .cartelera-cerca-titulo { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 800; margin-bottom: 1.1rem; background: none; -webkit-background-clip: initial; background-clip: initial; -webkit-text-fill-color: #c4321f; color: #c4321f; position: relative; }
-            .cartelera-cerca-titulo::after { content: ''; position: absolute; left: 0; bottom: 0; width: 46px; height: 3px; border-radius: 2px; background: linear-gradient(100deg,#c4321f 0%,#16264d 100%); }
-            .cartelera-cerca-vacio { font-size: 0.85rem; color: #8a8478; background: #fff; border-radius: 16px; padding: 1.2rem; box-shadow: 0 8px 20px -6px rgba(20,20,20,0.10), 0 1px 3px rgba(20,20,20,0.05); text-align: center; }
-            .cartelera-cerca-card { display: flex; gap: 12px; background: #fff; border-radius: 16px; padding: 12px; margin-bottom: 10px; box-shadow: 0 10px 22px -8px rgba(22,38,77,0.18), 0 2px 5px rgba(196,50,31,0.08); }
-            .cartelera-cerca-poster { width: 64px; height: 94px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: #eee; }
-            .cartelera-cerca-info { flex: 1; min-width: 0; }
-            .cartelera-cerca-pelicula { font-size: 13.5px; font-weight: 700; color: #16151a; line-height: 1.25; }
-            .cartelera-cerca-cine { font-size: 11.5px; color: #8a8478; margin-top: 2px; }
-            .cartelera-cerca-dist { white-space: nowrap; }
-            .cartelera-cerca-horarios { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-            .cartelera-cerca-horario { font-size: 11px; font-weight: 700; color: #16264d; background: rgba(22,38,77,0.08); border-radius: 8px; padding: 3px 8px; }
-            .cartelera-cerca-horario.cartelera-cerca-mas { color: #8a8478; background: rgba(22,38,77,0.04); }
+            /* Cada slide es un poco más angosto que la pantalla: asoma el siguiente y se entiende que se desliza. */
+            .cartelera-accesos-slide { flex: 0 0 calc(100% - 28px); scroll-snap-align: start; display: grid; grid-auto-rows: 1fr; gap: 10px; }
+            .cartelera-accesos-dots { display: flex; justify-content: center; gap: 6px; margin-top: 12px; }
+            .cartelera-accesos-dots span { width: 6px; height: 6px; border-radius: 3px; background: #e3dcd3; display: block; transition: width 0.2s ease, background 0.2s ease; }
+            .cartelera-accesos-dots span.activo { width: 20px; background: linear-gradient(135deg, #f0553f, #c4321f); }
+            .cartelera-cerca-seccion { display: block; background: none; border-radius: 0; padding: 4px 0 0; margin: 0; }
+            .cart-hoy-h { margin-bottom: 12px; }
+            .cart-hoy-s { margin-top: 3px; font-size: 11.5px; color: #8a8478; }
+        }
+
+        /* ====== ESCRITORIO ====== */
+        @media (min-width: 769px) {
+            /* El fondo queda libre: en pantallas anchas se ve el muro de pósters (feed-muro.js). */
+            #carteleraContainer { padding: 0 1rem 3rem; }
+
+            /* ---------- CABECERA: marquesina ---------- */
+            .cart-hero { position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 340px); column-gap: 40px; align-items: end;
+                margin: 6px 0 34px; padding: 0 44px 34px; border-radius: 28px; border: 1px solid rgba(196, 50, 31, 0.10);
+                background:
+                    radial-gradient(70% 120% at 100% 0%, rgba(240, 85, 63, 0.20), rgba(240, 85, 63, 0) 62%),
+                    radial-gradient(60% 100% at 0% 100%, rgba(196, 50, 31, 0.08), rgba(196, 50, 31, 0) 66%),
+                    #fff;
+                box-shadow: 0 30px 50px -30px rgba(150, 35, 20, 0.45), 0 2px 8px rgba(60, 15, 8, 0.06); }
+            .cart-hero-marca { position: absolute; right: 410px; top: 46px; font-size: 190px; line-height: 1; color: rgba(196, 50, 31, 0.06); transform: rotate(-12deg); pointer-events: none; }
+            /* La fila de lamparitas de la marquesina: dos capas que se prenden y apagan en alternancia. */
+            .cart-bulbs { position: relative; grid-column: 1 / -1; height: 30px; margin: 0 -44px 26px; padding: 0; display: block;
+                background-image: radial-gradient(circle at 50% 50%, rgba(240, 85, 63, 1) 0 2.6px, rgba(240, 85, 63, 0.30) 3.2px, rgba(240, 85, 63, 0) 8px);
+                background-size: 28px 30px; background-position: 0 0; background-repeat: repeat-x;
+                border-bottom: 1px solid rgba(196, 50, 31, 0.10); background-color: rgba(196, 50, 31, 0.045); animation: cartLuzA 1.6s steps(1, end) infinite; }
+            .cart-bulbs::before { content: ""; position: absolute; inset: 0; pointer-events: none;
+                background-image: radial-gradient(circle at 50% 50%, rgba(240, 85, 63, 1) 0 2.6px, rgba(240, 85, 63, 0.30) 3.2px, rgba(240, 85, 63, 0) 8px);
+                background-size: 28px 30px; background-position: 14px 0; background-repeat: repeat-x; animation: cartLuzB 1.6s steps(1, end) infinite; }
+            .cart-bulbs i { display: none; }
+            @keyframes cartLuzA { 0% { opacity: 1; } 50% { opacity: 0.35; } }
+            @keyframes cartLuzB { 0% { opacity: 0.35; } 50% { opacity: 1; } }
+            .cart-eyebrow { position: relative; grid-column: 1; display: flex; align-items: center; gap: 9px; font-size: 12.5px; font-weight: 700; letter-spacing: 0.2em; color: #c4321f; }
+            .cart-eyebrow b { width: 9px; height: 9px; border-radius: 50%; background: #f0553f; box-shadow: 0 0 0 5px rgba(240, 85, 63, 0.18); }
+            .cart-titulo { position: relative; grid-column: 1; margin: 8px 0 0; padding-bottom: 6px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 76px; line-height: 1.02; letter-spacing: -0.03em;
+                background: linear-gradient(100deg, #e24a33 0%, #b3281a 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+            .cart-sub { position: relative; grid-column: 1; margin-top: 6px; font-size: 19px; font-weight: 700; color: #16151a; letter-spacing: -0.01em; }
+            /* El aviso legal pasa a ser una "nota al pie" con borde punteado, como el talón de una entrada. */
+            .cart-hero .cartelera-aviso-orientativo { position: relative; grid-column: 2; grid-row: 2 / 5; align-self: end; display: flex; gap: 9px; margin: 0; padding: 14px 16px;
+                font-size: 12px; line-height: 1.5; color: #7d766a; background: rgba(255, 255, 255, 0.72); border: 1.5px dashed rgba(196, 50, 31, 0.28); border-radius: 16px; }
+            .cart-hero .cartelera-aviso-orientativo i { margin-top: 3px; color: #c4321f; opacity: 0.7; }
+
+            /* ---------- ATAJOS: carrusel de a una ---------- */
+            .cartelera-grid { display: block; margin: 0 0 44px; }
+            .cartelera-accesos-cab { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+            .cartelera-accesos-titulo { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 26px; letter-spacing: -0.02em; color: #16151a; }
+            .cart-flechas { display: flex; gap: 10px; }
+            .cart-flecha { display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; padding: 0; border: 1px solid rgba(22, 38, 77, 0.08); border-radius: 50%; cursor: pointer; font-size: 0.85rem; color: #16264d; background: #fff;
+                box-shadow: 0 8px 16px -8px rgba(22, 38, 77, 0.35); transition: transform 0.12s ease, opacity 0.15s ease; }
+            .cart-flecha:hover:not(:disabled) { transform: translateY(-2px); color: #c4321f; }
+            .cart-flecha:disabled { opacity: 0.35; cursor: default; box-shadow: none; }
+            .cart-flecha:focus-visible { outline: 2px solid #c4321f; outline-offset: 2px; }
+            .cartelera-accesos-track { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 8px 0 32px; margin: -8px 0 -32px; }
+            .cartelera-accesos-track::-webkit-scrollbar { display: none; }
+            /* Los "slides" de a dos de mobile se disuelven: cada atajo es una tarjeta del carrusel. */
+            .cartelera-accesos-slide { display: contents; }
+            .cartelera-accesos-dots { display: none; }
+            .cart-puntos { display: flex; justify-content: center; gap: 8px; margin-top: 18px; }
+            .cart-puntos button { width: 8px; height: 8px; padding: 0; border: 0; border-radius: 4px; cursor: pointer; background: #e3dcd3; transition: width 0.2s ease, background 0.2s ease; }
+            .cart-puntos button.activo { width: 26px; background: linear-gradient(135deg, #f0553f, #c4321f); }
+
+            /* La tarjeta se da vuelta: el ícono arriba a la derecha, el texto abajo. */
+            .cat-card { flex: 0 0 calc((100% - 32px) / 3); scroll-snap-align: start; flex-direction: column; align-items: stretch; justify-content: space-between; gap: 10px;
+                min-height: 196px; padding: 16px 20px 20px; border-radius: 26px; transition: transform 0.18s ease, box-shadow 0.18s ease; }
+            .cat-card { box-shadow: 0 14px 18px -13px rgba(60, 15, 8, 0.55); }
+            .cat-card:hover { transform: translateY(-5px); box-shadow: 0 24px 32px -12px rgba(60, 15, 8, 0.55); }
+            .cat-card:active { transform: translateY(-2px) scale(0.99); }
+            .cat-card::after { background: linear-gradient(0deg, rgba(18, 8, 10, 0.80) 0%, rgba(30, 12, 12, 0.38) 52%, rgba(20, 8, 8, 0) 100%); }
+            .cat-card[style*="--foto"]::after { background: linear-gradient(0deg, rgba(18, 8, 10, 0.92) 0%, rgba(40, 14, 14, 0.62) 55%, rgba(196, 50, 31, 0.28) 100%); }
+            .cat-ico { order: -1; align-self: flex-end; width: 96px; height: 96px; margin-right: -6px; }
+            .cat-ico img { width: 80px; height: 80px; transition: transform 0.25s ease; }
+            .cat-card:hover .cat-ico img { transform: scale(1.1) rotate(-5deg); }
+            .cat-textos { flex: none; }
+            .cat-k { font-size: 11px; }
+            .cat-t { margin-top: 6px; font-size: 21px; }
+            .cat-s { margin-top: 6px; font-size: 13px; }
+
+            /* ---------- HOY CERCA TUYO: entradas ---------- */
+            .cartelera-cerca-seccion { display: block; background: none; border-radius: 0; padding: 0; margin: 0; }
+            .cart-hoy-h { margin-bottom: 18px; }
+            .cartelera-cerca-titulo { font-size: 30px; gap: 11px; }
+            .cartelera-cerca-titulo b { width: 10px; height: 10px; box-shadow: 0 0 0 5px rgba(240, 85, 63, 0.18); }
+            .cart-hoy-s { margin-top: 5px; font-size: 14px; }
+            .cartelera-cerca-vacio { font-size: 0.95rem; }
+            .cartelera-cerca-card { --talon: 118px; margin-bottom: 14px; padding: 16px 0 16px 16px; border-radius: 20px; cursor: pointer; transition: transform 0.18s ease, box-shadow 0.18s ease; }
+            .cartelera-cerca-card:hover { transform: translateY(-3px); box-shadow: 0 18px 28px -12px rgba(22, 38, 77, 0.34), 0 2px 6px rgba(22, 38, 77, 0.07); }
+            .cartelera-cerca-poster { width: 74px; height: 110px; margin-right: 14px; border-radius: 9px; }
+            .cartelera-cerca-pelicula { font-size: 17px; padding-right: 14px; }
+            .cartelera-cerca-cine { font-size: 13px; padding-right: 14px; margin-top: 4px; }
+            .cartelera-cerca-dist { font-size: 12px; }
+            .cartelera-cerca-horarios { padding-right: 14px; gap: 6px; margin-top: 10px; }
+            .cartelera-cerca-horario { font-size: 12px; padding: 4px 9px; }
+            .cartelera-cerca-card .cp-resumen { margin: -16px 0; padding: 12px 10px; }
+            .cartelera-cerca-card .cp-monto { font-size: 24px; }
+            .cartelera-cerca-card .cp-tachado { font-size: 12px; }
+            .cartelera-cerca-card .cp-cu { font-size: 11px; }
+            .cartelera-cerca-card .cp-tag { font-size: 11px; }
+            .cartelera-cerca-card:has(.cp-resumen)::before { top: -10px; }
+            .cartelera-cerca-card:has(.cp-resumen)::after { bottom: -10px; }
+        }
+        /* Atajos: 3 por vista en pantallas medianas, 4 en las grandes, 2 en las chicas. */
+        @media (min-width: 769px) and (max-width: 979px) { .cat-card { flex-basis: calc((100% - 16px) / 2); } }
+        @media (min-width: 1100px) { .cat-card { flex-basis: calc((100% - 48px) / 4); } }
+        /* Entradas en dos columnas cuando hay lugar. */
+        @media (min-width: 769px) and (max-width: 999px) { .cart-hero-marca { display: none; } }
+        @media (min-width: 1000px) {
+            #carteleraCercaResultado .cartelera-cerca-card, #carteleraContainer .cc-pagina .cartelera-cerca-card { margin-bottom: 0; }
+            #carteleraCercaResultado { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 24px; align-items: start; }
+            #carteleraCercaResultado > .cc-carrusel, #carteleraCercaResultado > .cartelera-cerca-vacio { grid-column: 1 / -1; }
+            #carteleraContainer .cc-pagina { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 24px; align-items: start; padding-top: 6px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .cart-bulbs, .cart-bulbs::before { animation: none; }
+            .cat-card, .cat-ico img, .cartelera-cerca-card { transition: none; }
         }
     </style>
 
-    <div class="modulo-header-card tono-rojo">
-        <i class="fas fa-film modulo-header-decor"></i>
-        <div class="modulo-header-texto">
-            <div class="modulo-header-titulo">Cartelera</div>
-            <div class="modulo-header-subtitulo" STYLE="FONT-WEIGHT: BOLD;">Todo lo del cine físico, en un solo lugar.</div>
-            <div class="cartelera-aviso-orientativo" role="note">Toda la información es solo orientativa y no pretende reemplazar la información oficial de las cadenas de cine aquí mencionadas.</div>
-        </div>
-    </div>
+    <!-- Cabecera -->
+    <header class="cart-hero" id="cartHero">
+        <i class="fas fa-film cart-hero-marca" aria-hidden="true"></i>
+        <div class="cart-bulbs" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="cart-eyebrow"><b></b>EN CARTEL · HOY</div>
+        <h1 class="cart-titulo">Cartelera</h1>
+        <div class="cart-sub">Todo lo del cine físico, en un solo lugar.</div>
+        <div class="cartelera-aviso-orientativo" role="note"><i class="fas fa-circle-info" aria-hidden="true"></i><span>Toda la información es solo orientativa y no pretende reemplazar la información oficial de las cadenas de cine aquí mencionadas.</span></div>
+    </header>
 
     <div class="cartelera-grid">
+        <div class="cartelera-accesos-cab">
+            <div class="cartelera-accesos-titulo">Empezá por acá</div>
+            <!-- Flechas: solo escritorio -->
+            <div class="cart-flechas">
+                <button type="button" class="cart-flecha" data-paso="-1" aria-label="Ver los atajos anteriores"><i class="fas fa-chevron-left"></i></button>
+                <button type="button" class="cart-flecha" data-paso="1" aria-label="Ver los atajos siguientes"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
         <div class="cartelera-accesos-track" id="carteleraAccesosTrack">
             <!-- Slide 1 -->
             <div class="cartelera-accesos-slide">
-                <button type="button" class="cartelera-card" onclick="window.accesoRapidoCartelera('ya-se-que-ver')">
-                    <i class="fas fa-clapperboard cartelera-decor tono-rojo"></i>
-                    <i class="fas fa-chevron-right cartelera-flecha"></i>
-                    <div class="cartelera-icono tono-rojo"><i class="fas fa-ticket"></i></div>
-                    <div>
-                        <div class="cartelera-card-titulo">Ya sé qué quiero ver</div>
-                        <div class="cartelera-card-sub">Elegí el título y te decimos cuándo y dónde</div>
-                    </div>
+                <button type="button" class="cat-card cat-rojo" onclick="window.accesoRapidoCartelera('ya-se-que-ver')">
+                    <span class="cat-textos">
+                        <span class="cat-k">PELÍCULA</span>
+                        <span class="cat-t">Ya sé qué quiero ver</span>
+                        <span class="cat-s">Elegí el título y te decimos cuándo y dónde</span>
+                    </span>
+                    <span class="cat-ico">
+                        <img src="assets/images/iconos3d/admission_tickets.webp" alt="" width="64" height="64" loading="lazy" decoding="async" draggable="false" onerror="this.hidden=true;this.nextElementSibling.hidden=false;">
+                        <i class="fas fa-ticket" hidden></i>
+                    </span>
                 </button>
-                <button type="button" class="cartelera-card" onclick="window.accesoRapidoCartelera('recomendacion-cines')">
-                    <i class="fas fa-heart cartelera-decor tono-marino"></i>
-                    <i class="fas fa-chevron-right cartelera-flecha"></i>
-                    <div class="cartelera-icono tono-marino"><i class="fas fa-compass"></i></div>
-                    <div>
-                        <div class="cartelera-card-titulo">¿Alguna recomendación en cines?</div>
-                        <div class="cartelera-card-sub">Según tu espíritu cinéfilo</div>
-                    </div>
-                </button>
-                <button type="button" class="cartelera-card" onclick="window.accesoRapidoCartelera('organizar-salida')">
-                    <i class="fas fa-calendar-days cartelera-decor tono-marino"></i>
-                    <i class="fas fa-chevron-right cartelera-flecha"></i>
-                    <div class="cartelera-icono tono-marino"><i class="fas fa-user-friends"></i></div>
-                    <div>
-                        <div class="cartelera-card-titulo">Organizar una salida</div>
-                        <div class="cartelera-card-sub">Según dónde, cuándo y cuánto $</div>
-                    </div>
-                </button>
-                <button type="button" class="cartelera-card" onclick="window.accesoRapidoCartelera('promos-bancos')">
-                    <i class="fas fa-building-columns cartelera-decor tono-rojo"></i>
-                    <i class="fas fa-chevron-right cartelera-flecha"></i>
-                    <div class="cartelera-icono tono-rojo"><i class="fas fa-credit-card"></i></div>
-                    <div>
-                        <div class="cartelera-card-titulo">Promos y bancos</div>
-                        <div class="cartelera-card-sub">Descuentos de bancos y billeteras en cada cine</div>
-                    </div>
+                <button type="button" class="cat-card cat-azul" onclick="window.accesoRapidoCartelera('recomendacion-cines')">
+                    <span class="cat-textos">
+                        <span class="cat-k">RECOMENDACIÓN</span>
+                        <span class="cat-t">¿Alguna recomendación en cines?</span>
+                        <span class="cat-s">Según tu espíritu cinéfilo</span>
+                    </span>
+                    <span class="cat-ico">
+                        <img src="assets/images/iconos3d/performing_arts.webp" alt="" width="64" height="64" loading="lazy" decoding="async" draggable="false" onerror="this.hidden=true;this.nextElementSibling.hidden=false;">
+                        <i class="fas fa-compass" hidden></i>
+                    </span>
                 </button>
             </div>
             <!-- Slide 2 -->
             <div class="cartelera-accesos-slide">
-                <button type="button" class="cartelera-card" onclick="window.accesoRapidoCartelera('por-cadena')">
-                    <i class="fas fa-building cartelera-decor tono-rojo"></i>
-                    <i class="fas fa-chevron-right cartelera-flecha"></i>
-                    <div class="cartelera-icono tono-rojo"><i class="fas fa-film"></i></div>
-                    <div>
-                        <div class="cartelera-card-titulo">Por cadena de cine</div>
-                        <div class="cartelera-card-sub">Cinemark, Cinépolis, Hoyts y más</div>
-                    </div>
+                <button type="button" class="cat-card cat-ambar" onclick="window.accesoRapidoCartelera('organizar-salida')">
+                    <span class="cat-textos">
+                        <span class="cat-k">PLAN</span>
+                        <span class="cat-t">Organizar una salida</span>
+                        <span class="cat-s">Según dónde, cuándo y cuánto $</span>
+                    </span>
+                    <span class="cat-ico">
+                        <img src="assets/images/iconos3d/calendar.webp" alt="" width="64" height="64" loading="lazy" decoding="async" draggable="false" onerror="this.hidden=true;this.nextElementSibling.hidden=false;">
+                        <i class="fas fa-calendar-days" hidden></i>
+                    </span>
                 </button>
-                <button type="button" class="cartelera-card" onclick="window.accesoRapidoCartelera('cine-argentino')">
-                    <i class="fas fa-sun cartelera-decor tono-marino"></i>
-                    <i class="fas fa-chevron-right cartelera-flecha"></i>
-                    <div class="cartelera-icono tono-marino"><i class="fas fa-video"></i></div>
-                    <div>
-                        <div class="cartelera-card-titulo">Cine argentino</div>
-                        <div class="cartelera-card-sub">Funciones en Espacios INCAA y cines independientes</div>
-                    </div>
+                <button type="button" class="cat-card cat-vino" onclick="window.accesoRapidoCartelera('promos-bancos')">
+                    <span class="cat-textos">
+                        <span class="cat-k">DESCUENTOS</span>
+                        <span class="cat-t">Promos y bancos</span>
+                        <span class="cat-s">Descuentos de bancos y billeteras en cada cine</span>
+                    </span>
+                    <span class="cat-ico">
+                        <img src="assets/images/iconos3d/credit_card.webp" alt="" width="64" height="64" loading="lazy" decoding="async" draggable="false" onerror="this.hidden=true;this.nextElementSibling.hidden=false;">
+                        <i class="fas fa-credit-card" hidden></i>
+                    </span>
                 </button>
-                <button type="button" class="cartelera-card" onclick="window.accesoRapidoCartelera('modo-ahorro')">
-                    <i class="fas fa-coins cartelera-decor tono-marino"></i>
-                    <i class="fas fa-chevron-right cartelera-flecha"></i>
-                    <div class="cartelera-icono tono-marino"><i class="fas fa-piggy-bank"></i></div>
-                    <div>
-                        <div class="cartelera-card-titulo">Cine modo ahorro</div>
-                        <div class="cartelera-card-sub">Las funciones más baratas cerca tuyo</div>
-                    </div>
+            </div>
+            <!-- Slide 3 -->
+            <div class="cartelera-accesos-slide">
+                <button type="button" class="cat-card cat-vino" onclick="window.accesoRapidoCartelera('por-cadena')">
+                    <span class="cat-textos">
+                        <span class="cat-k">CADENAS</span>
+                        <span class="cat-t">Por cadena de cine</span>
+                        <span class="cat-s">Cinemark, Cinépolis, Hoyts y más</span>
+                    </span>
+                    <span class="cat-ico">
+                        <img src="assets/images/iconos3d/cinema.webp" alt="" width="64" height="64" loading="lazy" decoding="async" draggable="false" onerror="this.hidden=true;this.nextElementSibling.hidden=false;">
+                        <i class="fas fa-film" hidden></i>
+                    </span>
                 </button>
-                <button type="button" class="cartelera-card" onclick="window.accesoRapidoCartelera('sorteos')">
-                    <i class="fas fa-star cartelera-decor tono-rojo"></i>
-                    <i class="fas fa-chevron-right cartelera-flecha"></i>
-                    <div class="cartelera-icono tono-rojo"><i class="fas fa-gift"></i></div>
-                    <div>
-                        <div class="cartelera-card-titulo">Sorteos</div>
-                        <div class="cartelera-card-sub">Los sorteos que ofrecen los cines, en un solo lugar</div>
-                    </div>
+                <button type="button" class="cat-card cat-azul" onclick="window.accesoRapidoCartelera('cine-argentino')">
+                    <span class="cat-textos">
+                        <span class="cat-k">NUESTRO CINE</span>
+                        <span class="cat-t">Cine argentino</span>
+                        <span class="cat-s">Funciones en Espacios INCAA y cines independientes</span>
+                    </span>
+                    <span class="cat-ico">
+                        <img src="assets/images/iconos3d/sun.webp" alt="" width="64" height="64" loading="lazy" decoding="async" draggable="false" onerror="this.hidden=true;this.nextElementSibling.hidden=false;">
+                        <i class="fas fa-video" hidden></i>
+                    </span>
+                </button>
+            </div>
+            <!-- Slide 4 -->
+            <div class="cartelera-accesos-slide">
+                <button type="button" class="cat-card cat-ambar" onclick="window.accesoRapidoCartelera('modo-ahorro')">
+                    <span class="cat-textos">
+                        <span class="cat-k">AHORRO</span>
+                        <span class="cat-t">Cine modo ahorro</span>
+                        <span class="cat-s">Las funciones más baratas cerca tuyo</span>
+                    </span>
+                    <span class="cat-ico">
+                        <img src="assets/images/iconos3d/money_bag.webp" alt="" width="64" height="64" loading="lazy" decoding="async" draggable="false" onerror="this.hidden=true;this.nextElementSibling.hidden=false;">
+                        <i class="fas fa-piggy-bank" hidden></i>
+                    </span>
+                </button>
+                <button type="button" class="cat-card cat-rojo" onclick="window.accesoRapidoCartelera('sorteos')">
+                    <span class="cat-textos">
+                        <span class="cat-k">PREMIOS</span>
+                        <span class="cat-t">Sorteos</span>
+                        <span class="cat-s">Los sorteos que ofrecen los cines, en un solo lugar</span>
+                    </span>
+                    <span class="cat-ico">
+                        <img src="assets/images/iconos3d/wrapped_gift.webp" alt="" width="64" height="64" loading="lazy" decoding="async" draggable="false" onerror="this.hidden=true;this.nextElementSibling.hidden=false;">
+                        <i class="fas fa-gift" hidden></i>
+                    </span>
                 </button>
             </div>
         </div>
         <div class="cartelera-accesos-dots" id="carteleraAccesosDots">
             <span class="activo"></span>
             <span></span>
+            <span></span>
+            <span></span>
         </div>
+        <!-- Puntos: solo escritorio (los arma cartelera.js) -->
+        <div class="cart-puntos" id="carteleraAccesosPuntos"></div>
     </div>
 
     <div class="cartelera-cerca-seccion">
-        <div class="cartelera-cerca-titulo">Hoy cerca tuyo</div>
+        <div class="cart-hoy-h">
+            <div class="cartelera-cerca-titulo"><b></b>Hoy cerca tuyo</div>
+            <div class="cart-hoy-s">Funciones de hoy en tu zona</div>
+        </div>
         <div id="carteleraCercaResultado">
             <div class="cartelera-cerca-vacio">
                 <div class="buscador-pensando">
