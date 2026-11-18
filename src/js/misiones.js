@@ -26,7 +26,7 @@
     'use strict';
     if (window._misiones) return;
 
-    const esMobile = () => window.innerWidth <= 768;
+    const esMobile = () => true; // la tarjeta y el modal también funcionan en escritorio
     const $ = (id) => document.getElementById(id);
     const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const cab = () => ({ headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
@@ -260,7 +260,23 @@
         .mi-fiesta .sig{margin-top:18px;padding:12px 14px;border-radius:18px;border:1px solid #EAECF0;background:#fff;display:flex;align-items:center;gap:12px;text-align:left}
         .mi-fiesta .sig .k{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#475467}
         .mi-fiesta .sig .n{margin-top:2px;font-family:'Space Grotesk','Inter',sans-serif;font-weight:600;font-size:16px;color:#101828}
-        .mi-fiesta .sig .d{font-size:12.5px;line-height:17px;color:#475467}`;
+        .mi-fiesta .sig .d{font-size:12.5px;line-height:17px;color:#475467}
+        /* escritorio: la hoja inferior pasa a ser una ventana centrada */
+        @media (min-width:769px){
+            #miOverlay{align-items:center;justify-content:center;padding:24px;box-sizing:border-box}
+            .mi-hoja{max-width:600px;max-height:min(88vh,800px);border-radius:28px;box-shadow:0 24px 60px rgba(16,24,40,.35);transform:translateY(12px)}
+            .mi-asa{display:none}
+            .mi-fiesta{max-width:440px}
+            #miToast{bottom:32px}
+            /* sin barras de scroll, y un degradé abajo cuando hay más para ver */
+            .mi-scroll,.mi-fiesta{scrollbar-width:none}
+            .mi-scroll::-webkit-scrollbar,.mi-fiesta::-webkit-scrollbar{display:none}
+            .mi-hoja{position:relative}
+            .mi-hoja::after{content:"";position:absolute;left:0;right:0;bottom:0;height:72px;border-radius:0 0 28px 28px;background:linear-gradient(to bottom,rgba(255,255,255,0),#fff 88%);pointer-events:none;opacity:0;transition:opacity .2s ease}
+            .mi-hoja.mi-hay-mas::after{opacity:1}
+            .mi-fiesta::after{content:"";display:block;position:sticky;bottom:0;height:44px;margin:-44px -22px 0;border-radius:0 0 30px 30px;background:linear-gradient(to bottom,rgba(255,255,255,0),#fff 88%);pointer-events:none;opacity:0;transition:opacity .2s ease}
+            .mi-fiesta.mi-hay-mas::after{opacity:1}
+        }`;
         document.head.appendChild(st);
     }
 
@@ -478,6 +494,17 @@
             }
         }
 
+        // Avisa (clase «mi-hay-mas») cuando queda contenido por ver debajo, para mostrar el degradé inferior (escritorio).
+        function vigilarScroll(sc, marca) {
+            if (!sc || !marca || sc._miVigila) return;
+            sc._miVigila = true;
+            const f = () => marca.classList.toggle('mi-hay-mas', sc.scrollHeight - sc.scrollTop - sc.clientHeight > 6);
+            sc.addEventListener('scroll', f, { passive: true });
+            if (typeof ResizeObserver === 'function') new ResizeObserver(f).observe(sc);
+            if (typeof MutationObserver === 'function') new MutationObserver(f).observe(sc, { childList: true, subtree: true });
+            f();
+        }
+
     // ------------------------------------------------------------------------------------------------ La hoja
     function crearHoja() {
         let o = $('miOverlay');
@@ -487,6 +514,7 @@
         o.innerHTML = '<div class="mi-hoja" role="dialog" aria-modal="true" aria-labelledby="miTitulo" tabindex="-1"><div class="mi-asa"></div><div class="mi-scroll" id="miScroll"></div></div>';
         o.addEventListener('click', (e) => { if (e.target === o) cerrar(); });
         document.body.appendChild(o);
+        vigilarScroll(o.querySelector('.mi-scroll'), o.querySelector('.mi-hoja'));
         return o;
     }
 
@@ -669,6 +697,7 @@
             <button type="button" class="mi-cta" style="margin-top:18px" data-mi="fiesta-logros">${TROFEO}Ver en Mis logros</button>
             <button type="button" class="mi-sec" data-mi="fiesta-seguir">Seguir</button></div>`;
         document.documentElement.classList.add('mi-bloqueado');
+        vigilarScroll(f.querySelector('.mi-fiesta'), f.querySelector('.mi-fiesta'));
         f.classList.add('on');
         requestAnimationFrame(() => { const b = f.querySelector('.mi-cta'); if (b) b.focus(); });
     }

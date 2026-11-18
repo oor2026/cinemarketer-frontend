@@ -359,3 +359,70 @@
         padding: 0.75rem 1rem;
     }
 }
+
+/* =====================================================================================================================
+   PREGUNTAS FRECUENTES (contacto) — REDISEÑO DESKTOP («Luz de proyector»)
+   VA AL FINAL de contacto.css. Todo dentro de @media (min-width: 769px): mobile no cambia.
+   Mismo lenguaje que Mi Sala y Configuración: tarjeta blanca angosta y centrada (deja libres los laterales para los badges
+   comerciales), título limpio, preguntas como paneles suaves. El fondo de pósters va por detrás (ver muro-faq.css).
+   ===================================================================================================================== */
+@media (min-width: 769px) {
+
+    /* El botón «Contactar a Soporte» es el de mobile: en desktop el botón es el del encabezado. */
+    .btn-soporte-mobile { display: none; }
+
+    .contacto-container {
+        max-width: 860px;
+        padding: 2.2rem 2.6rem 2.4rem;
+        background: #ffffff;
+        border-radius: 28px;
+        box-shadow: 0 0 0 1px rgba(16, 24, 40, 0.05), 0 30px 60px -34px rgba(16, 24, 40, 0.28);
+    }
+
+    /* Encabezado: de la caja azul con auricular a título limpio con línea fina; «Soporte» pasa a ser el botón rojo de la marca. */
+    .contacto-header {
+        background: none;
+        color: #0B2A63;
+        padding: 0 0 1.4rem;
+        border-radius: 0;
+        margin-bottom: 1.4rem;
+        border-bottom: 1px solid #EAECF0;
+        overflow: visible;
+    }
+    .contacto-header-decor { display: none; }
+    .contacto-header .header-icon { width: 54px; height: 54px; background: rgba(229, 9, 20, 0.09); color: #E50914; }
+    .contacto-header .header-icon i { font-size: 1.45rem; }
+    .contacto-header .header-text h2 { margin: 0 0 4px; font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif; font-size: 2rem; line-height: 1.1; font-weight: 700; color: #0B2A63; }
+    .contacto-header .header-text p { margin: 0; font-size: 0.95rem; color: #475467; opacity: 1; }
+    .btn-soporte {
+        padding: 0.8rem 1.6rem;
+        background: linear-gradient(135deg, #f0553f, #c4321f);
+        color: #ffffff;
+        border-radius: 999px;
+        font-size: 0.95rem;
+        box-shadow: 0 10px 22px -8px rgba(196, 50, 31, 0.55);
+    }
+    .btn-soporte:hover { box-shadow: 0 14px 26px -8px rgba(196, 50, 31, 0.6); }
+
+    /* Preguntas: sin la caja roja; cada pregunta es un panel suave que se abre. */
+    .faq-section { background: none; border-radius: 0; padding: 0; box-shadow: none; }
+    .faq-lista { gap: 12px; }
+    .faq-item {
+        background: #F9FAFB;
+        border: 1px solid #EAECF0;
+        border-radius: 16px;
+        transition: box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+    .faq-item:hover { border-color: #D0D5DD; box-shadow: 0 12px 22px -16px rgba(16, 24, 40, 0.35); }
+    .faq-pregunta { padding: 1.1rem 1.3rem; background: transparent; font-size: 1rem; font-weight: 600; color: #101828; }
+    .faq-chevron { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #F2F4F7; color: #667085; }
+    .faq-item.abierto { background: #ffffff; border-color: rgba(229, 9, 20, 0.38); box-shadow: 0 14px 26px -18px rgba(229, 9, 20, 0.45); }
+    .faq-item.abierto .faq-pregunta { background: transparent; color: #C4000F; }
+    .faq-item.abierto .faq-chevron { background: rgba(229, 9, 20, 0.09); color: #E50914; }
+    .faq-respuesta { padding: 0.2rem 1.3rem 1.2rem; font-size: 0.95rem; line-height: 1.7; color: #475467; background: transparent; border-top: 0; }
+
+    /* Ventana de soporte: mismas esquinas que el resto. */
+    .soporte-modal { border-radius: 24px; }
+    .soporte-textarea { border-radius: 14px; }
+    .btn-cancelar-soporte, .btn-enviar-soporte { border-radius: 999px; }
+}

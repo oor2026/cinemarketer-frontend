@@ -1042,3 +1042,129 @@
     color: #444;
     z-index: 1;
 }
+
+
+/* =====================================================================================================================
+   COMUNIDAD — ESCRITORIO (rediseño). Todo va dentro de @media (min-width: 769px): mobile no cambia.
+   Tono propio: marino (azul noche) con el rojo de marca como acento. Va al FINAL de comunidad.css.
+   ===================================================================================================================== */
+@media (min-width: 769px) {
+
+    /* ---------- Estructura: tres columnas ---------- */
+    #comunidad-container .com-layout {
+        grid-template-columns: 252px minmax(0, 1fr) 312px;
+        gap: 28px;
+        max-width: 1280px;
+        padding: 6px 16px 48px;
+        box-sizing: border-box;
+    }
+    #comunidad-container .com-pills-territorio { display: none; }
+    #comunidad-container .com-col-left,
+    #comunidad-container .com-col-right { top: 92px; height: calc(100vh - 112px); padding: 8px 14px 28px; margin: -8px -14px 0; }
+
+    /* ---------- Cabecera: la tarjeta "Comunidad" (existe en el HTML, en escritorio estaba oculta) ---------- */
+    #comunidad-container .com-col-center > .modulo-header-card {
+        position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between;
+        min-height: 132px; margin: 0 0 18px; padding: 26px 34px; box-sizing: border-box; border-radius: 28px; color: #fff;
+        background:
+            radial-gradient(70% 140% at 100% 0%, rgba(240, 85, 63, 0.38), rgba(240, 85, 63, 0) 62%),
+            radial-gradient(60% 120% at 0% 100%, rgba(66, 118, 230, 0.35), rgba(66, 118, 230, 0) 66%),
+            linear-gradient(135deg, #1d3270 0%, #0d1b45 100%);
+        box-shadow: 0 26px 40px -26px rgba(13, 27, 69, 0.75), 0 2px 8px rgba(13, 27, 69, 0.12);
+    }
+    #comunidad-container .modulo-header-decor { position: absolute; right: 22px; top: 50%; transform: translateY(-50%) rotate(-10deg); font-size: 8.5rem; color: rgba(255, 255, 255, 0.07); pointer-events: none; }
+    #comunidad-container .modulo-header-texto { position: relative; max-width: 560px; }
+    #comunidad-container .modulo-header-titulo { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 2.5rem; font-weight: 700; letter-spacing: -0.025em; line-height: 1.05; color: #fff; }
+    #comunidad-container .modulo-header-subtitulo { margin-top: 8px; font-size: 0.98rem; line-height: 1.45; font-weight: 500; color: rgba(226, 233, 255, 0.82); }
+
+    /* ---------- Caja "nueva publicación" ---------- */
+    #comunidad-container .com-nueva-pub {
+        gap: 16px; margin-bottom: 18px; padding: 16px 20px; border: 1px solid rgba(22, 38, 77, 0.07); border-radius: 24px; background: #fff;
+        box-shadow: 0 16px 28px -20px rgba(22, 38, 77, 0.40), 0 1px 3px rgba(22, 38, 77, 0.05);
+        transition: transform 0.16s ease, box-shadow 0.16s ease;
+    }
+    #comunidad-container .com-nueva-pub:hover { border-color: rgba(22, 38, 77, 0.07); transform: translateY(-2px); box-shadow: 0 22px 32px -20px rgba(22, 38, 77, 0.50), 0 1px 3px rgba(22, 38, 77, 0.05); }
+    #comunidad-container .com-nueva-pub-avatar { width: 48px; height: 48px; box-shadow: 0 0 0 3px #fff, 0 0 0 5px rgba(22, 38, 77, 0.14); }
+    #comunidad-container .com-nueva-pub-placeholder { font-size: 1.02rem; color: #8b91a1; }
+    #comunidad-container .com-nueva-pub-btn { width: 42px; height: 42px; font-size: 1.5rem; font-weight: 400; background: linear-gradient(135deg, #f0553f, #c4321f); box-shadow: 0 10px 18px -8px rgba(196, 50, 31, 0.75); transition: transform 0.16s ease; }
+    #comunidad-container .com-nueva-pub:hover .com-nueva-pub-btn { transform: rotate(90deg) scale(1.05); }
+
+    /* ---------- Columna izquierda: categorías ---------- */
+    #comunidad-container .com-col-left-inner {
+        gap: 4px; padding: 16px 12px 14px; border-radius: 26px; background: #fff; border: 1px solid rgba(22, 38, 77, 0.07);
+        box-shadow: 0 16px 28px -20px rgba(22, 38, 77, 0.40), 0 1px 3px rgba(22, 38, 77, 0.05);
+    }
+    #comunidad-container .com-categorias-label { display: flex; align-items: center; gap: 8px; padding: 0 10px 10px; font-size: 0.72rem; letter-spacing: 0.14em; color: #c4321f; }
+    #comunidad-container .com-categorias-label::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #f0553f; box-shadow: 0 0 0 4px rgba(240, 85, 63, 0.18); }
+    #comunidad-container .com-cat-item { gap: 12px; padding: 7px 10px; border-radius: 18px; font-size: 0.97rem; font-weight: 600; color: #4a5268; }
+    #comunidad-container .com-cat-icono {
+        flex: none; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; line-height: 1;
+        background: #f1efe9; transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    }
+    #comunidad-container .com-cat-item:hover { background: #f4f6fc; color: #16264d; }
+    #comunidad-container .com-cat-item:hover .com-cat-icono { transform: scale(1.08); }
+    #comunidad-container .com-cat-item.active { background: linear-gradient(90deg, rgba(22, 38, 77, 0.08), rgba(22, 38, 77, 0.02)); color: #16151a; font-weight: 700; }
+    #comunidad-container .com-cat-item.active .com-cat-icono { background: linear-gradient(135deg, #f0553f, #c4321f); box-shadow: 0 10px 16px -8px rgba(196, 50, 31, 0.8); }
+    #comunidad-container .com-cat-item:focus-visible { outline: 2px solid #c4321f; outline-offset: 2px; }
+
+    /* ---------- Publicaciones ---------- */
+    #comunidad-container .com-card {
+        margin-bottom: 18px; border: 1px solid rgba(22, 38, 77, 0.07); border-radius: 26px;
+        box-shadow: 0 16px 28px -22px rgba(22, 38, 77, 0.45), 0 1px 3px rgba(22, 38, 77, 0.05);
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    #comunidad-container .com-card:hover { transform: translateY(-2px); box-shadow: 0 24px 36px -22px rgba(22, 38, 77, 0.50), 0 1px 3px rgba(22, 38, 77, 0.05); }
+    #comunidad-container .com-card-header { gap: 14px; padding: 20px 24px 8px; align-items: center; }
+    #comunidad-container .com-card-avatar { width: 50px; height: 50px; box-shadow: 0 0 0 3px #fff, 0 0 0 5px rgba(22, 38, 77, 0.12); }
+    #comunidad-container .com-card-avatar span { font-size: 1.05rem; }
+    #comunidad-container .com-card-meta { gap: 4px; }
+    #comunidad-container .com-card-autor { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 1.08rem; font-weight: 700; letter-spacing: -0.01em; color: #16151a; }
+    #comunidad-container .com-card-badges { gap: 6px; }
+    #comunidad-container .com-badge-territory { padding: 3px 11px; font-size: 0.74rem; font-weight: 700; background: rgba(22, 38, 77, 0.08); color: #16264d; }
+    #comunidad-container .com-badge-tone { padding: 3px 11px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; background: rgba(196, 50, 31, 0.09); color: #b3281a; }
+    #comunidad-container .com-card-tiempo { font-size: 0.78rem; color: #9aa0ae; }
+    #comunidad-container .com-card-menu-btn { width: 34px; height: 34px; border-radius: 50%; color: #9aa0ae; }
+    #comunidad-container .com-card-menu-btn:hover { background: #f1efe9; color: #16264d; }
+    /* el título tiene estilos en línea: por eso el !important */
+    #comunidad-container .com-card-titulo { padding: 0 24px !important; margin: 10px 0 12px !important; font-family: 'Space Grotesk', system-ui, sans-serif !important; font-size: 1.4rem !important; letter-spacing: -0.015em; line-height: 1.2; color: #16151a !important; }
+    #comunidad-container .com-card-pelicula { margin: 4px 24px 8px; padding: 11px 16px; border: 0; border-radius: 16px; background: rgba(22, 38, 77, 0.06); font-size: 0.88rem; font-weight: 600; color: #16264d; transition: background 0.15s ease; }
+    #comunidad-container .com-card-pelicula:hover { background: rgba(22, 38, 77, 0.11); }
+    #comunidad-container .com-card-pelicula > .fa-film { color: #c4321f; }
+    #comunidad-container .com-card-content { padding: 4px 24px 12px; font-size: 1rem; line-height: 1.65; color: #2c3040; }
+    #comunidad-container .com-card-imagenes-wrap { margin: 8px 24px 10px; }
+    #comunidad-container .com-card-imagenes { border-radius: 20px; }
+    #comunidad-container .com-card-hashtags { padding: 0 24px !important; }
+    #comunidad-container .com-card-acciones { gap: 6px; padding: 10px 18px 14px; margin: 4px 0 0; border-top: 1px solid rgba(22, 38, 77, 0.07); }
+    #comunidad-container .com-accion-btn { gap: 8px; padding: 9px 16px; border-radius: 999px; font-size: 0.9rem; font-weight: 600; color: #6b7183; }
+    #comunidad-container .com-accion-btn:hover { background: rgba(22, 38, 77, 0.07); color: #16264d; }
+    #comunidad-container .com-accion-btn.btn-punto { color: #a56a00; background: rgba(244, 172, 20, 0.12); }
+    #comunidad-container .com-accion-btn.btn-punto:hover { background: rgba(244, 172, 20, 0.24); color: #8a5800; }
+    #comunidad-container .com-accion-btn.com-accion-active { color: #16264d; background: rgba(22, 38, 77, 0.09); }
+    #comunidad-container .com-accion-btn.com-accion-active.btn-punto { color: #8a5800; background: rgba(244, 172, 20, 0.28); }
+    #comunidad-container .com-vacio { padding: 3rem 1rem; border-radius: 26px; background: #fff; color: #9aa0ae; }
+
+    /* ---------- Columna derecha: widgets ---------- */
+    #comunidad-container .com-col-right-inner { gap: 18px; padding: 0; }
+    #comunidad-container .com-widget { padding: 18px 20px; border: 1px solid rgba(22, 38, 77, 0.07); border-radius: 26px; background: #fff; box-shadow: 0 16px 28px -22px rgba(22, 38, 77, 0.40), 0 1px 3px rgba(22, 38, 77, 0.05); }
+    #comunidad-container .com-widget-title { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; color: #16151a; }
+    #comunidad-container .com-widget-title::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #f0553f; box-shadow: 0 0 0 4px rgba(240, 85, 63, 0.18); }
+    #comunidad-container .com-widget-empty { padding: 1.4rem 0 1rem; font-size: 0.88rem; color: #9aa0ae; }
+    /* El banner Creator (o la publicidad) deja de ser un cuadro punteado: la tarjeta oscura va directo. */
+    #comunidad-container #comBannerRight.com-widget-banner { padding: 0; border: 0; background: none; box-shadow: none; min-height: 0; display: block; }
+    #comunidad-container #comBannerRight > div { padding: 20px 22px !important; border-radius: 26px !important; box-shadow: 0 18px 24px -20px rgba(36, 18, 66, 0.85); }
+    #comunidad-container #comBannerRight button { padding: 11px !important; border-radius: 14px !important; font-size: 0.9rem !important; }
+    #comunidad-container #comBannerRightBottom.com-widget-banner { min-height: 150px; border: 1.5px dashed rgba(22, 38, 77, 0.14); background: rgba(255, 255, 255, 0.55); box-shadow: none; }
+    #comunidad-container .com-widget-banner-ph { font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; color: #aab0be; }
+
+    /* ---------- Cargar más ---------- */
+    #comunidad-container .com-btn-mas { padding: 12px 28px; border: 1px solid rgba(22, 38, 77, 0.10); border-radius: 999px; background: #fff; color: #16264d; font-size: 0.92rem; font-weight: 700; cursor: pointer; box-shadow: 0 10px 18px -12px rgba(22, 38, 77, 0.45); transition: transform 0.16s ease; }
+    #comunidad-container .com-btn-mas:hover { transform: translateY(-2px); }
+}
+
+/* Pantallas medianas (769–1099 px): categorías a la izquierda y el feed; los widgets bajan debajo del feed. */
+@media (min-width: 769px) and (max-width: 1099px) {
+    #comunidad-container .com-layout { grid-template-columns: 224px minmax(0, 1fr); gap: 22px; }
+    #comunidad-container .com-col-right { grid-column: 2; position: static; height: auto; margin: 0; padding: 0; }
+    #comunidad-container .com-col-right-inner { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+    #comunidad-container .modulo-header-titulo { font-size: 2.1rem; }
+}

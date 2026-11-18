@@ -787,3 +787,253 @@
 #module-container:has(.perfil-card.modo-oscuro) {
     background: linear-gradient(155deg, #12141b, #0d0f14);
 }
+
+/* =====================================================================================================================
+   MI SALA — REDISEÑO DESKTOP
+   VA AL FINAL de perfil.css (se carga siempre; todo está dentro de @media (min-width: 769px), así que mobile no cambia).
+   Es la misma lógica visual que mobile: ROJO = películas, AZUL = series. Usa las variables --cine-* y --sala-* (modo oscuro incluido).
+   ===================================================================================================================== */
+@media (min-width: 769px) {
+
+    .perfil-card {
+        --sala-titulo: #0B2A63;
+        --sala-sub: #475467;
+        --sala-linea: #EAECF0;
+        --sala-panel: #F9FAFB;
+        --sala-borde: #D0D5DD;
+        --sala-seg: #F2F4F7;
+        --sala-seg-on: #ffffff;
+        --sala-seg-on-texto: #0B2A63;
+        --sala-enlace: #C4000F;
+        --sala-barra: #ffffff;
+        --sala-pel: #e50914;
+        --sala-ser: #2e6fd6;
+        --sala-chip-texto: #ffffff;
+        --sala-poster-fondo: #101828;
+    }
+    .perfil-card.modo-oscuro {
+        --sala-titulo: #f2f0ea;
+        --sala-sub: #b8b6ae;
+        --sala-linea: rgba(255, 255, 255, 0.10);
+        --sala-panel: #1b1e27;
+        --sala-borde: rgba(255, 255, 255, 0.22);
+        --sala-seg: rgba(255, 255, 255, 0.07);
+        --sala-seg-on: #2b2f3b;
+        --sala-seg-on-texto: #ffffff;
+        --sala-enlace: #ff8aa0;
+        --sala-barra: #0f1117;
+        --sala-pel: #ff3b5c;
+        --sala-ser: #7ab1ff;
+        --sala-chip-texto: #0d0f14;
+        --sala-poster-fondo: #0d0f14;
+    }
+
+    /* Las secciones nuevas se muestran; lo viejo de "Mi actividad" (menú + pilas de tarjetas) queda oculto en el HTML. */
+    .perfil-card .sala-movil { display: block; }
+    .perfil-card .sala-tabs { display: flex; }
+    .perfil-card #cineActividadTitulo,
+    .perfil-card #cineActividadWrap { display: none !important; }
+
+    /* Títulos de sección: del "cartelito" rosa a un título limpio (también "Quién soy" y "Mi espíritu"). */
+    .perfil-card .cine-section-title {
+        background: none !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+        margin: 30px 0 14px !important;
+        font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+        font-size: 22px;
+        line-height: 1.15;
+        font-weight: 700;
+        letter-spacing: 0;
+        text-transform: none;
+        color: var(--sala-titulo) !important;
+    }
+    .perfil-card .cine-section-title.sin-borde { margin-top: 0 !important; }
+
+    /* ------------------------------------------------------------------------------------- Barra de secciones */
+    .perfil-card .sala-tabs {
+        gap: 28px;
+        height: 54px;
+        margin: 26px 0 0;
+        padding: 0;
+        background: var(--sala-barra);
+        border-top: 1px solid var(--sala-linea);
+        border-bottom: 1px solid var(--sala-linea);
+        z-index: 30;
+    }
+    /* Al bajar, la barra queda fija debajo del header, con el ancho de la tarjeta (el JS calcula --sala-izq, --sala-ancho y --sala-pad). */
+    .perfil-card .sala-tabs.fijo {
+        position: fixed;
+        top: var(--sala-top, 70px);
+        left: var(--sala-izq, 0);
+        right: auto;
+        width: var(--sala-ancho, 100%);
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0 24px 0 var(--sala-pad, 24px);
+        border-radius: 0 0 14px 14px;
+        box-shadow: 0 8px 16px -10px rgba(16, 24, 40, 0.3);
+    }
+    .perfil-card .sala-tab {
+        flex: none;
+        display: flex;
+        align-items: center;
+        height: 100%;
+        margin: 0 0 -1px;
+        padding: 0;
+        background: none;
+        border: 0;
+        border-bottom: 3px solid transparent;
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--sala-sub);
+        white-space: nowrap;
+        cursor: pointer;
+        transition: color .15s ease;
+    }
+    .perfil-card .sala-tab:hover { color: var(--cine-text); }
+    .perfil-card .sala-tab.on { color: var(--cine-text); font-weight: 700; border-bottom-color: #E50914; }
+    .perfil-card .sala-tab span { margin-left: 6px; font-size: 12px; font-weight: 500; color: var(--cine-text-muted); }
+
+    /* ------------------------------------------------------------------------------------- Estructura común */
+    .perfil-card .sala-sec { padding: 34px 0 6px; scroll-margin-top: 140px; }
+    .perfil-card .sala-cab { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+    .perfil-card .sala-h2 { margin: 0; font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif; font-size: 22px; line-height: 1.15; font-weight: 700; color: var(--sala-titulo); }
+    .perfil-card .sala-sub { margin: 4px 0 0; font-size: 13.5px; line-height: 19px; color: var(--sala-sub); }
+    .perfil-card .sala-ver { display: inline-flex; align-items: center; gap: 2px; min-height: 40px; padding: 0 0 0 8px; background: none; border: 0; font-family: 'Inter', system-ui, sans-serif; font-size: 13.5px; font-weight: 600; color: var(--sala-enlace); white-space: nowrap; cursor: pointer; }
+    .perfil-card .sala-ver:hover { text-decoration: underline; }
+    .perfil-card .sala-seg { display: flex; gap: 4px; padding: 4px; max-width: 380px; border-radius: 14px; background: var(--sala-seg); }
+    .perfil-card .sala-seg button { flex: 1; height: 42px; border: 0; border-radius: 11px; background: transparent; font-family: 'Inter', system-ui, sans-serif; font-size: 14px; font-weight: 600; color: var(--sala-sub); display: flex; align-items: center; justify-content: center; gap: 7px; cursor: pointer; }
+    .perfil-card .sala-seg button.on { background: var(--sala-seg-on); color: var(--sala-seg-on-texto); box-shadow: 0 1px 3px rgba(16, 24, 40, 0.16); }
+    .perfil-card .sala-seg b { font-size: 12px; font-weight: 700; color: var(--cine-text-muted); }
+    .perfil-card .sala-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 16px; }
+    .perfil-card .sala-chip { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--sala-borde); background: transparent; font-family: 'Inter', system-ui, sans-serif; font-size: 13px; font-weight: 600; color: var(--cine-text-body); white-space: nowrap; cursor: pointer; }
+    .perfil-card .sala-chip:hover { border-color: var(--cine-text-muted); }
+    .perfil-card .sala-chip.pel.on { background: var(--sala-pel); border-color: var(--sala-pel); color: var(--sala-chip-texto); }
+    .perfil-card .sala-chip.ser.on { background: var(--sala-ser); border-color: var(--sala-ser); color: var(--sala-chip-texto); }
+    .perfil-card .sala-btnv { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; max-width: 320px; height: 46px; margin: 18px auto 0; border: 1.5px solid var(--sala-borde); border-radius: 999px; background: transparent; font-family: 'Inter', system-ui, sans-serif; font-size: 14px; font-weight: 600; color: var(--sala-titulo); cursor: pointer; }
+    .perfil-card .sala-btnv:hover { background: var(--sala-seg); }
+    .perfil-card .sala-vacio { margin: 8px 0 0; padding: 26px 16px; border-radius: 18px; background: var(--sala-panel); border: 1px dashed var(--sala-borde); text-align: center; font-size: 14px; line-height: 20px; color: var(--sala-sub); }
+
+    /* ------------------------------------------------------------------------------------- Mis gustos: pósters */
+    /* Los dos bloques (películas y series) pasan a ser UNA grilla: sus tarjetas son hijas directas. Siempre visibles. */
+    .perfil-card .sala-gustos-fila { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 2px 0 8px; }
+    .perfil-card .sala-gustos-fila .cine-spread { display: contents !important; }
+    .perfil-card .sala-gustos-fila .cine-snapshot {
+        position: relative;
+        width: auto;
+        height: auto;
+        aspect-ratio: 2 / 3;
+        margin: 0;
+        padding: 0;
+        border-radius: 18px;
+        overflow: hidden;
+        background: var(--sala-poster-fondo);
+        transform: none !important;     /* el diseño de abanico las inclinaba */
+    }
+    .perfil-card .sala-gustos-fila .cine-snapshot > div[id$="Vista"] { position: absolute; left: 0; top: 0; right: 0; bottom: 0; width: 100% !important; max-width: 100% !important; display: block !important; margin: 0; }
+    .perfil-card .sala-gustos-fila .cine-snapshot .poster { position: absolute; left: 0; top: 0; width: 100% !important; height: 100% !important; max-width: none; margin: 0; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; transform: none !important; background: transparent; }
+    .perfil-card .sala-gustos-fila .cine-snapshot .poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .perfil-card .sala-gustos-fila .cine-snapshot-lbl {
+        position: absolute; left: 0; right: 0; bottom: 0;
+        width: 100% !important; max-width: none !important; box-sizing: border-box;
+        margin: 0; padding: 56px 12px 14px;
+        white-space: normal; overflow-wrap: anywhere;
+        display: flex; flex-direction: column; align-items: center; gap: 2px;
+        background: linear-gradient(180deg, rgba(9, 12, 25, 0) 0%, rgba(9, 12, 25, 0.92) 100%);
+        font-size: 12px; line-height: 15px; text-align: center; color: rgba(255, 255, 255, 0.85);
+        pointer-events: none;
+    }
+    .perfil-card .sala-gustos-fila .cine-snapshot-title { white-space: normal; overflow-wrap: anywhere; font-family: 'Space Grotesk', 'Inter', sans-serif; font-size: 15px; line-height: 17px; font-weight: 600; color: #ffffff; }
+    .perfil-card .sala-gustos-fila .cine-edit-btn { top: 10px !important; right: 10px !important; left: auto !important; z-index: 3; width: 32px; height: 32px; }
+    .perfil-card .sala-gustos-fila #cineSpreadPeliculas .cine-snapshot::before,
+    .perfil-card .sala-gustos-fila #cineSpreadSeries .cine-snapshot::before {
+        position: absolute; left: 10px; top: 10px; z-index: 2;
+        display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 999px;
+        font-family: 'Inter', system-ui, sans-serif; font-size: 11.5px; font-weight: 700; color: var(--sala-chip-texto);
+    }
+    .perfil-card .sala-gustos-fila #cineSpreadPeliculas .cine-snapshot::before { content: "Película"; background: var(--sala-pel); }
+    .perfil-card .sala-gustos-fila #cineSpreadSeries .cine-snapshot::before { content: "Serie"; background: var(--sala-ser); }
+
+    /* ------------------------------------------------------------------------------------------- Actividad */
+    .perfil-card .sala-grid3 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+    .perfil-card .sala-poster { position: relative; display: block; width: 100%; padding: 0; border: 0; border-radius: 14px; overflow: hidden; background: var(--sala-poster-fondo); aspect-ratio: 2 / 3; cursor: pointer; transition: transform .18s ease, box-shadow .18s ease; }
+    .perfil-card .sala-poster:hover { transform: translateY(-3px); box-shadow: 0 14px 26px -12px rgba(16, 24, 40, 0.5); }
+    .perfil-card .sala-poster img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; }
+    .perfil-card .sala-poster .sala-sinfoto { position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; padding: 8px; text-align: center; font-size: 12px; line-height: 14px; color: #d0d5dd; }
+    .perfil-card .sala-voto { position: absolute; left: 8px; bottom: 8px; width: 28px; height: 28px; border-radius: 50%; border: 2px solid #ffffff; display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 11px; }
+    .perfil-card .sala-voto.like { background: #067647; }
+    .perfil-card .sala-voto.dislike { background: #B42318; }
+    .perfil-card .sala-lista-com { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .perfil-card .sala-com { display: flex; gap: 14px; padding: 14px; border: 1px solid var(--sala-linea); border-radius: 18px; background: var(--sala-panel); }
+    .perfil-card .sala-mini { position: relative; flex: none; width: 72px; height: 108px; padding: 0; border: 0; border-radius: 12px; overflow: hidden; background: var(--sala-poster-fondo); cursor: pointer; }
+    .perfil-card .sala-mini img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; }
+    .perfil-card .sala-mini .sala-ic { position: absolute; left: 5px; bottom: 5px; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #ffffff; background: var(--sala-pel); color: var(--sala-chip-texto); display: flex; align-items: center; justify-content: center; font-size: 10px; }
+    .perfil-card .sala-com.ser .sala-mini .sala-ic { background: var(--sala-ser); }
+    .perfil-card .sala-com-cuerpo { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .perfil-card .sala-com-cuerpo h3 { margin: 0; font-family: 'Space Grotesk', 'Inter', sans-serif; font-size: 15px; line-height: 1.2; font-weight: 600; color: var(--cine-text); }
+    .perfil-card .sala-spoiler-chip { align-self: flex-start; margin-top: 4px; padding: 2px 8px; border-radius: 999px; background: rgba(180, 35, 24, 0.12); color: #B42318; font-size: 11px; font-weight: 700; }
+    .perfil-card.modo-oscuro .sala-spoiler-chip { color: #ff8aa0; background: rgba(255, 59, 92, 0.16); }
+    .perfil-card .sala-com-cuerpo p { margin: 5px 0 0; font-size: 13.5px; line-height: 19px; color: var(--cine-text-body); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .perfil-card .sala-com.es-spoiler p { filter: blur(5px); }
+    .perfil-card .sala-com-meta { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 4px; font-size: 12px; color: var(--cine-text-muted); }
+    .perfil-card .sala-com-meta .sala-ver { min-height: 32px; margin-left: auto; }
+
+    /* ------------------------------------------------------------------------------------------- Mi Lista */
+    .perfil-card .sala-fila { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+    .perfil-card .sala-fila .sala-item { width: auto; }
+    .perfil-card .sala-item { position: relative; }
+    .perfil-card .sala-item .sala-poster { border-radius: 16px; }
+    .perfil-card .sala-item .sala-velo { position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(9, 12, 25, 0) 45%, rgba(9, 12, 25, 0.9) 100%); pointer-events: none; border-radius: inherit; }
+    .perfil-card .sala-item .sala-tit { position: absolute; left: 10px; right: 10px; bottom: 11px; font-family: 'Space Grotesk', 'Inter', sans-serif; font-size: 14px; line-height: 16px; font-weight: 600; color: #ffffff; text-align: center; pointer-events: none; }
+    .perfil-card .sala-quitar { position: absolute; right: 8px; top: 8px; z-index: 2; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 50%; background: var(--sala-pel); color: var(--sala-chip-texto); display: flex; align-items: center; justify-content: center; font-size: 13px; cursor: pointer; }
+    .perfil-card .sala-item.ser .sala-quitar { background: var(--sala-ser); }
+    .perfil-card .sala-lista-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+    /* Cerrada, Mi Lista muestra una sola fila; "Ver toda" la abre completa. */
+    .perfil-card .sala-fila .sala-item:nth-child(n+7) { display: none; }
+
+    /* ------------------------------------------------------------------------------------------- Mis logros */
+    .perfil-card .sala-contador { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 14px; border-radius: 999px; background: #0B2A63; color: #ffffff; font-size: 12.5px; font-weight: 700; white-space: nowrap; }
+    .perfil-card.modo-oscuro .sala-contador { background: #2b2f3b; }
+    .perfil-card .sala-sellos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px 6px; padding: 18px 10px 12px; border-radius: 22px; background: var(--sala-panel); border: 1px solid var(--sala-linea); }
+    .perfil-card .sala-sello { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 4px 10px; border: 0; border-radius: 14px; background: transparent; font-family: 'Inter', system-ui, sans-serif; text-align: center; cursor: pointer; transition: background .15s ease, transform .15s ease; }
+    .perfil-card .sala-sello:hover { background: var(--sala-seg); transform: translateY(-2px); }
+    .perfil-card .sala-sello strong { font-size: 13.5px; line-height: 17px; font-weight: 600; color: var(--cine-text); }
+    .perfil-card .sala-sello span { font-size: 12px; line-height: 14px; color: var(--cine-text-muted); }
+    .perfil-card .sala-sello-img { position: relative; display: inline-block; line-height: 0; }
+    .perfil-card .sala-nivel { position: absolute; right: -8px; bottom: -2px; height: 22px; padding: 0 7px; border-radius: 999px; border: 2px solid var(--sala-panel); background: #101828; color: #ffffff; font-style: normal; font-size: 11px; font-weight: 700; line-height: 18px; }
+    .perfil-card .sala-misterio { margin-top: 0; }
+    .perfil-card .sala-mist { cursor: default; }
+    .perfil-card .sala-mist:hover { background: transparent; transform: none; }
+    .perfil-card .sala-mist strong { color: var(--cine-text-muted); }
+
+    /* Hoja de detalle de un sello: en escritorio es una ventana centrada, no un panel desde abajo. */
+    .sala-hoja-fondo { position: fixed; left: 0; top: 0; right: 0; bottom: 0; z-index: 100000; background: rgba(16, 24, 40, 0.58); display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .sala-hoja { width: 100%; max-width: 440px; max-height: 88vh; overflow-y: auto; scrollbar-width: none; padding: 30px 28px 22px; border-radius: 28px; background: #ffffff; color: #101828; box-shadow: 0 30px 70px rgba(16, 24, 40, 0.4); display: flex; flex-direction: column; align-items: center; }
+    .sala-hoja::-webkit-scrollbar { display: none; }
+    .sala-hoja.oscura { background: #1b1e27; color: #f2f0ea; }
+    .sala-hoja .sala-asa { display: none; }
+    .sala-hoja h2 { margin: 14px 0 0; font-family: 'Space Grotesk', 'Inter', sans-serif; font-size: 26px; line-height: 1.1; font-weight: 700; color: #0B2A63; text-align: center; }
+    .sala-hoja.oscura h2 { color: #f2f0ea; }
+    .sala-hoja p { margin: 8px 0 0; max-width: 340px; font-size: 14.5px; line-height: 21px; text-align: center; color: #475467; }
+    .sala-hoja.oscura p { color: #b8b6ae; }
+    .sala-hoja .sala-dato { width: 100%; display: flex; align-items: center; gap: 10px; margin-top: 8px; padding: 11px 14px; border-radius: 14px; background: #F9FAFB; border: 1px solid #EAECF0; font-size: 13.5px; line-height: 18px; color: #344054; }
+    .sala-hoja.oscura .sala-dato { background: #0f1117; border-color: rgba(255, 255, 255, 0.1); color: #d0d5dd; }
+    .sala-hoja .sala-dato b { color: #101828; font-weight: 600; }
+    .sala-hoja.oscura .sala-dato b { color: #ffffff; }
+    .sala-hoja .sala-acc { display: flex; align-items: center; justify-content: center; width: 100%; height: 52px; margin-top: 20px; border: 0; border-radius: 999px; background: #E50914; box-shadow: 0 10px 24px rgba(229, 9, 20, 0.32); font-family: 'Space Grotesk', 'Inter', sans-serif; font-size: 16px; font-weight: 600; color: #ffffff; cursor: pointer; }
+    .sala-hoja .sala-cerrar { display: flex; align-items: center; justify-content: center; min-height: 46px; margin-top: 6px; padding: 0 20px; border: 0; background: transparent; font-family: inherit; font-size: 14px; font-weight: 600; color: #475467; cursor: pointer; }
+    .sala-hoja.oscura .sala-cerrar { color: #b8b6ae; }
+
+    /* ------------------------------------------------------------------------------- Publicaciones en Comunidad */
+    .perfil-card #perfilPublicacionesSeccion { scroll-margin-top: 140px; }
+    .perfil-card #perfilPublicacionesSeccion .perfil-seccion-titulo { display: block; padding: 30px 0 14px; background: none !important; font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif; font-size: 22px; line-height: 1.15; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--sala-titulo) !important; }
+    .perfil-card #perfilPublicacionesSeccion .perfil-seccion-titulo i { display: none; }
+    .perfil-card .perfil-pub-tile { border-radius: 16px; overflow: hidden; }
+}
+
+/* Pantallas anchas: más columnas. */
+@media (min-width: 1100px) {
+    .perfil-card .sala-sellos { grid-template-columns: repeat(6, 1fr); }
+}

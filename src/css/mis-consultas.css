@@ -693,3 +693,132 @@
     font-size: 0.85rem; font-weight: 600; color: #888; cursor: pointer;
 }
 .bandeja-hilo-subtab.active { background: #324C89; color: white; }
+
+/* =====================================================================================================================
+   MIS MENSAJES (mis-consultas) — REDISEÑO DESKTOP («Luz de proyector»)
+   VA AL FINAL de mis-consultas.css. Todo dentro de @media (min-width: 769px) y colgado de .bandeja-container: mobile y los
+   demás módulos que comparten este archivo no cambian.
+   Mismo lenguaje que Mi Sala / Configuración / Preguntas frecuentes: tarjeta blanca de 860 px centrada (laterales libres para
+   los badges comerciales), título limpio, pestañas con subrayado rojo, filas y tarjetas como paneles suaves.
+   El fondo de pósters va por detrás (ver muro-mensajes.css).
+   ===================================================================================================================== */
+@media (min-width: 769px) {
+
+    .bandeja-container {
+        max-width: 860px;
+        padding: 2.2rem 2.6rem 2.4rem;
+        background: #ffffff;
+        border-radius: 28px;
+        box-shadow: 0 0 0 1px rgba(16, 24, 40, 0.05), 0 30px 60px -34px rgba(16, 24, 40, 0.28);
+    }
+
+    /* Encabezado */
+    .bandeja-container .consultas-header {
+        background: none;
+        color: #0B2A63;
+        padding: 0 0 1.4rem;
+        border-radius: 0;
+        margin-bottom: 0;
+        border-bottom: 1px solid #EAECF0;
+        overflow: visible;
+    }
+    .bandeja-container .consultas-header-decor { display: none; }
+    .bandeja-container .consultas-header .header-icon { width: 54px; height: 54px; background: rgba(229, 9, 20, 0.09); color: #E50914; }
+    .bandeja-container .consultas-header .header-text h2 { margin: 0 0 4px; font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif; font-size: 2rem; line-height: 1.1; font-weight: 700; color: #0B2A63; }
+    .bandeja-container .consultas-header .header-text p { margin: 0; font-size: 0.95rem; color: #475467; opacity: 1; }
+
+    /* Pestañas: texto con subrayado rojo (igual que la barra de Mi Sala). */
+    .bandeja-container .bandeja-tabs { gap: 1.6rem; margin: 0 0 1.4rem; border-bottom: 1px solid #EAECF0; }
+    .bandeja-container .bandeja-tab { padding: 1rem 0; font-size: 0.95rem; color: #475467; border-bottom: 3px solid transparent; margin-bottom: -1px; }
+    .bandeja-container .bandeja-tab i { font-size: 0.9rem; }
+    .bandeja-container .bandeja-tab:hover:not(.active) { color: #101828; }
+    .bandeja-container .bandeja-tab.active { color: #101828; font-weight: 700; border-bottom-color: #E50914; }
+    .bandeja-container .bandeja-tab.active i { color: #E50914; }
+
+    .bandeja-container .bandeja-usuarios-vacio { padding: 3.5rem 1rem; }
+    .bandeja-container .bandeja-usuarios-vacio i { color: #D0D5DD; }
+
+    /* Recomendaciones: cada remitente es un panel. */
+    .bandeja-container .bandeja-usuarios-lista { gap: 10px; }
+    .bandeja-container .bandeja-usuario-fila {
+        padding: 0.9rem 1.2rem;
+        background: #F9FAFB;
+        border: 1px solid #EAECF0;
+        border-radius: 16px;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .bandeja-container .bandeja-usuario-fila:hover { background: #F9FAFB; border-color: #D0D5DD; transform: translateY(-2px); box-shadow: 0 12px 22px -16px rgba(16, 24, 40, 0.35); }
+    .bandeja-container .bandeja-usuario-nombre { font-size: 0.97rem; color: #101828; }
+    .bandeja-container .bandeja-usuario-preview { font-size: 0.88rem; color: #667085; }
+    .bandeja-container .bandeja-usuario-fecha { color: #98A2B3; }
+
+    /* Hilo de un usuario */
+    .bandeja-container .bandeja-hilo-header { border-bottom-color: #EAECF0; }
+    .bandeja-container .btn-volver { background: #F2F4F7; border-radius: 999px; padding: 0.5rem 1.1rem; color: #344054; font-weight: 600; }
+    .bandeja-container .btn-volver:hover { background: #E4E7EC; }
+    .bandeja-container .bandeja-hilo-avatar { width: 40px; height: 40px; }
+    .bandeja-container .bandeja-hilo-info h3 { font-family: 'Space Grotesk', 'Inter', sans-serif; font-size: 1.15rem; color: #0B2A63; }
+    .bandeja-container .btn-hilo-seleccionar { background: #F2F4F7; border-radius: 999px; padding: 0.45rem 0.95rem; color: #344054; }
+    .bandeja-container .btn-hilo-seleccionar.activo { background: #0B2A63; color: #ffffff; }
+    .bandeja-container .bandeja-hilo-subtabs { background: #F2F4F7; padding: 4px; border-radius: 14px; gap: 4px; max-width: 380px; }
+    .bandeja-container .bandeja-hilo-subtab { background: transparent; border-radius: 11px; padding: 0.6rem; color: #475467; }
+    .bandeja-container .bandeja-hilo-subtab.active { background: #ffffff; color: #0B2A63; box-shadow: 0 1px 3px rgba(16, 24, 40, 0.16); }
+    .bandeja-container .bandeja-hilo-items { gap: 10px; }
+    .bandeja-container .bandeja-hilo-card { background: #F9FAFB; border: 1px solid #EAECF0; border-radius: 16px; padding: 1rem; }
+    .bandeja-container .bandeja-hilo-poster { width: 64px; height: 96px; border-radius: 10px; }
+    .bandeja-container .bandeja-hilo-card-titulo { font-family: 'Space Grotesk', 'Inter', sans-serif; font-size: 1rem; color: #101828; }
+    .bandeja-container .btn-marcar-vista { background: #ffffff; border: 1.5px solid #D0D5DD; border-radius: 999px; padding: 0.4rem 1rem; color: #344054; }
+    .bandeja-container .btn-marcar-vista:hover { background: #E50914; border-color: #E50914; color: #ffffff; }
+    .bandeja-container .bandeja-hilo-aviso-pendientes { border-radius: 12px; }
+
+    /* Soporte */
+    .bandeja-container .consultas-container { max-width: none; padding: 0; }
+    .bandeja-container .btn-nueva-consulta {
+        background: linear-gradient(135deg, #f0553f, #c4321f);
+        color: #ffffff;
+        border-radius: 999px;
+        padding: 0.75rem 1.5rem;
+        box-shadow: 0 10px 22px -8px rgba(196, 50, 31, 0.55);
+    }
+    .bandeja-container .btn-nueva-consulta:hover { box-shadow: 0 14px 26px -8px rgba(196, 50, 31, 0.6); }
+    .bandeja-container .consultas-lista-section,
+    .bandeja-container .consultas-hilo-section { background: none; box-shadow: none; border-radius: 0; overflow: visible; }
+    .bandeja-container .consultas-lista { gap: 10px; }
+    .bandeja-container .ticket-item {
+        padding: 1rem 1.2rem;
+        background: #F9FAFB;
+        border: 1px solid #EAECF0;
+        border-radius: 16px;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .bandeja-container .ticket-item:last-child { border-bottom: 1px solid #EAECF0; }
+    .bandeja-container .ticket-item:hover { background: #F9FAFB; border-color: #D0D5DD; transform: translateY(-2px); box-shadow: 0 12px 22px -16px rgba(16, 24, 40, 0.35); }
+    .bandeja-container .ticket-item.no-leido { background: #ffffff; border-color: rgba(229, 9, 20, 0.35); }
+    .bandeja-container .ticket-icono.abierto { background: rgba(229, 9, 20, 0.09); }
+    .bandeja-container .ticket-asunto { color: #101828; }
+    .bandeja-container .ticket-item.no-leido .ticket-asunto { color: #C4000F; }
+    .bandeja-container .ticket-preview { color: #667085; }
+    .bandeja-container .ticket-fecha { color: #98A2B3; }
+    .bandeja-container .consultas-vacio i,
+    .bandeja-container .consultas-loading { color: #98A2B3; }
+
+    /* Hilo de un ticket */
+    .bandeja-container .hilo-header { padding: 0 0 1rem; border-bottom-color: #EAECF0; }
+    .bandeja-container .hilo-info h3 { font-family: 'Space Grotesk', 'Inter', sans-serif; font-size: 1.2rem; color: #0B2A63; }
+    .bandeja-container .hilo-mensajes { padding: 1.3rem 0; max-height: 460px; scrollbar-width: none; }
+    .bandeja-container .hilo-mensajes::-webkit-scrollbar { display: none; }
+    .bandeja-container .mensaje-texto { border-radius: 18px; font-size: 0.93rem; }
+    .bandeja-container .mensaje-burbuja.usuario .mensaje-texto { background: linear-gradient(135deg, #f0553f, #c4321f); border-bottom-right-radius: 6px; }
+    .bandeja-container .mensaje-burbuja.admin .mensaje-texto { background: #F2F4F7; color: #101828; border-bottom-left-radius: 6px; }
+    .bandeja-container .hilo-responder { padding: 1rem 0 0; border-top-color: #EAECF0; }
+    .bandeja-container .hilo-textarea { border: 1.5px solid #D0D5DD; border-radius: 16px; background: #F9FAFB; }
+    .bandeja-container .hilo-textarea:focus { border-color: #E50914; background: #ffffff; }
+    .bandeja-container .btn-enviar-hilo { border-radius: 999px; padding: 0.65rem 1.5rem; background: linear-gradient(135deg, #f0553f, #c4321f); }
+    .bandeja-container .hilo-cerrado-aviso { margin: 1rem 0 0; border-radius: 14px; background: #F2F4F7; }
+
+    /* Ventana «Nueva consulta»: mismas esquinas que el resto. */
+    .bandeja-container .soporte-modal { border-radius: 24px; }
+    .bandeja-container .soporte-textarea { border-radius: 14px; }
+    .bandeja-container .btn-cancelar-soporte,
+    .bandeja-container .btn-enviar-soporte { border-radius: 999px; }
+}

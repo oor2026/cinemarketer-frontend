@@ -95,15 +95,15 @@
                 <div class="com-col-left">
                     <div class="com-col-left-inner">
                         <div class="com-categorias-label">Categorías</div>
-                        <button class="com-cat-item active" data-territory="" onclick="window.filtrarComunidad('', this)">✨ Todo</button>
-                        <button class="com-cat-item" data-territory="PELICULAS_SERIES" onclick="window.filtrarComunidad('PELICULAS_SERIES', this)">🎬 Películas</button>
-                        <button class="com-cat-item" data-territory="LO_QUE_VIENE" onclick="window.filtrarComunidad('LO_QUE_VIENE', this)">📅 Estrenos</button>
-                        <button class="com-cat-item" data-territory="GENTE_CINE" onclick="window.filtrarComunidad('GENTE_CINE', this)">🎭 Gente de cine</button>
-                        <button class="com-cat-item" data-territory="PREMIOS" onclick="window.filtrarComunidad('PREMIOS', this)">🏆 Premios</button>
-                        <button class="com-cat-item" data-territory="INDUSTRIA" onclick="window.filtrarComunidad('INDUSTRIA', this)">💰 Industria</button>
-                        <button class="com-cat-item" data-territory="EXPERIENCIA" onclick="window.filtrarComunidad('EXPERIENCIA', this)">🍿 Experiencia</button>
-                        <button class="com-cat-item" data-territory="ARTE_CULTURA" onclick="window.filtrarComunidad('ARTE_CULTURA', this)">🎓 Arte y cultura</button>
-                        <button class="com-cat-item" data-territory="EVENTOS" onclick="window.filtrarComunidad('EVENTOS', this)">🎪 Eventos</button>
+                        <button class="com-cat-item active" data-territory="" onclick="window.filtrarComunidad('', this)"><span class="com-cat-icono">✨</span><span class="com-cat-label">Todo</span></button>
+                        <button class="com-cat-item" data-territory="PELICULAS_SERIES" onclick="window.filtrarComunidad('PELICULAS_SERIES', this)"><span class="com-cat-icono">🎬</span><span class="com-cat-label">Películas</span></button>
+                        <button class="com-cat-item" data-territory="LO_QUE_VIENE" onclick="window.filtrarComunidad('LO_QUE_VIENE', this)"><span class="com-cat-icono">📅</span><span class="com-cat-label">Estrenos</span></button>
+                        <button class="com-cat-item" data-territory="GENTE_CINE" onclick="window.filtrarComunidad('GENTE_CINE', this)"><span class="com-cat-icono">🎭</span><span class="com-cat-label">Gente de cine</span></button>
+                        <button class="com-cat-item" data-territory="PREMIOS" onclick="window.filtrarComunidad('PREMIOS', this)"><span class="com-cat-icono">🏆</span><span class="com-cat-label">Premios</span></button>
+                        <button class="com-cat-item" data-territory="INDUSTRIA" onclick="window.filtrarComunidad('INDUSTRIA', this)"><span class="com-cat-icono">💰</span><span class="com-cat-label">Industria</span></button>
+                        <button class="com-cat-item" data-territory="EXPERIENCIA" onclick="window.filtrarComunidad('EXPERIENCIA', this)"><span class="com-cat-icono">🍿</span><span class="com-cat-label">Experiencia</span></button>
+                        <button class="com-cat-item" data-territory="ARTE_CULTURA" onclick="window.filtrarComunidad('ARTE_CULTURA', this)"><span class="com-cat-icono">🎓</span><span class="com-cat-label">Arte y cultura</span></button>
+                        <button class="com-cat-item" data-territory="EVENTOS" onclick="window.filtrarComunidad('EVENTOS', this)"><span class="com-cat-icono">🎪</span><span class="com-cat-label">Eventos</span></button>
                     </div>
                 </div>
 

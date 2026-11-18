@@ -1214,3 +1214,103 @@ select.modal-edicion-input {
 
     #modalEliminarCuenta .modal-edicion-header { background: #c4321f !important; }
 }
+
+/* =====================================================================================================================
+   CONFIGURACIÓN — REDISEÑO DESKTOP («Luz de proyector»)
+   VA AL FINAL de mi-cuenta.css. Todo dentro de @media (min-width: 769px): mobile no cambia.
+   Mismo lenguaje que Mi Sala: títulos limpios (Space Grotesk, azul marino), paneles suaves en vez de barras azules,
+   rojo solo como acento. La columna de contenido queda angosta y centrada para dejar libres los laterales
+   (badges comerciales); el fondo de pósters pasa por detrás (ver muro-cuenta.css).
+   ===================================================================================================================== */
+@media (min-width: 769px) {
+
+    .profile-card {
+        max-width: 860px;
+        padding: 2.2rem 2.6rem 2.4rem;
+        border-radius: 28px;
+        box-shadow: 0 0 0 1px rgba(16, 24, 40, 0.05), 0 30px 60px -34px rgba(16, 24, 40, 0.28);
+    }
+
+    /* Encabezado: de la caja azul con engranaje a un título limpio con línea fina. */
+    .cuenta-header-v2 {
+        background: none;
+        color: #0B2A63;
+        padding: 0 0 1.4rem;
+        border-radius: 0;
+        margin-bottom: 1.2rem;
+        border-bottom: 1px solid #EAECF0;
+        overflow: visible;
+    }
+    .cuenta-header-v2-decor { display: none; }
+    .cuenta-header-v2-titulo-row { gap: 1rem; }
+    .cuenta-header-v2-icono { width: 54px; height: 54px; background: rgba(229, 9, 20, 0.09); color: #E50914; font-size: 1.45rem; }
+    .cuenta-header-v2-texto h2 { margin: 0 0 4px; font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif; font-size: 2rem; line-height: 1.1; font-weight: 700; color: #0B2A63; }
+    .cuenta-header-v2-texto p { margin: 0; font-size: 0.95rem; color: #475467; opacity: 1; }
+
+    /* Secciones: sin caja ni barra azul; título limpio y contenido en paneles suaves. */
+    .cuenta-seccion {
+        margin: 2.2rem 0 0;
+        background: none;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        overflow: visible;
+    }
+    .cuenta-seccion-titulo {
+        padding: 0;
+        margin: 0 0 0.9rem;
+        background: none;
+        font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+        font-size: 1.4rem;
+        line-height: 1.15;
+        font-weight: 700;
+        letter-spacing: 0;
+        text-transform: none;
+        color: #0B2A63;
+        gap: 0.6rem;
+    }
+    .cuenta-seccion-titulo i { font-size: 1rem; color: #E50914; }
+    .cuenta-seccion-titulo-suelto { margin: 1.6rem 0 0.9rem; }
+
+    /* Datos personales */
+    .datos-grid { gap: 12px; }
+    .dato-card {
+        background: #F9FAFB;
+        border: 1px solid #EAECF0;
+        border-radius: 16px;
+        padding: 1rem 1.2rem;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .dato-card:hover { transform: translateY(-2px); border-color: #D0D5DD; box-shadow: 0 12px 22px -16px rgba(16, 24, 40, 0.35); }
+    .dato-icon { width: 40px; height: 40px; border-radius: 12px; background: rgba(229, 9, 20, 0.09); font-size: 16px; }
+    .dato-label { font-size: 10.5px; font-weight: 600; letter-spacing: 0.06em; color: #667085; }
+    .dato-valor { font-size: 14px; font-weight: 600; color: #101828; }
+    .dato-edit-btn { top: 12px; right: 12px; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0.55; }
+    .dato-edit-btn:hover { opacity: 1; background: rgba(229, 9, 20, 0.09); }
+
+    /* Eliminar cuenta: acción peligrosa, discreta (contorno) en vez de un bloque rojo lleno. */
+    .btn-eliminar-cuenta {
+        background: transparent;
+        color: #B42318;
+        border: 1.5px solid rgba(180, 35, 24, 0.45);
+        border-radius: 999px;
+        padding: 0.7rem 1.6rem;
+        font-size: 0.88rem;
+    }
+    .btn-eliminar-cuenta:hover { background: #B42318; color: #ffffff; border-color: #B42318; }
+
+    /* Configuración de mi cuenta: los dos bloques (notificaciones y usuarios bloqueados) son paneles, igual que los datos. */
+    .cuenta-seccion > div[style*="border:1px solid #f0f0f0"] {
+        background: #F9FAFB;
+        border: 1px solid #EAECF0 !important;
+        border-radius: 18px !important;
+        padding: 1.3rem 1.4rem !important;
+    }
+    .cuenta-seccion > div[style*="border:1px solid #f0f0f0"] p:first-child,
+    .cuenta-seccion > div[style*="border:1px solid #f0f0f0"] > div > div > p:first-child { color: #101828 !important; }
+
+    /* Suscripciones: la tarjeta negra se queda (es la marca del plan), con las mismas esquinas que el resto. */
+    .cuenta-premium-panel { margin-bottom: 0; }
+    .premium-banner { border-radius: 24px; }
+    .plan-carousel-dot.active { background: #0B2A63; }
+}

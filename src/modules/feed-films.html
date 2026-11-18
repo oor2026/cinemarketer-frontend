@@ -1,11 +1,61 @@
 <div class="feed-container">
-    <!-- HEADER CON BIENVENIDA (desktop — sin cambios) -->
-    <div class="feed-header">
-        <div class="header-content">
-            <h1>¡Lo mejor del cine está en vos!</h1>
-            <p>La única y verdadera red social de cine donde descubrir, votar y comentar tiene su recompensa. ¡Empecemos!</p>
+    <!-- HERO DE INICIO (escritorio): saludo, título y accesos rápidos (el asistente es el botón flotante de js/feed-asistente.js).
+         Solo se ve en pantallas ≥ 769 px (ver css/feed-cine-desktop.css); en mobile está oculto. -->
+    <section class="fcd-hero" id="fcdHero" aria-label="Bienvenida">
+        <div class="fcd-hero-cabecera">
+            <div class="fcd-hero-textos">
+                <div class="fcd-saludo" id="inicioSaludoNombre">Hola</div>
+                <h1 class="fcd-titulo">Votá, comentá y sumá puntos</h1>
+            </div>
+            <p class="fcd-sub">La única y verdadera red social de cine donde descubrir, votar y comentar tiene su recompensa. ¡Empecemos!</p>
         </div>
-    </div>
+
+        <div class="fcd-accesos">
+            <button type="button" class="fcd-acceso" onclick="window.accesoRapidoInicio('buscar-titulo')">
+                <i class="fas fa-film fcd-acceso-decor tono-rojo"></i>
+                <i class="fas fa-chevron-right fcd-acceso-flecha"></i>
+                <span class="fcd-acceso-icono tono-rojo"><i class="fas fa-clapperboard"></i></span>
+                <span><span class="fcd-acceso-titulo">Buscar una película o serie</span><span class="fcd-acceso-sub">Por título</span></span>
+            </button>
+            <button type="button" class="fcd-acceso" onclick="window.accesoRapidoInicio('donde-verla')">
+                <i class="fas fa-tv fcd-acceso-decor tono-marino"></i>
+                <i class="fas fa-chevron-right fcd-acceso-flecha"></i>
+                <span class="fcd-acceso-icono tono-marino"><i class="fas fa-play"></i></span>
+                <span><span class="fcd-acceso-titulo">Dónde verla</span><span class="fcd-acceso-sub">Por plataforma</span></span>
+            </button>
+            <button type="button" class="fcd-acceso" onclick="window.accesoRapidoInicio('actor-director')">
+                <i class="fas fa-camera-retro fcd-acceso-decor tono-marino"></i>
+                <i class="fas fa-chevron-right fcd-acceso-flecha"></i>
+                <span class="fcd-acceso-icono tono-marino"><i class="fas fa-user"></i></span>
+                <span><span class="fcd-acceso-titulo">Actor, actriz o director</span><span class="fcd-acceso-sub">Buscar por nombre</span></span>
+            </button>
+            <button type="button" class="fcd-acceso" onclick="window.accesoRapidoInicio('trabajaron-juntos')">
+                <i class="fas fa-user-friends fcd-acceso-decor tono-rojo"></i>
+                <i class="fas fa-chevron-right fcd-acceso-flecha"></i>
+                <span class="fcd-acceso-icono tono-rojo"><i class="fas fa-users"></i></span>
+                <span><span class="fcd-acceso-titulo">Trabajaron juntos</span><span class="fcd-acceso-sub">Películas con dos personas a la vez</span></span>
+            </button>
+
+            <div class="fcd-accesos-etiqueta">Tu actividad</div>
+
+            <button type="button" class="fcd-acceso fcd-acceso-chip" title="Puntos, acumulados y cupos" onclick="window.accesoRapidoInicio('como-vengo')">
+                <span class="fcd-acceso-icono tono-rojo"><i class="fas fa-chart-line"></i></span>
+                <span class="fcd-acceso-titulo">¿Cómo vengo este mes?</span>
+            </button>
+            <button type="button" class="fcd-acceso fcd-acceso-chip" title="Premios a tu alcance" onclick="window.accesoRapidoInicio('que-aprovechar')">
+                <span class="fcd-acceso-icono tono-marino"><i class="fas fa-star"></i></span>
+                <span class="fcd-acceso-titulo">Qué puedo aprovechar</span>
+            </button>
+            <button type="button" class="fcd-acceso fcd-acceso-chip" title="Lo que te dio tu suscripción" onclick="window.accesoRapidoInicio('mi-premium')">
+                <span class="fcd-acceso-icono tono-marino"><i class="fas fa-crown"></i></span>
+                <span class="fcd-acceso-titulo">Mi Premium este mes</span>
+            </button>
+            <button type="button" class="fcd-acceso fcd-acceso-chip" title="Tu nivel y qué te falta" onclick="window.accesoRapidoInicio('mis-insignias')">
+                <span class="fcd-acceso-icono tono-rojo"><i class="fas fa-medal"></i></span>
+                <span class="fcd-acceso-titulo">Mis insignias</span>
+            </button>
+        </div>
+    </section>
 
     <!-- INICIO MOBILE: saludo + entrada al asistente. Solo mobile —
          en desktop este bloque no se muestra y el feed-header de
@@ -523,180 +573,191 @@
             <div class="inicio-catalogo-titulo" style="text-align: center;">Votá, comentá y sumá puntos</div>
         </div>
 
-    <!-- BANNER HORIZONTAL (se muestra solo si hay banner activo para FEED_FILMS) -->
-    <div id="feedBannerHorizontal" style="display:none;">
-        <a href="#" target="_blank" rel="noopener noreferrer sponsored" id="feedBannerLink">
-            <img src="" alt="Publicidad" id="feedBannerImg" class="feed-banner-img">
-        </a>
-        <span class="feed-banner-label">Publicidad</span>
-    </div>
-
-    <!-- FILTROS (cargados dinámicamente) -->
-    <div id="filtros-container"></div>
-
-    <!-- RESULTADOS (PELÍCULAS) -->
-    <div class="resultados-header" id="resultadosHeader" style="display:none;">
-        <div class="criterio-busqueda-pill">
-            <i class="fas fa-search"></i>
-            <span id="criterioBusquedaTexto">Resultados de búsqueda</span>
-            <button onclick="window.limpiarFiltros()" aria-label="Cerrar búsqueda"><i class="fas fa-times"></i></button>
+        <!-- BANNER HORIZONTAL (se muestra solo si hay banner activo para FEED_FILMS) -->
+        <div id="feedBannerHorizontal" style="display:none;">
+            <a href="#" target="_blank" rel="noopener noreferrer sponsored" id="feedBannerLink">
+                <img src="" alt="Publicidad" id="feedBannerImg" class="feed-banner-img">
+            </a>
+            <span class="feed-banner-label">Publicidad</span>
         </div>
-        <h3>Películas encontradas <span id="resultadosCount">0</span></h3>
-    </div>
 
-    <!-- RESULTADOS (SERIES) -->
-    <div class="resultados-header" id="resultadosHeaderSerie" style="display:none;">
-        <div class="criterio-busqueda-pill">
-            <i class="fas fa-search"></i>
-            <span id="criterioBusquedaTextoSerie">Resultados de búsqueda</span>
-            <button onclick="window.limpiarFiltros()" aria-label="Cerrar búsqueda"><i class="fas fa-times"></i></button>
+        <!-- FILTROS (cargados dinámicamente) -->
+        <div id="filtros-container"></div>
+
+        <!-- RESULTADOS (PELÍCULAS) -->
+        <div class="resultados-header" id="resultadosHeader" style="display:none;">
+            <div class="criterio-busqueda-pill">
+                <i class="fas fa-search"></i>
+                <span id="criterioBusquedaTexto">Resultados de búsqueda</span>
+                <button onclick="window.limpiarFiltros()" aria-label="Cerrar búsqueda"><i class="fas fa-times"></i></button>
+            </div>
+            <h3>Películas encontradas <span id="resultadosCount">0</span></h3>
         </div>
-        <h3>Series encontradas <span id="resultadosCountSerie">0</span></h3>
-    </div>
 
-    <!-- TABS PELÍCULAS / COMUNIDAD -->
-    <div class="feed-tabs">
-        <button class="feed-tab active" id="tabPeliculas" onclick="window.seleccionarTabFeed('peliculas', this)">
-            🎬 Películas
-        </button>
-        <button class="feed-tab" id="tabSeries" onclick="window.seleccionarTabFeed('series', this)">
-            📺 Series
-        </button>
-        <button class="feed-tab" id="tabComunidad"
-                         onclick="window.seleccionarTabFeed('comunidad', this)">
-        <i class="fas fa-pen-alt"></i> Comunidad
-    </button>
-        <button class="feed-tab-filtro" onclick="window.abrirFiltrosMobile()" title="Filtros">
-            <span class="feed-tab-filtro-label">Filtros avanzados</span>
-            <i class="fas fa-sliders-h feed-tab-filtro-icono-desktop"></i>
-            <i class="fas fa-search feed-tab-filtro-icono-mobile"></i>
-        </button>
-    </div>
-
-    <!-- CARRUSEL DESTACADO (película + premios, configurado por el admin) -->
-    <div id="destacadaContainer" style="display:none;">
-        <div class="destacada-label" id="destacadaLabel">⭐ Destacado</div>
-        <div class="destacada-card" id="destacadaCard"></div>
-        <div class="destacada-dots" id="destacadaDots" style="display:none;"></div>
-    </div>
-
-        <div id="destacadaContainerSerie" style="display:none;">
-            <div class="destacada-label" id="destacadaLabelSerie">⭐ Destacado</div>
-            <div class="destacada-card" id="destacadaCardSerie"></div>
-            <div class="destacada-dots" id="destacadaDotsSerie" style="display:none;"></div>
+        <!-- RESULTADOS (SERIES) -->
+        <div class="resultados-header" id="resultadosHeaderSerie" style="display:none;">
+            <div class="criterio-busqueda-pill">
+                <i class="fas fa-search"></i>
+                <span id="criterioBusquedaTextoSerie">Resultados de búsqueda</span>
+                <button onclick="window.limpiarFiltros()" aria-label="Cerrar búsqueda"><i class="fas fa-times"></i></button>
+            </div>
+            <h3>Series encontradas <span id="resultadosCountSerie">0</span></h3>
         </div>
-        <!-- MISIÓN DE HOY: la completa misiones.js con la misión MÁS FÁCIL de cumplir (la elige el servidor). Es un botón que abre
-             «Tus misiones». Mientras el servidor no tenga misiones queda oculta. Solo mobile. -->
-        <button type="button" class="inicio-mision" id="inicioMision" hidden style="display:none;" aria-label="Misiones"></button>
-           </div><!-- /inicio-hero-mobile -->
+
+        <!-- TABS PELÍCULAS / COMUNIDAD -->
+        <div class="feed-tabs">
+            <button class="feed-tab active" id="tabPeliculas" onclick="window.seleccionarTabFeed('peliculas', this)">
+                🎬 Películas
+            </button>
+            <button class="feed-tab" id="tabSeries" onclick="window.seleccionarTabFeed('series', this)">
+                📺 Series
+            </button>
+            <button class="feed-tab" id="tabComunidad"
+                    onclick="window.seleccionarTabFeed('comunidad', this)">
+                <i class="fas fa-pen-alt"></i> Comunidad
+            </button>
+            <button class="feed-tab-filtro" onclick="window.abrirFiltrosMobile()" title="Filtros">
+                <span class="feed-tab-filtro-label">Filtros avanzados</span>
+                <i class="fas fa-sliders-h feed-tab-filtro-icono-desktop"></i>
+                <i class="fas fa-search feed-tab-filtro-icono-mobile"></i>
+            </button>
+        </div>
+
+        <!-- ESCENA DE INICIO: el carrusel destacado y, al costado en escritorio, la Misión de hoy, el Voto Relámpago y la trivia.
+             En mobile los tres envoltorios (.fcd-escena*) son display:contents: desaparecen y todo queda como antes. -->
+        <div class="fcd-escena">
+            <div class="fcd-escena-principal">
+                <div id="destacadaContainer" style="display:none;">
+                    <div class="destacada-label" id="destacadaLabel">⭐ Destacado</div>
+                    <div class="destacada-card" id="destacadaCard"></div>
+                    <div class="destacada-dots" id="destacadaDots" style="display:none;"></div>
+                </div>
+
+                <div id="destacadaContainerSerie" style="display:none;">
+                    <div class="destacada-label" id="destacadaLabelSerie">⭐ Destacado</div>
+                    <div class="destacada-card" id="destacadaCardSerie"></div>
+                    <div class="destacada-dots" id="destacadaDotsSerie" style="display:none;"></div>
+                </div>
+            </div>
+            <div class="fcd-escena-lateral">
+                <!-- MISIÓN DE HOY: la completa misiones.js con la misión MÁS FÁCIL de cumplir (la elige el servidor). Es un botón que abre
+                     «Tus misiones». Mientras el servidor no tenga misiones queda oculta. Solo mobile. -->
+                <button type="button" class="inicio-mision" id="inicioMision" hidden style="display:none;" aria-label="Misiones"></button>
+                <!-- VOTO RELÁMPAGO (escritorio): abre el mismo modal que en mobile (ver dashboard.html). Oculto en mobile. -->
+                <button type="button" class="fcd-vr" onclick="window.abrirVotoRelampagoModal()">
+                    <i class="fas fa-bolt fcd-vr-rayo" aria-hidden="true"></i>
+                    <span class="fcd-vr-icono"><i class="fas fa-bolt"></i></span>
+                    <span><span class="fcd-vr-titulo">Voto Relámpago</span><span class="fcd-vr-sub">Tu voto, en un toque</span></span>
+                    <span class="fcd-vr-cta">Comenzar</span>
+                </button>
+
+                <!-- ADIVINA ADIVINADOR (trivia diaria) -->
+                <div id="triviaBadgeContainer" style="display:none;" onclick="window.abrirTrivia()">
+                    <!-- Viñeta que aparece sola, sin necesitar click — solo mobile. -->
+                    <div class="trivia-vineta-mobile" id="triviaVinetaMobile">
+                        <div class="trivia-vineta-mobile-inner">
+                            <p id="triviaVinetaTexto"></p>
+                        </div>
+                    </div>
+                    <div class="trivia-badge trivia-badge-peliculas">
+                        <i class="fas fa-clapperboard trivia-bg-icon" style="top:-10px; left:8%; font-size:34px; transform:rotate(-18deg);"></i>
+                        <i class="fas fa-film trivia-bg-icon" style="bottom:-12px; left:32%; font-size:26px; transform:rotate(12deg);"></i>
+                        <i class="fas fa-star trivia-bg-icon" style="top:6px; left:58%; font-size:18px; transform:rotate(-8deg);"></i>
+                        <i class="fas fa-video trivia-bg-icon" style="bottom:-8px; right:14%; font-size:30px; transform:rotate(20deg);"></i>
+                        <i class="fas fa-ticket trivia-bg-icon" style="top:-8px; right:2%; font-size:22px; transform:rotate(-15deg);"></i>
+                        <i class="fas fa-popcorn trivia-bg-icon" style="top:40%; left:46%; font-size:20px; transform:rotate(-6deg);"></i>
+                        <i class="fas fa-star trivia-bg-icon" style="bottom:30%; left:18%; font-size:14px; transform:rotate(10deg);"></i>
+                        <i class="fas fa-clapperboard trivia-bg-icon" style="top:50%; right:26%; font-size:18px; transform:rotate(16deg);"></i>
+                        <i class="fas fa-film trivia-bg-icon" style="bottom:-10px; right:38%; font-size:22px; transform:rotate(-12deg);"></i>
+
+                        <div class="trivia-badge-icon"><i class="fas fa-question-circle"></i></div>
+                        <div class="trivia-badge-texto">
+                            <p class="trivia-badge-titulo">Trivia de películas</p>
+                            <p class="trivia-badge-sub" id="triviaBadgeSub">Cargando...</p>
+                        </div>
+                        <i class="fas fa-chevron-right trivia-badge-chevron"></i>
+                    </div>
+                </div>
+
+                <!-- TRIVIA DE SERIES (badge y modales — misma estructura que la de Películas) -->
+                <div id="triviaSeriesBadgeContainer" style="display:none;" onclick="window.abrirTriviaSeries()">
+                    <!-- Viñeta que aparece sola, sin necesitar click — solo mobile. -->
+                    <div class="trivia-vineta-mobile" id="triviaVinetaSeriesMobile">
+                        <div class="trivia-vineta-mobile-inner">
+                            <p id="triviaVinetaSeriesTexto"></p>
+                        </div>
+                    </div>
+                    <div class="trivia-badge trivia-badge-series">
+                        <i class="fas fa-tv trivia-bg-icon" style="top:-10px; left:8%; font-size:34px; transform:rotate(-18deg);"></i>
+                        <i class="fas fa-satellite-dish trivia-bg-icon" style="bottom:-12px; left:32%; font-size:26px; transform:rotate(12deg);"></i>
+                        <i class="fas fa-star trivia-bg-icon" style="top:6px; left:58%; font-size:18px; transform:rotate(-8deg);"></i>
+                        <i class="fas fa-couch trivia-bg-icon" style="bottom:-8px; right:14%; font-size:30px; transform:rotate(20deg);"></i>
+                        <i class="fas fa-tablet-alt trivia-bg-icon" style="top:-8px; right:2%; font-size:22px; transform:rotate(-15deg);"></i>
+                        <i class="fas fa-play-circle trivia-bg-icon" style="top:40%; left:46%; font-size:20px; transform:rotate(-6deg);"></i>
+                        <i class="fas fa-star trivia-bg-icon" style="bottom:30%; left:18%; font-size:14px; transform:rotate(10deg);"></i>
+                        <i class="fas fa-tv trivia-bg-icon" style="top:50%; right:26%; font-size:18px; transform:rotate(16deg);"></i>
+                        <i class="fas fa-headphones trivia-bg-icon" style="bottom:-10px; right:38%; font-size:22px; transform:rotate(-12deg);"></i>
+
+                        <div class="trivia-badge-icon"><i class="fas fa-question-circle"></i></div>
+                        <div class="trivia-badge-texto">
+                            <p class="trivia-badge-titulo">Trivia de Series</p>
+                            <p class="trivia-badge-sub" id="triviaSeriesBadgeSub">Cargando...</p>
+                        </div>
+                        <i class="fas fa-chevron-right trivia-badge-chevron"></i>
+                    </div>
+                </div>
+            </div><!-- /fcd-escena-lateral -->
+        </div><!-- /fcd-escena -->
+    </div><!-- /inicio-hero-mobile -->
 
     <!-- FILTROS (mobile): selector Películas/Series + íconos de orden y género. Acá empieza el degradé de color (rojo en
          Películas, azul en Series) y baja por detrás de los íconos. En escritorio no tiene efecto. -->
     <div class="inicio-catalogo-mobile" id="inicioCatalogoMobile">
         <div class="inicio-catalogo-header">
             <div class="inicio-switch-tipo" id="inicioSwitchTipo">
-            <div class="inicio-switch-tipo-track">
-                <button type="button" class="inicio-switch-btn active" id="inicioSwitchPeliculas" onclick="window.cambiarSwitchTipoInicio('peliculas', this)"><i class="fas fa-clapperboard"></i> Películas</button>
-                <button type="button" class="inicio-switch-btn" id="inicioSwitchSeries" onclick="window.cambiarSwitchTipoInicio('series', this)"><i class="fas fa-tv"></i> Series</button>
+                <div class="inicio-switch-tipo-track">
+                    <button type="button" class="inicio-switch-btn active" id="inicioSwitchPeliculas" onclick="window.cambiarSwitchTipoInicio('peliculas', this)"><i class="fas fa-clapperboard"></i> Películas</button>
+                    <button type="button" class="inicio-switch-btn" id="inicioSwitchSeries" onclick="window.cambiarSwitchTipoInicio('series', this)"><i class="fas fa-tv"></i> Series</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- ADIVINA ADIVINADOR (trivia diaria) -->
-    <div id="triviaBadgeContainer" style="display:none;" onclick="window.abrirTrivia()">
-        <!-- Viñeta que aparece sola, sin necesitar click — solo mobile. -->
-        <div class="trivia-vineta-mobile" id="triviaVinetaMobile">
-            <div class="trivia-vineta-mobile-inner">
-                <p id="triviaVinetaTexto"></p>
+
+        <!-- #triviaSeriesModal también se mudó a dashboard.html. -->
+
+        <div id="rankingTriviaSeriesModal" class="trivia-modal-overlay" style="display:none;">
+            <div class="trivia-modal trivia-modal-series">
+                <button class="trivia-cerrar" onclick="window.cerrarRankingTriviaSeries()"><i class="fas fa-times"></i></button>
+                <div id="rankingTriviaSeriesContenido"></div>
             </div>
         </div>
-        <div class="trivia-badge trivia-badge-peliculas">
-            <i class="fas fa-clapperboard trivia-bg-icon" style="top:-10px; left:8%; font-size:34px; transform:rotate(-18deg);"></i>
-            <i class="fas fa-film trivia-bg-icon" style="bottom:-12px; left:32%; font-size:26px; transform:rotate(12deg);"></i>
-            <i class="fas fa-star trivia-bg-icon" style="top:6px; left:58%; font-size:18px; transform:rotate(-8deg);"></i>
-            <i class="fas fa-video trivia-bg-icon" style="bottom:-8px; right:14%; font-size:30px; transform:rotate(20deg);"></i>
-            <i class="fas fa-ticket trivia-bg-icon" style="top:-8px; right:2%; font-size:22px; transform:rotate(-15deg);"></i>
-            <i class="fas fa-popcorn trivia-bg-icon" style="top:40%; left:46%; font-size:20px; transform:rotate(-6deg);"></i>
-            <i class="fas fa-star trivia-bg-icon" style="bottom:30%; left:18%; font-size:14px; transform:rotate(10deg);"></i>
-            <i class="fas fa-clapperboard trivia-bg-icon" style="top:50%; right:26%; font-size:18px; transform:rotate(16deg);"></i>
-            <i class="fas fa-film trivia-bg-icon" style="bottom:-10px; right:38%; font-size:22px; transform:rotate(-12deg);"></i>
 
-            <div class="trivia-badge-icon"><i class="fas fa-question-circle"></i></div>
-            <div class="trivia-badge-texto">
-                <p class="trivia-badge-titulo">Trivia de películas</p>
-                <p class="trivia-badge-sub" id="triviaBadgeSub">Cargando...</p>
-            </div>
-            <i class="fas fa-chevron-right trivia-badge-chevron"></i>
+        <!-- Voto Relámpago se mudó a un modal aparte (ver dashboard.html),
+             disparado por el botón flotante amarillo. El HTML se movió
+             tal cual, mismos IDs — la lógica de carga/voto en
+             feed-films.js no se tocó para nada. -->
+
+        <!-- PILLS DE ORDENAMIENTO -->
+        <div class="ordenar-pills" id="ordenarPills">
+            <button class="pill-orden active" data-criterio="fecha" onclick="window.seleccionarOrden('fecha', this)">
+                <span class="pill-orden-icono"><i class="fas fa-fire"></i></span>
+                <span class="pill-orden-label">Más populares</span>
+            </button>
+            <button class="pill-orden" data-criterio="proximamente" onclick="window.seleccionarOrden('proximamente', this)">
+                <span class="pill-orden-icono"><i class="fas fa-clapperboard"></i></span>
+                <span class="pill-orden-label">Lo que se viene</span>
+            </button>
+            <button class="pill-orden" data-criterio="votos" onclick="window.seleccionarOrden('votos', this)">
+                <span class="pill-orden-icono"><i class="fas fa-thumbs-up"></i></span>
+                <span class="pill-orden-label">Más votadas</span>
+            </button>
+            <button class="pill-orden" data-criterio="titulo" onclick="window.seleccionarOrden('titulo', this)">
+                <span class="pill-orden-icono"><i class="fas fa-arrow-down-a-z"></i></span>
+                <span class="pill-orden-label">Título A-Z</span>
+            </button>
         </div>
-    </div>
 
-    <!-- #triviaModal y #rankingTriviaModal se mudaron a dashboard.html
-         (mismo criterio que Voto Relámpago) — la lógica en trivia.js
-         no se tocó. -->
-
-    <!-- TRIVIA DE SERIES (badge y modales — misma estructura que la de Películas) -->
-    <div id="triviaSeriesBadgeContainer" style="display:none;" onclick="window.abrirTriviaSeries()">
-        <!-- Viñeta que aparece sola, sin necesitar click — solo mobile. -->
-        <div class="trivia-vineta-mobile" id="triviaVinetaSeriesMobile">
-            <div class="trivia-vineta-mobile-inner">
-                <p id="triviaVinetaSeriesTexto"></p>
-            </div>
-        </div>
-        <div class="trivia-badge trivia-badge-series">
-            <i class="fas fa-tv trivia-bg-icon" style="top:-10px; left:8%; font-size:34px; transform:rotate(-18deg);"></i>
-            <i class="fas fa-satellite-dish trivia-bg-icon" style="bottom:-12px; left:32%; font-size:26px; transform:rotate(12deg);"></i>
-            <i class="fas fa-star trivia-bg-icon" style="top:6px; left:58%; font-size:18px; transform:rotate(-8deg);"></i>
-            <i class="fas fa-couch trivia-bg-icon" style="bottom:-8px; right:14%; font-size:30px; transform:rotate(20deg);"></i>
-            <i class="fas fa-tablet-alt trivia-bg-icon" style="top:-8px; right:2%; font-size:22px; transform:rotate(-15deg);"></i>
-            <i class="fas fa-play-circle trivia-bg-icon" style="top:40%; left:46%; font-size:20px; transform:rotate(-6deg);"></i>
-            <i class="fas fa-star trivia-bg-icon" style="bottom:30%; left:18%; font-size:14px; transform:rotate(10deg);"></i>
-            <i class="fas fa-tv trivia-bg-icon" style="top:50%; right:26%; font-size:18px; transform:rotate(16deg);"></i>
-            <i class="fas fa-headphones trivia-bg-icon" style="bottom:-10px; right:38%; font-size:22px; transform:rotate(-12deg);"></i>
-
-            <div class="trivia-badge-icon"><i class="fas fa-question-circle"></i></div>
-            <div class="trivia-badge-texto">
-                <p class="trivia-badge-titulo">Trivia de Series</p>
-                <p class="trivia-badge-sub" id="triviaSeriesBadgeSub">Cargando...</p>
-            </div>
-            <i class="fas fa-chevron-right trivia-badge-chevron"></i>
-        </div>
-    </div>
-
-    <!-- #triviaSeriesModal también se mudó a dashboard.html. -->
-
-    <div id="rankingTriviaSeriesModal" class="trivia-modal-overlay" style="display:none;">
-        <div class="trivia-modal trivia-modal-series">
-            <button class="trivia-cerrar" onclick="window.cerrarRankingTriviaSeries()"><i class="fas fa-times"></i></button>
-            <div id="rankingTriviaSeriesContenido"></div>
-        </div>
-    </div>
-
-    <!-- Voto Relámpago se mudó a un modal aparte (ver dashboard.html),
-         disparado por el botón flotante amarillo. El HTML se movió
-         tal cual, mismos IDs — la lógica de carga/voto en
-         feed-films.js no se tocó para nada. -->
-
-    <!-- PILLS DE ORDENAMIENTO -->
-    <div class="ordenar-pills" id="ordenarPills">
-        <button class="pill-orden active" data-criterio="fecha" onclick="window.seleccionarOrden('fecha', this)">
-            <span class="pill-orden-icono"><i class="fas fa-fire"></i></span>
-            <span class="pill-orden-label">Más populares</span>
-        </button>
-        <button class="pill-orden" data-criterio="proximamente" onclick="window.seleccionarOrden('proximamente', this)">
-            <span class="pill-orden-icono"><i class="fas fa-clapperboard"></i></span>
-            <span class="pill-orden-label">Lo que se viene</span>
-        </button>
-        <button class="pill-orden" data-criterio="votos" onclick="window.seleccionarOrden('votos', this)">
-            <span class="pill-orden-icono"><i class="fas fa-thumbs-up"></i></span>
-            <span class="pill-orden-label">Más votadas</span>
-        </button>
-        <button class="pill-orden" data-criterio="titulo" onclick="window.seleccionarOrden('titulo', this)">
-            <span class="pill-orden-icono"><i class="fas fa-arrow-down-a-z"></i></span>
-            <span class="pill-orden-label">Título A-Z</span>
-        </button>
-    </div>
-
-    <!-- PILLS DE ORDENAMIENTO — SERIES (poblado por JS, igual que el de arriba) -->
+        <!-- PILLS DE ORDENAMIENTO — SERIES (poblado por JS, igual que el de arriba) -->
         <div class="ordenar-pills" id="ordenarPillsSerie" style="display:none;"></div>
     </div><!-- /inicio-catalogo-mobile -->
 
@@ -743,58 +804,58 @@
             <button class="modal-cerrar-externa" onclick="window.cerrarModal()">×</button>
             <div class="modal-contenido">
 
-            <!-- HEADER: título + rating + cerrar -->
-            <div class="modal-header">
-                <h2 id="modalTitulo">Título de la película</h2>
-                <img class="modal-logo-barra" id="modalLogoBarra" alt="">
-                <div class="modal-header-right">
-                    <div class="modal-rating" id="modalRating">⭐ <span class="modal-rating-num">0</span><span class="modal-rating-label"> votos</span></div>
-                    <div class="modal-rating modal-badge-comentarios" id="modalComentariosCount">💬 <span class="modal-rating-num">0</span><span class="modal-rating-label"> comentarios</span></div>
-                    <button id="btnDondeVerlaModal"
-                            onclick="window.abrirDondeVerla(window.peliculaActualId, event)"
-                            title="Dónde verla"
-                            style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
-                        <i class="fas fa-tv" style="font-size:0.85rem;"></i>
-                    </button>
-                    <button id="btnNoInteresaModal"
-                            onclick="window.marcarNoInteresaPelicula(window.peliculaActualId, event)"
-                            title="No me interesa"
-                            style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
-                        <i class="fas fa-minus-circle" style="font-size:0.85rem;"></i>
-                    </button>
-                    <button id="btnCompartirModal"
-                            onclick="window.compartirPelicula(window.peliculaActualId, document.getElementById('modalTitulo').textContent)"
-                            title="Compartir"
-                            style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
-                        <i class="fas fa-share-alt" style="font-size:0.85rem;"></i>
-                    </button>
-                    <button id="btnRecomendarModalHeader"
-                            class="btn-recomendar-header"
-                            onclick="window.abrirPanelRecomendar(window.peliculaActualId, event)"
-                            title="Recomendar"
-                            style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
-                        <i class="fas fa-envelope" style="font-size:0.85rem;"></i>
-                    </button>
-                    <button id="btnPublicarModal"
-                            onclick="window.abrirWorkflowDesdeModal()"
-                            title="Publicar sobre esta película"
-                            style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
-                        <i class="fas fa-pen-alt" style="font-size:0.85rem;"></i>
-                    </button>
-                    <button class="btn-watchlist btn-watchlist-modal" id="btnWatchlistModal"
-                            onclick="window.toggleWatchlist(window.peliculaActualId, event)"
-                            title="Guardar en mi lista"
-                            style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
-                        <i class="fas fa-bookmark" style="font-size:0.85rem;"></i>
-                    </button>
-                    <button class="modal-cerrar" onclick="window.cerrarModal()">×</button>
+                <!-- HEADER: título + rating + cerrar -->
+                <div class="modal-header">
+                    <h2 id="modalTitulo">Título de la película</h2>
+                    <img class="modal-logo-barra" id="modalLogoBarra" alt="">
+                    <div class="modal-header-right">
+                        <div class="modal-rating" id="modalRating">⭐ <span class="modal-rating-num">0</span><span class="modal-rating-label"> votos</span></div>
+                        <div class="modal-rating modal-badge-comentarios" id="modalComentariosCount">💬 <span class="modal-rating-num">0</span><span class="modal-rating-label"> comentarios</span></div>
+                        <button id="btnDondeVerlaModal"
+                                onclick="window.abrirDondeVerla(window.peliculaActualId, event)"
+                                title="Dónde verla"
+                                style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+                            <i class="fas fa-tv" style="font-size:0.85rem;"></i>
+                        </button>
+                        <button id="btnNoInteresaModal"
+                                onclick="window.marcarNoInteresaPelicula(window.peliculaActualId, event)"
+                                title="No me interesa"
+                                style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+                            <i class="fas fa-minus-circle" style="font-size:0.85rem;"></i>
+                        </button>
+                        <button id="btnCompartirModal"
+                                onclick="window.compartirPelicula(window.peliculaActualId, document.getElementById('modalTitulo').textContent)"
+                                title="Compartir"
+                                style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+                            <i class="fas fa-share-alt" style="font-size:0.85rem;"></i>
+                        </button>
+                        <button id="btnRecomendarModalHeader"
+                                class="btn-recomendar-header"
+                                onclick="window.abrirPanelRecomendar(window.peliculaActualId, event)"
+                                title="Recomendar"
+                                style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+                            <i class="fas fa-envelope" style="font-size:0.85rem;"></i>
+                        </button>
+                        <button id="btnPublicarModal"
+                                onclick="window.abrirWorkflowDesdeModal()"
+                                title="Publicar sobre esta película"
+                                style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+                            <i class="fas fa-pen-alt" style="font-size:0.85rem;"></i>
+                        </button>
+                        <button class="btn-watchlist btn-watchlist-modal" id="btnWatchlistModal"
+                                onclick="window.toggleWatchlist(window.peliculaActualId, event)"
+                                title="Guardar en mi lista"
+                                style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+                            <i class="fas fa-bookmark" style="font-size:0.85rem;"></i>
+                        </button>
+                        <button class="modal-cerrar" onclick="window.cerrarModal()">×</button>
+                    </div>
                 </div>
-            </div>
 
                 <!-- BODY SCROLLABLE -->
                 <div class="modal-body">
 
-                <!-- FILA SUPERIOR: carrusel en móvil, lado a lado en desktop -->
+                    <!-- FILA SUPERIOR: carrusel en móvil, lado a lado en desktop -->
                     <!-- CAPA SOBRE LA PORTADA (solo mobile): el título (logo o texto) y los botones del encabezado, que modal-hero.js
                                          mueve acá. En escritorio no se ve. -->
                     <div class="modal-hero-capa">
@@ -807,111 +868,111 @@
                     <div class="modal-fila-superior">
 
                         <!-- CARRUSEL MÓVIL -->
-                    <div class="modal-carrusel" id="modalCarrusel">
+                        <div class="modal-carrusel" id="modalCarrusel">
 
-                        <!-- Slide 1: Poster -->
-                        <div class="carrusel-slide">
-                            <div class="modal-poster">
-                                <img id="modalPoster" src="" alt="Poster">
-                            </div>
-                        </div>
-
-                        <!-- Slide 2: Datos -->
-                        <div class="carrusel-slide">
-                            <div class="modal-columna-derecha">
-                                <div class="modal-info" id="modalInfo">
-
-                                    <div class="modal-hero-fondo" id="modalHeroFondo">
-                                        <div class="modal-stat-bar">
-                                            <div class="modal-stat-item">
-                                                <i class="fas fa-star"></i>
-                                                <span><span id="modalVotos">-</span> votos TMDB</span>
-                                            </div>
-                                            <div class="modal-stat-divider"></div>
-                                            <div class="modal-stat-item">
-                                                <i class="fas fa-fire"></i>
-                                                <span><span id="modalPopularidad">-</span> popularidad</span>
-                                            </div>
-                                        </div>
-
-                                        <div class="modal-chips-grid">
-                                            <div class="modal-chip modal-chip-red">
-                                                <div class="modal-chip-icon"><i class="fas fa-calendar-alt"></i></div>
-                                                <div class="modal-chip-texto">
-                                                    <span class="modal-chip-label">Estreno</span>
-                                                    <span class="modal-chip-valor" id="modalFecha">-</span>
-                                                </div>
-                                            </div>
-                                            <div class="modal-chip modal-chip-red">
-                                                <div class="modal-chip-icon"><i class="fas fa-clock"></i></div>
-                                                <div class="modal-chip-texto">
-                                                    <span class="modal-chip-label">Duración</span>
-                                                    <span class="modal-chip-valor"><span id="modalDuracion">-</span> min</span>
-                                                </div>
-                                            </div>
-                                            <div class="modal-chip modal-chip-red modal-chip-full">
-                                                <div class="modal-chip-icon"><i class="fas fa-globe"></i></div>
-                                                <div class="modal-chip-texto">
-                                                    <span class="modal-chip-label">Idioma</span>
-                                                    <span class="modal-chip-valor" id="modalIdioma">-</span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="modal-generos" id="modalGeneros"></div>
-                                    </div>
-
-                                    <div class="modal-sinopsis">
-                                        <div class="modal-sinopsis-titulo"><i class="fas fa-align-left"></i> Sinopsis</div>
-                                        <p id="modalSinopsis">Cargando...</p>
-                                    </div>
+                            <!-- Slide 1: Poster -->
+                            <div class="carrusel-slide">
+                                <div class="modal-poster">
+                                    <img id="modalPoster" src="" alt="Poster">
                                 </div>
                             </div>
-                        </div><!-- /slide 2 -->
 
-                    </div><!-- /modal-carrusel -->
+                            <!-- Slide 2: Datos -->
+                            <div class="carrusel-slide">
+                                <div class="modal-columna-derecha">
+                                    <div class="modal-info" id="modalInfo">
 
-                    <!-- MIGA DE PAN (dots) -->
-                    <div class="carrusel-dots" id="carruselDots">
-                        <span class="carrusel-dot active" onclick="irASlide(0)"></span>
-                        <span class="carrusel-dot" onclick="irASlide(1)"></span>
-                    </div>
+                                        <div class="modal-hero-fondo" id="modalHeroFondo">
+                                            <div class="modal-stat-bar">
+                                                <div class="modal-stat-item">
+                                                    <i class="fas fa-star"></i>
+                                                    <span><span id="modalVotos">-</span> votos TMDB</span>
+                                                </div>
+                                                <div class="modal-stat-divider"></div>
+                                                <div class="modal-stat-item">
+                                                    <i class="fas fa-fire"></i>
+                                                    <span><span id="modalPopularidad">-</span> popularidad</span>
+                                                </div>
+                                            </div>
 
-                </div><!-- /modal-fila-superior -->
+                                            <div class="modal-chips-grid">
+                                                <div class="modal-chip modal-chip-red">
+                                                    <div class="modal-chip-icon"><i class="fas fa-calendar-alt"></i></div>
+                                                    <div class="modal-chip-texto">
+                                                        <span class="modal-chip-label">Estreno</span>
+                                                        <span class="modal-chip-valor" id="modalFecha">-</span>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-chip modal-chip-red">
+                                                    <div class="modal-chip-icon"><i class="fas fa-clock"></i></div>
+                                                    <div class="modal-chip-texto">
+                                                        <span class="modal-chip-label">Duración</span>
+                                                        <span class="modal-chip-valor"><span id="modalDuracion">-</span> min</span>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-chip modal-chip-red modal-chip-full">
+                                                    <div class="modal-chip-icon"><i class="fas fa-globe"></i></div>
+                                                    <div class="modal-chip-texto">
+                                                        <span class="modal-chip-label">Idioma</span>
+                                                        <span class="modal-chip-valor" id="modalIdioma">-</span>
+                                                    </div>
+                                                </div>
+                                            </div>
 
-                <!-- ============================================== -->
-                <!-- CONTENEDOR PROPIO DEL TRÁILER -->
-                <!-- ============================================== -->
-                <!-- ELENCO & DIRECCIÓN -->
-                <div class="elenco-seccion" id="elencoSeccion" style="display:none;">
-                    <div class="elenco-header">
-                        <span class="elenco-titulo-seccion">👥 Elenco y dirección</span>
-                        <div class="elenco-tabs">
-                            <button class="elenco-tab active" id="tabElenco" onclick="window.switchElencoTab('cast')">Elenco</button>
-                            <button class="elenco-tab" id="tabDireccion" onclick="window.switchElencoTab('crew')">Dirección</button>
+                                            <div class="modal-generos" id="modalGeneros"></div>
+                                        </div>
+
+                                        <div class="modal-sinopsis">
+                                            <div class="modal-sinopsis-titulo"><i class="fas fa-align-left"></i> Sinopsis</div>
+                                            <p id="modalSinopsis">Cargando...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div><!-- /slide 2 -->
+
+                        </div><!-- /modal-carrusel -->
+
+                        <!-- MIGA DE PAN (dots) -->
+                        <div class="carrusel-dots" id="carruselDots">
+                            <span class="carrusel-dot active" onclick="irASlide(0)"></span>
+                            <span class="carrusel-dot" onclick="irASlide(1)"></span>
                         </div>
-                    </div>
-                    <div class="elenco-carrusel-outer">
-                        <button class="elenco-arrow" onclick="window.scrollElenco(-1)"><i class="fas fa-chevron-left"></i></button>
-                        <div class="elenco-track" id="elencoTrack"></div>
-                        <button class="elenco-arrow" onclick="window.scrollElenco(1)"><i class="fas fa-chevron-right"></i></button>
-                    </div>
-                </div>
 
-                <div class="trailer-propio-container" id="trailerPropioContainer">
-                    <div class="trailer-propio-wrapper">
-                        <div class="modal-trailer-container" id="modalTrailerContainer">
-                            <div class="trailer-placeholder">
-                                <i class="fas fa-film"></i>
-                                <span>Cargando tráiler...</span>
+                    </div><!-- /modal-fila-superior -->
+
+                    <!-- ============================================== -->
+                    <!-- CONTENEDOR PROPIO DEL TRÁILER -->
+                    <!-- ============================================== -->
+                    <!-- ELENCO & DIRECCIÓN -->
+                    <div class="elenco-seccion" id="elencoSeccion" style="display:none;">
+                        <div class="elenco-header">
+                            <span class="elenco-titulo-seccion">👥 Elenco y dirección</span>
+                            <div class="elenco-tabs">
+                                <button class="elenco-tab active" id="tabElenco" onclick="window.switchElencoTab('cast')">Elenco</button>
+                                <button class="elenco-tab" id="tabDireccion" onclick="window.switchElencoTab('crew')">Dirección</button>
                             </div>
                         </div>
-                        <div class="trailer-versiones" id="trailerVersiones"></div>
+                        <div class="elenco-carrusel-outer">
+                            <button class="elenco-arrow" onclick="window.scrollElenco(-1)"><i class="fas fa-chevron-left"></i></button>
+                            <div class="elenco-track" id="elencoTrack"></div>
+                            <button class="elenco-arrow" onclick="window.scrollElenco(1)"><i class="fas fa-chevron-right"></i></button>
+                        </div>
                     </div>
-                </div>
-                <!-- ============================================== -->
-                <!-- LEYENDA DE PORCENTAJE -->
-                <div id="modalLeyendaPorcentaje" style="text-align:center;font-size:0.95rem;font-weight:600;color:#333;margin:0rem 0 0.25rem;white-space:nowrap;grid-column:1/-1;width:100%;display:block;"></div>
+
+                    <div class="trailer-propio-container" id="trailerPropioContainer">
+                        <div class="trailer-propio-wrapper">
+                            <div class="modal-trailer-container" id="modalTrailerContainer">
+                                <div class="trailer-placeholder">
+                                    <i class="fas fa-film"></i>
+                                    <span>Cargando tráiler...</span>
+                                </div>
+                            </div>
+                            <div class="trailer-versiones" id="trailerVersiones"></div>
+                        </div>
+                    </div>
+                    <!-- ============================================== -->
+                    <!-- LEYENDA DE PORCENTAJE -->
+                    <div id="modalLeyendaPorcentaje" style="text-align:center;font-size:0.95rem;font-weight:600;color:#333;margin:0rem 0 0.25rem;white-space:nowrap;grid-column:1/-1;width:100%;display:block;"></div>
 
                     <!-- EXPECTATIVA — solo para películas que todavía no se
          estrenaron (fase "Lo que se viene"). No tiene sentido
@@ -943,99 +1004,99 @@
                         </button>
                     </div>
 
-                <!-- PELÍCULAS SIMILARES -->
-                <div class="similares-seccion similares-seccion-inline" style="display:none;">
-                    <h4 class="similares-titulo-seccion">🎬 Películas similares</h4>
-                    <div class="similares-carrusel-outer">
-                        <button class="similares-arrow" id="similares-arrow-left" onclick="window.scrollSimilares(-1)">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                        <div id="similares-container" class="similares-container"></div>
-                        <button class="similares-arrow" id="similares-arrow-right" onclick="window.scrollSimilares(1)">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- FILA INFERIOR: caja de comentarios (ancho completo) -->
-                <div class="modal-fila-comentarios">
-
-                    <!-- Header de la hoja (solo visible cuando está abierta a pantalla completa) -->
-                    <div class="comentarios-sheet-header" id="comentariosSheetHeader">
-                        <button onclick="window.cerrarComentariosSheet()" aria-label="Volver">
-                            <i class="fas fa-arrow-left"></i>
-                        </button>
-                        <span>Comentarios (<span id="comentariosSheetCount">0</span>)</span>
-                    </div>
-
-                    <!-- Título comentarios (solo visible en el preview, no dentro de la hoja) -->
-                    <h4 class="comentarios-seccion-titulo" id="comentariosTitulo">💬 Comentarios</h4>
-
-                    <!-- Switch modo spoiler -->
-                    <div class="spoiler-switch-row" id="spoilerSwitchRow">
-                        <label class="spoiler-switch-label" id="spoilerSwitchLabel"><span id="spoilerCountBadge"></span>Modo spoiler</label>
-                        <div class="spoiler-toggle" id="spoilerToggle" onclick="window.toggleModoSpoiler()">
-                            <div class="spoiler-toggle-dot"></div>
+                    <!-- PELÍCULAS SIMILARES -->
+                    <div class="similares-seccion similares-seccion-inline" style="display:none;">
+                        <h4 class="similares-titulo-seccion">🎬 Películas similares</h4>
+                        <div class="similares-carrusel-outer">
+                            <button class="similares-arrow" id="similares-arrow-left" onclick="window.scrollSimilares(-1)">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div id="similares-container" class="similares-container"></div>
+                            <button class="similares-arrow" id="similares-arrow-right" onclick="window.scrollSimilares(1)">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Lista de comentarios -->
-                    <div class="comentarios-lista" id="comentariosLista">
-                        <div class="sin-comentarios">Cargando comentarios...</div>
-                    </div>
+                    <!-- FILA INFERIOR: caja de comentarios (ancho completo) -->
+                    <div class="modal-fila-comentarios">
 
-                    <!-- Link "ver más" — solo visible en el preview -->
-                    <div class="ver-mas-comentarios" id="verMasComentarios" onclick="window.abrirComentariosSheet(false)">
-                        Ver los <span id="verMasCount">0</span> comentarios
-                    </div>
+                        <!-- Header de la hoja (solo visible cuando está abierta a pantalla completa) -->
+                        <div class="comentarios-sheet-header" id="comentariosSheetHeader">
+                            <button onclick="window.cerrarComentariosSheet()" aria-label="Volver">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                            <span>Comentarios (<span id="comentariosSheetCount">0</span>)</span>
+                        </div>
 
-                    <!-- Área de escritura (oculta hasta presionar Comentar) -->
-                    <div class="comentario-escritura" id="areaEscritura" style="display: none;">
-                        <div class="textarea-wrapper">
-                            <div class="textarea-emoji-col">
-                                <button id="emojiTriggerMain" type="button"
-                                        class="cep-trigger-btn" title="Insertar emoji">😊</button>
-                                <button id="gifTriggerMain" type="button"
-                                        class="cep-trigger-btn" title="Insertar GIF"
-                                        style="font-size:0.7rem;font-weight:700;color:#888;letter-spacing:-0.5px;">GIF</button>
+                        <!-- Título comentarios (solo visible en el preview, no dentro de la hoja) -->
+                        <h4 class="comentarios-seccion-titulo" id="comentariosTitulo">💬 Comentarios</h4>
+
+                        <!-- Switch modo spoiler -->
+                        <div class="spoiler-switch-row" id="spoilerSwitchRow">
+                            <label class="spoiler-switch-label" id="spoilerSwitchLabel"><span id="spoilerCountBadge"></span>Modo spoiler</label>
+                            <div class="spoiler-toggle" id="spoilerToggle" onclick="window.toggleModoSpoiler()">
+                                <div class="spoiler-toggle-dot"></div>
                             </div>
-                            <div class="textarea-input-col">
-                                <textarea id="nuevoComentario" placeholder="Escribe tu comentario... (máx 2000 caracteres)" maxlength="2000"></textarea>
-                                <div class="spoiler-aviso" id="spoilerAviso" style="display:none;">
-                                    <i class="fas fa-exclamation-triangle"></i> Estás escribiendo un comentario con spoiler
+                        </div>
+
+                        <!-- Lista de comentarios -->
+                        <div class="comentarios-lista" id="comentariosLista">
+                            <div class="sin-comentarios">Cargando comentarios...</div>
+                        </div>
+
+                        <!-- Link "ver más" — solo visible en el preview -->
+                        <div class="ver-mas-comentarios" id="verMasComentarios" onclick="window.abrirComentariosSheet(false)">
+                            Ver los <span id="verMasCount">0</span> comentarios
+                        </div>
+
+                        <!-- Área de escritura (oculta hasta presionar Comentar) -->
+                        <div class="comentario-escritura" id="areaEscritura" style="display: none;">
+                            <div class="textarea-wrapper">
+                                <div class="textarea-emoji-col">
+                                    <button id="emojiTriggerMain" type="button"
+                                            class="cep-trigger-btn" title="Insertar emoji">😊</button>
+                                    <button id="gifTriggerMain" type="button"
+                                            class="cep-trigger-btn" title="Insertar GIF"
+                                            style="font-size:0.7rem;font-weight:700;color:#888;letter-spacing:-0.5px;">GIF</button>
                                 </div>
-                                <div id="gifPreviewMain" style="display:none;padding:0.4rem 0.5rem 0.2rem;position:relative;">
-                                    <img id="gifPreviewImgMain" src="" alt="GIF seleccionado"
-                                         style="max-height:120px;border-radius:6px;display:block;">
-                                    <button onclick="window.quitarGifMain()"
-                                            style="position:absolute;top:0.2rem;right:0.7rem;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.75rem;cursor:pointer;line-height:1;padding:0;">✕</button>
+                                <div class="textarea-input-col">
+                                    <textarea id="nuevoComentario" placeholder="Escribe tu comentario... (máx 2000 caracteres)" maxlength="2000"></textarea>
+                                    <div class="spoiler-aviso" id="spoilerAviso" style="display:none;">
+                                        <i class="fas fa-exclamation-triangle"></i> Estás escribiendo un comentario con spoiler
+                                    </div>
+                                    <div id="gifPreviewMain" style="display:none;padding:0.4rem 0.5rem 0.2rem;position:relative;">
+                                        <img id="gifPreviewImgMain" src="" alt="GIF seleccionado"
+                                             style="max-height:120px;border-radius:6px;display:block;">
+                                        <button onclick="window.quitarGifMain()"
+                                                style="position:absolute;top:0.2rem;right:0.7rem;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.75rem;cursor:pointer;line-height:1;padding:0;">✕</button>
+                                    </div>
+                                    <span class="caracteres-restantes" id="caracteresRestantes">0/2000</span>
                                 </div>
-                                <span class="caracteres-restantes" id="caracteresRestantes">0/2000</span>
+                            </div>
+                            <div class="comentario-acciones">
+                                <div class="comentario-botones">
+                                    <button class="btn-cancelar" onclick="window.cancelarComentario(); window.cerrarComentariosSheet()">
+                                        <i class="fas fa-times"></i> Cancelar
+                                    </button>
+                                    <button class="btn-enviar" onclick="window.enviarComentario()">
+                                        <i class="fas fa-paper-plane"></i> Enviar
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <div class="comentario-acciones">
-                            <div class="comentario-botones">
-                                <button class="btn-cancelar" onclick="window.cancelarComentario(); window.cerrarComentariosSheet()">
-                                    <i class="fas fa-times"></i> Cancelar
-                                </button>
-                                <button class="btn-enviar" onclick="window.enviarComentario()">
-                                    <i class="fas fa-paper-plane"></i> Enviar
-                                </button>
-                            </div>
+
+                    </div><!-- /modal-fila-comentarios -->
+
+                    <!-- BARRA "ESCRIBÍ UN COMENTARIO" (ancho completo, siempre visible) -->
+                    <div class="modal-fila-boton">
+                        <div class="comentario-teaser" id="comentarioTeaser" onclick="window.abrirComentariosSheet(true)">
+                            <i class="fas fa-pen"></i>
+                            <span>Escribí un comentario...</span>
                         </div>
                     </div>
 
-                </div><!-- /modal-fila-comentarios -->
-
-                <!-- BARRA "ESCRIBÍ UN COMENTARIO" (ancho completo, siempre visible) -->
-                <div class="modal-fila-boton">
-                    <div class="comentario-teaser" id="comentarioTeaser" onclick="window.abrirComentariosSheet(true)">
-                        <i class="fas fa-pen"></i>
-                        <span>Escribí un comentario...</span>
-                    </div>
-                </div>
-
-            </div><!-- /modal-body -->
+                </div><!-- /modal-body -->
             </div><!-- /modal-contenido -->
         </div><!-- /modal-contenido-wrapper -->
     </div>
@@ -1049,290 +1110,290 @@
             <button class="modal-cerrar-externa" onclick="window.cerrarModalSerie()">×</button>
             <div class="modal-contenido">
 
-            <!-- HEADER: título + rating + cerrar -->
-            <div class="modal-header">
-                <h2 id="modalTituloSerie">Título de la serie</h2>
-                <img class="modal-logo-barra" id="modalLogoBarraSerie" alt="">
-                <div class="modal-header-right">
-                    <div class="modal-rating" id="modalRatingSerie">⭐ <span class="modal-rating-num">0</span><span class="modal-rating-label"> votos</span></div>
-                    <div class="modal-rating modal-badge-comentarios" id="modalComentariosCountSerie">💬 <span class="modal-rating-num">0</span><span class="modal-rating-label"> comentarios</span></div>
-                    <button id="btnDondeVerlaModalSerie"
-                            onclick="window.abrirDondeVerlaSerie(window.serieActualId, event)"
-                            title="Dónde verla"
-                            style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
-                        <i class="fas fa-tv" style="font-size:0.85rem;"></i>
-                    </button>
-                    <button id="btnNoInteresaModalSerie"
-                            onclick="window.marcarNoInteresaSerie(window.serieActualId, event)"
-                            title="No me interesa"
-                            style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
-                        <i class="fas fa-minus-circle" style="font-size:0.85rem;"></i>
-                    </button>
-                    <button id="btnCompartirModalSerie"
-                            onclick="window.compartirSerie(window.serieActualId, document.getElementById('modalTituloSerie').textContent)"
-                            title="Compartir"
-                            style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
-                        <i class="fas fa-share-alt" style="font-size:0.85rem;"></i>
-                    </button>
-                    <button id="btnRecomendarModalHeaderSerie"
-                            class="btn-recomendar-header"
-                            onclick="window.abrirPanelRecomendarSerie(window.serieActualId, event)"
-                            title="Recomendar"
-                            style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
-                        <i class="fas fa-envelope" style="font-size:0.85rem;"></i>
-                    </button>
-                    <button class="btn-watchlist-serie" id="btnWatchlistModalSerie"
-                            onclick="window.toggleWatchlistSerie(window.serieActualId, event)"
-                            title="Guardar en mi lista"
-                            style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
-                        <i class="fas fa-bookmark" style="font-size:0.85rem;"></i>
-                    </button>
-                    <button class="modal-cerrar" onclick="window.cerrarModalSerie()">×</button>
-                </div>
-            </div>
-
-            <!-- BODY SCROLLABLE -->
-            <div class="modal-body">
-
-                <!-- FILA SUPERIOR: carrusel en móvil, lado a lado en desktop -->
-                <!-- CAPA SOBRE LA PORTADA (solo mobile): el título (logo o texto) y los botones del encabezado, que modal-hero.js
-                                     mueve acá. En escritorio no se ve. -->
-                <div class="modal-hero-capa">
-                    <div class="modal-titulo-hero">
-                        <img class="modal-logo-titulo" id="modalLogoTituloSerie" alt="">
-                        <span class="modal-titulo-texto" id="modalTituloTextoSerie"></span>
+                <!-- HEADER: título + rating + cerrar -->
+                <div class="modal-header">
+                    <h2 id="modalTituloSerie">Título de la serie</h2>
+                    <img class="modal-logo-barra" id="modalLogoBarraSerie" alt="">
+                    <div class="modal-header-right">
+                        <div class="modal-rating" id="modalRatingSerie">⭐ <span class="modal-rating-num">0</span><span class="modal-rating-label"> votos</span></div>
+                        <div class="modal-rating modal-badge-comentarios" id="modalComentariosCountSerie">💬 <span class="modal-rating-num">0</span><span class="modal-rating-label"> comentarios</span></div>
+                        <button id="btnDondeVerlaModalSerie"
+                                onclick="window.abrirDondeVerlaSerie(window.serieActualId, event)"
+                                title="Dónde verla"
+                                style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+                            <i class="fas fa-tv" style="font-size:0.85rem;"></i>
+                        </button>
+                        <button id="btnNoInteresaModalSerie"
+                                onclick="window.marcarNoInteresaSerie(window.serieActualId, event)"
+                                title="No me interesa"
+                                style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+                            <i class="fas fa-minus-circle" style="font-size:0.85rem;"></i>
+                        </button>
+                        <button id="btnCompartirModalSerie"
+                                onclick="window.compartirSerie(window.serieActualId, document.getElementById('modalTituloSerie').textContent)"
+                                title="Compartir"
+                                style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+                            <i class="fas fa-share-alt" style="font-size:0.85rem;"></i>
+                        </button>
+                        <button id="btnRecomendarModalHeaderSerie"
+                                class="btn-recomendar-header"
+                                onclick="window.abrirPanelRecomendarSerie(window.serieActualId, event)"
+                                title="Recomendar"
+                                style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+                            <i class="fas fa-envelope" style="font-size:0.85rem;"></i>
+                        </button>
+                        <button class="btn-watchlist-serie" id="btnWatchlistModalSerie"
+                                onclick="window.toggleWatchlistSerie(window.serieActualId, event)"
+                                title="Guardar en mi lista"
+                                style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;width:36px;height:36px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+                            <i class="fas fa-bookmark" style="font-size:0.85rem;"></i>
+                        </button>
+                        <button class="modal-cerrar" onclick="window.cerrarModalSerie()">×</button>
                     </div>
-                    <div class="modal-header-right modal-acciones-hero" id="modalAccionesHeroSerie"></div>
                 </div>
-                <div class="modal-fila-superior">
 
-                    <div class="modal-carrusel" id="modalCarruselSerie">
+                <!-- BODY SCROLLABLE -->
+                <div class="modal-body">
 
-                        <!-- Slide 1: Poster -->
-                        <div class="carrusel-slide">
-                            <div class="modal-poster">
-                                <img id="modalPosterSerie" src="" alt="Poster">
-                            </div>
+                    <!-- FILA SUPERIOR: carrusel en móvil, lado a lado en desktop -->
+                    <!-- CAPA SOBRE LA PORTADA (solo mobile): el título (logo o texto) y los botones del encabezado, que modal-hero.js
+                                         mueve acá. En escritorio no se ve. -->
+                    <div class="modal-hero-capa">
+                        <div class="modal-titulo-hero">
+                            <img class="modal-logo-titulo" id="modalLogoTituloSerie" alt="">
+                            <span class="modal-titulo-texto" id="modalTituloTextoSerie"></span>
                         </div>
+                        <div class="modal-header-right modal-acciones-hero" id="modalAccionesHeroSerie"></div>
+                    </div>
+                    <div class="modal-fila-superior">
 
-                        <!-- Slide 2: Datos -->
-                        <div class="carrusel-slide">
-                            <div class="modal-columna-derecha">
-                                <div class="modal-info" id="modalInfoSerie">
+                        <div class="modal-carrusel" id="modalCarruselSerie">
 
-                                    <div class="modal-hero-fondo" id="modalHeroFondoSerie">
-                                        <div class="modal-stat-bar">
-                                            <div class="modal-stat-item">
-                                                <i class="fas fa-star"></i>
-                                                <span><span id="modalVotosSerie">-</span> votos TMDB</span>
+                            <!-- Slide 1: Poster -->
+                            <div class="carrusel-slide">
+                                <div class="modal-poster">
+                                    <img id="modalPosterSerie" src="" alt="Poster">
+                                </div>
+                            </div>
+
+                            <!-- Slide 2: Datos -->
+                            <div class="carrusel-slide">
+                                <div class="modal-columna-derecha">
+                                    <div class="modal-info" id="modalInfoSerie">
+
+                                        <div class="modal-hero-fondo" id="modalHeroFondoSerie">
+                                            <div class="modal-stat-bar">
+                                                <div class="modal-stat-item">
+                                                    <i class="fas fa-star"></i>
+                                                    <span><span id="modalVotosSerie">-</span> votos TMDB</span>
+                                                </div>
+                                                <div class="modal-stat-divider"></div>
+                                                <div class="modal-stat-item">
+                                                    <i class="fas fa-fire"></i>
+                                                    <span><span id="modalPopularidadSerie">-</span> popularidad</span>
+                                                </div>
                                             </div>
-                                            <div class="modal-stat-divider"></div>
-                                            <div class="modal-stat-item">
-                                                <i class="fas fa-fire"></i>
-                                                <span><span id="modalPopularidadSerie">-</span> popularidad</span>
+
+                                            <div class="modal-chips-grid">
+                                                <div class="modal-chip modal-chip-red">
+                                                    <div class="modal-chip-icon"><i class="fas fa-calendar-alt"></i></div>
+                                                    <div class="modal-chip-texto">
+                                                        <span class="modal-chip-label">Estreno</span>
+                                                        <span class="modal-chip-valor" id="modalFechaSerie">-</span>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-chip modal-chip-red">
+                                                    <div class="modal-chip-icon"><i class="fas fa-layer-group"></i></div>
+                                                    <div class="modal-chip-texto">
+                                                        <span class="modal-chip-label">Temporadas</span>
+                                                        <span class="modal-chip-valor" id="modalTemporadasSerie">-</span>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-chip modal-chip-red modal-chip-full">
+                                                    <div class="modal-chip-icon"><i class="fas fa-globe"></i></div>
+                                                    <div class="modal-chip-texto">
+                                                        <span class="modal-chip-label">Idioma</span>
+                                                        <span class="modal-chip-valor" id="modalIdiomaSerie">-</span>
+                                                    </div>
+                                                </div>
                                             </div>
+
+                                            <div class="modal-generos" id="modalGenerosSerie"></div>
                                         </div>
 
-                                        <div class="modal-chips-grid">
-                                            <div class="modal-chip modal-chip-red">
-                                                <div class="modal-chip-icon"><i class="fas fa-calendar-alt"></i></div>
-                                                <div class="modal-chip-texto">
-                                                    <span class="modal-chip-label">Estreno</span>
-                                                    <span class="modal-chip-valor" id="modalFechaSerie">-</span>
-                                                </div>
-                                            </div>
-                                            <div class="modal-chip modal-chip-red">
-                                                <div class="modal-chip-icon"><i class="fas fa-layer-group"></i></div>
-                                                <div class="modal-chip-texto">
-                                                    <span class="modal-chip-label">Temporadas</span>
-                                                    <span class="modal-chip-valor" id="modalTemporadasSerie">-</span>
-                                                </div>
-                                            </div>
-                                            <div class="modal-chip modal-chip-red modal-chip-full">
-                                                <div class="modal-chip-icon"><i class="fas fa-globe"></i></div>
-                                                <div class="modal-chip-texto">
-                                                    <span class="modal-chip-label">Idioma</span>
-                                                    <span class="modal-chip-valor" id="modalIdiomaSerie">-</span>
-                                                </div>
-                                            </div>
+                                        <div class="modal-sinopsis">
+                                            <div class="modal-sinopsis-titulo"><i class="fas fa-align-left"></i> Sinopsis</div>
+                                            <p id="modalSinopsisSerie">Cargando...</p>
                                         </div>
-
-                                        <div class="modal-generos" id="modalGenerosSerie"></div>
-                                    </div>
-
-                                    <div class="modal-sinopsis">
-                                        <div class="modal-sinopsis-titulo"><i class="fas fa-align-left"></i> Sinopsis</div>
-                                        <p id="modalSinopsisSerie">Cargando...</p>
                                     </div>
                                 </div>
-                            </div>
-                        </div><!-- /slide 2 -->
+                            </div><!-- /slide 2 -->
 
-                    </div><!-- /modal-carrusel -->
+                        </div><!-- /modal-carrusel -->
 
-                    <div class="carrusel-dots" id="carruselDotsSerie">
-                        <span class="carrusel-dot-serie active" onclick="window.irASlideSerie(0)"></span>
-                        <span class="carrusel-dot-serie" onclick="window.irASlideSerie(1)"></span>
-                    </div>
-
-                </div><!-- /modal-fila-superior -->
-
-                <!-- TEMPORADAS -->
-                <div class="temporadas-seccion" id="temporadasSeccionSerie" style="display:none;">
-                    <div class="temporadas-header">
-                        <span class="temporadas-titulo-seccion"><i class="fas fa-layer-group"></i> Temporadas</span>
-                        <span class="temporadas-resumen" id="temporadasResumenSerie"></span>
-                    </div>
-                    <div class="temporadas-track" id="temporadasTrackSerie"></div>
-                </div>
-
-                <!-- ELENCO & DIRECCIÓN -->
-                <div class="elenco-seccion" id="elencoSeccionSerie" style="display:none;">
-                    <div class="elenco-header">
-                        <span class="elenco-titulo-seccion">👥 Elenco y dirección</span>
-                        <div class="elenco-tabs">
-                            <button class="elenco-tab active" id="tabElencoSerie" onclick="window.switchElencoTabSerie('cast')">Elenco</button>
-                            <button class="elenco-tab" id="tabDireccionSerie" onclick="window.switchElencoTabSerie('crew')">Dirección</button>
+                        <div class="carrusel-dots" id="carruselDotsSerie">
+                            <span class="carrusel-dot-serie active" onclick="window.irASlideSerie(0)"></span>
+                            <span class="carrusel-dot-serie" onclick="window.irASlideSerie(1)"></span>
                         </div>
-                    </div>
-                    <div class="elenco-carrusel-outer">
-                        <button class="elenco-arrow" onclick="window.scrollElencoSerie(-1)"><i class="fas fa-chevron-left"></i></button>
-                        <div class="elenco-track" id="elencoTrackSerie"></div>
-                        <button class="elenco-arrow" onclick="window.scrollElencoSerie(1)"><i class="fas fa-chevron-right"></i></button>
-                    </div>
-                </div>
 
-                <div class="trailer-propio-container" id="trailerPropioContainerSerie">
-                    <div class="trailer-propio-wrapper">
-                        <div class="modal-trailer-container" id="modalTrailerContainerSerie">
-                            <div class="trailer-placeholder">
-                                <i class="fas fa-film"></i>
-                                <span>Cargando tráiler...</span>
+                    </div><!-- /modal-fila-superior -->
+
+                    <!-- TEMPORADAS -->
+                    <div class="temporadas-seccion" id="temporadasSeccionSerie" style="display:none;">
+                        <div class="temporadas-header">
+                            <span class="temporadas-titulo-seccion"><i class="fas fa-layer-group"></i> Temporadas</span>
+                            <span class="temporadas-resumen" id="temporadasResumenSerie"></span>
+                        </div>
+                        <div class="temporadas-track" id="temporadasTrackSerie"></div>
+                    </div>
+
+                    <!-- ELENCO & DIRECCIÓN -->
+                    <div class="elenco-seccion" id="elencoSeccionSerie" style="display:none;">
+                        <div class="elenco-header">
+                            <span class="elenco-titulo-seccion">👥 Elenco y dirección</span>
+                            <div class="elenco-tabs">
+                                <button class="elenco-tab active" id="tabElencoSerie" onclick="window.switchElencoTabSerie('cast')">Elenco</button>
+                                <button class="elenco-tab" id="tabDireccionSerie" onclick="window.switchElencoTabSerie('crew')">Dirección</button>
                             </div>
                         </div>
-                        <div class="trailer-versiones" id="trailerVersionesSerie"></div>
-                    </div>
-                </div>
-
-                <div id="modalLeyendaPorcentajeSerie" style="text-align:center;font-size:0.95rem;font-weight:600;color:#333;margin:0rem 0 0.25rem;white-space:nowrap;grid-column:1/-1;width:100%;display:block;"></div>
-
-                <!-- BOTONES VOTAR -->
-                <div class="modal-acciones">
-                    <button class="btn-like" onclick="window.votarSerie(window.serieActualId, 'like', event)" title="Me gusta">
-                        <i class="fas fa-thumbs-up"></i> <span class="btn-label-modal">Te banco</span> <span id="modalLikesSerie">0</span>
-                    </button>
-                    <button class="btn-dislike" onclick="window.votarSerie(window.serieActualId, 'dislike', event)" title="No me gusta">
-                        <i class="fas fa-thumbs-down"></i> <span class="btn-label-modal">No te banco</span> <span id="modalDislikesSerie">0</span>
-                    </button>
-                    <button class="btn-recomendar" onclick="window.abrirPanelRecomendarSerie(window.serieActualId, event)" title="Recomendar">
-                        <i class="fas fa-envelope"></i> <span class="btn-label-modal">Recomendar</span>
-                    </button>
-                </div>
-
-                <!-- SERIES SIMILARES -->
-                <div class="similares-seccion similares-seccion-inline" style="display:none;">
-                    <h4 class="similares-titulo-seccion">📺 Series similares</h4>
-                    <div class="similares-carrusel-outer">
-                        <button class="similares-arrow" onclick="window.scrollSimilaresSerie(-1)">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                        <div id="similares-container-serie" class="similares-container"></div>
-                        <button class="similares-arrow" onclick="window.scrollSimilaresSerie(1)">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- FILA INFERIOR: caja de comentarios (ancho completo) -->
-                <div class="modal-fila-comentarios">
-
-                    <div class="comentarios-sheet-header" id="comentariosSheetHeaderSerie">
-                        <button onclick="window.cerrarComentariosSheetSerie()" aria-label="Volver">
-                            <i class="fas fa-arrow-left"></i>
-                        </button>
-                        <span>Comentarios (<span id="comentariosSheetCountSerie">0</span>)</span>
-                    </div>
-
-                    <h4 class="comentarios-seccion-titulo" id="comentariosTituloSerie">💬 Comentarios</h4>
-
-                    <div class="spoiler-switch-row" id="spoilerSwitchRowSerie">
-                        <label class="spoiler-switch-label" id="spoilerSwitchLabelSerie"><span id="spoilerCountBadgeSerie"></span>Modo spoiler</label>
-                        <div class="spoiler-toggle" id="spoilerToggleSerie" onclick="window.toggleModoSpoilerSerie()">
-                            <div class="spoiler-toggle-dot"></div>
+                        <div class="elenco-carrusel-outer">
+                            <button class="elenco-arrow" onclick="window.scrollElencoSerie(-1)"><i class="fas fa-chevron-left"></i></button>
+                            <div class="elenco-track" id="elencoTrackSerie"></div>
+                            <button class="elenco-arrow" onclick="window.scrollElencoSerie(1)"><i class="fas fa-chevron-right"></i></button>
                         </div>
                     </div>
 
-                    <div class="comentarios-lista" id="comentariosListaSerie">
-                        <div class="sin-comentarios">Cargando comentarios...</div>
-                    </div>
-
-                    <div class="ver-mas-comentarios" id="verMasComentariosSerie" onclick="window.abrirComentariosSheetSerie(false)">
-                        Ver los <span id="verMasCountSerie">0</span> comentarios
-                    </div>
-
-                    <div class="comentario-escritura" id="areaEscrituraSerie" style="display: none;">
-                        <div class="textarea-wrapper">
-                            <div class="textarea-emoji-col">
-                                <button id="emojiTriggerMainSerie" type="button"
-                                        class="cep-trigger-btn" title="Insertar emoji">😊</button>
-                                <button id="gifTriggerMainSerie" type="button"
-                                        class="cep-trigger-btn" title="Insertar GIF"
-                                        style="font-size:0.7rem;font-weight:700;color:#888;letter-spacing:-0.5px;">GIF</button>
-                            </div>
-                            <div class="textarea-input-col">
-                                <textarea id="nuevoComentarioSerie" placeholder="Escribe tu comentario... (máx 2000 caracteres)" maxlength="2000"></textarea>
-                                <div class="spoiler-aviso" id="spoilerAvisoSerie" style="display:none;">
-                                    <i class="fas fa-exclamation-triangle"></i> Estás escribiendo un comentario con spoiler
+                    <div class="trailer-propio-container" id="trailerPropioContainerSerie">
+                        <div class="trailer-propio-wrapper">
+                            <div class="modal-trailer-container" id="modalTrailerContainerSerie">
+                                <div class="trailer-placeholder">
+                                    <i class="fas fa-film"></i>
+                                    <span>Cargando tráiler...</span>
                                 </div>
-                                <div id="gifPreviewMainSerie" style="display:none;padding:0.4rem 0.5rem 0.2rem;position:relative;">
-                                    <img id="gifPreviewImgMainSerie" src="" alt="GIF seleccionado"
-                                         style="max-height:120px;border-radius:6px;display:block;">
-                                    <button onclick="window.quitarGifMainSerie()"
-                                            style="position:absolute;top:0.2rem;right:0.7rem;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.75rem;cursor:pointer;line-height:1;padding:0;">✕</button>
-                                </div>
-                                <span class="caracteres-restantes" id="caracteresRestantesSerie">0/2000</span>
                             </div>
-                        </div>
-                        <div class="comentario-acciones">
-                            <div class="comentario-botones">
-                                <button class="btn-cancelar" onclick="window.cancelarComentarioSerie(); window.cerrarComentariosSheetSerie()">
-                                    <i class="fas fa-times"></i> Cancelar
-                                </button>
-                                <button class="btn-enviar" onclick="window.enviarComentarioSerie()">
-                                    <i class="fas fa-paper-plane"></i> Enviar
-                                </button>
-                            </div>
+                            <div class="trailer-versiones" id="trailerVersionesSerie"></div>
                         </div>
                     </div>
 
-                </div><!-- /modal-fila-comentarios -->
+                    <div id="modalLeyendaPorcentajeSerie" style="text-align:center;font-size:0.95rem;font-weight:600;color:#333;margin:0rem 0 0.25rem;white-space:nowrap;grid-column:1/-1;width:100%;display:block;"></div>
 
-                <div class="modal-fila-boton">
-                    <div class="comentario-teaser" id="comentarioTeaserSerie" onclick="window.abrirComentariosSheetSerie(true)">
-                        <i class="fas fa-pen"></i>
-                        <span>Escribí un comentario...</span>
+                    <!-- BOTONES VOTAR -->
+                    <div class="modal-acciones">
+                        <button class="btn-like" onclick="window.votarSerie(window.serieActualId, 'like', event)" title="Me gusta">
+                            <i class="fas fa-thumbs-up"></i> <span class="btn-label-modal">Te banco</span> <span id="modalLikesSerie">0</span>
+                        </button>
+                        <button class="btn-dislike" onclick="window.votarSerie(window.serieActualId, 'dislike', event)" title="No me gusta">
+                            <i class="fas fa-thumbs-down"></i> <span class="btn-label-modal">No te banco</span> <span id="modalDislikesSerie">0</span>
+                        </button>
+                        <button class="btn-recomendar" onclick="window.abrirPanelRecomendarSerie(window.serieActualId, event)" title="Recomendar">
+                            <i class="fas fa-envelope"></i> <span class="btn-label-modal">Recomendar</span>
+                        </button>
                     </div>
-                </div>
 
-                <!-- MODAL HIJO — DETALLE DE TEMPORADA -->
-                <div id="modalTemporada" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:1000000; align-items:center; justify-content:center; padding:1rem;">
-                    <div class="modal-temporada-contenido" onclick="event.stopPropagation()">
-                        <div class="modal-temporada-header">
-                            <button class="modal-temporada-volver" onclick="window.cerrarModalTemporada()" aria-label="Volver a la serie">
+                    <!-- SERIES SIMILARES -->
+                    <div class="similares-seccion similares-seccion-inline" style="display:none;">
+                        <h4 class="similares-titulo-seccion">📺 Series similares</h4>
+                        <div class="similares-carrusel-outer">
+                            <button class="similares-arrow" onclick="window.scrollSimilaresSerie(-1)">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div id="similares-container-serie" class="similares-container"></div>
+                            <button class="similares-arrow" onclick="window.scrollSimilaresSerie(1)">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- FILA INFERIOR: caja de comentarios (ancho completo) -->
+                    <div class="modal-fila-comentarios">
+
+                        <div class="comentarios-sheet-header" id="comentariosSheetHeaderSerie">
+                            <button onclick="window.cerrarComentariosSheetSerie()" aria-label="Volver">
                                 <i class="fas fa-arrow-left"></i>
                             </button>
-                            <div class="modal-temporada-titulos">
-                                <span class="modal-temporada-serie-nombre" id="modalTemporadaSerieNombre"></span>
-                                <span class="modal-temporada-numero" id="modalTemporadaNumero">Temporada</span>
+                            <span>Comentarios (<span id="comentariosSheetCountSerie">0</span>)</span>
+                        </div>
+
+                        <h4 class="comentarios-seccion-titulo" id="comentariosTituloSerie">💬 Comentarios</h4>
+
+                        <div class="spoiler-switch-row" id="spoilerSwitchRowSerie">
+                            <label class="spoiler-switch-label" id="spoilerSwitchLabelSerie"><span id="spoilerCountBadgeSerie"></span>Modo spoiler</label>
+                            <div class="spoiler-toggle" id="spoilerToggleSerie" onclick="window.toggleModoSpoilerSerie()">
+                                <div class="spoiler-toggle-dot"></div>
                             </div>
                         </div>
-                        <div class="modal-temporada-body" id="modalTemporadaBody">
-                            <div class="modal-temporada-loading">Cargando temporada...</div>
+
+                        <div class="comentarios-lista" id="comentariosListaSerie">
+                            <div class="sin-comentarios">Cargando comentarios...</div>
+                        </div>
+
+                        <div class="ver-mas-comentarios" id="verMasComentariosSerie" onclick="window.abrirComentariosSheetSerie(false)">
+                            Ver los <span id="verMasCountSerie">0</span> comentarios
+                        </div>
+
+                        <div class="comentario-escritura" id="areaEscrituraSerie" style="display: none;">
+                            <div class="textarea-wrapper">
+                                <div class="textarea-emoji-col">
+                                    <button id="emojiTriggerMainSerie" type="button"
+                                            class="cep-trigger-btn" title="Insertar emoji">😊</button>
+                                    <button id="gifTriggerMainSerie" type="button"
+                                            class="cep-trigger-btn" title="Insertar GIF"
+                                            style="font-size:0.7rem;font-weight:700;color:#888;letter-spacing:-0.5px;">GIF</button>
+                                </div>
+                                <div class="textarea-input-col">
+                                    <textarea id="nuevoComentarioSerie" placeholder="Escribe tu comentario... (máx 2000 caracteres)" maxlength="2000"></textarea>
+                                    <div class="spoiler-aviso" id="spoilerAvisoSerie" style="display:none;">
+                                        <i class="fas fa-exclamation-triangle"></i> Estás escribiendo un comentario con spoiler
+                                    </div>
+                                    <div id="gifPreviewMainSerie" style="display:none;padding:0.4rem 0.5rem 0.2rem;position:relative;">
+                                        <img id="gifPreviewImgMainSerie" src="" alt="GIF seleccionado"
+                                             style="max-height:120px;border-radius:6px;display:block;">
+                                        <button onclick="window.quitarGifMainSerie()"
+                                                style="position:absolute;top:0.2rem;right:0.7rem;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.75rem;cursor:pointer;line-height:1;padding:0;">✕</button>
+                                    </div>
+                                    <span class="caracteres-restantes" id="caracteresRestantesSerie">0/2000</span>
+                                </div>
+                            </div>
+                            <div class="comentario-acciones">
+                                <div class="comentario-botones">
+                                    <button class="btn-cancelar" onclick="window.cancelarComentarioSerie(); window.cerrarComentariosSheetSerie()">
+                                        <i class="fas fa-times"></i> Cancelar
+                                    </button>
+                                    <button class="btn-enviar" onclick="window.enviarComentarioSerie()">
+                                        <i class="fas fa-paper-plane"></i> Enviar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div><!-- /modal-fila-comentarios -->
+
+                    <div class="modal-fila-boton">
+                        <div class="comentario-teaser" id="comentarioTeaserSerie" onclick="window.abrirComentariosSheetSerie(true)">
+                            <i class="fas fa-pen"></i>
+                            <span>Escribí un comentario...</span>
                         </div>
                     </div>
-                </div>
 
-            </div><!-- /modal-body -->
+                    <!-- MODAL HIJO — DETALLE DE TEMPORADA -->
+                    <div id="modalTemporada" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:1000000; align-items:center; justify-content:center; padding:1rem;">
+                        <div class="modal-temporada-contenido" onclick="event.stopPropagation()">
+                            <div class="modal-temporada-header">
+                                <button class="modal-temporada-volver" onclick="window.cerrarModalTemporada()" aria-label="Volver a la serie">
+                                    <i class="fas fa-arrow-left"></i>
+                                </button>
+                                <div class="modal-temporada-titulos">
+                                    <span class="modal-temporada-serie-nombre" id="modalTemporadaSerieNombre"></span>
+                                    <span class="modal-temporada-numero" id="modalTemporadaNumero">Temporada</span>
+                                </div>
+                            </div>
+                            <div class="modal-temporada-body" id="modalTemporadaBody">
+                                <div class="modal-temporada-loading">Cargando temporada...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- /modal-body -->
             </div><!-- /modal-contenido -->
         </div><!-- /modal-contenido-wrapper -->
     </div>

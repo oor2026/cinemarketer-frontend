@@ -1028,6 +1028,7 @@ body.menu-open {
 
     /* Zona izquierda: navegación. Trivia va al final de la zona y es la que empuja al resto hacia el borde derecho */
     .nav-menu > li.nav-desk-inicio { order: 10; }
+    .nav-menu > li.nav-desk-cartelera { order: 15; }
     .nav-menu > li.nav-desk-sala { order: 20; }
     .nav-menu > li.nav-desk-lista { order: 30; }
     .nav-menu > li.nav-desk-comunidad { order: 40; }
@@ -1089,6 +1090,7 @@ body.menu-open {
 /* Ventanas de escritorio angostas: la navegación queda solo con íconos para que todo entre en una fila */
 @media (min-width: 769px) and (max-width: 1199px) {
     .nav-desk-inicio .nav-text-solo-desktop,
+    .nav-desk-cartelera .nav-text,
     .nav-desk-sala .nav-text,
     .nav-desk-lista .nav-text,
     .nav-desk-comunidad .nav-text,

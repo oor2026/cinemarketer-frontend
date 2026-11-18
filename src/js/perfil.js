@@ -4257,7 +4257,7 @@ document.addEventListener('click', function(e) {
         const cp = $('salaListaNPel'), cs = $('salaListaNSer'); if (cp) cp.textContent = np; if (cs) cs.textContent = ns;
         const sub = $('salaListaSub'); if (sub) sub.textContent = (np + ns) ? `${np + ns} ${(np + ns) === 1 ? 'título guardado' : 'títulos guardados'} para ver` : 'Lo que guardes para ver más tarde';
         const tabN = $('salaTabListaN'); if (tabN) tabN.textContent = (np + ns) || '';
-        const ver = $('salaListaVer'); if (ver) { ver.style.display = items.length > 3 ? '' : 'none'; ver.textContent = S.lista.abierta ? 'Ver menos' : 'Ver toda'; }
+        const ver = $('salaListaVer'); if (ver) { const columnas = MOBILE() ? 3 : 6; ver.style.display = items.length > columnas ? '' : 'none'; ver.textContent = S.lista.abierta ? 'Ver menos' : 'Ver toda'; }
 
         if (!items.length) { cuerpo.innerHTML = `<p class="sala-vacio">Todavía no guardaste ${serie ? 'series' : 'películas'} en tu lista.</p>`; return; }
         const tarjeta = (it, i) => {
@@ -4365,16 +4365,17 @@ document.addEventListener('click', function(e) {
             if (btn) btn.style.display = 'none';
             return;
         }
-        const visibles = L.abiertos ? L.sellos : L.sellos.slice(0, 6);
+        L.limite = MOBILE() ? 6 : 12;      // mobile: 2 filas de 3; escritorio: 2 filas de 6
+        const visibles = L.abiertos ? L.sellos : L.sellos.slice(0, L.limite);
         cuerpo.innerHTML = `<div class="sala-sellos">${visibles.map((s, i) => `<button type="button" class="sala-sello" onclick="window._salaSello(${i})" aria-label="Sello ${esc(s.nombre)}${s.fecha ? ', conseguido el ' + esc(fechaLarga(s.fecha)) : ''}">
             <span class="sala-sello-img">${selloSvg(s.categoria, 84, 'c' + i, s.imagenUrl)}${s.nivel > 1 ? `<em class="sala-nivel">Nv ${s.nivel}</em>` : ''}</span><strong>${esc(s.nombre)}</strong>${s.fecha ? `<span>${esc(fechaCorta(s.fecha))}</span>` : ''}</button>`).join('')}</div>${panelMist}`;
-        if (btn) { btn.style.display = L.sellos.length > 6 ? 'flex' : 'none'; btn.textContent = L.abiertos ? 'Ver menos' : `Ver los ${L.sellos.length} sellos`; }
+        if (btn) { btn.style.display = L.sellos.length > L.limite ? 'flex' : 'none'; btn.textContent = L.abiertos ? 'Ver menos' : `Ver los ${L.sellos.length} sellos`; }
     }
     window._salaLogrosToggle = function () { S.logros.abiertos = !S.logros.abiertos; pintarLogros(); };
 
     // Hoja de detalle de un sello (bottom sheet).
     window._salaSello = function (i) {
-        const s = (S.logros.abiertos ? S.logros.sellos : S.logros.sellos.slice(0, 6))[i];
+        const s = (S.logros.abiertos ? S.logros.sellos : S.logros.sellos.slice(0, S.logros.limite || 6))[i];
         if (!s) return;
         window._salaCerrarSello();
         const oscuro = !!document.querySelector('.perfil-card.modo-oscuro');
@@ -4429,6 +4430,14 @@ document.addEventListener('click', function(e) {
             if (!document.body.contains(barra)) { window.removeEventListener('scroll', window._salaScroll); return; }
             const top = altoHeader();
             barra.style.setProperty('--sala-top', top + 'px');
+            // Escritorio: la barra fija ocupa el ancho de la tarjeta y su texto queda alineado con la columna de contenido.
+            const tarjeta = document.querySelector('.perfil-card');
+            if (tarjeta && !MOBILE()) {
+                const rt = tarjeta.getBoundingClientRect();
+                barra.style.setProperty('--sala-izq', rt.left + 'px');
+                barra.style.setProperty('--sala-ancho', rt.width + 'px');
+                barra.style.setProperty('--sala-pad', Math.max(0, Math.round(espacio.getBoundingClientRect().left - rt.left)) + 'px');
+            }
             const pasada = espacio.getBoundingClientRect().top <= top;
             if (pasada && !barra.classList.contains('fijo')) { espacio.style.height = barra.offsetHeight + 'px'; barra.classList.add('fijo'); }
             else if (!pasada && barra.classList.contains('fijo')) { barra.classList.remove('fijo'); espacio.style.height = '0px'; }
@@ -4455,7 +4464,7 @@ document.addEventListener('click', function(e) {
     window._salaIniciar = function (perfil, userId) {
         const secciones = Array.from(document.querySelectorAll('.sala-movil'));
         const sinAcceso = !!(perfil.bloqueado || $('perfilPrivadoMsg'));      // bloqueado o privado: se oculta todo lo nuevo
-        const oculto = !MOBILE() || sinAcceso;
+        const oculto = sinAcceso;
         secciones.forEach((e) => { e.style.display = (oculto || e.id === 'salaLista') ? 'none' : ''; });
         // El contenedor de los gustos solo se oculta si no hay acceso. En escritorio NO se toca: ahí envuelve a las columnas de siempre.
         const fila = document.querySelector('.sala-gustos-fila'); if (fila) fila.style.display = sinAcceso ? 'none' : '';
@@ -4484,12 +4493,12 @@ document.addEventListener('click', function(e) {
     // Las métricas de la parte superior (👍 votaciones, 💬 comentarios, ✎ publicaciones) siguen llevando a su sección.
     const irActividadViejo = window._irAActividadDesdeMetrica;
     window._irAActividadDesdeMetrica = function (criterio) {
-        if (S.listo && MOBILE()) { window._salaCriterio(criterio); window._salaIr('salaActividad'); return; }
+        if (S.listo) { window._salaCriterio(criterio); window._salaIr('salaActividad'); return; }
         if (typeof irActividadViejo === 'function') irActividadViejo(criterio);
     };
     const irPublicacionesViejo = window._irAPublicacionesDesdeMetrica;
     window._irAPublicacionesDesdeMetrica = function () {
-        if (S.listo && MOBILE()) { window._salaIr('perfilPublicacionesSeccion'); return; }
+        if (S.listo) { window._salaIr('perfilPublicacionesSeccion'); return; }
         if (typeof irPublicacionesViejo === 'function') irPublicacionesViejo();
     };
 })();
