@@ -122,7 +122,7 @@
     }
 
     function sincronizar() {
-const hayFeed = !!(document.getElementById('fcdHero') || document.getElementById('cartHero') || document.getElementById('perfilContenido') || document.getElementById('cuentaPremiumPanel') || document.getElementById('faqLista') || document.getElementById('bandejaPanelMensajes') || document.getElementById('clubGridFree') || document.getElementById('clubPubGridFree'));
+const hayFeed = !!(document.getElementById('fcdHero') || document.getElementById('cartHero') || document.getElementById('perfilContenido') || document.getElementById('cuentaPremiumPanel') || document.getElementById('faqLista') || document.getElementById('bandejaPanelMensajes') || document.getElementById('clubGridFree') || document.getElementById('clubPubGridFree') || document.getElementById('psRoot'));
         const muro = document.getElementById('fcdMuro');
         if (hayFeed && ANCHO_MIN.matches) { if (!muro) construir(); }
         else if (muro) muro.remove();

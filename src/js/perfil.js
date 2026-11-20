@@ -285,6 +285,8 @@ function renderIdentidad(perfil) {
                         if (btnCambiarAvatar) btnCambiarAvatar.style.display = 'flex';
                         const btnMiCredencial = document.getElementById('btnMiCredencial');
                         if (btnMiCredencial) btnMiCredencial.style.display = 'inline-flex';
+                        // Panel de seguimiento: el botón solo aparece si el backend confirma Creator activo.
+                        verificarAccesoPanelSeguimiento();
                         const btnEditVistaCine = document.getElementById('btnEditarVistaCine');
                         if (btnEditVistaCine) btnEditVistaCine.style.display = 'inline-flex';
                         const btnEditNoMeCanso = document.getElementById('btnEditarNoMeCanso');
@@ -2640,6 +2642,38 @@ console.log('[DEBUG] if commentId?', !!commentId);
             }, 800);
         }
 };
+
+// ==============================================
+// PANEL DE SEGUIMIENTO — botón en Mi Sala (solo Creator activo)
+// El acceso lo decide SIEMPRE el backend (GET /creator/panel/access → 200 o 403): no se usa
+// ningún dato guardado en el navegador. Si no es 200, el botón no se crea.
+// ==============================================
+async function verificarAccesoPanelSeguimiento() {
+    if (document.getElementById('btnPanelSeguimiento')) return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    try {
+        const res = await fetch(`${CONFIG.API_URL}/creator/panel/access`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        // Mientras se esperaba la respuesta el usuario pudo irse de Mi Sala: se vuelve a buscar el contenedor.
+        const cab = document.getElementById('perfilPublicacionesCabecera');
+        if (!cab || document.getElementById('btnPanelSeguimiento')) return;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.id = 'btnPanelSeguimiento';
+        btn.className = 'perfil-panel-btn';
+        btn.innerHTML = '<i class="fas fa-chart-line"></i> Panel de seguimiento';
+        btn.addEventListener('click', () => window.abrirPanelSeguimiento());
+        cab.appendChild(btn);
+    } catch (e) { /* sin acceso o sin conexión: el botón simplemente no aparece */ }
+}
+
+window.abrirPanelSeguimiento = function () {
+    if (typeof window.loadModule === 'function') window.loadModule('panel-seguimiento', null);
+};
+
 // ==============================================
 // PUBLICACIONES EN COMUNIDAD — PERFIL
 // ==============================================

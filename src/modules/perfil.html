@@ -367,6 +367,18 @@
         #perfilPublicacionesSeccion .perfil-seccion-titulo i { color: var(--cine-section-accent); }
         #perfilPublicacionesSeccion > *:not(.perfil-seccion-titulo) { padding: 0; }
 
+        /* Panel de seguimiento (solo Creator activo): el botón lo crea perfil.js
+           únicamente si el backend confirma el acceso. */
+        #perfilPublicacionesCabecera { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; flex-wrap: wrap; }
+        .perfil-panel-btn {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.5rem 1rem; border-radius: 10px; cursor: pointer;
+            font-size: 0.82rem; font-weight: 700; font-family: inherit;
+            color: var(--cine-section-accent);
+            background: rgba(var(--cine-section-accent-rgb), 0.12);
+            border: 1px solid rgba(var(--cine-section-accent-rgb), 0.35);
+        }
+        .perfil-panel-btn:hover { background: rgba(var(--cine-section-accent-rgb), 0.22); }
                                                 .cine-fab-tema, .cine-fab-modo, .cine-fab-privacidad { display: none; }
 
                         .cine-eyebrow-mobile { display: none; }
@@ -780,9 +792,11 @@
          claro/oscuro), pero fuera de .cine-window (que es flex de 2
          columnas: margin + entry) para no romper ese layout. -->
     <div class="perfil-seccion" id="perfilPublicacionesSeccion">
-        <h3 class="perfil-seccion-titulo">
-            <i class="fas fa-pen-alt"></i> Publicaciones en Comunidad
-        </h3>
+        <div id="perfilPublicacionesCabecera">
+            <h3 class="perfil-seccion-titulo">
+                <i class="fas fa-pen-alt"></i> Publicaciones en Comunidad
+            </h3>
+        </div>
         <div id="perfilPublicacionesList">
             <div class="perfil-pensando"><img src="assets/images/icon-512.png" alt="Cinemarketer pensando"><span>Cargando...</span></div>
         </div>
