@@ -795,7 +795,3 @@
 @media (min-width: 1280px) {
     :root:has(#clubGridFree) { --fcd-lado: min(520px, calc((100vw - 1040px) / 2 + 70px)); }
 }
-
-@media (min-width: 1280px) {
-    :root:has(#clubGridFree) { --fcd-lado: min(520px, calc((100vw - 1040px) / 2 + 70px)); }
-}
