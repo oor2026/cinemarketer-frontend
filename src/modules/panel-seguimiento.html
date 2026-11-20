@@ -1,0 +1,95 @@
+<!-- modules/panel-seguimiento.html — Panel de seguimiento (solo Creator activo). Todo se pinta desde js/panel-seguimiento.js -->
+<div class="ps-root" id="psRoot">
+
+    <div class="ps-topbar">
+        <div class="ps-topbar-izq">
+            <button type="button" class="ps-volver" onclick="window.psVolver()">
+                <i class="fas fa-arrow-left"></i> Mi Sala
+            </button>
+            <h2 class="ps-titulo">Panel de seguimiento</h2>
+            <p class="ps-subtitulo">Cómo rinden tus publicaciones en Comunidad</p>
+        </div>
+        <div class="ps-topbar-der">
+            <div class="ps-periodos" id="psPeriodos" role="tablist" aria-label="Período">
+                <button type="button" class="ps-periodo" data-dias="7" onclick="window.psCambiarPeriodo(7)">7 días</button>
+                <button type="button" class="ps-periodo" data-dias="28" onclick="window.psCambiarPeriodo(28)">28 días</button>
+                <button type="button" class="ps-periodo" data-dias="90" onclick="window.psCambiarPeriodo(90)">90 días</button>
+            </div>
+            <span class="ps-rango" id="psRango"></span>
+        </div>
+    </div>
+
+    <!-- Solo mobile: el selector de período queda fijo arriba al scrollear (en escritorio se usa el de la barra superior). -->
+    <div class="ps-sticky" id="psSticky">
+        <div class="ps-periodos" role="tablist" aria-label="Período">
+            <button type="button" class="ps-periodo" data-dias="7" onclick="window.psCambiarPeriodo(7)">7 días</button>
+            <button type="button" class="ps-periodo" data-dias="28" onclick="window.psCambiarPeriodo(28)">28 días</button>
+            <button type="button" class="ps-periodo" data-dias="90" onclick="window.psCambiarPeriodo(90)">90 días</button>
+        </div>
+    </div>
+
+    <!-- Estado general: cargando / error / sin acceso. Se oculta cuando hay datos. -->
+    <div class="ps-aviso" id="psAviso">
+        <img src="assets/images/icon-512.png" alt="Cinemarketer pensando" class="ps-aviso-img">
+        <span>Cargando tu panel...</span>
+    </div>
+
+    <div id="psContenido" style="display:none;">
+
+        <section class="ps-kpis" id="psKpis" aria-label="Resumen del período"></section>
+        <p class="ps-kpis-nota" id="psKpisNota"></p>
+        <p class="ps-medicion" id="psMedicion" style="display:none;"></p>
+
+        <section class="ps-card ps-evolucion">
+            <div class="ps-card-cabecera">
+                <h3 class="ps-card-titulo">Evolución</h3>
+                <div class="ps-chips" id="psSerieChips"></div>
+            </div>
+            <div class="ps-grafico" id="psGrafico"></div>
+            <p class="ps-nota">Cada punto es un día (hora argentina). Se cuentan las interacciones de otras personas, no las tuyas.</p>
+        </section>
+
+        <div class="ps-columnas">
+            <section class="ps-card ps-tabla-card">
+                <div class="ps-card-cabecera">
+                    <h3 class="ps-card-titulo">Tus publicaciones</h3>
+                    <span class="ps-card-ayuda">Métricas del período. Tocá una para ver el detalle.</span>
+                    <label class="ps-orden-m">Ordenar por
+                        <select id="psOrdenMovil" onchange="window.psOrdenar(this.value)">
+                            <option value="recent">Más recientes</option>
+                            <option value="visualizaciones">Más vistas</option>
+                            <option value="bancos">Más Te banco</option>
+                            <option value="puntos">Más Merecés un punto</option>
+                            <option value="comentarios">Más comentarios</option>
+                        </select>
+                    </label>
+                </div>
+                <div id="psTabla"></div>
+            </section>
+
+            <aside class="ps-lateral">
+                <section class="ps-card">
+                    <div class="ps-card-cabecera">
+                        <h3 class="ps-card-titulo">Qué te funciona mejor</h3>
+                    </div>
+                    <div id="psInsights"></div>
+                </section>
+
+                <section class="ps-card ps-estado-card">
+                    <div class="ps-card-cabecera">
+                        <h3 class="ps-card-titulo">Estado de tus publicaciones</h3>
+                    </div>
+                    <div id="psEstado"></div>
+                </section>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Detalle de una publicación -->
+    <div class="ps-modal" id="psModal" style="display:none;" onclick="window.psCerrarDetalle(event)">
+        <div class="ps-modal-caja" role="dialog" aria-modal="true" aria-labelledby="psModalTitulo" onclick="event.stopPropagation()">
+            <button type="button" class="ps-modal-cerrar" aria-label="Cerrar" onclick="window.psCerrarDetalle(null)"><i class="fas fa-times"></i></button>
+            <div id="psModalContenido"></div>
+        </div>
+    </div>
+</div>

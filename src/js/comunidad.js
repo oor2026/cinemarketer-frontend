@@ -413,6 +413,9 @@
                 pubs.forEach(pub => {
                     cargarMisReacciones(pub.id);
                 });
+
+                // Panel de seguimiento: contar visualizaciones de estas cards
+                pubs.forEach(pub => observarVistaCard(pub.id));
             }
 
             const btnMas = document.getElementById('comCargarMas');
@@ -752,8 +755,86 @@
             } catch(e) {}
         }
 
+        // ==============================================
+        // PANEL DE SEGUIMIENTO — visualizaciones
+        // Una card cuenta como "vista" cuando estuvo al menos 1 s con 50 % o más visible.
+        // Se acumulan y se mandan en lote cada pocos segundos (y al salir de la página).
+        // El backend descarta las del propio autor y limita las repeticiones por día.
+        // ==============================================
+        const _vistasEnviadasSesion = new Set();
+        let _vistasPendientes = [];
+        let _vistasTimer = null;
+        let _vistaObserver = null;
+        const _vistaTemporizadores = new Map();
+
+        function enviarVistasPendientes(porSalida) {
+            if (_vistasPendientes.length === 0) return;
+            const token = localStorage.getItem('token');
+            if (!token) { _vistasPendientes = []; return; }
+            const ids = _vistasPendientes.splice(0, _vistasPendientes.length);
+            try {
+                fetch(`${API_URL}/publications/views`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids }),
+                    keepalive: !!porSalida
+                }).catch(() => {});
+            } catch (e) { /* mejor esfuerzo */ }
+        }
+
+        function observarVistaCard(pubId) {
+            if (!localStorage.getItem('token')) return;
+            if (!('IntersectionObserver' in window)) return;
+            const miId = parseInt(localStorage.getItem('userId'));
+            const card = document.querySelector(`#comFeed .com-card[data-id="${pubId}"]`);
+            if (!card) return;
+            // No se cuentan las propias (el backend también las filtra).
+            if (parseInt(card.dataset.autorId) === miId) return;
+            if (_vistasEnviadasSesion.has(pubId)) return;
+
+            if (!_vistaObserver) {
+                _vistaObserver = new IntersectionObserver((entradas) => {
+                    entradas.forEach(en => {
+                        const id = parseInt(en.target.dataset.id);
+                        if (en.isIntersecting) {
+                            if (_vistaTemporizadores.has(id)) return;
+                            _vistaTemporizadores.set(id, setTimeout(() => {
+                                _vistaTemporizadores.delete(id);
+                                if (_vistasEnviadasSesion.has(id)) return;
+                                _vistasEnviadasSesion.add(id);
+                                _vistasPendientes.push(id);
+                                _vistaObserver.unobserve(en.target);
+                                clearTimeout(_vistasTimer);
+                                _vistasTimer = setTimeout(() => enviarVistasPendientes(false), 4000);
+                            }, 1000));
+                        } else if (_vistaTemporizadores.has(id)) {
+                            clearTimeout(_vistaTemporizadores.get(id));
+                            _vistaTemporizadores.delete(id);
+                        }
+                    });
+                }, { threshold: 0.5 });
+
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'hidden') enviarVistasPendientes(true);
+                });
+                window.addEventListener('pagehide', () => enviarVistasPendientes(true));
+            }
+            _vistaObserver.observe(card);
+        }
+
     window.compartirPublicacion = function(pubId) {
             const url = `${window.location.origin}/publicacion?id=${pubId}`;
+
+        // Panel de seguimiento: se registra el CLIC en compartir (no que se haya compartido de verdad).
+        const tokenCompartir = localStorage.getItem('token');
+        if (tokenCompartir) {
+            fetch(`${API_URL}/publications/${pubId}/share-click`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${tokenCompartir}` },
+                keepalive: true
+            }).catch(() => {});
+        }
+
         if (navigator.share) {
             navigator.share({ url });
         } else {

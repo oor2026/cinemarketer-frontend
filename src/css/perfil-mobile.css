@@ -1137,3 +1137,7 @@
 .perfil-card .sala-misterio { margin-top: 0; }
 .perfil-card .sala-mist { cursor: default; }
 .perfil-card .sala-mist strong { color: var(--cine-text-muted); }
+
+/* Panel de seguimiento: el botón queda a la derecha del título, en la misma fila */
+.perfil-card #perfilPublicacionesCabecera { flex-wrap: nowrap; }
+.perfil-card .perfil-panel-btn { flex: 0 0 auto; align-self: flex-end; margin-bottom: 10px; padding: 8px 12px; font-size: 12.5px; }

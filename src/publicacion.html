@@ -146,6 +146,32 @@
     : 'https://cinemarketer-backend-production.up.railway.app/api';
   window._comunidadApiUrl = API_URL;   // lo usan las herramientas para armar sus pedidos
 
+    // Panel de seguimiento: cuenta la visita a esta página pública.
+  // Anónima (sin Authorization a propósito): suma visualización, no alcance.
+  // Una clave aleatoria por navegador evita contar la misma persona muchas veces el mismo día.
+  function registrarVistaPublica(id, pub) {
+      try {
+          const miId = localStorage.getItem('userId');
+          const autorId = pub && (pub.userId || (pub.user && pub.user.id));
+          if (miId && autorId && String(miId) === String(autorId)) return; // el autor mirando lo suyo no cuenta
+
+          let clave = null;
+          try { clave = localStorage.getItem('cmAnonKey'); } catch (e) {}
+          if (!clave) {
+              clave = (window.crypto && crypto.randomUUID)
+                  ? crypto.randomUUID()
+                  : 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 12);
+              try { localStorage.setItem('cmAnonKey', clave); } catch (e) {}
+          }
+          fetch(`${API_URL}/publications/public/${id}/view`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ anonKey: clave }),
+              keepalive: true
+          }).catch(() => {});
+      } catch (e) { /* mejor esfuerzo */ }
+  }
+
   async function cargarPublicacion() {
       const params = new URLSearchParams(window.location.search);
       const id = params.get('id');
@@ -158,6 +184,7 @@
           renderPublicacion(pub);
           cargarMetricas(id);
           cargarComentariosPublicos(id);
+          registrarVistaPublica(id, pub);
       } catch(e) {
           mostrarError();
       }
