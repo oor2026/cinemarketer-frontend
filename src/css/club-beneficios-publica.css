@@ -958,4 +958,99 @@
     .club-btn-cancelar:hover { background: #fff; border-color: #D0D5DD; }
     .club-btn-confirmar { border-radius: 14px; padding: 0.8rem; background: linear-gradient(135deg, #f0553f 0%, #c4321f 100%); box-shadow: 0 12px 22px -12px rgba(196, 50, 31, 0.7); }
     .club-btn-confirmar:hover { background: linear-gradient(135deg, #f0553f 0%, #c4321f 100%); filter: brightness(1.06); }
+
+    /* Refuerzos de la vista pública */
+    .club-header-v2-decor, .club-header-v2-sparkle { display: none !important; }
+    /* Flecha propia en los selects (por si algún CSS de la página les saca la nativa) */
+    .filtro-select {
+        -webkit-appearance: none; appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23667085' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right 0.9rem center; padding-right: 2.2rem;
+    }
+}
+
+/* =====================================================================================================================
+   FONDO DE PÓSTERS para la vista PÚBLICA del Club de Beneficios (club-beneficios-publica.html), solo desde 1280 px.
+   Es la misma sección «FONDO DE PÓSTERS» de feed-cine-desktop.css, copiada acá porque la página pública no carga ese archivo.
+   Diferencias: el contenido mide 1040 px y el degradé se disuelve en #f5f5f5 (el color de fondo de la página pública).
+   Se pega al FINAL de club-beneficios-publica.css (o va en su propio archivo enlazado en el <head>).
+   Lo arma js/feed-muro.js (el mismo archivo del dashboard).
+   ===================================================================================================================== */
+.fcd-muro { display: none; }
+@media (min-width: 1280px) {
+    /* Ancho de cada lateral: lo que sobra a cada lado del contenido (1040 px) más 70 px que se meten por debajo; máximo 520. */
+    :root { --fcd-lado: min(520px, calc((100vw - 1040px) / 2 + 70px)); }
+    .fcd-muro {
+        display: block;
+        position: fixed;
+        left: 0; top: 0; right: 0; bottom: 0;
+        z-index: -1;
+        pointer-events: none;
+    }
+    .fcd-muro-lado {
+        position: absolute;
+        top: 0; bottom: 0;
+        width: var(--fcd-lado);
+        overflow: hidden;
+    }
+    .fcd-muro-izq { left: 0; }
+    .fcd-muro-der { right: 0; }
+    .fcd-muro-inner {
+        position: absolute;
+        top: calc(50% - 520px);
+        width: 480px;
+        height: 1040px;
+        transform-origin: 50% 50%;
+        filter: drop-shadow(-4px 0 0 rgba(229, 9, 20, 0.55)) drop-shadow(4px 0 0 rgba(0, 120, 255, 0.55));
+        animation: fcdMuroEntrada 0.6s ease both;
+    }
+    .fcd-muro-izq .fcd-muro-inner { left: -130px; transform: rotate(-10deg) scale(var(--fcd-escala, 1)); }
+    .fcd-muro-der .fcd-muro-inner { right: -130px; transform: rotate(10deg) scale(var(--fcd-escala, 1)); }
+    .fcd-liviano .fcd-muro-inner { filter: none; }
+    @keyframes fcdMuroEntrada { from { opacity: 0; } to { opacity: 1; } }
+
+    /* El blanco degradé: transparente en el borde de la pantalla y del color de la página hacia el contenido. */
+    .fcd-muro-lado::after {
+        content: "";
+        position: absolute;
+        left: 0; top: 0; right: 0; bottom: 0;
+        pointer-events: none;
+    }
+    .fcd-muro-izq::after {
+        background: linear-gradient(90deg, rgba(245, 245, 245, 0) 0%, rgba(245, 245, 245, 0.35) 38%, rgba(245, 245, 245, 0.86) 72%, #f5f5f5 96%);
+    }
+    .fcd-muro-der::after {
+        background: linear-gradient(270deg, rgba(245, 245, 245, 0) 0%, rgba(245, 245, 245, 0.35) 38%, rgba(245, 245, 245, 0.86) 72%, #f5f5f5 96%);
+    }
+
+    .fcd-poster {
+        position: absolute;
+        width: 140px;
+        height: 210px;
+        overflow: hidden;
+        border-radius: 8px;
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3);
+    }
+    .fcd-poster-titulo {
+        position: absolute;
+        left: 10px; right: 10px; bottom: 14px;
+        font: 700 14px/1.05 'Space Grotesk', system-ui, sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #fff;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+    .fcd-poster img {
+        position: absolute;
+        left: 0; top: 0;
+        width: 100%; height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 0.45s ease;
+    }
+    .fcd-poster img.fcd-ok { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .fcd-muro-inner { animation: none; }
+    .fcd-poster img { transition: none; }
 }
