@@ -73,7 +73,27 @@ window['init_perfil'] = async function(userId) {
         }
 
     await cargarPerfil(userId);
+    registrarVisitaPerfil(userId);
 };
+
+// ==============================================
+// PANEL DE SEGUIMIENTO: VISITA AL PERFIL
+// ==============================================
+// Avisa que se abrió el perfil de otra persona (una por día y por visitante; el backend deduplica).
+// Mejor esfuerzo: nunca interrumpe la carga del perfil.
+function registrarVisitaPerfil(userId) {
+    try {
+        const token = localStorage.getItem('token');
+        const miId = localStorage.getItem('userId');
+        if (!token || !userId || String(userId) === String(miId)) return;
+        if (document.getElementById('perfilBloqueadoMsg')) return;   // perfil bloqueado: no hubo visita real
+        fetch(`${CONFIG.API_URL}/profile-views/${userId}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            keepalive: true
+        }).catch(() => {});
+    } catch (e) { /* mejor esfuerzo */ }
+}
 
 // ==============================================
 // CARGAR PERFIL

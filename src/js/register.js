@@ -298,7 +298,16 @@ async function handleRegister(e) {
             phone: phone
         };
 
-        const response = await fetch(`${CONFIG.API_URL}/auth/register`, {
+        // Panel de seguimiento: si llegó desde un link compartido (últimos 30 días), se manda la referencia.
+        let refQuery = '';
+        try {
+            const refGuardada = JSON.parse(localStorage.getItem('cmRef') || 'null');
+            if (refGuardada && refGuardada.pubId && refGuardada.key && (Date.now() - refGuardada.ts) < 30 * 24 * 3600 * 1000) {
+                refQuery = `?refPub=${encodeURIComponent(refGuardada.pubId)}&refKey=${encodeURIComponent(refGuardada.key)}`;
+            }
+        } catch (e) { /* mejor esfuerzo */ }
+
+        const response = await fetch(`${CONFIG.API_URL}/auth/register${refQuery}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(registerData)
@@ -311,6 +320,7 @@ async function handleRegister(e) {
         }
 
         if (response.ok) {
+            try { localStorage.removeItem('cmRef'); } catch (e) { /* mejor esfuerzo */ }
             mostrarErrores([]);
             const mensajeExito = '✅ ¡Registro exitoso!\n\n' +
                                 'Te hemos enviado un email de verificación a:\n' +

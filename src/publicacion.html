@@ -172,6 +172,28 @@
       } catch (e) { /* mejor esfuerzo */ }
   }
 
+    // Panel de seguimiento v1.5: si se entró por un link compartido (?ref=u<id>), se anota la visita y
+  // se recuerda en este navegador (30 días) de qué publicación vino, para atribuir un posible registro.
+  function registrarVisitaDesdeLink(id, pub) {
+      try {
+          const ref = new URLSearchParams(window.location.search).get('ref');
+          if (!ref || !/^u\d{1,12}$/.test(ref)) return;
+          const miId = localStorage.getItem('userId');
+          if (miId && ref === 'u' + miId) return;                                   // abriste tu propio link
+          const autorId = pub && (pub.userId || (pub.user && pub.user.id));
+          if (miId && autorId && String(miId) === String(autorId)) return;          // el autor mirando lo suyo
+          const clave = localStorage.getItem('cmAnonKey');                           // la crea registrarVistaPublica
+          if (!clave) return;
+          localStorage.setItem('cmRef', JSON.stringify({ pubId: Number(id), key: clave, ts: Date.now() }));
+          fetch(`${API_URL}/publications/public/${id}/share-visit`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ anonKey: clave, ref: ref }),
+              keepalive: true
+          }).catch(() => {});
+      } catch (e) { /* mejor esfuerzo */ }
+  }
+
   async function cargarPublicacion() {
       const params = new URLSearchParams(window.location.search);
       const id = params.get('id');
@@ -185,6 +207,7 @@
           cargarMetricas(id);
           cargarComentariosPublicos(id);
           registrarVistaPublica(id, pub);
+          registrarVisitaDesdeLink(id, pub);
       } catch(e) {
           mostrarError();
       }
