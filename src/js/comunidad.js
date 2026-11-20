@@ -823,7 +823,10 @@
         }
 
     window.compartirPublicacion = function(pubId) {
-            const url = `${window.location.origin}/publicacion?id=${pubId}`;
+            // Panel de seguimiento: "ref=u<id>" identifica quién compartió, para medir visitas y registros por link.
+            const miIdCompartir = localStorage.getItem('userId');
+            const url = `${window.location.origin}/publicacion?id=${pubId}` +
+                (miIdCompartir && /^\d+$/.test(miIdCompartir) ? `&ref=u${miIdCompartir}` : '');
 
         // Panel de seguimiento: se registra el CLIC en compartir (no que se haya compartido de verdad).
         const tokenCompartir = localStorage.getItem('token');
@@ -841,7 +844,6 @@
             navigator.clipboard.writeText(url);
         }
     };
-
     window.abrirMenuPublicacion = function(pubId, event) {
             event.stopPropagation();
 

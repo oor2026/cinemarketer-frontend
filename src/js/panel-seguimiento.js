@@ -245,6 +245,56 @@
             </div>`;
         $('psKpis').innerHTML = html;
         $('psKpisNota').textContent = `Las variaciones comparan con los ${S.dias} días anteriores.`;
+        pintarCrecimiento();
+    }
+
+    // Visitas al perfil y camino "compartir → visita → registro". Se miden desde "medicionNuevaDesde".
+    function pintarCrecimiento() {
+        const el = $('psCrecimiento'); if (!el) return;
+        const r = S.resumen; const a = r.actual || {}; const p = r.anterior || {};
+        const desde = r.medicionNuevaDesde || null;
+        // Sin ninguna medición todavía, o con un período anterior que empieza antes de medir: no se compara contra "0".
+        const anteriorIncompleto = !desde || desde > sumarDias(r.desde, -S.dias);
+        const visitas = Number(a.visitasLink || 0);
+        const registros = Number(a.registros || 0);
+        const conv = visitas > 0 ? (Math.round(registros / visitas * 1000) / 10) : null;
+
+        const bloque = (icono, nombre, ayuda, valor, pie) => `
+            <div class="ps-kpi">
+                <div class="ps-kpi-etiqueta"><i class="fas ${icono}"></i><span class="ps-kpi-nombre">${esc(nombre)}</span><span class="ps-kpi-ayuda" title="${esc(ayuda)}"><i class="fas fa-info-circle"></i></span></div>
+                <div class="ps-kpi-fila"><div class="ps-kpi-valor">${valor}</div></div>
+                <div class="ps-kpi-pie">${pie}</div>
+            </div>`;
+        const pieDelta = (act, prev) => {
+            const d = anteriorIncompleto ? { cls: 'igual', txt: 'Sin datos previos', corto: true } : delta(act, prev);
+            return `<span class="ps-delta ${d.cls}">${esc(d.txt)}${d.corto ? '' : ` <small>vs. ${S.dias} días previos</small>`}</span>`;
+        };
+
+        const personas = Number(a.visitantesPerfil || 0);
+        const verificados = Number(a.registrosVerificados || 0);
+        el.innerHTML = `
+            <div class="ps-card-cabecera">
+                <h3 class="ps-card-titulo">Perfil y crecimiento</h3>
+                <span class="ps-card-ayuda">Visitas a tu perfil y personas que llegaron desde tus publicaciones compartidas.</span>
+            </div>
+            <div class="ps-crec-grid">
+                ${bloque('fa-id-card', 'Visitas al perfil', 'Veces que otras personas con cuenta abrieron tu perfil (una por persona y por día). No cuentan las tuyas.',
+                    num(a.visitasPerfil), `<span class="ps-kpi-sub">${num(personas)} ${personas === 1 ? 'persona distinta' : 'personas distintas'}</span>` + pieDelta(a.visitasPerfil, p.visitasPerfil))}
+                ${bloque('fa-link', 'Visitas por link', 'Personas que abrieron una de tus publicaciones desde un link armado con el botón Compartir.',
+                    num(a.visitasLink), pieDelta(a.visitasLink, p.visitasLink))}
+                ${bloque('fa-user-check', 'Registros', 'Cuentas nuevas creadas con email después de entrar por un link compartido de una publicación tuya.',
+                    num(a.registros), `<span class="ps-kpi-sub">${num(verificados)} ${verificados === 1 ? 'verificó' : 'verificaron'} su email</span>` + pieDelta(a.registros, p.registros))}
+                ${bloque('fa-percentage', 'Conversión', 'De cada 100 visitas por link compartido, cuántas terminaron en un registro.',
+                    conv === null ? '—' : `${String(conv).replace('.', ',')}%`, `<span class="ps-kpi-sub">${conv === null ? 'Sin visitas por link todavía' : 'registros / visitas por link'}</span>`)}
+            </div>
+            <div class="ps-embudo" aria-label="Del compartir al registro">
+                <span>Clics en compartir <b>${num(a.compartidos)}</b></span><i class="fas fa-chevron-right"></i>
+                <span>Visitas por link <b>${num(a.visitasLink)}</b></span><i class="fas fa-chevron-right"></i>
+                <span>Registros <b>${num(a.registros)}</b></span>
+            </div>
+            <p class="ps-nota">${(Number(a.compartidos || 0) + visitas + registros) === 0
+                ? 'Cuando alguien comparta una publicación tuya y la persona que la abra se registre, lo vas a ver acá.'
+                : 'Se cuentan los links compartidos con el botón Compartir y los registros hechos con email. Un clic en compartir no siempre termina en un mensaje enviado.'}</p>`;
     }
 
     // ------------------------------------------------------------------ gráfico
