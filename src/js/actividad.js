@@ -6,7 +6,14 @@
     'use strict';
 
     const API = CONFIG.API_URL;
-    const slug = (new URLSearchParams(location.search).get('c') || '').trim().toLowerCase();
+    // La campaña llega en ?c=slug. También se acepta #c=slug: en producción el
+    // servidor redirige "actividad.html" a "actividad" y en ese salto pierde el
+    // "?c=", pero el navegador conserva lo que va después del "#".
+    const slugDeLaDireccion = new URLSearchParams(location.search).get('c');
+    const slug = (slugDeLaDireccion || new URLSearchParams(location.hash.slice(1)).get('c') || '').trim().toLowerCase();
+    if (slug && !slugDeLaDireccion) {
+        history.replaceState(null, '', `${location.pathname}?c=${encodeURIComponent(slug)}`);
+    }
     const AR = '-03:00'; // las fechas del servidor vienen en hora de Argentina, sin zona
 
     const estado = {
@@ -671,7 +678,8 @@
     // ------------------------------------------
     async function compartir(boton) {
         const c = estado.landing.campania;
-        const url = new URL(`actividad.html?c=${encodeURIComponent(c.slug)}`, location.href).href;
+        // La misma dirección en la que se está viendo la página (sin redirecciones de por medio).
+        const url = `${location.origin}${location.pathname}?c=${encodeURIComponent(c.slug)}`;
         const aciertos = boton && boton.dataset.aciertos;
         const texto = aciertos != null
             ? `Hice ${aciertos}/${boton.dataset.total} en "${c.nombre}" 🎬 ¿Me superás?`

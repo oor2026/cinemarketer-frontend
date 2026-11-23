@@ -235,7 +235,7 @@ var adminJuegos = window.adminJuegos || {
             b.push(`<button type="button" class="admin-btn-secondary" onclick="adminJuegos.accion('archivar')"><i class="fas fa-box-archive"></i> Archivar</button>`);
         }
         if (c.estado !== 'BORRADOR') {
-            b.push(`<a class="admin-btn-secondary jg-link" href="../actividad.html?c=${encodeURIComponent(c.slug)}" target="_blank" rel="noopener"><i class="fas fa-up-right-from-square"></i> Ver landing</a>`);
+            b.push(`<a class="admin-btn-secondary jg-link" href="../actividad.html#c=${encodeURIComponent(c.slug)}" target="_blank" rel="noopener"><i class="fas fa-up-right-from-square"></i> Ver landing</a>`);
         }
         return b.join('');
     },
