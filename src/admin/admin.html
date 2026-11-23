@@ -123,6 +123,10 @@
                 <i class="fas fa-plug"></i>
                 <span>Integraciones</span>
             </li>
+            <li class="sidebar-item" onclick="adminUI.switchSection('juegos', this)">
+                <i class="fas fa-gamepad"></i>
+                <span>Plataforma de juegos</span>
+            </li>
             </li>
         </ul>
     </aside>
@@ -590,6 +594,22 @@
             </div>
             <div id="adminIntegracionesResumen" class="integ-resumen"></div>
             <div id="adminIntegracionesLista">
+                <div class="admin-loading"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN: PLATAFORMA DE JUEGOS — campañas del Centro de actividad (ver js/admin-juegos.js) -->
+        <section id="section-juegos" class="admin-section">
+            <div class="section-header">
+                <div>
+                    <h1>Plataforma de juegos</h1>
+                    <p>Campañas de trivia con premio para el Centro de actividad</p>
+                </div>
+                <button class="btn-nuevo" id="adminJuegosBtnNueva" onclick="adminJuegos.nuevaCampania()">
+                    <i class="fas fa-plus"></i> Nueva campaña
+                </button>
+            </div>
+            <div id="adminJuegosContenido">
                 <div class="admin-loading"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>
             </div>
         </section>
@@ -2603,6 +2623,7 @@
 <script src="../js/admin-misiones.js?v=1"></script>
 <script src="../js/admin-notificaciones.js"></script>
 <script src="../js/admin-integraciones.js"></script>
+<script src="../js/admin-juegos.js"></script>
 
 <!-- MODAL DESBLOQUEAR USUARIO -->
 <div id="modalDesbloquearOverlay" style="display:none;position:fixed;inset:0;
