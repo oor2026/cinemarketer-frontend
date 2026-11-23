@@ -362,10 +362,25 @@
                 color: #fff !important;
                 font-size: 0 !important;
                 -webkit-tap-highlight-color: transparent;
+                flex-direction: column;
+                height: 46px;
+                gap: 3px !important;
             }
+            /* Contador debajo de cada ícono. El número real sigue en el botón (oculto con font-size: 0, lo usan otras
+               funciones); acá se muestra abreviado (1.2K, 3M) desde data-n, que completa feed-films.js. */
             .fila-genero-slide .btn-like::after,
             .fila-genero-slide .btn-dislike::after,
-            .fila-genero-slide .btn-comentarios-card::after { content: none !important; }
+            .fila-genero-slide .btn-comentarios-card::after {
+                content: attr(data-n) !important;
+                font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+                font-size: 11px;
+                font-weight: 700;
+                line-height: 1;
+                color: inherit;
+                opacity: 0.9;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+                font-variant-numeric: tabular-nums;
+            }
             .fila-genero-slide .votacion-buttons i { font-size: 19px; line-height: 1; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6)); }
             .fila-genero-slide .votacion-buttons .btn-like.votado { color: #4ADE80 !important; }
             .fila-genero-slide .votacion-buttons .btn-dislike.votado { color: #FF6B6B !important; }
