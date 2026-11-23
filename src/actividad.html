@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0d0c12">
+    <title>Centro de actividad — Cinemarketer</title>
+    <meta name="description" content="Jugá la trivia de Cinemarketer, sumá aciertos todos los días y competí por el premio.">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Cinemarketer">
+    <meta property="og:title" content="🎬 Centro de actividad — Cinemarketer">
+    <meta property="og:description" content="Una trivia por día. Sumá aciertos, subí en el ranking y ganá el premio.">
+    <meta property="og:image" content="https://cinemarketer.com.ar/assets/images/og-default.png">
+
+    <link rel="icon" href="assets/images/favicon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/actividad.css">
+</head>
+<body>
+
+<header class="act-barra">
+    <span class="act-barra-lado" aria-hidden="true"></span>
+    <a href="index.html" class="act-marca" aria-label="Una campaña producida por Cinemarketer. Ir a Cinemarketer">
+        <span class="act-marca-texto"><br><br>Una campaña producida por </span>
+        <img src="assets/images/isologotipo.webp" alt="Cinemarketer">
+    </a>
+    <div id="actCuenta" class="act-cuenta"></div>
+</header>
+
+<main id="act" class="act" aria-live="polite">
+    <div class="act-cargando"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>
+</main>
+
+<!-- Pantalla del juego: se abre encima de la landing -->
+<div id="actJuego" class="act-juego" role="dialog" aria-modal="true" aria-label="Partida" hidden></div>
+
+<div id="actAviso" class="act-aviso" role="status" hidden></div>
+
+<script src="js/config.js"></script>
+<script src="js/volver.js"></script>
+<script src="js/actividad.js"></script>
+</body>
+</html>

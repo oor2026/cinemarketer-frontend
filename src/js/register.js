@@ -339,7 +339,7 @@ async function handleRegister(e) {
             } else {
                 alert(mensajeExito);
             }
-            setTimeout(() => window.location.href = 'login.html', 3000);
+            setTimeout(() => window.location.href = window.cmVolver ? window.cmVolver.conVolver('login.html') : 'login.html', 3000);
 
         } else {
             if (response.status === 400 && data && typeof data === 'object') {

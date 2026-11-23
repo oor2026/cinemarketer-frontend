@@ -112,6 +112,8 @@ const adminUI = {
             adminComercial.cargar();
         } else if (sectionName === 'integraciones' && typeof adminIntegraciones !== 'undefined') {
             adminIntegraciones.init();
+        } else if (sectionName === 'juegos' && typeof adminJuegos !== 'undefined') {
+            adminJuegos.init();
         }
     },
 

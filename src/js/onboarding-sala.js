@@ -293,8 +293,11 @@
         });
     }
 
+    // Al terminar (o salir), vuelve a donde estaba antes de registrarse
+    // (por ejemplo, una actividad); si no, al dashboard como siempre.
     function irADashboard() {
-        window.location.replace('dashboard.html');
+        const volverA = window.cmVolver ? window.cmVolver.usar() : null;
+        window.location.replace(volverA || 'dashboard.html');
     }
 
     $('onbBtnEntrar').addEventListener('click', irADashboard);

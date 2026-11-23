@@ -164,11 +164,15 @@ window.googleAuth = {
 
             showToast('success', '¡Bienvenido a Cinemarketer!');
 
+        const volverA = window.cmVolver ? window.cmVolver.destino() : null;
         setTimeout(() => {
-            if (data.role === 'ADMIN') {
-                window.location.replace('admin/admin.html');
-            } else if (data.necesitaOnboardingSala) {
+            if (data.role !== 'ADMIN' && data.necesitaOnboardingSala) {
                 window.location.replace('onboarding-sala.html');
+            } else if (volverA) {
+                window.cmVolver.limpiar();
+                window.location.replace(volverA);
+            } else if (data.role === 'ADMIN') {
+                window.location.replace('admin/admin.html');
             } else {
                 window.location.replace('dashboard.html');
             }

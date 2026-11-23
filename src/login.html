@@ -36,6 +36,7 @@
     <link rel="stylesheet" href="css/login-cine-desktop.css">
     <!-- Google Identity Services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="js/volver.js"></script>
     <script src="js/google-auth.js"></script>
     <script src="js/toast.js"></script>
 </head>
@@ -485,12 +486,17 @@
 
                 showToast('success', '¡Bienvenido de nuevo!');
 
-                // Redirigir según rol
+                // Redirigir: el onboarding siempre primero (es parte del alta).
+                // Si venía de una actividad, el onboarding la retoma al terminar.
+                const volverA = window.cmVolver ? window.cmVolver.destino() : null;
                 setTimeout(() => {
-                    if (data.role === 'ADMIN') {
-                        window.location.replace('admin/admin.html');
-                    } else if (data.necesitaOnboardingSala) {
+                    if (data.role !== 'ADMIN' && data.necesitaOnboardingSala) {
                         window.location.replace('onboarding-sala.html');
+                    } else if (volverA) {
+                        window.cmVolver.limpiar();
+                        window.location.replace(volverA);
+                    } else if (data.role === 'ADMIN') {
+                        window.location.replace('admin/admin.html');
                     } else {
                          window.location.replace('dashboard.html');
                     }
