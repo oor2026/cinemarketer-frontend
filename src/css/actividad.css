@@ -25,6 +25,8 @@
 html, body { margin: 0; }
 /* Nada puede ensanchar la página hacia los costados (en el celular eso corre todo y corta los bordes). */
 html, body { overflow-x: clip; max-width: 100%; }
+/* Como una app: sin zoom con doble toque (responder rápido en la trivia no debe agrandar la pantalla). */
+html { touch-action: manipulation; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
 body {
     background: var(--fondo);
