@@ -234,6 +234,11 @@ var adminJuegos = window.adminJuegos || {
         if (c.estado === 'PUBLICADA') {
             b.push(`<button type="button" class="admin-btn-secondary" onclick="adminJuegos.accion('archivar')"><i class="fas fa-box-archive"></i> Archivar</button>`);
         }
+        if (c.estado === 'ARCHIVADA') {
+            b.push(`<label class="jg-ocultar" title="La landing muestra solo «Parece que la campaña ya finalizó»">
+                <input type="checkbox" ${c.landingOculta ? 'checked' : ''} onchange="adminJuegos.ocultarLanding(this)">
+                <span>Ocultar landing</span></label>`);
+        }
         if (c.estado !== 'BORRADOR') {
             b.push(`<a class="admin-btn-secondary jg-link" href="../actividad.html#c=${encodeURIComponent(c.slug)}" target="_blank" rel="noopener"><i class="fas fa-up-right-from-square"></i> Ver landing</a>`);
         }
@@ -273,6 +278,22 @@ var adminJuegos = window.adminJuegos || {
             this.recargar();
         } catch (e) {
             this.aviso(e.message, 'error');
+        }
+    },
+
+    async ocultarLanding(check) {
+        const c = this.detalle.campania;
+        const oculta = check.checked;
+        check.disabled = true;
+        try {
+            const r = await this.pedir(`/campanias/${c.id}/landing-oculta`, { method: 'PUT', body: { oculta } });
+            c.landingOculta = r.landingOculta;
+            this.aviso(oculta ? 'Landing oculta: ahora muestra «Parece que la campaña ya finalizó»' : 'La landing se vuelve a ver', 'success');
+        } catch (e) {
+            check.checked = !oculta;
+            this.aviso(e.message, 'error');
+        } finally {
+            check.disabled = false;
         }
     },
 
@@ -1173,6 +1194,8 @@ var adminJuegos = window.adminJuegos || {
             .jg-todas { margin-left:auto; display:flex; align-items:center; gap:6px; font-weight:600; cursor:pointer; }
             .jg-tmdb-resultado { display:grid; gap:8px; }
             .jg-candidata { display:flex; gap:10px; align-items:flex-start; border:1px solid #e5e7eb; border-radius:10px; padding:10px; cursor:pointer; }
+            .jg-ocultar { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:8px; background:#fff; border:1px solid #e5e7eb; font-weight:600; font-size:0.86rem; color:#374151; cursor:pointer; }
+            .jg-ocultar input { width:16px; height:16px; accent-color:#b91c1c; cursor:pointer; }
             .jg-subtitulo { margin:18px 0 8px; font-size:1rem; color:#1a3a6b; }
             .jg-ayuda-bloque { background:#fff; border-radius:10px; padding:10px 14px; margin:0 0 12px; font-size:0.84rem; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
             .jg-celda-acciones { white-space:nowrap; text-align:right; }
