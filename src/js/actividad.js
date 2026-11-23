@@ -132,6 +132,12 @@
             if ((e.status === 401 || e.status === 403) && token()) {
                 try { landing = await pedir(`/public/juegos/${encodeURIComponent(slug)}`, { sinToken: true }); }
                 catch (e2) { renderError(e2.message); return; }
+            } else if (e.status === 410) {
+                renderFinalizada();
+                return;
+            } else if (e.status === 410) {
+                renderFinalizada();
+                return;
             } else {
                 renderError(e.status === 404 ? 'No encontramos esta actividad. Revisá el enlace.' : e.message);
                 return;
@@ -143,6 +149,13 @@
         document.title = `${landing.campania.nombre} — Cinemarketer`;
         renderCuenta();
         renderLanding();
+    }
+
+    // Campaña archivada con la landing oculta desde el admin: pantalla negra y una sola leyenda.
+    function renderFinalizada() {
+        document.body.classList.add('act-finalizada');
+        document.title = 'Cinemarketer';
+        $('act').innerHTML = '<p class="act-finalizada-texto">Parece que la campaña ya finalizó</p>';
     }
 
     function renderError(texto) {

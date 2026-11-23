@@ -370,6 +370,12 @@ button { font-family: inherit; }
 
 .act-pie { text-align: center; color: var(--tenue); font-size: 0.85rem; margin-top: 28px; }
 
+/* ---------- Campaña finalizada (landing oculta) ---------- */
+body.act-finalizada { background: #000; }
+body.act-finalizada .act-barra, body.act-finalizada .act-fondo { display: none; }
+body.act-finalizada .act { min-height: 100vh; min-height: 100svh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.act-finalizada-texto { margin: 0; text-align: center; color: #b9b4c6; font-family: var(--titulos); font-size: 1.15rem; }
+
 /* ---------- Error ---------- */
 .act-error { text-align: center; padding: 72px 0; }
 .act-error > i { font-size: 2.4rem; color: var(--acento); }
