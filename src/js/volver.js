@@ -9,6 +9,10 @@
 // - Solo acepta direcciones internas ("/algo"), nunca otro sitio.
 // - Dura 24 horas: alcanza para registrarse y verificar el mail en el mismo
 //   navegador, sin que días después un login normal termine en otro lado.
+// - El destino viaja después del "#" (login.html#volver=...): en producción el
+//   servidor redirige "login.html" a "login" y en ese salto borra lo que va
+//   después del "?", pero el navegador conserva lo que va después del "#".
+//   También se acepta "?volver=" (por ejemplo /login?volver=..., que no redirige).
 window.cmVolver = {
     CLAVE: 'volverDespuesDeLogin',
     VIGENCIA_MS: 24 * 60 * 60 * 1000,
@@ -30,8 +34,13 @@ window.cmVolver = {
         } catch (e) { /* sin almacenamiento: queda el ?volver= de la dirección */ }
     },
 
+    _deLaDireccion: function () {
+        return this._segura(new URLSearchParams(location.search).get('volver'))
+            || this._segura(new URLSearchParams(location.hash.slice(1)).get('volver'));
+    },
+
     destino: function () {
-        const deLaDireccion = this._segura(new URLSearchParams(location.search).get('volver'));
+        const deLaDireccion = this._deLaDireccion();
         if (deLaDireccion) return deLaDireccion;
         try {
             const guardado = JSON.parse(localStorage.getItem(this.CLAVE) || 'null');
@@ -51,17 +60,17 @@ window.cmVolver = {
         return d;
     },
 
-    // "login.html" → "login.html?volver=%2Factividad%3Fc%3Dx" (si hay destino)
+    // "login.html" → "login.html#volver=%2Factividad%3Fc%3Dx" (si hay destino)
     conVolver: function (pagina) {
         const d = this.destino();
-        return d ? pagina + (pagina.indexOf('?') === -1 ? '?' : '&') + 'volver=' + encodeURIComponent(d) : pagina;
+        return d ? pagina.split('#')[0] + '#volver=' + encodeURIComponent(d) : pagina;
     }
 };
 
 // Al llegar con ?volver=, se guarda (sirve para el ida y vuelta del mail de
 // verificación) y los enlaces entre login y registro lo pasan de mano.
 (function () {
-    const d = window.cmVolver._segura(new URLSearchParams(location.search).get('volver'));
+    const d = window.cmVolver._deLaDireccion();
     if (d) window.cmVolver.guardar(d);
     document.addEventListener('DOMContentLoaded', function () {
         if (!window.cmVolver.destino()) return;

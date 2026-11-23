@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#0d0c12">
     <title>Centro de actividad — Cinemarketer</title>
     <meta name="description" content="Jugá la trivia de Cinemarketer, sumá aciertos todos los días y competí por el premio.">
@@ -24,7 +24,7 @@
 <header class="act-barra">
     <span class="act-barra-lado" aria-hidden="true"></span>
     <a href="index.html" class="act-marca" aria-label="Una campaña producida por Cinemarketer. Ir a Cinemarketer">
-        <span class="act-marca-texto"><br><br>Una campaña producida por </span>
+        <span class="act-marca-texto">Una campaña<br>producida por</span>
         <img src="assets/images/isologotipo.webp" alt="Cinemarketer">
     </a>
     <div id="actCuenta" class="act-cuenta"></div>
@@ -39,8 +39,31 @@
 
 <div id="actAviso" class="act-aviso" role="status" hidden></div>
 
+<!-- Completar perfil al ingresar con Google por primera vez (lo maneja google-auth.js) -->
+<div id="googleCompleteProfileModal" class="act-modal act-google-perfil" style="display:none;">
+    <div class="act-modal-caja" role="dialog" aria-modal="true" aria-labelledby="actGoogleTitulo">
+        <div class="act-modal-cab">
+            <div>
+                <h2 id="actGoogleTitulo">Un paso más</h2>
+                <p class="act-tenue">Completá estos datos para crear tu cuenta de Cinemarketer.</p>
+            </div>
+        </div>
+        <div class="act-modal-cuerpo act-login">
+            <p class="act-login-aviso"><strong>Importante:</strong> el DNI no se puede modificar después. Si te equivocás, escribinos a info@cinemarketer.com.ar</p>
+            <label for="googleDni">DNI</label>
+            <input type="text" id="googleDni" inputmode="numeric" maxlength="8" placeholder="Ej: 12345678">
+            <label for="googlePhone">Teléfono (Argentina, +54)</label>
+            <input type="tel" id="googlePhone" maxlength="15" placeholder="11 12345678">
+            <div id="googleProfileError" class="act-login-error" style="display:none;"></div>
+            <button type="button" id="googleCompleteBtn" class="act-btn act-login-btn" onclick="window.googleAuth.completarPerfil()">Ingresar a Cinemarketer</button>
+            <p class="act-tenue act-login-legal">Al continuar aceptás los <a href="terminos" target="_blank" rel="noopener">Términos y Condiciones</a>, la <a href="privacidad" target="_blank" rel="noopener">Política de Privacidad</a> y las Normas de Convivencia de Cinemarketer.</p>
+        </div>
+    </div>
+</div>
+
 <script src="js/config.js"></script>
 <script src="js/volver.js"></script>
+<script src="js/google-auth.js"></script>
 <script src="js/actividad.js"></script>
 </body>
 </html>

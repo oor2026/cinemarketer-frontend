@@ -107,7 +107,9 @@
     // ------------------------------------------
     function irA(pagina) {
         if (window.cmVolver) window.cmVolver.guardar(location.pathname + location.search);
-        location.href = `${pagina}?volver=${encodeURIComponent(location.pathname + location.search)}`;
+        // El destino va después del "#": en producción "login.html" redirige a "login"
+        // y en ese salto se pierde lo que va después del "?".
+        location.href = `${pagina}#volver=${encodeURIComponent(location.pathname + location.search)}`;
     }
 
     function renderCuenta() {
@@ -115,7 +117,7 @@
         if (estado.landing && estado.landing.yo) {
             cont.innerHTML = '<a class="act-btn-chico" href="dashboard.html"><i class="fas fa-house"></i> <span>Mi Cinemarketer</span></a>';
         } else {
-            cont.innerHTML = '<button type="button" class="act-btn-chico" data-ir="login.html">Ingresar</button>';
+            cont.innerHTML = '<button type="button" class="act-btn-chico" data-accion="ingresar">Ingresar</button>';
         }
     }
 
@@ -132,9 +134,6 @@
             if ((e.status === 401 || e.status === 403) && token()) {
                 try { landing = await pedir(`/public/juegos/${encodeURIComponent(slug)}`, { sinToken: true }); }
                 catch (e2) { renderError(e2.message); return; }
-            } else if (e.status === 410) {
-                renderFinalizada();
-                return;
             } else if (e.status === 410) {
                 renderFinalizada();
                 return;
@@ -388,12 +387,12 @@
                 <p class="act-accion-titulo">Empieza en</p>
                 ${cuenta(L.proximaTanda)}
                 ${yo ? '<p class="act-tenue">Ya tenés todo listo. Volvé cuando arranque.</p>'
-                     : '<button type="button" class="act-btn" data-ir="register.html">Creá tu cuenta gratis para jugar</button><button type="button" class="act-link" data-ir="login.html">Ya tengo cuenta</button>'}`;
+                     : '<button type="button" class="act-btn" data-ir="register.html">Creá tu cuenta gratis para jugar</button><button type="button" class="act-link" data-accion="ingresar">Ya tengo cuenta</button>'}`;
         }
         if (c.estado === 'ACTIVA') {
             if (!yo) {
                 return `
-                    <button type="button" class="act-btn act-btn-grande" data-ir="login.html"><i class="fas fa-play"></i> Ingresá para jugar</button>
+                    <button type="button" class="act-btn act-btn-grande" data-accion="ingresar"><i class="fas fa-play"></i> Ingresá para jugar</button>
                     <button type="button" class="act-link" data-ir="register.html">No tengo cuenta: crear una gratis</button>
                     <p class="act-tenue">Necesitás una cuenta de Cinemarketer para entrar al ranking.</p>`;
             }
@@ -746,6 +745,9 @@
             case 'salir': salirDelJuego(); break;
             case 'bases': abrirBases(); break;
             case 'premio': abrirPremio(); break;
+            case 'ingresar': abrirIngreso(); break;
+            case 'ingresar-google': ingresarConGoogle(); break;
+            case 'ver-clave': verClave(accion); break;
             case 'cerrar-modal': cerrarModal(); break;
         }
     });
@@ -825,6 +827,166 @@
             </div>`;
         abrirModal('El premio', esc(c.nombre), cuerpo, 'act-modal-premio');
     }
+
+    // ------------------------------------------
+    // Ingresar sin salir de la landing
+    // Quien ya tiene cuenta entra acá mismo (mail y contraseña, o Google) y
+    // sigue jugando: no hay idas y vueltas al login que se puedan perder.
+    // Crear cuenta sigue yendo al registro (necesita verificar el mail), y el
+    // destino viaja en el mail de verificación.
+    // ------------------------------------------
+    // El navegador interno de Instagram/Facebook no permite ingresar con Google.
+    const enNavegadorDeApp = () => /Instagram|FBAN|FBAV/.test(navigator.userAgent || '');
+    let googleListo = null;
+
+    function cargarGoogle() {
+        if (enNavegadorDeApp()) return Promise.resolve(false);
+        if (window.google && window.google.accounts) return Promise.resolve(true);
+        if (!googleListo) {
+            googleListo = new Promise(resolver => {
+                const s = document.createElement('script');
+                s.src = 'https://accounts.google.com/gsi/client';
+                s.async = true;
+                s.onload = () => resolver(true);
+                s.onerror = () => { googleListo = null; resolver(false); };
+                document.head.appendChild(s);
+            });
+        }
+        return googleListo;
+    }
+
+    function guardarDestino() {
+        if (window.cmVolver) window.cmVolver.guardar(location.pathname + location.search);
+    }
+
+    function abrirIngreso() {
+        guardarDestino();
+        cargarGoogle(); // se adelanta la carga para que el botón de Google responda al toque
+        abrirModal('Ingresá con tu cuenta de Cinemarketer', 'Para jugar y entrar al ranking necesitás tu cuenta de Cinemarketer.', `
+            <form id="actLoginForm" class="act-login" novalidate>
+                <img class="act-login-logo" src="assets/images/isologotipo.webp" alt="Cinemarketer">
+                <label for="actLoginEmail">Correo electrónico</label>
+                <input id="actLoginEmail" type="email" inputmode="email" autocomplete="email" maxlength="78" placeholder="tu@email.com" required>
+                <label for="actLoginClave">Contraseña</label>
+                <div class="act-login-clave">
+                    <input id="actLoginClave" type="password" autocomplete="current-password" maxlength="30" placeholder="••••••••" required>
+                    <button type="button" data-accion="ver-clave" aria-label="Mostrar contraseña"><i class="fas fa-eye"></i></button>
+                </div>
+                <div id="actLoginError" class="act-login-error" role="alert"></div>
+                <button type="submit" class="act-btn act-login-btn" id="actLoginBtn">Ingresar y jugar</button>
+                <a class="act-login-olvide" href="forgot-password.html">¿Olvidaste tu contraseña?</a>
+                <div class="act-login-o"><span>o</span></div>
+                <button type="button" class="act-login-google" id="googleLoginBtn" data-accion="ingresar-google">
+                    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.83z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.83c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+                    Continuar con Google
+                </button>
+                <p class="act-login-registro">¿No tenés cuenta? <button type="button" class="act-link" data-ir="register.html">Creala gratis</button></p>
+            </form>`, 'act-modal-login');
+        const email = $('actLoginEmail');
+        if (email) email.focus();
+    }
+
+    function errorIngreso(texto) {
+        const el = $('actLoginError');
+        if (el) el.textContent = texto || '';
+    }
+
+    function verClave(boton) {
+        const input = $('actLoginClave');
+        if (!input) return;
+        const ver = input.type === 'password';
+        input.type = ver ? 'text' : 'password';
+        boton.setAttribute('aria-label', ver ? 'Ocultar contraseña' : 'Mostrar contraseña');
+        boton.innerHTML = `<i class="fas ${ver ? 'fa-eye-slash' : 'fa-eye'}"></i>`;
+    }
+
+    // Mismos datos que guarda login.html, para que el resto de Cinemarketer reconozca la sesión.
+    function guardarSesion(d) {
+        try {
+            localStorage.setItem('token', d.token);
+            localStorage.setItem('userEmail', d.email);
+            localStorage.setItem('userRole', d.role);
+            localStorage.setItem('userPoints', d.totalPoints);
+            localStorage.setItem('userLevel', d.level || 'AMATEUR');
+        } catch (e) { /* sin almacenamiento */ }
+    }
+
+    async function ingresar(ev) {
+        ev.preventDefault();
+        const email = ($('actLoginEmail').value || '').trim();
+        const clave = $('actLoginClave').value || '';
+        if (!email || !clave) { errorIngreso('Completá tu mail y tu contraseña.'); return; }
+        errorIngreso('');
+        const boton = $('actLoginBtn');
+        boton.disabled = true;
+        boton.textContent = 'Ingresando...';
+        const restaurar = () => { boton.disabled = false; boton.textContent = 'Ingresar y jugar'; };
+
+        let res, datos = {};
+        try {
+            res = await fetch(`${API}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password: clave })
+            });
+            const texto = await res.text();
+            try { datos = texto ? JSON.parse(texto) : {}; } catch (e) { /* sin cuerpo */ }
+        } catch (e) {
+            errorIngreso('No pudimos conectarnos. Revisá tu conexión y probá de nuevo.');
+            restaurar();
+            return;
+        }
+
+        if (!res.ok) {
+            if (res.status === 429) errorIngreso(datos.message || 'Demasiados intentos. Probá de nuevo en unos minutos.');
+            else if (res.status === 403 && datos.message) errorIngreso(datos.message);
+            else if (res.status === 403) errorIngreso('Tu cuenta todavía no está verificada. Revisá tu mail y tocá el enlace de verificación.');
+            else if (res.status === 401) errorIngreso('El mail o la contraseña no son correctos. Si tu cuenta es con Google, usá "Continuar con Google".');
+            else errorIngreso(datos.message || 'No pudimos iniciar sesión. Probá de nuevo.');
+            restaurar();
+            return;
+        }
+
+        guardarSesion(datos);
+        // El onboarding es parte del alta: va primero y después vuelve acá (el destino ya está guardado).
+        if (datos.role !== 'ADMIN' && datos.necesitaOnboardingSala) {
+            location.replace('onboarding-sala.html');
+            return;
+        }
+        if (window.cmVolver) window.cmVolver.limpiar();
+        cerrarModal();
+        aviso('¡Listo! Ya podés jugar.');
+        cargar();
+    }
+
+    async function ingresarConGoogle() {
+        if (enNavegadorDeApp()) { abrirEnNavegador(); return; }
+        guardarDestino(); // google-auth.js vuelve a esta misma página (o pasa antes por el onboarding)
+        const ok = await cargarGoogle();
+        if (!ok || !window.googleAuth || !window.google) {
+            errorIngreso('No pudimos abrir Google. Probá de nuevo o ingresá con tu mail y contraseña.');
+            return;
+        }
+        window.googleAuth.iniciar();
+    }
+
+    // Desde Instagram/Facebook: se abre ESTA actividad en el navegador del teléfono,
+    // y ahí se ingresa con Google sin perderse.
+    function abrirEnNavegador() {
+        if (/android/i.test(navigator.userAgent)) {
+            const destino = location.host + location.pathname + location.search;
+            location.href = `intent://${destino}#Intent;scheme=https;package=com.android.chrome;end`;
+            return;
+        }
+        errorIngreso('Instagram no permite ingresar con Google. Tocá ··· arriba a la derecha y elegí «Abrir en el navegador»: se va a abrir esta misma actividad y ahí podés ingresar. También podés entrar acá con tu mail y contraseña.');
+    }
+
+    // google-auth.js avisa con showToast: en la landing se usa el aviso propio.
+    if (typeof window.showToast !== 'function') window.showToast = (tipo, texto) => aviso(texto);
+
+    document.addEventListener('submit', ev => {
+        if (ev.target && ev.target.id === 'actLoginForm') ingresar(ev);
+    });
 
     document.addEventListener('keydown', ev => {
         if (ev.key === 'Escape' && $('actModal') && !$('actModal').hidden) { cerrarModal(); return; }

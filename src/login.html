@@ -556,7 +556,10 @@
         return;
     }
 
-    const loginUrl = 'https://cinemarketer.com.ar/login.html';
+    // Chrome no comparte lo guardado con Instagram: el destino viaja en la dirección
+    // ("/login" no redirige, así que el ?volver= llega entero).
+    const volverA = window.cmVolver ? window.cmVolver.destino() : null;
+    const loginUrl = 'https://cinemarketer.com.ar/login' + (volverA ? '?volver=' + encodeURIComponent(volverA) : '');
 
     if (/android/i.test(navigator.userAgent)) {
         window.location.href = 'intent://' + loginUrl.replace('https://', '') + '#Intent;scheme=https;package=com.android.chrome;end';

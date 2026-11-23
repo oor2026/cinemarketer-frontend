@@ -307,6 +307,10 @@ async function handleRegister(e) {
             }
         } catch (e) { /* mejor esfuerzo */ }
 
+        // Si llegó desde una página (por ejemplo, una actividad), el mail de verificación la lleva.
+        const volverA = window.cmVolver ? window.cmVolver.destino() : null;
+        if (volverA) refQuery += (refQuery ? '&' : '?') + 'volver=' + encodeURIComponent(volverA);
+
         const response = await fetch(`${CONFIG.API_URL}/auth/register${refQuery}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
