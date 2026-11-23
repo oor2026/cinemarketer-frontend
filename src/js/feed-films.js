@@ -54,6 +54,38 @@ window._pintarContadorComentarios = function(el, count) {
     el.closest('.btn-comentarios-card')?.classList.toggle('tiene-comentarios', count > 0);
 };
 
+// Contadores abreviados de los carruseles mobile (1.2K, 3M). El número real
+// queda en el botón (lo leen otras funciones); la versión corta va en data-n
+// y la muestra el CSS debajo del ícono. Se actualiza sola cada vez que cambia.
+window._numeroCorto = function (n) {
+    n = Math.max(0, Math.floor(Number(n) || 0));
+    if (n < 1000) return String(n);
+    const corto = (valor, sufijo) => (Math.floor(valor * 10) / 10).toString() + sufijo;
+    return n < 1000000 ? corto(n / 1000, 'K') : corto(n / 1000000, 'M');
+};
+(function () {
+    const SELECTOR = '.fila-genero-slide .btn-like, .fila-genero-slide .btn-dislike, .fila-genero-slide .btn-comentarios-card';
+    let pendiente = false;
+    function sincronizar() {
+        pendiente = false;
+        document.querySelectorAll(SELECTOR).forEach(boton => {
+            const numero = parseInt((boton.textContent || '').replace(/\D/g, ''), 10) || 0;
+            const corto = window._numeroCorto(numero);
+            if (boton.dataset.n !== corto) boton.dataset.n = corto;
+        });
+    }
+    function programar() {
+        if (pendiente) return;
+        pendiente = true;
+        requestAnimationFrame(sincronizar);
+    }
+    function iniciar() {
+        new MutationObserver(programar).observe(document.body, { childList: true, subtree: true, characterData: true });
+        programar();
+    }
+    if (document.body) iniciar(); else document.addEventListener('DOMContentLoaded', iniciar);
+})();
+
 // ==============================================
 // "NO ME INTERESA" — solo afecta qué se muestra en
 // el feed hacia adelante; no toca votos, comentarios,
