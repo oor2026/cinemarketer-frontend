@@ -549,6 +549,8 @@ var adminJuegos = window.adminJuegos || {
         document.getElementById('jgPregTitulo').textContent = p ? 'Editar pregunta' : 'Nueva pregunta';
         document.getElementById('jgPregTexto').value = p ? p.texto : '';
         document.getElementById('jgPregImagen').value = p && p.imagenUrl ? p.imagenUrl : '';
+        this.subiendoImagenPregunta = false;
+        this.pintarImagenPregunta();
         const ops = p ? this.opcionesDe(p) : [];
         for (let i = 1; i <= 4; i++) {
             document.getElementById(`jgPregOp${i}`).value = ops[i - 1] || '';
@@ -559,8 +561,68 @@ var adminJuegos = window.adminJuegos || {
         document.getElementById('jgPregTexto').focus();
     },
 
+    // Imagen de la pregunta: se sube a Cloudinary apenas se elige y la URL
+    // queda en el campo oculto jgPregImagen hasta que se guarda la pregunta.
+    pintarImagenPregunta() {
+        const caja = document.getElementById('jgPregImgCaja');
+        if (!caja) return;
+        const url = document.getElementById('jgPregImagen').value;
+        if (this.subiendoImagenPregunta) {
+            caja.innerHTML = `<div class="jg-preg-img-preview"><span><i class="fas fa-spinner fa-spin"></i> Subiendo...</span></div>`;
+            return;
+        }
+        caja.innerHTML = `
+            <div class="jg-preg-img-preview">
+                ${url ? `<img src="${this.esc(url)}" alt="">` : '<span><i class="fas fa-image"></i> Sin imagen</span>'}
+            </div>
+            <div class="jg-preg-img-lado">
+                <div class="jg-img-botones">
+                    <label class="admin-btn-secondary jg-btn-chico jg-subir">
+                        <i class="fas fa-upload"></i> ${url ? 'Cambiar' : 'Subir imagen'}
+                        <input type="file" accept="image/jpeg,image/png,image/webp" hidden onchange="adminJuegos.subirImagenPregunta(this)">
+                    </label>
+                    ${url ? `<button type="button" class="jg-btn-peligro jg-btn-chico" onclick="adminJuegos.quitarImagenPregunta()">Quitar</button>` : ''}
+                </div>
+                <small class="jg-ayuda">JPG, PNG o WEBP, hasta 5 MB. Se ve arriba de la pregunta.</small>
+            </div>`;
+    },
+
+    async subirImagenPregunta(input) {
+        const archivo = input.files && input.files[0];
+        if (!archivo) return;
+        const error = document.getElementById('jgPregError');
+        error.textContent = '';
+        if (archivo.size > 5 * 1024 * 1024) { error.textContent = 'La imagen pesa más de 5 MB.'; input.value = ''; return; }
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(archivo.type)) { error.textContent = 'La imagen tiene que ser JPG, PNG o WEBP.'; input.value = ''; return; }
+        this.subiendoImagenPregunta = true;
+        this.pintarImagenPregunta();
+        const datos = new FormData();
+        datos.append('image', archivo);
+        try {
+            const res = await fetch(this.url(`/campanias/${this.detalle.campania.id}/imagenes/pregunta`), {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+                body: datos
+            });
+            let cuerpo = null;
+            try { cuerpo = await res.json(); } catch (e) { /* sin cuerpo */ }
+            if (!res.ok || !cuerpo || !cuerpo.url) throw new Error((cuerpo && (cuerpo.message || cuerpo.error)) || 'No se pudo subir la imagen');
+            document.getElementById('jgPregImagen').value = cuerpo.url;
+        } catch (e) {
+            error.textContent = e.message;
+        }
+        this.subiendoImagenPregunta = false;
+        this.pintarImagenPregunta();
+    },
+
+    quitarImagenPregunta() {
+        document.getElementById('jgPregImagen').value = '';
+        this.pintarImagenPregunta();
+    },
+
     async guardarPregunta() {
         const error = document.getElementById('jgPregError');
+        if (this.subiendoImagenPregunta) { error.textContent = 'Esperá a que termine de subir la imagen.'; return; }
         // Opciones cargadas, en orden, y cuál quedó marcada (renumerada si hay huecos).
         const opciones = [];
         let correcta = null;
@@ -1029,8 +1091,9 @@ var adminJuegos = window.adminJuegos || {
                 <div class="jg-modal-cuerpo">
                     <div class="form-group-admin"><label for="jgPregTexto">Pregunta *</label>
                         <textarea id="jgPregTexto" class="admin-textarea" rows="2" maxlength="400"></textarea></div>
-                    <div class="form-group-admin"><label for="jgPregImagen">Imagen (enlace, opcional)</label>
-                        <input id="jgPregImagen" class="admin-input" maxlength="500" placeholder="https://..."></div>
+                    <div class="form-group-admin"><label>Imagen (opcional)</label>
+                        <input type="hidden" id="jgPregImagen">
+                        <div class="jg-preg-img" id="jgPregImgCaja"></div></div>
                     <div class="form-group-admin"><label>Opciones (marcá la correcta) *</label>
                         ${opcion(1)}${opcion(2)}${opcion(3)}${opcion(4)}</div>
                     <div id="jgPregError" class="jg-error" role="alert"></div>
@@ -1169,6 +1232,11 @@ var adminJuegos = window.adminJuegos || {
             .jg-modal-cuerpo { padding:1.25rem; overflow-y:auto; }
             .jg-modal-pie { display:flex; justify-content:flex-end; gap:8px; padding:0 1.25rem 1.25rem; }
             .jg-opcion-input { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+            .jg-opcion-input .admin-input { flex:1; min-width:0; }
+            .jg-preg-img { display:flex; gap:12px; align-items:flex-start; }
+            .jg-preg-img-preview { width:120px; aspect-ratio:4 / 3; flex-shrink:0; border:1.5px dashed #d1d5db; border-radius:10px; background:#f9fafb; overflow:hidden; display:flex; align-items:center; justify-content:center; color:#9ca3af; font-size:0.8rem; text-align:center; }
+            .jg-preg-img-preview img { width:100%; height:100%; object-fit:cover; display:block; }
+            .jg-preg-img-lado { display:flex; flex-direction:column; gap:6px; min-width:0; }
             .jg-opcion-input input[type=radio] { width:18px; height:18px; flex-shrink:0; accent-color:#047857; }
             .jg-error { color:#b91c1c; font-size:0.85rem; min-height:1em; margin-top:8px; }
             .jg-tipos-tmdb { display:flex; gap:6px; flex-wrap:wrap; margin:10px 0; }
