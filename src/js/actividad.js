@@ -40,6 +40,42 @@
         try { return localStorage.getItem('token'); } catch (e) { return null; }
     }
 
+    // ---- Campañas sin registro: el navegador recuerda quién se anotó ----
+    // cmJuego:<slug>       → { token, nombre } del participante de esta campaña
+    // cmJuegoEmail:<slug>  → el email con que se anotó desde este dispositivo
+    //                        (no deja anotar otro email desde acá)
+    const CLAVE_JUEGO = `cmJuego:${slug}`;
+    const CLAVE_EMAIL = `cmJuegoEmail:${slug}`;
+
+    function participante() {
+        try { return JSON.parse(localStorage.getItem(CLAVE_JUEGO)) || null; } catch (e) { return null; }
+    }
+
+    function guardarParticipante(datos, email) {
+        try {
+            localStorage.setItem(CLAVE_JUEGO, JSON.stringify({ token: datos.token, nombre: datos.nombre }));
+            localStorage.setItem(CLAVE_EMAIL, email.trim().toLowerCase());
+        } catch (e) { /* sin almacenamiento */ }
+    }
+
+    function olvidarParticipante() {
+        try { localStorage.removeItem(CLAVE_JUEGO); } catch (e) { /* nada */ }
+    }
+
+    function emailDeEsteDispositivo() {
+        try { return localStorage.getItem(CLAVE_EMAIL); } catch (e) { return null; }
+    }
+
+    const sinRegistro = () => !!(estado.landing && estado.landing.campania.modoAcceso === 'SIN_REGISTRO');
+
+    // Con cuenta: /juegos/... con el login. Sin registro: /public/juegos/...?t=token
+    function rutaJuego(accion) {
+        const base = encodeURIComponent(slug);
+        if (!sinRegistro()) return `/juegos/${base}/${accion}`;
+        const p = participante();
+        return `/public/juegos/${base}/${accion}${p ? `?t=${encodeURIComponent(p.token)}` : ''}`;
+    }
+
     async function pedir(ruta, opciones = {}) {
         const headers = {};
         const t = opciones.sinToken ? null : token();
@@ -114,6 +150,13 @@
 
     function renderCuenta() {
         const cont = $('actCuenta');
+        if (sinRegistro()) {
+            const yo = estado.landing.yo;
+            cont.innerHTML = yo && yo.nombre
+                ? `<span class="act-btn-chico act-participante" title="Participás como ${esc(yo.nombre)}"><i class="fas fa-user"></i> <span>${esc(yo.nombre)}</span></span>`
+                : '';
+            return;
+        }
         if (estado.landing && estado.landing.yo) {
             cont.innerHTML = '<a class="act-btn-chico" href="dashboard.html"><i class="fas fa-house"></i> <span>Mi Cinemarketer</span></a>';
         } else {
@@ -127,12 +170,14 @@
     async function cargar() {
         if (!slug) { renderError('Falta indicar qué actividad querés ver.'); return; }
         let landing;
+        const p = participante();
+        const rutaLanding = `/public/juegos/${encodeURIComponent(slug)}${p ? `?t=${encodeURIComponent(p.token)}` : ''}`;
         try {
-            landing = await pedir(`/public/juegos/${encodeURIComponent(slug)}`);
+            landing = await pedir(rutaLanding);
         } catch (e) {
             // Token vencido: se muestra igual, como visitante.
             if ((e.status === 401 || e.status === 403) && token()) {
-                try { landing = await pedir(`/public/juegos/${encodeURIComponent(slug)}`, { sinToken: true }); }
+                try { landing = await pedir(rutaLanding, { sinToken: true }); }
                 catch (e2) { renderError(e2.message); return; }
             } else if (e.status === 410) {
                 renderFinalizada();
@@ -143,6 +188,8 @@
             }
         }
         estado.landing = landing;
+        // Sin registro con un token que ya no sirve: se olvida y vuelve a pedir los datos.
+        if (sinRegistro() && p && !landing.yo) olvidarParticipante();
         estado.desfaseMs = fecha(landing.ahora).getTime() - Date.now();
         aplicarAcento(landing.campania.colorAcento);
         document.title = `${landing.campania.nombre} — Cinemarketer`;
@@ -382,6 +429,7 @@
     function bloqueAccion(L) {
         const c = L.campania;
         const yo = L.yo;
+        if (c.modoAcceso === 'SIN_REGISTRO' && !yo) return bloqueAnotarse(L);
         if (c.estado === 'PROGRAMADA') {
             return `
                 <p class="act-accion-titulo">Empieza en</p>
@@ -421,6 +469,29 @@
         return `<p class="act-accion-titulo">¡Gracias por jugar!</p><p class="act-tenue">Mirá quién se llevó el premio.</p>${misDatos(yo)}`;
     }
 
+    // Sin registro y todavía sin anotarse en este dispositivo.
+    function bloqueAnotarse(L) {
+        const c = L.campania;
+        if (c.estado === 'PROGRAMADA') {
+            return `
+                <p class="act-accion-titulo">Empieza en</p>
+                ${cuenta(L.proximaTanda)}
+                <button type="button" class="act-btn" data-accion="anotarse">Anotarme para jugar</button>
+                <p class="act-tenue">Solo te pedimos tu nombre y tu email. No hace falta crear una cuenta.</p>`;
+        }
+        if (c.estado === 'ACTIVA') {
+            return `
+                <button type="button" class="act-btn act-btn-grande" data-accion="anotarse"><i class="fas fa-play"></i> Jugar</button>
+                <p class="act-tenue">Solo tu nombre y tu email. Sin crear cuenta.</p>
+                <button type="button" class="act-link" data-accion="anotarse">Ya jugué desde otro dispositivo</button>`;
+        }
+        const titulo = c.estado === 'CERRADA'
+            ? '<p class="act-accion-titulo">El ranking ya cerró</p><p class="act-tenue">Estamos revisando los resultados. Muy pronto publicamos al ganador o ganadora.</p>'
+            : '<p class="act-accion-titulo">¡Gracias por jugar!</p><p class="act-tenue">Mirá quién se llevó el premio.</p>';
+        return `${titulo}
+            <button type="button" class="act-link" data-accion="anotarse">¿Participaste? Ingresá tu nombre y email para ver tu resultado</button>`;
+    }
+
     // Resumen de la posición propia (solo si ya jugó algún día).
     function misDatos(yo) {
         if (!yo || !yo.posicion) return '';
@@ -443,7 +514,7 @@
                 <p>Tenés tiempo hasta el ${esc(fechaLarga(p.reclamarHasta))} para reclamarlo.</p></div>
                 <button type="button" class="act-btn" data-accion="reclamar"><i class="fas fa-gift"></i> Reclamar mi premio</button>`;
         } else if (p.estado === 'RECLAMADO') {
-            html = '<div><strong>Ya reclamaste tu premio</strong><p>Te escribimos al mail de tu cuenta para coordinar la entrega.</p></div>';
+            html = `<div><strong>Ya reclamaste tu premio</strong><p>Te escribimos ${sinRegistro() ? 'al email que cargaste' : 'al mail de tu cuenta'} para coordinar la entrega.</p></div>`;
         } else if (p.estado === 'ENTREGADO') {
             html = '<div><strong>Premio entregado</strong><p>¡Que lo disfrutes!</p></div>';
         } else if (p.estado === 'VENCIDO' || (p.estado === 'NOTIFICADO' && !p.puedeReclamar)) {
@@ -541,9 +612,10 @@
     async function jugar() {
         abrirJuego('<div class="act-juego-centro"><i class="fas fa-spinner fa-spin"></i></div>');
         try {
-            const partida = await pedir(`/juegos/${encodeURIComponent(slug)}/iniciar`, { method: 'POST' });
+            const partida = await pedir(rutaJuego('iniciar'), { method: 'POST' });
             mostrarPartida(partida);
         } catch (e) {
+            if (e.status === 401 && sinRegistro()) { olvidarParticipante(); salirDelJuegoSinPreguntar(); abrirAnotarse(); return; }
             if (e.status === 401) { cerrarJuego(); irA('login.html'); return; }
             mostrarErrorJuego(e.message);
         }
@@ -630,7 +702,7 @@
 
         let r;
         try {
-            r = await pedir(`/juegos/${encodeURIComponent(slug)}/responder`, {
+            r = await pedir(rutaJuego('responder'), {
                 method: 'POST', body: { preguntaId, opcion }
             });
         } catch (e) {
@@ -711,8 +783,8 @@
     async function reclamar(boton) {
         boton.disabled = true;
         try {
-            await pedir(`/juegos/${encodeURIComponent(slug)}/reclamar`, { method: 'POST' });
-            aviso('¡Listo! Te escribimos al mail de tu cuenta para coordinar la entrega.');
+            await pedir(rutaJuego('reclamar'), { method: 'POST' });
+            aviso(`¡Listo! Te escribimos ${sinRegistro() ? 'al email que cargaste' : 'al mail de tu cuenta'} para coordinar la entrega.`);
             cargar();
         } catch (e) {
             aviso(e.message);
@@ -746,11 +818,19 @@
             case 'bases': abrirBases(); break;
             case 'premio': abrirPremio(); break;
             case 'ingresar': abrirIngreso(); break;
+            case 'anotarse': abrirAnotarse(); break;
             case 'ingresar-google': ingresarConGoogle(); break;
             case 'ver-clave': verClave(accion); break;
             case 'cerrar-modal': cerrarModal(); break;
         }
     });
+
+    function salirDelJuegoSinPreguntar() {
+        cerrarJuego();
+        estado.partida = null;
+        $('actJuego').hidden = true;
+        if ($('actModal') === null || $('actModal').hidden) document.body.classList.remove('act-sin-scroll');
+    }
 
     function salirDelJuego() {
         const enPregunta = estado.partida && estado.partida.estado === 'EN_CURSO' && !estado.respondiendo;
@@ -981,11 +1061,85 @@
         errorIngreso('Instagram no permite ingresar con Google. Tocá ··· arriba a la derecha y elegí «Abrir en el navegador»: se va a abrir esta misma actividad y ahí podés ingresar. También podés entrar acá con tu mail y contraseña.');
     }
 
+    // ------------------------------------------
+    // Sin registro: anotarse con nombre y email
+    // ------------------------------------------
+    function abrirAnotarse() {
+        const c = estado.landing.campania;
+        const yaAnotado = emailDeEsteDispositivo();
+        const nuevo = c.estado === 'PROGRAMADA' || c.estado === 'ACTIVA';
+        const bases = c.basesCondiciones
+            ? `<details class="act-anotarse-bases"><summary>Ver bases y condiciones</summary><div>${esc(c.basesCondiciones).replace(/\n/g, '<br>')}</div></details>`
+            : '';
+        abrirModal(nuevo ? 'Anotate para jugar' : 'Ingresá tus datos',
+            nuevo ? 'Sin crear cuenta: solo tu nombre y tu email.' : 'Usá el mismo nombre y email con que jugaste.', `
+            <form id="actAnotarseForm" class="act-login" novalidate>
+                <label for="actAnotNombre">Nombre y apellido</label>
+                <input id="actAnotNombre" type="text" autocomplete="name" maxlength="120" placeholder="Como querés aparecer" required>
+                <label for="actAnotEmail">Email</label>
+                <input id="actAnotEmail" type="email" inputmode="email" autocomplete="email" maxlength="200" placeholder="tu@email.com" required
+                    ${yaAnotado ? `value="${esc(yaAnotado)}"` : ''}>
+                <p class="act-login-aviso"><i class="fas fa-triangle-exclamation"></i> Revisá bien tu email: es el único medio para contactarte si ganás. No lo verificamos, así que si está mal escrito no vamos a poder entregarte el premio.</p>
+                ${nuevo ? '<p class="act-tenue act-anotarse-nota">Si ya jugaste desde otro dispositivo, escribí el mismo nombre y email y seguís donde estabas.</p>' : ''}
+                <label class="act-check"><input type="checkbox" id="actAnotBases"> <span>Leí y acepto las bases y condiciones de esta actividad.</span></label>
+                ${bases}
+                ${c.pedirNovedades ? '<label class="act-check"><input type="checkbox" id="actAnotNovedades"> <span>Quiero recibir novedades de Cinemarketer (opcional).</span></label>' : ''}
+                <p class="act-tenue act-anotarse-legal">Usamos tu nombre y email para esta actividad. Pueden compartirse con el organizador del evento. En el ranking solo se ve tu nombre y la inicial de tu apellido.</p>
+                <div id="actAnotError" class="act-login-error" role="alert"></div>
+                <button type="submit" class="act-btn act-login-btn" id="actAnotBtn">${nuevo ? (c.estado === 'ACTIVA' ? 'Anotarme y jugar' : 'Anotarme') : 'Ver mi resultado'}</button>
+            </form>`, 'act-modal-login');
+        const primero = $('actAnotNombre');
+        if (primero) primero.focus();
+    }
+
+    async function anotarse(ev) {
+        ev.preventDefault();
+        const nombre = ($('actAnotNombre').value || '').trim();
+        const email = ($('actAnotEmail').value || '').trim();
+        const error = $('actAnotError');
+        if (!nombre) { error.textContent = 'Escribí tu nombre y apellido.'; return; }
+        if (!email) { error.textContent = 'Escribí tu email.'; return; }
+        if (!$('actAnotBases').checked) { error.textContent = 'Para participar tenés que aceptar las bases y condiciones.'; return; }
+        const previo = emailDeEsteDispositivo();
+        if (previo && previo !== email.toLowerCase()) {
+            error.textContent = `Desde este dispositivo ya participa ${previo}. Usá ese mismo email.`;
+            return;
+        }
+        error.textContent = '';
+        const boton = $('actAnotBtn');
+        const textoBoton = boton.textContent;
+        boton.disabled = true;
+        boton.textContent = 'Un momento...';
+        try {
+            const datos = await pedir(`/public/juegos/${encodeURIComponent(slug)}/anotarse`, {
+                method: 'POST',
+                sinToken: true,
+                body: {
+                    nombre, email, aceptaBases: true,
+                    aceptaNovedades: !!($('actAnotNovedades') && $('actAnotNovedades').checked)
+                }
+            });
+            guardarParticipante(datos, email);
+            cerrarModal();
+            aviso(datos.yaEstabaAnotado ? `¡Hola de nuevo, ${datos.nombre}!` : '¡Listo! Ya estás participando.');
+            await cargar();
+            if (estado.landing && estado.landing.campania.estado === 'ACTIVA' && estado.landing.yo
+                && estado.landing.yo.hoy !== 'TERMINADO' && !estado.landing.yo.descalificado) {
+                jugar();
+            }
+        } catch (e) {
+            error.textContent = e.message;
+            boton.disabled = false;
+            boton.textContent = textoBoton;
+        }
+    }
+
     // google-auth.js avisa con showToast: en la landing se usa el aviso propio.
     if (typeof window.showToast !== 'function') window.showToast = (tipo, texto) => aviso(texto);
 
     document.addEventListener('submit', ev => {
         if (ev.target && ev.target.id === 'actLoginForm') ingresar(ev);
+        if (ev.target && ev.target.id === 'actAnotarseForm') anotarse(ev);
     });
 
     document.addEventListener('keydown', ev => {

@@ -617,3 +617,19 @@ body.act-finalizada .act { min-height: 100vh; min-height: 100svh; display: flex;
 .act-login-legal { font-size: 0.78rem; text-align: center; margin-top: 12px; }
 .act-google-perfil { z-index: 160; }
 .act-google-perfil .act-modal-caja { max-width: 440px; }
+/* ---------- Campañas sin registro: anotarse con nombre y email ---------- */
+.act-check { display: flex; align-items: flex-start; gap: 10px; margin: 12px 0 0; font-weight: 600; font-size: 0.88rem; line-height: 1.4; cursor: pointer; }
+.act-login .act-check { margin: 12px 0 0; color: #e9e5f1; }
+.act-login .act-check input { width: 18px; height: 18px; flex-shrink: 0; margin: 1px 0 0; padding: 0; accent-color: var(--acento); }
+.act-anotarse-bases { margin: 8px 0 0 28px; font-size: 0.84rem; }
+.act-anotarse-bases summary { cursor: pointer; color: var(--acento); font-weight: 700; }
+.act-anotarse-bases div { margin-top: 8px; max-height: 180px; overflow-y: auto; padding: 10px 12px; border: 1px solid var(--borde); border-radius: 10px; color: var(--tenue); line-height: 1.5; }
+.act-anotarse-nota { margin: 8px 0 0; font-size: 0.82rem; }
+.act-anotarse-legal { margin: 14px 0 0; font-size: 0.78rem; line-height: 1.45; }
+.act-login .act-login-aviso { margin-top: 10px; line-height: 1.45; }
+.act-participante { cursor: default; max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.act-participante:hover { background: inherit; }
+@media (max-width: 640px) {
+    .act-btn-chico.act-participante span { display: inline; }
+    .act-participante { max-width: 140px; }
+}

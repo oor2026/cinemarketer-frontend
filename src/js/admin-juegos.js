@@ -112,7 +112,7 @@ var adminJuegos = window.adminJuegos || {
                     <tbody>
                         ${this.campanias.map(c => `
                             <tr class="jg-fila-link" onclick="adminJuegos.verDetalle(${Number(c.id)})">
-                                <td><strong>${this.esc(c.nombre)}</strong><div class="jg-tenue">/actividad?c=${this.esc(c.slug)}</div></td>
+                                <td><strong>${this.esc(c.nombre)}</strong>${c.modoAcceso === 'SIN_REGISTRO' ? ' <span class="jg-tag-sin-registro">Sin registro</span>' : ''}<div class="jg-tenue">/actividad?c=${this.esc(c.slug)}</div></td>
                                 <td>${this.badgeEstado(c.estado)}</td>
                                 <td>${this.fechaHora(c.inicio)}</td>
                                 <td>${this.fechaHora(c.cierre)}</td>
@@ -134,7 +134,8 @@ var adminJuegos = window.adminJuegos || {
                 id: null, estado: 'BORRADOR', nombre: '', slug: '', bajada: '',
                 inicio: `${iso(manana)}T00:00`, cierre: `${iso(fin)}T23:59`,
                 preguntasPorDia: 10, segundosPorPregunta: 15, premioTexto: '', premioDescripcion: '', premioImagenUrl: '',
-                cantidadSuplentes: 2, diasParaReclamar: 7, basesCondiciones: '', fondoUrl: '', colorAcento: '#e50914'
+                cantidadSuplentes: 2, diasParaReclamar: 7, basesCondiciones: '', fondoUrl: '', colorAcento: '#e50914',
+                modoAcceso: 'CINEMARKETER', pedirNovedades: true
             },
             tandas: null
         };
@@ -317,6 +318,7 @@ var adminJuegos = window.adminJuegos || {
         const estructura = this.estructuraEditable(c);
         const archivada = c.estado === 'ARCHIVADA';
         const slugEditable = c.estado === 'BORRADOR';
+        const sinRegistro = c.modoAcceso === 'SIN_REGISTRO';
         const dis = cond => cond ? '' : 'disabled';
         const v = x => this.esc(x == null ? '' : x);
 
@@ -331,6 +333,19 @@ var adminJuegos = window.adminJuegos || {
                         ${slugEditable ? '' : '<small class="jg-ayuda">Ya publicada: la dirección no se cambia porque el enlace puede estar compartido.</small>'}</div>
                     <div class="form-group-admin"><label for="jgBajada">Bajada</label>
                         <input id="jgBajada" class="admin-input" maxlength="300" value="${v(c.bajada)}" placeholder="¿Cuánto sabés del universo Marvel?"></div>
+                </fieldset>
+
+                <fieldset class="jg-grupo" ${archivada ? 'disabled' : ''}>
+                    <legend>Acceso de los jugadores</legend>
+                    <div class="jg-acceso">
+                        <label class="jg-acceso-opcion"><input type="radio" name="jgModoAcceso" value="CINEMARKETER" ${sinRegistro ? '' : 'checked'} ${dis(slugEditable)} onchange="adminJuegos.cambiarModoAcceso()">
+                            <span><strong>Con cuenta de Cinemarketer</strong><small>Para jugar hay que ingresar o registrarse. Suma usuarios a Cinemarketer.</small></span></label>
+                        <label class="jg-acceso-opcion"><input type="radio" name="jgModoAcceso" value="SIN_REGISTRO" ${sinRegistro ? 'checked' : ''} ${dis(slugEditable)} onchange="adminJuegos.cambiarModoAcceso()">
+                            <span><strong>Sin registro</strong><small>Solo nombre y email. El email no se verifica: si está mal escrito, es responsabilidad de quien juega.</small></span></label>
+                    </div>
+                    ${slugEditable ? '' : '<small class="jg-ayuda">Ya publicada: el modo de acceso no se cambia.</small>'}
+                    <label class="jg-check" id="jgNovedadesFila" ${sinRegistro ? '' : 'hidden'}><input type="checkbox" id="jgNovedades" ${c.pedirNovedades === false ? '' : 'checked'}>
+                        Mostrar el check opcional "Quiero recibir novedades de Cinemarketer"</label>
                 </fieldset>
 
                 <fieldset class="jg-grupo" ${archivada ? 'disabled' : ''}>
@@ -463,6 +478,11 @@ var adminJuegos = window.adminJuegos || {
         this.refrescarCaja(tipo);
     },
 
+    cambiarModoAcceso() {
+        const elegido = document.querySelector('input[name="jgModoAcceso"]:checked');
+        document.getElementById('jgNovedadesFila').hidden = !elegido || elegido.value !== 'SIN_REGISTRO';
+    },
+
     async guardarCampania() {
         const c = this.detalle.campania;
         const val = id => document.getElementById(id).value.trim();
@@ -483,7 +503,9 @@ var adminJuegos = window.adminJuegos || {
             diasParaReclamar: num('jgReclamar'),
             basesCondiciones: val('jgBases') || null,
             fondoUrl: c.fondoUrl || null,
-            colorAcento: document.getElementById('jgColor').value
+            colorAcento: document.getElementById('jgColor').value,
+            modoAcceso: (document.querySelector('input[name="jgModoAcceso"]:checked') || {}).value || c.modoAcceso || 'CINEMARKETER',
+            pedirNovedades: document.getElementById('jgNovedades').checked
         };
         if (!datos.nombre) { this.aviso('Falta el nombre de la campaña', 'error'); return; }
 
@@ -981,7 +1003,7 @@ var adminJuegos = window.adminJuegos || {
                     const conPremio = g.estado === 'NOTIFICADO' || g.estado === 'RECLAMADO';
                     return `<tr>
                         <td><strong>${Number(g.puesto)}°</strong></td>
-                        <td>${this.esc(g.nombre)}<div class="jg-tenue">${this.esc(g.email || '')}</div>${g.motivo ? `<div class="jg-tenue">Motivo: ${this.esc(g.motivo)}</div>` : ''}</td>
+                        <td>${this.esc(g.nombre)}${g.conCuenta === false ? ' <span class="jg-tag-sin-registro">Sin registro</span>' : ''}<div class="jg-tenue">${this.esc(g.email || '')}</div>${g.motivo ? `<div class="jg-tenue">Motivo: ${this.esc(g.motivo)}</div>` : ''}</td>
                         <td>${g.rol === 'GANADOR' ? 'Ganador/a' : 'Suplente'}</td>
                         <td><span class="jg-badge" style="color:${e.color};background:${e.fondo};">${e.texto}</span></td>
                         <td>${g.reclamarHasta ? this.fechaHora(g.reclamarHasta) : '—'}</td>
@@ -999,13 +1021,13 @@ var adminJuegos = window.adminJuegos || {
                 <tbody>${datos.ranking.map(f => `
                     <tr class="${f.motivoDescalificacion ? 'jg-descalificado' : ''}">
                         <td><strong>${f.posicion != null ? Number(f.posicion) : '—'}</strong></td>
-                        <td>${this.esc(f.nombre)}<div class="jg-tenue">${this.esc(f.email || '')}</div>${f.motivoDescalificacion ? `<div class="jg-texto-alerta">Descalificado: ${this.esc(f.motivoDescalificacion)}</div>` : ''}</td>
+                        <td>${this.esc(f.nombre)}${f.conCuenta === false ? ' <span class="jg-tag-sin-registro">Sin registro</span>' : ''}<div class="jg-tenue">${this.esc(f.email || '')}</div>${f.motivoDescalificacion ? `<div class="jg-texto-alerta">Descalificado: ${this.esc(f.motivoDescalificacion)}</div>` : ''}</td>
                         <td>${Number(f.aciertos)}</td>
                         <td>${this.tiempo(f.tiempoMs)}</td>
                         <td>${Number(f.diasJugados)}</td>
                         <td class="jg-celda-acciones">${yaPublicados ? '' : f.motivoDescalificacion
-                            ? `<button type="button" class="admin-btn-secondary jg-btn-chico" onclick="adminJuegos.rehabilitar(${Number(f.userId)})">Rehabilitar</button>`
-                            : `<button type="button" class="jg-btn-peligro jg-btn-chico" onclick="adminJuegos.descalificar(${Number(f.userId)})">Descalificar</button>`}</td>
+                            ? `<button type="button" class="admin-btn-secondary jg-btn-chico" onclick="adminJuegos.rehabilitar(${Number(f.participanteId)})">Rehabilitar</button>`
+                            : `<button type="button" class="jg-btn-peligro jg-btn-chico" onclick="adminJuegos.descalificar(${Number(f.participanteId)})">Descalificar</button>`}</td>
                     </tr>`).join('')}</tbody>
             </table></div>` : '<div class="jg-vacio">Todavía nadie jugó.</div>';
 
@@ -1036,17 +1058,17 @@ var adminJuegos = window.adminJuegos || {
         this.accionCierre(`/campanias/${c.id}/ganadores/publicar`, undefined, 'Ganadores publicados');
     },
 
-    descalificar(userId) {
+    descalificar(participanteId) {
         const motivo = prompt('Motivo de la descalificación (queda registrado):');
         if (motivo == null) return;
         if (!motivo.trim()) { this.aviso('Escribí el motivo', 'error'); return; }
-        this.accionCierre(`/campanias/${this.detalle.campania.id}/descalificar`, { userId, motivo: motivo.trim() }, 'Participante descalificado');
+        this.accionCierre(`/campanias/${this.detalle.campania.id}/descalificar`, { participanteId, motivo: motivo.trim() }, 'Participante descalificado');
     },
 
-    async rehabilitar(userId) {
+    async rehabilitar(participanteId) {
         if (!confirm('¿Devolverle su lugar en el ranking?')) return;
         try {
-            await this.pedir(`/campanias/${this.detalle.campania.id}/descalificar/${userId}`, { method: 'DELETE' });
+            await this.pedir(`/campanias/${this.detalle.campania.id}/descalificar/${participanteId}`, { method: 'DELETE' });
             this.aviso('Participante rehabilitado', 'success');
         } catch (e) {
             this.aviso(e.message, 'error');
@@ -1157,6 +1179,15 @@ var adminJuegos = window.adminJuegos || {
         s.textContent = `
             .jg-vacio { background:#fff; border-radius:12px; padding:1.5rem; text-align:center; color:#6b7280; }
             .jg-tenue { color:#8a8f9c; font-size:0.8rem; }
+            .jg-tag-sin-registro { display:inline-block; margin-left:6px; padding:1px 8px; border-radius:999px; background:#ede9fe; color:#5b21b6; font-size:0.7rem; font-weight:700; vertical-align:middle; }
+            .jg-acceso { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:10px; }
+            .jg-acceso-opcion { display:flex; gap:10px; align-items:flex-start; padding:12px; border:1.5px solid #e5e7eb; border-radius:10px; cursor:pointer; }
+            .jg-acceso-opcion:has(input:checked) { border-color:#e50914; background:#fff5f5; }
+            .jg-acceso-opcion input { margin-top:3px; accent-color:#e50914; }
+            .jg-acceso-opcion span { display:flex; flex-direction:column; gap:3px; }
+            .jg-acceso-opcion small { color:#6b7280; font-size:0.78rem; line-height:1.4; }
+            .jg-check { display:flex; gap:8px; align-items:center; margin-top:10px; font-size:0.86rem; color:#374151; cursor:pointer; }
+            .jg-check[hidden] { display:none; }
             .jg-badge { display:inline-block; border-radius:999px; padding:3px 10px; font-size:0.75rem; font-weight:700; white-space:nowrap; }
             .jg-tabla-wrap { overflow-x:auto; background:#fff; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
             .jg-tabla { width:100%; border-collapse:collapse; font-size:0.88rem; }
