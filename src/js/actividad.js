@@ -152,8 +152,12 @@
         const cont = $('actCuenta');
         if (sinRegistro()) {
             const yo = estado.landing.yo;
+            // En celular se ve solo el ícono; al tocarlo aparece el nombre.
             cont.innerHTML = yo && yo.nombre
-                ? `<span class="act-btn-chico act-participante" title="Participás como ${esc(yo.nombre)}"><i class="fas fa-user"></i> <span>${esc(yo.nombre)}</span></span>`
+                ? `<div class="act-participante-wrap">
+                       <button type="button" class="act-btn-chico act-participante" data-accion="ver-participante" aria-expanded="false" aria-label="Participás como ${esc(yo.nombre)}"><i class="fas fa-user"></i> <span>${esc(yo.nombre)}</span></button>
+                       <div class="act-participante-pop" hidden>Participás como <strong>${esc(yo.nombre)}</strong></div>
+                   </div>`
                 : '';
             return;
         }
@@ -795,7 +799,18 @@
     // ------------------------------------------
     // Eventos (delegados)
     // ------------------------------------------
+    function mostrarParticipante(boton, ver) {
+        const pop = boton.parentElement.querySelector('.act-participante-pop');
+        if (!pop) return;
+        pop.hidden = !ver;
+        boton.setAttribute('aria-expanded', ver ? 'true' : 'false');
+    }
+
     document.addEventListener('click', ev => {
+        // Un toque fuera del nombre del participante lo cierra.
+        const abierto = document.querySelector('.act-participante[aria-expanded="true"]');
+        if (abierto && !ev.target.closest('.act-participante-wrap')) mostrarParticipante(abierto, false);
+
         const pestania = ev.target.closest('[data-pestania]');
         if (pestania) { estado.pestania = pestania.dataset.pestania; aplicarPestania(); return; }
 
@@ -819,6 +834,7 @@
             case 'premio': abrirPremio(); break;
             case 'ingresar': abrirIngreso(); break;
             case 'anotarse': abrirAnotarse(); break;
+            case 'ver-participante': mostrarParticipante(accion, accion.getAttribute('aria-expanded') !== 'true'); break;
             case 'ingresar-google': ingresarConGoogle(); break;
             case 'ver-clave': verClave(accion); break;
             case 'cerrar-modal': cerrarModal(); break;
@@ -1079,7 +1095,7 @@
                 <label for="actAnotEmail">Email</label>
                 <input id="actAnotEmail" type="email" inputmode="email" autocomplete="email" maxlength="200" placeholder="tu@email.com" required
                     ${yaAnotado ? `value="${esc(yaAnotado)}"` : ''}>
-                <p class="act-login-aviso"><i class="fas fa-triangle-exclamation"></i> Revisá bien tu email: es el único medio para contactarte si ganás. No lo verificamos, así que si está mal escrito no vamos a poder entregarte el premio.</p>
+                <p class="act-login-aviso"><i class="fas fa-triangle-exclamation"></i> Revisá bien tu email: es el único medio para contactarte si ganás. No lo verificamos, por lo que si contiene errores no podremos entregarte el premio.</p>
                 ${nuevo ? '<p class="act-tenue act-anotarse-nota">Si ya jugaste desde otro dispositivo, escribí el mismo nombre y email y seguís donde estabas.</p>' : ''}
                 <label class="act-check"><input type="checkbox" id="actAnotBases"> <span>Leí y acepto las bases y condiciones de esta actividad.</span></label>
                 ${bases}
