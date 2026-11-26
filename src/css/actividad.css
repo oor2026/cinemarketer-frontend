@@ -627,9 +627,13 @@ body.act-finalizada .act { min-height: 100vh; min-height: 100svh; display: flex;
 .act-anotarse-nota { margin: 8px 0 0; font-size: 0.82rem; }
 .act-anotarse-legal { margin: 14px 0 0; font-size: 0.78rem; line-height: 1.45; }
 .act-login .act-login-aviso { margin-top: 10px; line-height: 1.45; }
-.act-participante { cursor: default; max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.act-participante:hover { background: inherit; }
-@media (max-width: 640px) {
-    .act-btn-chico.act-participante span { display: inline; }
-    .act-participante { max-width: 140px; }
+.act-participante-wrap { position: relative; }
+.act-participante { max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.act-participante span { overflow: hidden; text-overflow: ellipsis; }
+.act-participante-pop {
+    position: absolute; right: 0; top: calc(100% + 6px); z-index: 30;
+    width: max-content; max-width: min(260px, 80vw); padding: 8px 12px; border-radius: 10px;
+    background: #fff; color: #14121a; font-size: 0.85rem; line-height: 1.35;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25); overflow-wrap: anywhere;
 }
+.act-participante-pop[hidden] { display: none; }
