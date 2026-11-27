@@ -7281,6 +7281,32 @@ var BUSCADOR_SAGAS = [
                     { id: 391860, nombre: 'Kingsman' }
                 ];
 
+                // Las sagas se piden al servidor (GET /api/sagas): es la MISMA lista que usan las misiones, así hay una sola fuente.
+                // La lista de arriba queda como RESPALDO: si el pedido falla, el asistente sigue funcionando con ella.
+                window._buscadorSagasPromesa = null;
+                window._buscadorCargarSagas = function() {
+                    if (window._buscadorSagasPromesa) return window._buscadorSagasPromesa;
+                    window._buscadorSagasPromesa = (async () => {
+                        try {
+                            const token = localStorage.getItem('token');
+                            const res = await fetch(`${CONFIG.API_URL}/sagas`, { headers: { 'Authorization': `Bearer ${token}` } });
+                            if (!res.ok) throw new Error(`Error ${res.status}`);
+                            const data = await res.json();
+                            const nuevas = (data.sagas || []).map(s => s.coleccion
+                                ? { id: s.id, nombre: s.nombre, ...(s.peliculas && s.peliculas.length ? { peliculasExtra: s.peliculas } : {}) }
+                                : { id: s.id, nombre: s.nombre, peliculas: s.peliculas || [] });
+                            if (nuevas.length) {
+                                BUSCADOR_SAGAS.splice(0, BUSCADOR_SAGAS.length, ...nuevas);
+                                window._buscadorSagasHtmlCache = null;
+                            }
+                        } catch (e) {
+                            window._buscadorSagasPromesa = null;   // se reintenta la próxima vez; mientras tanto vale la lista de respaldo
+                            console.warn('[sagas] no se pudo cargar la lista desde el servidor, se usa la de respaldo:', e.message);
+                        }
+                    })();
+                    return window._buscadorSagasPromesa;
+                };
+
                 window._buscadorAbrirNivel3Caracteristica = function() {
                     document.getElementById('buscadorNivel2PeliculaSerie').style.display = 'none';
                     document.getElementById('buscadorNivel3Caracteristica').style.display = 'block';
@@ -7324,6 +7350,9 @@ var BUSCADOR_SAGAS = [
 
                         const filtroInput = document.getElementById('buscadorSagaFiltro');
                         if (filtroInput) filtroInput.value = '';
+
+                        // Sagas desde el servidor (una sola vez por sesión; si falla, vale la lista de respaldo de este mismo archivo).
+                        await window._buscadorCargarSagas();
 
                         const grid = document.getElementById('buscadorSagaGrid');
 
