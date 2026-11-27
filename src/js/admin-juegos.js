@@ -134,7 +134,7 @@ var adminJuegos = window.adminJuegos || {
                 id: null, estado: 'BORRADOR', nombre: '', slug: '', bajada: '',
                 inicio: `${iso(manana)}T00:00`, cierre: `${iso(fin)}T23:59`,
                 preguntasPorDia: 10, segundosPorPregunta: 15, premioTexto: '', premioDescripcion: '', premioImagenUrl: '',
-                cantidadSuplentes: 2, diasParaReclamar: 7, basesCondiciones: '', fondoUrl: '', colorAcento: '#e50914',
+                cantidadGanadores: 1, cantidadSuplentes: 2, diasParaReclamar: 7, basesCondiciones: '', fondoUrl: '', colorAcento: '#e50914',
                 modoAcceso: 'CINEMARKETER', pedirNovedades: true
             },
             tandas: null
@@ -375,6 +375,8 @@ var adminJuegos = window.adminJuegos || {
                         <small class="jg-ayuda">En la landing se ve recortada en la tarjeta del premio y completa al tocarla. Si la dejás vacía, se muestra la regla del ganador y los suplentes.</small></div>
                     ${this.cajaImagen('premio')}
                     <div class="jg-fila">
+                        <div class="form-group-admin"><label for="jgGanadores">Ganadores</label>
+                            <input id="jgGanadores" type="number" min="1" max="20" class="admin-input" value="${v(c.cantidadGanadores || 1)}" ${dis(!['CERRADA', 'PUBLICADA', 'ARCHIVADA'].includes(c.estado))}></div>
                         <div class="form-group-admin"><label for="jgSuplentes">Suplentes</label>
                             <input id="jgSuplentes" type="number" min="0" max="5" class="admin-input" value="${v(c.cantidadSuplentes)}"></div>
                         <div class="form-group-admin"><label for="jgReclamar">Días para reclamar</label>
@@ -499,6 +501,7 @@ var adminJuegos = window.adminJuegos || {
             premioDescripcion: val('jgPremioDesc') || null,
             premioImagenUrl: c.premioImagenUrl || null,   // las imágenes se guardan al subirlas
             rewardId: c.rewardId || null,
+            cantidadGanadores: num('jgGanadores'),
             cantidadSuplentes: num('jgSuplentes'),
             diasParaReclamar: num('jgReclamar'),
             basesCondiciones: val('jgBases') || null,
@@ -988,7 +991,7 @@ var adminJuegos = window.adminJuegos || {
             ACTIVA: 'La campaña está en juego: el ranking se actualiza con cada partida. Podés descalificar a alguien si detectás algo raro.',
             PROGRAMADA: 'Todavía no empezó.',
             CERRADA: hayPropuesta
-                ? 'Revisá la propuesta. Si descalificás a alguien, la propuesta se borra y hay que volver a proponer. Al publicar, el ganador recibe el aviso y empieza a correr su plazo para reclamar.'
+                ? 'Revisá la propuesta. Si descalificás a alguien, la propuesta se borra y hay que volver a proponer. Al publicar, cada ganador recibe el aviso y empieza a correr su plazo para reclamar.'
                 : 'La campaña cerró. Revisá el ranking, descalificá si hace falta y después proponé los ganadores.',
             PUBLICADA: 'Ganadores publicados. Si el ganador no reclama a tiempo, el premio pasa solo al siguiente suplente (se revisa cada hora).',
             ARCHIVADA: 'Campaña archivada.'
@@ -1054,7 +1057,7 @@ var adminJuegos = window.adminJuegos || {
 
     publicarGanadores() {
         const c = this.detalle.campania;
-        if (!confirm(`¿Publicar los ganadores? Se muestran en la landing, el ganador recibe el aviso y tiene ${c.diasParaReclamar} días para reclamar. No se puede deshacer.`)) return;
+        if (!confirm(`¿Publicar los ganadores? Al publicar, cada ganador recibe el aviso y empieza a correr su plazo para reclamar. ' ${c.diasParaReclamar} días para reclamar. No se puede deshacer.`)) return;
         this.accionCierre(`/campanias/${c.id}/ganadores/publicar`, undefined, 'Ganadores publicados');
     },
 

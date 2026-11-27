@@ -468,7 +468,7 @@
                 <p class="act-tenue">${c.preguntasPorDia} preguntas · ${c.segundosPorPregunta} segundos cada una · un intento por día</p>`;
         }
         if (c.estado === 'CERRADA') {
-            return '<p class="act-accion-titulo">El ranking ya cerró</p><p class="act-tenue">Estamos revisando los resultados. Muy pronto publicamos al ganador o ganadora.</p>';
+            return `<p class="act-accion-titulo">El ranking ya cerró</p><p class="act-tenue">Estamos revisando los resultados. Muy pronto publicamos ${quienesGanan(c)}.</p>`;
         }
         return `<p class="act-accion-titulo">¡Gracias por jugar!</p><p class="act-tenue">Mirá quién se llevó el premio.</p>${misDatos(yo)}`;
     }
@@ -540,7 +540,7 @@
                         <li class="${g.tienePremio ? 'act-con-premio' : ''}">
                             ${avatar(g.nombre, g.avatar)}
                             <div><strong>${esc(g.nombre)}</strong>
-                                <small>${g.rol === 'GANADOR' ? 'Primer puesto' : `Suplente · puesto ${g.puesto}`}${g.tienePremio ? ' · se lleva el premio' : ''}</small></div>
+                                <small>${g.rol === 'GANADOR' ? (g.puesto === 1 ? 'Primer puesto' : `Puesto ${g.puesto}`) : `Suplente · puesto ${g.puesto}`}${g.tienePremio ? ' · se lleva el premio' : ''}</small></div>
                         </li>`).join('')}
                 </ul>
             </section>`;
@@ -752,7 +752,7 @@
                 </div>
                 ${res.proximaTanda
                     ? `<p class="act-accion-titulo">Volvé mañana para seguir sumando</p>${cuenta(res.proximaTanda)}`
-                    : '<p class="act-accion-titulo">Era el último día de la campaña</p><p class="act-tenue">Cuando cierre el ranking, publicamos al ganador o ganadora.</p>'}
+                    : `<p class="act-accion-titulo">Era el último día de la campaña</p><p class="act-tenue">Cuando cierre el ranking, publicamos ${quienesGanan(estado.landing.campania)}.</p>`}
                 <div class="act-resultado-botones">
                     <button type="button" class="act-btn" data-accion="compartir" data-aciertos="${res.aciertos}" data-total="${res.total}"><i class="fas fa-share-nodes"></i> Desafiar a alguien</button>
                     <button type="button" class="act-btn act-btn-secundario" data-accion="salir">Ver el ranking</button>
@@ -861,11 +861,16 @@
     // ------------------------------------------
     let focoAntesDelModal = null;
 
-    // "Gana quien termine 1°..." según los suplentes y el plazo de la campaña.
+    // "Gana quien termine 1°..." o "Ganan los 3 primeros...", según la campaña.
     function reglaPremio(c) {
+        const n = c.cantidadGanadores || 1;
         const suplentes = c.cantidadSuplentes > 0
             ? ` Hay ${c.cantidadSuplentes} ${c.cantidadSuplentes === 1 ? 'suplente' : 'suplentes'} por si no se reclama.` : '';
-        return `Gana quien termine 1° en el ranking.${suplentes}`;
+        return (n > 1 ? `Ganan los ${n} primeros del ranking: cada uno se lleva el premio.` : 'Gana quien termine 1° en el ranking.') + suplentes;
+    }
+
+    function quienesGanan(c) {
+        return (c && c.cantidadGanadores > 1) ? 'a quienes ganaron' : 'al ganador o ganadora';
     }
 
     function abrirModal(titulo, subtitulo, cuerpo, clase) {
